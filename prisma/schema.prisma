@@ -1,0 +1,1366 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated-client"
+  engineType    = "wasm"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  taxNo     String?
+  taxOffice String?
+  domain    String?
+  currency  String   @default("TRY")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users             User[]
+  products          Product[]
+  warehouses        Warehouse[]
+  currentAccounts   CurrentAccount[]
+  orders            Order[]
+  invoices          Invoice[]
+  stockTransactions StockTransaction[]
+  productionOrders  ProductionOrder[]
+  journalEntries    JournalEntry[]
+  expenses          Expense[]
+  incomes           Income[]
+  permissions       CompanyPermission[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  
+  access_token      String?  
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String     @default("USER")
+  isApproved    Boolean    @default(false)
+  isDeleted     Boolean    @default(false)
+  companyId     String?
+  company       Company?   @relation(fields: [companyId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+  addresses     Address[]
+  branchId      String?
+  branch        Branch?    @relation(fields: [branchId], references: [id])
+  warehouseId   String?
+  warehouse     Warehouse? @relation(fields: [warehouseId], references: [id])
+  purchaseRequisitions         PurchaseRequisition[]
+  purchaseRequisitionApprovals PurchaseRequisitionApproval[]
+  roles                        UserRole[]
+  
+  // B2B Eklemeleri
+  customer_type                String     @default("b2c") // "b2c" veya "b2b"
+  b2b_group_id                 String?
+  b2bGroup                     B2BGroup?  @relation(fields: [b2b_group_id], references: [id])
+  company_name                 String?
+  tax_id                       String?
+  tax_office                   String?
+  credit_limit                 Decimal?   @default(0.0)
+  current_balance              Decimal?   @default(0.0)
+
+  @@index([isDeleted])
+  @@index([companyId])
+  @@index([b2b_group_id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  userId       String
+  addressTitle String
+  firstName    String
+  lastName     String
+  phone        String
+  city         String
+  district     String
+  fullAddress  String
+  isDefault    Boolean @default(false)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDefault])
+}
+
+model Product {
+  id                String                @id @default(cuid())
+  name              String
+  sku               String                @unique
+  category          String
+  subCategory       String?
+  stock             Float                 @default(0)
+  criticalLimit     Float                 @default(0)
+  price             Decimal               @default(0.0) 
+  oldPrice          Decimal?              
+  list_price        Decimal?              @default(0.0)
+  sale_price        Decimal?              @default(0.0)
+  discount_start_date DateTime?
+  discount_end_date   DateTime?
+  stock_quantity    Int?                  @default(0)
+  isCampaignActive  Boolean               @default(false)
+  cartDiscountRate  Float                 @default(0)
+  cost              Decimal               @default(0.0) 
+  image             String?
+  images            Json
+  desc              String?              
+  seoTitle          String?
+  seoDesc           String?              
+  seoKeywords       String?
+  videoUrl          String?
+  attributes        Json
+  isRawMaterial     Boolean               @default(false)
+  rating            Float                 @default(5.0)
+  reviews           Int                   @default(0)
+  isDeleted         Boolean               @default(false)
+  version           Int                   @default(1)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  companyId         String?
+  company           Company?              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  variants          ProductVariant[]
+  usedInRecipes     RecipeItem[]          @relation("Ingredient")
+  recipe            RecipeItem[]          @relation("MainProduct")
+  locations         StockLocation[]
+  stockTransactions StockTransaction[]
+  stockTransfers    StockTransfer[]
+  cycleCountItems   StockCycleCountItem[]
+  
+  // Yeni İlişkiler
+  units                    ProductUnit[]
+  productionOrders         ProductionOrder[]
+  routeSteps               RouteStep[]
+  wasteLogs                WasteLog[]
+  purchaseRequisitionItems PurchaseRequisitionItem[]
+  despatchLines            DespatchLine[]
+  
+  // B2B Eklemeleri
+  b2b_base_price           Decimal?              @default(0.0)
+  tieredPricing            TieredPricing[]
+  b2bPrices                ProductB2BPrice[]
+
+  // Vitrin / Pazarlama Etiketleri
+  isDeal                   Boolean               @default(false)
+  salesCount               Int                   @default(0)
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([isDeleted])
+  @@index([sku])
+  @@index([companyId])
+  @@index([isDeal])
+  @@index([salesCount])
+}
+
+model CategoryDetail {
+  id         String  @id @default(cuid())
+  name       String  @unique
+  parentId   String?
+  attributes Json
+  variants   Json
+
+  @@index([parentId])
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  attributes Json
+  stock      Float   @default(0)
+  price      Decimal? 
+  sku        String  @unique
+  barcode    String? @unique
+  cost       Decimal? @default(0.0) 
+  product    Product @relation(fields: [productId], references: [id])
+
+  // Yeni İlişkiler
+  locations         StockLocation[]
+  stockTransactions StockTransaction[]
+  recipeMain       RecipeItem[]          @relation("MainProductVariant")
+  recipeIngredient RecipeItem[]          @relation("IngredientVariant")
+  productionOrders ProductionOrder[]
+  wasteLogs        WasteLog[]
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model StockLocation {
+  id               String          @id @default(cuid())
+  productId        String
+  productVariantId String?
+  warehouseId      String
+  stock            Float           @default(0)
+  reserved         Float           @default(0)
+  minStock         Float           @default(0)
+  criticalLimit    Float           @default(0)
+  rack             String? // Format: "A-01-03" (Blok-Raf-Göz)
+  warehouse       Warehouse       @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant          ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([productId, warehouseId])
+  @@index([productVariantId])
+}
+
+model Warehouse {
+  id                String            @id @default(cuid())
+  name              String
+  code              String            @unique
+  type              String
+  address           String?           
+  isActive          Boolean           @default(true)
+  isLocked          Boolean           @default(false)
+  branchId          String
+  branch            Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  companyId         String?
+  company           Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  locations         StockLocation[]
+  users             User[]
+  transfersFrom     StockTransfer[]   @relation("FromWarehouse")
+  transfersTo       StockTransfer[]   @relation("ToWarehouse")
+  stockTransactions StockTransaction[]
+  cycleCounts       StockCycleCount[]
+
+  // Yeni İlişkiler
+  productionOrders         ProductionOrder[]
+  wasteLogs                WasteLog[]
+  purchaseRequisitionItems PurchaseRequisitionItem[]
+
+  @@index([branchId])
+  @@index([companyId])
+}
+
+model Branch {
+  id                  String                @id @default(cuid())
+  name                String
+  code                String                @unique
+  address             String?               
+  phone               String?
+  isActive            Boolean               @default(true)
+  warehouses          Warehouse[]
+  users               User[]
+  purchaseRequisitions PurchaseRequisition[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model RecipeItem {
+  id                   String          @id @default(cuid())
+  mainProductId        String
+  mainProductVariantId String?
+  ingredientId         String
+  ingredientVariantId  String?
+  quantity             Float
+  unit                 String
+  ingredient           Product         @relation("Ingredient", fields: [ingredientId], references: [id])
+  mainProduct          Product         @relation("MainProduct", fields: [mainProductId], references: [id])
+  mainProductVariant   ProductVariant? @relation("MainProductVariant", fields: [mainProductVariantId], references: [id])
+  ingredientVariant    ProductVariant? @relation("IngredientVariant", fields: [ingredientVariantId], references: [id])
+
+  @@index([mainProductId])
+  @@index([ingredientId])
+}
+
+model ProductionOrder {
+  id                String          @id @default(cuid())
+  productId         String
+  product           Product         @relation(fields: [productId], references: [id])
+  productVariantId  String?
+  variant           ProductVariant? @relation(fields: [productVariantId], references: [id])
+  quantity          Float
+  status            String          @default("Bekliyor") // "Bekliyor"|"ONAYLANDI"|"Tamamlandı"|"İptal"
+  date              DateTime        @default(now())
+  startDate         DateTime?
+  endDate           DateTime?
+  productionPlanId  String?
+  plan              ProductionPlan? @relation(fields: [productionPlanId], references: [id])
+  warehouseId       String?         // Üretilen mamulün ekleneceği, hammaddelerin düşeceği depo
+  warehouse         Warehouse?      @relation(fields: [warehouseId], references: [id])
+  approvedBy        String?
+  completedBy       String?
+  notes             String?         
+  companyId         String?
+  company           Company?        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  wasteLogs         WasteLog[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([date])
+  @@index([companyId])
+}
+
+model CurrentAccount {
+  id              String         @id @default(cuid())
+  cariKod         String?        @unique // Cari Kodu
+  name            String         // Kurumsal için firma ünvanı, bireysel için ad-soyad
+  type            String         @default("MUSTERI") // Roller (virgülle ayrılmış veya ilişkisel)
+  cariTipi        String         @default("CORPORATE") // "INDIVIDUAL" (B2C) veya "CORPORATE" (B2B)
+  
+  // B2C (Bireysel) Alanlar
+  ad              String?
+  soyad           String?
+  tckn            String?        @unique
+  dogumTarihi     DateTime?
+  
+  // B2B (Kurumsal) Alanlar
+  taxNo           String?
+  taxId           String?
+  taxOffice       String?
+  mersisNo        String?
+  yetkiliKisi     String?
+  webSitesi       String?
+  
+  // İletişim Bilgileri
+  phone           String?
+  email           String?        @unique
+  address         String?        
+  
+  // Finansal Limitler ve B2B Parametreleri
+  balance         Decimal        @default(0.0) 
+  currency        String         @default("TRY")
+  openingBalance  Decimal        @default(0.0) 
+  isActive        Boolean        @default(true)
+  isDeleted       Boolean        @default(false)
+  discountRate    Float?
+  creditLimit     Decimal?       
+  riskLimit       Decimal?       
+  vadeGun         Int?
+  b2bMinQty       Float?         @default(1)
+  b2bPaymentTerms String?        @default("Nakit")
+  b2bCode         String?
+  loyaltyPoints   Float          @default(0)
+  dealerGroup     String         @default("Standart")
+  priceGroup      String         @default("Liste")
+  priceFormula    String?
+  parentDealerId  String?
+  kaynakPlatform  String         @default("ATAK_B2B")
+  eFaturaDurumu   Boolean        @default(false)
+  blokeDurumu     Boolean        @default(false)
+  adresler        Json?
+  entegrasyonHaritalama Json?
+  auditLogs       Json?
+  dosyalar        Json?
+  bankalar        Json?
+  kvkk            Json?
+  yetkililer      Json?
+  tanimlar        Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  companyId       String?
+  company         Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoices        Invoice[]
+  orders          Order[]
+  subAccounts     SubAccount[]
+  transactions    Transaction[]
+  despatchAdvices DespatchAdvice[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([isDeleted])
+  @@index([parentDealerId])
+  @@index([companyId])
+  @@map("cariler")
+}
+
+model SubAccount {
+  id               String         @id @default(cuid())
+  currentAccountId String
+  name             String
+  email            String         @unique
+  phone            String?
+  role             String
+  balance          Decimal        @default(0.0) 
+  currentAccount   CurrentAccount @relation(fields: [currentAccountId], references: [id])
+
+  @@index([currentAccountId])
+}
+
+model Transaction {
+  id               String         @id @default(cuid())
+  currentAccountId String
+  subAccountId     String?
+  date             DateTime       @default(now())
+  type             String
+  amount           Decimal        
+  description      String         
+  paymentMethod    String?
+  currentAccount   CurrentAccount @relation(fields: [currentAccountId], references: [id])
+
+  @@index([currentAccountId])
+  @@index([date])
+}
+
+model Invoice {
+  id               String         @id @default(cuid())
+  orderId          String?
+  currentAccountId String
+  date             DateTime       @default(now())
+  dueDate          DateTime
+  totalAmount      Decimal        
+  taxAmount        Decimal        
+  status           String
+  type             String
+  externalLink     String?
+  items            Json
+  notes            String?        
+  isDeleted        Boolean        @default(false)
+  stockMovement    Boolean        @default(false) @map("stock_movement")
+  companyId        String?
+  company          Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoiceItems     InvoiceItem[]
+  currentAccount   CurrentAccount @relation(fields: [currentAccountId], references: [id], onDelete: Cascade)
+  despatchAdvices  DespatchAdvice[]
+  order            Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([currentAccountId])
+  @@index([status])
+  @@index([date])
+  @@index([isDeleted])
+  @@index([companyId])
+  @@index([orderId])
+}
+
+model Bank {
+  id            String  @id @default(cuid())
+  name          String
+  accountNumber String
+  iban          String
+  balance       Decimal @default(0.0) 
+  currency      String  @default("TRY")
+  logo          String?
+  branch        String? 
+  type          String  @default("VADESIZ")
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  currentAccountId String
+  date             DateTime       @default(now())
+  status           String
+  total            Decimal        
+  shippingFee      Decimal        @default(0.0)
+  summary          String?        
+  type             String         @default("B2C")
+  method           String?
+  isDeleted        Boolean        @default(false)
+  companyId        String?
+  company          Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  currentAccount   CurrentAccount @relation(fields: [currentAccountId], references: [id], onDelete: Cascade)
+  despatchAdvices  DespatchAdvice[]
+  invoices         Invoice[]
+
+  @@index([status])
+  @@index([date])
+  @@index([currentAccountId])
+  @@index([isDeleted])
+  @@index([companyId])
+}
+
+model CMSData {
+  id                       String  @id @default("singleton")
+  heroTitle                String
+  heroSubtitle             String
+  buttonText               String
+  announcement             String
+  announcement2            String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
+  maintenanceMode          Boolean @default(false)
+  siteName                 String  @default("Atak Arıcılık")
+  primaryColor             String  @default("#b45309")
+  secondaryColor           String  @default("#1F2937")
+  siteDescription          String  @default("")
+  categoryTitle            String  @default("")
+  categorySubtitle         String  @default("")
+  appTitle                 String  @default("")
+  appSubtitle              String  @default("")
+  contactPhone             String  @default("")
+  contactEmail             String  @default("")
+  contactAddress           String  @default("")
+  socialInstagram          String  @default("")
+  socialWhatsapp           String  @default("")
+  socialFacebook           String  @default("")
+  socialYoutube            String  @default("")
+  logoFont                 String  @default("Outfit")
+  logoUrl                  String  @default("")
+  logoSize                 Int     @default(18)
+  logoWeight               String  @default("font-black")
+  footerSlogan             String  @default("FABRİKADAN DİREKT")
+  borderRadius             Int     @default(12)
+  announcementActive       Boolean @default(true)
+  announcementSpeed        Int     @default(15)
+  layoutWidth              String  @default("max-w-4xl")
+  heroAlignment            String  @default("center")
+  pricingRules             Json
+  shippingThreshold        Float   @default(5000)
+  shippingFee              Float   @default(150)
+  shippingCarriers         Json
+  themeTemplates           Json
+  contentAnywhereRules     Json
+  savedSectionTemplates    Json
+  popupConfig              Json
+  topBarText1              String  @default("Türkiye'nin Her Yerine Güvenli Sevkiyat")
+  topBarText2              String  @default("304 Paslanmaz Çelik ve Dayanıklı Tasarım")
+  faqData                  Json
+  cartDiscountType         String  @default("none")
+  cartDiscountValue        Float   @default(0)
+  cartDiscountMinAmount    Float   @default(0)
+  bankTransferDiscountRate Float   @default(0)
+  companyName              String  @default("")
+  bankName                 String  @default("")
+  bankIban                 String  @default("")
+  efaturaPrefix            String  @default("GIB")
+  earsivPrefix             String  @default("EAR")
+  companyStampUrl          String  @default("")
+  // Firma Bilgileri & Parametreleri
+  companyOwnerName           String  @default("")
+  companyOwnerSurname        String  @default("")
+  companyTaxNo               String  @default("")
+  companyTaxOffice           String  @default("")
+  companyFax                 String  @default("")
+  companyGsm                 String  @default("")
+  companyKepAddress          String  @default("")
+  companyMersisNo            String  @default("")
+  companySicilNo             String  @default("")
+  companyRegion              String  @default("")
+  companyCountry             String  @default("")
+  companyCity                String  @default("")
+  companyDistrict            String  @default("")
+  companyBuildingName        String  @default("")
+  companyBuildingNo          String  @default("")
+  companyStreet              String  @default("")
+  companyPostalCode          String  @default("")
+  companyWebsite             String  @default("")
+  
+  // Firma Varsayılanları
+  companyDefaultKdv          Int     @default(20)
+  companyDefaultUnit         String  @default("Adet")
+  companyDefaultReturnDays   Int     @default(30)
+  companySalesKdvIncluded    Boolean @default(true)
+  companyPurchaseKdvIncluded Boolean @default(true)
+  companyDefaultLanguages    String  @default("")
+  companyExcludedChars       String  @default("")
+  companyDefaultTevkifatCode String  @default("")
+  companyListStartDay        Int     @default(15)
+  
+  // Firma Parametreleri
+  companyAutoSendEarsivMail       Boolean @default(true)
+  companyUsePaymentPlan           Boolean @default(true)
+  companyAutoUpdatePriceByMargin  Boolean @default(true)
+  companyUseCurrencyInPurchase    Boolean @default(true)
+  companyAutoDeductInstallments   Boolean @default(true)
+  companyUseRowRateInPurchase     Boolean @default(false)
+  companyCheckCurrentVkn          Boolean @default(true)
+  
+  // E-Fatura Ayarları
+  companyInvoiceFooter            String  @default("")
+  footerText               String  @default("© 2026 Atak Arıcılık. Tüm Hakları Saklıdır.")
+  mapCoordinates           String  @default("")
+  // Fırsat Ürünleri Bölümü
+  dealSectionActive        Boolean @default(false)
+  dealProductIds           String  @default("[]")
+}
+
+model CMSPage {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  status    String
+  sections  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Integration {
+  id       String  @id @default(cuid())
+  name     String
+  type     String
+  status   String
+  lastSync String?
+  logo     String
+  settings Json
+}
+
+model IntegrationLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  time          String
+  message       String
+  status        String
+  createdAt     DateTime @default(now())
+
+  @@index([integrationId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STOCK TRANSACTION — Kurumsal Audit Log
+// ─────────────────────────────────────────────────────────────────────────────
+model StockTransaction {
+  id               String          @id @default(cuid())
+  productId        String
+  productVariantId String?
+  warehouseId      String?
+  type             String // "IN"|"OUT"|"TRANSFER_OUT"|"TRANSFER_IN"|"PRODUCTION_IN"|"PRODUCTION_OUT"|"RETURN"|"SALE"|"CYCLE_SURPLUS"|"CYCLE_DEFICIT"
+  quantity         Float
+  unitCost         Decimal?         // Birim maliyet (FIFO/AOM için)
+  remainingQty     Float? // FIFO/LIFO için kalan miktar
+  description      String?         
+  date             DateTime        @default(now())
+  userId           String? // Hangi kullanıcı
+  userEmail        String? // Kullanıcı e-posta
+  moduleSource     String?         @default("MANUAL") // "MANUAL"|"API"|"MARKETPLACE"|"TRANSFER"|"CYCLE_COUNT"|"PRODUCTION"
+  ipAddress        String? // İstemci IP
+  referenceId      String? // İlgili transfer/sayım ID
+  metadata         Json? // Ek JSON detayları
+  companyId        String?
+  company          Company?        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id])
+  variant          ProductVariant? @relation(fields: [productVariantId], references: [id])
+  warehouse        Warehouse?      @relation(fields: [warehouseId], references: [id])
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([date])
+  @@index([type])
+  @@index([moduleSource])
+  @@index([productVariantId])
+  @@index([companyId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STOCK TRANSFER — In-Transit Workflow
+// ─────────────────────────────────────────────────────────────────────────────
+model StockTransfer {
+  id              String    @id @default(cuid())
+  transferNo      String    @unique @default(cuid())
+  productId       String
+  fromWarehouseId String
+  toWarehouseId   String
+  quantity        Float
+  status          String    @default("Taslak") // "Taslak"|"Yolda"|"Tamamlandı"|"Reddedildi"
+  requester       String?
+  approvedBy      String?
+  rejectionReason String?
+  notes           String?   
+  dispatchedAt    DateTime?
+  receivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  product         Product   @relation(fields: [productId], references: [id])
+  fromWarehouse   Warehouse @relation("FromWarehouse", fields: [fromWarehouseId], references: [id], onDelete: Cascade)
+  toWarehouse     Warehouse @relation("ToWarehouse", fields: [toWarehouseId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STOCK CYCLE COUNT — Sayım İşlemleri
+// ─────────────────────────────────────────────────────────────────────────────
+model StockCycleCount {
+  id          String                @id @default(cuid())
+  code        String                @unique // SAYIM-2026-001
+  warehouseId String
+  warehouse   Warehouse             @relation(fields: [warehouseId], references: [id])
+  type        String // "GENEL"|"KISMI"|"BARKODLU"
+  status      String                @default("TASLAK") // "TASLAK"|"DEVAM_EDIYOR"|"TAMAMLANDI"|"IPTAL"
+  isLocked    Boolean               @default(false)
+  startedAt   DateTime?
+  completedAt DateTime?
+  notes       String?               
+  createdBy   String?
+  items       StockCycleCountItem[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([warehouseId])
+  @@index([status])
+}
+
+model StockCycleCountItem {
+  id           String          @id @default(cuid())
+  cycleCountId String
+  cycleCount   StockCycleCount @relation(fields: [cycleCountId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product         @relation(fields: [productId], references: [id])
+  systemStock  Float
+  countedStock Float?
+  difference   Float?
+  rack         String?
+  notes        String?         
+
+  @@index([cycleCountId])
+  @@index([productId])
+}
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  discountType  String
+  discountValue Float
+  minCartAmount Float     @default(0)
+  maxUses       Int?
+  uses          Int       @default(0)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([code])
+}
+
+model Ticket {
+  id        String          @id @default(cuid())
+  email     String
+  subject   String
+  status    String          @default("OPEN")
+  category  String          @default("GENERAL")
+  orderId   String?
+  messages  TicketMessage[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([status])
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender    String
+  message   String   
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  type        String   @default("percentage")
+  value       Float    @default(0)
+  minOrder    Float    @default(0)
+  maxUses     Int      @default(100)
+  usedCount   Int      @default(0)
+  startDate   String
+  endDate     String
+  isActive    Boolean  @default(true)
+  target      String   @default("all")
+  description String   @default("") 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  rating    Int
+  message   String   
+  status    String   @default("PENDING")
+  reply     String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   
+  category  String   @default("Genel")
+  image     String?
+  metaDesc  String?  
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model AccountingAccount {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  type        String
+  parentCode  String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  debitLines  JournalLine[] @relation("DebitAccount")
+  creditLines JournalLine[] @relation("CreditAccount")
+
+  @@index([code])
+}
+
+model JournalEntry {
+  id          String        @id @default(cuid())
+  date        DateTime      @default(now())
+  number      String        @unique
+  description String        
+  status      String        @default("DRAFT")
+  type        String        @default("GENERAL")
+  createdBy   String?
+  referenceId String?
+  companyId   String?
+  company     Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines       JournalLine[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([date])
+  @@index([number])
+  @@index([companyId])
+}
+
+model JournalLine {
+  id              String            @id @default(cuid())
+  journalEntry    JournalEntry      @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  journalEntryId  String
+  debitAccount    AccountingAccount @relation("DebitAccount", fields: [debitAccountId], references: [id])
+  debitAccountId  String
+  creditAccount   AccountingAccount @relation("CreditAccount", fields: [creditAccountId], references: [id])
+  creditAccountId String
+  amount          Decimal           
+  description     String?           
+
+  @@index([journalEntryId])
+  @@index([debitAccountId])
+  @@index([creditAccountId])
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  category      String
+  amount        Decimal  
+  taxAmount     Decimal  @default(0.0) 
+  description   String   
+  supplier      String?
+  receiptNo     String?
+  paymentMethod String   @default("NAKIT")
+  bankId        String?
+  status        String   @default("ODENDI")
+  companyId     String?
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([companyId])
+}
+
+model BudgetItem {
+  id        String   @id @default(cuid())
+  year      Int
+  month     Int
+  category  String
+  planned   Decimal  
+  actual    Decimal  @default(0.0) 
+  notes     String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([year, month, category])
+}
+
+model TaxDeclaration {
+  id        String    @id @default(cuid())
+  period    String
+  type      String
+  amount    Decimal   
+  taxBase   Decimal?  
+  taxRate   Float?
+  status    String    @default("BEKLIYOR")
+  dueDate   DateTime
+  paidDate  DateTime?
+  paidAt    DateTime?
+  notes     String?   
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([period])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  name        String
+  quantity    Float
+  unitPrice   Decimal 
+  vatRate     Float   @default(18)
+  totalAmount Decimal 
+
+  @@index([invoiceId])
+}
+
+model Income {
+  id               String   @id @default(cuid())
+  date             DateTime @default(now())
+  category         String
+  amount           Decimal  
+  taxAmount        Decimal  @default(0.0) 
+  description      String   
+  currentAccountId String?
+  paymentMethod    String   @default("HAVALE")
+  bankId           String?
+  status           String   @default("ALINDI")
+  companyId        String?
+  company          Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([companyId])
+}
+
+model AuthLog {
+  id         String   @id @default(cuid())
+  ip         String
+  userId     String?
+  route      String
+  method     String
+  failReason String   
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model MediaItem {
+  id        String   @id @default(cuid())
+  name      String
+  url       String   @unique
+  size      String
+  tag       String   @default("general")
+  alt       String   @default("")
+  createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// YENİ ERP MODÜLLERİ: PLANLAMA, BİRİM, İSTASYON VE FİRE MODELLERİ
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProductUnit {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String   // Örn: "Koli", "Paket", "kg", "Adet"
+  factor    Float    // Örn: 12 (1 Koli = 12 Adet)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model ProductionPlan {
+  id        String            @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  status    String            @default("TASLAK") // "TASLAK"|"ONAYLANDI"|"TAMAMLANDI"|"IPTAL"
+  orders    ProductionOrder[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Workstation {
+  id        String      @id @default(cuid())
+  name      String
+  code      String      @unique
+  capacity  Float       @default(100)
+  unit      String      @default("SAAT")
+  isActive  Boolean     @default(true)
+  steps     RouteStep[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model RouteStep {
+  id            String      @id @default(cuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stepNumber    Int
+  name          String
+  workstationId String
+  workstation   Workstation @relation(fields: [workstationId], references: [id])
+  setupTime     Float       @default(0)
+  runTime       Float       @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([productId])
+  @@index([workstationId])
+}
+
+model WasteLog {
+  id                String           @id @default(cuid())
+  productId         String
+  product           Product          @relation(fields: [productId], references: [id])
+  productVariantId  String?
+  variant           ProductVariant?  @relation(fields: [productVariantId], references: [id])
+  productionOrderId String?
+  productionOrder   ProductionOrder? @relation(fields: [productionOrderId], references: [id])
+  warehouseId       String
+  warehouse         Warehouse        @relation(fields: [warehouseId], references: [id])
+  quantity          Float
+  reason            String
+  date              DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+
+  @@index([productId])
+  @@index([warehouseId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PURCHASE REQUISITION — Satın Alma Talepleri Modelleri
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PurchaseRequisition {
+  id                   String                        @id @default(cuid())
+  requisitionNo        String                        @unique
+  requestDate          DateTime                      @default(now())
+  branchId             String
+  branch               Branch                        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  departmentId         String
+  requesterId          String
+  requester            User                          @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  projectId            String?
+  costCenterId         String?
+  priority             String                        @default("Normal") // "Düşük", "Normal", "Yüksek", "Kritik"
+  status               String                        @default("Taslak") // "Taslak", "Onay Bekliyor", "Onaylandı", "Reddedildi", "Teklife Aktarıldı", "Siparişe Aktarıldı", "Tamamlandı", "İptal"
+  approvalStatus       String                        @default("Bekliyor") // "Bekliyor", "Onaylandı", "Reddedildi", "Revizyon"
+  expectedDeliveryDate DateTime
+  totalAmount          Decimal                       @default(0.0) 
+  notes                String?                       
+  items                PurchaseRequisitionItem[]
+  approvals            PurchaseRequisitionApproval[]
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+
+  @@index([status])
+  @@index([priority])
+  @@index([requesterId])
+  @@index([branchId])
+}
+
+model PurchaseRequisitionItem {
+  id            String              @id @default(cuid())
+  requisitionId String
+  requisition   PurchaseRequisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouseId   String
+  warehouse         Warehouse           @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  quantity      Float
+  unitPrice     Decimal             
+  totalPrice    Decimal             
+  description   String?             
+
+  @@index([requisitionId])
+  @@index([productId])
+}
+
+model PurchaseRequisitionApproval {
+  id            String              @id @default(cuid())
+  requisitionId String
+  requisition   PurchaseRequisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  approverId    String
+  approver      User                @relation(fields: [approverId], references: [id], onDelete: Cascade)
+  action        String // "Onayla", "Reddet", "Revizyona Gönder", "Yorum Ekle"
+  comment       String?             
+  approvalDate  DateTime            @default(now())
+
+  @@index([requisitionId])
+  @@index([approverId])
+}
+
+model DespatchAdvice {
+  id                 String         @id @default(uuid()) @map("despatch_id")
+  despatchNo         String         @unique @map("despatch_no")
+  ettnNo             String         @unique @default(uuid()) @map("ettn_no")
+  customerAccountId  String         @map("customer_id")
+  invoiceId          String?        @map("invoice_id")
+  orderId            String?        @map("order_id")
+  issueDate          DateTime       @map("issue_date")
+  actualDespatchDate DateTime       @map("actual_despatch_date")
+  carrierId          String?        @map("carrier_id")
+  driverName         String?        @map("driver_name")
+  driverIdentityNo   String?        @map("driver_identity_no")
+  licensePlate       String?        @map("license_plate")
+  status             String         @map("status")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  customerAccount    CurrentAccount @relation(fields: [customerAccountId], references: [id])
+  invoice            Invoice?       @relation(fields: [invoiceId], references: [id])
+  order              Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  lines              DespatchLine[]
+
+  @@map("despatch_advices")
+  @@index([customerAccountId])
+  @@index([invoiceId])
+  @@index([orderId])
+}
+
+model DespatchLine {
+  id               String         @id @default(uuid()) @map("line_id")
+  despatchId       String         @map("despatch_id")
+  productId        String         @map("stock_id")
+  quantity         Float          @map("quantity")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  despatchAdvice   DespatchAdvice @relation(fields: [despatchId], references: [id], onDelete: Cascade)
+  product          Product        @relation(fields: [productId], references: [id])
+
+  @@map("despatch_lines")
+  @@index([despatchId])
+  @@index([productId])
+}
+
+// ─── Rol Tabanlı Erişim Kontrolü (RBAC) Modelleri ───
+
+model Role {
+  id          String           @id @default(cuid()) @map("role_id")
+  name        String           @unique @map("role_name")
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id    String           @id @default(cuid()) @map("permission_id")
+  name  String           @unique @map("permission_name")
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId String @map("user_id")
+  roleId String @map("role_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model SystemAuditLog {
+  id        String   @id @default(uuid())
+  tableName String
+  recordId  String
+  action    String
+  oldData   Json?
+  newData   Json?
+  userId    String?
+  companyId String?
+  createdAt DateTime @default(now())
+
+  @@index([tableName])
+  @@index([recordId])
+  @@index([action])
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+// ─── B2B (Bayi/Kurumsal) Modelleri ───
+
+model B2BGroup {
+  id                 String          @id @default(cuid())
+  group_name         String          @unique // Örn: "Toptancı 1"
+  base_discount_rate Float           @default(0) // Temel iskonto oranı (örn: 15 -> %15)
+  users              User[]
+  tieredPricing      TieredPricing[]
+  b2bPrices          ProductB2BPrice[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@map("b2b_groups")
+}
+
+model ProductB2BPrice {
+  id           String    @id @default(cuid())
+  productId    String
+  b2bGroupId   String
+  price        Decimal   // B2B Grubu için özel taban fiyat
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  b2bGroup     B2BGroup  @relation(fields: [b2bGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, b2bGroupId])
+  @@index([productId])
+  @@index([b2bGroupId])
+  @@map("product_b2b_prices")
+}
+
+model TieredPricing {
+  id                  String    @id @default(cuid())
+  productId           String
+  b2bGroupId          String
+  min_quantity        Int       // Minimum alım adedi (örn: 10)
+  discount_percentage Float     // Uygulanacak indirim yüzdesi (örn: 5 -> %5)
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  b2bGroup            B2BGroup  @relation(fields: [b2bGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, b2bGroupId, min_quantity])
+  @@index([productId])
+  @@index([b2bGroupId])
+  @@map("tiered_pricings")
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("ORDER") // ORDER, TICKET, etc.
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  orderId   String?
+
+  @@map("admin_notifications")
+}
+
+model FeatureModule {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "b2b", "b2c", "production", "inventory", "accounting"
+  name        String   // e.g. "B2B Bayi Portalı", "B2C E-Ticaret", "Üretim / MRP", "Depo / Stok", "Muhasebe"
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions CompanyPermission[]
+
+  @@map("features_modules")
+}
+
+model CompanyPermission {
+  id              String        @id @default(cuid())
+  companyId       String
+  featureModuleId String
+  isEnabled       Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  featureModule FeatureModule @relation(fields: [featureModuleId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, featureModuleId])
+  @@index([companyId])
+  @@index([featureModuleId])
+  @@map("company_permissions")
+}
+
+model FailedCargoRequest {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  carrierName    String   @map("carrier_name")
+  requestPayload String   @map("request_payload")
+  errorMessage   String?  @map("error_message")
+  retryCount     Int      @default(0) @map("retry_count")
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("failed_cargo_requests")
+}
+
+model EmailTemplate {
+  id        String   @id @default(uuid())
+  eventType String   @unique @map("event_type")
+  name      String
+  subject   String
+  bodyHtml  String    @map("body_html")
+  variables String
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id           String   @id @default(uuid())
+  recipient    String
+  subject      String
+  bodyHtml     String    @map("body_html")
+  eventType    String?  @map("event_type")
+  status       String
+  errorMessage String?   @map("error_message")
+  retryCount   Int      @default(0) @map("retry_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("email_logs")
+}

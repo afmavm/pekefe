@@ -348,8 +348,8 @@ export default function MuhasebeLayout({ children }: { children: React.ReactNode
   }>({ orders: [], products: [], dealers: [] });
   const [searching, setSearching] = useState(false);
 
-  const siteName = cmsData?.siteName || "Atak Arıcılık";
-  const primaryColor = cmsData?.primaryColor || "#f97316";
+  const siteName = cmsData?.siteName || "Pekefe";
+  const primaryColor = cmsData?.primaryColor || "#6b1d2f";
 
   const [notifications, setNotifications] = useState([
     { id: 1, type: "success", text: "Trendyol entegrasyonu güncellendi. 15 ürün senkronize edildi.", time: "2 dk önce" },

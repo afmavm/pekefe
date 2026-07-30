@@ -6,7 +6,7 @@ import { getInventoryReportData } from "@/modules/inventory/server/inventoryActi
 import ReportsClient from "./ReportsClient";
 
 export const metadata: Metadata = {
-  title: "Envanter Raporları | Atak Arıcılık ERP",
+  title: "Envanter Raporları | Pekefe ERP",
   description: "Kurumsal Excel ve PDF formatlarında envanter ve stok raporları oluşturucu.",
 };
 

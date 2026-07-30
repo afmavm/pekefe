@@ -4,7 +4,7 @@ import AccountingDashboard from "@/modules/accounting/components/AccountingDashb
 import { AlertCircle, Loader2 } from "lucide-react";
 
 export const metadata = {
-  title: "Ön Muhasebe & Defter | Atak Arıcılık Yönetim Paneli",
+  title: "Ön Muhasebe & Defter | Pekefe Yönetim Paneli",
   description: "Genel yevmiye fişleri, banka hesapları, B2B fatura tahsilat mutabakatı ve bütçe planlaması.",
 };
 

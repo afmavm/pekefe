@@ -1058,7 +1058,7 @@ export default function CampaignsPage() {
                     value={companyName}
                     onChange={e => setCompanyName(e.target.value)}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-orange-500"
-                    placeholder="Örn: Atak Arıcılık San. ve Tic. Ltd. Şti."
+                    placeholder="Örn: Pekefe Gıda San. ve Tic. Ltd. Şti."
                   />
                 </div>
 

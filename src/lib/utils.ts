@@ -152,10 +152,30 @@ export function normalizeImagePath(path?: any): string {
   return clean;
 }
 
+export interface ProductMediaObject {
+  id?: string;
+  type: "image" | "video";
+  url: string;
+  name?: string;
+}
+
+export function isVideoUrl(url?: string | null): boolean {
+  if (!url || typeof url !== "string") return false;
+  const clean = url.toLowerCase().trim();
+  return (
+    clean.endsWith(".mp4") ||
+    clean.endsWith(".webm") ||
+    clean.endsWith(".ogg") ||
+    clean.includes("youtube.com") ||
+    clean.includes("youtu.be") ||
+    clean.includes("vimeo.com")
+  );
+}
+
 export function resolveProductImage(image: any, images: any): string {
   let mainImage = typeof image === "string" ? image.trim() : "";
   
-  let imagesList: string[] = [];
+  let imagesList: any[] = [];
   if (images) {
     try {
       const parsed = typeof images === "string" ? JSON.parse(images) : images;
@@ -167,61 +187,89 @@ export function resolveProductImage(image: any, images: any): string {
     }
   }
 
-  // 1. Durum: Ana görsel boşsa galerideki ilk logo olmayan görseli, yoksa ilk görseli seç
+  const getStringUrl = (item: any): string => {
+    if (!item) return "";
+    if (typeof item === "string") return item;
+    if (typeof item === "object" && item.url) return item.url;
+    return "";
+  };
+
+  // 1. Durum: Ana görsel boşsa galerideki ilk logo ve video olmayan resmi seç
   if (!mainImage && imagesList.length > 0) {
-    mainImage = imagesList.find(img => img && !isLogoImage(img)) || imagesList[0];
+    const found = imagesList.find(item => {
+      const u = getStringUrl(item);
+      return u && !isLogoImage(u) && !isVideoUrl(u);
+    });
+    if (found) mainImage = getStringUrl(found);
+    else mainImage = getStringUrl(imagesList[0]);
   }
 
   // 2. Durum: Ana görsel logoysa galerideki logo olmayan görseli seç
   if (isLogoImage(mainImage) && imagesList.length > 0) {
-    const nonLogo = imagesList.find(img => img && !isLogoImage(img));
+    const nonLogo = imagesList.find(item => {
+      const u = getStringUrl(item);
+      return u && !isLogoImage(u);
+    });
     if (nonLogo) {
-      mainImage = nonLogo;
+      mainImage = getStringUrl(nonLogo);
     }
   }
 
   return normalizeImagePath(mainImage);
 }
 
-export function resolveProductGallery(image: string | null | undefined, images: any): string[] {
-  const mainImage = resolveProductImage(image, images);
-  
-  let imagesList: string[] = [];
+export function resolveProductMediaItems(image: any, images: any, videoUrl?: string | null): ProductMediaObject[] {
+  const result: ProductMediaObject[] = [];
+  const addedUrls = new Set<string>();
+
+  const processItem = (item: any) => {
+    if (!item) return;
+    let url = "";
+    let type: "image" | "video" = "image";
+    let name = "";
+
+    if (typeof item === "string") {
+      url = item.trim();
+      type = isVideoUrl(url) ? "video" : "image";
+      name = type === "video" ? "Ürün_Videosu.mp4" : "Görsel.jpg";
+    } else if (typeof item === "object" && item.url) {
+      url = String(item.url).trim();
+      type = item.type === "video" || isVideoUrl(url) ? "video" : "image";
+      name = item.name || (type === "video" ? "Ürün_Videosu.mp4" : "Görsel.jpg");
+    }
+
+    if (!url || isLogoImage(url) || addedUrls.has(url)) return;
+    addedUrls.add(url);
+    result.push({ id: Math.random().toString(), type, url: normalizeImagePath(url), name });
+  };
+
+  // 1. Process images field array
   if (images) {
     try {
       const parsed = typeof images === "string" ? JSON.parse(images) : images;
       if (Array.isArray(parsed)) {
-        imagesList = parsed;
+        parsed.forEach(processItem);
       }
     } catch (e) {
-      console.error("Failed to parse images JSON in resolveProductGallery:", e);
+      // ignore
     }
   }
 
-  let normalizedList = imagesList.map(img => normalizeImagePath(img)).filter(Boolean);
-  
-  const containsNonLogo = normalizedList.some(img => !isLogoImage(img));
-  if (containsNonLogo) {
-    normalizedList = normalizedList.filter(img => !isLogoImage(img));
+  // 2. Process primary image field
+  if (typeof image === "string" && image.trim()) {
+    processItem(image);
   }
 
-  const combined = new Set<string>();
-  if (mainImage && !isLogoImage(mainImage)) {
-    combined.add(mainImage);
-  }
-  normalizedList.forEach(img => {
-    if (img && !isLogoImage(img)) {
-      combined.add(img);
-    }
-  });
-
-  if (combined.size === 0) {
-    if (mainImage) combined.add(mainImage);
-    normalizedList.forEach(img => {
-      if (img) combined.add(img);
-    });
+  // 3. Process videoUrl field if present
+  if (videoUrl && typeof videoUrl === "string" && videoUrl.trim()) {
+    processItem({ type: "video", url: videoUrl, name: "Tanıtım_Videosu.mp4" });
   }
 
-  return Array.from(combined);
+  return result;
+}
+
+export function resolveProductGallery(image: string | null | undefined, images: any): string[] {
+  const mediaItems = resolveProductMediaItems(image, images);
+  return mediaItems.map(m => m.url);
 }
 

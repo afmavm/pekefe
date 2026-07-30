@@ -4,49 +4,49 @@ import { requireAdmin } from '@/lib/auth-helpers';
 
 export const dynamic = 'force-dynamic';
 
-// Ortak HTML base layout
+// Ortak HTML base layout — Pekefe Bordo Theme (#6b1d2f)
 const base = (content: string) => `<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Atak Aricilik</title>
+<title>Pekefe Traditional Excellence</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #333; }
-  .wrapper { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-  .header { background: linear-gradient(135deg, #b45309 0%, #92400e 100%); padding: 32px 40px; text-align: center; }
-  .header h1 { color: #fff; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-  .header p { color: rgba(255,255,255,0.82); font-size: 13px; margin-top: 4px; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #333; }
+  .wrapper { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
+  .header { background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 40px; text-align: center; }
+  .header h1 { color: #fff; font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+  .header p { color: #fef3c7; font-size: 12px; margin-top: 6px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .body { padding: 36px 40px; }
-  .body h2 { font-size: 20px; color: #1a1a1a; margin-bottom: 16px; }
-  .body p { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 14px; }
-  .btn { display: inline-block; padding: 14px 32px; background: #b45309; color: #fff !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; margin: 10px 0 18px; }
-  .info-box { background: #fef3c7; border-left: 4px solid #b45309; border-radius: 6px; padding: 14px 18px; margin: 20px 0; }
-  .info-box p { color: #92400e; margin: 0; font-size: 13px; margin-bottom: 6px; }
+  .body h2 { font-size: 20px; color: #1a0a10; margin-bottom: 16px; font-weight: 700; }
+  .body p { font-size: 14px; color: #475569; line-height: 1.7; margin-bottom: 14px; }
+  .btn { display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #fff !important; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 14px; margin: 12px 0 18px; box-shadow: 0 4px 14px rgba(107,29,47,0.25); }
+  .info-box { background: #fffbf5; border-left: 4px solid #d97706; border: 1px solid #fde68a; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .info-box p { color: #78350f; margin: 0; font-size: 13px; margin-bottom: 6px; }
   .order-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
-  .order-table th { background: #f8f8f8; padding: 10px 14px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e5e5e5; }
+  .order-table th { background: #fcf8f6; padding: 10px 14px; text-align: left; font-weight: 600; color: #6b1d2f; border-bottom: 2px solid #e2e8f0; }
   .order-table td { padding: 10px 14px; border-bottom: 1px solid #eee; color: #444; }
-  .order-table .total td { font-weight: 700; color: #b45309; border-top: 2px solid #e5e5e5; background: #fffbf0; }
+  .order-table .total td { font-weight: 700; color: #6b1d2f; border-top: 2px solid #e2e8f0; background: #fffbf5; }
   .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
   .badge-warning { background: #fef3c7; color: #92400e; }
   .divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
-  .footer { background: #1a1a1a; padding: 24px 40px; text-align: center; }
-  .footer p { color: #888; font-size: 11px; line-height: 1.8; }
-  .footer a { color: #b45309; text-decoration: none; }
+  .footer { background: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 24px 40px; text-align: center; }
+  .footer p { color: #94a3b8; font-size: 11px; line-height: 1.8; }
+  .footer a { color: #6b1d2f; text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="wrapper">
   <div class="header">
-    <h1>&#x1F41D; ATAK ARICILIK</h1>
-    <p>Turkiye'nin Lider Aricilik Ekipmanlari Tedarikcisi</p>
+    <h1>🌿 PEKEFE</h1>
+    <p>Geleneksel &amp; Doğal Lezzetler · İspir</p>
   </div>
   <div class="body">${content}</div>
   <div class="footer">
-    <p>&copy; 2026 Atak Aricilik. Tum Haklari Saklidir.</p>
-    <p>Bu e-posta {{recipientEmail}} adresine gonderilmistir.</p>
-    <p><a href="mailto:info@atakaricilik.com">info@atakaricilik.com</a> | <a href="tel:+905441494851">0544 149 48 51</a></p>
+    <p>&copy; 2026 Pekefe Traditional Excellence. Tüm Hakları Saklıdır.</p>
+    <p>Bu e-posta {{recipientEmail}} adresine gönderilmiştir.</p>
+    <p><a href="mailto:info@pekefe.com">info@pekefe.com</a> | <a href="http://localhost:3000">www.pekefe.com</a></p>
   </div>
 </div>
 </body>
@@ -56,22 +56,22 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'WELCOME',
     name: 'Hoş Geldiniz - Yeni Üyelik',
-    subject: "Atak Arıcılık'a Hoş Geldiniz, {{userName}}!",
+    subject: "Pekefe Ailesine Hoş Geldiniz, {{userName}}! 🌿",
     variables: JSON.stringify(['userName', 'userEmail', 'loginUrl', 'recipientEmail']),
-    bodyHtml: base(`<h2>Merhaba, {{userName}}!</h2>
-      <p>Atak Arıcılık ailesine katıldığınız için çok mutluyuz. Hesabınız başarıyla oluşturulmuştur.</p>
-      <p>Türkiye'nin en geniş ve en kaliteli profesyonel arıcılık ekipmanları kataloğu artık hizmetinizde!</p>
+    bodyHtml: base(`<h2>Aramıza Hoş Geldiniz, {{userName}}! ✨</h2>
+      <p>Pekefe ailesine katıldığınız için teşekkür ederiz. Hesabınız başarıyla oluşturulmuştur.</p>
+      <p>Anadolu'nun bereketli yaylalarından süzülen %100 doğal ve geleneksel ürün koleksiyonumuz artık hizmetinizde!</p>
       <div class="info-box"><p>✅ Hesabınız <strong>{{userEmail}}</strong> adresiyle aktif edilmiştir.</p></div>
       <a href="{{loginUrl}}" class="btn">Alışverişe Başla &rarr;</a>`)
   },
   {
     eventType: 'PASSWORD_RESET',
     name: 'Şifre Sıfırlama İsteği',
-    subject: 'Şifrenizi Sıfırlayın - Atak Arıcılık',
+    subject: 'Şifrenizi Sıfırlayın - Pekefe',
     variables: JSON.stringify(['userName', 'resetUrl', 'expiresIn', 'recipientEmail']),
     bodyHtml: base(`<h2>Şifre Sıfırlama Talebi</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
-      <p>Hesabınız için şifre sıfırlama talebinde bulunuldu. Şifrenizi sıfırlamak için aşağıdaki butona tıklayınız.</p>
+      <p>Hesabınız için şifre sıfırlama talebinde bulunuldu. Şifrenizi yenilemek için aşağıdaki butona tıklayın.</p>
       <div class="info-box"><p>⌛ Bu bağlantı güvenlik nedeniyle <strong>{{expiresIn}}</strong> içinde geçerliliğini yitirecektir.</p></div>
       <a href="{{resetUrl}}" class="btn">Şifremi Sıfırla &rarr;</a>
       <hr class="divider" />
@@ -80,11 +80,11 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'ORDER_CONFIRMED',
     name: 'Sipariş Onaylandı',
-    subject: 'Siparişiniz Alındı - #{{orderNo}}',
+    subject: 'Siparişiniz Alındı — #{{orderNo}} 📦',
     variables: JSON.stringify(['userName', 'orderNo', 'orderDate', 'orderTotal', 'shippingAddress', 'orderDetailUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Siparişiniz alındı! 🎉</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
-      <p>Siparişiniz tarafımıza ulaşmış ve hazırlık süreci başlatılmıştır. Siparişiniz kargoya teslim edildiğinde bilgilendirileceksiniz.</p>
+      <p>Siparişiniz tarafımıza ulaşmış ve özenle hazırlanmaya başlanmıştır. Ürünleriniz kargoya teslim edildiğinde bilgilendirileceksiniz.</p>
       <div class="info-box">
         <p>📦 Sipariş No: <strong>#{{orderNo}}</strong></p>
         <p>📅 Sipariş Tarihi: <strong>{{orderDate}}</strong></p>
@@ -96,7 +96,7 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'ORDER_SHIPPED',
     name: 'Sipariş Kargoya Verildi',
-    subject: 'Siparişiniz Kargoya Verildi - #{{orderNo}}',
+    subject: 'Siparişiniz Kargoya Verildi — #{{orderNo}} 🚚',
     variables: JSON.stringify(['userName', 'orderNo', 'cargoCompany', 'trackingNo', 'trackingUrl', 'estimatedDelivery', 'recipientEmail']),
     bodyHtml: base(`<h2>Siparişiniz yola çıktı! 🚚</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
@@ -110,18 +110,18 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'ORDER_DELIVERED',
     name: 'Sipariş Teslim Edildi',
-    subject: 'Siparişiniz Teslim Edildi - #{{orderNo}}',
+    subject: 'Siparişiniz Teslim Edildi — #{{orderNo}} ✅',
     variables: JSON.stringify(['userName', 'orderNo', 'deliveredAt', 'feedbackUrl', 'shopUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Siparişiniz teslim edildi! ✅</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
       <p><strong>#{{orderNo}}</strong> numaralı siparişiniz <strong>{{deliveredAt}}</strong> tarihinde başarıyla teslim edilmiştir.</p>
-      <p>Ürünlerimiz ve alışveriş deneyiminiz hakkındaki görüşleriniz bizim için çok değerlidir. Deneyiminizi bizimle paylaşmak ister misiniz?</p>
+      <p>Geleneksel lezzetlerimiz ve alışveriş deneyiminiz hakkındaki görüşleriniz bizim için çok değerlidir.</p>
       <a href="{{feedbackUrl}}" class="btn">Değerlendirme Yap &rarr;</a>`)
   },
   {
     eventType: 'PAYMENT_RECEIVED',
     name: 'Ödeme Alındı',
-    subject: 'Ödemeniz Onaylandı - #{{orderNo}}',
+    subject: 'Ödemeniz Onaylandı — #{{orderNo}} 💳',
     variables: JSON.stringify(['userName', 'orderNo', 'paymentAmount', 'paymentMethod', 'paymentDate', 'invoiceUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Ödemeniz alındı! 💳</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
@@ -136,7 +136,7 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'ORDER_CANCELLED',
     name: 'Sipariş İptal Edildi',
-    subject: 'Siparişiniz İptal Edildi - #{{orderNo}}',
+    subject: 'Siparişiniz İptal Edildi — #{{orderNo}}',
     variables: JSON.stringify(['userName', 'orderNo', 'cancelReason', 'refundAmount', 'refundMethod', 'refundDays', 'shopUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Siparişiniz iptal edildi</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
@@ -148,7 +148,7 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'ORDER_RETURNED',
     name: 'İade Onaylandı',
-    subject: 'İadeniz Onaylandı - #{{orderNo}}',
+    subject: 'İadeniz Onaylandı — #{{orderNo}} 🔄',
     variables: JSON.stringify(['userName', 'orderNo', 'refundAmount', 'refundDays', 'refundMethod', 'recipientEmail']),
     bodyHtml: base(`<h2>İadeniz onaylandı! 🔄</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
@@ -162,34 +162,34 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'B2B_APPROVED',
     name: 'B2B Bayi Hesabı Onaylandı',
-    subject: 'Bayi Hesabınız Aktif Edildi! - Atak Arıcılık',
+    subject: 'Tebrikler! Bayi Hesabınız Aktif Edildi — Pekefe B2B 🏆',
     variables: JSON.stringify(['userName', 'companyName', 'b2bGroup', 'discountRate', 'loginUrl', 'catalogUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Tebrikler! Bayi hesabınız aktif edildi! 🏆</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
-      <p><strong>{{companyName}}</strong> firması adına yapmış olduğunuz B2B bayi başvurusu onaylanmıştır!</p>
+      <p><strong>{{companyName}}</strong> firması adına yapmış olduğunuz Pekefe B2B bayi başvurusu onaylanmıştır!</p>
       <div class="info-box">
         <p>🏷️ Bayi Grubu: <strong>{{b2bGroup}}</strong></p>
         <p>💰 Özel İndirim Oranınız: <strong>%{{discountRate}}</strong></p>
       </div>
-      <p>Artık B2B bayi fiyatlarıyla giriş yapabilir ve siparişlerinizi özel iskonto oranlarıyla verebilirsiniz.</p>
+      <p>Artık Pekefe B2B bayi fiyatlarıyla giriş yapabilir ve siparişlerinizi özel iskonto oranlarıyla verebilirsiniz.</p>
       <a href="{{loginUrl}}" class="btn">Bayi Paneline Giriş Yap &rarr;</a>`)
   },
   {
     eventType: 'B2B_REJECTED',
     name: 'B2B Bayi Başvurusu Reddedildi',
-    subject: 'B2B Başvurunuz Hakkında Bilgilendirme - Atak Arıcılık',
+    subject: 'B2B Başvurunuz Hakkında Bilgilendirme — Pekefe B2B',
     variables: JSON.stringify(['userName', 'companyName', 'rejectReason', 'contactUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>Bayi Başvurunuz Hakkında</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>
-      <p><strong>{{companyName}}</strong> firması adına yaptığınız B2B bayi başvurusu incelenmiş olup, bu aşamada onaylanamamıştır.</p>
+      <p><strong>{{companyName}}</strong> firması adına yaptığınız Pekefe B2B bayi başvurusu incelenmiş olup, bu aşamada onaylanamamıştır.</p>
       <div class="info-box"><p>📝 Gerekçe: <strong>{{rejectReason}}</strong></p></div>
-      <p>Eksik belgelerinizi veya bilgilerinizi güncelleyerek bizimle iletişime geçebilir ya da tekrar başvurabilirsiniz.</p>
+      <p>Bilgilerinizi güncelleyerek bizimle iletişime geçebilirsiniz.</p>
       <a href="{{contactUrl}}" class="btn">İletişime Geçin &rarr;</a>`)
   },
   {
     eventType: 'LOW_STOCK_ALERT',
     name: 'Kritik Stok Uyarısı (Admin)',
-    subject: 'Kritik Stok Uyarısı - {{productName}}',
+    subject: 'Kritik Stok Uyarısı — {{productName}}',
     variables: JSON.stringify(['productName', 'sku', 'currentStock', 'criticalLimit', 'warehouseName', 'adminPanelUrl', 'recipientEmail']),
     bodyHtml: base(`<h2>⚠️ Kritik Stok Seviyesi Uyarısı</h2>
       <p>Aşağıdaki ürünün stok seviyesi kritik limitin altına düşmüştür.</p>
@@ -207,7 +207,7 @@ const DEFAULT_TEMPLATES = [
   {
     eventType: 'EMAIL_VERIFICATION',
     name: 'E-posta Doğrulama',
-    subject: 'E-posta Adresinizi Doğrulayın - Atak Arıcılık',
+    subject: 'E-posta Adresinizi Doğrulayın — Pekefe ✉️',
     variables: JSON.stringify(['userName', 'verifyUrl', 'expiresIn', 'recipientEmail']),
     bodyHtml: base(`<h2>E-posta adresinizi doğrulayın ✉️</h2>
       <p>Merhaba <strong>{{userName}}</strong>,</p>

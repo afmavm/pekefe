@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Toast } from "@/components/ui/Toast";
 
 export default function Hesap() {
+  const router = useRouter();
   const sessionResult = useSession() || {};
   const session = sessionResult.data;
   const status = sessionResult.status || "unauthenticated";
@@ -30,6 +32,7 @@ export default function Hesap() {
 
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
+  const [favoritesList, setFavoritesList] = useState([]);
 
   const [savingInfo, setSavingInfo] = useState(false);
   const [savedInfoSuccess, setSavedInfoSuccess] = useState(false);
@@ -41,16 +44,46 @@ export default function Hesap() {
     setToast({ isOpen: true, message, type });
   };
 
+  const loadFavorites = () => {
+    if (typeof window !== "undefined") {
+      const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
+      const favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+      setFavoritesList(favs);
+    }
+  };
+
+  const removeFavoriteItem = (id) => {
+    const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
+    let favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+    favs = favs.filter(item => String(item.id) !== String(id) && String(item.sku) !== String(id));
+    localStorage.setItem(favoritesKey, JSON.stringify(favs));
+    setFavoritesList(favs);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("pekefe_favorites_changed"));
+    }
+    showNotification("Ürün favorilerinizden çıkarıldı.", "info");
+  };
+
+  // Auth Guard – redirect unauthenticated users to /giris
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/giris?callbackUrl=%2Fhesap");
+    }
+  }, [status, router]);
+
   // Fetch Live Data on Load
   useEffect(() => {
+    loadFavorites();
     if (status === "authenticated") {
       fetchUserData();
       fetchOrdersData();
       fetchAddressesData();
-    } else if (status === "unauthenticated") {
-      setLoadingUser(false);
     }
-  }, [status]);
+    if (typeof window !== "undefined") {
+      window.addEventListener("pekefe_favorites_changed", loadFavorites);
+      return () => window.removeEventListener("pekefe_favorites_changed", loadFavorites);
+    }
+  }, [status, session]);
 
   const fetchUserData = async () => {
     try {
@@ -547,18 +580,58 @@ export default function Hesap() {
           {activeTab === "favorites" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-headline-md text-on-surface font-bold">Favorilerim</h2>
+                <h2 className="font-headline-md text-on-surface font-bold">
+                  Favorilerim {favoritesList.length > 0 ? `(${favoritesList.length})` : ""}
+                </h2>
               </div>
-              <div className="bg-surface-container-lowest p-10 rounded-xl border border-outline-variant/30 text-center space-y-4">
-                <span className="material-symbols-outlined text-4xl text-outline-variant">favorite</span>
-                <p className="text-sm text-on-surface-variant">Henüz favorilere eklenmiş bir lezzet bulunmamaktadır.</p>
-                <Link
-                  href="/kategoriler"
-                  className="inline-block bg-primary text-white px-8 py-3 rounded-xl font-label-md uppercase tracking-wider hover:opacity-90 transition-all shadow-md mt-2 text-xs font-bold"
-                >
-                  Koleksiyonları Keşfet
-                </Link>
-              </div>
+
+              {favoritesList.length === 0 ? (
+                <div className="bg-surface-container-lowest p-10 rounded-xl border border-outline-variant/30 text-center space-y-4">
+                  <span className="material-symbols-outlined text-4xl text-outline-variant">favorite</span>
+                  <p className="text-sm text-on-surface-variant">Henüz favorilere eklenmiş bir lezzet bulunmamaktadır.</p>
+                  <Link
+                    href="/kategoriler"
+                    className="inline-block bg-primary text-white px-8 py-3 rounded-xl font-label-md uppercase tracking-wider hover:opacity-90 transition-all shadow-md mt-2 text-xs font-bold"
+                  >
+                    Koleksiyonları Keşfet
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {favoritesList.map((fav) => (
+                    <div key={fav.id || fav.sku} className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative">
+                      <button
+                        onClick={() => removeFavoriteItem(fav.id || fav.sku)}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-500 flex items-center justify-center transition cursor-pointer z-10"
+                        title="Favorilerden Çıkar"
+                      >
+                        <span className="material-symbols-outlined text-base">close</span>
+                      </button>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="relative w-20 h-20 bg-slate-50 rounded-xl border border-slate-100 overflow-hidden flex-shrink-0 p-2">
+                          <Image
+                            src={fav.img || fav.image || "/premium-pekefe-kavanoz.png"}
+                            alt={fav.name}
+                            fill
+                            className="object-contain p-1 group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-slate-800 text-sm truncate">{fav.name}</h3>
+                          <p className="text-amber-700 font-bold text-sm font-mono mt-1">{fav.price}</p>
+                          {fav.weight && <span className="text-[10px] text-slate-400 font-semibold uppercase">{fav.weight}</span>}
+                        </div>
+                      </div>
+                      <Link
+                        href={`/urun/${fav.id || fav.sku}`}
+                        className="w-full py-2.5 bg-slate-900 hover:bg-amber-600 text-white font-bold text-xs rounded-xl text-center transition block shadow-sm"
+                      >
+                        Ürünü İncele
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

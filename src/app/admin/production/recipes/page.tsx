@@ -5,7 +5,7 @@ import { AlertCircle, Loader2, Hammer } from "lucide-react";
 import UpgradeGate from "@/components/UpgradeGate";
 
 export const metadata = {
-  title: "Ürün Reçeteleri (BOM) | Atak Arıcılık Yönetim Paneli",
+  title: "Ürün Reçeteleri (BOM) | Pekefe Yönetim Paneli",
   description: "Malzeme ürün ağaçları (BOM), hammadde ve yarı mamul reçete oranları.",
 };
 

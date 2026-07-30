@@ -370,7 +370,7 @@ export default async function AdminDashboardPage() {
     prisma.cMSData.findFirst({ where: { id: "singleton" } })
   ]);
 
-  const siteName = cmsData?.siteName || "Atak Arıcılık";
+  const siteName = cmsData?.siteName || "Pekefe";
 
   // Read scan results from local JSON file
   let scanResults = {

@@ -3,7 +3,7 @@ import { ArrowLeftRight, Truck } from "lucide-react";
 import TransfersClient from "./TransfersClient";
 
 export const metadata = {
-  title: "Depolar Arası Transfer | Atak Arıcılık ERP",
+  title: "Depolar Arası Transfer | Pekefe ERP",
   description: "In-Transit transfer yönetimi: Taslak → Yolda → Tamamlandı akışı.",
 };
 

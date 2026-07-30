@@ -25,6 +25,11 @@ export const DEFAULT_PRODUCTS = [
     ingredients: "100% Saf İspir Beyaz Dut Şırası",
     ritual: "Oda sıcaklığında (18°C - 22°C), taş değirmen tahini ile %40'a %60 oranında karıştırılarak servis edilmesi önerilir. Karıştırırken metal kaşık yerine ahşap veya seramik kaşık tercih edilmelidir.",
     nutrients: { energy: "293 kcal", carb: "70.2 g", protein: "0.8 g", calcium: "400 mg", iron: "10.2 mg" },
+    variants: [
+      { id: "v-dut-400", size: "400g Cam Kavanoz", price: 160, stock: 40, sku: "PRD-PK-001-400" },
+      { id: "v-dut-800", size: "800g Cam Kavanoz", price: 280, stock: 142, sku: "PRD-PK-001-800" },
+      { id: "v-dut-1kg", size: "1 Kg Vakum Ambalaj", price: 340, stock: 30, sku: "PRD-PK-001-1KG" }
+    ],
     specifications: [
       { key: "Menşei", value: "Erzurum / İspir" },
       { key: "Pişirme Yöntemi", value: "Odun Ateşinde Bakır Kazanlar" },
@@ -276,18 +281,46 @@ export function formatDbProductToStorefront(p) {
   const catLower = p.category ? String(p.category).toLowerCase().trim() : "all";
   const stockVal = p.stock_quantity ?? p.stock ?? 0;
 
+  // --- Price Logic ---
+  const variants = p.variants || attrs.variants || [];
+  const basePrice = Number(p.sale_price ?? p.price ?? 0);
+  const listPrice = (p.list_price || p.oldPrice) ? Number(p.list_price || p.oldPrice) : null;
+  const b2bPrice = p.b2b_price ? Number(p.b2b_price) : null;
+
+  // If variants exist, derive price from first variant; compute min/max range
+  let defaultPrice = basePrice;
+  let priceMin = null;
+  let priceMax = null;
+  if (Array.isArray(variants) && variants.length > 0) {
+    const variantPrices = variants.map(v => Number(v.price)).filter(n => n > 0);
+    if (variantPrices.length > 0) {
+      priceMin = Math.min(...variantPrices);
+      priceMax = Math.max(...variantPrices);
+      defaultPrice = variantPrices[0]; // default = first variant price
+    }
+  }
+
   return {
     id: String(p.id),
     dbId: p.id,
     name: p.name,
     sku: p.sku,
+    barcode: p.barcode || attrs.barcode || null,
+    variants,
+    attributes: attrs,
     category: catLower,
     categoryDisplay: p.category || "Genel",
     subCategory: p.subCategory || "",
     desc: p.desc || attrs.desc || "Asırlık İspir kalitesiyle hazırlanan katkısız ve saf mahsul.",
-    meta: attrs.meta || `${stockVal} Adet Stokta`,
-    price: Number(p.sale_price ?? p.price ?? 0),
-    oldPrice: (p.list_price || p.oldPrice) ? Number(p.list_price || p.oldPrice) : null,
+    meta: attrs.meta || `${p.category || 'Doğal Mahsul'} · İspir`,
+    price: defaultPrice,
+    priceMin,
+    priceMax,
+    oldPrice: listPrice,
+    b2b_price: b2bPrice,
+    list_price: listPrice,
+    retail_list_price: listPrice,
+    is_b2b_user: false, // determined client-side by session
     image: mainImage,
     images: parsedImages.length > 0 ? parsedImages : [mainImage],
     stock: stockVal,
@@ -315,7 +348,18 @@ export function getProducts() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
       return DEFAULT_PRODUCTS;
     }
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    // Sanitize stale "X Adet Stokta" meta values from localStorage
+    const sanitized = parsed.map(p => {
+      if (p.meta && /^\d+ adet stokta$/i.test(String(p.meta).trim())) {
+        return {
+          ...p,
+          meta: `${p.category || 'Doğal Mahsul'} · İspir`
+        };
+      }
+      return p;
+    });
+    return sanitized;
   } catch (err) {
     return DEFAULT_PRODUCTS;
   }

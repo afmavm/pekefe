@@ -73,7 +73,7 @@ export default function MovementsExport({ transactions }: MovementsExportProps) 
 
       exportToPDF({
         title: "Stok Hareketleri Audit Log Raporu",
-        subtitle: "Atak Arıcılık ERP Envanter Takip Sistemi",
+        subtitle: "Pekefe ERP Envanter Takip Sistemi",
         filename: "stok_hareketleri_raporu",
         headers,
         rows,

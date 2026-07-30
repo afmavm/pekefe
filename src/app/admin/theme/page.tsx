@@ -137,7 +137,7 @@ export default function ThemeAdminPage() {
             }}
             className={`${theme.logoWeight} tracking-tight`}
           >
-            Atak Arıcılık
+            Pekefe
           </span>
           <div className="mt-3 flex gap-2">
             <div className="w-8 h-8 rounded" style={{ backgroundColor: theme.primaryColor, border: "2px solid rgba(255,255,255,0.3)" }} />

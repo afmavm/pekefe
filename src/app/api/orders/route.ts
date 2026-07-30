@@ -117,6 +117,24 @@ export const POST = withAuth<any>(
       const body = await req.json();
       const { summary, amount, method, items, currentAccountId } = body;
 
+      if (!amount || Number(amount) <= 0) {
+        return NextResponse.json(
+          { error: 'Fiyatı 0 TL olan ürünler sipariş edilemez. Lütfen sepetinizi kontrol edin.', code: 'INVALID_AMOUNT', statusCode: 400 },
+          { status: 400 }
+        );
+      }
+
+      if (items && Array.isArray(items)) {
+        for (const item of items) {
+          if (item.price !== undefined && Number(item.price) <= 0) {
+            return NextResponse.json(
+              { error: 'Fiyatı 0 TL olan ürünler sipariş edilemez.', code: 'INVALID_ITEM_PRICE', statusCode: 400 },
+              { status: 400 }
+            );
+          }
+        }
+      }
+
       // Güvenlik Kontrolü: Bayi sadece kendi cari hesabına veya admin ise herhangi bir cari hesaba sipariş girebilir
       if (!isAdminRole(session.user.role)) {
         const dealerAccount = await prisma.currentAccount.findFirst({

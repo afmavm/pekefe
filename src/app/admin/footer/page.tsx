@@ -158,7 +158,7 @@ export default function FooterAdminPage() {
                 value={footerText}
                 onChange={(e) => setFooterText(e.target.value)}
                 className={inputClass}
-                placeholder="© 2026 Atak Arıcılık. Tüm Hakları Saklıdır."
+                placeholder="© 2026 Pekefe. Tüm Hakları Saklıdır."
               />
             </div>
           </div>

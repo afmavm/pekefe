@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link } from "@/navigation";
-import { Heart, Star, ShoppingBag, Tag, PackageCheck, PackageX } from "lucide-react";
+import { Heart, Star, ShoppingBag, Tag, PackageCheck, PackageX, Video } from "lucide-react";
 import { useCartStore } from "@/modules/catalog/store";
+import { addToCart as addToCartStorage } from "@/utils/cartStorage";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { slugify, resolveProductImage } from "@/lib/utils";
+import { slugify, resolveProductImage, isVideoUrl } from "@/lib/utils";
 import MiniCountdown from "./MiniCountdown";
 
 interface ProductCardClientProps {
@@ -49,7 +50,6 @@ export default function ProductCardClient({
   primaryColor,
   unitText = "kg"
 }: ProductCardClientProps) {
-  const addToCart = useCartStore((state) => state.addItem);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(true);
@@ -72,29 +72,71 @@ export default function ProductCardClient({
     }
   }, [product.id, session]);
 
+  const variantsList = React.useMemo(() => {
+    const customVars = (product as any).variants || product.attributes?.variants || [];
+    if (Array.isArray(customVars) && customVars.length > 0) {
+      return customVars;
+    }
+    return [];
+  }, [product]);
+
+  const getVariantLabel = (v: any) => {
+    if (!v) return "";
+    let attrs = v.attributes;
+    if (typeof attrs === "string") {
+      try { attrs = JSON.parse(attrs); } catch (e) {}
+    }
+    if (attrs && typeof attrs === "object") {
+      return attrs.size || attrs.name || v.name || v.size || "";
+    }
+    return v.size || v.name || "";
+  };
+
+  const [selectedVariant, setSelectedVariant] = useState<any>(variantsList.length > 0 ? variantsList[0] : null);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
 
-    addToCart({
-      id: product.id,
-      name: product.name,
-      sku: product.sku,
-      price: product.is_b2b_user && product.b2b_price ? product.b2b_price : product.price,
-      quantity: 1,
-      image: imageUrl
-    });
+    const basePrice = product.is_b2b_user && product.b2b_price ? product.b2b_price : product.price;
+    const effectivePrice = selectedVariant && selectedVariant.price ? Number(selectedVariant.price) : basePrice;
 
-    setIsAdded(true);
-    setTimeout(() => {
-      setIsAdded(false);
-    }, 1800);
+    if (!effectivePrice || Number(effectivePrice) <= 0) {
+      toast.error("Fiyatı 0 TL olan ürünler sepete eklenemez.", {
+        description: "Lütfen yönetici tarafından fiyat belirlenmesini bekleyin."
+      });
+      return;
+    }
 
-    toast.success(`${product.name} sepete eklendi!`, {
-      description: `1 ${unitText} başarıyla eklendi.`,
-      icon: <ShoppingBag className="w-5 h-5 text-emerald-500" />
-    });
+    const variantLabel = getVariantLabel(selectedVariant);
+    const uniqueCartId = selectedVariant?.id 
+      ? `${product.id}_${selectedVariant.id}` 
+      : (variantLabel ? `${product.id}_${variantLabel.replace(/\s+/g, '_')}` : product.id);
+
+    const itemName = variantLabel ? `${product.name} (${variantLabel})` : product.name;
+
+    const success = addToCartStorage({
+      id: uniqueCartId,
+      productId: product.id,
+      name: itemName,
+      sku: selectedVariant?.sku || product.sku,
+      price: Number(effectivePrice),
+      image: imageUrl,
+      images: [imageUrl]
+    }, 1);
+
+    if (success) {
+      setIsAdded(true);
+      setTimeout(() => {
+        setIsAdded(false);
+      }, 1800);
+
+      toast.success(`${itemName} sepete eklendi!`, {
+        description: `1 ${unitText} başarıyla eklendi.`,
+        icon: <ShoppingBag className="w-5 h-5 text-emerald-500" />
+      });
+    }
   };
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
@@ -156,6 +198,14 @@ export default function ProductCardClient({
         {isOutOfStock && (
           <div className="absolute top-4 left-4 z-20 bg-slate-700 dark:bg-slate-800 text-slate-200 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
             {tc("out_of_stock").toUpperCase()}
+          </div>
+        )}
+
+        {/* Video Özellikli Rozeti */}
+        {(Boolean((product as any).videoUrl) || (Array.isArray(product.images) && product.images.some((m: any) => m?.type === "video" || isVideoUrl(m?.url || m)))) && (
+          <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 bg-slate-900/85 text-amber-400 border border-amber-500/30 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg">
+            <Video className="w-3.5 h-3.5 animate-pulse text-amber-400" />
+            <span>Video</span>
           </div>
         )}
 
@@ -228,28 +278,58 @@ export default function ProductCardClient({
           </span>
         </div>
 
-        {/* Birim Bilgisi */}
-        <div className="mb-3.5 flex items-center justify-between text-xs">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-450">
-            {tc("unit").toUpperCase()}
-          </span>
-          <span className="bg-slate-100 dark:bg-slate-800 text-slate-750 dark:text-slate-200 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-200/50 dark:border-slate-700/50">
-            {unitText}
-          </span>
-        </div>
+        {/* Birim / Ölçü Varyant Bilgisi */}
+        {variantsList.length > 0 ? (
+          <div className="mb-3.5 space-y-1 select-none">
+            <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              <span>Ölçü / Gramaj Seçin:</span>
+              <span className="font-mono text-[9px] font-bold">{getVariantLabel(selectedVariant)}</span>
+            </div>
+            <select
+              value={selectedVariant?.id || getVariantLabel(selectedVariant)}
+              onChange={(e) => {
+                const found = variantsList.find((v: any) => (v.id || getVariantLabel(v)) === e.target.value);
+                if (found) setSelectedVariant(found);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer hover:border-amber-500 transition shadow-xs"
+            >
+              {variantsList.map((v: any, idx: number) => {
+                const label = getVariantLabel(v);
+                return (
+                  <option key={v.id || idx} value={v.id || label}>
+                    {label} - ₺{Number(v.price).toLocaleString("tr-TR")}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        ) : (
+          <div className="mb-3.5 flex items-center justify-between text-xs">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-450">
+              {tc("unit").toUpperCase()}
+            </span>
+            <span className="bg-slate-100 dark:bg-slate-800 text-slate-750 dark:text-slate-200 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+              {unitText}
+            </span>
+          </div>
+        )}
 
         {/* SKU & Barkod Alanı */}
         <div className="mb-4 flex flex-col gap-1.5 bg-slate-50/50 dark:bg-slate-950/30 p-3 rounded-2xl border border-slate-100/80 dark:border-slate-800/80 text-[10px] tracking-wide select-none">
           <div className="flex items-center justify-between">
             <span className="font-semibold uppercase text-slate-500 dark:text-slate-400">SKU</span>
-            <span className="font-mono font-medium text-slate-800 dark:text-slate-200">{product.sku}</span>
+            <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
+              {selectedVariant?.sku || product.sku}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="font-semibold uppercase text-slate-500 dark:text-slate-400">Barkod</span>
             <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
-              {product.barcode
+              {selectedVariant?.barcode
+                || product.barcode
                 || product.attributes?.barcode
-                || `868${String(product.sku).replace(/\D/g, "").slice(0, 10).padStart(10, "0")}`}
+                || `868${String(selectedVariant?.sku || product.sku).replace(/\D/g, "").slice(0, 10).padStart(10, "0")}`}
             </span>
           </div>
         </div>
@@ -272,7 +352,7 @@ export default function ProductCardClient({
                     <div className="flex items-baseline gap-0.5">
                       <span className="text-amber-600 dark:text-amber-400 font-bold text-lg">₺</span>
                       <span className="text-amber-600 dark:text-amber-400 font-extrabold text-2xl tracking-tight leading-none">
-                        {(product.b2b_price ?? product.price).toLocaleString("tr-TR")}
+                        {(selectedVariant && selectedVariant.price ? Number(selectedVariant.price) : (product.b2b_price ?? product.price)).toLocaleString("tr-TR")}
                       </span>
                     </div>
                   </div>
@@ -287,7 +367,7 @@ export default function ProductCardClient({
                   <div className="flex items-baseline gap-0.5">
                     <span className="text-slate-900 dark:text-white font-bold text-lg">₺</span>
                     <span className="text-slate-900 dark:text-white font-extrabold text-2xl tracking-tight leading-none">
-                      {product.price.toLocaleString("tr-TR")}
+                      {(selectedVariant && selectedVariant.price ? Number(selectedVariant.price) : product.price).toLocaleString("tr-TR")}
                     </span>
                   </div>
                 </>

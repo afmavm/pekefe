@@ -4,10 +4,10 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { routing } from './navigation';
 
-const AUTH_ROUTES = ['/dashboard', '/orders', '/account', '/hesap', '/cart', '/checkout', '/sepet/odeme'];
+const AUTH_ROUTES = ['/dashboard', '/orders', '/account', '/hesap', '/cart', '/checkout'];
 const ADMIN_ROUTES = ['/admin', '/management'];
 const PENDING_ROUTE = '/pending-approval';
-const PUBLIC_ONLY_ROUTES = ['/giris', '/kayit', '/login-customer', '/register-customer'];
+const PUBLIC_ONLY_ROUTES = ['/giris', '/kayit'];
 
 function matchesAny(pathname: string, routes: string[]): boolean {
   const cleanPath = pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');

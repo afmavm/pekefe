@@ -77,10 +77,14 @@ export default function Home() {
   const [productsState, setProductsState] = useState([]);
 
   useEffect(() => {
+    // Always clear stale localStorage cache and fetch fresh data from DB
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("pekefe_products_state");
+    }
     fetchLiveProducts().then((live) => {
       if (live && live.length > 0) setProductsState(live);
+      else setProductsState(getProducts());
     });
-    setProductsState(getProducts());
 
     const handleProductsChange = () => {
       setProductsState(getProducts());
@@ -105,7 +109,14 @@ export default function Home() {
     };
     return productsState.filter(Boolean).map(p => {
       const rawPrice = p.price;
-      const formattedPrice = typeof rawPrice === "number" ? `₺${rawPrice}` : (rawPrice || "₺0");
+      // Handle all price formats: number, "300", "300 TL", "₺300"
+      let numericPrice = 0;
+      if (typeof rawPrice === "number") {
+        numericPrice = rawPrice;
+      } else if (typeof rawPrice === "string") {
+        numericPrice = parseFloat(rawPrice.replace(/[₺TL\s,]/gi, "")) || 0;
+      }
+      const formattedPrice = numericPrice > 0 ? `₺${numericPrice.toLocaleString("tr-TR")}` : "₺0";
       return {
         ...p,
         priceDisplay: formattedPrice,
@@ -573,8 +584,14 @@ export default function Home() {
               desc={p.desc}
               meta={p.meta}
               price={p.price}
+              priceMin={p.priceMin}
+              priceMax={p.priceMax}
+              oldPrice={p.oldPrice}
+              b2b_price={p.b2b_price}
+              variants={p.variants || []}
               image={p.image}
               tag={p.tag}
+              stock={p.stock}
               onAddToCart={() => {
                 setToastMsg(`${p.name} sepete eklendi!`);
                 setToastOpen(true);

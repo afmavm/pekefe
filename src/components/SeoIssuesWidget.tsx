@@ -31,43 +31,34 @@ export default function SeoIssuesWidget() {
 
   // Form states populated on init
   const [metaPages, setMetaPages] = useState([
-    { id: "home", name: "Ana Sayfa", path: "/tr", desc: "", fixed: false },
-    { id: "products", name: "Ürünler", path: "/tr/products", desc: "", fixed: false },
-    { id: "about", name: "Hakkımızda", path: "/tr/about", desc: "", fixed: false },
-    { id: "contact", name: "İletişim", path: "/tr/contact", desc: "", fixed: false },
-    { id: "blog", name: "Blog", path: "/tr/blog", desc: "", fixed: false },
-    { id: "campaigns", name: "Kampanyalar", path: "/tr/campaigns", desc: "", fixed: false },
-    { id: "b2b", name: "Bayi Portalı (B2B)", path: "/tr/b2b-portal", desc: "", fixed: false },
-    { id: "cart", name: "Sepetim", path: "/tr/cart", desc: "", fixed: false },
+    { id: "home", name: "Ana Sayfa", path: "/", desc: "", fixed: false },
+    { id: "products", name: "Ürünler", path: "/kategoriler", desc: "", fixed: false },
+    { id: "about", name: "Hikayemiz", path: "/hikayemiz", desc: "", fixed: false },
+    { id: "contact", name: "İletişim", path: "/iletisim", desc: "", fixed: false },
+    { id: "blog", name: "Blog", path: "/blog", desc: "", fixed: false },
+    { id: "campaigns", name: "Kampanyalar", path: "/kampanyalar", desc: "", fixed: false },
+    { id: "b2b", name: "Bayi Portalı (B2B)", path: "/b2b", desc: "", fixed: false },
+    { id: "cart", name: "Sepetim", path: "/sepet", desc: "", fixed: false },
   ]);
 
   const [altImages, setAltImages] = useState([
-    { id: "logo", name: "logo_dark.png", location: "Navbar Üst Logo", alt: "", fixed: false },
-    { id: "banner", name: "banner_honey.jpg", location: "Ana Sayfa Hero Görseli", alt: "", fixed: false },
-    { id: "hive", name: "hive_wood.png", location: "Ahşap Kovan Ürün Görseli", alt: "", fixed: false },
-    { id: "comb", name: "comb_wax.png", location: "Arı Mumu Detay Görseli", alt: "", fixed: false },
-    { id: "suit", name: "bee_suit.jpg", location: "Koruyucu Arıcı Maskesi", alt: "", fixed: false },
-    { id: "smoker", name: "smoker_stainless.jpg", location: "Paslanmaz Krom Körük", alt: "", fixed: false },
-    { id: "extractor", name: "extractor_3frame.jpg", location: "3 Çerçeveli Bal Süzme Makinesi", alt: "", fixed: false },
-    { id: "tool", name: "hive_tool_j.jpg", location: "J Tipi Kovan El Demiri", alt: "", fixed: false },
-    { id: "trap", name: "pollen_trap.jpg", location: "Plastik Polen Tuzağı", alt: "", fixed: false },
-    { id: "feeder", name: "feeder_plastic.jpg", location: "Yarım Ay Kovan İçi Şurupluk", alt: "", fixed: false },
-    { id: "excluder", name: "queen_excluder.jpg", location: "Metal Ana Arı Izgarası", alt: "", fixed: false },
-    { id: "fork", name: "uncapping_fork.jpg", location: "Paslanmaz Sır Alma Tarağı", alt: "", fixed: false },
+    { id: "logo", name: "logo.png", location: "Navbar Üst Logo", alt: "", fixed: false },
+    { id: "banner", name: "ispir-manzara-hero.png", location: "Ana Sayfa Hero Görseli", alt: "", fixed: false },
+    { id: "pekmez", name: "pekefe-dut-pekmezi-kavanoz-tr.jpg", location: "Dut Pekmezi Ürün Görseli", alt: "", fixed: false },
+    { id: "bal", name: "pekefe-ispir-bal-kavanoz-tr.jpg", location: "İspir Yayla Balı Detay Görseli", alt: "", fixed: false },
+    { id: "fasulye", name: "pekefe-ispir-fasulye-paket-tr.jpg", location: "İspir Kuru Fasulyesi Görseli", alt: "", fixed: false },
   ]);
 
   const [duplicatePages, setDuplicatePages] = useState([
-    { id: "orders", name: "Sipariş Geçmişi", path: "/tr/orders", currentTitle: "Atak Arıcılık", newTitle: "", fixed: false },
-    { id: "success", name: "Sipariş Başarılı", path: "/tr/order-success", currentTitle: "Atak Arıcılık", newTitle: "", fixed: false },
-    { id: "cat1", name: "Kategori: Arı Kovanı", path: "/tr/category/ari-kovani", currentTitle: "Ürünler - Atak Arıcılık", newTitle: "", fixed: false },
-    { id: "cat2", name: "Kategori: Ekipmanlar", path: "/tr/category/ekipmanlar", currentTitle: "Ürünler - Atak Arıcılık", newTitle: "", fixed: false },
-    { id: "cat3", name: "Kategori: Bal Süzme", path: "/tr/category/bal-suzme", currentTitle: "Ürünler - Atak Arıcılık", newTitle: "", fixed: false },
+    { id: "orders", name: "Sipariş Geçmişi", path: "/hesap", currentTitle: "Pekefe", newTitle: "", fixed: false },
+    { id: "success", name: "Sipariş Başarılı", path: "/sepet/onay", currentTitle: "Pekefe", newTitle: "", fixed: false },
+    { id: "cat1", name: "Kategori: Pekmez", path: "/kategoriler", currentTitle: "Ürünler - Pekefe", newTitle: "", fixed: false },
   ]);
 
   const [lowWords, setLowWords] = useState([
-    { id: "contact", name: "İletişim", path: "/tr/contact", currentWords: 84, targetWords: 300, textToAdd: "", fixed: false },
-    { id: "faq", name: "Sıkça Sorulan Sorular", path: "/tr/faq", currentWords: 142, targetWords: 300, textToAdd: "", fixed: false },
-    { id: "apply", name: "Bayi Başvuru Formu", path: "/tr/b2b-apply", currentWords: 98, targetWords: 300, textToAdd: "", fixed: false },
+    { id: "contact", name: "İletişim", path: "/iletisim", currentWords: 84, targetWords: 300, textToAdd: "", fixed: false },
+    { id: "faq", name: "Sıkça Sorulan Sorular", path: "/sss", currentWords: 142, targetWords: 300, textToAdd: "", fixed: false },
+    { id: "apply", name: "Bayi Başvuru Formu", path: "/b2b", currentWords: 98, targetWords: 300, textToAdd: "", fixed: false },
   ]);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -330,7 +321,7 @@ export default function SeoIssuesWidget() {
                         <div className="flex gap-2">
                           <input 
                             type="text" 
-                            placeholder="Görseli betimleyen SEO dostu alt metni yazın (örn: Atak Arıcılık Logosu)..." 
+                            placeholder="Görseli betimleyen SEO dostu alt metni yazın (örn: Pekefe Logosu)..." 
                             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-900 bg-white"
                             onChange={(e) => textInput = e.target.value}
                             onKeyDown={(e) => {
@@ -374,7 +365,7 @@ export default function SeoIssuesWidget() {
                         <div className="flex gap-2">
                           <input 
                             type="text" 
-                            placeholder="Benzersiz ve açıklayıcı bir başlık yazın (örn: Siparişinizi Tamamlayın - Atak Arıcılık)..." 
+                            placeholder="Benzersiz ve açıklayıcı bir başlık yazın (örn: Siparişinizi Tamamlayın - Pekefe)..." 
                             className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 bg-white"
                             onChange={(e) => textInput = e.target.value}
                             onKeyDown={(e) => {

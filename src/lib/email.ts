@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || 'smtp.turkticaret.net',
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // true for 465, false for other ports
+  secure: false,
   auth: {
-    user: process.env.SMTP_USER, 
-    pass: process.env.SMTP_PASS, 
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
@@ -18,23 +18,26 @@ export const sendOrderConfirmationEmail = async (to: string, orderId: string, na
 
   try {
     const html = `
-      <div style="font-family: Arial, sans-serif; max-w-xl; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px;">
-        <h2 style="color: #b45309; margin-bottom: 16px;">Siparişiniz Alındı!</h2>
-        <p style="color: #374151; font-size: 16px;">Merhaba <strong>${name}</strong>,</p>
-        <p style="color: #374151; font-size: 16px;">Siparişiniz başarıyla alınmıştır. Bizi tercih ettiğiniz için teşekkür ederiz.</p>
-        <div style="background-color: #f9fafb; padding: 16px; border-radius: 6px; margin: 24px 0;">
-          <p style="margin: 0; color: #6b7280; font-size: 14px; text-transform: uppercase;">Sipariş Numarası</p>
-          <p style="margin: 4px 0 0 0; color: #111827; font-size: 20px; font-weight: bold;">${orderId}</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 16px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="color: #6b1d2f; margin: 0; font-size: 24px; font-weight: bold;">PEKEFE</h2>
+          <p style="color: #94a3b8; font-size: 12px; margin-top: 4px; text-transform: uppercase;">Geleneksel & Doğal Lezzetler</p>
         </div>
-        <p style="color: #374151; font-size: 16px;">Ödenen Tutar: <strong>${total.toLocaleString('tr-TR')} ₺</strong></p>
-        <p style="color: #6b7280; font-size: 14px; margin-top: 32px;">Siparişinizin durumunu sitemizdeki "Kargom Nerede?" bölümünden takip edebilirsiniz.</p>
-        <hr style="border-color: #e5e7eb; margin: 24px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Bu e-posta otomatik olarak oluşturulmuştur. Atak Arıcılık B2B Platformu.</p>
+        <h3 style="color: #1a0a10; margin-bottom: 16px;">Siparişiniz Alındı! 🎉</h3>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6;">Merhaba <strong>${name}</strong>,</p>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6;">Siparişiniz başarıyla alınmıştır. Pekefe'yi tercih ettiğiniz için teşekkür ederiz.</p>
+        <div style="background-color: #fffbf5; border: 1px solid #fde68a; padding: 20px; border-radius: 12px; margin: 24px 0;">
+          <p style="margin: 0; color: #78350f; font-size: 13px; text-transform: uppercase; font-weight: bold;">Sipariş Numarası</p>
+          <p style="margin: 6px 0 0 0; color: #6b1d2f; font-size: 20px; font-weight: bold; font-family: monospace;">${orderId}</p>
+        </div>
+        <p style="color: #374151; font-size: 16px;">Ödenen Tutar: <strong style="color: #15803d;">${total.toLocaleString('tr-TR')} ₺</strong></p>
+        <hr style="border-color: #f1f5f9; margin: 24px 0;" />
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Bu e-posta otomatik olarak oluşturulmuştur. © ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
       </div>
     `;
 
     await transporter.sendMail({
-      from: `"Atak Arıcılık B2B" <${process.env.SMTP_USER}>`,
+      from: `"Pekefe" <${process.env.SMTP_USER}>`,
       to,
       subject: `Sipariş Onayı - ${orderId}`,
       html,

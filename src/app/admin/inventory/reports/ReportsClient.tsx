@@ -614,7 +614,7 @@ export default function ReportsClient({
           <div className="only-print bg-slate-900 text-white p-6 rounded-2xl mb-6">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Atak Arıcılık ERP Raporlama Servisi</h1>
+                <h1 className="text-xl font-bold tracking-tight">Pekefe ERP Raporlama Servisi</h1>
                 <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">
                   {reportType === "stock_status"
                     ? "Stok Durum Raporu"

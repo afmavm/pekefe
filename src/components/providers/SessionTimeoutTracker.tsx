@@ -37,7 +37,7 @@ export function SessionTimeoutTracker() {
   const getLoginUrl = (role?: string) => {
     const adminRoles = ["SUPER_ADMIN", "ADMIN", "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"];
     const isAdmin = role && adminRoles.includes(role);
-    return isAdmin ? `/${locale}/login` : `/${locale}/login-customer`;
+    return isAdmin ? `/giris` : `/giris`;
   };
 
   const [showWarning, setShowWarning] = useState(false);
@@ -53,34 +53,15 @@ export function SessionTimeoutTracker() {
     if (status === "loading") return;
 
     if (status === "authenticated") {
-      const isSessionCookiePresent = document.cookie
-        .split(";")
-        .some((item) => item.trim().startsWith("browser_session_active="));
-
       const isRememberMe = document.cookie
         .split(";")
         .some((item) => item.trim().startsWith("remember_me=true"));
 
-      if (!isSessionCookiePresent) {
-        // If they just logged in during this page lifecycle, or if they have Remember Me checked, restore the cookie
-        if (wasUnauthenticatedRef.current || isRememberMe) {
-          if (isRememberMe) {
-            document.cookie = "browser_session_active=true; path=/; max-age=2592000; SameSite=Lax";
-          } else {
-            document.cookie = "browser_session_active=true; path=/; SameSite=Lax";
-          }
-        } else {
-          // Cookie is missing, no Remember Me, and they didn't just log in -> browser was closed and reopened!
-          const loginUrl = getLoginUrl(session?.user?.role);
-          signOut({ callbackUrl: `${loginUrl}?reason=browser_close` });
-        }
+      // Ensure browser_session_active cookie is always present when authenticated
+      if (isRememberMe) {
+        document.cookie = "browser_session_active=true; path=/; max-age=2592000; SameSite=Lax";
       } else {
-        // Keep refreshing session cookie
-        if (isRememberMe) {
-          document.cookie = "browser_session_active=true; path=/; max-age=2592000; SameSite=Lax";
-        } else {
-          document.cookie = "browser_session_active=true; path=/; SameSite=Lax";
-        }
+        document.cookie = "browser_session_active=true; path=/; SameSite=Lax";
       }
     } else if (status === "unauthenticated") {
       wasUnauthenticatedRef.current = true;

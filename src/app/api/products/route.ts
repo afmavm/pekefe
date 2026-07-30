@@ -443,7 +443,9 @@ export async function POST(request: NextRequest) {
           ...(data.attributes || {}),
           barcode: data.barcode,
           unit: data.unit,
-          manufacturerCode: data.manufacturerCode
+          manufacturerCode: data.manufacturerCode,
+          brand: data.brand,
+          model: data.model
         },
         isRawMaterial: data.isRawMaterial
       }
@@ -453,18 +455,37 @@ export async function POST(request: NextRequest) {
       for (const wh of body.warehouses) {
         if (!wh.name) continue;
         
-        let warehouseRecord = await prisma.warehouse.findFirst({
-          where: { name: wh.name }
-        });
+        let warehouseRecord = null;
+        if (wh.id && typeof wh.id === "string" && !wh.id.includes(".")) {
+          warehouseRecord = await prisma.warehouse.findUnique({
+            where: { id: wh.id }
+          });
+        }
+        if (!warehouseRecord && wh.code) {
+          warehouseRecord = await prisma.warehouse.findUnique({
+            where: { code: wh.code.trim().toUpperCase() }
+          });
+        }
+        if (!warehouseRecord) {
+          warehouseRecord = await prisma.warehouse.findFirst({
+            where: { name: wh.name }
+          });
+        }
         
         if (!warehouseRecord) {
           const safeBranchId = await getSafeBranchId(wh.branchId);
-          const tempId = wh.code ? wh.code.trim().toUpperCase() : 'WH-' + wh.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8) + '-' + Math.floor(100 + Math.random() * 900);
+          let targetCode = wh.code ? wh.code.trim().toUpperCase() : 'WH-' + wh.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
+          const codeExists = await prisma.warehouse.findUnique({ where: { code: targetCode } });
+          if (codeExists) {
+            targetCode = targetCode + '-' + Math.floor(1000 + Math.random() * 9000);
+          }
+
+          const tempId = targetCode;
           warehouseRecord = await prisma.warehouse.create({
             data: {
               id: tempId,
               name: wh.name,
-              code: wh.code || tempId,
+              code: targetCode,
               type: 'Depo',
               address: wh.location || 'Genel Konum',
               branchId: safeBranchId

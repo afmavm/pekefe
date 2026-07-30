@@ -5,7 +5,7 @@ import { AlertCircle, Loader2, Hammer } from "lucide-react";
 import UpgradeGate from "@/components/UpgradeGate";
 
 export const metadata = {
-  title: "Fire & Hurda Takibi | Atak Arıcılık Yönetim Paneli",
+  title: "Fire & Hurda Takibi | Pekefe Yönetim Paneli",
   description: "İmalat fire kayıtları, ıskartalar ve hammadde zayiat raporları.",
 };
 

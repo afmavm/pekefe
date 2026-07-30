@@ -1,8 +1,8 @@
 {
-  "speedScore": 97,
-  "loadTime": "1.62s",
-  "interactivity": "87ms",
+  "speedScore": 95,
+  "loadTime": "1.38s",
+  "interactivity": "47ms",
   "visualStability": "0.03",
-  "serverResponse": "0.64s",
-  "lastScanDate": "26.07.2026 00:12:35"
+  "serverResponse": "0.53s",
+  "lastScanDate": "30.07.2026 22:29:28"
 }

@@ -162,7 +162,7 @@ export default function Header() {
                         </Link>
                         <Link href="/b2b" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
                           <span className="material-symbols-outlined text-[18px] text-primary">business</span>
-                          B2B Bayilik Portalı
+                          {session?.user?.role === "DEALER" && session?.user?.isApproved !== false ? "B2B Bayi Portalı" : "B2B Bayilik Başvurusu"}
                         </Link>
                         {isAdmin && (
                           <Link href="/admin/dashboard" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-secondary hover:bg-secondary/5 transition-colors border-t border-outline-variant/10">

@@ -135,7 +135,7 @@ Body snippet: ${item.bodyHtml.substring(0, 150)}...`);
 
     const secureVal = process.env.SMTP_SECURE;
     const isSecure = secureVal ? secureVal === "true" : (port === 465);
-    const fromName = process.env.SMTP_FROM_NAME || "Atak Arıcılık B2B";
+    const fromName = process.env.SMTP_FROM_NAME || "Pekefe";
 
     const transporter = nodemailer.createTransport({
       host,

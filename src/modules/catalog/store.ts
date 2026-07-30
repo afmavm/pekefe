@@ -41,6 +41,12 @@ export const useCartStore = create<CartStore>()(
       setIsCartOpen: (isOpen) => set({ isCartOpen: isOpen }),
 
       addItem: (newItem) => {
+        const itemPrice = Number(newItem.price) || 0;
+        if (itemPrice <= 0) {
+          console.warn("Attempted to add 0 TL product to cart:", newItem);
+          return;
+        }
+
         set((state) => {
           const itemId = String(newItem.id);
           const existingIndex = state.items.findIndex((item) => String(item.id) === itemId);
@@ -74,6 +80,13 @@ export const useCartStore = create<CartStore>()(
           }, 0);
           const discountedTotal = Math.max(0, cartTotal - totalItemDiscount);
 
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("pekefe_cart", JSON.stringify(updatedItems));
+              window.dispatchEvent(new Event("pekefe_cart_changed"));
+            } catch (e) {}
+          }
+
           return {
             items: updatedItems,
             cartTotal,
@@ -98,6 +111,13 @@ export const useCartStore = create<CartStore>()(
             return total;
           }, 0);
           const discountedTotal = Math.max(0, cartTotal - totalItemDiscount);
+
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("pekefe_cart", JSON.stringify(updatedItems));
+              window.dispatchEvent(new Event("pekefe_cart_changed"));
+            } catch (e) {}
+          }
 
           return {
             items: updatedItems,
@@ -131,6 +151,13 @@ export const useCartStore = create<CartStore>()(
           }, 0);
           const discountedTotal = Math.max(0, cartTotal - totalItemDiscount);
 
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("pekefe_cart", JSON.stringify(updatedItems));
+              window.dispatchEvent(new Event("pekefe_cart_changed"));
+            } catch (e) {}
+          }
+
           return {
             items: updatedItems,
             cartTotal,
@@ -141,6 +168,12 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => {
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("pekefe_cart", JSON.stringify([]));
+            window.dispatchEvent(new Event("pekefe_cart_changed"));
+          } catch (e) {}
+        }
         set({
           items: [],
           cartTotal: 0,

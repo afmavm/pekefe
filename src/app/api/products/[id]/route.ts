@@ -228,8 +228,6 @@ export async function PUT(
     if (body.images !== undefined) data.images = body.images || [];
     if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl;
     if (body.desc !== undefined) data.desc = body.desc;
-    if (body.brand !== undefined) data.brand = body.brand;
-    if (body.model !== undefined) data.model = body.model;
     if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
     if (body.seoDesc !== undefined) data.seoDesc = body.seoDesc;
     if (body.seoKeywords !== undefined) data.seoKeywords = body.seoKeywords;
@@ -239,7 +237,9 @@ export async function PUT(
       body.attributes !== undefined ||
       body.barcode !== undefined ||
       body.unit !== undefined ||
-      body.manufacturerCode !== undefined
+      body.manufacturerCode !== undefined ||
+      body.brand !== undefined ||
+      body.model !== undefined
     ) {
       const existingProduct = await prisma.product.findUnique({ where: { id: realId } });
       const currentAttrs = existingProduct?.attributes
@@ -253,7 +253,9 @@ export async function PUT(
         ...(body.attributes || {}),
         ...(body.barcode !== undefined ? { barcode: body.barcode } : {}),
         ...(body.unit !== undefined ? { unit: body.unit } : {}),
-        ...(body.manufacturerCode !== undefined ? { manufacturerCode: body.manufacturerCode } : {})
+        ...(body.manufacturerCode !== undefined ? { manufacturerCode: body.manufacturerCode } : {}),
+        ...(body.brand !== undefined ? { brand: body.brand } : {}),
+        ...(body.model !== undefined ? { model: body.model } : {})
       };
     }
 
@@ -275,16 +277,18 @@ export async function PUT(
         if (!wh.name) continue;
         
         let warehouseRecord = null;
-        // Try to find by id first if it's a valid database id (not a random Math.random float string)
-        const isDbId = wh.id && !wh.id.includes('.');
+        const isDbId = wh.id && typeof wh.id === "string" && !wh.id.includes('.');
         if (isDbId) {
           warehouseRecord = await prisma.warehouse.findUnique({
             where: { id: wh.id }
           });
         }
-        
+        if (!warehouseRecord && wh.code) {
+          warehouseRecord = await prisma.warehouse.findUnique({
+            where: { code: wh.code.trim().toUpperCase() }
+          });
+        }
         if (!warehouseRecord) {
-          // Check by name
           warehouseRecord = await prisma.warehouse.findFirst({
             where: { name: wh.name }
           });
@@ -293,24 +297,28 @@ export async function PUT(
         const safeBranchId = await getSafeBranchId(wh.branchId);
 
         if (warehouseRecord) {
-          // Update the warehouse record details if they were modified in the manager modal
           warehouseRecord = await prisma.warehouse.update({
             where: { id: warehouseRecord.id },
             data: {
               name: wh.name,
-              code: wh.code || warehouseRecord.code,
+              code: warehouseRecord.code,
               address: wh.location || warehouseRecord.address,
               branchId: safeBranchId
             }
           });
         } else {
-          // Create new warehouse
-          const tempId = isDbId ? wh.id : (wh.code ? wh.code.trim().toUpperCase() : 'WH-' + wh.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8) + '-' + Math.floor(100 + Math.random() * 900));
+          let targetCode = wh.code ? wh.code.trim().toUpperCase() : 'WH-' + wh.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
+          const codeExists = await prisma.warehouse.findUnique({ where: { code: targetCode } });
+          if (codeExists) {
+            targetCode = targetCode + '-' + Math.floor(1000 + Math.random() * 9000);
+          }
+
+          const tempId = isDbId ? wh.id : targetCode;
           warehouseRecord = await prisma.warehouse.create({
             data: {
               id: tempId,
               name: wh.name,
-              code: wh.code || tempId,
+              code: targetCode,
               type: 'Depo',
               address: wh.location || 'Genel Konum',
               branchId: safeBranchId

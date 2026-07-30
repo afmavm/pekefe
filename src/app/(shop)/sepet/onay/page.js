@@ -85,6 +85,18 @@ export default function SepetOnay() {
                 </span>
                 <p className="font-body-lg text-on-surface">2-3 İş Günü İçinde (Soğuk Zincir Kargo)</p>
               </div>
+              <div>
+                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
+                  ÖDEME YÖNTEMİ
+                </span>
+                <p className="font-body-lg text-on-surface font-semibold">
+                  {completedOrder?.paymentMethod === "bankTransfer"
+                    ? "Banka Havalesi / EFT (%2 İndirimli)"
+                    : completedOrder?.paymentMethod === "openAccount"
+                    ? "B2B Vadeli Açık Hesap"
+                    : "Kredi / Banka Kartı"}
+                </p>
+              </div>
               <div className="pt-6 border-t border-outline-variant/30">
                 <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
                   TESLİMAT ADRESİ

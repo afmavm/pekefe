@@ -1581,7 +1581,7 @@ export default function BackupAdminPage() {
                     value={companyName}
                     onChange={e => setCompanyName(e.target.value)}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none text-xs font-bold focus:border-orange-500 bg-white text-slate-700"
-                    placeholder="Örn: Atak Arıcılık San. ve Tic. Ltd. Şti."
+                    placeholder="Örn: Pekefe Gıda San. ve Tic. Ltd. Şti."
                   />
                 </div>
 

@@ -55,7 +55,7 @@ export default function HomeHeroClient({
         <>
           {/* Bayi Başvurusu Yap Butonu */}
           <Link 
-            href="/register-customer" 
+            href="/kayit" 
             className="px-10 py-4.5 bg-white border border-zinc-200 text-zinc-800 font-black rounded-2xl hover:bg-zinc-50 active:scale-[0.98] transition-all tracking-wide text-[15px] w-full sm:w-auto flex items-center justify-center gap-2.5 shadow-sm shadow-zinc-200"
           >
             {b2bButtonText}
@@ -63,7 +63,7 @@ export default function HomeHeroClient({
 
           {/* Bayi Girişi Yap Butonu */}
           <Link 
-            href="/login-customer" 
+            href="/giris" 
             className="px-10 py-4.5 bg-neutral-900 border border-neutral-800 text-white font-black rounded-2xl hover:bg-neutral-800 active:scale-[0.98] transition-all tracking-wide text-[15px] w-full sm:w-auto flex items-center justify-center gap-2.5 shadow-lg"
           >
             <LogIn className="w-4.5 h-4.5 text-zinc-400" /> Giriş Yap

@@ -117,7 +117,7 @@ export default function EmailTemplatesPage() {
   <p>Merhaba <strong>{{kullanici_adi}}</strong>,</p>
   <p>Bu yeni bir e-posta bildirim şablonudur. İçeriği buradan düzenleyebilirsiniz.</p>
   <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
-  <p style="font-size: 12px; color: #999; text-align: center;">Atak Arıcılık B2B</p>
+  <p style="font-size: 12px; color: #999; text-align: center;">Pekefe Geleneksel Lezzetler</p>
 </div>
       `.trim(),
       variables: "kullanici_adi",

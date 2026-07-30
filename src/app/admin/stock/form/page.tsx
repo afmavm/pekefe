@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
+import { isVideoUrl } from "@/lib/utils";
 
 interface Variant {
   id: string;
@@ -524,14 +525,34 @@ function EnterpriseStockFormPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [draggedMediaIndex, setDraggedMediaIndex] = useState<number | null>(null);
   const [isSkuLocked, setIsSkuLocked] = useState(true);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const isInitialized = useRef(false);
 
+  // Live Units API Fetch
+  const fetchUnitsFromApi = async () => {
+    try {
+      const res = await fetch("/api/units");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.units && Array.isArray(data.units)) {
+          setUnits(data.units);
+        }
+      }
+    } catch (e) {
+      console.error("Units fetch error:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnitsFromApi();
+  }, []);
+
   // Dynamic sizes and colors states
-  const [sizes, setSizes] = useState<string[]>(["Standart Boy", "Büyük Boy", "Mini Boy"]);
-  const [colors, setColors] = useState<string[]>(["Kahverengi Deri", "Kırmızı Deri", "Sarı Deri"]);
+  const [sizes, setSizes] = useState<string[]>(["400g Cam Kavanoz", "800g Cam Kavanoz", "1 kg Vakum", "5 kg Teneke"]);
+  const [colors, setColors] = useState<string[]>(["Sade", "Cevizli", "Fındıklı", "Antep Fıstıklı"]);
   const [isSizeManagerOpen, setIsSizeManagerOpen] = useState(false);
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
   const [newSizeName, setNewSizeName] = useState("");
@@ -558,7 +579,7 @@ function EnterpriseStockFormPage() {
     { id: "2", date: "2026-05-31 10:12", type: "B2B Satış Siparişi (#10943)", warehouse: "Merkez Depo", qty: -12, user: "Entegrasyon", status: "Tamamlandı" },
     { id: "3", date: "2026-05-30 16:45", type: "Şube Sevk (Sevk İrsaliyesi)", warehouse: "Merkez Depo", qty: -50, user: "Mehmet Demir", status: "Tamamlandı" },
     { id: "4", date: "2026-05-30 16:45", type: "Şube Sevk (Giriş İrsaliyesi)", warehouse: "Şube Depo", qty: 50, user: "Mehmet Demir", status: "Tamamlandı" },
-    { id: "5", date: "2026-05-29 09:30", type: "Üretim Girişi (BOM-KORUK)", warehouse: "Üretim Bandı", qty: 80, user: "Üretim Robotu", status: "Tamamlandı" },
+    { id: "5", date: "2026-05-29 09:30", type: "Üretim Girişi (BOM-PKM)", warehouse: "İspir Dolum Hattı", qty: 80, user: "Otomatik Paketleme Robotu", status: "Tamamlandı" },
   ]);
 
   // Add new movement form state
@@ -704,19 +725,19 @@ function EnterpriseStockFormPage() {
 
   // Form Fields
   const [form, setForm] = useState({
-    name: "Atak Paslanmaz 304 Pro Arı Körüğü",
-    sku: "MM-KORUK-304",
-    barcode: "8681234567890",
-    brand: "",
-    model: "",
-    category: "Arıcılık Aletleri",
-    unit: "Adet",
-    manufacturerCode: "ATK-304-PR",
+    name: "Öz Hakiki İspir Dut Pekmezi (800g)",
+    sku: "PKF-DUT-800",
+    barcode: "8691167531368",
+    brand: "Pekefe",
+    model: "Geleneksel Cam Kavanoz",
+    category: "Dut Pekmezi",
+    unit: "Kavanoz",
+    manufacturerCode: "PKF-DUT-800",
     stockType: "Ticari Mal",
-    warehouse: "Merkez Depo",
-    desc: "304 paslanmaz çelikten üretilen, çift hava kanalı teknolojisi sayesinde asla sönmeyen profesyonel arı körüğü. Deri körük kısmı ısıya ve aşınmaya karşı dayanıklı olarak tasarlanmıştır.",
-    shortDesc: "Profesyonel paslanmaz çelik arı körüğü",
-    recipeDetails: "Körük yüksekliği: 28 cm, Çap: 10 cm, Malzeme: 304 Paslanmaz Çelik. Paket içeriği: 1 adet paslanmaz arı körüğü, 1 adet deri körük.",
+    warehouse: "Erzurum İspir Merkez Depo",
+    desc: "İspir Erzurum yüksek yaylalarından toplanan organik meyvelerden kısık odun ateşinde bakır kazanlarda kaynatılarak üretilen %100 doğal, katkısız ve ilave şekersiz dut pekmezi.",
+    shortDesc: "Geleneksel odun ateşinde pişirilmiş %100 doğal İspir Dut Pekmezi",
+    recipeDetails: "%100 İspir Dut Meyvesi, Odun Ateşinde Bakır Kazan Pişirimi. Şeker ilavesiz, koruyucusuz ve katkısızdır.",
 
     // Price Matrix (Currency, VAT rate, Included switch)
     purchasePrice: 450,
@@ -776,6 +797,19 @@ function EnterpriseStockFormPage() {
     longDescExtra: "",
     badgeText1: "",
     badgeText2: "",
+
+    // Food & Harvest Attributes
+    altitude: "2200 Metre",
+    harvestSeason: "Temmuz - Ağustos",
+    harvestStory: "",
+    ingredients: "",
+    ritual: "",
+    nutrients_energy: "293 kcal",
+    nutrients_carb: "70.2 g",
+    nutrients_protein: "0.8 g",
+    nutrients_calcium: "400 mg",
+    nutrients_iron: "10.2 mg",
+    hmfLevel: "< 10 mg/kg (Analiz Raporlu)",
   });
 
   // Always fetch branches on mount (both create and edit mode)
@@ -840,17 +874,17 @@ function EnterpriseStockFormPage() {
     if (!productId) {
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const randBarcode = "869" + Math.floor(1000000000 + Math.random() * 9000000000);
-      const randManCode = `ATK-ARI-${Math.floor(1000 + Math.random() * 9000)}`;
+      const randManCode = `PKF-DUT-${Math.floor(1000 + Math.random() * 9000)}`;
       setForm({
         ...form,
         name: "",
-        sku: `TM-${randNum}`,
+        sku: `PKF-${randNum}`,
         barcode: randBarcode,
-        category: "Arıcılık Aletleri",
-        unit: "Adet",
+        category: "",
+        unit: "Kavanoz",
         manufacturerCode: randManCode,
         stockType: "Ticari Mal",
-        warehouse: "Merkez Depo",
+        warehouse: "Erzurum İspir Merkez Depo",
         desc: "",
         shortDesc: "",
         recipeDetails: "",
@@ -1014,6 +1048,18 @@ function EnterpriseStockFormPage() {
           discount_start_date: toLocalDateTimeString(product.discount_start_date),
           discount_end_date: toLocalDateTimeString(product.discount_end_date),
 
+          altitude: attrs.altitude || "2200 Metre",
+          harvestSeason: attrs.harvestSeason || "Temmuz - Ağustos",
+          harvestStory: attrs.harvestStory || "",
+          ingredients: attrs.ingredients || "",
+          ritual: attrs.ritual || "",
+          nutrients_energy: attrs.nutrients?.energy || "293 kcal",
+          nutrients_carb: attrs.nutrients?.carb || "70.2 g",
+          nutrients_protein: attrs.nutrients?.protein || "0.8 g",
+          nutrients_calcium: attrs.nutrients?.calcium || "400 mg",
+          nutrients_iron: attrs.nutrients?.iron || "10.2 mg",
+          hmfLevel: attrs.hmfLevel || "< 10 mg/kg (Analiz Raporlu)",
+
           seoTitle: product.seoTitle || "",
           seoDesc: product.seoDesc || "",
           seoKeywords: product.seoKeywords || "",
@@ -1169,27 +1215,48 @@ function EnterpriseStockFormPage() {
     { id: "2", name: "Bayi XML Çıktısı", priceSource: "B2B Satış Fiyatı", markupPercent: 10, active: true },
   ]);
 
-  // Categories list
-  const [categories, setCategories] = useState<string[]>([
-    "Arıcılık Aletleri",
-    "Kovan Ürünleri",
-    "Bal Çıkarma Makineleri",
-    "Arıcı Kıyafetleri"
-  ]);
+  // Categories list initialized empty, populated live from DB API
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryObjects, setCategoryObjects] = useState<any[]>([]);
+
+  const loadCategoriesFromApi = async () => {
+    try {
+      const res = await fetch("/api/categories", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoryObjects(data);
+          const names = data.map((c: any) => c.name).filter(Boolean);
+          setCategories(names);
+          setForm(prev => ({
+            ...prev,
+            category: prev.category && names.includes(prev.category) ? prev.category : (names[0] || "")
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error loading categories from API:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadCategoriesFromApi();
+  }, []);
 
   // Units list
   const [units, setUnits] = useState<string[]>([
+    "Kavanoz",
     "Adet",
     "Kg",
-    "Metre",
-    "Plaka",
-    "Rulo"
+    "Paket",
+    "Kutu",
+    "Teneke"
   ]);
 
   // Variant list
   const [variants, setVariants] = useState<Variant[]>([
-    { id: "1", sku: "MM-KORUK-304-L", barcode: "8681234567891", name: "Büyük Boy - Kırmızı Deri", size: "Büyük Boy", color: "Kırmızı Deri", stock: 120, price: 900 },
-    { id: "2", sku: "MM-KORUK-304-M", barcode: "8681234567892", name: "Standart Boy - Kahverengi", size: "Standart Boy", color: "Kahverengi Deri", stock: 350, price: 850 },
+    { id: "1", sku: "PKF-DUT-800-CEVIZ", barcode: "8691234567891", name: "800g Cam Kavanoz - Cevizli", size: "800g Cam Kavanoz", color: "Cevizli", stock: 120, price: 340 },
+    { id: "2", sku: "PKF-DUT-800-SADE", barcode: "8691234567892", name: "800g Cam Kavanoz - Sade", size: "800g Cam Kavanoz", color: "Sade", stock: 350, price: 300 },
   ]);
 
   // Track if any form values are changed by the user
@@ -1233,10 +1300,10 @@ function EnterpriseStockFormPage() {
 
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [variantForm, setVariantForm] = useState({
-    size: "Standart Boy",
-    color: "Kahverengi Deri",
+    size: "800g Cam Kavanoz",
+    color: "Cevizli",
     stock: 50,
-    price: 850,
+    price: 340,
   });
 
   // Dynamic Warehouse Modal States
@@ -1318,9 +1385,10 @@ function EnterpriseStockFormPage() {
 
   // SKU code automatic generator
   const generateSkuCode = () => {
-    let prefix = "TM";
-    if (form.stockType === "Hammadde") prefix = "HM";
-    else if (form.stockType === "Mamul") prefix = "MM";
+    let prefix = "PKF";
+    if (form.stockType === "Hammadde") prefix = "PKF-HM";
+    else if (form.stockType === "Mamul") prefix = "PKF-MM";
+    else if (form.stockType === "Yarı Mamul") prefix = "PKF-YMM";
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     setForm(prev => ({ ...prev, sku: `${prefix}-${randomNum}` }));
     setIsSkuLocked(false);
@@ -1331,9 +1399,9 @@ function EnterpriseStockFormPage() {
   const generateManufacturerCode = () => {
     const catPart = form.category 
       ? form.category.replace(/\s+/g, "").substring(0, 3).toUpperCase() 
-      : "GEN";
+      : "PKF";
     const random = Math.floor(1000 + Math.random() * 9000);
-    setForm(prev => ({ ...prev, manufacturerCode: `ATK-${catPart}-${random}` }));
+    setForm(prev => ({ ...prev, manufacturerCode: `PKF-${catPart}-${random}` }));
     toast.success("Üretici Kodu başarıyla üretildi.");
   };
 
@@ -1459,6 +1527,38 @@ function EnterpriseStockFormPage() {
     toast.success("Medyaya dış bağlantı başarıyla eklendi.");
   };
 
+  const handleMediaDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedMediaIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleMediaDragOverItem = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleMediaDropItem = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedMediaIndex === null || draggedMediaIndex === dropIndex) return;
+
+    const updated = [...mediaList];
+    const [movedItem] = updated.splice(draggedMediaIndex, 1);
+    updated.splice(dropIndex, 0, movedItem);
+    setMediaList(updated);
+    setDraggedMediaIndex(null);
+    toast.success("Medya sırası güncellendi.");
+  };
+
+  const moveMediaPosition = (index: number, direction: "left" | "right") => {
+    const targetIndex = direction === "left" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= mediaList.length) return;
+    const updated = [...mediaList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    setMediaList(updated);
+    toast.success("Medya konumu değiştirildi.");
+  };
+
   const deleteMediaItem = (id: string) => {
     setMediaList(prev => prev.filter(m => m.id !== id));
     toast.error("Medya dosyası silindi.");
@@ -1546,6 +1646,19 @@ function EnterpriseStockFormPage() {
           marketplaces: marketplaces,
           shortDesc: form.shortDesc,
           recipeDetails: form.recipeDetails,
+          altitude: form.altitude,
+          harvestSeason: form.harvestSeason,
+          harvestStory: form.harvestStory,
+          ingredients: form.ingredients,
+          ritual: form.ritual,
+          nutrients: {
+            energy: form.nutrients_energy,
+            carb: form.nutrients_carb,
+            protein: form.nutrients_protein,
+            calcium: form.nutrients_calcium,
+            iron: form.nutrients_iron,
+          },
+          hmfLevel: form.hmfLevel,
           unitCoefficients: form.unitCoefficients,
           branchPrices: branchPrices,
           specsMaterial: form.specsMaterial,
@@ -1660,23 +1773,53 @@ function EnterpriseStockFormPage() {
     toast.success("Deri tipi/renk seçeneği kaldırıldı.");
   };
 
-  // Add/Remove Categories
-  const addCategory = () => {
-    if (!newCategoryName.trim()) return;
-    if (categories.includes(newCategoryName.trim())) {
+  // Add/Remove Categories synced with DB API
+  const addCategory = async () => {
+    const catName = newCategoryName.trim();
+    if (!catName) return;
+    if (categories.includes(catName)) {
       toast.warning("Bu kategori zaten mevcut.");
       return;
     }
-    setCategories(prev => [...prev, newCategoryName.trim()]);
-    setForm(prev => ({ ...prev, category: newCategoryName.trim() }));
-    setNewCategoryName("");
-    toast.success("Yeni kategori başarıyla eklendi.");
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: catName })
+      });
+      if (res.ok) {
+        toast.success("Yeni kategori veritabanına başarıyla eklendi.");
+        setNewCategoryName("");
+        await loadCategoriesFromApi();
+        await refreshCategories();
+        setForm(prev => ({ ...prev, category: catName }));
+      } else {
+        const errData = await res.json();
+        toast.error(errData.error || "Kategori eklenemedi.");
+      }
+    } catch (err) {
+      toast.error("Bağlantı hatası.");
+    }
   };
 
-  const removeCategory = (catName: string) => {
+  const removeCategory = async (catName: string) => {
     if (categories.length <= 1) {
       toast.error("En az bir kategori bulunmalıdır.");
       return;
+    }
+    const targetObj = categoryObjects.find(c => c.name === catName);
+    if (targetObj?.id) {
+      try {
+        const res = await fetch(`/api/categories?id=${targetObj.id}`, { method: "DELETE" });
+        if (res.ok) {
+          toast.success("Kategori veritabanından silindi.");
+          await loadCategoriesFromApi();
+          await refreshCategories();
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
     setCategories(prev => prev.filter(c => c !== catName));
     if (form.category === catName) {
@@ -1686,28 +1829,47 @@ function EnterpriseStockFormPage() {
   };
 
   // Add/Remove Units
-  const addUnit = () => {
+  const addUnit = async () => {
     if (!newUnitName.trim()) return;
-    if (units.includes(newUnitName.trim())) {
+    const name = newUnitName.trim();
+    if (units.includes(name)) {
       toast.warning("Bu birim zaten mevcut.");
       return;
     }
-    setUnits(prev => [...prev, newUnitName.trim()]);
-    setForm(prev => ({ ...prev, unit: newUnitName.trim() }));
-    setNewUnitName("");
-    toast.success("Yeni birim başarıyla eklendi.");
+    try {
+      const res = await fetch("/api/units", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+      if (res.ok) {
+        setUnits(prev => [...prev, name]);
+        setForm(prev => ({ ...prev, unit: name }));
+        setNewUnitName("");
+        toast.success(`"${name}" birimi veritabanına eklendi.`);
+      } else {
+        toast.error("Birim veritabanına eklenemedi.");
+      }
+    } catch (e) {
+      toast.error("Birim eklenirken hata oluştu.");
+    }
   };
 
-  const removeUnit = (unitName: string) => {
+  const removeUnit = async (unitName: string) => {
     if (units.length <= 1) {
       toast.error("En az bir birim bulunmalıdır.");
       return;
     }
-    setUnits(prev => prev.filter(u => u !== unitName));
-    if (form.unit === unitName) {
-      setForm(prev => ({ ...prev, unit: units.find(u => u !== unitName) || "" }));
+    try {
+      await fetch(`/api/units?name=${encodeURIComponent(unitName)}`, { method: "DELETE" });
+      setUnits(prev => prev.filter(u => u !== unitName));
+      if (form.unit === unitName) {
+        setForm(prev => ({ ...prev, unit: units.find(u => u !== unitName) || "" }));
+      }
+      toast.success(`"${unitName}" birimi silindi.`);
+    } catch (e) {
+      toast.error("Birim silinemedi.");
     }
-    toast.success("Birim silindi.");
   };
 
   // Add/Remove Variants
@@ -2091,7 +2253,7 @@ function EnterpriseStockFormPage() {
                         type="text"
                         value={form.manufacturerCode}
                         onChange={e => setForm({ ...form, manufacturerCode: e.target.value })}
-                        placeholder="Örn: ATK-304-PR"
+                        placeholder="Örn: PKF-DUT-800"
                         className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all text-slate-800"
                       />
                     </div>
@@ -2105,13 +2267,13 @@ function EnterpriseStockFormPage() {
                           onChange={e => {
                             const newType = e.target.value;
                             setForm(prev => {
-                              let prefix = "TM";
-                              if (newType === "Hammadde") prefix = "HM";
-                              else if (newType === "Mamul") prefix = "MM";
-                              else if (newType === "Yarı Mamul") prefix = "YMM";
+                              let prefix = "PKF";
+                              if (newType === "Hammadde") prefix = "PKF-HM";
+                              else if (newType === "Mamul") prefix = "PKF-MM";
+                              else if (newType === "Yarı Mamul") prefix = "PKF-YMM";
                               
                               const parts = prev.sku ? prev.sku.split("-") : [];
-                              const numPart = parts.length > 1 ? parts[1] : Math.floor(100000 + Math.random() * 900000).toString();
+                              const numPart = parts.length > 1 ? parts[parts.length - 1] : Math.floor(100000 + Math.random() * 900000).toString();
                               return {
                                 ...prev,
                                 stockType: newType,
@@ -2596,6 +2758,126 @@ function EnterpriseStockFormPage() {
                     )}
                   </div>
 
+                  {/* GELİŞMİŞ GİDA & HASAT BİLGİLERİ (PEKEFE MAHSUL HİKAYESİ & BESİN DEĞERLERİ) */}
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5.5 space-y-4.5 shadow-sm text-left">
+                    <div className="flex items-center gap-3 pb-3.5 border-b border-slate-200/80">
+                      <div className="bg-amber-600 text-white rounded-xl p-2 shadow-md shadow-amber-200">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-700">Mahsul Hikayesi, Besin Değerleri & Ritüel (Pekefe Özel)</h3>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Ürün detay sayfasındaki "Mahsul Hikayesi & Detaylar" ve "Analiz & Besin Değerleri" sekmelerini özelleştirin</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Rakım / Altitude */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Rakım / Yetişme Yüksekliği</label>
+                        <input
+                          type="text"
+                          placeholder="Örn: 2200 Metre"
+                          value={form.altitude || ""}
+                          onChange={e => setForm({ ...form, altitude: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-500 outline-none"
+                        />
+                      </div>
+
+                      {/* Hasat Sezonu / Harvest Season */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Hasat Sezonu / Dönemi</label>
+                        <input
+                          type="text"
+                          placeholder="Örn: Temmuz - Ağustos"
+                          value={form.harvestSeason || ""}
+                          onChange={e => setForm({ ...form, harvestSeason: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-500 outline-none"
+                        />
+                      </div>
+
+                      {/* İçindekiler / Ingredients */}
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700">İçindekiler Temizliği / Reçete</label>
+                        <input
+                          type="text"
+                          placeholder="Örn: %100 Saf İspir Beyaz Dut Şırası"
+                          value={form.ingredients || ""}
+                          onChange={e => setForm({ ...form, ingredients: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-500 outline-none"
+                        />
+                      </div>
+
+                      {/* Tüketim & Servis Ritüeli */}
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700">Tüketim & Servis Ritüeli Önerisi</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Örn: Oda sıcaklığında (18°C - 22°C), taş değirmen tahini ile %40'a %60 oranında karıştırılarak ahşap kaşık ile servis edilmesi önerilir."
+                          value={form.ritual || ""}
+                          onChange={e => setForm({ ...form, ritual: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-500 outline-none resize-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Besin Değerleri Grid */}
+                    <div className="pt-2 border-t border-slate-100 space-y-3">
+                      <span className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">100g Değerinde Analiz & Besin Ögeleri</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold text-slate-500">Enerji (kcal)</label>
+                          <input
+                            type="text"
+                            placeholder="293 kcal"
+                            value={form.nutrients_energy || ""}
+                            onChange={e => setForm({ ...form, nutrients_energy: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:bg-white outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold text-slate-500">Karbonhidrat (g)</label>
+                          <input
+                            type="text"
+                            placeholder="70.2 g"
+                            value={form.nutrients_carb || ""}
+                            onChange={e => setForm({ ...form, nutrients_carb: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:bg-white outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold text-slate-500">Protein (g)</label>
+                          <input
+                            type="text"
+                            placeholder="0.8 g"
+                            value={form.nutrients_protein || ""}
+                            onChange={e => setForm({ ...form, nutrients_protein: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:bg-white outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold text-slate-500">Kalsiyum (mg)</label>
+                          <input
+                            type="text"
+                            placeholder="400 mg"
+                            value={form.nutrients_calcium || ""}
+                            onChange={e => setForm({ ...form, nutrients_calcium: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:bg-white outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold text-slate-500">Demir (mg)</label>
+                          <input
+                            type="text"
+                            placeholder="10.2 mg"
+                            value={form.nutrients_iron || ""}
+                            onChange={e => setForm({ ...form, nutrients_iron: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:bg-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* KISA AÇIKLAMA */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700">Kısa Açıklama</label>
@@ -3061,7 +3343,7 @@ function EnterpriseStockFormPage() {
                           type="text"
                           value={form.seoTitle}
                           onChange={e => setForm({ ...form, seoTitle: e.target.value })}
-                          placeholder="Paslanmaz Arı Körüğü - Premium Seri"
+                          placeholder="Geleneksel İspir Dut Pekmezi (800g) - Pekefe"
                           className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                         />
                       </div>
@@ -3072,7 +3354,7 @@ function EnterpriseStockFormPage() {
                           type="text"
                           value={form.seoDesc}
                           onChange={e => setForm({ ...form, seoDesc: e.target.value })}
-                          placeholder="Atak Arıcılık tarafından özel imal edilen yüksek kaliteli paslanmaz arı körüklerini en uygun fiyatlarla satın alın."
+                          placeholder="Pekefe İspir Erzurum yöresi doğal lezzetlerini en uygun fiyatlarla satın alın."
                           className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                         />
                       </div>
@@ -3086,7 +3368,7 @@ function EnterpriseStockFormPage() {
                         rows={3}
                         value={form.recipeDetails}
                         onChange={e => setForm({ ...form, recipeDetails: e.target.value })}
-                        placeholder="İmalatta kullanılacak hammadde detayları ve özel işçilik notları..."
+                        placeholder="İmalatta kullanılacak hammaddeler, meyve oranı ve geleneksel kaynatma notları..."
                         className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none resize-none"
                       />
                     </div>
@@ -3110,7 +3392,7 @@ function EnterpriseStockFormPage() {
                           type="text"
                           value={form.badgeText2 || ""}
                           onChange={e => setForm({ ...form, badgeText2: e.target.value })}
-                          placeholder="Örnek: Arıcılık (Boş bırakılırsa kategori gösterilir)"
+                          placeholder="Örnek: İspir Hasadı (Boş bırakılırsa kategori gösterilir)"
                           className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                         />
                       </div>
@@ -3123,48 +3405,48 @@ function EnterpriseStockFormPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Gövde Malzemesi */}
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Gövde Malzemesi (Teknik Özellik)</label>
+                          <label className="block text-xs font-bold text-slate-700">İçerik & Malzeme (Teknik Özellik)</label>
                           <input
                             type="text"
                             value={form.specsMaterial}
                             onChange={e => setForm({ ...form, specsMaterial: e.target.value })}
-                            placeholder="Örnek: 304 Kalite Paslanmaz Çelik"
+                            placeholder="Örnek: %100 Organik İspir Dut Meyvesi & Odun Ateşi"
                             className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                           />
                         </div>
 
                         {/* Ağırlık */}
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Ağırlık (Teknik Özellik)</label>
+                          <label className="block text-xs font-bold text-slate-700">Ağırlık & Gramaj (Teknik Özellik)</label>
                           <input
                             type="text"
                             value={form.specsWeight}
                             onChange={e => setForm({ ...form, specsWeight: e.target.value })}
-                            placeholder="Örnek: 950 Gram (Ekipmansız boş ağırlık)"
+                            placeholder="Örnek: 800 Gram Net (Cam Kavanoz)"
                             className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                           />
                         </div>
 
                         {/* Boyutlar */}
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Boyutlar (Teknik Özellik)</label>
+                          <label className="block text-xs font-bold text-slate-700">Ambalaj Ölçüleri (Teknik Özellik)</label>
                           <input
                             type="text"
                             value={form.specsDimensions}
                             onChange={e => setForm({ ...form, specsDimensions: e.target.value })}
-                            placeholder="Örnek: 28 cm Yükseklik x 10 cm Silindir Çapı"
+                            placeholder="Örnek: 14 cm Yükseklik x 8.5 cm Çap"
                             className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                           />
                         </div>
 
-                        {/* Körük Kılıfı & Körük */}
+                        {/* Ambalaj Koruması */}
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Körük Kılıfı & Körük (Teknik Özellik)</label>
+                          <label className="block text-xs font-bold text-slate-700">Ambalaj & Koruması (Teknik Özellik)</label>
                           <input
                             type="text"
                             value={form.specsBellows}
                             onChange={e => setForm({ ...form, specsBellows: e.target.value })}
-                            placeholder="Örnek: Hakiki Sığır Derisi & Isıl İşlem Görmüş Ahşap Plaka"
+                            placeholder="Örnek: Gıdaya Uygun Cam Kavanoz & Vakumlu Emniyet Bandı"
                             className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                           />
                         </div>
@@ -3186,7 +3468,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview1_title}
                                 onChange={e => setForm({ ...form, quickOverview1_title: e.target.value })}
-                                placeholder="Örnek: 304 Paslanmaz Çelik"
+                                placeholder="Örnek: Odun Ateşinde Bakır Kazan"
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3196,7 +3478,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview1_desc}
                                 onChange={e => setForm({ ...form, quickOverview1_desc: e.target.value })}
-                                placeholder="Örnek: Yüksek ısı mukavemeti ve uzun ömürlü paslanmaz gövde yapısı."
+                                placeholder="Örnek: Geleneksel yöntemlerle kısık odun ateşinde ağır ağır kaynatılmıştır."
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3210,7 +3492,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview2_title}
                                 onChange={e => setForm({ ...form, quickOverview2_title: e.target.value })}
-                                placeholder="Örnek: Deri Isı Kalkanı Körük"
+                                placeholder="Örnek: İlave Şeker Ve Katkı İçermez"
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3220,7 +3502,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview2_desc}
                                 onChange={e => setForm({ ...form, quickOverview2_desc: e.target.value })}
-                                placeholder="Örnek: Elinizi ısıdan koruyan yüksek kaliteli ahşap ve hakiki deri körük."
+                                placeholder="Örnek: %100 meyve şekerinden oluşan besleyici ve doğal içeriğe sahiptir."
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3234,7 +3516,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview3_title}
                                 onChange={e => setForm({ ...form, quickOverview3_title: e.target.value })}
-                                placeholder="Örnek: Yoğun Duman Izgarası"
+                                placeholder="Örnek: %100 Yerli İspir Hasadı"
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3244,7 +3526,7 @@ function EnterpriseStockFormPage() {
                                 type="text"
                                 value={form.quickOverview3_desc}
                                 onChange={e => setForm({ ...form, quickOverview3_desc: e.target.value })}
-                                placeholder="Örnek: Optimize edilmiş duman odasıyla arıları strese sokmayan duman çıkışı."
+                                placeholder="Örnek: Erzurum İspir yöresinin yüksek rakımlı temiz bahçelerinden toplanmıştır."
                                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                               />
                             </div>
@@ -3545,24 +3827,67 @@ function EnterpriseStockFormPage() {
 
               {/* Upload Grid */}
               <div className="grid grid-cols-3 gap-3">
-                {mediaList.map((media) => (
-                  <div key={media.id} className="relative aspect-square border border-slate-200 rounded-xl overflow-hidden group shadow-sm bg-slate-50">
-                    <img src={media.url} alt={media.name} className="w-full h-full object-cover" />
-                    
-                    {/* Media Type Overlay Indicator */}
-                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-slate-900/75 text-white rounded text-[8px] font-bold flex items-center gap-1">
-                      {media.type === "video" ? <Video className="w-2.5 h-2.5 text-orange-500" /> : <Eye className="w-2.5 h-2.5" />}
-                      <span className="uppercase">{media.type}</span>
+                {mediaList.map((media, index) => (
+                  <div
+                    key={media.id}
+                    draggable
+                    onDragStart={(e) => handleMediaDragStart(e, index)}
+                    onDragOver={(e) => handleMediaDragOverItem(e, index)}
+                    onDrop={(e) => handleMediaDropItem(e, index)}
+                    className={`relative aspect-square border border-slate-200 rounded-xl overflow-hidden group shadow-sm bg-slate-900 cursor-grab active:cursor-grabbing transition-all ${
+                      draggedMediaIndex === index ? "opacity-30 ring-2 ring-orange-500 scale-95" : "hover:border-orange-400"
+                    }`}
+                  >
+                    {media.type === "video" || isVideoUrl(media.url) ? (
+                      <div className="w-full h-full relative flex items-center justify-center bg-slate-950">
+                        <video src={media.url} className="w-full h-full object-cover opacity-60" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40">
+                          <span className="material-symbols-outlined text-amber-400 text-3xl animate-pulse">play_circle</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <img src={media.url} alt={media.name} className="w-full h-full object-cover" />
+                    )}
+
+                    {/* Media Type & Order Overlay Indicator */}
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-slate-900/80 text-white rounded text-[8px] font-black uppercase tracking-wider flex items-center gap-1 backdrop-blur-xs">
+                      {media.type === "video" ? <Video className="w-2.5 h-2.5 text-amber-400" /> : <Eye className="w-2.5 h-2.5 text-slate-300" />}
+                      <span>#{index + 1} {media.type}</span>
                     </div>
 
-                    {/* Delete Hover Action */}
-                    <button
-                      type="button"
-                      onClick={() => deleteMediaItem(media.id)}
-                      className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all rounded-xl border-none cursor-pointer"
-                    >
-                      Kaldır
-                    </button>
+                    {/* Hover Move & Delete Controls */}
+                    <div className="absolute inset-0 bg-slate-900/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-2 transition-all gap-1.5">
+                      <div className="flex gap-1">
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => moveMediaPosition(index, "left")}
+                            className="px-1.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] font-bold border-none cursor-pointer"
+                            title="Sola Taşı"
+                          >
+                            ◀ Sol
+                          </button>
+                        )}
+                        {index < mediaList.length - 1 && (
+                          <button
+                            type="button"
+                            onClick={() => moveMediaPosition(index, "right")}
+                            className="px-1.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] font-bold border-none cursor-pointer"
+                            title="Sağa Taşı"
+                          >
+                            Sağ ▶
+                          </button>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteMediaItem(media.id)}
+                        className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[10px] font-bold border-none cursor-pointer shadow-sm"
+                      >
+                        Kaldır
+                      </button>
+                    </div>
                   </div>
                 ))}
 

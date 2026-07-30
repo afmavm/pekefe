@@ -274,12 +274,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Kredi kartı bilgileri eksik." }, { status: 400 });
       }
 
-      const [month, year] = expDate.split('/');
+      const [rawMonth, rawYear] = (expDate || "").split('/');
+      const cleanMonth = (rawMonth || "").trim();
+      let cleanYear = (rawYear || "").trim();
+      if (cleanYear.length === 2) cleanYear = `20${cleanYear}`;
+
       const paymentReq: PaymentRequest = {
-        cardNumber,
-        expireMonth: month,
-        expireYear: year,
-        cvv,
+        cardNumber: cardNumber.replace(/\s+/g, ""),
+        expireMonth: cleanMonth,
+        expireYear: cleanYear,
+        cvv: cvv.trim(),
         amount: verifiedTotal,
         orderId: customOrderId,
         customerName: name,

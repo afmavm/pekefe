@@ -25,15 +25,19 @@ function parseStoredCart(stored) {
 
 function normalizeItems(items) {
   if (!Array.isArray(items)) return [];
-  return items.map(item => ({
-    ...item,
-    id: String(item.id),
-    quantity: item.quantity || item.qty || 1,
-    desc: item.desc || `${item.name} · Premium Kavanoz`,
-    badge: item.badge || "Geleneksel",
-    img: item.img || item.image || "/premium-pekefe-kavanoz.png",
-    image: item.image || item.img || "/premium-pekefe-kavanoz.png",
-  }));
+  return items.map(item => {
+    const cleanName = item.name ? String(item.name).replace(/\s*\(\s*undefined\s*\)/gi, "").trim() : "";
+    return {
+      ...item,
+      id: String(item.id),
+      name: cleanName,
+      quantity: item.quantity || item.qty || 1,
+      desc: item.desc || `${cleanName} · Premium Kavanoz`,
+      badge: item.badge || "Geleneksel",
+      img: item.img || item.image || "/premium-pekefe-kavanoz.png",
+      image: item.image || item.img || "/premium-pekefe-kavanoz.png",
+    };
+  });
 }
 
 export function getCart() {
@@ -69,6 +73,18 @@ export function saveCart(cart) {
 
 export function addToCart(product, quantity = 1) {
   try {
+    const price = Number(product.price) || 0;
+    if (price <= 0) {
+      if (typeof window !== "undefined") {
+        import("sonner").then(({ toast }) => {
+          toast.error("Fiyatı 0 TL olan ürünler sepete eklenemez.", {
+            description: "Lütfen yetkili tarafından fiyat tanımlanmasını bekleyin."
+          });
+        });
+      }
+      return false;
+    }
+
     const store = useCartStore.getState();
     const image = product.images && product.images[0]
       ? product.images[0]
@@ -77,7 +93,7 @@ export function addToCart(product, quantity = 1) {
     store.addItem({
       id: String(product.id),
       name: product.name,
-      price: Number(product.price) || 0,
+      price: price,
       quantity,
       image,
       img: image,
@@ -86,8 +102,10 @@ export function addToCart(product, quantity = 1) {
     });
 
     saveCart(getCart());
+    return true;
   } catch (e) {
     console.error("Error adding to cart", e);
+    return false;
   }
 }
 

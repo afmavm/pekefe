@@ -494,34 +494,76 @@ export default function StockProductionPage() {
 
   // Category Hierarchy recursive renderer
   const renderCategoryTree = (parentId: string | null = null, depth = 0) => {
-    const list = categories.filter(c => c.parentId === parentId);
-    if (list.length === 0) return null;
+    const isRoot = parentId === null || parentId === "" || parentId === undefined;
+    const list = categories.filter(c => {
+      if (isRoot) {
+        return !c.parentId || c.parentId === "" || c.parentId === null;
+      }
+      return String(c.parentId) === String(parentId);
+    });
+
+    if (list.length === 0) {
+      if (isRoot && categories.length > 0) {
+        return (
+          <div className="space-y-2">
+            {categories.map(cat => (
+              <div key={cat.id} className="flex justify-between items-center bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow transition-all">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  <span className="font-bold text-slate-800 text-xs sm:text-sm">{cat.name}</span>
+                  <span className="text-[9px] font-mono bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-100">
+                    ID: {cat.id}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => openEditCategoryModal(cat)}
+                    className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded-lg border border-slate-200 transition cursor-pointer"
+                    title="Düzenle"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCategory(cat.id)}
+                    className="p-1.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg border border-slate-200 transition cursor-pointer"
+                    title="Sil"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return null;
+    }
 
     return (
-      <div className={`space-y-1 ${depth > 0 ? "pl-6 border-l border-slate-100 mt-1.5" : ""}`}>
+      <div className={`space-y-1.5 ${depth > 0 ? "pl-6 border-l border-slate-200 mt-1.5" : ""}`}>
         {list.map(cat => {
-          const hasChildren = categories.some(c => c.parentId === cat.id);
+          const hasChildren = categories.some(c => c.parentId && String(c.parentId) === String(cat.id));
           const isExpanded = !!expandedCategories[cat.id];
 
           return (
             <div key={cat.id} className="space-y-1">
-              <div className="flex justify-between items-center bg-white border border-slate-100 hover:border-slate-200 rounded-xl p-3 shadow-sm hover:shadow transition-all">
-                <div className="flex items-center gap-2">
+              <div className="flex justify-between items-center bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-3.5 shadow-sm hover:shadow transition-all">
+                <div className="flex items-center gap-2.5">
                   {hasChildren ? (
                     <button 
                       type="button"
                       onClick={() => setExpandedCategories(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
-                      className="p-1 hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded"
+                      className="p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded transition cursor-pointer"
                     >
-                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
                   ) : (
                     <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 bg-slate-300 rounded-full" />
+                      <div className="w-2 h-2 bg-orange-500 rounded-full" />
                     </div>
                   )}
-                  <span className="font-semibold text-slate-800 text-xs sm:text-sm">{cat.name}</span>
-                  <span className="text-[9px] font-mono bg-slate-50 text-slate-400 px-1 py-0.5 rounded border border-slate-100">
+                  <span className="font-bold text-slate-800 text-xs sm:text-sm">{cat.name}</span>
+                  <span className="text-[9px] font-mono bg-[#6b1d2f]/10 text-[#6b1d2f] px-1.5 py-0.5 rounded border border-[#6b1d2f]/20 font-semibold">
                     ID: {cat.id}
                   </span>
                 </div>

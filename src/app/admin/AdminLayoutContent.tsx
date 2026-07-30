@@ -231,16 +231,16 @@ const navGroups: NavGroup[] = [
         description: "Çift Kayıtlı Defter, Yevmiye & Mizan",
         feature: "accounting",
         subItems: [
-          { name: "Muhasebe Dashboard", href: "/muhasebe", icon: BarChart3, permission: "view_dashboard" },
-          { name: "Satış & Alış Belgesi", href: "/muhasebe/belgeler", icon: Receipt },
-          { name: "Gelir & Gider", href: "/muhasebe/gelir-gider", icon: DollarSign },
-          { name: "Cari Mizan", href: "/muhasebe/cari", icon: Users },
-          { name: "Banka Hesapları", href: "/muhasebe/banka", icon: Store },
-          { name: "Yevmiye Fişleri", href: "/muhasebe/yevmiye", icon: BookOpen },
-          { name: "Satın Alma Talepleri", href: "/muhasebe/purchase-requisitions", icon: ClipboardList },
-          { name: "Gelen Faturalar", href: "/muhasebe/gelen-faturalar", icon: FileText, permission: "approve_invoice" },
-          { name: "Tedarikçi Ödemeleri", href: "/muhasebe/tedarikci-odemeleri", icon: Banknote, permission: "approve_invoice" },
-          { name: "Antigravity Engine", href: "/muhasebe/antigravity", icon: Zap, permission: "use_ai_assistant" },
+          { name: "Muhasebe Dashboard", href: "/admin/muhasebe", icon: BarChart3, permission: "view_dashboard" },
+          { name: "Satış & Alış Belgesi", href: "/admin/muhasebe/belgeler", icon: Receipt },
+          { name: "Gelir & Gider", href: "/admin/muhasebe/gelir-gider", icon: DollarSign },
+          { name: "Cari Mizan", href: "/admin/muhasebe/cari", icon: Users },
+          { name: "Banka Hesapları", href: "/admin/muhasebe/banka", icon: Store },
+          { name: "Yevmiye Fişleri", href: "/admin/muhasebe/yevmiye", icon: BookOpen },
+          { name: "Satın Alma Talepleri", href: "/admin/muhasebe/purchase-requisitions", icon: ClipboardList },
+          { name: "Gelen Faturalar", href: "/admin/muhasebe/gelen-faturalar", icon: FileText, permission: "approve_invoice" },
+          { name: "Tedarikçi Ödemeleri", href: "/admin/muhasebe/tedarikci-odemeleri", icon: Banknote, permission: "approve_invoice" },
+          { name: "Antigravity Engine", href: "/admin/muhasebe/antigravity", icon: Zap, permission: "use_ai_assistant" },
         ],
       },
     ],
@@ -456,8 +456,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }>({ orders: [], products: [], dealers: [] });
   const [searching, setSearching] = useState(false);
 
-  const siteName = cmsData?.siteName || "Atak Arıcılık";
-  const primaryColor = cmsData?.primaryColor || "#f97316";
+  const siteName = cmsData?.siteName || "Pekefe";
+  const primaryColor = cmsData?.primaryColor || "#6b1d2f";
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

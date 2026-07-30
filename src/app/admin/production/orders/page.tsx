@@ -5,7 +5,7 @@ import { AlertCircle, Loader2, Hammer } from "lucide-react";
 import UpgradeGate from "@/components/UpgradeGate";
 
 export const metadata = {
-  title: "Üretim Emirleri | Atak Arıcılık Yönetim Paneli",
+  title: "Üretim Emirleri | Pekefe Yönetim Paneli",
   description: "Fabrika iş emirleri yönetimi, malzeme tahsisatı ve durum kontrolleri.",
 };
 

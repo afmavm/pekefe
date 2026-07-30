@@ -5,7 +5,7 @@ import { getShelvesData } from "@/modules/inventory/server/inventoryActions";
 import ShelvesClient from "./ShelvesClient";
 
 export const metadata: Metadata = {
-  title: "Raf Yönetimi (WMS) | Atak Arıcılık ERP",
+  title: "Raf Yönetimi (WMS) | Pekefe ERP",
   description: "WMS uyumlu Blok-Raf-Göz adresleme ve ürün eşleştirme ekranı.",
 };
 

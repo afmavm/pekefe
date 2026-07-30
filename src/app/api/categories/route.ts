@@ -29,10 +29,18 @@ export const POST = withAuth<any>(
 
     try {
       const body = await req.json();
+      
+      let customId = body.id;
+      if (!customId || customId.startsWith("cms")) {
+        const count = await prisma.categoryDetail.count();
+        customId = `PKF-KAT-${String(count + 1).padStart(3, '0')}`;
+      }
+
       const category = await prisma.categoryDetail.create({
         data: {
+          id: customId,
           name: body.name,
-          parentId: body.parentId,
+          parentId: body.parentId ? String(body.parentId) : null,
           attributes: body.attributes || [],
           variants: body.variants || []
         }
@@ -60,7 +68,7 @@ export const PUT = withAuth<any>(
         where: { id: body.id },
         data: {
           name: body.name,
-          parentId: body.parentId,
+          parentId: body.parentId ? String(body.parentId) : null,
           attributes: body.attributes || [],
           variants: body.variants || []
         }

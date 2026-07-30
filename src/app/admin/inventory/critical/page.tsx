@@ -5,7 +5,7 @@ import { getCriticalStocks } from "@/modules/inventory/server/inventoryActions";
 import CriticalClient from "./CriticalClient";
 
 export const metadata: Metadata = {
-  title: "Kritik Stoklar | Atak Arıcılık ERP",
+  title: "Kritik Stoklar | Pekefe ERP",
   description: "Minimum stok limitleri altına düşen, tükenen ve riskli ürünler listesi.",
 };
 

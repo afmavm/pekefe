@@ -6,12 +6,13 @@ import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as any) as any,
+
   providers: [
     CredentialsProvider({
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
         });
 
         if (!user || !user.password) {
@@ -50,128 +51,104 @@ export const authOptions: NextAuthOptions = {
           warehouseId: user.warehouseId,
           companyId: user.companyId,
           customer_type: user.customer_type,
-          b2b_group_id: user.b2b_group_id
+          b2b_group_id: user.b2b_group_id,
         } as any;
-      }
-    })
+      },
+    }),
   ],
+
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.role = user.role;
-        token.isApproved = user.isApproved;
-        (user as any).branchId;
-        token.branchId = (user as any).branchId;
-        token.warehouseId = (user as any).warehouseId;
-        token.companyId = (user as any).companyId;
-        token.customer_type = (user as any).customer_type;
-        token.b2b_group_id = (user as any).b2b_group_id;
+        token.image = user.image;
+        token.role = (user as any).role ?? "USER";
+        token.isApproved = (user as any).isApproved ?? true;
+        token.branchId = (user as any).branchId ?? null;
+        token.warehouseId = (user as any).warehouseId ?? null;
+        token.companyId = (user as any).companyId ?? null;
+        token.customer_type = (user as any).customer_type ?? "b2c";
+        token.b2b_group_id = (user as any).b2b_group_id ?? null;
 
-        // Fetch permissions for this user
+        // Kullanıcı rol izinleri
         try {
           const userRoles = await prisma.userRole.findMany({
             where: { userId: user.id },
             include: {
               role: {
                 include: {
-                  permissions: {
-                    include: {
-                      permission: true
-                    }
-                  }
-                }
-              }
-            }
+                  permissions: { include: { permission: true } },
+                },
+              },
+            },
           });
 
           const permissions = new Set<string>();
           for (const ur of userRoles) {
             for (const rp of ur.role.permissions) {
-              if (rp.permission?.name) {
-                permissions.add(rp.permission.name);
-              }
+              if (rp.permission?.name) permissions.add(rp.permission.name);
             }
           }
 
-          // Admins automatically get all permissions
-          if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-            permissions.add('view_dashboard');
-            permissions.add('approve_invoice');
-            permissions.add('create_despatch');
-            permissions.add('edit_stock');
-            permissions.add('use_ai_assistant');
-            permissions.add('manage_users');
+          if (token.role === "ADMIN" || token.role === "SUPER_ADMIN") {
+            ["view_dashboard", "approve_invoice", "create_despatch", "edit_stock", "use_ai_assistant", "manage_users"]
+              .forEach((p) => permissions.add(p));
           }
 
           token.permissions = Array.from(permissions);
-        } catch (e) {
-          console.error("Error fetching user permissions in JWT callback:", e);
+        } catch {
           token.permissions = [];
         }
 
-        // Fetch company features
+        // Şirket özellikleri
         if (token.companyId) {
           try {
             const companyPerms = await prisma.companyPermission.findMany({
-              where: {
-                companyId: token.companyId,
-                isEnabled: true
-              },
-              include: {
-                featureModule: true
-              }
+              where: { companyId: String(token.companyId), isEnabled: true },
+              include: { featureModule: true },
             });
             token.companyFeatures = companyPerms
-              .map(cp => cp.featureModule?.key)
+              .map((cp: any) => cp.featureModule?.key)
               .filter(Boolean) as string[];
-          } catch (e) {
-            console.error("Error fetching company features in JWT callback:", e);
+          } catch {
             token.companyFeatures = [];
           }
         } else {
-          // If no company is assigned, default to enabling all features so single-tenant flow works
-          token.companyFeatures = ['b2b', 'b2c', 'production', 'inventory', 'accounting'];
+          token.companyFeatures = ["b2b", "b2c", "production", "inventory", "accounting"];
         }
       }
 
       if (trigger === "update") {
-        if (session?.name) {
-          token.name = session.name;
-        }
-        if (session?.companyFeatures) {
-          token.companyFeatures = session.companyFeatures;
-        } else if (token.companyId) {
+        if (session?.name) token.name = session.name;
+        if (session?.companyFeatures) token.companyFeatures = session.companyFeatures;
+        else if (token.companyId) {
           try {
             const companyPerms = await prisma.companyPermission.findMany({
-              where: {
-                companyId: token.companyId,
-                isEnabled: true
-              },
-              include: {
-                featureModule: true
-              }
+              where: { companyId: String(token.companyId), isEnabled: true },
+              include: { featureModule: true },
             });
             token.companyFeatures = companyPerms
-              .map(cp => cp.featureModule?.key)
+              .map((cp: any) => cp.featureModule?.key)
               .filter(Boolean) as string[];
-          } catch (e) {
-            console.error("Error re-fetching company features:", e);
+          } catch {
+            // sessizce geç
           }
         }
       }
 
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.role = token.role;
-        session.user.isApproved = token.isApproved;
+        session.user.id = token.id as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.image as string | undefined;
+        session.user.role = token.role as string;
+        session.user.isApproved = token.isApproved as boolean;
         (session.user as any).branchId = token.branchId;
         (session.user as any).warehouseId = token.warehouseId;
         (session.user as any).companyId = token.companyId;
@@ -183,11 +160,16 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   pages: {
-    signIn: "/login-customer",
+    signIn: "/giris",
   },
+
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };

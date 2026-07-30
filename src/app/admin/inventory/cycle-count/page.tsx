@@ -8,7 +8,7 @@ import {
 import CycleCountClient from "./CycleCountClient";
 
 export const metadata: Metadata = {
-  title: "Sayım İşlemleri | Atak Arıcılık ERP",
+  title: "Sayım İşlemleri | Pekefe ERP",
   description: "Stok doğruluğu ve periyodik sayım yönetimi paneli.",
 };
 

@@ -205,7 +205,7 @@ export default function ReportsPage() {
           `).join("")}
           
           <tr><td colspan="7" style="border: none; height: 15px;"></td></tr>
-          <tr><td colspan="3" style="font-weight: bold; color: #475569;">Rapor Notu:</td><td colspan="4" style="color: #64748b; font-style: italic;">Bu rapor Atak Arıcılık Yönetim Paneli tarafından otomatik üretilmiştir.</td></tr>
+          <tr><td colspan="3" style="font-weight: bold; color: #475569;">Rapor Notu:</td><td colspan="4" style="color: #64748b; font-style: italic;">Bu rapor Pekefe Yönetim Paneli tarafından otomatik üretilmiştir.</td></tr>
         </table>
       </body>
       </html>

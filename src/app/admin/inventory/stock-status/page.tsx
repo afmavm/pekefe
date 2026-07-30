@@ -21,7 +21,7 @@ import {
 import { getStockStatus } from "@/modules/inventory/server/inventoryActions";
 
 export const metadata: Metadata = {
-  title: "Stok Durumu | Atak Arıcılık ERP",
+  title: "Stok Durumu | Pekefe ERP",
 };
 
 interface PageProps {

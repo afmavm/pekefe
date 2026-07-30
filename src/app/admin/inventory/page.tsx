@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 
 export const metadata = {
-  title: "Envanter & Depo Genel Bakış | Atak Arıcılık ERP",
+  title: "Envanter & Depo Genel Bakış | Pekefe ERP",
   description: "Envanter & Depo modülü genel bakış: kritik stoklar, depo dağılımı, son hareketler.",
 };
 

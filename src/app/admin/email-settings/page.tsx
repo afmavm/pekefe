@@ -94,7 +94,7 @@ export default function EmailSettingsPage() {
         smtpPort: data.smtpPort || "587",
         smtpUser: data.smtpUser || "",
         smtpPass: "", // For security, keep password field blank in client-state initially
-        smtpFromName: data.smtpFromName || "Atak Arıcılık B2B",
+        smtpFromName: data.smtpFromName || "Pekefe B2B",
         smtpSecure: data.smtpSecure || false,
         smtpMaxRetries: data.smtpMaxRetries !== undefined ? Number(data.smtpMaxRetries) : 3,
         smtpRetryDelay: data.smtpRetryDelay !== undefined ? Number(data.smtpRetryDelay) : 5,
@@ -446,7 +446,7 @@ export default function EmailSettingsPage() {
                       <label className="text-xs font-bold text-slate-600 block">Gönderen Adı (From Display Name)</label>
                       <input
                         type="text"
-                        placeholder="Örn: Atak Arıcılık B2B Destek"
+                        placeholder="Örn: Pekefe B2B Destek"
                         value={form.smtpFromName}
                         onChange={e => setForm({ ...form, smtpFromName: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
@@ -815,7 +815,7 @@ export default function EmailSettingsPage() {
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-600 block">Test Mesajı</label>
                     <textarea
-                      placeholder="Örn: Atak Arıcılık B2B WhatsApp test mesajı."
+                      placeholder="Örn: Pekefe B2B WhatsApp test mesajı."
                       rows={3}
                       value={testMessage}
                       onChange={e => setTestMessage(e.target.value)}

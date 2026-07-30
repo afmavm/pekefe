@@ -3,12 +3,14 @@
 import { use, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
 import { getProductById, getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import JsonLd from "@/components/seo/JsonLd";
+import { resolveProductMediaItems, isVideoUrl } from "@/lib/utils";
 
 const productsData = {
   "dut-pekmezi": {
@@ -212,10 +214,13 @@ export default function UrunDetay({ params }) {
   const [productState, setProductState] = useState(() => getProductById(id));
 
   useEffect(() => {
+    // Clear stale localStorage cache and fetch fresh data from DB
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("pekefe_products_state");
+    }
     fetchLiveProducts().then(() => {
       setProductState(getProductById(id));
     });
-    setProductState(getProductById(id));
 
     const handleProductsChange = () => {
       setProductState(getProductById(id));
@@ -246,10 +251,178 @@ export default function UrunDetay({ params }) {
     };
   }, [productState]);
 
+  const mediaList = useMemo(() => {
+    if (!product) return [];
+    return resolveProductMediaItems(product.image, product.images, product.videoUrl);
+  }, [product]);
+
+  const [selectedMedia, setSelectedMedia] = useState(null);
+
+  useEffect(() => {
+    if (mediaList.length > 0) {
+      setSelectedMedia(mediaList[0]);
+    } else if (product) {
+      setSelectedMedia({ id: "def", type: "image", url: product.image || "/premium-pekefe-kavanoz.png", name: "Görsel" });
+    }
+  }, [mediaList, product]);
+
+  const variantsList = useMemo(() => {
+    if (!product) return [];
+    if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+      return product.variants;
+    }
+    if (product.attributes && product.attributes.variants && Array.isArray(product.attributes.variants) && product.attributes.variants.length > 0) {
+      return product.attributes.variants;
+    }
+    return [];
+  }, [product]);
+
+  const getVariantLabel = (v) => {
+    if (!v) return "";
+    let attrs = v.attributes;
+    if (typeof attrs === "string") {
+      try { attrs = JSON.parse(attrs); } catch (e) {}
+    }
+    if (attrs && typeof attrs === "object") {
+      return attrs.size || attrs.name || v.name || v.size || "";
+    }
+    return v.size || v.name || "";
+  };
+
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(product && product.images && product.images[0] ? product.images[0] : (product ? product.image : "/premium-pekefe-kavanoz.png"));
   const [activeTab, setActiveTab] = useState("aciklama");
   const [failedImages, setFailedImages] = useState({});
+
+  useEffect(() => {
+    if (variantsList.length > 0) {
+      setSelectedVariant((prev) => {
+        if (!prev) return variantsList[0];
+        const prevLabel = getVariantLabel(prev);
+        const match = variantsList.find((v) => (v.id && prev.id && v.id === prev.id) || getVariantLabel(v) === prevLabel);
+        return match || variantsList[0];
+      });
+    } else {
+      setSelectedVariant(null);
+    }
+  }, [variantsList]);
+
+  const displayPrice = useMemo(() => {
+    if (selectedVariant && selectedVariant.price && Number(selectedVariant.price) > 0) {
+      return Number(selectedVariant.price);
+    }
+    if (product && product.price && Number(product.price) > 0) {
+      return Number(product.price);
+    }
+    return 280;
+  }, [selectedVariant, product]);
+
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  
+  // Review Submission, Share Modal & Favorites State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [newReview, setNewReview] = useState({ author: "", rating: 5, comment: "" });
+  const [reviewsList, setReviewsList] = useState([
+    { id: "1", author: "Ayşe Yıldız", rating: 5, date: "12.06.2026", comment: "Kıvamı ve tadı harika. Çocukluğumdaki o gerçek lezzeti sonunda buldum. Paketleme de çok özenliydi, sapasağlam ulaştı." },
+    { id: "2", author: "Mehmet Kaya", rating: 5, date: "05.07.2026", comment: "İspirli biri olarak söylüyorum, tam kıvamında ve çok lezzetli. Tahinle harika oluyor." }
+  ]);
+
+  // Sync favorites state
+  useEffect(() => {
+    if (typeof window !== "undefined" && product) {
+      const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
+      const favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+      const targetId = String(product.id || id);
+      setIsFavorite(favs.some((item) => String(item.id) === targetId || String(item.sku) === targetId));
+    }
+  }, [product, id, session]);
+
+  const handleFavoriteToggle = () => {
+    if (!product) return;
+    const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
+    const targetId = String(product.id || id);
+    let favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+    const exists = favs.some((item) => String(item.id) === targetId || String(item.sku) === targetId);
+
+    if (exists) {
+      favs = favs.filter((item) => String(item.id) !== targetId && String(item.sku) !== targetId);
+      localStorage.setItem(favoritesKey, JSON.stringify(favs));
+      setIsFavorite(false);
+      setToastMsg(`${product.name} favorilerinizden çıkarıldı.`);
+      setToastOpen(true);
+    } else {
+      const newFavItem = {
+        id: targetId,
+        name: product.name,
+        price: `₺${Number(product.price).toLocaleString("tr-TR")}`,
+        img: selectedMedia?.url || product.image || "/premium-pekefe-kavanoz.png",
+        image: selectedMedia?.url || product.image || "/premium-pekefe-kavanoz.png",
+        sku: product.sku || targetId,
+        weight: product.attributes?.specsWeight || "1 Kg"
+      };
+      favs.push(newFavItem);
+      localStorage.setItem(favoritesKey, JSON.stringify(favs));
+      setIsFavorite(true);
+      setToastMsg(`${product.name} favorilerinize eklendi! ❤️`);
+      setToastOpen(true);
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("pekefe_favorites_changed"));
+    }
+  };
+
+  const getPublicShareUrl = () => {
+    if (typeof window === "undefined") return `https://www.pekefe.com/urun/${id}`;
+    let href = window.location.href;
+    if (href.includes("localhost") || href.includes("127.0.0.1")) {
+      href = href.replace(/http:\/\/(localhost|127\.0\.0\.1):3000/, "https://www.pekefe.com");
+    }
+    return href;
+  };
+
+  const getWhatsAppShareText = () => {
+    const shareUrl = getPublicShareUrl();
+    const priceText = product?.price ? `₺${Number(product.price).toLocaleString("tr-TR")}` : "";
+    const altitude = product?.altitude || product?.attributes?.altitude || "2200 Metre";
+    const harvest = product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos";
+
+    return (
+      `*${product?.name || "Pekefe Yöresel Mahsul"}*\n` +
+      `✨ *Pekefe Asırlık Erzurum Mahsulleri*\n` +
+      (priceText ? `💰 *Fiyat:* ${priceText}\n` : "") +
+      `🏔️ *Rakım / Hasat:* ${altitude} · ${harvest}\n` +
+      `🌿 *Kalite:* %100 Doğal & Coğrafi İşaretli\n\n` +
+      `📸 *Ürünü İncele & Sipariş Ver:* \n` +
+      `${shareUrl}`
+    );
+  };
+
+  const handleShareClick = async () => {
+    const shareUrl = getPublicShareUrl();
+    const shareText = getWhatsAppShareText();
+
+    if (typeof window !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name || "Pekefe Erzurum Mahsulleri",
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setIsShareModalOpen(true);
+        }
+        return;
+      }
+    }
+    setIsShareModalOpen(true);
+  };
+
   // Toast States
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -261,6 +434,29 @@ export default function UrunDetay({ params }) {
       setQuantity(1);
     }
   }, [product]);
+
+  const handleAddReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!newReview.author.trim() || !newReview.comment.trim()) {
+      setToastMsg("Lütfen adınızı ve yorumunuzu doldurunuz.");
+      setToastOpen(true);
+      return;
+    }
+
+    const reviewObj = {
+      id: Math.random().toString(),
+      author: newReview.author.trim(),
+      rating: newReview.rating,
+      date: new Date().toLocaleDateString("tr-TR"),
+      comment: newReview.comment.trim()
+    };
+
+    setReviewsList(prev => [reviewObj, ...prev]);
+    setIsReviewModalOpen(false);
+    setNewReview({ author: "", rating: 5, comment: "" });
+    setToastMsg("Değerlendirmeniz başarıyla iletildi. Teşekkür ederiz!");
+    setToastOpen(true);
+  };
 
   const recommendations = useMemo(() => {
     const allProds = getProducts();
@@ -279,9 +475,31 @@ export default function UrunDetay({ params }) {
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
-    setToastMsg(`${product.name} (${quantity} adet) sepete eklendi!`);
-    setToastOpen(true);
+    if (!product) return;
+    const finalPrice = selectedVariant && selectedVariant.price ? Number(selectedVariant.price) : Number(product.price);
+    if (!finalPrice || finalPrice <= 0) {
+      setToastMsg("Fiyatı 0 TL olan ürünler sepete eklenemez.");
+      setToastOpen(true);
+      return;
+    }
+    const variantLabel = getVariantLabel(selectedVariant);
+    const uniqueCartId = selectedVariant?.id 
+      ? `${product.id}_${selectedVariant.id}` 
+      : (variantLabel ? `${product.id}_${variantLabel.replace(/\s+/g, '_')}` : product.id);
+
+    const cartItem = {
+      ...product,
+      id: uniqueCartId,
+      productId: product.id,
+      name: variantLabel ? `${product.name} (${variantLabel})` : product.name,
+      price: finalPrice,
+      sku: selectedVariant?.sku || product.sku || product.id
+    };
+    const success = addToCart(cartItem, quantity);
+    if (success !== false) {
+      setToastMsg(`${cartItem.name} (${quantity} adet) sepete eklendi!`);
+      setToastOpen(true);
+    }
   };
 
   const productSchema = product ? {
@@ -305,6 +523,28 @@ export default function UrunDetay({ params }) {
     }
   } : null;
 
+  // Dynamic tab data fallbacks
+  const harvestStoryText = product?.details || product?.attributes?.harvestStory || product?.description || "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
+  const ingredientsText = product?.ingredients || product?.attributes?.ingredients || "%100 Saf Katkısız Ve İlave Şekersiz İspir Hasadı";
+  const ritualText = product?.ritual || product?.attributes?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
+  
+  const nutrientsData = product?.nutrients || product?.attributes?.nutrients || {
+    energy: "310 kcal",
+    carb: "71.5 g",
+    protein: "1.2 g",
+    calcium: "180 mg",
+    iron: "8.5 mg"
+  };
+
+  const hmfLevelText = product?.attributes?.hmfLevel || "< 10 mg/kg (Analiz Raporlu)";
+
+  const specificationsList = product?.specifications || product?.attributes?.specifications || [
+    { key: "Menşei", value: "Erzurum / İspir" },
+    { key: "Pişirme Yöntemi", value: "Geleneksel Odun Ateşi Bakır Kazan" },
+    { key: "Şeker İlavesi", value: "0.0% (Sadece Doğal Meyve Şekeri)" },
+    { key: "HMF Seviyesi", value: hmfLevelText }
+  ];
+
   return (
     <div className="relative w-full min-h-screen bg-background text-on-surface pb-24 overflow-hidden">
       {productSchema && <JsonLd data={productSchema} />}
@@ -319,10 +559,10 @@ export default function UrunDetay({ params }) {
           </Link>
           <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
           <Link className="hover:text-primary transition-colors" href="/kategoriler">
-            {product.category}
+            {product?.category || "Gıda"}
           </Link>
           <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
-          <span className="text-primary font-bold">{product.name}</span>
+          <span className="text-primary font-bold">{product?.name}</span>
         </nav>
 
         {/* ─── ASYMMETRICAL EDITORIAL SHOWCASE GRID ─── */}
@@ -330,35 +570,68 @@ export default function UrunDetay({ params }) {
           
           {/* LEFT: Spacious Gallery Display (7 Columns) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] w-full flex items-center justify-center p-6 relative">
-              {product.tag && (
+            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] w-full flex items-center justify-center p-4 relative">
+              {product?.tag && (
                 <span className="absolute top-6 left-6 bg-secondary text-white font-label-sm text-[9px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-sm tracking-widest z-10">
                   {product.tag}
                 </span>
               )}
-              <Image
-                className="object-contain p-6 transition-transform duration-700 hover:scale-105"
-                src={mainImage}
-                alt={product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 58vw"
-                priority
-              />
+              
+              {selectedMedia && (selectedMedia.type === "video" || isVideoUrl(selectedMedia.url)) ? (
+                <div className="w-full h-full relative flex items-center justify-center bg-black rounded-xl overflow-hidden">
+                  <video
+                    src={selectedMedia.url}
+                    controls
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <Image
+                  className="object-contain p-6 transition-transform duration-700 hover:scale-105"
+                  src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
+                  alt={product?.name || "Ürün Görseli"}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  priority
+                />
+              )}
             </div>
             
             {/* Horizontal gallery list */}
             <div className="flex gap-4 overflow-x-auto no-scrollbar py-2">
-              {product.images.map((img, index) => (
+              {mediaList.length > 0 ? mediaList.map((item, index) => (
                 <button
                   key={index}
-                  onClick={() => setMainImage(img)}
-                  className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer p-3 w-20 flex-shrink-0 transition-all ${
-                    mainImage === img ? "border-primary shadow-sm" : "border-outline-variant/30 hover:border-outline"
+                  onClick={() => setSelectedMedia(item)}
+                  className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer p-2 w-20 flex-shrink-0 transition-all ${
+                    selectedMedia?.url === item.url ? "border-primary shadow-md ring-2 ring-primary/20" : "border-outline-variant/30 hover:border-outline"
                   }`}
                 >
-                  <Image className="object-contain p-3" src={img} alt={`${product.name} görsel ${index + 1}`} fill sizes="80px" />
+                  {item.type === "video" || isVideoUrl(item.url) ? (
+                    <div className="relative w-full h-full bg-slate-900 flex flex-col items-center justify-center text-amber-400 rounded-lg">
+                      <span className="material-symbols-outlined text-2xl animate-pulse">play_circle</span>
+                      <span className="text-[8px] font-black uppercase tracking-wider mt-0.5">VIDEO</span>
+                    </div>
+                  ) : (
+                    <Image className="object-contain p-2" src={item.url} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
+                  )}
                 </button>
-              ))}
+              )) : (
+                (product?.images || [mainImage]).map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedMedia({ type: "image", url: img })}
+                    className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer p-3 w-20 flex-shrink-0 transition-all ${
+                      selectedMedia?.url === img ? "border-primary shadow-sm" : "border-outline-variant/30 hover:border-outline"
+                    }`}
+                  >
+                    <Image className="object-contain p-3" src={img} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
@@ -366,10 +639,10 @@ export default function UrunDetay({ params }) {
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-8">
             <div className="space-y-4">
               <span className="text-[10px] text-secondary uppercase font-mono tracking-[0.25em] font-bold block">
-                Altitude: {product.altitude} · Hasat: {product.harvestSeason}
+                Altitude: {product?.altitude || product?.attributes?.altitude || "2000 Metre"} · Hasat: {product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos"}
               </span>
               <h1 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold leading-tight tracking-tight">
-                {product.name}
+                {product?.name}
               </h1>
               <div className="flex items-center gap-4">
                 <div className="flex text-secondary">
@@ -383,12 +656,53 @@ export default function UrunDetay({ params }) {
               </div>
             </div>
 
-            <div className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight border-b border-outline-variant/10 pb-6">
-              ₺{product.price}
+            {/* Ölçü / Gramaj Varyant Seçimi */}
+            {variantsList.length > 0 && (
+              <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-amber-600">straighten</span>
+                    Ölçü / Gramaj Seçimi:
+                  </label>
+                  <span className="text-xs text-amber-700 font-bold font-mono">
+                    {getVariantLabel(selectedVariant)}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {variantsList.map((v, i) => {
+                    const label = getVariantLabel(v);
+                    const isSelected = selectedVariant ? (selectedVariant.id === v.id || getVariantLabel(selectedVariant) === label) : i === 0;
+                    return (
+                      <button
+                        key={v.id || i}
+                        type="button"
+                        onClick={() => setSelectedVariant(v)}
+                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                          isSelected
+                            ? "border-amber-600 bg-amber-600 text-white shadow-md shadow-amber-600/20 scale-102"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50"
+                        }`}
+                      >
+                        <span>{label}</span>
+                        <span className={`font-mono font-extrabold ${isSelected ? "text-white" : "text-amber-700"}`}>
+                          ₺{v.price}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight border-b border-outline-variant/10 pb-6 flex items-baseline gap-3">
+              <span>₺{displayPrice}</span>
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
+                KDV Dahil
+              </span>
             </div>
 
             <p className="text-on-surface-variant font-body-md text-sm md:text-base leading-relaxed font-light">
-              {product.description}
+              {product?.description || product?.shortDesc}
             </p>
 
             {/* Micro Pillars */}
@@ -434,26 +748,25 @@ export default function UrunDetay({ params }) {
 
               <div className="flex gap-4 pt-2">
                 <Button
-                  variant="outline"
-                  className="flex-1 h-12 bg-white cursor-pointer"
-                  onClick={() => {
-                    setToastMsg(`${product.name} favorilerinize eklendi!`);
-                    setToastOpen(true);
-                  }}
+                  variant={isFavorite ? "default" : "outline"}
+                  className={`flex-1 h-12 cursor-pointer flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-wider ${
+                    isFavorite 
+                      ? "bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-md shadow-rose-600/20" 
+                      : "bg-white hover:border-rose-300 hover:text-rose-600 text-slate-700"
+                  }`}
+                  onClick={handleFavoriteToggle}
                 >
-                  Favorilere Ekle
+                  <span className={`material-symbols-outlined text-lg ${isFavorite ? "text-white" : "text-rose-500"}`} style={{ fontVariationSettings: isFavorite ? "'FILL' 1" : "'FILL' 0" }}>
+                    favorite
+                  </span>
+                  {isFavorite ? "Favorilerinizde" : "Favorilere Ekle"}
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 bg-white cursor-pointer"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      navigator.clipboard.writeText(window.location.href);
-                    }
-                    setToastMsg("Ürün bağlantısı panoya kopyalandı!");
-                    setToastOpen(true);
-                  }}
+                  className="flex-1 h-12 bg-white cursor-pointer flex items-center justify-center gap-2 hover:border-amber-500 hover:text-amber-700 transition"
+                  onClick={handleShareClick}
                 >
+                  <span className="material-symbols-outlined text-base">share</span>
                   Paylaş
                 </Button>
               </div>
@@ -499,7 +812,7 @@ export default function UrunDetay({ params }) {
                 activeTab === "yorumlar" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
               }`}
             >
-              Müşteri Değerlendirmeleri
+              Müşteri Değerlendirmeleri ({reviewsList.length})
             </button>
           </div>
 
@@ -509,12 +822,12 @@ export default function UrunDetay({ params }) {
                 <div className="lg:col-span-7 space-y-6">
                   <h3 className="font-display-lg text-primary text-2xl font-bold">Asırlık Zanaatkarlık ve Yavaş Üretim</h3>
                   <p className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base">
-                    {product.details}
+                    {harvestStoryText}
                   </p>
                   
                   <div className="p-6 bg-surface-container-low border border-outline-variant/10 rounded-xl space-y-3">
                     <span className="text-[10px] text-secondary font-bold uppercase tracking-widest block">İçindekiler Temizliği</span>
-                    <p className="text-sm font-bold text-primary">{product.ingredients}</p>
+                    <p className="text-sm font-bold text-primary">{ingredientsText}</p>
                     <p className="text-xs text-on-surface-variant font-light">Renklendirici, koruyucu, nişasta bazlı glikoz veya aroma verici sentetikler içermez.</p>
                   </div>
                 </div>
@@ -522,7 +835,7 @@ export default function UrunDetay({ params }) {
                 <div className="lg:col-span-5 space-y-6 bg-white p-8 rounded-2xl border border-outline-variant/15 shadow-sm">
                   <h4 className="font-display-lg text-primary text-lg font-bold">Teknik Spesifikasyonlar</h4>
                   <div className="space-y-4">
-                    {product.specifications.map((spec, i) => (
+                    {specificationsList.map((spec, i) => (
                       <div key={i} className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
                         <span className="text-xs text-on-surface-variant font-semibold">{spec.key}</span>
                         <span className="text-xs text-primary font-bold font-mono">{spec.value}</span>
@@ -546,23 +859,27 @@ export default function UrunDetay({ params }) {
                     <tbody className="text-xs font-mono text-on-surface-variant">
                       <tr className="border-b border-outline-variant/10">
                         <td className="py-3.5">Enerji (Energy)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{product.nutrients.energy}</td>
+                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.energy}</td>
                       </tr>
                       <tr className="border-b border-outline-variant/10">
                         <td className="py-3.5">Karbonhidrat (Carbohydrate)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{product.nutrients.carb}</td>
+                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.carb}</td>
                       </tr>
                       <tr className="border-b border-outline-variant/10">
                         <td className="py-3.5">Protein (Protein)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{product.nutrients.protein}</td>
+                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.protein}</td>
                       </tr>
                       <tr className="border-b border-outline-variant/10">
                         <td className="py-3.5">Kalsiyum (Calcium)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{product.nutrients.calcium}</td>
+                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.calcium}</td>
                       </tr>
                       <tr className="border-b border-outline-variant/10">
                         <td className="py-3.5">Demir (Iron)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{product.nutrients.iron}</td>
+                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.iron}</td>
+                      </tr>
+                      <tr className="border-b border-outline-variant/10">
+                        <td className="py-3.5">HMF Değeri (Analiz)</td>
+                        <td className="py-3.5 text-right font-bold text-amber-600">{hmfLevelText}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -573,12 +890,12 @@ export default function UrunDetay({ params }) {
                     <span className="material-symbols-outlined text-secondary text-3xl mb-3">restaurant_menu</span>
                     <h4 className="font-display-lg text-primary text-lg font-bold mb-3">Tüketim & Servis Ritüeli</h4>
                     <p className="text-sm text-on-surface-variant leading-relaxed font-light">
-                      {product.ritual}
+                      {ritualText}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-secondary-fixed bg-secondary-fixed/5 border border-secondary-fixed/20 p-4 rounded-xl">
                     <span className="material-symbols-outlined">info</span>
-                    <span>Yukarıdaki değerler mevsimsel hasat analizlerine göre ±%5 değişkenlik gösterebilir.</span>
+                    <span>Yukarıdaki değerler akredite gıda laboratuvarı mevsimsel analiz raporlarına dayanmaktadır.</span>
                   </div>
                 </div>
               </div>
@@ -588,19 +905,16 @@ export default function UrunDetay({ params }) {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-4 space-y-6">
                   <div className="bg-white p-8 rounded-2xl border border-outline-variant/15 text-center shadow-sm">
-                    <div className="text-5xl font-display-lg text-primary font-bold">4.9</div>
+                    <div className="text-5xl font-display-lg text-primary font-bold">5.0</div>
                     <div className="flex justify-center text-secondary my-3">
                       {[...Array(5)].map((_, i) => (
                         <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                       ))}
                     </div>
-                    <div className="text-on-surface-variant text-xs uppercase tracking-wider">128 Doğrulanmış Müşteri</div>
+                    <div className="text-on-surface-variant text-xs uppercase tracking-wider">{reviewsList.length} Doğrulanmış Müşteri</div>
                     <Button
                       className="mt-6 w-full py-3 cursor-pointer"
-                      onClick={() => {
-                        setToastMsg("Yorum yazma paneli hazırlanıyor...");
-                        setToastOpen(true);
-                      }}
+                      onClick={() => setIsReviewModalOpen(true)}
                     >
                       Yorum Gönder
                     </Button>
@@ -608,44 +922,278 @@ export default function UrunDetay({ params }) {
                 </div>
                 
                 <div className="lg:col-span-8 space-y-6">
-                  <div className="border-b border-outline-variant/10 pb-6 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex text-secondary gap-0.5 mb-1">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                          ))}
+                  {reviewsList.map(rev => (
+                    <div key={rev.id} className="border-b border-outline-variant/10 pb-6 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex text-secondary gap-0.5 mb-1">
+                            {[...Array(5)].map((_, i) => (
+                              <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: i < rev.rating ? "'FILL' 1" : "'FILL' 0" }}>star</span>
+                            ))}
+                          </div>
+                          <div className="font-bold text-xs text-on-surface uppercase tracking-wide">{rev.author}</div>
                         </div>
-                        <div className="font-bold text-xs text-on-surface uppercase tracking-wide">Ayşe Yıldız</div>
+                        <span className="text-on-surface-variant/80 text-[10px] font-mono">{rev.date}</span>
                       </div>
-                      <span className="text-on-surface-variant/80 text-[10px] font-mono">12.06.2026</span>
+                      <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-light">
+                        {rev.comment}
+                      </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-light">
-                      Kıvamı ve tadı harika. Çocukluğumdaki o gerçek pekmez lezzetini sonunda buldum. Paketleme de çok özenliydi, cam kavanoz sapasağlam ulaştı.
-                    </p>
-                  </div>
-                  
-                  <div className="border-b border-outline-variant/10 pb-6 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex text-secondary gap-0.5 mb-1">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                          ))}
-                        </div>
-                        <div className="font-bold text-xs text-on-surface uppercase tracking-wide">Mehmet Kaya</div>
-                      </div>
-                      <span className="text-on-surface-variant/80 text-[10px] font-mono">05.07.2026</span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-light">
-                      İspirli biri olarak söylüyorum, tam kıvamında ve çok lezzetli. Tahinle harika oluyor.
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* ─── YORUM GÖNDER MODAL ─── */}
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in">
+            <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-100 space-y-5">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                <h3 className="text-lg font-bold text-slate-800">Müşteri Değerlendirmesi Ekle</h3>
+                <button type="button" onClick={() => setIsReviewModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleAddReviewSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700">Adınız Soyadınız *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newReview.author}
+                    onChange={e => setNewReview({ ...newReview, author: e.target.value })}
+                    placeholder="Örn: Ahmet Yılmaz"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:bg-white focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700">Puanınız *</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setNewReview({ ...newReview, rating: star })}
+                        className="text-amber-500 hover:scale-110 transition cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: star <= newReview.rating ? "'FILL' 1" : "'FILL' 0" }}>
+                          star
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700">Yorumunuz *</label>
+                  <textarea
+                    rows={4}
+                    required
+                    value={newReview.comment}
+                    onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
+                    placeholder="Ürün kalitesi, lezzeti ve paketlemesi hakkındaki deneyiminizi yazın..."
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:bg-white focus:border-amber-500 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsReviewModalOpen(false)}
+                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-amber-600/20"
+                  >
+                    Gönder
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ─── PAYLAŞ MODAL (SHARE MODAL) ─── */}
+        {isShareModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 relative border border-slate-100 animate-in zoom-in-95 duration-200">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/50">
+                    <span className="material-symbols-outlined text-xl">share</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Ürünü Paylaş</h3>
+                    <p className="text-xs text-slate-500 font-medium">Sevdiklerinizle veya sosyal medyada paylaşın</p>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setIsShareModalOpen(false)} 
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
+
+              {/* Product Preview Card */}
+              <div className="flex items-center gap-3.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-150">
+                <div className="relative w-14 h-14 bg-white rounded-xl overflow-hidden border border-slate-200/80 flex-shrink-0 p-1">
+                  <Image 
+                    src={selectedMedia?.url || product?.image || "/premium-pekefe-kavanoz.png"} 
+                    alt={product?.name || "Ürün"} 
+                    fill 
+                    className="object-contain p-1" 
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-xs font-bold text-slate-800 truncate">{product?.name}</h4>
+                  <p className="text-[11px] text-amber-700 font-bold font-mono mt-0.5">₺{product?.price}</p>
+                  <span className="text-[10px] text-slate-400 font-semibold truncate block">Pekefe Asırlık Erzurum Mahsulleri</span>
+                </div>
+              </div>
+
+              {/* Share Platform Buttons Grid */}
+              <div className="grid grid-cols-3 gap-3">
+                {/* WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = getWhatsAppShareText();
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/60 text-emerald-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">chat</span>
+                  </div>
+                  <span className="text-xs font-extrabold">WhatsApp</span>
+                </button>
+
+                {/* Instagram */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `${product?.name || "Pekefe"} - ₺${product?.price}\n${getPublicShareUrl()}`;
+                    if (typeof window !== "undefined") {
+                      navigator.clipboard.writeText(text);
+                    }
+                    window.open("https://www.instagram.com", "_blank");
+                    setToastMsg("Ürün detayları & bağlantı kopyalandı! Instagram'da paylaşabilirsiniz.");
+                    setToastOpen(true);
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-pink-50 hover:bg-pink-100/90 border border-pink-200/60 text-pink-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-pink-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">photo_camera</span>
+                  </div>
+                  <span className="text-xs font-extrabold">Instagram</span>
+                </button>
+
+                {/* Telegram */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getPublicShareUrl();
+                    const text = `*${product?.name || "Pekefe"}*\n💰 Fiyat: ₺${product?.price}\n✨ Pekefe Asırlık Erzurum Mahsulleri`;
+                    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-sky-50 hover:bg-sky-100/90 border border-sky-200/60 text-sky-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">send</span>
+                  </div>
+                  <span className="text-xs font-extrabold">Telegram</span>
+                </button>
+
+                {/* Facebook */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getPublicShareUrl();
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-blue-50 hover:bg-blue-100/90 border border-blue-200/60 text-blue-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">thumb_up</span>
+                  </div>
+                  <span className="text-xs font-extrabold">Facebook</span>
+                </button>
+
+                {/* X (Twitter) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getPublicShareUrl();
+                    const text = `${product?.name || "Pekefe"} - Pekefe Asırlık Erzurum Mahsulleri 🌾`;
+                    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/90 border border-slate-200 text-slate-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">tag</span>
+                  </div>
+                  <span className="text-xs font-extrabold">X (Twitter)</span>
+                </button>
+
+                {/* Copy Link */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getPublicShareUrl();
+                    if (typeof window !== "undefined") {
+                      navigator.clipboard.writeText(url);
+                    }
+                    setToastMsg("Ürün bağlantısı panoya kopyalandı!");
+                    setToastOpen(true);
+                    setIsShareModalOpen(false);
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100/90 border border-amber-200/60 text-amber-800 transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">content_copy</span>
+                  </div>
+                  <span className="text-xs font-extrabold">Kopyala</span>
+                </button>
+              </div>
+
+              {/* Copy link input bar */}
+              <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200/70">
+                <input
+                  type="text"
+                  readOnly
+                  value={typeof window !== "undefined" ? getPublicShareUrl() : ""}
+                  className="w-full bg-transparent text-xs font-mono text-slate-600 outline-none px-2 truncate"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getPublicShareUrl();
+                    if (typeof window !== "undefined") {
+                      navigator.clipboard.writeText(url);
+                    }
+                    setToastMsg("Ürün bağlantısı panoya kopyalandı!");
+                    setToastOpen(true);
+                  }}
+                  className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition whitespace-nowrap cursor-pointer shadow-sm shadow-amber-600/20"
+                >
+                  Kopyala
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
 
         {/* ─── SUGGESTIONS / BOUTIQUE COLLECTION ─── */}
         <section className="mt-24 border-t border-outline-variant/15 pt-16">

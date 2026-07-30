@@ -59,7 +59,7 @@ interface SeoErrors {
 }
 
 const defaults: SeoState = {
-  siteName: "Atak Arıcılık",
+  siteName: "Pekefe",
   siteDescription: "",
   socialInstagram: "",
   socialWhatsapp: "",
@@ -390,7 +390,7 @@ export default function SeoAdminPage() {
               onChange={(e) => update("siteName", e.target.value)} 
               onBlur={() => handleBlur("siteName")}
               className={inputClass(errors.siteName)} 
-              placeholder="Atak Arıcılık" 
+              placeholder="Pekefe" 
             />
           </div>
           {errors.siteName && (

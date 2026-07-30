@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import CariPage from "../muhasebe/cari/page";
 
 export const metadata = {
-  title: "Cari Hesaplar & Bayi Yönetimi | Atak Arıcılık Yönetim Paneli",
+  title: "Cari Hesaplar & Bayi Yönetimi | Pekefe Yönetim Paneli",
   description: "B2B bayi ve müşteri cari kartları, risk limitleri, özel fiyatlandırma formülleri, B2B yetkilendirme ve sadakat puanı yönetimi.",
 };
 

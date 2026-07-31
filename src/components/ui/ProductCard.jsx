@@ -71,15 +71,15 @@ export function ProductCard({
 
   return (
     <div className={`flex flex-col md:flex-row gap-8 items-center border-b border-outline-variant/10 pb-12 ${className}`}>
-      {/* Image Frame */}
-      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 relative group flex items-center justify-center p-4">
+      {/* Image Frame - Luxury Editorial Photography Bleed */}
+      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all">
         {tag && (
-          <span className="absolute top-4 left-4 bg-secondary text-white font-label-sm text-[9px] px-3 py-1 rounded-full uppercase font-bold shadow-sm tracking-wider z-10">
+          <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
             {tag}
           </span>
         )}
         {isOutOfStock && (
-          <span className="absolute top-4 right-4 bg-slate-700 text-white text-[9px] px-3 py-1 rounded-full uppercase font-bold z-10">
+          <span className="absolute top-4 right-4 bg-slate-800/90 text-white text-[10px] px-3.5 py-1 rounded-full uppercase font-bold z-10 shadow-md">
             Tükendi
           </span>
         )}
@@ -88,8 +88,8 @@ export function ProductCard({
             src={image}
             alt={name || "Pekefe Ürünü"}
             fill
-            sizes="(max-width: 768px) 100vw, 25vw"
-            className="object-contain p-8 transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
+            sizes="(max-width: 768px) 100vw, 35vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             unoptimized={typeof image === "string" && (image.startsWith("http://") || image.startsWith("https://"))}
             onError={() => setImgError(true)}
           />

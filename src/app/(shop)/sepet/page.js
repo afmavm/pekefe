@@ -68,7 +68,17 @@ export default function Sepet() {
   }, []);
 
   const [promoCode, setPromoCode] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pekefe_applied_coupon");
+      if (stored) {
+        setAppliedCoupon(JSON.parse(stored));
+      }
+    } catch (e) {}
+  }, []);
 
   const updateQuantity = (id, delta) => {
     updateCartQty(id, delta);
@@ -80,30 +90,74 @@ export default function Sepet() {
 
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
 
-  const handleApplyPromo = (e) => {
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const handleApplyPromo = async (e) => {
     e.preventDefault();
-    if (promoCode.toUpperCase() === "PEKEFE10") {
-      setDiscount(0.1); // 10% discount
-      setToast({
-        isOpen: true,
-        message: "PEKEFE10 indirim kodu uygulandı! %10 indirim kazandınız.",
-        type: "success",
+    const codeToTest = promoCode.trim();
+    if (!codeToTest) return;
+
+    setIsApplyingPromo(true);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: codeToTest,
+          cartTotal: subtotal,
+        }),
       });
-    } else {
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const couponObj = {
+          code: data.coupon.code,
+          discountAmount: data.discountAmount,
+          type: data.coupon.type,
+          value: data.coupon.value,
+        };
+        setAppliedCoupon(couponObj);
+        localStorage.setItem("pekefe_applied_coupon", JSON.stringify(couponObj));
+        setToast({
+          isOpen: true,
+          message: `"${data.coupon.code}" indirim kodu başarıyla uygulandı! ₺${data.discountAmount.toLocaleString("tr-TR")} indirim kazandınız.`,
+          type: "success",
+        });
+      } else {
+        setToast({
+          isOpen: true,
+          message: data.error || "Geçersiz veya süresi dolmuş kupon kodu.",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Coupon error:", err);
       setToast({
         isOpen: true,
-        message: "Geçersiz veya süresi dolmuş kupon kodu.",
+        message: "Kupon doğrulanırken bir hata oluştu.",
         type: "error",
       });
+    } finally {
+      setIsApplyingPromo(false);
     }
   };
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const discountAmount = subtotal * discount;
+  const handleRemovePromo = () => {
+    setAppliedCoupon(null);
+    setPromoCode("");
+    localStorage.removeItem("pekefe_applied_coupon");
+    setToast({
+      isOpen: true,
+      message: "İndirim kodu kaldırıldı.",
+      type: "info",
+    });
+  };
+
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const shippingThreshold = 750;
   const isShippingFree = subtotal >= shippingThreshold;
   const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : 35;
-  const total = subtotal - discountAmount + shippingCost;
+  const total = Math.max(0, subtotal - discountAmount + shippingCost);
   const remainingForFreeShipping = Math.max(0, shippingThreshold - subtotal);
   const progressPercent = Math.min(100, (subtotal / shippingThreshold) * 100);
 
@@ -221,14 +275,14 @@ export default function Sepet() {
                   </span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between items-center text-secondary">
-                    <span className="font-body-md">İndirimler (%10)</span>
-                    <span className="font-label-md">-₺{discountAmount}</span>
+                  <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold">
+                    <span className="font-body-md">Kupon İndirimi ({appliedCoupon?.code})</span>
+                    <span className="font-label-md">-₺{discountAmount.toLocaleString("tr-TR")}</span>
                   </div>
                 )}
                 <div className="pt-4 border-t border-outline-variant/30 flex justify-between items-center text-primary font-bold">
                   <span className="text-lg">Genel Toplam</span>
-                  <span className="text-2xl">₺{total}</span>
+                  <span className="text-2xl">₺{total.toLocaleString("tr-TR")}</span>
                 </div>
               </div>
               <div className="space-y-4">
@@ -244,26 +298,56 @@ export default function Sepet() {
                   Güvenli Ödeme Altyapısı
                 </div>
               </div>
-              <form onSubmit={handleApplyPromo} className="mt-8">
-                <label className="block text-label-sm text-on-surface-variant uppercase mb-2">
-                  İndirim Kodu
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="flex-grow bg-surface border border-outline-variant/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                    placeholder="Kodu giriniz (PEKEFE10)"
-                    type="text"
-                  />
+
+              {/* Coupon Code Section */}
+              {appliedCoupon ? (
+                <div className="mt-8 p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-emerald-600 text-xl">verified</span>
+                    <div>
+                      <span className="font-bold text-xs text-emerald-900 dark:text-emerald-200 block">
+                        {appliedCoupon.code} Kodlu İndirim Aktif
+                      </span>
+                      <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                        -₺{discountAmount.toLocaleString("tr-TR")} indirim uygulandı
+                      </span>
+                    </div>
+                  </div>
                   <button
-                    type="submit"
-                    className="bg-secondary text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-all cursor-pointer"
+                    type="button"
+                    onClick={handleRemovePromo}
+                    className="text-xs text-red-600 hover:text-red-800 font-bold underline cursor-pointer px-2 py-1"
                   >
-                    Uygula
+                    Kaldır
                   </button>
                 </div>
-              </form>
+              ) : (
+                <form onSubmit={handleApplyPromo} className="mt-8">
+                  <label className="block text-label-sm text-on-surface-variant uppercase mb-2">
+                    İndirim Kodu
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className="flex-grow bg-surface border border-outline-variant/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm font-medium"
+                      placeholder="Kodu giriniz (PEKEFE10)"
+                      type="text"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isApplyingPromo}
+                      className="bg-secondary text-white px-5 py-2 rounded-lg font-bold hover:opacity-90 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1 shrink-0"
+                    >
+                      {isApplyingPromo ? (
+                        <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                      ) : (
+                        "Uygula"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
             {/* Quick Help */}
             <div className="mt-6 p-4 rounded-xl border border-outline-variant/30 text-center">

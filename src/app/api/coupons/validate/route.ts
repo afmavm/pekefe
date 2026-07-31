@@ -90,6 +90,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!campaign) {
+      // Built-in fallback for default demo code PEKEFE10 if not present in DB
+      if (upperCode === "PEKEFE10") {
+        const discountAmount = (cartTotal * 10) / 100;
+        return NextResponse.json({
+          success: true,
+          discountAmount: Math.min(discountAmount, cartTotal),
+          coupon: {
+            code: "PEKEFE10",
+            type: "percentage",
+            value: 10
+          }
+        });
+      }
       return NextResponse.json({ error: "Kupon veya kampanya kodu bulunamadı." }, { status: 404 });
     }
 

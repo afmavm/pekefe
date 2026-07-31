@@ -4,24 +4,6 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
 
-export default function SSS() {
-  const [settings, setSettings] = useState(getSettings());
-
-  useEffect(() => {
-    setSettings(getSettings());
-    fetchLiveSettings().then((live) => {
-      if (live) setSettings(live);
-    });
-
-    const handleSettingsChange = () => {
-      setSettings(getSettings());
-    };
-    window.addEventListener("pekefe_settings_changed", handleSettingsChange);
-    return () => {
-      window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
-    };
-  }, []);
-
 const faqData = [
   {
     category: "order",
@@ -108,7 +90,23 @@ const faqData = [
   }
 ];
 
-export default function Sss() {
+export default function SSS() {
+  const [settings, setSettings] = useState(getSettings());
+
+  useEffect(() => {
+    setSettings(getSettings());
+    fetchLiveSettings().then((live) => {
+      if (live) setSettings(live);
+    });
+
+    const handleSettingsChange = () => {
+      setSettings(getSettings());
+    };
+    window.addEventListener("pekefe_settings_changed", handleSettingsChange);
+    return () => {
+      window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
+    };
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeAccordionId, setActiveAccordionId] = useState("order-1"); // Open first item by default
   const [activeCategory, setActiveCategory] = useState("order");

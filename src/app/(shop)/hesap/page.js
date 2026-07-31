@@ -33,6 +33,7 @@ export default function Hesap() {
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [favoritesList, setFavoritesList] = useState([]);
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
 
   const [savingInfo, setSavingInfo] = useState(false);
   const [savedInfoSuccess, setSavedInfoSuccess] = useState(false);
@@ -100,6 +101,9 @@ export default function Hesap() {
             email: data.user.email || session?.user?.email || "",
             phone: data.currentAccount?.phone || "",
           });
+          if (data.currentAccount) {
+            setLoyaltyPoints(Number(data.currentAccount.loyaltyPoints || 0));
+          }
         }
       }
     } catch (err) {
@@ -241,6 +245,8 @@ export default function Hesap() {
     }
   };
 
+  const loyaltyTier = loyaltyPoints >= 2000 ? "PEKEFE USTASI" : loyaltyPoints >= 500 ? "PEKEFE GURMESİ" : "PEKEFE DOSTU";
+
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-16">
       {/* Hero Section / Header */}
@@ -323,14 +329,14 @@ export default function Hesap() {
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <p className="font-label-sm text-xs opacity-80 uppercase tracking-widest text-amber-300 mb-1">Pekefe Dostu</p>
+                  <p className="font-label-sm text-xs opacity-80 uppercase tracking-widest text-amber-300 mb-1">{loyaltyTier}</p>
                   <h4 className="font-headline-md text-xl leading-none font-bold">Sadakat Kartı</h4>
                 </div>
                 <span className="material-symbols-outlined text-3xl text-amber-300">verified</span>
               </div>
               <div className="mb-6">
                 <p className="font-label-sm text-xs opacity-70 mb-1">Pekefe Lezzet Puanı</p>
-                <p className="text-2xl font-bold tracking-tight text-amber-300">1.250 PTS</p>
+                <p className="text-2xl font-bold tracking-tight text-amber-300 font-mono">{Number(loyaltyPoints).toLocaleString("tr-TR")} PTS</p>
               </div>
               <div className="flex justify-between items-end">
                 <p className="font-label-sm text-xs font-semibold">{infoForm.firstName} {infoForm.lastName}</p>

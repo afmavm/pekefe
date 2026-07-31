@@ -97,6 +97,13 @@ export default function SepetOnay() {
                     : "Kredi / Banka Kartı"}
                 </p>
               </div>
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-center gap-3">
+                <span className="material-symbols-outlined text-amber-600 text-2xl">workspace_premium</span>
+                <div>
+                  <p className="font-bold text-xs uppercase tracking-wider text-amber-800">Kazanılan Lezzet Puanı</p>
+                  <p className="font-extrabold text-sm text-amber-900">+{Math.floor(total)} PTS Pekefe Lezzet Puanı Hesabınıza Tanımlandı!</p>
+                </div>
+              </div>
               <div className="pt-6 border-t border-outline-variant/30">
                 <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
                   TESLİMAT ADRESİ

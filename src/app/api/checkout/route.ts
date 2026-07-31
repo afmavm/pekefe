@@ -415,6 +415,17 @@ export async function POST(request: NextRequest) {
         }
       });
 
+      // Sadakat Puanı Kazanımı (Pekefe Lezzet Puanı: Her 1 TL Harcama = 1 PTS Puan)
+      const earnedLoyaltyPoints = Math.floor(verifiedTotal);
+      if (earnedLoyaltyPoints > 0 && account) {
+        account = await tx.currentAccount.update({
+          where: { id: account.id },
+          data: {
+            loyaltyPoints: { increment: earnedLoyaltyPoints }
+          }
+        });
+      }
+
       // Yeni Sipariş Bildirimi Ekle
       try {
         const notifId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;

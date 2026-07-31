@@ -430,56 +430,8 @@ export default function Odeme() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div
-                onClick={() => setShippingMethod("standard")}
-                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
-                  shippingMethod === "standard"
-                    ? "border-[#6b1d2f] bg-[#6b1d2f]/5 shadow-sm"
-                    : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    shippingMethod === "standard" ? "border-[#6b1d2f] bg-[#6b1d2f]" : "border-gray-300"
-                  }`}>
-                    {shippingMethod === "standard" && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-[#1a0a10]">Standart Teslimat</div>
-                    <div className="text-xs text-gray-500">2-4 İş Günü (Soğuk Korumalı)</div>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-[#6b1d2f]">
-                  {subtotal >= 750 ? "ÜCRETSİZ" : "₺35"}
-                </span>
-              </div>
-
-              <div
-                onClick={() => setShippingMethod("express")}
-                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
-                  shippingMethod === "express"
-                    ? "border-[#6b1d2f] bg-[#6b1d2f]/5 shadow-sm"
-                    : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    shippingMethod === "express" ? "border-[#6b1d2f] bg-[#6b1d2f]" : "border-gray-300"
-                  }`}>
-                    {shippingMethod === "express" && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-[#1a0a10]">VIP Öncelikli Gönderim</div>
-                    <div className="text-xs text-gray-500">Ertesi Gün Teslimat</div>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-[#1a0a10]">₺45</span>
-              </div>
-            </div>
-
             {/* Carrier Selection */}
-            <div className="pt-2">
+            <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kargo Firması Tercihi</label>
               <div className="grid grid-cols-3 gap-3">
                 {["Yurtiçi Kargo", "Aras Kargo", "MNG Kargo"].map((carrier) => (

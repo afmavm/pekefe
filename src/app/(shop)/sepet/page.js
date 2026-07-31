@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
-import { getCart, updateCartQty, removeFromCart } from "@/utils/cartStorage";
+import { getCart, updateCartQty, removeFromCart, addToCart } from "@/utils/cartStorage";
 import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
+import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 
 export default function Sepet() {
   const [cartItems, setCartItems] = useState([]);
   const [settings, setSettings] = useState(getSettings());
+  const [allProducts, setAllProducts] = useState([]);
+  const [recIndex, setRecIndex] = useState(0);
 
   useEffect(() => {
     setSettings(getSettings());
@@ -24,6 +27,34 @@ export default function Sepet() {
       window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
     };
   }, []);
+
+  useEffect(() => {
+    setAllProducts(getProducts());
+    fetchLiveProducts().then((live) => {
+      if (live && live.length > 0) {
+        setAllProducts(live);
+      }
+    });
+  }, []);
+
+  const recommendations = useMemo(() => {
+    if (!Array.isArray(allProducts) || allProducts.length === 0) return [];
+    const cartIds = new Set((cartItems || []).map((item) => String(item.productId || item.id)));
+    const available = allProducts.filter((p) => !cartIds.has(String(p.id)));
+    return available.length > 0 ? available : allProducts;
+  }, [allProducts, cartItems]);
+
+  const maxRecIndex = Math.max(0, recommendations.length - 3);
+
+  const handlePrevRec = () => {
+    setRecIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextRec = () => {
+    setRecIndex((prev) => Math.min(maxRecIndex, prev + 1));
+  };
+
+  const visibleRecommendations = recommendations.slice(recIndex, recIndex + 3);
 
   useEffect(() => {
     setCartItems(getCart());
@@ -249,105 +280,110 @@ export default function Sepet() {
         </div>
       )}
 
-      {/* Recommendations Section */}
-      <section className="mt-section-gap">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <span className="text-secondary font-label-md uppercase tracking-[0.2em]">Sepetini Tamamla</span>
-            <h2 className="font-headline-lg text-[28px] md:text-headline-lg text-primary mt-2">
-              Birlikte İyi Gider
-            </h2>
-          </div>
-          <div className="hidden md:flex gap-4">
-            <button aria-label="Önceki ürünler" className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button aria-label="Sonraki ürünler" className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
-          {/* Product 1: Taş Değirmen Tahin */}
-          <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 transition-all duration-300 hover:-translate-y-1 group">
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface p-4 flex items-center justify-center">
-              <Image
-                className="object-contain transition-transform duration-500 group-hover:scale-105"
-                alt="Taş Değirmen Tahin"
-                src="/pekmez-tahin-eslesme.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-              <div className="absolute top-3 left-3 bg-secondary text-white font-label-sm text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider font-bold z-10">
-                Pekmez Eşleşmesi
-              </div>
+      {/* Dynamic Catalog Recommendations Section ("Birlikte İyi Gider") */}
+      {recommendations.length > 0 && (
+        <section className="mt-section-gap">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <span className="text-secondary font-label-md uppercase tracking-[0.2em]">Sepetini Tamamla</span>
+              <h2 className="font-headline-lg text-[28px] md:text-headline-lg text-primary mt-2">
+                Birlikte İyi Gider
+              </h2>
             </div>
-            <h4 className="font-display-lg text-primary text-base font-bold mb-1 group-hover:text-primary transition-colors">
-              Taş Değirmen Çifte Kavrulmuş Tahin
-            </h4>
-            <p className="text-on-surface-variant text-xs mb-4 font-mono">600g · Yerli Susam</p>
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-lg text-primary font-mono">₺180</span>
-              <button aria-label="Taş Değirmen Çifte Kavrulmuş Tahin sepete ekle" className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">shopping_cart</span>
+            <div className="hidden md:flex gap-4">
+              <button
+                type="button"
+                onClick={handlePrevRec}
+                disabled={recIndex === 0}
+                aria-label="Önceki ürünler"
+                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                  recIndex === 0
+                    ? "border-outline-variant/30 text-outline-variant/40 cursor-not-allowed"
+                    : "border-outline-variant hover:bg-primary hover:text-white hover:border-primary"
+                }`}
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleNextRec}
+                disabled={recIndex >= maxRecIndex}
+                aria-label="Sonraki ürünler"
+                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                  recIndex >= maxRecIndex
+                    ? "border-outline-variant/30 text-outline-variant/40 cursor-not-allowed"
+                    : "border-outline-variant hover:bg-primary hover:text-white hover:border-primary"
+                }`}
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
           </div>
 
-          {/* Product 2: Yerli İspir Cevizi */}
-          <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 transition-all duration-300 hover:-translate-y-1 group">
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface p-4 flex items-center justify-center">
-              <Image
-                className="object-contain transition-transform duration-500 group-hover:scale-105"
-                alt="İspir Kabuklu Cevizi"
-                src="/ispir-kome-gercek-hasat.jpg"
-                fill
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-              <div className="absolute top-3 left-3 bg-secondary text-white font-label-sm text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider font-bold z-10">
-                Pestil İçi
-              </div>
-            </div>
-            <h4 className="font-display-lg text-primary text-base font-bold mb-1 group-hover:text-primary transition-colors">
-              Yerli İspir İnce Kabuklu Ceviz
-            </h4>
-            <p className="text-on-surface-variant text-xs mb-4 font-mono">500g · Yeni Sezon Hasadı</p>
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-lg text-primary font-mono">₺220</span>
-              <button aria-label="Yerli İspir İnce Kabuklu Ceviz sepete ekle" className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">shopping_cart</span>
-              </button>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            {visibleRecommendations.map((p) => {
+              const tagLabel = p.tag || p.categoryDisplay || "Geleneksel Reçete";
+              const formattedPrice = `₺${Number(p.price || 0).toLocaleString("tr-TR")}`;
+              return (
+                <div
+                  key={p.id}
+                  className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-surface-container-low border border-outline-variant/10 flex items-center justify-center">
+                      <Image
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        alt={p.name}
+                        src={p.image || "/premium-pekefe-kavanoz.png"}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                      />
+                      <div className="absolute top-3 left-3 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider font-bold z-10 shadow-sm">
+                        {tagLabel}
+                      </div>
+                    </div>
+                    <Link href={`/urun/${p.id}`} className="block">
+                      <h4 className="font-display-lg text-primary text-base font-bold mb-1 hover:underline transition-colors line-clamp-1">
+                        {p.name}
+                      </h4>
+                    </Link>
+                    <p className="text-on-surface-variant text-xs mb-4 font-mono line-clamp-1">
+                      {p.meta || p.desc || "Asırlık İspir Kalitesi"}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-outline-variant/10">
+                    <span className="font-bold text-lg text-primary font-mono">{formattedPrice}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const itemToAdd = {
+                          id: p.id,
+                          productId: p.id,
+                          name: p.name,
+                          price: Number(p.price || 0),
+                          sku: p.sku || p.id,
+                          image: p.image,
+                          quantity: 1,
+                        };
+                        addToCart(itemToAdd);
+                        setToast({
+                          isOpen: true,
+                          message: `${p.name} sepete eklendi!`,
+                          type: "success",
+                        });
+                      }}
+                      aria-label={`${p.name} sepete ekle`}
+                      className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center"
+                    >
+                      <span className="material-symbols-outlined text-sm">shopping_cart</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {/* Product 3: Doğal Dağ Çayı */}
-          <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 transition-all duration-300 hover:-translate-y-1 group">
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-surface p-4 flex items-center justify-center">
-              <Image
-                className="object-contain transition-transform duration-500 group-hover:scale-105"
-                alt="İspir Dağ Çayı Harmanı"
-                src="/ispir-pestil-kurutma-gercek.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-              <div className="absolute top-3 left-3 bg-secondary text-white font-label-sm text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider font-bold z-10">
-                Köme Eşleşmesi
-              </div>
-            </div>
-            <h4 className="font-display-lg text-primary text-base font-bold mb-1 group-hover:text-primary transition-colors">
-              İspir Yayla Kekik & Dağ Çayı
-            </h4>
-            <p className="text-on-surface-variant text-xs mb-4 font-mono">150g · Pamuk Kese</p>
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-lg text-primary font-mono">₺120</span>
-              <button aria-label="İspir Yayla Kekik ve Dağ Çayı sepete ekle" className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">shopping_cart</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
       <Toast
         isOpen={toast.isOpen}
         message={toast.message}

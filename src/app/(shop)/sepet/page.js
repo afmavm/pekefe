@@ -5,9 +5,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
 import { getCart, updateCartQty, removeFromCart } from "@/utils/cartStorage";
+import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 
 export default function Sepet() {
   const [cartItems, setCartItems] = useState([]);
+  const [settings, setSettings] = useState(getSettings());
+
+  useEffect(() => {
+    setSettings(getSettings());
+    fetchLiveSettings().then((live) => {
+      if (live) setSettings(live);
+    });
+    const handleSettingsChange = () => {
+      setSettings(getSettings());
+    };
+    window.addEventListener("pekefe_settings_changed", handleSettingsChange);
+    return () => {
+      window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
+    };
+  }, []);
 
   useEffect(() => {
     setCartItems(getCart());
@@ -223,10 +239,10 @@ export default function Sepet() {
               <p className="font-label-sm text-on-surface-variant mb-2">Yardıma mı ihtiyacınız var?</p>
               <a
                 className="text-primary font-bold hover:underline flex items-center justify-center gap-2"
-                href="tel:08505550000"
+                href={`tel:${(settings?.phone || DEFAULT_SETTINGS.phone).replace(/[^0-9+]/g, "")}`}
               >
                 <span className="material-symbols-outlined text-sm">phone</span>
-                0850 555 00 00
+                {settings?.phone || DEFAULT_SETTINGS.phone}
               </a>
             </div>
           </div>

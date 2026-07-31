@@ -10,7 +10,7 @@ const base = (content: string) => `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pekefe Traditional Excellence</title>
+<title>Pekefe Geleneksel Lezzetler</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #333; }
@@ -44,7 +44,7 @@ const base = (content: string) => `<!DOCTYPE html>
   </div>
   <div class="body">${content}</div>
   <div class="footer">
-    <p>&copy; 2026 Pekefe Traditional Excellence. Tüm Hakları Saklıdır.</p>
+    <p>&copy; 2026 Pekefe Geleneksel Lezzetler. Tüm Hakları Saklıdır.</p>
     <p>Bu e-posta {{recipientEmail}} adresine gönderilmiştir.</p>
     <p><a href="mailto:info@pekefe.com">info@pekefe.com</a> | <a href="http://localhost:3000">www.pekefe.com</a></p>
   </div>

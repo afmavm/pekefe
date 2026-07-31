@@ -262,7 +262,7 @@ export default function Giris() {
 
         {/* Footer */}
         <footer className="mt-auto w-full max-w-[420px] border-t border-gray-100 py-5 flex justify-between items-center text-xs text-gray-400">
-          <span>© 2026 Pekefe Traditional Excellence</span>
+          <span>© 2026 Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</span>
           <div className="flex gap-4">
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/sss">Destek</Link>
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/gizlilik">Gizlilik</Link>

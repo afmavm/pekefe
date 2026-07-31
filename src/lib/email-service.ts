@@ -76,7 +76,7 @@ export const emailService = {
         takip_linki: "https://yurticikargo.com/query?no=YK1234567890"
       },
       reconciliation_request: {
-        cari_unvan: "PEKEFE TRADITIONAL EXCELLENCE LTD. ŞTİ.",
+        cari_unvan: "Pekefe Geleneksel Gıda Ürünleri Ltd. Şti.",
         bakiye: "45,670.00 ₺ (Alacaklı)",
         vade_tarihi: "30.06.2026",
         onay_linki: "http://localhost:3000/b2b"

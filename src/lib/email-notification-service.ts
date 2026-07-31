@@ -91,7 +91,7 @@ export class EmailNotificationService {
               <p style="color: #64748b; font-size: 13px; line-height: 1.5;">Sorularınız için bu e-postaya yanıt verebilir veya info@pekefe.com adresimizden bize ulaşabilirsiniz.</p>
             </div>
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</p>
             </div>
           </div>
         `
@@ -245,7 +245,7 @@ export class EmailNotificationService {
             </div>
             <!-- Footer -->
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</p>
             </div>
           </div>
         `
@@ -297,7 +297,7 @@ export class EmailNotificationService {
             </div>
             <!-- Footer -->
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</p>
             </div>
           </div>
         `
@@ -328,7 +328,7 @@ export class EmailNotificationService {
               <p style="color: #64748b; font-size: 13px; line-height: 1.5; text-align: center;">Sorularınız veya istekleriniz için bu e-postaya yanıt verebilir veya info@pekefe.com adresimizden bize ulaşabilirsiniz.</p>
             </div>
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</p>
             </div>
           </div>
         `
@@ -353,7 +353,7 @@ export class EmailNotificationService {
               <p style="color: #64748b; font-size: 13px; line-height: 1.5;">Bu talebi siz yapmadıysanız bu e-postayı güvenle göz ardı edebilirsiniz.</p>
             </div>
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
             </div>
           </div>
         `
@@ -398,7 +398,7 @@ export class EmailNotificationService {
                   </tr>
                   <tr>
                     <td style="background-color:#fcf8f6;padding:16px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
+                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
                     </td>
                   </tr>
                 </table>
@@ -437,7 +437,7 @@ export class EmailNotificationService {
                   </tr>
                   <tr>
                     <td style="background-color:#fcf8f6;padding:16px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
+                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
                     </td>
                   </tr>
                 </table>

@@ -32,7 +32,7 @@ export const sendOrderConfirmationEmail = async (to: string, orderId: string, na
         </div>
         <p style="color: #374151; font-size: 16px;">Ödenen Tutar: <strong style="color: #15803d;">${total.toLocaleString('tr-TR')} ₺</strong></p>
         <hr style="border-color: #f1f5f9; margin: 24px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Bu e-posta otomatik olarak oluşturulmuştur. © ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Bu e-posta otomatik olarak oluşturulmuştur. © ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
       </div>
     `;
 

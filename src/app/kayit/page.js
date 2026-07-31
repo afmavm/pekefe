@@ -377,7 +377,7 @@ export default function Kayit() {
 
         {/* Footer */}
         <footer className="mt-auto w-full max-w-[400px] border-t border-gray-100 py-5 flex justify-between items-center text-xs text-gray-400">
-          <span>© 2026 Pekefe Traditional Excellence</span>
+          <span>© 2026 Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</span>
           <div className="flex gap-4">
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/sss">Destek</Link>
             <button type="button" onClick={() => setActiveModal("privacy")} className="hover:text-[#6b1d2f] transition-colors cursor-pointer">Gizlilik</button>

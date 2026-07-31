@@ -45,6 +45,73 @@ const CheckoutSchema = z.object({
   }).optional()
 });
 
+async function findProductForCartItem(dbClient: any, item: any) {
+  if (!item) return null;
+
+  const candidateIds: string[] = [];
+  const candidateSkus: string[] = [];
+
+  // 1. Explicit productId
+  if (item.productId && typeof item.productId === "string" && item.productId.trim()) {
+    candidateIds.push(item.productId.trim());
+  }
+
+  // 2. Exact item.id
+  if (item.id && typeof item.id === "string" && item.id.trim()) {
+    const rawId = item.id.trim();
+    candidateIds.push(rawId);
+
+    // 3. Prefix before underscore if item.id is formatted like "productId_variantId"
+    if (rawId.includes("_")) {
+      const prefix = rawId.split("_")[0];
+      if (prefix && prefix.trim()) {
+        candidateIds.push(prefix.trim());
+      }
+    }
+  }
+
+  // 4. Explicit item.sku
+  if (item.sku && typeof item.sku === "string" && item.sku.trim()) {
+    candidateSkus.push(item.sku.trim());
+  }
+
+  // Query 1: Match by ID or SKU candidates
+  if (candidateIds.length > 0 || candidateSkus.length > 0) {
+    let product = await dbClient.product.findFirst({
+      where: {
+        OR: [
+          ...candidateIds.map((id) => ({ id })),
+          ...candidateSkus.map((sku) => ({ sku })),
+        ],
+      },
+    });
+
+    if (product) return product;
+  }
+
+  // Query 2: Fallback by Product Name
+  if (item.name && typeof item.name === "string" && item.name.trim()) {
+    const rawName = item.name.trim();
+    // Clean name: strip parenthetical variant labels like "(500 Gr)" or "(1 Kg)"
+    const cleanName = rawName.replace(/\s*\([^)]*\)/gi, "").trim();
+
+    if (cleanName) {
+      let product = await dbClient.product.findFirst({
+        where: {
+          OR: [
+            { name: { equals: cleanName } },
+            { name: { equals: rawName } },
+            { name: { contains: cleanName } },
+          ],
+        },
+      });
+      if (product) return product;
+    }
+  }
+
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, "checkoutLimit");
   if (rateLimitResponse) return rateLimitResponse;
@@ -152,14 +219,7 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     for (const item of cart) {
-      const product = await prisma.product.findFirst({
-        where: { 
-          OR: [
-            { id: String(item.id) },
-            { sku: item.sku || "" }
-          ]
-        }
-      });
+      const product = await findProductForCartItem(prisma, item);
 
       if (!product) {
         return NextResponse.json({ 
@@ -376,14 +436,7 @@ export async function POST(request: NextRequest) {
 
       // Stok güncelleme ve Optimistic Locking
       for (const item of cart) {
-        const product = await tx.product.findFirst({
-          where: { 
-            OR: [
-              { id: String(item.id) },
-              { sku: item.sku || "" }
-            ]
-          }
-        });
+        const product = await findProductForCartItem(tx, item);
 
         if (product) {
           if (product.stock < Number(item.quantity)) {

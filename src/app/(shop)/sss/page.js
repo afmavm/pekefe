@@ -1,7 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
+
+export default function SSS() {
+  const [settings, setSettings] = useState(getSettings());
+
+  useEffect(() => {
+    setSettings(getSettings());
+    fetchLiveSettings().then((live) => {
+      if (live) setSettings(live);
+    });
+
+    const handleSettingsChange = () => {
+      setSettings(getSettings());
+    };
+    window.addEventListener("pekefe_settings_changed", handleSettingsChange);
+    return () => {
+      window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
+    };
+  }, []);
 
 const faqData = [
   {
@@ -276,14 +295,14 @@ export default function Sss() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 className="px-8 py-4 bg-secondary text-white font-label-md rounded-full hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 shadow-lg cursor-pointer"
-                href="mailto:destek@pekefe.com"
+                href={`mailto:${settings.email}`}
               >
                 <span className="material-symbols-outlined">mail</span>
                 Bize Yazın
               </a>
               <a
                 className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/20 font-label-md rounded-full hover:bg-white/20 active:scale-95 transition-all duration-300 flex items-center gap-2 cursor-pointer"
-                href="tel:+904425110000"
+                href={`tel:${settings.phone.replace(/[^0-9+]/g, "")}`}
               >
                 <span className="material-symbols-outlined">call</span>
                 Hemen Arayın

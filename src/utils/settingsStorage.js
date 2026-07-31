@@ -6,6 +6,8 @@ export const DEFAULT_SETTINGS = {
   email: "info@pekefe.com",
   phone: "+90 (442) 511 00 00",
   address: "Atatürk Cad. No:42, İspir, Erzurum, Türkiye",
+  companyTitle: "Pekefe Geleneksel Gıda Ürünleri Ltd. Şti.",
+  shippingNote: "Pazartesi-Perşembe günleri saat 14:00'e kadar verilen siparişler aynı gün, diğer günlerdeki siparişler ise ürünlerin tazeliğini korumak amacıyla takip eden ilk iş günü kargoya teslim edilir.",
   mapsLink: "https://maps.google.com/?q=Atatürk+Caddesi+No:42+İspir+Erzurum+Türkiye",
   instagram: "https://instagram.com/pekefe",
   whatsapp: "https://wa.me/904425110000",
@@ -50,6 +52,8 @@ export async function fetchLiveSettings() {
           email: data.contactEmail || DEFAULT_SETTINGS.email,
           phone: data.contactPhone || DEFAULT_SETTINGS.phone,
           address: data.contactAddress || DEFAULT_SETTINGS.address,
+          companyTitle: data.siteName ? `${data.siteName} Ltd. Şti.` : DEFAULT_SETTINGS.companyTitle,
+          shippingNote: data.topBarText1 || DEFAULT_SETTINGS.shippingNote,
           mapsLink: data.mapCoordinates
             ? `https://maps.google.com/?q=${encodeURIComponent(data.mapCoordinates)}`
             : data.contactAddress

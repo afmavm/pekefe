@@ -1,8 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
 
 export default function TeslimatVeIade() {
+  const [settings, setSettings] = useState(getSettings());
+
+  useEffect(() => {
+    setSettings(getSettings());
+    fetchLiveSettings().then((live) => {
+      if (live) setSettings(live);
+    });
+
+    const handleSettingsChange = () => {
+      setSettings(getSettings());
+    };
+    window.addEventListener("pekefe_settings_changed", handleSettingsChange);
+    return () => {
+      window.removeEventListener("pekefe_settings_changed", handleSettingsChange);
+    };
+  }, []);
+
   return (
     <div className="w-full bg-background text-on-surface font-body-md antialiased pb-section-gap">
       <main className="max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-16">
@@ -28,9 +47,7 @@ export default function TeslimatVeIade() {
                 uygun olarak anlaşmalı kargo firmalarımız aracılığıyla gönderilir.
               </li>
               <li>
-                <strong>Gönderim Süresi:</strong> Pazartesi-Perşembe günleri saat 14:00'e kadar verilen
-                siparişler aynı gün, diğer günlerdeki siparişler ise ürünlerin tazeliğini korumak
-                amacıyla takip eden ilk iş günü kargoya teslim edilir.
+                <strong>Gönderim Süresi:</strong> {settings.shippingNote}
               </li>
               <li>
                 <strong>Paketleme:</strong> Ballarımız ve pekmezlerimiz kırılmayı önleyen hava kanallı
@@ -74,12 +91,12 @@ export default function TeslimatVeIade() {
               iletişime geçebilirsiniz:
             </p>
             <div className="flex flex-col sm:flex-row gap-4 font-semibold text-primary">
-              <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">mail</span> info@pekefe.com
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">phone</span> +90 (442) 511 00 00
-              </span>
+              <a href={`mailto:${settings.email}`} className="flex items-center gap-2 hover:underline">
+                <span className="material-symbols-outlined text-sm">mail</span> {settings.email}
+              </a>
+              <a href={`tel:${settings.phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:underline">
+                <span className="material-symbols-outlined text-sm">phone</span> {settings.phone}
+              </a>
             </div>
           </section>
         </article>

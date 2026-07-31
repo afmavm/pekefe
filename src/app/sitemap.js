@@ -3,9 +3,11 @@
  * Next.js App Router tarafından otomatik olarak /sitemap.xml endpoint'ine dönüştürülür.
  */
 
+import { prisma } from '@/lib/prisma';
+
 const BASE_URL = 'https://www.pekefe.com';
 
-const PRODUCT_SLUGS = [
+const FALLBACK_PRODUCT_SLUGS = [
   'dut-pekmezi',
   'karadut-pekmezi',
   'sade-pestil',
@@ -20,7 +22,7 @@ const BLOG_SLUGS = [
   'pekmezli-kurabiye',
 ];
 
-export default function sitemap() {
+export default async function sitemap() {
   const staticPages = [
     {
       url: BASE_URL,
@@ -120,12 +122,31 @@ export default function sitemap() {
     },
   ];
 
-  const productPages = PRODUCT_SLUGS.map((slug) => ({
+  let dbProductSlugs = [];
+  try {
+    const products = await prisma.product.findMany({
+      select: { sku: true, updatedAt: true }
+    });
+    if (products && products.length > 0) {
+      dbProductSlugs = products.map(p => ({
+        url: `${BASE_URL}/urun/${p.sku}`,
+        lastModified: p.updatedAt || new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      }));
+    }
+  } catch (e) {
+    console.error("Sitemap DB products error:", e);
+  }
+
+  const fallbackPages = FALLBACK_PRODUCT_SLUGS.map((slug) => ({
     url: `${BASE_URL}/urun/${slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.9,
   }));
+
+  const productPages = dbProductSlugs.length > 0 ? dbProductSlugs : fallbackPages;
 
   const blogPages = BLOG_SLUGS.map((slug) => ({
     url: `${BASE_URL}/blog/${slug}`,

@@ -39,46 +39,33 @@ export function ProductCard({
 
   const isB2B = session?.user?.role === "dealer" || session?.user?.customer_type === "B2B";
 
-  // Determine displayed price
+  const hasVariants = Array.isArray(variants) && variants.length > 0;
+  const [selectedVariant, setSelectedVariant] = useState(hasVariants ? variants[0] : null);
+
+  // Numeric computations
   const numericB2B = b2b_price ? Number(b2b_price) : null;
   const numericPrice = typeof price === "number" ? price : parseFloat(String(price || "0").replace(/[₺TL\s,]/gi, "")) || 0;
   const numericOld = oldPrice ? Number(oldPrice) : null;
 
-  const displayPrice = isB2B && numericB2B ? numericB2B : numericPrice;
-  const displayOld  = isB2B && numericB2B ? numericPrice : numericOld;
+  // Active Price Resolution
+  let activePrice = numericPrice;
+  let activeOldPrice = numericOld;
 
-  // Format helper
-  const fmt = (n) => `₺${Number(n).toLocaleString("tr-TR")}`;
-
-  // Price display string
-  let priceDisplay;
-  if (priceMin != null && priceMax != null && priceMin !== priceMax) {
-    // Multiple variants with different prices
-    if (isB2B && numericB2B) {
-      priceDisplay = <span className="text-xl font-display-lg text-amber-700 font-bold">{fmt(numericB2B)} <span className="text-xs font-normal text-slate-500">Bayi</span></span>;
-    } else {
-      priceDisplay = (
-        <span className="text-xl font-display-lg text-primary font-bold">
-          {fmt(priceMin)}<span className="text-sm font-normal text-on-surface-variant mx-1">-</span>{fmt(priceMax)}
-        </span>
-      );
+  if (selectedVariant) {
+    if (selectedVariant.price != null && Number(selectedVariant.price) > 0) {
+      activePrice = Number(selectedVariant.price);
     }
-  } else {
-    priceDisplay = (
-      <div className="flex items-baseline gap-2">
-        <span className="text-xl font-display-lg text-primary font-bold">{fmt(displayPrice)}</span>
-        {displayOld && displayOld > displayPrice && (
-          <span className="text-sm text-on-surface-variant line-through">{fmt(displayOld)}</span>
-        )}
-        {isB2B && numericB2B && (
-          <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Bayi</span>
-        )}
-      </div>
-    );
+    if (selectedVariant.oldPrice != null && Number(selectedVariant.oldPrice) > 0) {
+      activeOldPrice = Number(selectedVariant.oldPrice);
+    }
   }
 
-  // Variant badge row (show up to 3 variants)
-  const hasVariants = Array.isArray(variants) && variants.length > 0;
+  if (isB2B && numericB2B) {
+    activeOldPrice = activePrice;
+    activePrice = numericB2B;
+  }
+
+  const fmt = (n) => `₺${Number(n).toLocaleString("tr-TR")}`;
 
   const isOutOfStock = stock === 0;
 
@@ -114,7 +101,7 @@ export function ProductCard({
       </div>
 
       {/* Editorial Description Column */}
-      <div className="w-full md:w-1/2 space-y-3">
+      <div className="w-full md:w-1/2 space-y-4">
         <span className="text-[10px] text-on-surface-variant uppercase font-mono tracking-widest">{meta}</span>
         <h3 className="font-display-lg text-primary text-xl font-bold leading-snug">
           {name}
@@ -123,45 +110,74 @@ export function ProductCard({
           {desc}
         </p>
 
-        {/* Variant badges */}
+        {/* Interactive Variant Pills */}
         {hasVariants && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {variants.slice(0, 4).map((v, i) => {
-              const label = getVariantLabel(v);
-              const vPrice = v.price ? Number(v.price) : null;
-              return (
-                <span key={v.id || i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-outline-variant/30 bg-surface-container-low text-[11px] font-semibold text-primary">
-                  {label}
-                  {vPrice ? <span className="text-secondary font-bold">₺{vPrice.toLocaleString("tr-TR")}</span> : null}
-                </span>
-              );
-            })}
-            {variants.length > 4 && (
-              <span className="text-[10px] text-on-surface-variant self-center">+{variants.length - 4} seçenek</span>
-            )}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Seçenek:</span>
+            <div className="flex flex-wrap gap-2">
+              {variants.map((v, i) => {
+                const label = getVariantLabel(v);
+                const vPrice = v.price ? Number(v.price) : null;
+                const isSelected = selectedVariant?.id === v.id || (selectedVariant && getVariantLabel(selectedVariant) === label);
+                return (
+                  <button
+                    key={v.id || i}
+                    type="button"
+                    onClick={() => setSelectedVariant(v)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer border ${
+                      isSelected
+                        ? "border-primary bg-primary text-white font-bold shadow-md scale-105"
+                        : "border-outline-variant/30 bg-surface-container-low text-on-surface hover:border-primary/50 font-medium"
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {vPrice ? (
+                      <span className={`font-bold ${isSelected ? "text-amber-300" : "text-secondary"}`}>
+                        ₺{vPrice.toLocaleString("tr-TR")}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2">
-          {priceDisplay}
+        {/* Clean Luxury Price Display */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-outline-variant/15">
+          <div className="flex items-baseline gap-2 whitespace-nowrap">
+            <span className="text-2xl md:text-3xl font-display-lg text-primary font-extrabold tracking-tight">
+              {fmt(activePrice)}
+            </span>
+            {activeOldPrice && activeOldPrice > activePrice && (
+              <span className="text-sm text-on-surface-variant/70 line-through font-medium">
+                {fmt(activeOldPrice)}
+              </span>
+            )}
+            {isB2B && numericB2B && (
+              <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Bayi</span>
+            )}
+          </div>
+
           <div className="flex items-center gap-3">
             {onAddToCart && !isOutOfStock && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddToCart();
+                  onAddToCart(selectedVariant);
                 }}
-                className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center"
+                className="bg-primary text-white hover:bg-primary/90 px-4 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-2 shadow-sm font-label-md text-xs font-bold uppercase tracking-wider"
                 aria-label={`${name} sepete ekle`}
               >
-                <span className="material-symbols-outlined text-sm">shopping_cart</span>
+                <span className="material-symbols-outlined text-base">shopping_cart</span>
+                <span>Sepete Ekle</span>
               </button>
             )}
             <Link
               href={`/urun/${id}`}
-              className="border border-secondary hover:bg-secondary hover:text-white text-secondary font-label-sm text-xs px-6 py-2.5 rounded-md tracking-wider uppercase transition-all"
+              className="border border-secondary hover:bg-secondary hover:text-white text-secondary font-label-sm text-xs px-5 py-2.5 rounded-lg tracking-wider uppercase transition-all font-bold"
             >
-              Detayları Gör
+              Detaylar
             </Link>
           </div>
         </div>

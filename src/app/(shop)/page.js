@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { addToCart } from "@/utils/cartStorage";
 
 export default function Home() {
   const [activeRecipe, setActiveRecipe] = useState("tahini");
@@ -592,8 +593,19 @@ export default function Home() {
               image={p.image}
               tag={p.tag}
               stock={p.stock}
-              onAddToCart={() => {
-                setToastMsg(`${p.name} sepete eklendi!`);
+              onAddToCart={(selectedVar) => {
+                const varLabel = selectedVar?.attributes?.size || selectedVar?.attributes?.name || selectedVar?.name || selectedVar?.size || "";
+                const itemToAdd = {
+                  id: selectedVar?.id || `${p.id}_var`,
+                  productId: p.id,
+                  name: varLabel ? `${p.name} (${varLabel})` : p.name,
+                  price: selectedVar?.price ? Number(selectedVar.price) : p.price,
+                  sku: selectedVar?.sku || p.sku || p.id,
+                  image: p.image,
+                  quantity: 1
+                };
+                addToCart(itemToAdd);
+                setToastMsg(`${itemToAdd.name} sepete eklendi!`);
                 setToastOpen(true);
               }}
               className={idx % 2 === 1 ? "md:translate-y-8" : ""}

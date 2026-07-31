@@ -50,6 +50,9 @@ export class EmailNotificationService {
           user: user,
           pass: pass,
         },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 20000,
         maxConnections: 5,
         maxMessages: 100,
         rateLimit: 10,
@@ -239,6 +242,58 @@ export class EmailNotificationService {
                 <a href="{{detay_linki}}" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 15px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.3);">Sipariş Durumumu Takip Et</a>
               </div>
               <p style="color: #64748b; font-size: 13px; line-height: 1.5; text-align: center;">Sorularınız için <a href="mailto:info@pekefe.com" style="color: #6b1d2f;">info@pekefe.com</a> adresinden bize ulaşabilirsiniz.</p>
+            </div>
+            <!-- Footer -->
+            <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
+            </div>
+          </div>
+        `
+      },
+      order_status_updated: {
+        name: "Sipariş Durum Güncellemesi",
+        subject: "Siparişinizin Durumu Güncellendi: {{siparis_durumu}} — Sipariş No: {{siparis_no}} 📦",
+        variables: "kullanici_adi,siparis_no,siparis_durumu,siparis_tutari,kargo_sirketi,takip_no,detay_linki,tarih",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); background-color: #ffffff;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 0.05em;">PEKEFE</h2>
+              <p style="color: #fef3c7; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.2em;">Sipariş Durum Güncellemesi</p>
+            </div>
+            <!-- Body -->
+            <div style="padding: 36px 32px;">
+              <h3 style="color: #1a0a10; margin-top: 0; font-size: 20px; font-weight: 700; text-align: center;">Siparişinizin Durumu Güncellendi</h3>
+              <p style="color: #475569; font-size: 15px; line-height: 1.7; margin-top: 24px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 15px; line-height: 1.7;"><strong>{{siparis_no}}</strong> numaralı siparişinizin yeni durumu: <strong style="color: #6b1d2f; font-size: 16px;">{{siparis_durumu}}</strong></p>
+
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; margin: 24px 0;">
+                <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #334155;">🚚 Güncel Sipariş & Kargo Bilgileri</p>
+                <table style="width: 100%; font-size: 14px; color: #1e293b; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 6px 0; font-weight: 600; color: #64748b; width: 45%;">Sipariş Numarası:</td>
+                    <td style="padding: 6px 0; font-family: monospace; font-weight: 800; color: #6b1d2f;">{{siparis_no}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-weight: 600; color: #64748b;">Yeni Durum:</td>
+                    <td style="padding: 6px 0; font-weight: 800; color: #15803d;">{{siparis_durumu}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-weight: 600; color: #64748b;">Kargo Şirketi:</td>
+                    <td style="padding: 6px 0; font-weight: 600;">{{kargo_sirketi}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; font-weight: 600; color: #64748b;">Kargo Takip No:</td>
+                    <td style="padding: 6px 0; font-family: monospace; font-weight: 700; color: #0369a1;">{{takip_no}}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- CTA Butonu -->
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="{{detay_linki}}" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 15px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.3);">Sipariş Detayını Görüntüle</a>
+              </div>
+              <p style="color: #64748b; font-size: 13px; line-height: 1.5; text-align: center;">Bizi tercih ettiğiniz için teşekkür ederiz. Sorularınız için <a href="mailto:info@pekefe.com" style="color: #6b1d2f;">info@pekefe.com</a> adresinden bize ulaşabilirsiniz.</p>
             </div>
             <!-- Footer -->
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">

@@ -217,7 +217,7 @@ export const POST = withAuth<any>(
           const targetId = currentAccountId || "CARI-001";
           const cariAccount = await prisma.currentAccount.findUnique({
             where: { id: targetId },
-            select: { phone: true, name: true }
+            select: { phone: true, name: true, email: true, address: true }
           });
 
           // 1. Müşteriye WhatsApp Bildirimi
@@ -276,6 +276,25 @@ export const POST = withAuth<any>(
               });
             } catch (adminMailErr) {
               console.error("Failed to queue admin order received email from quick order:", adminMailErr);
+            }
+          }
+
+          // Müşteri E-posta Gönderimi (Sipariş Onayı)
+          if (cariAccount?.email && cariAccount.email !== "guest@nexab2b.com") {
+            try {
+              await emailNotificationService.queueEmail(cariAccount.email, "order_received", {
+                kullanici_adi: cariAccount.name || "Değerli Müşterimiz",
+                siparis_no: result.id,
+                siparis_tutari: Number(amount).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                siparis_icerik: orderItemsText,
+                odeme_yontemi: method || "Belirtilmedi",
+                kargo_adresi: cariAccount.address || "Teslimat Adresi",
+                kargo_sirketi: "Standart Kargo",
+                tarih: localDateString,
+                detay_linki: `${hostUrl}/hesap`
+              });
+            } catch (custMailErr) {
+              console.error("Failed to queue customer order received email:", custMailErr);
             }
           }
 

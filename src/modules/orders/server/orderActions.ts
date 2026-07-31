@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { emailNotificationService } from "@/lib/email-notification-service";
 
 /**
  * Asserts that the current session belongs to a verified ADMIN or DEALER profile.
@@ -30,8 +31,42 @@ export async function updateOrderStatusAction(orderId: string, status: string) {
     await assertAuth();
     const updated = await prisma.order.update({
       where: { id: orderId },
-      data: { status }
+      data: { status },
+      include: { currentAccount: true }
     });
+
+    // Send Status Update Email to Customer
+    const recipientEmail = updated.currentAccount?.email;
+    if (recipientEmail && recipientEmail !== "guest@nexab2b.com") {
+      try {
+        let cargoCompany = "Belirtilmedi";
+        let trackingNo = "—";
+        if (updated.summary && updated.summary.startsWith("[")) {
+          const carrierMatch = updated.summary.match(/^\[([^\]|]+)(?:\s*\|\s*([^\]]+))?\]/);
+          if (carrierMatch) {
+            cargoCompany = carrierMatch[1].trim();
+            if (carrierMatch[2]) trackingNo = carrierMatch[2].trim();
+          }
+        }
+
+        const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
+        const orderDateStr = updated.date ? new Date(updated.date).toLocaleDateString("tr-TR") : new Date().toLocaleDateString("tr-TR");
+
+        await emailNotificationService.queueEmail(recipientEmail, "order_status_updated", {
+          kullanici_adi: updated.currentAccount?.name || "Değerli Müşterimiz",
+          siparis_no: updated.id,
+          siparis_durumu: status,
+          siparis_tutari: Number(updated.total).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
+          kargo_sirketi: cargoCompany,
+          takip_no: trackingNo,
+          tarih: orderDateStr,
+          detay_linki: `${hostUrl}/hesap`
+        });
+      } catch (mailErr) {
+        console.error("Order status notification email failed:", mailErr);
+      }
+    }
+
     return { success: true, order: updated };
   } catch (error: any) {
     console.error("Error in updateOrderStatusAction:", error);
@@ -51,6 +86,32 @@ export async function bulkUpdateOrderStatusAction(orderIds: string[], status: st
       },
       data: { status }
     });
+
+    // Send status update emails for bulk orders
+    if (Array.isArray(orderIds) && orderIds.length > 0) {
+      prisma.order.findMany({
+        where: { id: { in: orderIds } },
+        include: { currentAccount: true }
+      }).then(orders => {
+        orders.forEach(ord => {
+          const recipientEmail = ord.currentAccount?.email;
+          if (recipientEmail && recipientEmail !== "guest@nexab2b.com") {
+            const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
+            emailNotificationService.queueEmail(recipientEmail, "order_status_updated", {
+              kullanici_adi: ord.currentAccount?.name || "Değerli Müşterimiz",
+              siparis_no: ord.id,
+              siparis_durumu: status,
+              siparis_tutari: Number(ord.total).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
+              kargo_sirketi: "Standart Kargo",
+              takip_no: "—",
+              tarih: ord.date ? new Date(ord.date).toLocaleDateString("tr-TR") : new Date().toLocaleDateString("tr-TR"),
+              detay_linki: `${hostUrl}/hesap`
+            }).catch(e => console.error("Bulk status email error:", e));
+          }
+        });
+      }).catch(e => console.error("Error fetching bulk orders for status email:", e));
+    }
+
     return { success: true, count: result.count };
   } catch (error: any) {
     console.error("Error in bulkUpdateOrderStatusAction:", error);

@@ -64,13 +64,43 @@ export default function Blog() {
       ? articles
       : articles.filter((art) => art.category === selectedCategory);
 
-  const handleNewsletterSubmit = (e) => {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
-    setToast({
-      isOpen: true,
-      message: "Bültene başarıyla kaydoldunuz! En yeni tarifler e-postanıza gönderilecektir.",
-      type: "success",
-    });
+    if (!newsletterEmail) return;
+
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setToast({
+          isOpen: true,
+          message: data.error || "Abonelik oluşturulurken bir hata oluştu.",
+          type: "error",
+        });
+        return;
+      }
+
+      setToast({
+        isOpen: true,
+        message: "Bültene başarıyla kaydoldunuz! En yeni tarifler e-postanıza gönderilecektir.",
+        type: "success",
+      });
+      setNewsletterEmail("");
+    } catch (err) {
+      console.error("Newsletter error:", err);
+      setToast({
+        isOpen: true,
+        message: "Bağlantı hatası oluştu. Lütfen tekrar deneyin.",
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -313,7 +343,9 @@ export default function Blog() {
           </p>
           <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto flex gap-2">
             <input
-              className="flex-1 bg-white border border-outline-variant/30 rounded-lg px-6 py-4 focus:ring-1 focus:ring-primary outline-none transition-all"
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
+              className="flex-1 bg-white border border-outline-variant/30 rounded-lg px-6 py-4 focus:ring-1 focus:ring-primary outline-none transition-all text-slate-800"
               placeholder="E-posta adresiniz"
               type="email"
               required

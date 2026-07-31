@@ -372,16 +372,26 @@ export default function Hesap() {
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Sipariş Tarihi</p>
                             <p className="font-body-md font-semibold">
-                              {new Date(order.date || order.createdAt).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
+                              {order.formattedDate || (() => {
+                                const raw = order.date || order.createdAt;
+                                if (!raw) return "Tarih Belirtilmedi";
+                                const d = new Date(raw);
+                                if (!isNaN(d.getTime())) {
+                                  return d.toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' });
+                                }
+                                return String(raw).split(" ")[0] || String(raw);
+                              })()}
                             </p>
                           </div>
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Sipariş No</p>
-                            <p className="font-body-md font-semibold">#{order.orderNo || order.id.slice(-8).toUpperCase()}</p>
+                            <p className="font-body-md font-semibold">#{order.orderNumber || order.orderNo || (order.id ? order.id.slice(-8).toUpperCase() : "000000")}</p>
                           </div>
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Toplam</p>
-                            <p className="font-body-md font-bold text-primary font-mono">₺{Number(order.totalAmount || order.total || 0).toLocaleString("tr-TR")}</p>
+                            <p className="font-body-md font-bold text-primary font-mono">
+                              ₺{Number(order.totalAmount ?? order.total ?? order.amount ?? 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
                           </div>
                         </div>
                         {renderOrderStatusBadge(order.status)}

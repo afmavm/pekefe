@@ -70,6 +70,7 @@ export const GET = withAuth<any>(
 
         return {
           id: order.id,
+          orderNo: orderNumber,
           orderNumber,
           client: order.currentAccount?.name || "Bilinmeyen",
           address: order.currentAccount?.address || "Açık adres bulunmamaktadır",
@@ -81,10 +82,14 @@ export const GET = withAuth<any>(
             ? order.type
             : (order.currentAccount?.cariTipi === "CORPORATE" ? "B2B" : "B2C")) as "B2B" | "B2C",
           summary: order.summary || "",
+          total: Number(order.total),
+          totalAmount: Number(order.total),
           amount: Number(order.total),
           shippingFee: Number(order.shippingFee || 0),
           method: order.method || "Belirtilmedi",
-          date: order.date.toLocaleString('tr-TR'),
+          date: order.date ? new Date(order.date).toISOString() : new Date().toISOString(),
+          createdAt: order.date ? new Date(order.date).toISOString() : new Date().toISOString(),
+          formattedDate: order.date ? new Date(order.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : "",
           status: order.status,
           cargoCompany,
           trackingNo,

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { addToCart } from "@/utils/cartStorage";
 
 const initialProducts = [
   {
@@ -390,10 +391,29 @@ export default function Kategoriler() {
                       name={p.name}
                       desc={p.desc}
                       meta={p.meta}
-                      price={`${p.price} TL`}
+                      price={p.price}
+                      priceMin={p.priceMin}
+                      priceMax={p.priceMax}
+                      oldPrice={p.oldPrice}
+                      b2b_price={p.b2b_price}
+                      variants={p.variants || []}
                       image={p.image}
                       tag={p.tag}
-                      onAddToCart={() => handleAddToCart(p.name)}
+                      stock={p.stock}
+                      onAddToCart={(selectedVar) => {
+                        const varLabel = selectedVar?.attributes?.size || selectedVar?.attributes?.name || selectedVar?.name || selectedVar?.size || "";
+                        const itemToAdd = {
+                          id: selectedVar?.id || `${p.id}_var`,
+                          productId: p.id,
+                          name: varLabel ? `${p.name} (${varLabel})` : p.name,
+                          price: selectedVar?.price ? Number(selectedVar.price) : p.price,
+                          sku: selectedVar?.sku || p.sku || p.id,
+                          image: p.image,
+                          quantity: 1
+                        };
+                        addToCart(itemToAdd);
+                        handleAddToCart(itemToAdd.name);
+                      }}
                       className={idx % 2 === 1 ? "lg:flex-row-reverse" : ""}
                     />
                   </div>

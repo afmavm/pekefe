@@ -11,6 +11,22 @@ export const tenantStorage = new AsyncLocalStorage<TenantContext>();
 
 const globalForPrisma = global as unknown as { prisma: any };
 
+// Helper to execute out-of-band basePrisma queries safely without deadlocking active transactions in SQLite
+const safeBaseQuery = async <T>(queryPromise: Promise<T>, timeoutMs = 250): Promise<T | null> => {
+  let timeoutId: NodeJS.Timeout;
+  const timeoutPromise = new Promise<null>((resolve) => {
+    timeoutId = setTimeout(() => resolve(null), timeoutMs);
+  });
+  try {
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    clearTimeout(timeoutId!);
+    return result;
+  } catch {
+    clearTimeout(timeoutId!);
+    return null;
+  }
+};
+
 const createPrismaClient = () => {
   let dbUrl = process.env.DATABASE_URL || "file:./dev.db";
   
@@ -84,14 +100,16 @@ const createPrismaClient = () => {
               if (["update", "delete"].includes(operation)) {
                 if (anyArgs.where) {
                   const dbModelName = model.charAt(0).toLowerCase() + model.slice(1);
-                  const record = await (basePrisma as any)[dbModelName].findFirst({
-                    where: {
-                      ...anyArgs.where,
-                      companyId: companyId
-                    },
-                    select: { id: true }
-                  });
-                  if (!record) {
+                  const record = await safeBaseQuery(
+                    (basePrisma as any)[dbModelName].findFirst({
+                      where: {
+                        ...anyArgs.where,
+                        companyId: companyId
+                      },
+                      select: { id: true }
+                    })
+                  );
+                  if (tenant && !record) {
                     throw new Error(`Record to ${operation} not found in model ${model} or unauthorized access.`);
                   }
                 }
@@ -132,18 +150,22 @@ const createPrismaClient = () => {
             let oldData: any = null;
             let recordId = "";
 
-            // Güncelleme veya silme öncesi eski veriyi çekiyoruz
+            // Güncelleme veya silme öncesi eski veriyi çekiyoruz (safeBaseQuery ile deadlock engellenir)
             if (operation === "update" || operation === "delete") {
               action = operation === "update" ? "UPDATE" : "DELETE";
               try {
                 const anyArgs = args as any;
                 if (anyArgs.where) {
                   const dbName = model.charAt(0).toLowerCase() + model.slice(1);
-                  oldData = await (basePrisma as any)[dbName].findUnique({
-                    where: anyArgs.where,
-                  });
+                  oldData = await safeBaseQuery(
+                    (basePrisma as any)[dbName].findUnique({
+                      where: anyArgs.where,
+                    })
+                  );
                   if (oldData) {
                     recordId = oldData.id || "";
+                  } else if (anyArgs.where.id) {
+                    recordId = String(anyArgs.where.id);
                   }
                 }
               } catch (e) {

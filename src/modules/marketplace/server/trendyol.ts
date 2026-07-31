@@ -105,7 +105,7 @@ export class TrendyolService {
           totalPrice: 420.00, 
           customerFirstName: "Can", 
           customerLastName: "Demir", 
-          lines: [{ sku: "ATAK-ELBISE-01", quantity: 2, productName: "Tam Koruma Arıcı Elbisesi" }] 
+          lines: [{ sku: "PEKEFE-ELBISE-01", quantity: 2, productName: "Tam Koruma Arıcı Elbisesi" }] 
         }
       ];
 
@@ -210,7 +210,7 @@ export class HepsiburadaService {
       const currentAccountId = await ensureCurrentAccount();
 
       const mockHBOrders = [
-        { id: "HB-99341", total: 650, items: "Atak Pro Paslanmaz Arı Körüğü", sku: "ATAK-KORUK-01", quantity: 1 }
+        { id: "HB-99341", total: 650, items: "Pekefe Pro Paslanmaz Arı Körüğü", sku: "PEKEFE-KORUK-01", quantity: 1 }
       ];
 
       let newCount = 0;
@@ -331,7 +331,7 @@ export class XmlSupplierService {
       await logActivity(integrationId, "XML verisi indiriliyor ve parse ediliyor...", "info");
       
       const newProductsMock = [
-        { name: "Premium Arıcı Maskesi", sku: "ATAK-MASKE-01", price: 1200, stock: 40 }
+        { name: "Premium Arıcı Maskesi", sku: "PEKEFE-MASKE-01", price: 1200, stock: 40 }
       ];
 
       for (const item of newProductsMock) {
@@ -341,7 +341,7 @@ export class XmlSupplierService {
             data: {
               name: item.name,
               sku: item.sku,
-              category: "Arıcılık",
+              category: "geleneksel lezzetler",
               price: item.price,
               cost: item.price * 0.75,
               stock: item.stock,

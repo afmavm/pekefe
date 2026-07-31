@@ -858,7 +858,7 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-bold text-slate-700 flex items-center gap-2">
               <Clock className="w-4 h-4 text-orange-500" />
-              Canlı Webhook Sipariş Akışı (atakaricilik.com)
+              Canlı Webhook Sipariş Akışı (pekefe.com)
             </h2>
             <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-100 text-[9px] font-black uppercase tracking-wider">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />

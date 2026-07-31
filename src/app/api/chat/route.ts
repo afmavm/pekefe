@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const userRole = (session?.user as any)?.role || "GUEST";
     const userEmail = session?.user?.email || undefined;
 
-    // Gemini AI destekli Atak Destek servisine yönlendir
+    // Gemini AI destekli Pekefe Destek servisine yönlendir
     const reply = await queryGeminiSupport(message, userRole, userEmail);
 
     return NextResponse.json({ reply });

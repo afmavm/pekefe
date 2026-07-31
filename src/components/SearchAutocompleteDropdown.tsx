@@ -90,7 +90,7 @@ export default function SearchAutocompleteDropdown({
           {results.map((p) => {
             const imageUrl =
               resolveProductImage(p.image, p.images) ||
-              "https://placehold.co/100x100?text=Atak";
+              "https://placehold.co/100x100?text=Pekefe";
             return (
               <Link
                 key={p.id}

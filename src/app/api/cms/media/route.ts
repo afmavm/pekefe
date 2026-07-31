@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Seed default items if the media table is empty
     if (items.length === 0) {
       const defaultItems = [
-        { name: "logo_dark.webp", url: "/uploads/logo_dark.png", size: "45 KB", tag: "logo", alt: "Atak Arıcılık Kurumsal Logosu" },
+        { name: "logo_dark.webp", url: "/uploads/logo_dark.png", size: "45 KB", tag: "logo", alt: "PEKEFE Geleneksel & Doğal Lezzetler Kurumsal Logosu" },
         { name: "banner_honey.webp", url: "/uploads/banner_honey.jpg", size: "380 KB", tag: "banner", alt: "Arı Kovanı ve Bal Süzme Slayt Görseli" },
         { name: "hive_wood.webp", url: "/uploads/hive_wood.png", size: "120 KB", tag: "product", alt: "304 Kalite Paslanmaz Krom Arı Kovanı" },
         { name: "comb_wax.webp", url: "/uploads/comb_wax.png", size: "85 KB", tag: "product", alt: "Doğal Petek Mum Kalıbı Görseli" },

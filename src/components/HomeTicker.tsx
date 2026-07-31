@@ -35,16 +35,16 @@ export default function HomeTicker() {
       `}</style>
       <div className="ticker-container flex">
         <div className="ticker-span">
-          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> Atak Arıcılık
+          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> PEKEFE Geleneksel & Doğal Lezzetler
         </div>
         <div className="ticker-span">
-          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> Atak Arıcılık
+          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> PEKEFE Geleneksel & Doğal Lezzetler
         </div>
         <div className="ticker-span">
-          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> Atak Arıcılık
+          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> PEKEFE Geleneksel & Doğal Lezzetler
         </div>
         <div className="ticker-span">
-          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> Atak Arıcılık
+          Arı Körüğü <span className="ticker-dot">•</span> Arıcı Elbisesi <span className="ticker-dot">•</span> Kovan Bakım Seti <span className="ticker-dot">•</span> Yerli İmalat <span className="ticker-dot">•</span> Hızlı Kargo <span className="ticker-dot">•</span> PEKEFE Geleneksel & Doğal Lezzetler
         </div>
       </div>
     </div>

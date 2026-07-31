@@ -120,12 +120,12 @@ export interface ProductionOrder {
 const initialWarehouses: Warehouse[] = [
   { id: "WH-01", name: "Erzurum Merkez Depo", type: "Merkez Depo", address: "Gürcükapı Mah. Sanayi Cad. No: 124, Yakutiye/Erzurum" },
   { id: "WH-02", name: "İstanbul Bayi Depo (Ataşehir)", type: "Şube", address: "Ataşehir, İstanbul" },
-  { id: "WH-03", name: "Atak Sanal Depo", type: "Sanal" },
+  { id: "WH-03", name: "Pekefe Sanal Depo", type: "Sanal" },
 ];
 
 const initialProducts: Product[] = [
   { 
-    id: 1, name: "Atak Pro Paslanmaz Arı Körüğü", sku: "ATAK-KORUK-01", category: "Arıcılık", subCategory: "Körük", stock: 150, criticalLimit: 20, price: 850, cost: 300, 
+    id: 1, name: "Pekefe Pro Paslanmaz Arı Körüğü", sku: "PEKEFE-KORUK-01", category: "geleneksel lezzetler", subCategory: "Körük", stock: 150, criticalLimit: 20, price: 850, cost: 300, 
     image: "/uploads/beekeeping_bellows_premium.png",
     desc: "Asırlık Erzurum kalitesi, patentli çift hava kanalı sayesinde hiç sönmeyen 304 paslanmaz arı körüğü.",
     attributes: { 
@@ -144,7 +144,7 @@ const initialProducts: Product[] = [
       specsWeight: "950 Gram (Ekipmansız boş ağırlık)",
       specsDimensions: "28 cm Yükseklik x 10 cm Silindir Çapı",
       specsBellows: "Hakiki Sığır Derisi & Isıl İşlem Görmüş Ahşap Plaka",
-      longDescExtra: "ATAK profesyonel körük serisi, arıcılarımızın konforlu ve güvenli bir arılık yönetimi yapabilmesi için tasarlanmıştır. Gövdede yer alan çelik tel ızgara, körükten çıkan havanın duman odasına kesintisiz iletilmesini sağlarken yanmayı hızlandırır. Koruyucu tel örgü kalkanı, çalışma esnasında gövde ısısının doğrudan elinizle temas etmesini engelleyerek iş kazalarının önüne geçer. Ergonomik tasarımı, uzun süreli kullanımlarda bile bilek yorgunluğuna yol açmaz.",
+      longDescExtra: "PEKEFE profesyonel körük serisi, arıcılarımızın konforlu ve güvenli bir arılık yönetimi yapabilmesi için tasarlanmıştır. Gövdede yer alan çelik tel ızgara, körükten çıkan havanın duman odasına kesintisiz iletilmesini sağlarken yanmayı hızlandırır. Koruyucu tel örgü kalkanı, çalışma esnasında gövde ısısının doğrudan elinizle temas etmesini engelleyerek iş kazalarının önüne geçer. Ergonomik tasarımı, uzun süreli kullanımlarda bile bilek yorgunluğuna yol açmaz.",
       usageGuide: "Körüğün tabanındaki havalandırma sacının altına kuru ot, talaş veya hafif nemlendirilmiş duman kartonunu yerleştirin.\nKutuyu hafifçe ateşleyin ve dumanın kor halinde alev almasını sağlayın.\nİlk kor oluştuktan sonra duman odasının geri kalanını talaş, çam iğnesi veya kuru otla doldurun.\nKörüğü arkasındaki ahşap tabladan ritmik bir şekilde pompalayarak dumanın yoğunlaşmasını sağlayın.\nDuman çıkışı stabil bir hale geldikten sonra kapağı kilitleyin. İşlem bitiminde körüğü asma halkasından dikey bir şekilde muhafaza edin.",
       warrantyInfo: "Tüm metal parçalar, korozyon ve paslanmaya karşı 2 Yıl Üretici Garantisi altındadır.\nKörük derisinin aşınması veya ahşap parçanın su teması sebebiyle deforme olması garanti kapsamı dışındadır, ancak teknik servisimizden yedek körük temin edilebilir.\nKullanım kılavuzundaki yönergelere uygun olmayan aşırı yakıt doldurma kaynaklı metal eğrilmeleri garanti kapsamında değerlendirilmez."
     },
@@ -157,7 +157,7 @@ const initialProducts: Product[] = [
     ]
   },
   { 
-    id: 2, name: "Tam Koruma Arıcı Elbisesi", sku: "ATAK-ELBISE-01", category: "Arıcılık", subCategory: "Elbise", stock: 80, criticalLimit: 10, price: 1200, cost: 500, 
+    id: 2, name: "Tam Koruma Arıcı Elbisesi", sku: "PEKEFE-ELBISE-01", category: "geleneksel lezzetler", subCategory: "Elbise", stock: 80, criticalLimit: 10, price: 1200, cost: 500, 
     image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800",
     desc: "3 katmanlı, nefes alabilir, arı sokmalarına karşı %100 güvenli profesyonel elbise.",
     attributes: { "Beden": "L/XL", "Katman Sayısı": "3 Katmanlı" },
@@ -166,7 +166,7 @@ const initialProducts: Product[] = [
     recipe: []
   },
   { 
-    id: 3, name: "Kovan Bakım Seti", sku: "ATAK-SET-01", category: "Arıcılık", subCategory: "Set", stock: 120, criticalLimit: 15, price: 650, cost: 250, 
+    id: 3, name: "Kovan Bakım Seti", sku: "PEKEFE-SET-01", category: "geleneksel lezzetler", subCategory: "Set", stock: 120, criticalLimit: 15, price: 650, cost: 250, 
     image: "https://images.unsplash.com/photo-1587049016823-69ef9d5045ac?q=80&w=800",
     desc: "8 parça paslanmaz çelik aletler ve özel taşıma çantası içeren profesyonel kovan bakım seti.",
     attributes: { "Parça Sayısı": "8 Parça", "Çanta": "Dahil" },
@@ -175,7 +175,7 @@ const initialProducts: Product[] = [
     recipe: []
   },
   {
-    id: 4, name: "Profesyonel Galvaniz Arıcı Körüğü", sku: "KORUK-GALV-01", category: "Arıcılık Ekipmanları", subCategory: "Körük", stock: 10, criticalLimit: 5, price: 350, oldPrice: 455, isCampaignActive: true, cost: 85,
+    id: 4, name: "Profesyonel Galvaniz Arıcı Körüğü", sku: "KORUK-GALV-01", category: "yöresel ürünler", subCategory: "Körük", stock: 10, criticalLimit: 5, price: 350, oldPrice: 455, isCampaignActive: true, cost: 85,
     image: "https://images.unsplash.com/photo-1587049016823-69ef9d5045ac?q=80&w=800",
     desc: "Korozyona dayanıklı galvaniz kaplama, dayanıklı deri körük ve optimum hava üfleme kapasitesi sunan profesyonel arıcı körüğü.",
     attributes: { unit: "adet" },
@@ -188,7 +188,7 @@ const initialProducts: Product[] = [
   { id: 103, name: "Doğal Deri Bağlama İpi", sku: "RAW-IP-01", category: "Hammadde", stock: 1000, criticalLimit: 100, price: 0, cost: 20, image: "https://placehold.co/100?text=Ip", isRawMaterial: true, attributes: {}, variants: [] },
 ];
 
-const initialCategories = ["Arıcılık", "Tekstil", "Elektronik", "Hammadde"];
+const initialCategories = ["geleneksel lezzetler", "Tekstil", "Elektronik", "Hammadde"];
 
 interface ProductContextType {
   products: Product[];
@@ -230,7 +230,7 @@ const initialCategoryDetails: CategoryDetail[] = [
   },
   { 
     id: "CAT-BEE", 
-    name: "Arıcılık", 
+    name: "geleneksel lezzetler", 
     attributes: [
       { name: "Malzeme", type: "text", isRequired: true },
       { name: "Hava Kanalı", type: "text", isRequired: false }

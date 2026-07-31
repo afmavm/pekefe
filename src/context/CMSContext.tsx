@@ -80,7 +80,7 @@ interface CMSContextType {
 
 const defaultCMSData: CMSData = {
   heroTitle: "Arıcılığın Gücünü Hissedin.",
-  heroSubtitle: "Fabrikadan direkt, ATAK profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.",
+  heroSubtitle: "Fabrikadan direkt, PEKEFE profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.",
   buttonText: "Ürünleri Keşfet",
   announcement: "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!",
   announcement2: "🔥 %100 Yerli İmalat & 304 Paslanmaz Çelik Garantisi",
@@ -88,16 +88,16 @@ const defaultCMSData: CMSData = {
   topBarText1: "Türkiye'nin Her Yerine Güvenli Sevkiyat",
   topBarText2: "Yerli Üretim Paslanmaz Çelik",
   logoUrl: "/uploads/1779016776947-365377533-Logo.jpg",
-  siteName: "Atak Arıcılık",
+  siteName: "PEKEFE Geleneksel & Doğal Lezzetler",
   primaryColor: "#b45309",
   footerSlogan: "FABRİKADAN DİREKT",
-  siteDescription: "Türkiye'nin 1 Numaralı Profesyonel Arıcılık Ekipmanı Üreticisi. Aradığınız tüm ürünleri buradan inceleyebilir ve güvenle sipariş verebilirsiniz.",
+  siteDescription: "Türkiye'nin 1 Numaralı Profesyonel geleneksel lezzetler Ekipmanı Üreticisi. Aradığınız tüm ürünleri buradan inceleyebilir ve güvenle sipariş verebilirsiniz.",
   categoryTitle: "Ürün gruplarını hızlıca keşfedin.",
   categorySubtitle: "Aradığınız yüksek kaliteli ekipmanlar, tek tık uzağınızda.",
   appTitle: "iOS ve Android ile hızlı sipariş takibi.",
   appSubtitle: "Akıllı liste özelliği ile sürekli aldığınız ürünleri kaydedin, tek tıkla sipariş verin. Teslimatınızı adım adım izleyin.",
   contactPhone: "0544 149 48 51",
-  contactEmail: "info@atakaricilik.com",
+  contactEmail: "info@pekefe.com",
   socialInstagram: "",
   socialWhatsapp: "05441494851",
   socialFacebook: "",
@@ -115,7 +115,7 @@ const defaultCMSData: CMSData = {
       category: "İade ve Değişim",
       iconName: "RefreshCw",
       questions: [
-        { q: "İade şartlarınız nelerdir?", a: "Kullanılmamış arıcılık ekipmanlarında 14 gün koşulsuz iade hakkınız bulunmaktadır." }
+        { q: "İade şartlarınız nelerdir?", a: "Kullanılmamış yöresel ürünlernda 14 gün koşulsuz iade hakkınız bulunmaktadır." }
       ]
     }
   ],
@@ -169,7 +169,7 @@ const defaultCMSData: CMSData = {
   themeTemplates: `[
     {"id":"tmpl-1","name":"Global Header Deluxe","type":"header","isActive":true,"targetPage":"Tüm Sayfalar","lastUpdated":"2 saat önce"},
     {"id":"tmpl-2","name":"Global Footer Carbon","type":"footer","isActive":true,"targetPage":"Tüm Sayfalar","lastUpdated":"Dün"},
-    {"id":"tmpl-3","name":"Atak Detay Ürün Sayfası","type":"product_page","isActive":true,"targetPage":"Katalog Detay","lastUpdated":"3 gün önce"},
+    {"id":"tmpl-3","name":"Pekefe Detay Ürün Sayfası","type":"product_page","isActive":true,"targetPage":"Katalog Detay","lastUpdated":"3 gün önce"},
     {"id":"tmpl-4","name":"Modern Ürün Listeleme Grid","type":"product_loop","isActive":false,"targetPage":"Kategori Sayfaları","lastUpdated":"1 hafta önce"}
   ]`,
   contentAnywhereRules: `[
@@ -182,7 +182,7 @@ const defaultCMSData: CMSData = {
     {"id":"tmpl-6","name":"304 Paslanmaz Çelik & Yerli Üretim Rozeti","blocksCount":2,"category":"Layout","lastUpdated":"5 gün önce"},
     {"id":"tmpl-7","name":"Kargo Barem Tamamlama Widgetı","blocksCount":4,"category":"B2B Specific","lastUpdated":"2 hafta önce"}
   ]`,
-  popupConfig: `{"isActive":false,"title":"Bahar Kampanyası","description":"Tüm arıcılık ekipmanlarında geçerli %20 indirim fırsatını kaçırmayın!","imageUrl":"https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=800&q=80","buttonText":"Fırsatları İncele","buttonLink":"/products"}`,
+  popupConfig: `{"isActive":false,"title":"Bahar Kampanyası","description":"Tüm yöresel ürünlernda geçerli %20 indirim fırsatını kaçırmayın!","imageUrl":"https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=800&q=80","buttonText":"Fırsatları İncele","buttonLink":"/products"}`,
   mapCoordinates: ""
 };
 

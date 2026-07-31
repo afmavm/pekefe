@@ -20,7 +20,7 @@ export default function FinalCTA({ whatsappUrl }: FinalCTAProps) {
       <div className="absolute inset-0 z-0">
         <Image 
           src="/uploads/beekeeping_harvest_process.jpg" 
-          alt="ATAK Arıcılık Hasat Süreci" 
+          alt="PEKEFE Geleneksel & Doğal Lezzetler Hasat Süreci" 
           fill
           sizes="100vw"
           className="object-cover opacity-[0.95] dark:opacity-[0.82] transition-opacity duration-300"

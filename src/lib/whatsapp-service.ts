@@ -142,7 +142,7 @@ export class WhatsAppNotificationService {
     const cleanPhone = rawPhone.replace(/[^0-9+]/g, "");
     const adminPhone = cleanPhone.startsWith("+") ? cleanPhone : (cleanPhone.startsWith("0") ? `+90${cleanPhone.substring(1)}` : `+90${cleanPhone}`);
 
-    const host = order.hostUrl || getLiveEnv("NEXTAUTH_URL", "https://b2b.atakaricilik.com");
+    const host = order.hostUrl || getLiveEnv("NEXTAUTH_URL", "https://b2b.pekefe.com");
     const detayLink = `${host}/admin/orders/${order.orderId}`;
     const formattedAmount = order.siparisTutari.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const localDateStr = new Date().toLocaleDateString("tr-TR", {
@@ -165,7 +165,7 @@ export class WhatsAppNotificationService {
       `📅 *Tarih:* ${localDateStr}`,
       `────────────────────────`,
       `🔗 *Sipariş Detayı:* ${detayLink}`,
-      `\n_Atak Arıcılık B2B Otomatik Bildirim Sistemi_`
+      `\n_PEKEFE Geleneksel & Doğal Lezzetler B2B Otomatik Bildirim Sistemi_`
     ].join("\n");
 
     console.log(`[WhatsAppService] Yönetici sipariş bildirimi gönderiliyor. Alıcı: ${adminPhone}`);

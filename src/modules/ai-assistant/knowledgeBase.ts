@@ -7,10 +7,10 @@ export interface CorporateKnowledge {
 }
 
 export const ATAC_CORPORATE_KB: CorporateKnowledge = {
-  brandIdentity: `Atak Arıcılık, 2021 yılında Erzurum Palandöken OSB'de kurulan, premium ve patentli arıcı körüğü ile profesyonel arıcılık ekipmanları üreten Türk sanayi kuruluşudur.
+  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, 2021 yılında Erzurum Palandöken OSB'de kurulan, premium ve patentli arıcı körüğü ile profesyonel yöresel ürünler üreten Türk sanayi kuruluşudur.
 Fabrika adresi: Erzurum Organize Sanayi Bölgesi, Palandöken/Erzurum.
 İletişim: WhatsApp ve destek bilet sistemi üzerinden 09:00–18:00 saatleri arasında (Hafta içi) ulaşılabilir.
-Kuruluş felsefesi: "Fabrikadan Direkt" — Aracısız, en uygun fabrika fiyatı ile kaliteli arıcılık ekipmanı.`,
+Kuruluş felsefesi: "Fabrikadan Direkt" — Aracısız, en uygun fabrika fiyatı ile kaliteli geleneksel lezzetler ekipmanı.`,
 
   bellowsDetail: `[ÜRÜN DETAYI — PATENTLİ ARICI KÖRÜĞÜ]
 • Malzeme: 304 Kalite Paslanmaz Çelik (Inoks) gövde. Paslanma, erime ve yüksek ısıda deformasyon yapmaz.
@@ -69,7 +69,7 @@ export async function queryAiAssistant(message: string, role: string, userEmail?
     lowerMsg.includes("hava kanallı") ||
     lowerMsg.includes("körük neden sönmüyor")
   ) {
-    return "Atak Arıcılık tescilli çift hava kanallı tasarımımız sayesinde hava sirkülasyonu sürekli devam eder, körük içiniz rahat bir şekilde kovan başında sönmeden çalışır.";
+    return "PEKEFE Geleneksel & Doğal Lezzetler tescilli çift hava kanallı tasarımımız sayesinde hava sirkülasyonu sürekli devam eder, körük içiniz rahat bir şekilde kovan başında sönmeden çalışır.";
   }
 
   // Scenario B: B2B/Dealer Queries
@@ -171,7 +171,7 @@ export async function queryAiAssistant(message: string, role: string, userEmail?
     lowerMsg.includes("deri") ||
     lowerMsg.includes("tamir")
   ) {
-    return "Atak Arıcılık olarak ürettiğimiz tüm körükler ve sac ekipmanlar imalat hatalarına karşı 2 yıl garantilidir. Körük derisi, körük körüğü yay değişimi gibi tüm yedek parça ve teknik servis hizmetleri Erzurum fabrikamızca kesintisiz sağlanır.";
+    return "PEKEFE Geleneksel & Doğal Lezzetler olarak ürettiğimiz tüm körükler ve sac ekipmanlar imalat hatalarına karşı 2 yıl garantilidir. Körük derisi, körük körüğü yay değişimi gibi tüm yedek parça ve teknik servis hizmetleri Erzurum fabrikamızca kesintisiz sağlanır.";
   }
 
   if (
@@ -181,7 +181,7 @@ export async function queryAiAssistant(message: string, role: string, userEmail?
     lowerMsg.includes("standart") ||
     lowerMsg.includes("büyük")
   ) {
-    return "Atak körüklerimizi iki ana modelde üretiyoruz: Profesyonel arıcılarımız için daha uzun duman sirkülasyonu sağlayan 'Büyük Boy Körük' ve hobi arıcılarımız için daha hafif ve pratik kullanım sunan 'Standart Boy Körük'. Her iki modelimiz de 304 sınıf paslanmaz çelikten üretilmiştir.";
+    return "Pekefe körüklerimizi iki ana modelde üretiyoruz: Profesyonel arıcılarımız için daha uzun duman sirkülasyonu sağlayan 'Büyük Boy Körük' ve hobi arıcılarımız için daha hafif ve pratik kullanım sunan 'Standart Boy Körük'. Her iki modelimiz de 304 sınıf paslanmaz çelikten üretilmiştir.";
   }
 
   if (
@@ -194,5 +194,5 @@ export async function queryAiAssistant(message: string, role: string, userEmail?
   }
 
   // Strict hallucination block fallback
-  return "Bu konuda size yardımcı olabilmek için destek ekibimize bağlanmanızı veya bir bilet (ticket) oluşturmanızı tavsiye ederim. Ben Atak Destek olarak patentli körükler, toptan bayilik şartları, ödeme yöntemleri ve kargo teslimatları hakkında sorularınızı yanıtlayabilirim.";
+  return "Bu konuda size yardımcı olabilmek için destek ekibimize bağlanmanızı veya bir bilet (ticket) oluşturmanızı tavsiye ederim. Ben Pekefe Destek olarak patentli körükler, toptan bayilik şartları, ödeme yöntemleri ve kargo teslimatları hakkında sorularınızı yanıtlayabilirim.";
 }

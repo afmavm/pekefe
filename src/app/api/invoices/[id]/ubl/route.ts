@@ -28,7 +28,7 @@ export const GET = withAuth<{ id: string }>(
         items = typeof invoice.items === 'string' ? JSON.parse(invoice.items) : (invoice.items as any);
       } catch (e) {}
 
-      let companyName = "ATAK ARICILIK TİCARET A.Ş.";
+      let companyName = "PEKEFE GERÇEK HASAT TİCARET A.Ş.";
       let companyVkn = "1234567890";
       let companyTaxOffice = "KAYSERİ";
       let companyAddress = "Merkez Mah. Apikültür Cad. No:44";

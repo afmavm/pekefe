@@ -546,7 +546,7 @@ export default function MuhasebeLayout({ children }: { children: React.ReactNode
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="font-black text-sm text-slate-800 tracking-tight leading-none">
-                  Atak<span className="text-orange-500">ERP</span>
+                  Pekefe<span className="text-orange-500">ERP</span>
                 </span>
                 <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
                   Cloud Panel
@@ -1080,7 +1080,7 @@ export default function MuhasebeLayout({ children }: { children: React.ReactNode
                 <span><kbd className="px-1 bg-white border border-slate-200 rounded text-[9px]">↑↓</kbd> Gezin</span>
                 <span><kbd className="px-1 bg-white border border-slate-200 rounded text-[9px]">Enter</kbd> Seç</span>
               </div>
-              <span>Atak ERP Cloud</span>
+              <span>Pekefe ERP Cloud</span>
             </div>
           </div>
         </div>

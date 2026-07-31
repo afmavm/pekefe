@@ -382,7 +382,7 @@ model CurrentAccount {
   priceGroup      String         @default("Liste")
   priceFormula    String?
   parentDealerId  String?
-  kaynakPlatform  String         @default("ATAK_B2B")
+  kaynakPlatform  String         @default("PEKEFE_B2B")
   eFaturaDurumu   Boolean        @default(false)
   blokeDurumu     Boolean        @default(false)
   adresler        Json?
@@ -513,7 +513,7 @@ model CMSData {
   announcement             String
   announcement2            String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
   maintenanceMode          Boolean @default(false)
-  siteName                 String  @default("Atak Arıcılık")
+  siteName                 String  @default("PEKEFE Geleneksel & Doğal Lezzetler")
   primaryColor             String  @default("#b45309")
   secondaryColor           String  @default("#1F2937")
   siteDescription          String  @default("")
@@ -601,7 +601,7 @@ model CMSData {
   
   // E-Fatura Ayarları
   companyInvoiceFooter            String  @default("")
-  footerText               String  @default("© 2026 Atak Arıcılık. Tüm Hakları Saklıdır.")
+  footerText               String  @default("© 2026 PEKEFE Geleneksel & Doğal Lezzetler. Tüm Hakları Saklıdır.")
   mapCoordinates           String  @default("")
   // Fırsat Ürünleri Bölümü
   dealSectionActive        Boolean @default(false)

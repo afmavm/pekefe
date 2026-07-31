@@ -177,7 +177,7 @@ export default function TicketsAndCRMPage() {
 
   // Load CRM tasks from local storage or set initial values
   useEffect(() => {
-    const saved = localStorage.getItem("atak_crm_tasks");
+    const saved = localStorage.getItem("pekefe_crm_tasks");
     if (saved) {
       try {
         setCrmTasks(JSON.parse(saved));
@@ -186,13 +186,13 @@ export default function TicketsAndCRMPage() {
       }
     } else {
       setCrmTasks(INITIAL_CRM_TASKS);
-      localStorage.setItem("atak_crm_tasks", JSON.stringify(INITIAL_CRM_TASKS));
+      localStorage.setItem("pekefe_crm_tasks", JSON.stringify(INITIAL_CRM_TASKS));
     }
   }, []);
 
   const saveCrmTasks = (newTasks: CRMTask[]) => {
     setCrmTasks(newTasks);
-    localStorage.setItem("atak_crm_tasks", JSON.stringify(newTasks));
+    localStorage.setItem("pekefe_crm_tasks", JSON.stringify(newTasks));
   };
 
   const fetchTickets = async () => {

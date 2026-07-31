@@ -1,5 +1,5 @@
 /**
- * Atak Destek — Gemini AI Destekli Müşteri Destek Servisi
+ * Pekefe Destek — Gemini AI Destekli Müşteri Destek Servisi
  * 
  * Kurumsal bilgi tabanı + Gemini Pro ile doğal dil destek asistanı.
  * Soru tipine göre önce veritabanından gerçek zamanlı veri çekebilir,
@@ -13,9 +13,9 @@ import { ATAC_CORPORATE_KB } from "./knowledgeBase";
 // ─── Gemini Client ────────────────────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-// ─── Sistem Promptu (Atak Destek kimliği ve bilgi tabanı) ────────────────────
+// ─── Sistem Promptu (Pekefe Destek kimliği ve bilgi tabanı) ────────────────────
 function buildSystemPrompt(contextData?: string): string {
-  return `Sen "Atak Destek" adlı, Atak Arıcılık firmasına özel profesyonel bir müşteri destek asistanısın. 
+  return `Sen "Pekefe Destek" adlı, PEKEFE Geleneksel & Doğal Lezzetler firmasına özel profesyonel bir müşteri destek asistanısın. 
 Türkçe konuşuyorsun, kibar, samimi ve bilgilendirici bir dil kullanıyorsun.
 
 ═══ MARKA KİMLİĞİ ═══
@@ -49,13 +49,13 @@ C: Tüm ürünlerimiz Erzurum Palandöken'deki fabrikamızda yerli üretimle ima
 ${contextData ? contextData : "Oturum açmamış ziyaretçi — kişisel sipariş/hesap bilgisi mevcut değil."}
 
 ═══ DAVRANIŞ KURALLARI ═══
-1. Sadece Atak Arıcılık ürünleri ve hizmetleri hakkında bilgi ver.
+1. Sadece PEKEFE Geleneksel & Doğal Lezzetler ürünleri ve hizmetleri hakkında bilgi ver.
 2. Rakip marka veya ürünler hakkında yorum yapma.
 3. Kişisel hesap bilgisi için kullanıcıdan giriş yapmasını iste.
 4. Bilmediğin veya emin olmadığın konularda "Bu konuyu WhatsApp destek hattımıza yönlendiriyorum" de.
 5. Cevaplarını kısa, net ve kullanışlı tut. Gereksiz tekrar yapma.
 6. Fiyat bilgisi verme — bunun için ürün sayfasını veya bayi portalını yönlendir.
-7. Her zaman "Atak Destek" kimliğinde kal, başka bir asistan gibi davranma.`;
+7. Her zaman "Pekefe Destek" kimliğinde kal, başka bir asistan gibi davranma.`;
 }
 
 // ─── Gerçek Zamanlı DB Bağlamı ───────────────────────────────────────────────
@@ -147,7 +147,7 @@ export async function queryGeminiSupport(
 
     return text?.trim() || fallbackResponse();
   } catch (err: any) {
-    console.error("[Atak Destek - Gemini Error]:", err?.message || err);
+    console.error("[Pekefe Destek - Gemini Error]:", err?.message || err);
 
     // Gemini hatası durumunda kural tabanlı sisteme düş
     const { queryAiAssistant } = await import("./knowledgeBase");

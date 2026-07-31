@@ -1387,7 +1387,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span><kbd className="px-1 bg-white border border-slate-200 rounded text-[9px]">↑↓</kbd> Gezin</span>
                 <span><kbd className="px-1 bg-white border border-slate-200 rounded text-[9px]">Enter</kbd> Seç</span>
               </div>
-              <span>Atak ERP Cloud</span>
+              <span>Pekefe ERP Cloud</span>
             </div>
           </div>
         </div>

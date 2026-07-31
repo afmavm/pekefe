@@ -48,7 +48,7 @@ export class CargoService {
   static generateZPL(trackingNumber: string, request: CargoLabelRequest, carrier: string): string {
     return `^XA
 ^CF0,40
-^FO50,50^FDATAK ARICILIK LJM^FS
+^FO50,50^FDPEKEFE GERÇEK HASAT LJM^FS
 ^CF0,24
 ^FO50,110^FDSiparis No: ${request.orderId}^FS
 ^FO50,145^FDKargo Firma: ${carrier}^FS

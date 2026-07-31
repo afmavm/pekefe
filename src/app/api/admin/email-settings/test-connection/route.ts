@@ -27,7 +27,7 @@ export const POST = withAuth<any>(
       // If password is empty in the test request, use the one stored in environment variables
       const pass = smtpPass !== undefined && smtpPass !== "" ? smtpPass : process.env.SMTP_PASS;
 
-      const fromName = smtpFromName || "Atak Arıcılık B2B Test";
+      const fromName = smtpFromName || "PEKEFE Geleneksel & Doğal Lezzetler B2B Test";
       const isSecure = smtpSecure === undefined ? (port === 465) : smtpSecure;
 
       console.log(`[SMTP_TEST] Initiating connection test to ${host}:${port} (Secure: ${isSecure}) for user ${smtpUser}`);
@@ -105,12 +105,12 @@ export const POST = withAuth<any>(
               </div>
               
               <p style="color: #475569; font-size: 14px; line-height: 1.5;">
-                Bu e-posta, Atak Arıcılık B2B yönetim panelinden yaptığınız <strong>SMTP Bağlantı Testi</strong> sonucunda otomatik olarak gönderilmiştir. Bu e-postayı alıyorsanız, sisteminiz otomatik bildirimleri (yeni kayıt, şifre sıfırlama, sipariş onayı, kargo bilgilendirmesi) başarıyla e-posta olarak gönderebilir durumdadır.
+                Bu e-posta, PEKEFE Geleneksel & Doğal Lezzetler B2B yönetim panelinden yaptığınız <strong>SMTP Bağlantı Testi</strong> sonucunda otomatik olarak gönderilmiştir. Bu e-postayı alıyorsanız, sisteminiz otomatik bildirimleri (yeni kayıt, şifre sıfırlama, sipariş onayı, kargo bilgilendirmesi) başarıyla e-posta olarak gönderebilir durumdadır.
               </p>
               
               <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
               <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
-                Atak Arıcılık B2B Yönetici Otomasyonu
+                PEKEFE Geleneksel & Doğal Lezzetler B2B Yönetici Otomasyonu
               </p>
             </div>
           `

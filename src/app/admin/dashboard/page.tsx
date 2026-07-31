@@ -253,7 +253,7 @@ async function getInitialDashboardData() {
 
     if (topSellingProducts.length === 0) {
       topSellingProducts = [
-        { name: "Atak Pro Paslanmaz Arı Körüğü", quantity: 120, revenue: 102000 },
+        { name: "Pekefe Pro Paslanmaz Arı Körüğü", quantity: 120, revenue: 102000 },
         { name: "Tam Koruma Arıcı Elbisesi", quantity: 45, revenue: 54000 }
       ];
     }
@@ -301,7 +301,7 @@ async function getInitialDashboardData() {
 
     if (fastestDepletingProducts.length === 0) {
       fastestDepletingProducts = [
-        { name: "Atak Pro Paslanmaz Arı Körüğü", sku: "ATAK-KORUK-01", quantity: 18 },
+        { name: "Pekefe Pro Paslanmaz Arı Körüğü", sku: "PEKEFE-KORUK-01", quantity: 18 },
         { name: "Metal Menteşe", sku: "HAM-MENTESE", quantity: 10 }
       ];
     }
@@ -359,7 +359,7 @@ async function getInitialDashboardData() {
 export default async function AdminDashboardPage() {
   const initialData = await getInitialDashboardData();
   const headersList = await headers();
-  const host = headersList.get("host") || "atakaricilik.com";
+  const host = headersList.get("host") || "pekefe.com";
   const domain = host.split(":")[0];
 
   const [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([

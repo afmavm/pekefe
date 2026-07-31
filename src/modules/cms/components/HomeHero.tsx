@@ -58,7 +58,7 @@ export default function HomeHero({ productSmoker }: HomeHeroProps) {
       <div className="absolute inset-0 z-0">
         <Image 
           src="/uploads/honey_sunset_hero.jpg" 
-          alt="ATAK Arıcılık Sunset Hero" 
+          alt="PEKEFE Geleneksel & Doğal Lezzetler Sunset Hero" 
           fill
           priority
           sizes="100vw"
@@ -169,7 +169,7 @@ export default function HomeHero({ productSmoker }: HomeHeroProps) {
                   return (
                     <Image
                       src={finalSrc}
-                      alt={productSmoker.name || "ATAK Arı Körüğü"}
+                      alt={productSmoker.name || "Pekefe Gıda Körüğü"}
                       fill
                       unoptimized
                       sizes="(max-width: 768px) 100vw, 384px"

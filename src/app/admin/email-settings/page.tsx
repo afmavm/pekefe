@@ -498,7 +498,7 @@ export default function EmailSettingsPage() {
                       <div className="relative">
                         <input
                           type="email"
-                          placeholder="Örn: admin@atakacicilik.com"
+                          placeholder="Örn: admin@pekefe.com"
                           value={form.adminNotificationEmail}
                           onChange={e => setForm({ ...form, adminNotificationEmail: e.target.value })}
                           className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"

@@ -358,7 +358,7 @@ export async function GET(request: NextRequest) {
             ? `<img src="${cmsData.logoUrl}" alt="${cmsData.siteName || 'Logo'}" style="max-height:60px; max-width:200px; object-fit:contain; margin-bottom:8px; display:block;" />`
             : ``
           }
-          <div class="company-title">${cmsData?.companyName || "ATAK B2B E-TİCARET A.Ş."}</div>
+          <div class="company-title">${cmsData?.companyName || "PEKEFE B2B E-TİCARET A.Ş."}</div>
           <div class="company-details">
             ${cmsData?.contactAddress ? cmsData.contactAddress.replace(/\n/g, "<br>") : "Merkez Mahallesi İstiklal Caddesi No:45/A<br>Şişli / İSTANBUL"}<br>
             Tel: ${cmsData?.contactPhone || "+90 (212) 555 12 34"}<br>
@@ -541,9 +541,9 @@ export async function GET(request: NextRequest) {
     <div class="footer-section">
       ${resolvedType === "EARSIV" && cmsData?.companyStampUrl
         ? ``
-        : `<span style="font-size:9px;color:#aaa;">Bu belge ${cmsData?.companyName || "Atak B2B"} tarafından elektronik ortamda düzenlenmiştir.</span>`
+        : `<span style="font-size:9px;color:#aaa;">Bu belge ${cmsData?.companyName || "PEKEFE B2B"} tarafından elektronik ortamda düzenlenmiştir.</span>`
       }
-      <br>e-Fatura Entegrasyon Altyapısı ATAK B2B Bulut Çözümleri tarafından sağlanmaktadır.<br>
+      <br>e-Fatura Entegrasyon Altyapısı PEKEFE B2B Bulut Çözümleri tarafından sağlanmaktadır.<br>
       Raporlama Kodu: ISO-9001:2015 | Yazılım Versiyonu: v4.2.1-prod
     </div>
   </div>

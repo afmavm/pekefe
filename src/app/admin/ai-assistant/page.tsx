@@ -251,7 +251,7 @@ export default function AIAssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Merhaba! Ben Atak ERP Asistanı. Size doğal Türkçe ile veritabanı sorguları yapmanızda yardımcı olabilirim.\n\nAşağıdaki örnek sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.",
+      content: "Merhaba! Ben Pekefe ERP Asistanı. Size doğal Türkçe ile veritabanı sorguları yapmanızda yardımcı olabilirim.\n\nAşağıdaki örnek sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.",
       timestamp: new Date()
     }
   ]);
@@ -352,7 +352,7 @@ export default function AIAssistantPage() {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-black text-slate-900">Atak ERP Asistanı</h1>
+            <h1 className="text-lg font-black text-slate-900">Pekefe ERP Asistanı</h1>
             <span className="px-2 py-0.5 bg-violet-100 text-violet-700 text-[9px] font-black rounded-full border border-violet-200 uppercase tracking-wider">
               NL2SQL
             </span>

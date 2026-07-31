@@ -114,8 +114,8 @@ export const POST = withAuth<any>(
     if (rateLimitResponse) return rateLimitResponse;
 
     const forwardedHost = req.headers.get('x-forwarded-host');
-    const host = forwardedHost || req.headers.get('host') || 'atakaricilik.com';
-    const cleanHost = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'b2b.atakaricilik.com' : host;
+    const host = forwardedHost || req.headers.get('host') || 'pekefe.com';
+    const cleanHost = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'b2b.pekefe.com' : host;
     const protocol = req.headers.get('x-forwarded-proto') || 'https';
     const hostUrl = `${protocol}://${cleanHost}`;
 

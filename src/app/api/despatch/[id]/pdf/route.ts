@@ -292,7 +292,7 @@ export async function GET(
     <div class="header">
       <div class="company-logo">
         ${cmsData?.logoUrl ? `<img src="${cmsData.logoUrl}" alt="${cmsData.siteName || 'Logo'}" />` : ""}
-        <div class="company-name">${cmsData?.companyName || "ATAK B2B E-TİCARET A.Ş."}</div>
+        <div class="company-name">${cmsData?.companyName || "PEKEFE B2B E-TİCARET A.Ş."}</div>
         <div class="company-info">
           ${cmsData?.contactAddress?.replace(/\n/g, "<br>") || "Merkez Mah. İstiklal Cad. No:45/A<br>Şişli / İSTANBUL"}<br>
           Tel: ${cmsData?.contactPhone || "+90 (212) 555 12 34"} | E-Posta: ${cmsData?.contactEmail || "info@atakb2b.com"}<br>
@@ -317,7 +317,7 @@ export async function GET(
     <div class="parties">
       <div class="party-box">
         <div class="party-title">📦 Gönderen (Satıcı)</div>
-        <div class="party-name">${cmsData?.companyName || "ATAK B2B E-TİCARET A.Ş."}</div>
+        <div class="party-name">${cmsData?.companyName || "PEKEFE B2B E-TİCARET A.Ş."}</div>
         <div class="party-detail">
           ${cmsData?.contactAddress?.replace(/\n/g, "<br>") || "Merkez Mah. İstiklal Cad. No:45/A<br>Şişli / İSTANBUL"}<br>
           VKN: 1234567890<br>
@@ -403,12 +403,12 @@ export async function GET(
     <!-- Legal Note -->
     <div class="legal-note">
       Bu belge 213 sayılı V.U.K. hükümlerine göre elektronik ortamda düzenlenmiş Sevk İrsaliyesidir. GİB entegrasyonu ile oluşturulmuştur.<br>
-      ${cmsData?.companyName || "Atak B2B"} | ${cmsData?.contactPhone || ""} | ${cmsData?.contactEmail || ""}
+      ${cmsData?.companyName || "PEKEFE B2B"} | ${cmsData?.contactPhone || ""} | ${cmsData?.contactEmail || ""}
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      e-İrsaliye Altyapısı ATAK B2B Bulut Çözümleri tarafından sağlanmaktadır. | Yazılım Versiyonu: v4.2.1-prod
+      e-İrsaliye Altyapısı PEKEFE B2B Bulut Çözümleri tarafından sağlanmaktadır. | Yazılım Versiyonu: v4.2.1-prod
     </div>
 
   </div>

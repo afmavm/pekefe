@@ -89,7 +89,7 @@ function simulateGIBResponse(vkn: string) {
       success: true,
       efatura: true,
       earsiv: false,
-      firmaAdi: "Atak Arıcılık",
+      firmaAdi: "PEKEFE Geleneksel & Doğal Lezzetler",
       vkn,
       sorguTarihi: new Date().toISOString(),
       kayitTarihi: "2021-01-15",
@@ -98,17 +98,17 @@ function simulateGIBResponse(vkn: string) {
       ad: "HAMİT",
       soyad: "YAZICI",
       vergiDairesi: "KAZIMKARABEKİR VERGİ DAİRESİ",
-      email: "info@atakaricilik.com",
+      email: "info@pekefe.com",
       tel: "905304215970",
       adres: "KURTULUŞ MAH. 1. TOPTANCILAR SİTESİ SK. SEZERLER IS MERKEZİ S BLOK NO: 10 K YAKUTİYE/ ERZURUM",
       sehir: "Erzurum",
       ilce: "Yakutiye",
-      website: "www.atakaricilik.com",
+      website: "www.pekefe.com",
       mersisNo: "3374846021800019",
       sicilNo: "12345/Erzurum",
       bolge: "Doğu Anadolu",
       fax: "",
-      kepAddress: "atakaricilik@hs01.kep.tr",
+      kepAddress: "pekefe@hs01.kep.tr",
       binaAdi: "Sezerler İş Merkezi S Blok",
       binaNo: "10",
       sokak: "1. Toptancılar Sitesi Sokak",
@@ -150,7 +150,7 @@ function simulateGIBResponse(vkn: string) {
   let bolge = "Marmara";
   let fax = "0212 123 45 68";
   let kepAddress = vkn + "@hs01.kep.tr";
-  let binaAdi = "Atak İş Hanı";
+  let binaAdi = "Pekefe İş Hanı";
   let binaNo = "20/A";
   let sokak = "İstiklal Sokak";
   let postaKodu = "34000";
@@ -256,17 +256,17 @@ function simulateGIBResponse(vkn: string) {
       sokak = "Liman Caddesi";
       postaKodu = "35230";
     } else {
-      firmaAdi = "ATAK ARICILIK GIDA SANAYİ VE TİCARET LİMİTED ŞİRKETİ";
-      email = "info@atak-aricilik.com";
+      firmaAdi = "PEKEFE GERÇEK HASAT GIDA SANAYİ VE TİCARET LİMİTED ŞİRKETİ";
+      email = "info@pekefe-pekefe.com";
       tel = "0212 123 45 67";
       adres = "Merkez Mahallesi, İstiklal Caddesi No: 20/A, Kat: 1";
       sehir = "İstanbul";
       ilce = "Kadıköy";
       vergiDairesi = "KAZIMKARABEKİR VERGİ DAİRESİ";
-      website = "www.atak-aricilik.com";
+      website = "www.pekefe-pekefe.com";
       bolge = "Marmara";
       sicilNo = "54321/İstanbul";
-      binaAdi = "Atak İş Hanı";
+      binaAdi = "Pekefe İş Hanı";
       binaNo = "20/A";
       sokak = "İstiklal Sokak";
       postaKodu = "34000";

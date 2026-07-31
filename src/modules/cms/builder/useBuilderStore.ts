@@ -181,7 +181,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   futureStack: [],
 
   mediaItems: [
-    { id: "1", name: "logo_dark.png", url: "/uploads/logo_dark.png", size: "45 KB", tag: "logo", alt: "Atak Arıcılık Kurumsal Logosu", createdAt: "29.05.2026" },
+    { id: "1", name: "logo_dark.png", url: "/uploads/logo_dark.png", size: "45 KB", tag: "logo", alt: "PEKEFE Geleneksel & Doğal Lezzetler Kurumsal Logosu", createdAt: "29.05.2026" },
     { id: "2", name: "banner_honey.jpg", url: "/uploads/banner_honey.jpg", size: "380 KB", tag: "banner", alt: "Arı Kovanı ve Bal Süzme Slayt Görseli", createdAt: "29.05.2026" },
     { id: "3", name: "hive_wood.png", url: "/uploads/hive_wood.png", size: "120 KB", tag: "product", alt: "304 Kalite Paslanmaz Krom Arı Kovanı", createdAt: "29.05.2026" },
     { id: "4", name: "comb_wax.png", url: "/uploads/comb_wax.png", size: "85 KB", tag: "product", alt: "Doğal Petek Mum Kalıbı Görseli", createdAt: "29.05.2026" },

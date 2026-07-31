@@ -60,7 +60,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
         oldPrice: p.oldPrice || Math.round(p.price * 1.3),
         desc: p.desc || "",
         image: p.image || null,
-        category: p.category || "Arıcılık",
+        category: p.category || "geleneksel lezzetler",
         attributes: p.attributes || {},
         rating: p.rating || 5,
         reviews: p.reviews || 12,
@@ -73,7 +73,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
       }))
     : [];
 
-  const uniqueCategories = ["all", ...Array.from(new Set(displayProducts.map(p => p.category || "Arıcılık")))];
+  const uniqueCategories = ["all", ...Array.from(new Set(displayProducts.map(p => p.category || "geleneksel lezzetler")))];
 
   const filteredProducts = activeCategory === "all"
     ? displayProducts
@@ -130,7 +130,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                   id: p.id,
                   name: p.name,
                   sku: p.sku,
-                  category: p.category || "Arıcılık",
+                  category: p.category || "geleneksel lezzetler",
                   price: p.price,
                   oldPrice: p.oldPrice || null,
                   image: p.image || null,

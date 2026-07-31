@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     
     // Generate a default cariKod if not provided
     const count = await prisma.currentAccount.count();
-    const generatedCariKod = data.cariKod || `ATAK-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+    const generatedCariKod = data.cariKod || `PEKEFE-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
 
     const account = await prisma.currentAccount.create({
       data: {
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
         dealerGroup: data.dealerGroup || "Standart",
         priceGroup: data.priceGroup || "Liste",
         priceFormula: data.priceFormula || null,
-        kaynakPlatform: data.kaynakPlatform || "ATAK_B2B",
+        kaynakPlatform: data.kaynakPlatform || "PEKEFE_B2B",
         eFaturaDurumu: data.eFaturaDurumu !== undefined ? Boolean(data.eFaturaDurumu) : false,
         blokeDurumu: data.blokeDurumu !== undefined ? Boolean(data.blokeDurumu) : false,
         adresler: data.adresler || [],

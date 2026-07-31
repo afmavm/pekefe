@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           phone: phone || null,
           cariTipi: "INDIVIDUAL",  // B2C bireysel müşteri
           type: "MUSTERI",
-          kaynakPlatform: "ATAK_B2C", // B2C web sitesi üzerinden kayıt
+          kaynakPlatform: "PEKEFE_B2C", // B2C web sitesi üzerinden kayıt
           balance: 0,
           creditLimit: 0,
         },

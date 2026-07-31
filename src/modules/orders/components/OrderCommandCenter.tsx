@@ -96,7 +96,7 @@ export default function OrderCommandCenter() {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiInput, setAiInput] = useState("");
   const [aiMessages, setAiMessages] = useState<any[]>([
-    { role: "assistant", content: "Merhaba! Atak Arıcılık Akıllı Lojistik & Sipariş Asistanıyım. Sipariş havuzundaki kritik riskleri analiz edebilir, en çok satan arıcılık ekipmanlarını raporlayabilir veya cari durumları sorgulayabilirim. Nasıl yardımcı olabilirim?" }
+    { role: "assistant", content: "Merhaba! PEKEFE Geleneksel & Doğal Lezzetler Akıllı Lojistik & Sipariş Asistanıyım. Sipariş havuzundaki kritik riskleri analiz edebilir, en çok satan yöresel ürünlernı raporlayabilir veya cari durumları sorgulayabilirim. Nasıl yardımcı olabilirim?" }
   ]);
 
   // Settings
@@ -437,7 +437,7 @@ export default function OrderCommandCenter() {
 
     // Build beautiful A4 invoice pages
     const selectedOrders = orders.filter(o => selectedRows.has(o.id));
-    const companyName = cmsSettings?.companyName || "ATAK ARICILIK E-TİCARET";
+    const companyName = cmsSettings?.companyName || "PEKEFE GERÇEK HASAT E-TİCARET";
     const logoUrl = cmsSettings?.logoUrl || "/uploads/1779836095322-585290292-Logo.jpg";
     const fullLogoUrl = window.location.origin + logoUrl;
 
@@ -531,7 +531,7 @@ export default function OrderCommandCenter() {
 
           <div style="margin-top: 60px; border-top: 1px solid #f1f5f9; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8; line-height: 1.6;">
             <p style="margin: 0; color: #475569; font-weight: 800;">Bizi tercih ettiğiniz için teşekkür ederiz!</p>
-            <p style="margin: 4px 0 0 0;">Atak Arıcılık Destek Hattı: info@atakaricilik.com</p>
+            <p style="margin: 4px 0 0 0;">PEKEFE Geleneksel & Doğal Lezzetler Destek Hattı: info@pekefe.com</p>
           </div>
         </div>
       `;
@@ -582,7 +582,7 @@ export default function OrderCommandCenter() {
       return;
     }
 
-    const companyName = cmsSettings?.companyName || "ATAK ARICILIK";
+    const companyName = cmsSettings?.companyName || "PEKEFE GERÇEK HASAT";
 
     const labelsHtml = selectedOrders.map(o => {
       const clientAcc = findClientAccount(o.client);
@@ -801,7 +801,7 @@ export default function OrderCommandCenter() {
         <body onload="window.print()">
           <div class="header">
             <div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px;">ATAK ARICILIK SEVKİYAT</h1>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px;">PEKEFE GERÇEK HASAT SEVKİYAT</h1>
               <p style="margin: 5px 0 0 0; color: #64748b; font-size: 12px;">Toplu Çeki Listesi (Warehouse Picking)</p>
             </div>
             <div>
@@ -900,7 +900,7 @@ export default function OrderCommandCenter() {
       // Page header
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(16);
-      doc.text("ATAK ARICILIK - SIPARIS LISTESI", 14, 15);
+      doc.text("PEKEFE GERÇEK HASAT - SIPARIS LISTESI", 14, 15);
       
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(10);
@@ -951,7 +951,7 @@ export default function OrderCommandCenter() {
       return;
     }
 
-    const companyName = cmsSettings?.companyName || "ATAK ARICILIK E-TİCARET";
+    const companyName = cmsSettings?.companyName || "PEKEFE GERÇEK HASAT E-TİCARET";
     const logoUrl = cmsSettings?.logoUrl || "/uploads/1779836095322-585290292-Logo.jpg";
     const fullLogoUrl = window.location.origin + logoUrl;
 
@@ -1054,7 +1054,7 @@ export default function OrderCommandCenter() {
 
             <div style="margin-top: 60px; border-top: 1px solid #f1f5f9; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8; line-height: 1.6;">
               <p style="margin: 0; color: #475569; font-weight: 800;">Bizi tercih ettiğiniz için teşekkür ederiz!</p>
-              <p style="margin: 4px 0 0 0;">Atak Arıcılık Destek Hattı: info@atakaricilik.com</p>
+              <p style="margin: 4px 0 0 0;">PEKEFE Geleneksel & Doğal Lezzetler Destek Hattı: info@pekefe.com</p>
             </div>
           </div>
         </body>
@@ -1977,7 +1977,7 @@ export default function OrderCommandCenter() {
                     <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white text-xs">
                       <div className="p-4 flex items-center gap-3">
                         <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="font-semibold text-slate-700">{selectedOrder.email || "info@atakaricilik.com"}</span>
+                        <span className="font-semibold text-slate-700">{selectedOrder.email || "info@pekefe.com"}</span>
                       </div>
                       <div className="p-4 flex items-center gap-3">
                         <Phone className="w-4 h-4 text-slate-400 shrink-0" />
@@ -1993,9 +1993,9 @@ export default function OrderCommandCenter() {
               {activeDrawerTab === "logistic" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
                   
-                  {/* Arıcılık Lojistik */}
+                  {/* geleneksel lezzetler Lojistik */}
                   <div className="p-5 bg-white border border-slate-200 rounded-xl space-y-4 shadow-sm">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Arıcılık Lojistik Paket Detayları</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">geleneksel lezzetler Lojistik Paket Detayları</p>
                     
                     <div className="grid grid-cols-3 gap-3 text-center text-xs font-bold">
                       {(() => {
@@ -2075,7 +2075,7 @@ export default function OrderCommandCenter() {
             <div className="bg-slate-900 text-white px-4 py-3 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider">ATAK AI Lojistik Asistanı</span>
+                <span className="text-xs font-bold uppercase tracking-wider">PEKEFE AI Lojistik Asistanı</span>
               </div>
               <button 
                 onClick={() => setIsAiOpen(false)}
@@ -2138,7 +2138,7 @@ export default function OrderCommandCenter() {
         <button 
           onClick={() => setIsAiOpen(!isAiOpen)}
           className="w-12 h-12 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors shadow-2xl cursor-pointer"
-          title="Atak Lojistik AI Asistanı"
+          title="Pekefe Lojistik AI Asistanı"
         >
           <MessageSquare className="w-5 h-5" />
         </button>

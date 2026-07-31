@@ -197,10 +197,10 @@ export default function CariPage() {
 
   useEffect(() => {
     if (view === "risk") {
-      setPlatformFilter("ATAK_B2B");
+      setPlatformFilter("PEKEFE_B2B");
       setActiveTab("commercial");
     } else if (view === "b2b") {
-      setPlatformFilter("ATAK_B2B");
+      setPlatformFilter("PEKEFE_B2B");
       setActiveTab("general");
     } else if (view === "general") {
       setPlatformFilter("ALL");
@@ -260,7 +260,7 @@ export default function CariPage() {
     currency: "TRY", openingBalance: 0, balance: 0,
     discountRate: 0, creditLimit: 0, riskLimit: 0, vadeGun: 0,
     dealerGroup: "Standart", priceGroup: "Liste", priceFormula: "",
-    kaynakPlatform: "ATAK_B2B", eFaturaDurumu: false, blokeDurumu: false,
+    kaynakPlatform: "PEKEFE_B2B", eFaturaDurumu: false, blokeDurumu: false,
     isActive: true,
     adresler: [] as Address[], entegrasyonHaritalama: {} as Record<string, string>,
     dosyalar: [] as any[], auditLogs: [] as any[],
@@ -608,7 +608,7 @@ export default function CariPage() {
         <!-- Footer Notice -->
         <div style="margin-top: 40px; border-top: 1px solid #cbd5e1; padding-top: 15px; text-align: center; font-size: 9px; color: #94a3b8; line-height: 1.4;">
           <p style="margin: 0; font-weight: 700; color: #64748b;">Bu belge sistem uzerinden dijital olarak olusturulmustur ve mali degeri yoktur.</p>
-          <p style="margin: 3px 0 0 0;">Atak Aricilik Gida Tarim Hayvancilik San. ve Tic. Ltd. Sti. | Kayseri, Turkiye</p>
+          <p style="margin: 3px 0 0 0;">Pekefe Aricilik Gida Tarim Hayvancilik San. ve Tic. Ltd. Sti. | Kayseri, Turkiye</p>
         </div>
 
       </div>
@@ -816,7 +816,7 @@ export default function CariPage() {
       doc.setFontSize(7.5);
       doc.setTextColor(100, 116, 139); // Improved contrast from 148, 163, 184
       doc.text("Bu belge sistem uzerinden dijital olarak olusturulmustur ve resmi mali degeri yoktur.", 45, 197);
-      doc.text("Atak Aricilik Gida Tarim Hayvancilik San. ve Tic. Ltd. Sti.", 68, 201);
+      doc.text("Pekefe Aricilik Gida Tarim Hayvancilik San. ve Tic. Ltd. Sti.", 68, 201);
 
       doc.save(isOdeme ? `Odeme_Fisi_${receiptNo}.pdf` : `Tahsilat_Makbuzu_${receiptNo}.pdf`);
       toast.success(isOdeme ? "📥 PDF Fişi indirildi." : "📥 PDF Makbuzu indirildi.");
@@ -1202,7 +1202,7 @@ export default function CariPage() {
       currency: "TRY", openingBalance: 0, balance: 0,
       discountRate: 0, creditLimit: 0, riskLimit: 0, vadeGun: 0,
       dealerGroup: "Standart", priceGroup: "Liste", priceFormula: "",
-      kaynakPlatform: "ATAK_B2B", eFaturaDurumu: false, blokeDurumu: false,
+      kaynakPlatform: "PEKEFE_B2B", eFaturaDurumu: false, blokeDurumu: false,
       isActive: true,
       adresler: [], entegrasyonHaritalama: {},
       dosyalar: [], auditLogs: [],
@@ -1875,7 +1875,7 @@ export default function CariPage() {
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none text-slate-700 text-xs font-semibold"
               >
                 <option value="ALL">Tüm Platformlar</option>
-                <option value="ATAK_B2B">ATAK B2B</option>
+                <option value="PEKEFE_B2B">PEKEFE B2B</option>
                 <option value="Trendyol">Trendyol</option>
                 <option value="Hepsiburada">Hepsiburada</option>
                 <option value="Shopify">Shopify</option>
@@ -1955,11 +1955,11 @@ export default function CariPage() {
                           acc.kaynakPlatform === "Trendyol" ? "bg-orange-50 text-orange-700" :
                           acc.kaynakPlatform === "Hepsiburada" ? "bg-amber-50 text-amber-700" :
                           acc.kaynakPlatform === "Shopify" ? "bg-emerald-50 text-emerald-700" :
-                          acc.kaynakPlatform === "ATAK_B2C" ? "bg-sky-50 text-sky-700" :
+                          acc.kaynakPlatform === "PEKEFE_B2C" ? "bg-sky-50 text-sky-700" :
                           "bg-slate-100 text-slate-700"
                         }`}>
-                          {acc.kaynakPlatform === "ATAK_B2C" ? "Web B2C" :
-                           acc.kaynakPlatform === "ATAK_B2B" ? "B2B Portal" :
+                          {acc.kaynakPlatform === "PEKEFE_B2C" ? "Web B2C" :
+                           acc.kaynakPlatform === "PEKEFE_B2B" ? "B2B Portal" :
                            acc.kaynakPlatform}
                         </span>
 
@@ -2965,7 +2965,7 @@ export default function CariPage() {
                       <div className="relative">
                         <input 
                           type="text" 
-                          placeholder="ATAK-2026-0001"
+                          placeholder="PEKEFE-2026-0001"
                           disabled={isKodLocked}
                           value={formData.cariKod} 
                           onChange={e => setFormData({...formData, cariKod: e.target.value})}
@@ -3679,7 +3679,7 @@ export default function CariPage() {
                         ...formData,
                         tanimlar: { ...formData.tanimlar, isleri: e.target.value }
                       })}
-                      placeholder="Arıcılık Malzemeleri, Gıda vb."
+                      placeholder="Geleneksel & Doğal Lezzetler, Gıda vb."
                       className="w-full px-2.5 py-1.5 border border-slate-200 bg-white rounded-xl outline-none"
                     />
                   </div>

@@ -20,7 +20,7 @@ export default function Testimonials({ currentUser }: TestimonialsProps) {
 
   useEffect(() => {
     const defaultReviews = [
-      { name: "Mehmet Yılmaz", location: "Erzurum – Profesyonel Arıcı", stars: 5, text: "30 yıldır Erzurum'da aktif arıcılık yapıyorum. ATAK Pro paslanmaz körüğü geçen ay satın aldım. Sabahtan akşama kadar tek bir kere bile sönme yapmadı. Kalın paslanmaz sacı ve çift hava kanallı harika." },
+      { name: "Mehmet Yılmaz", location: "Erzurum – Profesyonel Arıcı", stars: 5, text: "30 yıldır Erzurum'da aktif geleneksel lezzetler yapıyorum. PEKEFE Pro paslanmaz körüğü geçen ay satın aldım. Sabahtan akşama kadar tek bir kere bile sönme yapmadı. Kalın paslanmaz sacı ve çift hava kanallı harika." },
       { name: "Ahmet Demir", location: "Muğla – Çam Balı Üreticisi", stars: 5, text: "3 katmanlı arıcı elbisesini satın aldım. Kumaş kalınlığı ve hava alabilir yapısı çok başarılı. Sıcak havalarda hiç terletmiyor ve arıların iğnelerine karşı tam bir zırh gibi koruyor." },
       { name: "Hasan Kaya", location: "İzmir – Hobi Arıcısı", stars: 5, text: "Kovan bakım seti sayesinde arılıkta ihtiyacım olan her şey tek bir çantada toplandı. Çıta çıkarma pensi ve keskileri oldukça sağlam, paslanmaz çelik kalitesi çok iyi. Tavsiye ederim." }
     ];
@@ -61,7 +61,7 @@ export default function Testimonials({ currentUser }: TestimonialsProps) {
       toast.success("Yorumunuz başarıyla yayınlandı! Teşekkür ederiz.");
 
       const defaultReviews = [
-        { name: "Mehmet Yılmaz", location: "Erzurum – Profesyonel Arıcı", stars: 5, text: "30 yıldır Erzurum'da aktif arıcılık yapıyorum. ATAK Pro paslanmaz körüğü geçen ay satın aldım. Sabahtan akşama kadar tek bir kere bile sönme yapmadı. Kalın paslanmaz sacı ve çift hava kanallı harika." },
+        { name: "Mehmet Yılmaz", location: "Erzurum – Profesyonel Arıcı", stars: 5, text: "30 yıldır Erzurum'da aktif geleneksel lezzetler yapıyorum. PEKEFE Pro paslanmaz körüğü geçen ay satın aldım. Sabahtan akşama kadar tek bir kere bile sönme yapmadı. Kalın paslanmaz sacı ve çift hava kanallı harika." },
         { name: "Ahmet Demir", location: "Muğla – Çam Balı Üreticisi", stars: 5, text: "3 katmanlı arıcı elbisesini satın aldım. Kumaş kalınlığı ve hava alabilir yapısı çok başarılı. Sıcak havalarda hiç terletmiyor ve arıların iğnelerine karşı tam bir zırh gibi koruyor." },
         { name: "Hasan Kaya", location: "İzmir – Hobi Arıcısı", stars: 5, text: "Kovan bakım seti sayesinde arılıkta ihtiyacım olan her şey tek bir çantada toplandı. Çıta çıkarma pensi ve keskileri oldukça sağlam, paslanmaz çelik kalitesi çok iyi. Tavsiye ederim." }
       ];

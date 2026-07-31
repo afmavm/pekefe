@@ -109,7 +109,7 @@ export async function publishCmsChangesAction(cmsValues: any, pages: any[]) {
       /* 4  */ s(merged.announcement),
       /* 5  */ s(merged.announcement2),
       /* 6  */ b(merged.maintenanceMode),
-      /* 7  */ s(merged.siteName, 'Atak Arıcılık'),
+      /* 7  */ s(merged.siteName, 'PEKEFE Geleneksel & Doğal Lezzetler'),
       /* 8  */ s(merged.primaryColor, '#b45309'),
       /* 9  */ s(merged.secondaryColor, '#1F2937'),
       /* 10 */ s(merged.siteDescription),

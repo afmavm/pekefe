@@ -48,7 +48,7 @@ export function exportToPDF({
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(16);
     doc.setTextColor(33, 43, 54); // dark slate text
-    doc.text("ATAK ARICILIK ERP", 14, 15);
+    doc.text("PEKEFE GERÇEK HASAT ERP", 14, 15);
 
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(11);

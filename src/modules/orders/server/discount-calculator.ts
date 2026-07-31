@@ -1,5 +1,5 @@
 /**
- * Atak Arıcılık Sepet İndirim Hesaplama Motoru
+ * PEKEFE Geleneksel & Doğal Lezzetler Sepet İndirim Hesaplama Motoru
  * Hem client-side (CartContext, Checkout UI) hem server-side (api/checkout) kullanılır.
  * Bu sayede fiyat tutarsızlığı ve manipülasyon girişimleri önlenir.
  */

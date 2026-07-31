@@ -27,7 +27,7 @@ function buildOrderMessage(payload: WhatsAppPayload): string {
     `📅 Tarih   : ${new Date().toLocaleDateString("tr-TR", { day:"2-digit", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" })}`,
     `────────────────────────`,
     `Siparişiniz alındı, en kısa sürede hazırlanacaktır.`,
-    `_ATAK E-Ticaret_`,
+    `_PEKEFE E-Ticaret_`,
   ].filter(Boolean);
   return lines.join("\n");
 }
@@ -43,7 +43,7 @@ function buildInvoiceMessage(payload: WhatsAppPayload): string {
     `📅 Tarih  : ${new Date().toLocaleDateString("tr-TR")}`,
     `────────────────────────`,
     `Faturanız kesilmiş olup e-posta adresinize gönderilmiştir.`,
-    `_ATAK E-Ticaret_`,
+    `_PEKEFE E-Ticaret_`,
   ].filter(Boolean).join("\n");
 }
 
@@ -57,7 +57,7 @@ function buildReminderMessage(payload: WhatsAppPayload): string {
     `────────────────────────`,
     `Hesabınızda vadesi geçmiş bakiye bulunmaktadır.`,
     `Lütfen ödemenizi en kısa sürede yapınız.`,
-    `_ATAK E-Ticaret Muhasebe_`,
+    `_PEKEFE E-Ticaret Muhasebe_`,
   ].filter(Boolean).join("\n");
 }
 
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       } else if (type === "reminder") {
         finalMessage = buildReminderMessage({ to, message: "", type, accountName, amount });
       } else {
-        finalMessage = `ATAK E-Ticaret: Yeni bildiriminiz var.`;
+        finalMessage = `PEKEFE E-Ticaret: Yeni bildiriminiz var.`;
       }
     }
 

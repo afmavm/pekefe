@@ -408,7 +408,7 @@ export default function SeoAdminPage() {
             onBlur={() => handleBlur("siteDescription")}
             rows={3}
             className={textClass(errors.siteDescription)}
-            placeholder="Erzurum fabrikamızda üretilen yüksek kaliteli arıcılık ekipmanları..."
+            placeholder="Erzurum fabrikamızda üretilen yüksek kaliteli yöresel ürünler..."
           />
           <div className="flex justify-between items-center mt-1">
             <p className="text-xs text-gray-400">
@@ -461,7 +461,7 @@ export default function SeoAdminPage() {
                 onChange={(e) => update("contactEmail", e.target.value)} 
                 onBlur={() => handleBlur("contactEmail")}
                 className={inputClass(errors.contactEmail)} 
-                placeholder="destek@atakaricilik.com" 
+                placeholder="destek@pekefe.com" 
               />
             </div>
             {errors.contactEmail && (
@@ -580,7 +580,7 @@ export default function SeoAdminPage() {
               onChange={(e) => update("socialInstagram", e.target.value)} 
               onBlur={() => handleBlur("socialInstagram")}
               className={inputClass(errors.socialInstagram)} 
-              placeholder="instagram.com/atakaricilik" 
+              placeholder="instagram.com/pekefe" 
             />
           </div>
           {errors.socialInstagram ? (
@@ -589,7 +589,7 @@ export default function SeoAdminPage() {
             </p>
           ) : (
             <p className="text-[10px] text-gray-400 mt-1 font-semibold uppercase tracking-wider">
-              Kullanıcı adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @atakaricilik)
+              Kullanıcı adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @pekefe)
             </p>
           )}
         </div>
@@ -604,7 +604,7 @@ export default function SeoAdminPage() {
               onChange={(e) => update("socialFacebook", e.target.value)} 
               onBlur={() => handleBlur("socialFacebook")}
               className={inputClass(errors.socialFacebook)} 
-              placeholder="facebook.com/atakaricilik" 
+              placeholder="facebook.com/pekefe" 
             />
           </div>
           {errors.socialFacebook ? (
@@ -613,7 +613,7 @@ export default function SeoAdminPage() {
             </p>
           ) : (
             <p className="text-[10px] text-gray-400 mt-1 font-semibold uppercase tracking-wider">
-              Kullanıcı adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @atakaricilik)
+              Kullanıcı adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @pekefe)
             </p>
           )}
         </div>
@@ -628,7 +628,7 @@ export default function SeoAdminPage() {
               onChange={(e) => update("socialYoutube", e.target.value)} 
               onBlur={() => handleBlur("socialYoutube")}
               className={inputClass(errors.socialYoutube)} 
-              placeholder="youtube.com/@atakaricilik" 
+              placeholder="youtube.com/@pekefe" 
             />
           </div>
           {errors.socialYoutube ? (
@@ -637,7 +637,7 @@ export default function SeoAdminPage() {
             </p>
           ) : (
             <p className="text-[10px] text-gray-400 mt-1 font-semibold uppercase tracking-wider">
-              Kanal adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @atakaricilik)
+              Kanal adı girebilirsiniz. Otomatik olarak tam linke çevrilir. (Örn: @pekefe)
             </p>
           )}
         </div>

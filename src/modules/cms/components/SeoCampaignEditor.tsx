@@ -39,7 +39,7 @@ export default function SeoCampaignEditor({
               type="text"
               value={values.companyName || ""}
               onChange={(e) => onChange("companyName", e.target.value)}
-              placeholder="Atak Arıcılık İthalat İhracat San. Tic. Ltd. Şti."
+              placeholder="PEKEFE Geleneksel & Doğal Lezzetler İthalat İhracat San. Tic. Ltd. Şti."
               className={inputClass}
             />
           </div>

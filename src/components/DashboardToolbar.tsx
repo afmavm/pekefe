@@ -72,7 +72,7 @@ export default function DashboardToolbar({ siteName, domain, stats, scanResults 
       
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", jsonString);
-      downloadAnchor.setAttribute("download", `atak_aricilik_dashboard_${new Date().toISOString().slice(0, 10)}.json`);
+      downloadAnchor.setAttribute("download", `pekefe_pekefe_dashboard_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -123,7 +123,7 @@ export default function DashboardToolbar({ siteName, domain, stats, scanResults 
         </head>
         <body>
           <table>
-            <tr><td colspan="4" class="title">ATAK ARICILIK - E-TİCARET PERFORMANS & SEO DENETİM RAPORU</td></tr>
+            <tr><td colspan="4" class="title">PEKEFE GERÇEK HASAT - E-TİCARET PERFORMANS & SEO DENETİM RAPORU</td></tr>
             <tr><td colspan="4" style="border: none;"></td></tr>
             <tr class="section"><td colspan="4">1. GENEL BİLGİLER</td></tr>
             <tr class="header"><td colspan="2">Rapor Parametresi</td><td colspan="2">Değer</td></tr>
@@ -148,7 +148,7 @@ export default function DashboardToolbar({ siteName, domain, stats, scanResults 
             <tr><td colspan="2">Bu Ay Alınan Toplam Sipariş</td><td colspan="2" class="value-bold text-right">${stats.monthOrders}</td></tr>
             <tr><td colspan="2">Geçen Ay Alınan Toplam Sipariş</td><td colspan="2" class="value-bold text-right">${stats.lastMonthOrders}</td></tr>
             <tr><td colspan="4" style="border: none;"></td></tr>
-            <tr><td colspan="2" style="font-weight: bold; color: #475569;">Rapor Notu:</td><td colspan="2" style="color: #64748b; font-style: italic;">Bu rapor Atak Arıcılık Yönetim Paneli tarafından otomatik ve güvenli bir şekilde üretilmiştir.</td></tr>
+            <tr><td colspan="2" style="font-weight: bold; color: #475569;">Rapor Notu:</td><td colspan="2" style="color: #64748b; font-style: italic;">Bu rapor PEKEFE Geleneksel & Doğal Lezzetler Yönetim Paneli tarafından otomatik ve güvenli bir şekilde üretilmiştir.</td></tr>
           </table>
         </body>
         </html>
@@ -160,7 +160,7 @@ export default function DashboardToolbar({ siteName, domain, stats, scanResults 
       
       const link = document.createElement("a");
       link.href = url;
-      link.download = `atak_aricilik_dashboard_${new Date().toISOString().slice(0, 10)}.xls`;
+      link.download = `pekefe_pekefe_dashboard_${new Date().toISOString().slice(0, 10)}.xls`;
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
@@ -352,13 +352,13 @@ export default function DashboardToolbar({ siteName, domain, stats, scanResults 
         </head>
         <body>
           <div class="header-bar">
-            <div class="brand">ATAK <span>Arıcılık</span></div>
+            <div class="brand">PEKEFE <span>geleneksel lezzetler</span></div>
             <div class="report-title">Performans & SEO Raporu</div>
           </div>
           
           <div class="title-section">
             <h1>Mağaza Denetim Raporu</h1>
-            <p>Atak Arıcılık E-Ticaret Altyapısı Hız ve Optimizasyon Analiz Raporu</p>
+            <p>PEKEFE Geleneksel & Doğal Lezzetler E-Ticaret Altyapısı Hız ve Optimizasyon Analiz Raporu</p>
           </div>
 
           <div class="meta-grid">

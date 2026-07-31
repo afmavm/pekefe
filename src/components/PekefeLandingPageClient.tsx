@@ -26,7 +26,7 @@ import { CMSSectionRenderer } from "@/components/CMSSectionRenderer";
 
 // Modularized Static Sections
 import TrustStrip from "@/modules/cms/components/TrustStrip";
-import WhyAtak from "@/modules/cms/components/WhyAtak";
+import WhyPekefe from "@/modules/cms/components/WhyPekefe";
 import FinalCTA from "@/modules/cms/components/FinalCTA";
 
 // Isolated Interactive Sections
@@ -55,19 +55,19 @@ interface ProductDto {
   stock?: number;
 }
 
-interface AtakLandingPageClientProps {
+interface PekefeLandingPageClientProps {
   products: ProductDto[];
   cmsData: any;
   initialSections?: any[];
   heroProduct?: any;
 }
 
-export default function AtakLandingPageClient({ 
+export default function PekefeLandingPageClient({ 
   products, 
   cmsData, 
   initialSections = [],
   heroProduct
-}: AtakLandingPageClientProps) {
+}: PekefeLandingPageClientProps) {
   const t = useTranslations("Home");
   
   const whatsappNumber = cmsData?.socialWhatsapp ? cmsData.socialWhatsapp.replace(/\D/g, "") : "905441494851";
@@ -134,7 +134,7 @@ export default function AtakLandingPageClient({
         images: heroProduct.images || [],
         stock: heroProduct.stock ?? 0
       }
-    : findProduct("ATAK-KORUK-01", 850, "Atak Pro Paslanmaz Arı Körüğü");
+    : findProduct("PEKEFE-KORUK-01", 850, "Pekefe Pro Paslanmaz Arı Körüğü");
 
   return (
     <div>
@@ -147,18 +147,18 @@ export default function AtakLandingPageClient({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": cmsData?.siteName || "Atak Arıcılık",
-              "url": "https://atakaricilik.com",
-              "logo": "https://atakaricilik.com/uploads/1779836095322-585290292-Logo.jpg",
+              "name": cmsData?.siteName || "PEKEFE Geleneksel & Doğal Lezzetler",
+              "url": "https://pekefe.com",
+              "logo": "https://pekefe.com/uploads/1779836095322-585290292-Logo.jpg",
               "contactPoint": {
                 "@type": "ContactPoint",
                 "telephone": cmsData?.contactPhone || "+905441494851",
                 "contactType": "customer service",
-                "email": cmsData?.contactEmail || "info@atakaricilik.com"
+                "email": cmsData?.contactEmail || "info@pekefe.com"
               },
               "sameAs": [
-                cmsData?.socialInstagram || "https://instagram.com/atakaricilik",
-                cmsData?.socialFacebook || "https://facebook.com/atakaricilik"
+                cmsData?.socialInstagram || "https://instagram.com/pekefe",
+                cmsData?.socialFacebook || "https://facebook.com/pekefe"
               ]
             })
           }}
@@ -170,12 +170,12 @@ export default function AtakLandingPageClient({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ItemList",
-              "name": "Popüler Arıcılık Ekipmanları",
-              "description": "Atak Arıcılık patentli arı körükleri ve profesyonel arıcılık malzemeleri.",
+              "name": "Popüler yöresel ürünler",
+              "description": "PEKEFE Geleneksel & Doğal Lezzetler patentli arı körükleri ve profesyonel Geleneksel & Doğal Lezzetler.",
               "numberOfItems": products.length,
               "itemListElement": products.map((p, idx) => {
                 const pImage = p.image && p.image.trim() !== "" ? p.image : "https://placehold.co/400x400?text=Gorsel+Yok";
-                const absoluteImage = pImage.startsWith("http") ? pImage : `https://atakaricilik.com${pImage.startsWith("/") ? "" : "/"}${pImage}`;
+                const absoluteImage = pImage.startsWith("http") ? pImage : `https://pekefe.com${pImage.startsWith("/") ? "" : "/"}${pImage}`;
                 return {
                   "@type": "ListItem",
                   "position": idx + 1,
@@ -187,7 +187,7 @@ export default function AtakLandingPageClient({
                     "sku": p.sku,
                     "brand": {
                       "@type": "Brand",
-                      "name": "Atak Arıcılık"
+                      "name": "PEKEFE Geleneksel & Doğal Lezzetler"
                     },
                     "offers": {
                       "@type": "Offer",
@@ -195,7 +195,7 @@ export default function AtakLandingPageClient({
                       "price": p.price,
                       "itemCondition": "https://schema.org/NewCondition",
                       "availability": p.stock && p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                      "url": `https://atakaricilik.com/products/${slugify(p.name)}`
+                      "url": `https://pekefe.com/products/${slugify(p.name)}`
                     }
                   }
                 };
@@ -289,7 +289,7 @@ export default function AtakLandingPageClient({
             <HomeHero productSmoker={productSmoker} />
             <TrustStrip />
             <ProductGrid products={products} />
-            <WhyAtak />
+            <WhyPekefe />
             <InteractiveHotspots />
             <Testimonials currentUser={currentUser} />
             <HomeFaq />

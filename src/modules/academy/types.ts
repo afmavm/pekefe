@@ -1,7 +1,7 @@
 export interface AcademyCourse {
   id: string;
   title: string;
-  category: "Arıcılık" | "Gastronomi" | "Sürdürülebilir Tarım";
+  category: "geleneksel lezzetler" | "Gastronomi" | "Sürdürülebilir Tarım";
   instructor: string;
   duration: string;
   lessonsCount: number;

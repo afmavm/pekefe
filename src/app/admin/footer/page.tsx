@@ -192,7 +192,7 @@ export default function FooterAdminPage() {
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
                 className={inputClass}
-                placeholder="info@atakaricilik.com"
+                placeholder="info@pekefe.com"
               />
             </div>
 
@@ -244,7 +244,7 @@ export default function FooterAdminPage() {
                 value={socialInstagram}
                 onChange={(e) => setSocialInstagram(e.target.value)}
                 className={inputClass}
-                placeholder="instagram.com/atakaricilik"
+                placeholder="instagram.com/pekefe"
               />
             </div>
 
@@ -260,7 +260,7 @@ export default function FooterAdminPage() {
                 value={socialFacebook}
                 onChange={(e) => setSocialFacebook(e.target.value)}
                 className={inputClass}
-                placeholder="facebook.com/atakaricilik"
+                placeholder="facebook.com/pekefe"
               />
             </div>
 
@@ -276,7 +276,7 @@ export default function FooterAdminPage() {
                 value={socialYoutube}
                 onChange={(e) => setSocialYoutube(e.target.value)}
                 className={inputClass}
-                placeholder="youtube.com/@atakaricilik"
+                placeholder="youtube.com/@pekefe"
               />
             </div>
 

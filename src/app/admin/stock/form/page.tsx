@@ -3327,7 +3327,7 @@ function EnterpriseStockFormPage() {
                           type="text"
                           value={form.seoKeywords}
                           onChange={e => setForm({ ...form, seoKeywords: e.target.value })}
-                          placeholder="arı körüğü, paslanmaz körük, arıcılık malzemeleri"
+                          placeholder="arı körüğü, paslanmaz körük, Geleneksel & Doğal Lezzetler"
                           className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
                         />
                       </div>

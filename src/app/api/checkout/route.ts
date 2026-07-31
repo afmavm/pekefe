@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
   try {
     const forwardedHost = request.headers.get('x-forwarded-host');
-    const host = forwardedHost || request.headers.get('host') || 'atakaricilik.com';
-    const cleanHost = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'b2b.atakaricilik.com' : host;
+    const host = forwardedHost || request.headers.get('host') || 'pekefe.com';
+    const cleanHost = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'b2b.pekefe.com' : host;
     const protocol = request.headers.get('x-forwarded-proto') || 'https';
     const hostUrl = `${protocol}://${cleanHost}`;
 

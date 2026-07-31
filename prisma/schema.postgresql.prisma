@@ -329,7 +329,7 @@ model CMSData {
   announcement             String
   announcement2            String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
   maintenanceMode          Boolean @default(false)
-  siteName                 String  @default("Atak Arıcılık")
+  siteName                 String  @default("PEKEFE Geleneksel & Doğal Lezzetler")
   primaryColor             String  @default("#b45309")
   secondaryColor           String  @default("#1F2937")
   siteDescription          String  @default("")

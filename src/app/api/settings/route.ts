@@ -115,7 +115,7 @@ export async function PUT(request: Request) {
       announcement: getVal('announcement', 'string', ''),
       announcement2: getVal('announcement2', 'string', '🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları'),
       maintenanceMode: getVal('maintenanceMode', 'boolean', false),
-      siteName: getVal('siteName', 'string', 'Atak Arıcılık'),
+      siteName: getVal('siteName', 'string', 'PEKEFE Geleneksel & Doğal Lezzetler'),
       primaryColor: getVal('primaryColor', 'string', '#b45309'),
       secondaryColor: getVal('secondaryColor', 'string', '#1F2937'),
       siteDescription: getVal('siteDescription', 'string', ''),
@@ -160,7 +160,7 @@ export async function PUT(request: Request) {
       bankIban: getVal('bankIban', 'string', ''),
       efaturaPrefix: getVal('efaturaPrefix', 'string', 'GIB'),
       earsivPrefix: getVal('earsivPrefix', 'string', 'EAR'),
-      footerText: getVal('footerText', 'string', '© 2026 Atak Arıcılık. Tüm Hakları Saklıdır.'),
+      footerText: getVal('footerText', 'string', '© 2026 PEKEFE Geleneksel & Doğal Lezzetler. Tüm Hakları Saklıdır.'),
       mapCoordinates: getVal('mapCoordinates', 'string', ''),
       dealSectionActive: getVal('dealSectionActive', 'boolean', false),
       // dealProductIds schema.prisma'da String tipi, JSON.stringify ile saklanmalı

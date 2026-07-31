@@ -51,8 +51,8 @@ const SECTION_DEFINITIONS: SectionBlock[] = [
     icon: "🦸",
     visible: true,
     fields: {
-      heroTitle: "Atak Arıcılık Körükleri",
-      heroSubtitle: "Profesyonel Paslanmaz Arıcılık Ekipmanları",
+      heroTitle: "PEKEFE Geleneksel & Doğal Lezzetler Körükleri",
+      heroSubtitle: "Profesyonel Paslanmaz yöresel ürünler",
       buttonText: "Siparişe Başla",
       heroAlignment: "center",
     }
@@ -65,7 +65,7 @@ const SECTION_DEFINITIONS: SectionBlock[] = [
     visible: true,
     fields: {
       categoryTitle: "Ürün Gruplarını Keşfedin",
-      categorySubtitle: "Arıcılık Malzemeleri ve Paslanmaz Ekipmanlar",
+      categorySubtitle: "Geleneksel & Doğal Lezzetler ve Paslanmaz Ekipmanlar",
     }
   },
   {
@@ -104,7 +104,7 @@ const SECTION_DEFINITIONS: SectionBlock[] = [
     visible: true,
     fields: {
       appTitle: "Mobil Uygulamamızı İndirin",
-      appSubtitle: "Atak Arıcılık B2B bayilik sistemi artık cebinizde.",
+      appSubtitle: "PEKEFE Geleneksel & Doğal Lezzetler B2B bayilik sistemi artık cebinizde.",
     }
   },
   {
@@ -133,8 +133,8 @@ const SECTION_DEFINITIONS: SectionBlock[] = [
     icon: "🗒️",
     visible: true,
     fields: {
-      siteName: "Atak Arıcılık",
-      siteDescription: "Fabrikadan Direkt Paslanmaz Arıcılık Ekipmanları",
+      siteName: "PEKEFE Geleneksel & Doğal Lezzetler",
+      siteDescription: "Fabrikadan Direkt Paslanmaz yöresel ürünler",
       footerSlogan: "GELENEKSEL LEZZET VE KALİTE",
       contactPhone: "0 (444) 00 00",
       contactEmail: "info@atakb2b.com",

@@ -191,7 +191,7 @@ export function NewRequisitionClient() {
   const getLastPurchaseInfo = () => {
     if (!activeProduct) return null;
     const lastPrice = activeProduct.cost || activeProduct.price * 0.85;
-    const suppliers = ["Atak Çelik A.Ş.", "Arı Ekipmanları Sanayi", "Petek Ambalaj A.Ş.", "Teknik Metal LTD."];
+    const suppliers = ["Pekefe Çelik A.Ş.", "Arı Ekipmanları Sanayi", "Petek Ambalaj A.Ş.", "Teknik Metal LTD."];
     // Hash product id to keep supplier consistent for demo
     const index = activeProduct.id.charCodeAt(0) % suppliers.length;
     return {

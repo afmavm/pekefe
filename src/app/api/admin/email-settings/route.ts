@@ -51,7 +51,7 @@ export const GET = withAuth<any>(
         smtpPort,
         smtpUser: process.env.SMTP_USER || "",
         smtpPass: process.env.SMTP_PASS || "",
-        smtpFromName: process.env.SMTP_FROM_NAME || "Atak Arıcılık B2B",
+        smtpFromName: process.env.SMTP_FROM_NAME || "PEKEFE Geleneksel & Doğal Lezzetler B2B",
         smtpSecure,
         smtpMaxRetries: Number(process.env.SMTP_MAX_RETRIES) || 3,
         smtpRetryDelay: Number(process.env.SMTP_RETRY_DELAY) || 5,
@@ -116,7 +116,7 @@ export const POST = withAuth<any>(
       if (smtpPass !== undefined) {
         process.env.SMTP_PASS = smtpPass;
       }
-      process.env.SMTP_FROM_NAME = smtpFromName || "Atak Arıcılık B2B";
+      process.env.SMTP_FROM_NAME = smtpFromName || "PEKEFE Geleneksel & Doğal Lezzetler B2B";
       process.env.SMTP_SECURE = secureStr;
       process.env.SMTP_MAX_RETRIES = maxRetriesStr;
       process.env.SMTP_RETRY_DELAY = retryDelayStr;
@@ -135,7 +135,7 @@ export const POST = withAuth<any>(
         SMTP_HOST: smtpHost,
         SMTP_PORT: smtpPort,
         SMTP_USER: smtpUser,
-        SMTP_FROM_NAME: smtpFromName || "Atak Arıcılık B2B",
+        SMTP_FROM_NAME: smtpFromName || "PEKEFE Geleneksel & Doğal Lezzetler B2B",
         SMTP_SECURE: secureStr,
         SMTP_MAX_RETRIES: maxRetriesStr,
         SMTP_RETRY_DELAY: retryDelayStr,

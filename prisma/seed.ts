@@ -117,7 +117,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      email: 'branch_manager@atakaricilik.com',
+      email: 'branch_manager@pekefe.com',
       name: 'Ahmet Şube Yöneticisi',
       password: hashedPassword,
       role: 'BRANCH_MANAGER',
@@ -128,7 +128,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      email: 'warehouse_supervisor@atakaricilik.com',
+      email: 'warehouse_supervisor@pekefe.com',
       name: 'Mehmet Depo Sorumlusu',
       password: hashedPassword,
       role: 'WAREHOUSE_SUPERVISOR',
@@ -140,7 +140,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      email: 'sales_staff@atakaricilik.com',
+      email: 'sales_staff@pekefe.com',
       name: 'Veli Satış Personeli',
       password: hashedPassword,
       role: 'SALES_STAFF',
@@ -162,7 +162,7 @@ async function main() {
   // 1. Categories
   await prisma.categoryDetail.create({
     data: {
-      name: 'Arıcılık',
+      name: 'geleneksel lezzetler',
       attributes: [
         { name: "Malzeme", type: "text", isRequired: true },
         { name: "Hava Kanalı", type: "text", isRequired: false }
@@ -173,7 +173,7 @@ async function main() {
 
   await prisma.categoryDetail.create({
     data: {
-      name: 'Arıcılık Ekipmanları',
+      name: 'yöresel ürünler',
       attributes: [
         { name: "Malzeme", type: "text", isRequired: true },
         { name: "Hava Kanalı", type: "text", isRequired: false },
@@ -335,9 +335,9 @@ async function main() {
 
   const koruk = await prisma.product.create({
     data: {
-      name: 'Atak Pro Paslanmaz Arı Körüğü',
-      sku: 'ATAK-KORUK-01',
-      category: 'Arıcılık',
+      name: 'Pekefe Pro Paslanmaz Arı Körüğü',
+      sku: 'PEKEFE-KORUK-01',
+      category: 'geleneksel lezzetler',
       stock: 150,
       criticalLimit: 20,
       price: 850,
@@ -362,7 +362,7 @@ async function main() {
         specsWeight: "950 Gram (Ekipmansız boş ağırlık)",
         specsDimensions: "28 cm Yükseklik x 10 cm Silindir Çapı",
         specsBellows: "Hakiki Sığır Derisi & Isıl İşlem Görmüş Ahşap Plaka",
-        longDescExtra: "ATAK profesyonel körük serisi, arıcılarımızın konforlu ve güvenli bir arılık yönetimi yapabilmesi için tasarlanmıştır. Gövdede yer alan çelik tel ızgara, körükten çıkan havanın duman odasına kesintisiz iletilmesini sağlarken yanmayı hızlandırır. Koruyucu tel örgü kalkanı, çalışma esnasında gövde ısısının doğrudan elinizle temas etmesini engelleyerek iş kazalarının önüne geçer. Ergonomik tasarımı, uzun süreli kullanımlarda bile bilek yorgunluğuna yol açmaz.",
+        longDescExtra: "PEKEFE profesyonel körük serisi, arıcılarımızın konforlu ve güvenli bir arılık yönetimi yapabilmesi için tasarlanmıştır. Gövdede yer alan çelik tel ızgara, körükten çıkan havanın duman odasına kesintisiz iletilmesini sağlarken yanmayı hızlandırır. Koruyucu tel örgü kalkanı, çalışma esnasında gövde ısısının doğrudan elinizle temas etmesini engelleyerek iş kazalarının önüne geçer. Ergonomik tasarımı, uzun süreli kullanımlarda bile bilek yorgunluğuna yol açmaz.",
         usageGuide: "Körüğün tabanındaki havalandırma sacının altına kuru ot, talaş veya hafif nemlendirilmiş duman kartonunu yerleştirin.\nKutuyu hafifçe ateşleyin ve dumanın kor halinde alev almasını sağlayın.\nİlk kor oluştuktan sonra duman odasının geri kalanını talaş, çam iğnesi veya kuru otla doldurun.\nKörüğü arkasındaki ahşap tabladan ritmik bir şekilde pompalayarak dumanın yoğunlaşmasını sağlayın.\nDuman çıkışı stabil bir hale geldikten sonra kapağı kilitleyin. İşlem bitiminde körüğü asma halkasından dikey bir şekilde muhafaza edin.",
         warrantyInfo: "Tüm metal parçalar, korozyon ve paslanmaya karşı 2 Yıl Üretici Garantisi altındadır.\nKörük derisinin aşınması veya ahşap parçanın su teması sebebiyle deforme olması garanti kapsamı dışındadır, ancak teknik servisimizden yedek körük temin edilebilir.\nKullanım kılavuzundaki yönergelere uygun olmayan aşırı yakıt doldurma kaynaklı metal eğrilmeleri garanti kapsamında değerlendirilmez."
       },
@@ -373,8 +373,8 @@ async function main() {
   const elbise = await prisma.product.create({
     data: {
       name: 'Tam Koruma Arıcı Elbisesi',
-      sku: 'ATAK-ELBISE-01',
-      category: 'Arıcılık',
+      sku: 'PEKEFE-ELBISE-01',
+      category: 'geleneksel lezzetler',
       stock: 80,
       criticalLimit: 10,
       price: 1200,
@@ -389,8 +389,8 @@ async function main() {
   const set = await prisma.product.create({
     data: {
       name: 'Kovan Bakım Seti',
-      sku: 'ATAK-SET-01',
-      category: 'Arıcılık',
+      sku: 'PEKEFE-SET-01',
+      category: 'geleneksel lezzetler',
       stock: 120,
       criticalLimit: 15,
       price: 650,
@@ -406,7 +406,7 @@ async function main() {
     data: {
       name: 'Profesyonel Galvaniz Arıcı Körüğü',
       sku: 'KORUK-GALV-01',
-      category: 'Arıcılık Ekipmanları',
+      category: 'yöresel ürünler',
       stock: 10,
       criticalLimit: 5,
       price: 350,
@@ -477,17 +477,17 @@ async function main() {
   // 5. CMS
   const cmsDataFields = {
     heroTitle: "Arıcılığın Gücünü Hissedin.",
-    heroSubtitle: "Fabrikadan direkt, ATAK profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.",
+    heroSubtitle: "Fabrikadan direkt, PEKEFE profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.",
     buttonText: "Ürünleri Keşfet",
     announcement: "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!",
-    siteName: "Atak Arıcılık",
-    primaryColor: "#b45309", // Amber-700 - arıcılık altın rengi
-    siteDescription: "Türkiye'nin 1 Numaralı Profesyonel Arıcılık Ekipmanı Üreticisi",
+    siteName: "PEKEFE Geleneksel & Doğal Lezzetler",
+    primaryColor: "#b45309", // Amber-700 - geleneksel lezzetler altın rengi
+    siteDescription: "Türkiye'nin 1 Numaralı Profesyonel geleneksel lezzetler Ekipmanı Üreticisi",
     footerSlogan: "FABRİKADAN DİREKT",
     contactPhone: "0(544) 149 4851",
-    contactEmail: "info@atakaricilik.com",
+    contactEmail: "info@pekefe.com",
     contactAddress: "Organize Sanayi Bölgesi, Manisa",
-    companyName: "Atak Arıcılık San. ve Tic. Ltd. Şti.",
+    companyName: "PEKEFE Geleneksel & Doğal Lezzetler San. ve Tic. Ltd. Şti.",
     bankName: "Ziraat Bankası",
     bankIban: "TR12 0001 0023 4567 8901 2345 67",
     socialWhatsapp: "05441494851",
@@ -513,8 +513,8 @@ async function main() {
         category: "Ürün ve Üretim",
         iconName: "ShieldCheck",
         questions: [
-          { q: "Arı körükleriniz hangi malzemeden imal edilmektedir?", a: "Tüm Atak Pro körüklerimiz paslanma ve kararmaya karşı son derece dayanıklı 304 sınıf paslanmaz çelikten kendi imalat tesislerimizde yerli olarak üretilmektedir." },
-          { q: "Ürünlerin garanti kapsamı nedir?", a: "Atak Arıcılık olarak ürettiğimiz tüm paslanmaz körükler ve arıcı elbiseleri imalat ve tasarım hatalarına karşı 2 yıl üretici garantisi altındadır." }
+          { q: "Arı körükleriniz hangi malzemeden imal edilmektedir?", a: "Tüm Pekefe Pro körüklerimiz paslanma ve kararmaya karşı son derece dayanıklı 304 sınıf paslanmaz çelikten kendi imalat tesislerimizde yerli olarak üretilmektedir." },
+          { q: "Ürünlerin garanti kapsamı nedir?", a: "PEKEFE Geleneksel & Doğal Lezzetler olarak ürettiğimiz tüm paslanmaz körükler ve arıcı elbiseleri imalat ve tasarım hatalarına karşı 2 yıl üretici garantisi altındadır." }
         ]
       },
       {
@@ -544,7 +544,7 @@ async function main() {
       name: 'Ana Sayfa',
       status: 'Yayında',
       sections: JSON.stringify([
-        { id: "s1", type: "hero", title: "Büyük Karşılama (Hero)", content: { heroTitle: "Arıcılığın Gücünü Hissedin.", heroSubtitle: "Fabrikadan direkt, ATAK profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.", buttonText: "Ürünleri Keşfet" } },
+        { id: "s1", type: "hero", title: "Büyük Karşılama (Hero)", content: { heroTitle: "Arıcılığın Gücünü Hissedin.", heroSubtitle: "Fabrikadan direkt, PEKEFE profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.", buttonText: "Ürünleri Keşfet" } },
         { id: "s2", type: "features", title: "Özellikler (Grid)", content: { items: 3 } }
       ])
     },
@@ -553,7 +553,7 @@ async function main() {
       slug: '/',
       status: 'Yayında',
       sections: JSON.stringify([
-        { id: "s1", type: "hero", title: "Büyük Karşılama (Hero)", content: { heroTitle: "Arıcılığın Gücünü Hissedin.", heroSubtitle: "Fabrikadan direkt, ATAK profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.", buttonText: "Ürünleri Keşfet" } },
+        { id: "s1", type: "hero", title: "Büyük Karşılama (Hero)", content: { heroTitle: "Arıcılığın Gücünü Hissedin.", heroSubtitle: "Fabrikadan direkt, PEKEFE profesyonel körük ve ekipmanlarıyla kovanlarınızı ustaca yönetin.", buttonText: "Ürünleri Keşfet" } },
         { id: "s2", type: "features", title: "Özellikler (Grid)", content: { items: 3 } }
       ])
     }
@@ -567,7 +567,7 @@ async function main() {
       content: {
         badge: "%100 Yerli İmalat Güvencesi",
         title: "Kovanlarınız İçin Teknoloji & Güven",
-        subtitle: "2021 yılından beri geleneksel arıcılık deneyimini modern üretim teknolojileriyle birleştiriyor, arıcılarımızın emeğine yüksek kaliteli ekipmanlarımızla değer katıyoruz."
+        subtitle: "2021 yılından beri geleneksel geleneksel lezzetler deneyimini modern üretim teknolojileriyle birleştiriyor, arıcılarımızın emeğine yüksek kaliteli ekipmanlarımızla değer katıyoruz."
       }
     },
     {
@@ -578,8 +578,8 @@ async function main() {
         badge: "Hikayemiz",
         title: "Arıcılığın Geleceğine Güvenli Dokunuş: Biz Kimiz?",
         paragraphs: [
-          "2021 yılında, arıcılık sektörünün en temel ve hayati ihtiyaçlarından biri olan arıcı körüğü üretimiyle yolculuğumuza başladık. Kuruluşumuzdan bu yana, geleneksel arıcılık kültürünü modern üretim teknolojileriyle harmanlayarak, hem arıcılarımızın işini kolaylaştırmayı hem de arı kolonilerinin sağlığını korumayı kendimize misyon edindik.",
-          "Kısa sürede üretim kapasitemizi ve ürün çeşitliliğimizi artırarak, sektörde kalitenin ve güvenin adresi konumuna geldik. Bugün, yüksek malzeme kalitesine sahip, dayanıklı ve ergonomik arıcı körüklerimizin yanı sıra, arıcılık sektörünün tüm ihtiyaçlarına yanıt veren geniş bir ürün yelpazesini Atak Arıcılık markamız altında tek bir çatıda buluşturuyoruz."
+          "2021 yılında, doğal gıda sektörünün en temel ve hayati ihtiyaçlarından biri olan arıcı körüğü üretimiyle yolculuğumuza başladık. Kuruluşumuzdan bu yana, geleneksel geleneksel lezzetler kültürünü modern üretim teknolojileriyle harmanlayarak, hem arıcılarımızın işini kolaylaştırmayı hem de arı kolonilerinin sağlığını korumayı kendimize misyon edindik.",
+          "Kısa sürede üretim kapasitemizi ve ürün çeşitliliğimizi artırarak, sektörde kalitenin ve güvenin adresi konumuna geldik. Bugün, yüksek malzeme kalitesine sahip, dayanıklı ve ergonomik arıcı körüklerimizin yanı sıra, doğal gıda sektörünün tüm ihtiyaçlarına yanıt veren geniş bir ürün yelpazesini PEKEFE Geleneksel & Doğal Lezzetler markamız altında tek bir çatıda buluşturuyoruz."
         ],
         bullets: [
           "Kendi Tesisimizde Kalın Sac İmalatı",
@@ -588,7 +588,7 @@ async function main() {
           "Türkiye'nin 81 İline Anında Sevkiyat"
         ],
         foundingYear: "2021",
-        foundingText: "2021'den bu yana Erzurum fabrikamızda 304 paslanmaz çelik saclarla üretilen yerli ve orijinal ATAK ekipmanları."
+        foundingText: "2021'den bu yana Erzurum fabrikamızda 304 paslanmaz çelik saclarla üretilen yerli ve orijinal PEKEFE ekipmanları."
       }
     },
     {
@@ -597,9 +597,9 @@ async function main() {
       title: "Misyon & Vizyon",
       content: {
         missionTitle: "Misyonumuz",
-        missionText: "Arıcılarımızın emeklerine değer katacak, en zorlu saha şartlarında bile yüksek performans gösterecek birinci sınıf arıcılık ekipmanlarını üretmek ve güvenilir tedarik ağımızla Türkiye'nin dört bir yanına ulaştırmaktır.",
+        missionText: "Arıcılarımızın emeklerine değer katacak, en zorlu saha şartlarında bile yüksek performans gösterecek birinci sınıf yöresel ürünlernı üretmek ve güvenilir tedarik ağımızla Türkiye'nin dört bir yanına ulaştırmaktır.",
         visionTitle: "Vizyonumuz",
-        visionText: "Yenilikçi AR-GE yatırımlarımızla, Türkiye'de arıcı körüğü ve arıcılık ekipmanları denildiğinde akla gelen ilk yerli üretici olmak ve kalitemizi küresel pazara taşıyarak uluslararası standartlarda öncü bir marka haline gelmektir."
+        visionText: "Yenilikçi AR-GE yatırımlarımızla, Türkiye'de arıcı körüğü ve yöresel ürünler denildiğinde akla gelen ilk yerli üretici olmak ve kalitemizi küresel pazara taşıyarak uluslararası standartlarda öncü bir marka haline gelmektir."
       }
     },
     {
@@ -607,7 +607,7 @@ async function main() {
       type: "stats",
       title: "Rakamlarla Biz",
       content: {
-        title: "Rakamlarla Atak Arıcılık",
+        title: "Rakamlarla PEKEFE Geleneksel & Doğal Lezzetler",
         items: [
           { value: "2021", label: "Kuruluş Yılı" },
           { value: "3.500+", label: "Memnun Arıcı Müşteri" },

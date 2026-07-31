@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const invoiceId = `NEX${new Date().getFullYear()}${Math.floor(Math.random() * 900000000 + 100000000)}`;
     
     // Query dynamic CMS site name for supplier company branding
-    let companyName = "ATAK ARICILIK LİMİTED ŞİRKETİ";
+    let companyName = "PEKEFE GERÇEK HASAT LİMİTED ŞİRKETİ";
     let companyVkn = "1234567890";
     let companyTaxOffice = "Boğaziçi";
     let companyAddress = "Kayseri OSB 1. Cadde No: 5";

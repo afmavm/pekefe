@@ -198,7 +198,7 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
             <h2 className="text-4xl font-extrabold tracking-tight mb-4">{content.categoryTitle || "Kategoriler"}</h2>
             <p className="text-zinc-400 font-medium max-w-xl mx-auto mb-12">{content.categorySubtitle}</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/products?category=Arıcılık" className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 rounded-xl font-bold border border-zinc-800 transition">Arıcılık Ekipmanları</Link>
+              <Link href="/products?category=geleneksel lezzetler" className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 rounded-xl font-bold border border-zinc-800 transition">yöresel ürünler</Link>
               <Link href="/products" className="px-6 py-3 rounded-xl font-bold text-white transition hover:brightness-110" style={{ backgroundColor: primaryRGB }}>Tüm Ürünler</Link>
             </div>
           </div>
@@ -226,7 +226,7 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
                   <div className="w-24 h-4 bg-zinc-800 rounded-full mx-auto mb-6"></div>
                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
                     <ShoppingBag className="w-16 h-16 text-zinc-700 animate-pulse" />
-                    <div className="text-sm font-black text-zinc-400">Atak B2B App</div>
+                    <div className="text-sm font-black text-zinc-400">PEKEFE B2B App</div>
                   </div>
                   <div className="w-16 h-1 bg-zinc-800 rounded-full mx-auto mt-6"></div>
                 </div>
@@ -272,7 +272,7 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
 
     case "pricing":
       const tiers = Array.isArray(content.tiers) ? content.tiers : [
-        { name: "Standart", price: "0 TL", features: ["15 güne kadar vade", "Tüm arıcılık ekipmanlarına erişim", "Mobil uygulama siparişi"] },
+        { name: "Standart", price: "0 TL", features: ["15 güne kadar vade", "Tüm yöresel ürünlerna erişim", "Mobil uygulama siparişi"] },
         { name: "Platin Üye", price: "Fiyat Sorun", features: ["60 güne kadar vade", "Özel nakliye & hızlı sevkiyat", "Hacimli ürünlerde ek %10 indirim"] }
       ];
       return (
@@ -306,8 +306,8 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
 
     case "testimonials":
       const reviews = Array.isArray(content.reviews) ? content.reviews : [
-        { author: "Hasan Polat", role: "Polat Arıcılık Çiftliği", text: "Erzurum'dan gelen paslanmaz arı körükleri tam istediğimiz kalitede. Uzun süre sönmeden çalışıyor." },
-        { author: "Zeynep Demir", role: "Demir Arıcılık Kooperatifi", text: "B2B portalı üzerinden sipariş vermek çok kolay. Vade süreleri ve bayi iskonto oranları çok avantajlı." }
+        { author: "Hasan Polat", role: "Polat geleneksel lezzetler Çiftliği", text: "Erzurum'dan gelen paslanmaz arı körükleri tam istediğimiz kalitede. Uzun süre sönmeden çalışıyor." },
+        { author: "Zeynep Demir", role: "Demir geleneksel lezzetler Kooperatifi", text: "B2B portalı üzerinden sipariş vermek çok kolay. Vade süreleri ve bayi iskonto oranları çok avantajlı." }
       ];
       return (
         <Wrapper baseClass="py-20 bg-zinc-950 text-white" wrapperId={wrapperId} wrapperClass={wrapperClass} wrapperStyle={wrapperStyle} customCss={customCss}>
@@ -379,8 +379,8 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
         >
           <div className="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-col items-center md:items-start gap-2">
-              <span className="text-white font-extrabold uppercase tracking-widest">{content.siteName || "Atak Arıcılık B2B"}</span>
-              <p className="text-zinc-600 text-center md:text-left">{content.siteDescription || "Türkiye'nin Lider Arıcılık Ekipmanı B2B Platformu"}</p>
+              <span className="text-white font-extrabold uppercase tracking-widest">{content.siteName || "PEKEFE Geleneksel & Doğal Lezzetler B2B"}</span>
+              <p className="text-zinc-600 text-center md:text-left">{content.siteDescription || "Türkiye'nin Lider geleneksel lezzetler Ekipmanı B2B Platformu"}</p>
             </div>
             <div className="flex gap-6">
               <a href="/products" className="hover:text-zinc-300 transition">Katalog</a>
@@ -389,7 +389,7 @@ export const CMSSectionRenderer: React.FC<SectionProps> = ({ type, content, prim
             </div>
             <div className="flex flex-col items-center md:items-end gap-1.5 text-zinc-600">
               <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {content.contactPhone || "0544 149 48 51"}</span>
-              <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {content.contactEmail || "info@atakaricilik.com"}</span>
+              <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {content.contactEmail || "info@pekefe.com"}</span>
             </div>
           </div>
         </footer>

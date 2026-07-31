@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-webhook-signature') || request.headers.get('x-wc-webhook-signature');
     const authHeader = request.headers.get('authorization');
     
-    const secret = process.env.ECOMMERCE_WEBHOOK_SECRET || 'atakaricilik_webhook_secret_2026';
-    const expectedToken = process.env.ECOMMERCE_WEBHOOK_TOKEN || 'atakaricilik_auth_token_2026';
+    const secret = process.env.ECOMMERCE_WEBHOOK_SECRET || 'pekefe_webhook_secret_2026';
+    const expectedToken = process.env.ECOMMERCE_WEBHOOK_TOKEN || 'pekefe_auth_token_2026';
 
     let isAuthorized = false;
 
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     const orderNumber = parsedPayload.order_id;
     const orderDateFormatted = parsedPayload.created_at ? new Date(parsedPayload.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
 
-    let companyName = "ATAK ARICILIK LİMİTED ŞİRKETİ";
+    let companyName = "PEKEFE GERÇEK HASAT LİMİTED ŞİRKETİ";
     let companyVkn = "1234567890";
     let companyTaxOffice = "Boğaziçi";
     let companyAddress = "Kayseri OSB 1. Cadde No: 5";

@@ -429,7 +429,7 @@ export default function MovementsList({
 
         exportToPDF({
           title: "Stok Hareketleri Audit Log Raporu",
-          subtitle: "Atak Aricilik ERP Envanter Takip Sistemi",
+          subtitle: "Pekefe Aricilik ERP Envanter Takip Sistemi",
           filename: "stok_hareketleri_tumu",
           headers,
           rows,

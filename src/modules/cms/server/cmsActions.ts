@@ -66,10 +66,10 @@ export async function getCmsSettingsAndPages() {
     return {
       cmsData: {
         id: "singleton",
-        siteName: "Atak Arıcılık",
+        siteName: "PEKEFE Geleneksel & Doğal Lezzetler",
         primaryColor: "#b45309",
         secondaryColor: "#1F2937",
-        heroTitle: "Erzurum'dan Türkiye'ye Arıcılık Ekipmanları",
+        heroTitle: "Erzurum'dan Türkiye'ye yöresel ürünler",
         heroSubtitle: "%100 Yerli İmalat Paslanmaz Arı Körükleri",
         buttonText: "Ürünleri İncele",
         announcement: "Yeni Sezon Körük Modellerimiz Satışta!",
@@ -175,7 +175,7 @@ export async function updateCmsSettingsAction(values: any) {
       /* 4  */ s(merged.announcement),
       /* 5  */ s(merged.announcement2),
       /* 6  */ b(merged.maintenanceMode),
-      /* 7  */ s(merged.siteName, 'Atak Arıcılık'),
+      /* 7  */ s(merged.siteName, 'PEKEFE Geleneksel & Doğal Lezzetler'),
       /* 8  */ s(merged.primaryColor, '#b45309'),
       /* 9  */ s(merged.secondaryColor, '#1F2937'),
       /* 10 */ s(merged.siteDescription),

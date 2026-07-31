@@ -4,11 +4,11 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-export default function WhyAtak() {
+export default function WhyPekefe() {
   const t = useTranslations("Home");
 
   return (
-    <section id="neden-atak" className="py-24 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111827]/10 scroll-mt-20 sm:scroll-mt-24">
+    <section id="neden-pekefe" className="py-24 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111827]/10 scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">

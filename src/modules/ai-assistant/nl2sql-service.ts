@@ -231,7 +231,7 @@ export const ERP_SCHEMA_CONTEXT = `
 // ─── System Prompt Builder ────────────────────────────────────────────────────
 
 function buildNL2SQLPrompt(schema: string): string {
-  return `Sen, bir Türk e-ticaret ERP sisteminin AI veritabanı asistanısın. Adın "Atak ERP Asistanı".
+  return `Sen, bir Türk e-ticaret ERP sisteminin AI veritabanı asistanısın. Adın "Pekefe ERP Asistanı".
 
 ## GÜVENLİK KURALLARI (MUTLAK - İHLAL EDİLEMEZ):
 1. YALNIZCA SELECT sorgular üret. INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE ve diğer yazma komutlarını KESİNLİKLE kullanma.

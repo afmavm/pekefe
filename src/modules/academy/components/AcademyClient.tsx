@@ -8,9 +8,9 @@ import { AcademyCourse } from "../types";
 
 const INITIAL_COURSES: AcademyCourse[] = [
   {
-    id: "course-aricilik-masterclass",
-    title: "Yüksek Rakım Geleneksel Arıcılık Ustalık Sınıfı",
-    category: "Arıcılık",
+    id: "course-pekefe-masterclass",
+    title: "Yüksek Rakım Geleneksel geleneksel lezzetler Ustalık Sınıfı",
+    category: "geleneksel lezzetler",
     instructor: "İlhan Efe (Baş Arıcı & Usta Zanaatkar)",
     duration: "6 Hafta (Modüler)",
     lessonsCount: 18,

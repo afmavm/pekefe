@@ -544,7 +544,7 @@ export async function POST(request: NextRequest) {
       }
 
       return order;
-    });
+    }, { maxWait: 10000, timeout: 30000 });
 
     // 3. E-posta bildirimi (Kuyruğa al) — Müşteriye sipariş onayı
     if (customerEmail !== "guest@nexab2b.com") {

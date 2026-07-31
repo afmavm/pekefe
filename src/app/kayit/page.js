@@ -190,7 +190,7 @@ export default function Kayit() {
                   type="text" required
                   autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
-                  placeholder="Mehmet Yılmaz"
+                  placeholder=""
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
@@ -208,7 +208,7 @@ export default function Kayit() {
                   type="email" required
                   autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
-                  placeholder="ornek@mail.com"
+                  placeholder=""
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -226,7 +226,7 @@ export default function Kayit() {
                   type="tel" required
                   autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
-                  placeholder="05XX XXX XX XX"
+                  placeholder=""
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value);
@@ -244,7 +244,7 @@ export default function Kayit() {
                   type={showPassword ? "text" : "password"} required
                   autoComplete="new-password"
                   className="w-full pl-10 pr-11 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
-                  placeholder="••••••••"
+                  placeholder=""
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -278,6 +278,7 @@ export default function Kayit() {
                 <input
                   type={showConfirm ? "text" : "password"} required
                   autoComplete="new-password"
+                  placeholder=""
                   className={`w-full pl-10 pr-11 py-3.5 rounded-xl border bg-gray-50 focus:bg-white focus:ring-2 transition-all text-sm outline-none placeholder:text-gray-400 ${
                     confirmPassword && confirmPassword !== password
                       ? "border-red-300 focus:border-red-400 focus:ring-red-100"

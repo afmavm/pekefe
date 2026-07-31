@@ -165,7 +165,7 @@ export default function Giris() {
           </div>
 
           {/* Form */}
-          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate autoComplete="off">
             {/* E-posta */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
@@ -175,8 +175,9 @@ export default function Giris() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">mail</span>
                 <input
                   type="email"
+                  autoComplete="off"
                   className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all duration-200 text-sm outline-none placeholder:text-gray-400"
-                  placeholder="ornek@pekefe.com"
+                  placeholder=""
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -193,8 +194,9 @@ export default function Giris() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">lock</span>
                 <input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   className="w-full pl-11 pr-12 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all duration-200 text-sm outline-none placeholder:text-gray-400"
-                  placeholder="••••••••"
+                  placeholder=""
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

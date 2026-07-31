@@ -570,9 +570,9 @@ export default function UrunDetay({ params }) {
           
           {/* LEFT: Spacious Gallery Display (7 Columns) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] w-full relative shadow-md group">
+            <div className="bg-surface-container-low/60 rounded-2xl overflow-hidden border border-outline-variant/20 aspect-square max-h-[600px] w-full relative shadow-sm group flex items-center justify-center p-2">
               {product?.tag && (
-                <span className="absolute top-6 left-6 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-4 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest z-10">
+                <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest z-10">
                   {product.tag}
                 </span>
               )}
@@ -590,11 +590,11 @@ export default function UrunDetay({ params }) {
                 </div>
               ) : (
                 <Image
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-105"
                   src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
                   alt={product?.name || "Ürün Görseli"}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />
               )}

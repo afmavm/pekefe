@@ -64,7 +64,7 @@ export default async function proxy(req: NextRequest) {
     }
   }
 
-  if (pathname.startsWith('/en') || pathname.startsWith('/tr')) {
+  if (pathname.startsWith('/en')) {
     return intlMiddleware(req);
   }
 

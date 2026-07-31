@@ -11,22 +11,6 @@ export const tenantStorage = new AsyncLocalStorage<TenantContext>();
 
 const globalForPrisma = global as unknown as { prisma: any };
 
-// Helper to execute out-of-band basePrisma queries safely without deadlocking active transactions in SQLite
-const safeBaseQuery = async <T>(queryPromise: Promise<T>, timeoutMs = 250): Promise<T | null> => {
-  let timeoutId: NodeJS.Timeout;
-  const timeoutPromise = new Promise<null>((resolve) => {
-    timeoutId = setTimeout(() => resolve(null), timeoutMs);
-  });
-  try {
-    const result = await Promise.race([queryPromise, timeoutPromise]);
-    clearTimeout(timeoutId!);
-    return result;
-  } catch {
-    clearTimeout(timeoutId!);
-    return null;
-  }
-};
-
 const createPrismaClient = () => {
   let dbUrl = process.env.DATABASE_URL || "file:./dev.db";
   
@@ -85,54 +69,34 @@ const createPrismaClient = () => {
           const companyId = tenant?.companyId || null;
           const role = tenant?.role || null;
 
-          // 1. Tenant İzolasyonu
+          // 1. Tenant İzolasyonu (Sıfır sub-query, direkt filtre ekleme)
           if (tenant && tenantIsolatedModels.includes(model)) {
             if (role !== "SUPER_ADMIN") {
               const anyArgs = args as any;
 
-              // Read Operations
-              if (["findFirst", "findFirstOrThrow", "findMany", "count", "aggregate", "groupBy"].includes(operation)) {
+              // Read, Update & Delete Operations
+              if (["findFirst", "findFirstOrThrow", "findMany", "count", "aggregate", "groupBy", "update", "delete", "updateMany", "deleteMany"].includes(operation)) {
                 anyArgs.where = anyArgs.where || {};
-                anyArgs.where.companyId = companyId;
-              }
-
-              // Update & Delete Operations (Safe verification using findFirst to bypass Prisma unique validation constraints)
-              if (["update", "delete"].includes(operation)) {
-                if (anyArgs.where) {
-                  const dbModelName = model.charAt(0).toLowerCase() + model.slice(1);
-                  const record = await safeBaseQuery(
-                    (basePrisma as any)[dbModelName].findFirst({
-                      where: {
-                        ...anyArgs.where,
-                        companyId: companyId
-                      },
-                      select: { id: true }
-                    })
-                  );
-                  if (tenant && !record) {
-                    throw new Error(`Record to ${operation} not found in model ${model} or unauthorized access.`);
-                  }
+                if (companyId) {
+                  anyArgs.where.companyId = companyId;
                 }
-              }
-
-              if (["updateMany", "deleteMany"].includes(operation)) {
-                anyArgs.where = anyArgs.where || {};
-                anyArgs.where.companyId = companyId;
               }
 
               // Create Operations (skip user since companyId might be empty or custom)
               if (operation === "create" && model !== "User") {
                 anyArgs.data = anyArgs.data || {};
-                anyArgs.data.companyId = companyId;
+                if (companyId) {
+                  anyArgs.data.companyId = companyId;
+                }
               }
 
               if (operation === "createMany" && model !== "User") {
                 if (Array.isArray(anyArgs.data)) {
                   anyArgs.data = anyArgs.data.map((item: any) => ({
                     ...item,
-                    companyId: companyId,
+                    ...(companyId ? { companyId } : {}),
                   }));
-                } else if (anyArgs.data) {
+                } else if (anyArgs.data && companyId) {
                   anyArgs.data.companyId = companyId;
                 }
               }
@@ -146,63 +110,26 @@ const createPrismaClient = () => {
           }
 
           if (auditTargetModels.includes(model) && ["create", "update", "delete", "upsert"].includes(operation)) {
-            let action = "CREATE";
-            let oldData: any = null;
-            let recordId = "";
-
-            // Güncelleme veya silme öncesi eski veriyi çekiyoruz (safeBaseQuery ile deadlock engellenir)
-            if (operation === "update" || operation === "delete") {
-              action = operation === "update" ? "UPDATE" : "DELETE";
-              try {
-                const anyArgs = args as any;
-                if (anyArgs.where) {
-                  const dbName = model.charAt(0).toLowerCase() + model.slice(1);
-                  oldData = await safeBaseQuery(
-                    (basePrisma as any)[dbName].findUnique({
-                      where: anyArgs.where,
-                    })
-                  );
-                  if (oldData) {
-                    recordId = oldData.id || "";
-                  } else if (anyArgs.where.id) {
-                    recordId = String(anyArgs.where.id);
-                  }
-                }
-              } catch (e) {
-                console.error(`[AUDIT PRE-FETCH ERROR] Failed to fetch old state for ${model}:`, e);
-              }
-            }
-
-            // Ana işlemi çalıştır
+            const anyArgs = args as any;
+            
+            // Ana işlemi doğrudan ve beklemeden çalıştır (sıfır kilitlenme)
             const result = await query(args);
 
-            // Kayıt ID'sini sonuçtan çözmeye çalış
-            if (!recordId && result) {
-              recordId = (result as any).id || "";
-            }
-
-            let newData: any = null;
-            if (operation === "create" || operation === "update" || operation === "upsert") {
-              newData = result;
-              if (operation === "upsert") {
-                action = oldData ? "UPDATE" : "CREATE";
-              }
-            }
+            const resAny = result as any;
+            const recordId = String(resAny?.id || anyArgs?.where?.id || "unknown");
+            const action = operation.toUpperCase();
 
             // Non-blocking log kaydı yaz (ana akışı bekletmeden arka planda çalıştır)
             basePrisma.systemAuditLog.create({
               data: {
                 tableName: model,
-                recordId: String(recordId || "unknown"),
+                recordId,
                 action,
-                oldData: oldData ? JSON.parse(JSON.stringify(oldData)) : null,
-                newData: newData ? JSON.parse(JSON.stringify(newData)) : null,
+                newData: result ? JSON.parse(JSON.stringify(result)) : undefined,
                 userId,
                 companyId,
               }
-            }).catch(err => {
-              console.error("[AUDIT LOG ERROR] Failed to save audit entry:", err);
-            });
+            }).catch(() => {});
 
             return result;
           }

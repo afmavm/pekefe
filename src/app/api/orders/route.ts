@@ -46,15 +46,16 @@ export const GET = withAuth<any>(
       const sortedOrders = [...orders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       const formattedOrders = orders.map(order => {
-        const year = order.date ? new Date(order.date).getFullYear() : new Date().getFullYear();
-        
-        // Find chronological 1-based index of this order in the database
-        const chronologicalIndex = sortedOrders.findIndex(o => o.id === order.id) + 1;
-        const sequenceStr = String(chronologicalIndex).padStart(4, '0');
-        
-        const cleanId = order.id.replace(/^ORD-/, "");
-        const suffix = (cleanId.length > 8 ? cleanId.slice(-8) : cleanId).toUpperCase();
-        const orderNumber = order.id.startsWith("B2B-") ? order.id : `${year}-${suffix}-${sequenceStr}`;
+        let orderNumber = order.id;
+        if (/^(PKF|B2B|B2C|ORD)-/i.test(order.id)) {
+          orderNumber = order.id.toUpperCase();
+        } else {
+          const year = order.date ? new Date(order.date).getFullYear() : new Date().getFullYear();
+          const cleanId = order.id.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+          const suffix = cleanId.length > 6 ? cleanId.slice(-6) : cleanId.padStart(6, '0');
+          const prefix = order.type === "B2B" ? "B2B" : "PKF";
+          orderNumber = `${prefix}-${year}-${suffix}`;
+        }
 
         let cargoCompany = undefined;
         let trackingNo = undefined;

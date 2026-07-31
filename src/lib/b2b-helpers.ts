@@ -72,8 +72,9 @@ export async function generateNextOrderId(typeOrTx?: any, tx?: any): Promise<str
     where: { type: type }
   });
   
+  let prefix = type === "B2B" ? "B2B" : "PKF";
   let nextSeq = count + 1;
-  let customOrderId = `${type}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+  let customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
   
   let isIdUnique = false;
   while (!isIdUnique) {
@@ -82,7 +83,7 @@ export async function generateNextOrderId(typeOrTx?: any, tx?: any): Promise<str
       isIdUnique = true;
     } else {
       nextSeq++;
-      customOrderId = `${type}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+      customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
     }
   }
   return customOrderId;

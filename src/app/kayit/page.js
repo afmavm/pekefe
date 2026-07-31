@@ -25,19 +25,16 @@ export default function Kayit() {
   // Modal State for Legal Documents (prevents page navigation)
   const [activeModal, setActiveModal] = useState(null); // 'terms' | 'privacy' | null
 
-  // ── Form Taslağını Koru (Session Storage Auto-Backup) ──
+  // ── Form Alanlarının Boş Gelmesini Sağla (Clean Empty State) ──
   useEffect(() => {
     try {
-      const savedDraft = sessionStorage.getItem("pekefe_register_draft");
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (parsed.name) setName(parsed.name);
-        if (parsed.email) setEmail(parsed.email);
-        if (parsed.phone) setPhone(parsed.phone);
-      }
-    } catch (e) {
-      console.error("Draft restore error:", e);
-    }
+      sessionStorage.removeItem("pekefe_register_draft");
+    } catch (e) {}
+    setName("");
+    setEmail("");
+    setPhone("");
+    setPassword("");
+    setConfirmPassword("");
   }, []);
 
   // Form alanları değiştikçe taslağı güncelle
@@ -182,7 +179,7 @@ export default function Kayit() {
           </div>
 
           {/* Form */}
-          <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+          <form className="space-y-4" onSubmit={handleSubmit} noValidate autoComplete="off">
 
             {/* Ad Soyad */}
             <div className="space-y-1.5">
@@ -191,12 +188,12 @@ export default function Kayit() {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[18px]">person</span>
                 <input
                   type="text" required
+                  autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
                   placeholder="Mehmet Yılmaz"
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
-                    updateDraft("name", e.target.value);
                   }}
                 />
               </div>
@@ -209,12 +206,12 @@ export default function Kayit() {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[18px]">mail</span>
                 <input
                   type="email" required
+                  autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
                   placeholder="ornek@mail.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    updateDraft("email", e.target.value);
                   }}
                 />
               </div>
@@ -227,12 +224,12 @@ export default function Kayit() {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[18px]">phone_iphone</span>
                 <input
                   type="tel" required
+                  autoComplete="off"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
                   placeholder="05XX XXX XX XX"
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value);
-                    updateDraft("phone", e.target.value);
                   }}
                 />
               </div>
@@ -245,6 +242,7 @@ export default function Kayit() {
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[18px]">lock</span>
                 <input
                   type={showPassword ? "text" : "password"} required
+                  autoComplete="new-password"
                   className="w-full pl-10 pr-11 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none placeholder:text-gray-400"
                   placeholder="••••••••"
                   value={password}
@@ -279,6 +277,7 @@ export default function Kayit() {
                 </span>
                 <input
                   type={showConfirm ? "text" : "password"} required
+                  autoComplete="new-password"
                   className={`w-full pl-10 pr-11 py-3.5 rounded-xl border bg-gray-50 focus:bg-white focus:ring-2 transition-all text-sm outline-none placeholder:text-gray-400 ${
                     confirmPassword && confirmPassword !== password
                       ? "border-red-300 focus:border-red-400 focus:ring-red-100"

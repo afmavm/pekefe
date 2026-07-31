@@ -570,9 +570,9 @@ export default function UrunDetay({ params }) {
           
           {/* LEFT: Spacious Gallery Display (7 Columns) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] w-full flex items-center justify-center p-4 relative">
+            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] w-full relative shadow-md group">
               {product?.tag && (
-                <span className="absolute top-6 left-6 bg-secondary text-white font-label-sm text-[9px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-sm tracking-widest z-10">
+                <span className="absolute top-6 left-6 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-4 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest z-10">
                   {product.tag}
                 </span>
               )}
@@ -590,7 +590,7 @@ export default function UrunDetay({ params }) {
                 </div>
               ) : (
                 <Image
-                  className="object-contain p-6 transition-transform duration-700 hover:scale-105"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
                   alt={product?.name || "Ürün Görseli"}
                   fill
@@ -606,8 +606,8 @@ export default function UrunDetay({ params }) {
                 <button
                   key={index}
                   onClick={() => setSelectedMedia(item)}
-                  className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer p-2 w-20 flex-shrink-0 transition-all ${
-                    selectedMedia?.url === item.url ? "border-primary shadow-md ring-2 ring-primary/20" : "border-outline-variant/30 hover:border-outline"
+                  className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer w-20 flex-shrink-0 transition-all ${
+                    selectedMedia?.url === item.url ? "border-primary shadow-md ring-2 ring-primary/20 scale-105" : "border-outline-variant/30 hover:border-outline opacity-80 hover:opacity-100"
                   }`}
                 >
                   {item.type === "video" || isVideoUrl(item.url) ? (
@@ -616,7 +616,7 @@ export default function UrunDetay({ params }) {
                       <span className="text-[8px] font-black uppercase tracking-wider mt-0.5">VIDEO</span>
                     </div>
                   ) : (
-                    <Image className="object-contain p-2" src={item.url} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
+                    <Image className="object-cover" src={item.url} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
                   )}
                 </button>
               )) : (
@@ -624,11 +624,11 @@ export default function UrunDetay({ params }) {
                   <button
                     key={index}
                     onClick={() => setSelectedMedia({ type: "image", url: img })}
-                    className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer p-3 w-20 flex-shrink-0 transition-all ${
-                      selectedMedia?.url === img ? "border-primary shadow-sm" : "border-outline-variant/30 hover:border-outline"
+                    className={`relative aspect-square bg-surface-container-low rounded-xl border overflow-hidden cursor-pointer w-20 flex-shrink-0 transition-all ${
+                      selectedMedia?.url === img ? "border-primary shadow-md ring-2 ring-primary/20 scale-105" : "border-outline-variant/30 hover:border-outline opacity-80 hover:opacity-100"
                     }`}
                   >
-                    <Image className="object-contain p-3" src={img} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
+                    <Image className="object-cover" src={img} alt={`${product?.name} görsel ${index + 1}`} fill sizes="80px" />
                   </button>
                 ))
               )}

@@ -222,16 +222,10 @@ export default function ProductCardClient({
           unoptimized
           quality={65}
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-          className={`transition-[transform,opacity] duration-700 ease-out lg:group-hover:scale-105 ${
+          className={`transition-[transform,opacity] duration-700 ease-out lg:group-hover:scale-105 object-cover p-0 ${
             isImageLoaded ? "opacity-100" : "opacity-0"
           } ${
             isOutOfStock ? "opacity-40 grayscale" : ""
-          } ${
-            (imageUrl.includes("unsplash.com") || imageUrl.includes("uploads/")) && 
-            !imageUrl.toLowerCase().endsWith(".png") && 
-            !imageUrl.toLowerCase().endsWith(".svg")
-              ? "object-cover p-0"
-              : "object-contain p-4"
           }`}
           onLoad={() => setIsImageLoaded(true)}
           priority={false}

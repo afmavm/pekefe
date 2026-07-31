@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Toast } from "@/components/ui/Toast";
 import { getCart, clearCart } from "@/utils/cartStorage";
+import { turkeyLocations } from "@/data/turkey-locations";
 
 export default function Odeme() {
   const router = useRouter();
@@ -78,7 +79,15 @@ export default function Odeme() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "city") {
+      setFormData((prev) => ({
+        ...prev,
+        city: value,
+        district: "", // Reset district when city changes
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCardNumberChange = (e) => {
@@ -350,31 +359,48 @@ export default function Odeme() {
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
                 >
-                  <option value="İstanbul">İstanbul</option>
-                  <option value="Ankara">Ankara</option>
-                  <option value="İzmir">İzmir</option>
-                  <option value="Erzurum">Erzurum</option>
-                  <option value="Bursa">Bursa</option>
-                  <option value="Antalya">Antalya</option>
-                  <option value="Trabzon">Trabzon</option>
-                  <option value="Adana">Adana</option>
-                  <option value="Kocaeli">Kocaeli</option>
-                  <option value="Diğer">Diğer İller</option>
+                  <option value="" disabled>İl Seçiniz</option>
+                  {Object.keys(turkeyLocations)
+                    .sort((a, b) => a.localeCompare(b, "tr"))
+                    .map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">İLEÇE</label>
-                <input
-                  name="district"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                  placeholder="Kadıköy"
-                  type="text"
-                />
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">İLÇE *</label>
+                {formData.city && turkeyLocations[formData.city]?.length > 0 ? (
+                  <select
+                    name="district"
+                    value={formData.district}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
+                  >
+                    <option value="" disabled>İlçe Seçiniz</option>
+                    {turkeyLocations[formData.city].map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    name="district"
+                    value={formData.district}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                    placeholder="İlçe giriniz"
+                    type="text"
+                    required
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2 space-y-1.5">

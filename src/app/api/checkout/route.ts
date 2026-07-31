@@ -493,14 +493,39 @@ export async function POST(request: NextRequest) {
       return order;
     });
 
-    // 3. E-posta bildirimi (Kuyruğa al)
+    // 3. E-posta bildirimi (Kuyruğa al) — Müşteriye sipariş onayı
     if (customerEmail !== "guest@nexab2b.com") {
       try {
+        // Sipariş içeriği — her ürünü satır satır listele
+        const customerOrderItemsText = cart
+          .map((item: any) => `• ${item.name} × ${item.quantity} adet — ₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}`)
+          .join("\n");
+
+        // Teslimat adresi
+        const shippingAddr = shippingAddress
+          ? `${shippingAddress.firstName} ${shippingAddress.lastName}\n${shippingAddress.fullAddress}\n${shippingAddress.district} / ${shippingAddress.city}\nTel: ${shippingAddress.phone}`
+          : address;
+
+        const paymentLabel =
+          paymentMethod === "creditCard" ? "Kredi Kartı" :
+          paymentMethod === "bankTransfer" ? "Banka Havalesi / EFT" :
+          "Açık Hesap (Vadeli)";
+
+        const orderDateStr = new Date().toLocaleDateString("tr-TR", {
+          day: "2-digit", month: "long", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        });
+
         await emailNotificationService.queueEmail(customerEmail, "order_received", {
           kullanici_adi: name,
           siparis_no: result.id,
-          siparis_tutari: verifiedTotal.toLocaleString("tr-TR"),
-          detay_linki: `${hostUrl}/track-order?id=${result.id}`
+          siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          siparis_icerik: customerOrderItemsText,
+          odeme_yontemi: paymentLabel,
+          kargo_adresi: shippingAddr,
+          kargo_sirketi: selectedCarrierName || "Standart Kargo",
+          tarih: orderDateStr,
+          detay_linki: `${hostUrl}/hesap`
         });
       } catch (mailErr) {
         console.error("Failed to queue order received email:", mailErr);

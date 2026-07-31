@@ -185,35 +185,64 @@ export class EmailNotificationService {
       order_received: {
         name: "Sipariş Alındı (Sipariş Onayı)",
         subject: "Siparişiniz Alındı — Sipariş No: {{siparis_no}} 📦",
-        variables: "kullanici_adi,siparis_no,siparis_tutari,detay_linki",
+        variables: "kullanici_adi,siparis_no,siparis_tutari,siparis_icerik,odeme_yontemi,kargo_adresi,kargo_sirketi,tarih,detay_linki",
         bodyHtml: `
-          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); background-color: #ffffff;">
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); background-color: #ffffff;">
+            <!-- Header -->
             <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 32px; text-align: center;">
-              <h2 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.05em;">PEKEFE</h2>
-              <p style="color: #fef3c7; font-size: 12px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.15em;">Sipariş Onayı</p>
+              <h2 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 0.05em;">PEKEFE</h2>
+              <p style="color: #fef3c7; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.2em;">Geleneksel & Doğal Lezzetler — Sipariş Onayı</p>
             </div>
+            <!-- Body -->
             <div style="padding: 36px 32px;">
-              <h3 style="color: #1a0a10; margin-top: 0; font-size: 20px; font-weight: 700; text-align: center;">Siparişiniz Başarıyla Alındı!</h3>
-              <p style="color: #475569; font-size: 15px; line-height: 1.7; margin-top: 24px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
-              <p style="color: #475569; font-size: 15px; line-height: 1.7;">Siparişiniz sistemimize ulaşmış ve hazırlık sürecine alınmıştır. Pekefe'yi tercih ettiğiniz için teşekkür ederiz.</p>
-              <div style="background-color: #fffbf5; border: 1px solid #fde68a; border-radius: 12px; padding: 20px; margin: 24px 0;">
+              <div style="text-align: center; margin-bottom: 28px;">
+                <div style="display: inline-block; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 50%; width: 64px; height: 64px; line-height: 64px; font-size: 32px;">✅</div>
+                <h3 style="color: #1a0a10; margin: 16px 0 4px 0; font-size: 22px; font-weight: 800;">Siparişiniz Alındı!</h3>
+                <p style="color: #64748b; font-size: 13px; margin: 0;">{{tarih}}</p>
+              </div>
+              <p style="color: #475569; font-size: 15px; line-height: 1.7;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 15px; line-height: 1.7;">Siparişiniz başarıyla sistemimize ulaşmış ve hazırlık sürecine alınmıştır. Aşağıda sipariş detaylarınızı bulabilirsiniz.</p>
+
+              <!-- Sipariş Özeti -->
+              <div style="background-color: #fffbf5; border: 1px solid #fde68a; border-radius: 14px; padding: 22px; margin: 24px 0;">
+                <p style="margin: 0 0 14px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #92400e;">📋 Sipariş Özeti</p>
                 <table style="width: 100%; font-size: 14px; color: #1e293b; border-collapse: collapse;">
                   <tr>
-                    <td style="padding: 6px 0; font-weight: bold; width: 45%;">Sipariş Numarası:</td>
-                    <td style="padding: 6px 0; font-family: monospace; font-weight: bold; color: #6b1d2f;">{{siparis_no}}</td>
+                    <td style="padding: 7px 0; font-weight: 600; color: #64748b; width: 42%;">Sipariş Numarası</td>
+                    <td style="padding: 7px 0; font-family: monospace; font-weight: 800; color: #6b1d2f;">{{siparis_no}}</td>
                   </tr>
-                  <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Sipariş Tutarı:</td>
-                    <td style="padding: 6px 0; font-weight: bold; color: #15803d;">₺{{siparis_tutari}}</td>
+                  <tr style="border-top: 1px solid #fde68a;">
+                    <td style="padding: 7px 0; font-weight: 600; color: #64748b;">Sipariş Tutarı</td>
+                    <td style="padding: 7px 0; font-weight: 800; color: #15803d; font-size: 16px;">₺{{siparis_tutari}}</td>
+                  </tr>
+                  <tr style="border-top: 1px solid #fde68a;">
+                    <td style="padding: 7px 0; font-weight: 600; color: #64748b;">Ödeme Yöntemi</td>
+                    <td style="padding: 7px 0; font-weight: 600; color: #1e293b;">{{odeme_yontemi}}</td>
                   </tr>
                 </table>
               </div>
-              <div style="text-align: center; margin: 32px 0;">
-                <a href="{{detay_linki}}" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 14px 36px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.25);">Sipariş Detaylarını Görüntüle</a>
+
+              <!-- Ürün Listesi -->
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; margin: 20px 0;">
+                <p style="margin: 0 0 14px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #334155;">🛒 Sipariş Edilen Ürünler</p>
+                <div style="font-size: 14px; color: #475569; line-height: 2; white-space: pre-line;">{{siparis_icerik}}</div>
               </div>
+
+              <!-- Kargo Adresi -->
+              <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 22px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #0369a1;">📦 Kargo Bilgileri</p>
+                <p style="margin: 0; font-size: 14px; color: #1e293b; line-height: 1.7;"><strong>Teslimat Adresi:</strong><br>{{kargo_adresi}}</p>
+              </div>
+
+              <!-- CTA Butonu -->
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="{{detay_linki}}" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 15px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.3);">Sipariş Durumumu Takip Et</a>
+              </div>
+              <p style="color: #64748b; font-size: 13px; line-height: 1.5; text-align: center;">Sorularınız için <a href="mailto:info@pekefe.com" style="color: #6b1d2f;">info@pekefe.com</a> adresinden bize ulaşabilirsiniz.</p>
             </div>
+            <!-- Footer -->
             <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Traditional Excellence. Tüm hakları saklıdır.</p>
             </div>
           </div>
         `
@@ -413,15 +442,17 @@ export class EmailNotificationService {
   ): Promise<string> {
     const cleanEventType = eventType.toLowerCase().trim();
 
+    // Önce veritabanındaki şablona bak
     let template = await prisma.emailTemplate.findUnique({
       where: { eventType: cleanEventType },
     });
 
-    try {
-      template = await this.seedDefaultTemplate(cleanEventType);
-    } catch (seedErr: any) {
-      if (!template) {
-        console.error(`[EmailNotificationService] Failed to upsert template for ${eventType}:`, seedErr);
+    // Şablon DB'de yoksa (veya INACTIVE ise) seed et — mevcut özelleştirmeleri ASLA ezme
+    if (!template) {
+      try {
+        template = await this.seedDefaultTemplate(cleanEventType);
+      } catch (seedErr: any) {
+        console.error(`[EmailNotificationService] Failed to seed template for ${eventType}:`, seedErr);
       }
     }
 

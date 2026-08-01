@@ -3,215 +3,22 @@
 import { use, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import { getProductById, getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { getProductBySlug, getProductById, getProducts, fetchLiveProducts, generateSlug } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import JsonLd from "@/components/seo/JsonLd";
 import { resolveProductMediaItems, isVideoUrl } from "@/lib/utils";
 
-const productsData = {
-  "dut-pekmezi": {
-    name: "Geleneksel İspir Dut Pekmezi",
-    category: "Geleneksel Pekmezler",
-    price: 280,
-    tag: "En Çok Satan",
-    altitude: "2200 Metre",
-    harvestSeason: "Temmuz - Ağustos",
-    images: [
-      "/geleneksel-pekmez.png",
-      "/premium-pekefe-kavanoz.png",
-      "/ispir-meyve-kurutma.png"
-    ],
-    description: "İspir'in 2000 rakımlı yaylalarındaki yabani beyaz dut ağaçlarından toplanıp odun ateşinde ve kalın bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf ve yoğun gövdeli geleneksel dut pekmezi.",
-    details: "Asırlık yabani dut ağaçlarından şafak vakti çarşaflar gerilerek toplanan dutlar, soğuk kaynak sularıyla yıkanıp sıkılır. Elde edilen saf şıra, meşe odunu ateşinde el yapımı bakır kazanlarda (herle) yavaşça karıştırılarak kaynatılır. HMF değerlerinin yükselmemesi için ideal sıcaklıklarda dinlendirilen pekmezimiz, kimyasal koruyucu ve ilave şeker barındırmaz.",
-    ingredients: "100% Saf İspir Beyaz Dut Şırası",
-    ritual: "Oda sıcaklığında (18°C - 22°C), taş değirmen tahini ile %40'a %60 oranında karıştırılarak servis edilmesi önerilir. Karıştırırken metal kaşık yerine ahşap veya seramik kaşık tercih edilmelidir.",
-    nutrients: { energy: "293 kcal", carb: "70.2 g", protein: "0.8 g", calcium: "400 mg", iron: "10.2 mg" },
-    specifications: [
-      { key: "Menşei", value: "Erzurum / İspir" },
-      { key: "Pişirme Yöntemi", value: "Odun Ateşinde Bakır Kazanlar" },
-      { key: "Şeker İlavesi", value: "0.0% (Sadece Doğal Meyve Şekeri)" },
-      { key: "HMF Seviyesi", value: "< 10 mg/kg (Analiz Raporlu)" }
-    ]
-  },
-  "karadut-pekmezi": {
-    name: "Yabani Karadut Pekmezi",
-    category: "Geleneksel Pekmezler",
-    price: 320,
-    tag: "Özel Hasat",
-    altitude: "1800 Metre",
-    harvestSeason: "Ağustos",
-    images: [
-      "/premium-pekefe-kavanoz.png",
-      "/geleneksel-pekmez.png",
-      "/ispir-dut-hasadi.png"
-    ],
-    description: "Geleneksel vakumlu kaynatma tekniği kullanılarak, yüksek sıcaklıklara çıkılmadan meyvenin vitamin ve minerallerini koruyan, yoğun kıvamlı ve hafif ekşimsi butik karadut özü.",
-    details: "Yabani karadut meyvelerinin preslenmesiyle elde edilen şıra, düşük sıcaklıktaki vakumlu kazanlarımızda besin değerlerini yitirmeden yoğunlaştırılır. Karadutun doğal ekşi-tatlı aroması ve yüksek polifenol yapısı korunur. Ağız yaraları, bağışıklık desteği ve doğal enerji deposu olarak bilinir.",
-    ingredients: "100% Yabani Karadut Şırası",
-    ritual: "Sabahları aç karnına bir yemek kaşığı doğrudan tüketilmesi veya ılık kaynak suyuna eklenerek doğal bir meyve şerbeti şeklinde yavaşça yudumlanması önerilir.",
-    nutrients: { energy: "285 kcal", carb: "68.5 g", protein: "1.2 g", calcium: "380 mg", iron: "12.4 mg" },
-    specifications: [
-      { key: "Menşei", value: "Erzurum / İspir" },
-      { key: "Koyulaştırma Yöntemi", value: "Düşük Sıcaklıkta Vakumlu Yoğunlaştırma" },
-      { key: "Katkı Maddesi", value: "Yoktur (Sıfır Koruyucu)" },
-      { key: "Ambalaj", value: "Premium Cam Şişe" }
-    ]
-  },
-  "sade-pestil": {
-    name: "Sade Dut Pestili",
-    category: "Pestil & Köme",
-    price: 180,
-    tag: "Doğal Güneşte Kurutulmuş",
-    altitude: "1900 Metre",
-    harvestSeason: "Temmuz",
-    images: [
-      "/ispir-meyve-kurutma.png",
-      "/el-emegi.png",
-      "/premium-pekefe-kavanoz.png"
-    ],
-    description: "Saf dut şırası ve tam buğday ununun bakır kazanlarda pişirilip keten sergiler üzerine incecik dökülmesi ve İspir güneşi altında doğal olarak kurutulmasıyla üretilen ipeksi sade pestil.",
-    details: "Kazanlarda kaynayan dut şırası, az miktarda tam buğday unu ile bulamaç (herle) kıvamına getirilir. Keten bezlere milimetrik kalınlıkta serilerek İspir'in kuru dağ rüzgarlarında güneş altında kurumaya bırakılır. Kuruyan pestiller bezlerden su yardımıyla sıyrılıp, katlanarak özel kraft kutularına yerleştirilir.",
-    ingredients: "İspir Beyaz Dut Şırası, Tam Buğday Unu, Eser Miktar Bal",
-    ritual: "Yanında taze demlenmiş soğuk çiçek çayı veya Türk kahvesiyle oda sıcaklığında tüketilmesi; arzu edilirse manda kaymağı sarılarak servis edilmesi önerilir.",
-    nutrients: { energy: "380 kcal", carb: "82.0 g", protein: "3.5 g", calcium: "120 mg", iron: "4.0 mg" },
-    specifications: [
-      { key: "Kurutma Şekli", value: "Keten Bezlerde Güneşte Doğal Kurutma" },
-      { key: "Kalınlık", value: "< 1.5mm (İpeksi Tekstür)" },
-      { key: "Şeker İlavesi", value: "Yok (Glikozsuz)" },
-      { key: "Ambalaj", value: "Nem Bariyerli Kraft Kutu" }
-    ]
-  },
-  "cevizli-pestil": {
-    name: "Cevizli Rulo Pestil",
-    category: "Pestil & Köme",
-    price: 220,
-    tag: "Geleneksel Tarif",
-    altitude: "1900 Metre",
-    harvestSeason: "Temmuz - Eylül",
-    images: [
-      "/el-emegi.png",
-      "/ispir-meyve-kurutma.png",
-      "/premium-pekefe-kavanoz.png"
-    ],
-    description: "İspir havzasının yerli cevizleriyle harmanlanan, ipeksi kıvamda serilen geleneksel dut pestilinin rulo haline getirilmiş en asil ve besleyici şekli.",
-    details: "Güneşte kurutulmuş sade dut pestilinin içerisine yerli İspir cevizlerinin dövülerek serpilmesi ve rulo şeklinde sarılmasıyla elde edilir. Cevizin doğal yağ ve protein dengesi, dutun karamelize enerjisiyle birleşerek mükemmel bir atıştırmalık sunar.",
-    ingredients: "Dut Pestili (Dut şırası, un), Yerli İspir Cevizi",
-    ritual: "İnce halkalar şeklinde dilimlenerek, yanında olgunlaştırılmış sert keçi peyniri ile şarküteri tahtalarında servis edilmesi asil bir zıtlık oluşturur.",
-    nutrients: { energy: "410 kcal", carb: "72.4 g", protein: "5.8 g", calcium: "140 mg", iron: "4.8 mg" },
-    specifications: [
-      { key: "Ceviz Oranı", value: "%35 (Yerli İspir Cevizi)" },
-      { key: "Koruyucu", value: "Sıfır (Katkısız)" },
-      { key: "Kurutma", value: "Doğal Rüzgar Altında Güneşte" },
-      { key: "Hediye Kutusu", value: "Premium Ahşap Kaplamalı Kutu" }
-    ]
-  },
-  "ispir-kome": {
-    name: "İspir Dut Kömesi (Cevizli Sucuk)",
-    category: "Pestil & Köme",
-    price: 380,
-    tag: "Coğrafi İşaretli",
-    altitude: "2100 Metre",
-    harvestSeason: "Eylül",
-    images: [
-      "/ispir-dut-hasadi.png",
-      "/vakumlu-uretim.png",
-      "/geleneksel-kazan.png"
-    ],
-    description: "İpe dizilen taze İspir cevizlerinin, kaynayan dut şırası herlesine defalarca daldırılıp İspir'in kuru havasında asılarak kurutulmasıyla elde edilen efsanevi coğrafi tescilli köme.",
-    details: "Ayıklanan taze yerli cevizler pamuk ipliklere dizilir. Odun ateşinde hazırlanan sıcak dut herlesine (şıra, bal, un karışımı) batırılarak üzeri kaplanır. Havada asılarak kurutulan kömeler, kıvamını bulduktan sonra toplanarak paketlenir. Çiğnenebilir, yumuşak ve zengin lif yapılıdır.",
-    ingredients: "İspir Cevizi, Dut Şırası, Süzme Bal, Tam Buğday Unu, Süt",
-    ritual: "Serin bir ortamda saklanmalı, servis etmeden hemen önce ince şeritler halinde verev (asimetrik) dilimlenerek ikram edilmelidir.",
-    nutrients: { energy: "420 kcal", carb: "68.0 g", protein: "6.2 g", calcium: "150 mg", iron: "5.2 mg" },
-    specifications: [
-      { key: "Tescil Tipi", value: "Coğrafi İşaretli Mahsul" },
-      { key: "Ceviz Cinsi", value: "İnce Kabuklu İspir Cevizi" },
-      { key: "Kaplama Sayısı", value: "Üç Kat Daldırma (Maksimum Dolgunluk)" },
-      { key: "Koruyucu Kimyasal", value: "0.0% (Bulunmadı)" }
-    ]
-  },
-  "ispir-tek-cekim-kome": {
-    name: "İspir Tek Çekim Dut Kömesi",
-    category: "Pestil & Köme",
-    price: 240,
-    tag: "Sınırlı Üretim",
-    altitude: "2100 Metre",
-    harvestSeason: "Eylül",
-    images: [
-      "/premium-pekefe-kavanoz.png",
-      "/ispir-dut-hasadi.png",
-      "/geleneksel-kazan.png"
-    ],
-    description: "Ceviz yoğunluğunu hissetmek isteyenler için tasarlanmış, dut herlesine sadece tek bir kez daldırılarak kaplama tabakası ince tutulmuş premium cevizli sucuk serisi.",
-    details: "Yerli İspir cevizleri ipe dizildikten sonra kaynayan şıra kazanına sadece bir kez batırılır. Bu sayede üzerindeki tatlı dış tabaka ince kalır ve cevizlerin kıtırlığı ile aroması en üst perdeden hissedilir. Ağır tatlı sevmeyen gurmelerin bir numaralı tercihidir.",
-    ingredients: "Yerli İspir Cevizi (%50), Dut Şırası, Bal, Un",
-    ritual: "Sıcak espresso veya sert bir Türk kahvesiyle mükemmel uyum sağlar. Kahvenin acılığı, ince tatlı herle kaplamasını mükemmel dengeler.",
-    nutrients: { energy: "445 kcal", carb: "60.4 g", protein: "7.8 g", calcium: "165 mg", iron: "5.5 mg" },
-    specifications: [
-      { key: "Ceviz Oranı", value: "%50 (Yoğun Kıtırlık)" },
-      { key: "Herle Kaplama Kalınlığı", value: "< 1.0mm (Tek Daldırma)" },
-      { key: "Glikoz/Sakkaroz", value: "0.0% (Eklenmemiş)" },
-      { key: "Hasat Yılı", value: "Güncel Sezon Hasadı" }
-    ]
-  },
-  "muska-tatlisi": {
-    name: "Dut Pestil Muska Tatlısı",
-    category: "Geleneksel Tatlılar",
-    price: 200,
-    tag: "El Emeği",
-    altitude: "1900 Metre",
-    harvestSeason: "Temmuz",
-    images: [
-      "/ispir-meyve-kurutma.png",
-      "/el-emegi.png",
-      "/geleneksel-pekmez.png"
-    ],
-    description: "İncecik kesilen sade dut pestilinin içerisine yerli ceviz, bal ve pekmez karışımı yerleştirilerek muska şeklinde katlanan en asil saray tatlısı.",
-    details: "Keten sergilerden sıyrılan taze sade pestiller şeritler halinde kesilir. İçerisine dövülmüş ceviz içi, saf İspir balı ve koyu dut pekmezi karışımı dolgu olarak yerleştirilir. Usta kadınların el emeğiyle muska şeklinde katlanarak hazırlanan bu lezzet lokmaları, ağızda eriyen bir dokuya sahiptir.",
-    ingredients: "Dut Pestili, Yerli Ceviz, Saf Çiçek Balı, Yoğun Dut Pekmezi",
-    ritual: "Oda sıcaklığında, üzerine hafifçe toz antep fıstığı serpiştirilerek ve taze demlenmiş bergamatlı siyah çay ile servis edilmesi önerilir.",
-    nutrients: { energy: "395 kcal", carb: "78.0 g", protein: "4.5 g", calcium: "130 mg", iron: "4.2 mg" },
-    specifications: [
-      { key: "Katlama Biçimi", value: "Geleneksel Muska (Üçgen)" },
-      { key: "İç Dolgu", value: "Ceviz, Bal, Pekmez Karışımı" },
-      { key: "Koruyucu ve Katkı", value: "Kesinlikle İçermez" },
-      { key: "Kutu Tipi", value: "Premium Cam Sunum Kabı" }
-    ]
-  },
-  "sarma-tatlisi": {
-    name: "Dut Pestil Sarma Tatlısı",
-    category: "Geleneksel Tatlılar",
-    price: 210,
-    tag: "Gurme Seri",
-    altitude: "1900 Metre",
-    harvestSeason: "Temmuz - Ağustos",
-    images: [
-      "/el-emegi.png",
-      "/ispir-meyve-kurutma.png",
-      "/premium-pekefe-kavanoz.png"
-    ],
-    description: "İncecik serilmiş sade dut pestilinin içerisine bol miktarda dövülmüş İspir cevizi ve antep fıstığı kreması sarılarak hazırlanan gurme lezzet rulosu.",
-    details: "Taze sade dut pestilinin üzerine homojen olarak yerli ceviz içi ve katkısız Antep fıstığı ezmesi sürülür. Rulo halinde sıkıca sarıldıktan sonra lokmalık dilimler şeklinde kesilir. Hem fıstık hem ceviz aromalarını pestilin karamelize dokusuyla buluşturur.",
-    ingredients: "Dut Pestili, İspir Cevizi, Katkısız Antep Fıstığı Ezmesi",
-    ritual: "Yemek sonrasında hafif bir tatlı olarak, yanında bir top sade dondurma veya soğuk kaymak ile servis edilmesi tavsiye edilir.",
-    nutrients: { energy: "415 kcal", carb: "74.0 g", protein: "5.1 g", calcium: "135 mg", iron: "4.5 mg" },
-    specifications: [
-      { key: "Dış Tabaka", value: "Keten Güneşte Kurutulmuş Dut Pestili" },
-      { key: "İç Dolgu", value: "Ceviz & Fıstık Ezmesi Harmanı" },
-      { key: "Katkı Oranı", value: "0% Yapay Aroma / Renklendirici" },
-      { key: "Ambalaj", value: "Premium Karton Sunum Kutusu" }
-    ]
-  }
-};
-
 export default function UrunDetay({ params }) {
   const resolvedParams = use(params);
-  const { id } = resolvedParams;
+  const router = useRouter();
+  const slugOrId = resolvedParams?.slug || resolvedParams?.id;
 
-  const [productState, setProductState] = useState(() => getProductById(id));
+  const [productState, setProductState] = useState(() => getProductBySlug(slugOrId));
 
   useEffect(() => {
     // Clear stale localStorage cache and fetch fresh data from DB
@@ -219,17 +26,19 @@ export default function UrunDetay({ params }) {
       localStorage.removeItem("pekefe_products_state");
     }
     fetchLiveProducts().then(() => {
-      setProductState(getProductById(id));
+      const fresh = getProductBySlug(slugOrId);
+      if (fresh) setProductState(fresh);
     });
 
     const handleProductsChange = () => {
-      setProductState(getProductById(id));
+      const fresh = getProductBySlug(slugOrId);
+      if (fresh) setProductState(fresh);
     };
     window.addEventListener("pekefe_products_changed", handleProductsChange);
     return () => {
       window.removeEventListener("pekefe_products_changed", handleProductsChange);
     };
-  }, [id]);
+  }, [slugOrId]);
 
   const translateImage = (url) => {
     if (!url) return url;
@@ -250,6 +59,16 @@ export default function UrunDetay({ params }) {
       images: productState.images ? productState.images.map(translateImage) : productState.images
     };
   }, [productState]);
+
+  // Canonical URL check: if user landed via ID (e.g. /urun/cms7y76vq0005uetc6rj8y5z6), silently update URL to slug
+  useEffect(() => {
+    if (product && product.slug && typeof window !== "undefined") {
+      const expectedSlug = product.slug;
+      if (slugOrId !== expectedSlug && slugOrId === product.id) {
+        window.history.replaceState(null, "", `/urun/${expectedSlug}`);
+      }
+    }
+  }, [product, slugOrId]);
 
   const mediaList = useMemo(() => {
     if (!product) return [];
@@ -336,15 +155,15 @@ export default function UrunDetay({ params }) {
     if (typeof window !== "undefined" && product) {
       const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
       const favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
-      const targetId = String(product.id || id);
+      const targetId = String(product.id || slugOrId);
       setIsFavorite(favs.some((item) => String(item.id) === targetId || String(item.sku) === targetId));
     }
-  }, [product, id, session]);
+  }, [product, slugOrId, session]);
 
   const handleFavoriteToggle = () => {
     if (!product) return;
     const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
-    const targetId = String(product.id || id);
+    const targetId = String(product.id || slugOrId);
     let favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
     const exists = favs.some((item) => String(item.id) === targetId || String(item.sku) === targetId);
 
@@ -376,8 +195,9 @@ export default function UrunDetay({ params }) {
   };
 
   const getPublicShareUrl = () => {
-    if (typeof window === "undefined") return `https://www.pekefe.com/urun/${id}`;
-    let href = window.location.href;
+    const slug = product?.slug || slugOrId;
+    if (typeof window === "undefined") return `https://www.pekefe.com/urun/${slug}`;
+    let href = window.location.origin + `/urun/${slug}`;
     if (href.includes("localhost") || href.includes("127.0.0.1")) {
       href = href.replace(/http:\/\/(localhost|127\.0\.0\.1):3000/, "https://www.pekefe.com");
     }
@@ -387,7 +207,7 @@ export default function UrunDetay({ params }) {
   const getWhatsAppShareText = () => {
     const shareUrl = getPublicShareUrl();
     const priceText = product?.price ? `₺${Number(product.price).toLocaleString("tr-TR")}` : "";
-    const altitude = product?.altitude || product?.attributes?.altitude || "2200 Metre";
+    const altitude = product?.altitude || product?.attributes?.altitude || "2000 Metre";
     const harvest = product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos";
 
     return (
@@ -460,13 +280,13 @@ export default function UrunDetay({ params }) {
 
   const recommendations = useMemo(() => {
     const allProds = getProducts();
-    const filtered = allProds.filter(p => p.id !== id).slice(0, 3);
+    const filtered = allProds.filter(p => p.id !== (product?.id || slugOrId) && p.slug !== slugOrId).slice(0, 3);
     return filtered.map(p => ({
       ...p,
       image: p.image ? translateImage(p.image) : p.image,
       images: p.images ? p.images.map(translateImage) : p.images
     }));
-  }, [id, product]);
+  }, [slugOrId, product]);
 
   const handleQuantityChange = (val) => {
     if (quantity + val >= 1) {
@@ -507,28 +327,28 @@ export default function UrunDetay({ params }) {
     "@type": "Product",
     "name": product.name,
     "image": product.images && product.images[0] ? `https://www.pekefe.com${product.images[0]}` : `https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg`,
-    "description": product.description || product.details,
-    "sku": product.id,
+    "description": product.seoDesc || product.shortDesc || product.description || product.details,
+    "sku": product.sku || product.id,
     "brand": {
       "@type": "Brand",
       "name": "PEKEFE"
     },
     "offers": {
       "@type": "Offer",
-      "url": `https://www.pekefe.com/urun/${product.id}`,
+      "url": `https://www.pekefe.com/urun/${product.slug || product.id}`,
       "priceCurrency": "TRY",
-      "price": product.price,
+      "price": displayPrice,
       "itemCondition": "https://schema.org/NewCondition",
       "availability": "https://schema.org/InStock"
     }
   } : null;
 
-  // Dynamic tab data fallbacks
-  const harvestStoryText = product?.details || product?.attributes?.harvestStory || product?.description || "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
-  const ingredientsText = product?.ingredients || product?.attributes?.ingredients || "%100 Saf Katkısız Ve İlave Şekersiz İspir Hasadı";
-  const ritualText = product?.ritual || product?.attributes?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
+  // Dynamic tab data fetched directly from Admin Management page attributes with fallback
+  const harvestStoryText = product?.attributes?.harvestStory || product?.attributes?.details || product?.details || product?.desc || product?.description || "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
+  const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "%100 Saf Katkısız Ve İlave Şekersiz İspir Hasadı";
+  const ritualText = product?.attributes?.ritual || product?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
   
-  const nutrientsData = product?.nutrients || product?.attributes?.nutrients || {
+  const nutrientsData = product?.attributes?.nutrients || product?.nutrients || {
     energy: "310 kcal",
     carb: "71.5 g",
     protein: "1.2 g",
@@ -538,12 +358,31 @@ export default function UrunDetay({ params }) {
 
   const hmfLevelText = product?.attributes?.hmfLevel || "< 10 mg/kg (Analiz Raporlu)";
 
-  const specificationsList = product?.specifications || product?.attributes?.specifications || [
-    { key: "Menşei", value: "Erzurum / İspir" },
-    { key: "Pişirme Yöntemi", value: "Geleneksel Odun Ateşi Bakır Kazan" },
-    { key: "Şeker İlavesi", value: "0.0% (Sadece Doğal Meyve Şekeri)" },
-    { key: "HMF Seviyesi", value: hmfLevelText }
-  ];
+  const specificationsList = useMemo(() => {
+    const attrs = product?.attributes || {};
+    if (attrs.specifications && Array.isArray(attrs.specifications) && attrs.specifications.length > 0) {
+      return attrs.specifications;
+    }
+    if (product?.specifications && Array.isArray(product.specifications) && product.specifications.length > 0) {
+      return product.specifications;
+    }
+    // Build specs dynamically from admin attributes if individual fields exist
+    const list = [];
+    list.push({ key: "Menşei", value: attrs.specsMaterial || "Erzurum / İspir" });
+    list.push({ key: "Kurutma Yöntemi", value: attrs.specsBellows || "Keten Bezlerde Güneşte Doğal Kurutma" });
+    if (attrs.specsDimensions) {
+      list.push({ key: "Kalınlık", value: attrs.specsDimensions });
+    } else {
+      list.push({ key: "Kalınlık", value: "< 1.5 mm (İpeksi Dokulu)" });
+    }
+    if (attrs.specsWeight) {
+      list.push({ key: "Şeker / Glikoz", value: attrs.specsWeight });
+    } else {
+      list.push({ key: "Şeker / Glikoz", value: "0.0% (Sadece Doğal Meyve Şekeri)" });
+    }
+    list.push({ key: "HMF Seviyesi", value: hmfLevelText });
+    return list;
+  }, [product, hmfLevelText]);
 
   return (
     <div className="relative w-full min-h-screen bg-background text-on-surface pb-24 overflow-hidden">
@@ -559,7 +398,7 @@ export default function UrunDetay({ params }) {
           </Link>
           <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
           <Link className="hover:text-primary transition-colors" href="/kategoriler">
-            {product?.category || "Gıda"}
+            {product?.categoryDisplay || product?.category || "Gıda"}
           </Link>
           <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
           <span className="text-primary font-bold">{product?.name}</span>
@@ -639,7 +478,7 @@ export default function UrunDetay({ params }) {
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-8">
             <div className="space-y-4">
               <span className="text-[10px] text-secondary uppercase font-mono tracking-[0.25em] font-bold block">
-                Altitude: {product?.altitude || product?.attributes?.altitude || "2000 Metre"} · Hasat: {product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos"}
+                Rakım: {product?.altitude || product?.attributes?.altitude || "2000 Metre"} · Hasat: {product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos"}
               </span>
               <h1 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold leading-tight tracking-tight">
                 {product?.name}
@@ -702,7 +541,7 @@ export default function UrunDetay({ params }) {
             </div>
 
             <p className="text-on-surface-variant font-body-md text-sm md:text-base leading-relaxed font-light">
-              {product?.description || product?.shortDesc}
+              {product?.shortDesc || product?.description || product?.desc}
             </p>
 
             {/* Micro Pillars */}
@@ -821,9 +660,16 @@ export default function UrunDetay({ params }) {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                 <div className="lg:col-span-7 space-y-6">
                   <h3 className="font-display-lg text-primary text-2xl font-bold">Asırlık Zanaatkarlık ve Yavaş Üretim</h3>
-                  <p className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base">
-                    {harvestStoryText}
-                  </p>
+                  {typeof harvestStoryText === "string" && /<[a-z][\s\S]*>/i.test(harvestStoryText) ? (
+                    <div 
+                      className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base prose max-w-none"
+                      dangerouslySetInnerHTML={{ __html: harvestStoryText }}
+                    />
+                  ) : (
+                    <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base whitespace-pre-line">
+                      {harvestStoryText}
+                    </div>
+                  )}
                   
                   <div className="p-6 bg-surface-container-low border border-outline-variant/10 rounded-xl space-y-3">
                     <span className="text-[10px] text-secondary font-bold uppercase tracking-widest block">İçindekiler Temizliği</span>
@@ -1057,7 +903,7 @@ export default function UrunDetay({ params }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="text-xs font-bold text-slate-800 truncate">{product?.name}</h4>
-                  <p className="text-[11px] text-amber-700 font-bold font-mono mt-0.5">₺{product?.price}</p>
+                  <p className="text-[11px] text-amber-700 font-bold font-mono mt-0.5">₺{displayPrice}</p>
                   <span className="text-[10px] text-slate-400 font-semibold truncate block">Pekefe Asırlık Erzurum Mahsulleri</span>
                 </div>
               </div>
@@ -1083,7 +929,7 @@ export default function UrunDetay({ params }) {
                 <button
                   type="button"
                   onClick={() => {
-                    const text = `${product?.name || "Pekefe"} - ₺${product?.price}\n${getPublicShareUrl()}`;
+                    const text = `${product?.name || "Pekefe"} - ₺${displayPrice}\n${getPublicShareUrl()}`;
                     if (typeof window !== "undefined") {
                       navigator.clipboard.writeText(text);
                     }
@@ -1104,7 +950,7 @@ export default function UrunDetay({ params }) {
                   type="button"
                   onClick={() => {
                     const url = getPublicShareUrl();
-                    const text = `*${product?.name || "Pekefe"}*\n💰 Fiyat: ₺${product?.price}\n✨ Pekefe Asırlık Erzurum Mahsulleri`;
+                    const text = `*${product?.name || "Pekefe"}*\n💰 Fiyat: ₺${displayPrice}\n✨ Pekefe Asırlık Erzurum Mahsulleri`;
                     window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
                   }}
                   className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl bg-sky-50 hover:bg-sky-100/90 border border-sky-200/60 text-sky-800 transition group cursor-pointer"
@@ -1237,7 +1083,7 @@ export default function UrunDetay({ params }) {
                 </div>
                 <div className="mt-4 space-y-1">
                   <h3 className="font-display-lg text-primary text-sm font-bold leading-snug group-hover:underline">
-                    <Link href={`/urun/${rec.id}`}>{rec.name}</Link>
+                    <Link href={`/urun/${rec.slug || rec.id}`}>{rec.name}</Link>
                   </h3>
                   <div className="text-secondary font-bold text-xs font-mono">₺{rec.price}</div>
                 </div>

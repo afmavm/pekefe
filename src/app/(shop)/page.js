@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
+import { HeroSlider } from "@/components/home/HeroSlider";
 
 export default function Home() {
   const [activeRecipe, setActiveRecipe] = useState("tahini");
@@ -257,97 +258,8 @@ export default function Home() {
       {/* Subtle background grain grid */}
       <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply"></div>
 
-      {/* ─── HERO SECTION (Cinematic Video Full-bleed) ─── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black select-none">
-        {/* Background Video with complex ambient overlay */}
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover scale-[1.03] filter brightness-[0.45] contrast-[1.1] saturate-[0.85] transition-all duration-[2000ms]"
-            src="/pekefe_tanitim.mp4"
-          />
-          {/* Multi-layered cinematic gradient for deep shadow overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-black/85 via-black/40 to-black/20"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(139,0,0,0.15),transparent_60%)]"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#F9F9FF] z-10"></div>
-        </div>
-
-        <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-20 py-24 text-white relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Elegant glassmorphic panel wrapper for text */}
-            <div className="lg:col-span-8 xl:col-span-7 text-left space-y-8 p-8 md:p-12 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-md shadow-2xl relative overflow-hidden transition-all duration-700 hover:border-white/20 hover:bg-white/[0.04]">
-              {/* Subtle ambient light source inside card */}
-              <div className="absolute -top-24 -left-24 w-48 h-48 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
-              
-              <div className="relative space-y-6">
-                {/* Translated Badge */}
-                <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-lg shadow-md max-w-full">
-                  <span className="flex h-2.5 w-2.5 relative shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
-                  </span>
-                  <span className="whitespace-nowrap font-label-sm text-xs sm:text-sm md:text-base uppercase tracking-[0.12em] sm:tracking-[0.18em] text-white font-extrabold drop-shadow">
-                    Erzurum İspir'in Geleneksel El Emeği Mirası
-                  </span>
-                </div>
-
-                <h1 className="font-display-lg text-[36px] sm:text-[48px] md:text-[60px] lg:text-[68px] text-white leading-[1.15] font-bold tracking-tight drop-shadow-md">
-                  Zamanın Yavaş Akışında, <br />
-                  <span className="text-secondary-fixed italic font-normal font-serif relative">
-                    Doğanın Saf İmzası.
-                    <span className="absolute bottom-1 left-0 w-full h-[2px] bg-secondary-fixed/30 rounded-full"></span>
-                  </span>
-                </h1>
-
-                <p className="font-body-lg text-white/85 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed font-light drop-shadow-sm">
-                  Endüstriyel hiçbir süreçten geçirilmeden, İspir'in yüksek rakımlı dağlarında geleneksel tariflerle üretilen, katkısız ve saf butik lezzetler koleksiyonu.
-                </p>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-                  <Button
-                    onClick={() => document.getElementById("koleksiyon").scrollIntoView({ behavior: "smooth" })}
-                    size="lg"
-                    className="w-full sm:w-auto shadow-lg hover:shadow-secondary/20 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    Koleksiyonu Keşfet
-                  </Button>
-                  <Button
-                    onClick={() => document.getElementById("hikaye").scrollIntoView({ behavior: "smooth" })}
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto text-white border-white/20 bg-white/5 hover:bg-white/15 hover:border-white/30 backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    Hikayemiz
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Scroll Down Line */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none opacity-60 transition-opacity duration-500 hover:opacity-100">
-            <span className="text-[9px] uppercase tracking-[0.3em] font-label-sm text-white/50 font-mono">Kaydırın</span>
-            <div className="w-[1px] h-14 bg-white/10 relative overflow-hidden rounded-full">
-              <div 
-                className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-white to-transparent" 
-                style={{ 
-                  animation: 'scrollDownLine 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite' 
-                }}
-              ></div>
-            </div>
-            
-            <style dangerouslySetInnerHTML={{__html: `
-              @keyframes scrollDownLine {
-                0% { transform: translateY(-100%); }
-                70%, 100% { transform: translateY(200%); }
-              }
-            `}} />
-          </div>
-        </div>
-      </section>
+      {/* ─── HERO SECTION (Cinematic Image Slider) ─── */}
+      <HeroSlider />
 
       {/* ─── BRAND STORY SECTION (Editorial Storytelling) ─── */}
       <section id="hikaye" className="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto reveal-element scroll-mt-20">

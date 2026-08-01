@@ -218,5 +218,22 @@ body {
   animation: scaleUp 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes kenburns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(-1%, -0.5%);
+  }
+  100% {
+    transform: scale(1.04) translate(0.5%, 0.5%);
+  }
+}
+
+.animate-ken-burns {
+  animation: kenburns 14s ease-in-out infinite alternate;
+}
+
+
 
 

@@ -1,5 +1,25 @@
 "use client";
 
+/**
+ * Generates a SEO-friendly URL slug from a Turkish product name.
+ * Example: "Sade Dut Pestili" → "sade-dut-pestili"
+ */
+export function generateSlug(name = "") {
+  const trMap = {
+    ç: "c", Ç: "c", ğ: "g", Ğ: "g", ı: "i", İ: "i",
+    ö: "o", Ö: "o", ş: "s", Ş: "s", ü: "u", Ü: "u",
+  };
+  return name
+    .split("")
+    .map((ch) => trMap[ch] ?? ch)
+    .join("")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 export const DEFAULT_PRODUCTS = [
   {
     id: "dut-pekmezi",
@@ -302,6 +322,7 @@ export function formatDbProductToStorefront(p) {
 
   return {
     id: String(p.id),
+    slug: p.slug || generateSlug(p.name),
     dbId: p.id,
     name: p.name,
     sku: p.sku,
@@ -312,6 +333,7 @@ export function formatDbProductToStorefront(p) {
     categoryDisplay: p.category || "Genel",
     subCategory: p.subCategory || "",
     desc: p.desc || attrs.desc || "Asırlık İspir kalitesiyle hazırlanan katkısız ve saf mahsul.",
+    shortDesc: attrs.shortDesc || p.desc || "",
     meta: attrs.meta || `${p.category || 'Doğal Mahsul'} · İspir`,
     price: defaultPrice,
     priceMin,
@@ -329,14 +351,18 @@ export function formatDbProductToStorefront(p) {
     altitude: attrs.altitude || "2000 Metre",
     harvestSeason: attrs.harvestSeason || "Temmuz - Ağustos",
     description: p.desc || attrs.description || p.name,
-    details: attrs.details || p.desc || "Bakır kazanlarda odun ateşinde pişirilmiş saf İspir mahsulü.",
+    harvestStory: attrs.harvestStory || attrs.details || p.desc || "",
+    details: attrs.harvestStory || attrs.details || p.desc || "Bakır kazanlarda odun ateşinde pişirilmiş saf İspir mahsulü.",
     ingredients: attrs.ingredients || "%100 Doğal ve Katkısız",
     ritual: attrs.ritual || "Oda sıcaklığında servis edilmesi tavsiye olunur.",
     nutrients: attrs.nutrients || { energy: "300 kcal", carb: "70 g", protein: "1 g", calcium: "350 mg", iron: "8 mg" },
-    specifications: attrs.specifications || [
+    specifications: (attrs.specifications && attrs.specifications.length > 0) ? attrs.specifications : [
       { key: "Menşei", value: "Erzurum / İspir" },
       { key: "Katkı Maddesi", value: "Sıfır (%100 Doğal)" }
-    ]
+    ],
+    seoTitle: p.seoTitle || null,
+    seoDesc: p.seoDesc || null,
+    seoKeywords: p.seoKeywords || null,
   };
 }
 
@@ -395,6 +421,21 @@ export function saveProducts(newProducts) {
 
 export function getProductById(id) {
   const products = getProducts();
-  const found = products.find(p => String(p.id) === String(id) || String(p.sku) === String(id));
-  return found || products[0];
+  const found = products.find(p => String(p.id) === String(id) || String(p.sku) === String(id) || String(p.slug) === String(id));
+  return found || null;
+}
+
+/**
+ * Look up a product by its SEO-friendly slug.
+ * Falls back to ID lookup so old links continue to work during transition.
+ */
+export function getProductBySlug(slug) {
+  const products = getProducts();
+  // 1. Exact slug match
+  let found = products.find(p => p.slug && String(p.slug) === String(slug));
+  // 2. Fallback: treat slug as DB id or sku
+  if (!found) found = products.find(p => String(p.id) === String(slug) || String(p.sku) === String(slug));
+  // 3. Last resort: generate slug on the fly from name and compare
+  if (!found) found = products.find(p => generateSlug(p.name) === String(slug));
+  return found || null;
 }

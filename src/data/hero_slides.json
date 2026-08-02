@@ -125,7 +125,7 @@
     "title": "Zanaatkar Ruh,",
     "highlightTitle": "Steril Standartlar.",
     "subtitle": "Asırlık geleneksel tarifler; paslanmaz krom tanklar, hassas sıcaklık sensörleri ve el değmeden steril cam kavanozlama sistemiyle güvenle sofralarınıza ulaşır.",
-    "image": "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
+    "image": "/uploads/1785703207712-7vwrvuoh8.webp",
     "active": true,
     "objectPositionX": 50,
     "objectPositionY": 50,
@@ -137,6 +137,26 @@
     "secondaryCta": {
       "text": "Sertifikalarımız",
       "href": "/sertifikalar"
+    }
+  },
+  {
+    "id": "slide-user-8",
+    "tag": "Usta Ellerden Özel Sarma Pestil Çeşitleri",
+    "title": "El Sarımı İncelik,",
+    "highlightTitle": "Zengin Gurme Çeşitler.",
+    "subtitle": "Hindistan Cevizli, Fındık Ezmeli ve Kadayıflı Sarma Pestil çeşitlerimiz; usta ellerin hassas sarım işçiliği ve %100 doğal malzemelerle steril tesisimizde hazırlanır.",
+    "image": "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sarma Pestil Çeşitleri",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
     }
   }
 ]

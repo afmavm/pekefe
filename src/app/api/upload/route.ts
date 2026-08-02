@@ -52,21 +52,29 @@ export async function POST(request: NextRequest) {
     let originalSize = file.size;
     let finalSize = buffer.length;
 
-    // 3. Görselleri %100 Stüdyo Netliğinde WebP Formatına Dönüştür & Optimize Et (Sıfır Bulanıklık)
+    // 3. Görselleri %100 Stüdyo Netliğinde 2K/4K UHD WebP Formatına Dönüştür & Optimize Et (Lanczos3 & Sharpening)
     const isImage = file.type.startsWith("image/") || [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".webp", ".avif", ".heic", ".tiff"].includes(fileExt);
     
     if (isImage && !fileExt.endsWith(".svg")) {
       try {
         const sharp = require("sharp");
+        const meta = await sharp(buffer).metadata();
+        const targetWidth = Math.max(meta.width || 2560, 2560);
+
         const convertedWebp = await sharp(buffer)
           .resize({
-            width: 3840,
-            height: 2160,
+            width: Math.min(targetWidth, 3840),
             fit: "inside",
-            withoutEnlargement: true,
+            withoutEnlargement: false,
+            kernel: sharp.kernel.lanczos3,
+          })
+          .sharpen({
+            sigma: 0.8,
+            m1: 1.0,
+            m2: 0.5,
           })
           .webp({
-            quality: 98,
+            quality: 100,
             effort: 6,
             chromaSubsampling: "4:4:4",
             smartSubsample: false,

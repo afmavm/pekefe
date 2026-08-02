@@ -85,33 +85,41 @@ export function HeroSlider({ customSlides }) {
     }
   }, [customSlides]);
 
-  // Strict Sequential Advance: 0 -> 1 -> 2 -> 3 -> 0
+  // Infinite Sequential Loop: 0 -> 1 -> 2 -> ... -> (N-1) -> 0 -> 1
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
+    setSlides((currentList) => {
+      if (!currentList || currentList.length === 0) return currentList;
+      setCurrentIndex((prev) => (prev + 1) % currentList.length);
+      return currentList;
+    });
     setProgressKey((prev) => prev + 1);
-  }, [slides.length]);
+  }, []);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    setSlides((currentList) => {
+      if (!currentList || currentList.length === 0) return currentList;
+      setCurrentIndex((prev) => (prev - 1 + currentList.length) % currentList.length);
+      return currentList;
+    });
     setProgressKey((prev) => prev + 1);
-  }, [slides.length]);
+  }, []);
 
   const goToSlide = (index) => {
     setCurrentIndex(index);
     setProgressKey((prev) => prev + 1);
   };
 
-  // Clean Autoplay Timer (6 Seconds)
+  // Dynamic Infinite Autoplay Timer for ANY number of slides (N >= 1)
   useEffect(() => {
-    if (isPaused || slides.length <= 1) return;
+    if (isPaused || !slides || slides.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
-      setProgressKey((prev) => prev + 1);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+      setProgressKey((prevKey) => prevKey + 1);
     }, SLIDE_DURATION);
 
     return () => clearInterval(timer);
-  }, [isPaused, slides.length]);
+  }, [isPaused, slides]);
 
   // Touch Swipe Handlers for Mobile
   const handleTouchStart = (e) => {
@@ -130,20 +138,21 @@ export function HeroSlider({ customSlides }) {
     }
   };
 
-  const currentSlide = slides[currentIndex] || slides[0];
+  const safeIndex = currentIndex % (slides.length || 1);
+  const currentSlide = slides[safeIndex] || slides[0];
 
   return (
     <section
-      className="relative min-h-screen flex items-end justify-start overflow-hidden bg-slate-950 select-none group/slider"
+      className="relative h-[calc(100vh-80px)] min-h-[520px] max-h-[780px] sm:max-h-[850px] flex items-end justify-start overflow-hidden bg-slate-950 select-none group/slider"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* ─── SLIDE BACKGROUND IMAGES (FULL UNCONTAINED VISIBILITY & KEN BURNS EFFECT) ─── */}
+      {/* ─── SLIDE BACKGROUND IMAGES (CRYSTAL CLEAR HIGH-RES & KEN BURNS EFFECT) ─── */}
       {slides.map((slide, index) => {
-        const isActive = index === currentIndex;
+        const isActive = index === safeIndex;
         return (
           <div
             key={slide.id || index}
@@ -157,38 +166,39 @@ export function HeroSlider({ customSlides }) {
                 alt={slide.title || "Pekefe Hasat Görseli"}
                 fill
                 priority={index === 0}
-                className={`object-cover filter brightness-100 contrast-100 saturate-[1.05] ${
+                quality={100}
+                unoptimized
+                className={`object-cover filter brightness-100 contrast-[1.02] saturate-[1.05] ${
                   isActive ? "animate-ken-burns" : ""
                 }`}
                 sizes="100vw"
-                unoptimized={typeof slide.image === "string" && (slide.image.startsWith("http://") || slide.image.startsWith("https://"))}
               />
             </div>
 
-            {/* Ultra-Soft Subtle Vignette — 100% Bright Unshaded Image Left & Right */}
+            {/* Ultra-Soft Subtle Ambient Overlay — Keeps Photo 100% Clear & Text Perfectly Readable */}
             <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/10 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent h-1/3 bottom-0 top-auto"></div>
           </div>
         );
       })}
 
-      {/* ─── REPOSITIONED TYPOGRAPHY CONTENT (BOTTOM-LEFT MINIMALIST PANEL) ─── */}
-      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-20 pb-28 pt-36 text-white relative">
-        <div className="max-w-2xl text-left space-y-6 animate-fade-in" key={currentIndex}>
+      {/* ─── FIT-TO-VIEWPORT TYPOGRAPHY CONTENT (SOL ALT - TAM EKRAN DÜZENİ) ─── */}
+      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-20 pb-20 pt-16 text-white relative">
+        <div className="max-w-2xl text-left space-y-4 animate-fade-in" key={safeIndex}>
           
           {/* Animated Live Badge */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg max-w-full">
-            <span className="flex h-2.5 w-2.5 relative shrink-0">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg max-w-full">
+            <span className="flex h-2 w-2 relative shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
-            <span className="whitespace-nowrap font-label-sm text-xs sm:text-sm uppercase tracking-[0.15em] text-white font-extrabold drop-shadow">
+            <span className="whitespace-nowrap font-label-sm text-[11px] sm:text-xs uppercase tracking-[0.15em] text-white font-extrabold drop-shadow">
               {currentSlide.tag}
             </span>
           </div>
 
           {/* Title with Serif Highlight */}
-          <h1 className="font-display-lg text-[32px] sm:text-[44px] md:text-[54px] lg:text-[60px] text-white leading-[1.15] font-bold tracking-tight drop-shadow-lg">
+          <h1 className="font-display-lg text-[28px] sm:text-[38px] md:text-[48px] lg:text-[54px] text-white leading-[1.12] font-bold tracking-tight drop-shadow-xl">
             {currentSlide.title} <br />
             <span className="text-secondary-fixed italic font-normal font-serif relative">
               {currentSlide.highlightTitle}
@@ -196,14 +206,14 @@ export function HeroSlider({ customSlides }) {
           </h1>
 
           {/* Subtitle */}
-          <p className="font-body-lg text-sm sm:text-base md:text-lg text-white/90 leading-relaxed font-light max-w-xl drop-shadow-md">
+          <p className="font-body-lg text-xs sm:text-sm md:text-base text-white/90 leading-relaxed font-light max-w-lg drop-shadow-md line-clamp-3 sm:line-clamp-none">
             {currentSlide.subtitle}
           </p>
 
           {/* Action Buttons */}
-          <div className="pt-2 flex flex-wrap items-center gap-4">
+          <div className="pt-2 flex flex-wrap items-center gap-3">
             <Link href={currentSlide.primaryCta.href}>
-              <Button size="lg" className="shadow-2xl shadow-primary/40 font-bold px-7 h-13 text-sm sm:text-base cursor-pointer hover:scale-102 transition-transform">
+              <Button size="lg" className="shadow-2xl shadow-primary/40 font-bold px-6 h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform">
                 {currentSlide.primaryCta.text}
               </Button>
             </Link>
@@ -211,7 +221,7 @@ export function HeroSlider({ customSlides }) {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/20 backdrop-blur-md px-7 h-13 text-sm sm:text-base cursor-pointer hover:scale-102 transition-transform bg-black/30"
+                className="border-white/30 text-white hover:bg-white/20 backdrop-blur-md px-6 h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform bg-black/30"
               >
                 {currentSlide.secondaryCta.text}
               </Button>
@@ -221,31 +231,31 @@ export function HeroSlider({ customSlides }) {
         </div>
       </div>
 
-      {/* ─── CAROUSEL NAVIGATION & COUNTER CONTROLS ─── */}
-      <div className="absolute bottom-8 left-0 right-0 z-30 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex items-center justify-between gap-6 pointer-events-none">
+      {/* ─── FIT-TO-VIEWPORT NAVIGATION & COUNTER CONTROLS (EKRANA TAM OTURAN OKLAR & SAYAÇ) ─── */}
+      <div className="absolute bottom-6 left-0 right-0 z-30 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex items-center justify-between gap-4 pointer-events-none">
         
         {/* Slide Counter & Dots */}
-        <div className="flex items-center gap-4 bg-black/50 backdrop-blur-md border border-white/15 px-5 py-2.5 rounded-full pointer-events-auto shadow-xl">
+        <div className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full pointer-events-auto shadow-xl">
           <span className="font-mono text-xs font-bold text-amber-400">
-            0{currentIndex + 1}
+            {String(safeIndex + 1).padStart(2, "0")}
           </span>
           <span className="text-white/40 text-xs font-mono">/</span>
           <span className="font-mono text-xs font-medium text-white/60">
-            0{slides.length}
+            {String(slides.length).padStart(2, "0")}
           </span>
 
           <div className="h-3 w-px bg-white/20 mx-1"></div>
 
           {/* Dots */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => goToSlide(i)}
                 aria-label={`Slayt ${i + 1}`}
                 className={`transition-all duration-500 rounded-full cursor-pointer ${
-                  i === currentIndex
-                    ? "w-8 h-2 bg-amber-400 shadow-md shadow-amber-400/50"
+                  i === safeIndex
+                    ? "w-6 h-2 bg-amber-400 shadow-md shadow-amber-400/50"
                     : "w-2 h-2 bg-white/40 hover:bg-white/80"
                 }`}
               />
@@ -254,20 +264,20 @@ export function HeroSlider({ customSlides }) {
         </div>
 
         {/* Manual Arrow Controls */}
-        <div className="flex items-center gap-3 pointer-events-auto">
+        <div className="flex items-center gap-2.5 pointer-events-auto">
           <button
             onClick={prevSlide}
             aria-label="Önceki Slayt"
-            className="w-12 h-12 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xl"
+            className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xl"
           >
-            <span className="material-symbols-outlined text-xl">chevron_left</span>
+            <span className="material-symbols-outlined text-lg">chevron_left</span>
           </button>
           <button
             onClick={nextSlide}
             aria-label="Sonraki Slayt"
-            className="w-12 h-12 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xl"
+            className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xl"
           >
-            <span className="material-symbols-outlined text-xl">chevron_right</span>
+            <span className="material-symbols-outlined text-lg">chevron_right</span>
           </button>
         </div>
 

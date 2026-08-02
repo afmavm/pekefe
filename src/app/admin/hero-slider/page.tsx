@@ -15,6 +15,9 @@ export interface HeroSlide {
   subtitle: string;
   image: string;
   active: boolean;
+  objectPositionX?: number; // 0% - 100%
+  objectPositionY?: number; // 0% - 100%
+  imageScale?: number;      // 1.0 - 1.6
   primaryCta: { text: string; href: string };
   secondaryCta: { text: string; href: string };
 }
@@ -28,6 +31,9 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     subtitle: "2000 metre rakımlı İspir yaylalarından şafak vakti toplanan saf beyaz dutlar; meşe odun ateşinde ve bakır kazanlarda kaynatılarak asırlık lezzetine kavuşur.",
     image: "/ispir-manzara-hero.png",
     active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
     primaryCta: { text: "Seçkin Mahsulleri Keşfet", href: "/kategoriler" },
     secondaryCta: { text: "Hikayemizi İncele", href: "/hikayemiz" },
   },
@@ -39,6 +45,9 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     subtitle: "Hiçbir katkı maddesi, ilave şeker veya koruyucu kimyasal içermeyen %100 saf ve yoğun gövdeli geleneksel Pekefe lezzet şöleni.",
     image: "/geleneksel-kazan.png",
     active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
     primaryCta: { text: "Geleneksel Pekmezler", href: "/kategoriler" },
     secondaryCta: { text: "Üretim Tesisimiz", href: "/tesisimiz" },
   },
@@ -50,6 +59,9 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     subtitle: "Keten sergilere milimetrik hassasiyetle dökülen dut herlesi, İspir'in nemsiz dağ rüzgârları ve bol güneşi altında eşsiz aromasına kavuşur.",
     image: "/ispir-pestil-kurutma-gercek.png",
     active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
     primaryCta: { text: "Sade Dut Pestili İncele", href: "/urun/pekefe-sade-dut-pestili" },
     secondaryCta: { text: "Tüm Pestil Çeşitleri", href: "/kategoriler" },
   },
@@ -61,6 +73,9 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     subtitle: "İpe dizilmiş yerli cevizlerin kaynayan saf şıra herlesine daldırılmasıyla üretilen coğrafi tescilli saray lezzeti İspir Cevizli Dut Kömesi.",
     image: "/ispir-kome-gercek-hasat.jpg",
     active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
     primaryCta: { text: "Köme & Tatlı Koleksiyonu", href: "/kategoriler" },
     secondaryCta: { text: "Rekolte Kulübü", href: "/rekolte-kulubu" },
   },
@@ -72,6 +87,9 @@ export default function AdminHeroSliderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0, posX: 50, posY: 50 });
+  const previewBoxRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
@@ -83,6 +101,9 @@ export default function AdminHeroSliderPage() {
     subtitle: "",
     image: "/ispir-manzara-hero.png",
     active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
     primaryCta: { text: "Keşfet", href: "/kategoriler" },
     secondaryCta: { text: "Hikayemiz", href: "/hikayemiz" },
   });
@@ -232,6 +253,33 @@ export default function AdminHeroSliderPage() {
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingImage(true);
+    dragStartPos.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: form.objectPositionX ?? 50,
+      posY: form.objectPositionY ?? 50,
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingImage || !previewBoxRef.current) return;
+    const rect = previewBoxRef.current.getBoundingClientRect();
+    const deltaX = ((e.clientX - dragStartPos.current.x) / rect.width) * 100;
+    const deltaY = ((e.clientY - dragStartPos.current.y) / rect.height) * 100;
+
+    const newX = Math.min(100, Math.max(0, Math.round(dragStartPos.current.posX - deltaX)));
+    const newY = Math.min(100, Math.max(0, Math.round(dragStartPos.current.posY - deltaY)));
+
+    setForm((prev) => ({ ...prev, objectPositionX: newX, objectPositionY: newY }));
+  };
+
+  const handleMouseUp = () => {
+    setIsDraggingImage(false);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-16">
       {/* Header */}
@@ -239,7 +287,7 @@ export default function AdminHeroSliderPage() {
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200/60">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Otomatik 1920x1080 WebP Dönüştürücü Aktif</span>
+            <span>Otomatik 1920x1080 WebP & Kadraj Hizalama Aktif</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Hero Slayt Yönetimi</h1>
           <p className="text-sm text-slate-500 max-w-2xl">
@@ -273,11 +321,11 @@ export default function AdminHeroSliderPage() {
         </div>
         <div className="space-y-1 text-xs">
           <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-            <span>Otomatik 1920x1080 px (WebP) Görsel Dönüştürücü Sistemde Aktiftir</span>
-            <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">OTOMATİK KORUMA</span>
+            <span>Otomatik Görsel Dönüştürücü & İnteraktif Kadrajlama Aktiftir</span>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">KADRAJ MODU</span>
           </h4>
           <p className="text-slate-600 leading-relaxed">
-            Hangi formatta (PNG, JPG, BMP, HEIC) veya boyutta olursa olsun, yüklediğiniz her görsel arka planda otomatik olarak <strong>1920x1080 px WebP</strong> formatına dönüştürülür ve piksel kaybı yaşanmadan sıkıştırılır. Kullanıcıların teknik detay bilmesine gerek kalmadan ana sayfa slaytları ışık hızında açılır.
+            Görselinizi yükledikten sonra düzenleme modalında fare ile sürükleyerek <strong>(Drag & Pan)</strong> veya odak butonlarını kullanarak resmin görünmesini istediğiniz açısını hassas şekilde ayarlayabilirsiniz.
           </p>
         </div>
       </div>
@@ -297,6 +345,10 @@ export default function AdminHeroSliderPage() {
                 src={slide.image}
                 alt={slide.title}
                 fill
+                style={{
+                  objectPosition: `${slide.objectPositionX ?? 50}% ${slide.objectPositionY ?? 50}%`,
+                  transform: `scale(${slide.imageScale ?? 1.0})`,
+                }}
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-bold font-mono rounded">
@@ -315,6 +367,9 @@ export default function AdminHeroSliderPage() {
                     Gizli / Pasif
                   </span>
                 )}
+                <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  Kadraj: X:{slide.objectPositionX ?? 50}% Y:{slide.objectPositionY ?? 50}%
+                </span>
               </div>
 
               <h3 className="text-base font-bold text-slate-900 truncate">
@@ -365,7 +420,7 @@ export default function AdminHeroSliderPage() {
                 <button
                   onClick={() => handleOpenEditModal(slide)}
                   className="p-2 hover:bg-amber-50 text-amber-700 rounded-lg transition cursor-pointer"
-                  title="Düzenle"
+                  title="Düzenle / Kadrajla"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
@@ -392,13 +447,13 @@ export default function AdminHeroSliderPage() {
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                  <span>{editingSlide ? "Slaytı Düzenle" : "Yeni Slayt Ekle"}</span>
+                  <span>{editingSlide ? "Slaytı Düzenle & Kadrajla" : "Yeni Slayt Ekle & Kadrajla"}</span>
                   <span className="text-xs bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md font-mono font-bold">
-                    CANLI ÖNİZLEME MODU
+                    CANLI KADRAJLAMA MODU
                   </span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Resim ve metinleri değiştirirken alt taraftaki canlı önizleme alanından vitrin görünümünü anlık takip edebilirsiniz.
+                  Görseli fare ile sürükleyerek veya aşağıdaki kadraj butonlarıyla dilediğiniz açıya hizalayabilirsiniz.
                 </p>
               </div>
               <button
@@ -410,17 +465,31 @@ export default function AdminHeroSliderPage() {
               </button>
             </div>
 
-            {/* LIVE REAL-TIME VISUAL SLIDE PREVIEW BOX */}
-            <div className="space-y-2">
+            {/* LIVE REAL-TIME VISUAL SLIDE PREVIEW BOX WITH MOUSE DRAG & PAN */}
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-900 flex items-center gap-2">
                   <Eye className="w-4 h-4 text-amber-600" />
-                  <span>Slayt Vitrin Canlı Önizlemesi (Görsel ve Metin Yerleşimi)</span>
+                  <span>Slayt Vitrin Canlı Önizleme & Kadraj Alanı</span>
+                  <span className="text-[10px] bg-amber-100 text-amber-800 font-mono px-2 py-0.5 rounded">
+                    💡 İpucu: Resmi Fare ile Sürükleyebilirsiniz (Drag & Pan)
+                  </span>
                 </label>
-                <span className="text-[10px] font-mono text-slate-400">1920 x 1080 px Oranlanmış Görünüm</span>
+                <span className="text-[10px] font-mono text-slate-500 font-bold">
+                  Odak: X: %{form.objectPositionX ?? 50} | Y: %{form.objectPositionY ?? 50} | Zoom: %{Math.round((form.imageScale ?? 1.0) * 100)}
+                </span>
               </div>
 
-              <div className="relative w-full aspect-[21/9] sm:aspect-[16/7] rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-900 shadow-xl group/preview select-none flex items-end justify-start p-4 sm:p-6 text-white">
+              <div
+                ref={previewBoxRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                className={`relative w-full aspect-[21/9] sm:aspect-[16/7] rounded-2xl overflow-hidden bg-slate-950 border-2 transition-colors border-slate-900 shadow-xl group/preview select-none flex items-end justify-start p-4 sm:p-6 text-white ${
+                  isDraggingImage ? "cursor-grabbing border-amber-500" : "cursor-grab hover:border-amber-400/80"
+                }`}
+              >
                 {/* Background Image Preview */}
                 {form.image ? (
                   <Image
@@ -428,7 +497,11 @@ export default function AdminHeroSliderPage() {
                     alt="Canlı Önizleme"
                     fill
                     unoptimized
-                    className="object-cover filter brightness-100 contrast-[1.02] saturate-[1.05]"
+                    style={{
+                      objectPosition: `${form.objectPositionX ?? 50}% ${form.objectPositionY ?? 50}%`,
+                      transform: `scale(${form.imageScale ?? 1.0})`,
+                    }}
+                    className="object-cover filter brightness-100 contrast-[1.02] saturate-[1.05] transition-all duration-75"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-mono">
@@ -437,17 +510,26 @@ export default function AdminHeroSliderPage() {
                 )}
 
                 {/* Ambient Soft Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/15 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent h-1/2 bottom-0 top-auto"></div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/15 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent h-1/2 bottom-0 top-auto pointer-events-none"></div>
 
-                {/* Watermark Badge */}
-                <div className="absolute top-3 right-3 px-3 py-1 bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-bold font-mono rounded-lg border border-white/20 flex items-center gap-1.5 z-20">
+                {/* Watermark Badge & Drag Hint */}
+                <div className="absolute top-3 right-3 px-3 py-1 bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-bold font-mono rounded-lg border border-white/20 flex items-center gap-1.5 z-20 pointer-events-none">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>VITRIN CANLI GÖRÜNÜMÜ</span>
                 </div>
 
+                {/* Dragging Overlay Indicator */}
+                {isDraggingImage && (
+                  <div className="absolute inset-0 bg-amber-500/10 border-2 border-amber-400 z-30 pointer-events-none flex items-center justify-center">
+                    <span className="px-4 py-2 bg-black/80 text-amber-300 text-xs font-bold rounded-full shadow-2xl backdrop-blur-md">
+                      🎯 Görsel Açı/Kadraj Ayarlanıyor (X: %{form.objectPositionX} Y: %{form.objectPositionY})
+                    </span>
+                  </div>
+                )}
+
                 {/* Overlaid Typography Content */}
-                <div className="relative z-20 space-y-2 max-w-lg text-left drop-shadow-md">
+                <div className="relative z-20 space-y-2 max-w-lg text-left drop-shadow-md pointer-events-none">
                   {form.tag && (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
@@ -480,6 +562,102 @@ export default function AdminHeroSliderPage() {
                   </div>
                 </div>
               </div>
+
+              {/* INTERACTIVE FRAMING & ZOOM CONTROLS PANEL */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
+                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>🎯 Kadraj Hazır Ayarları:</span>
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, objectPositionX: 50, objectPositionY: 50 }))}
+                      className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 transition cursor-pointer"
+                    >
+                      🎯 Ortala
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, objectPositionX: 25, objectPositionY: 50 }))}
+                      className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 transition cursor-pointer"
+                    >
+                      ⬅️ Sol Odak
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, objectPositionX: 75, objectPositionY: 50 }))}
+                      className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 transition cursor-pointer"
+                    >
+                      ➡️ Sağ Odak
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, objectPositionX: 50, objectPositionY: 20 }))}
+                      className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 transition cursor-pointer"
+                    >
+                      ⬆️ Üst Odak
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, objectPositionX: 50, objectPositionY: 80 }))}
+                      className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 transition cursor-pointer"
+                    >
+                      ⬇️ Alt Odak
+                    </button>
+                  </div>
+                </div>
+
+                {/* Fine Tuning Sliders */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-slate-700">
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Yatay Kadraj (X):</span>
+                      <span className="font-mono text-amber-700 font-bold">%{form.objectPositionX ?? 50}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={form.objectPositionX ?? 50}
+                      onChange={(e) => setForm({ ...form, objectPositionX: Number(e.target.value) })}
+                      className="w-full accent-amber-600 cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Dikey Kadraj (Y):</span>
+                      <span className="font-mono text-amber-700 font-bold">%{form.objectPositionY ?? 50}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={form.objectPositionY ?? 50}
+                      onChange={(e) => setForm({ ...form, objectPositionY: Number(e.target.value) })}
+                      className="w-full accent-amber-600 cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Yakınlaştırma (Scale):</span>
+                      <span className="font-mono text-amber-700 font-bold">%{Math.round((form.imageScale ?? 1.0) * 100)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={100}
+                      max={160}
+                      step={5}
+                      value={Math.round((form.imageScale ?? 1.0) * 100)}
+                      onChange={(e) => setForm({ ...form, imageScale: Number(e.target.value) / 100 })}
+                      className="w-full accent-amber-600 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* FORM INPUTS */}

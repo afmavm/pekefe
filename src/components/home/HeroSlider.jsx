@@ -168,6 +168,10 @@ export function HeroSlider({ customSlides }) {
                 priority={index === 0}
                 quality={100}
                 unoptimized
+                style={{
+                  objectPosition: `${slide.objectPositionX ?? 50}% ${slide.objectPositionY ?? 50}%`,
+                  transform: `scale(${slide.imageScale ?? 1.0})`,
+                }}
                 className={`object-cover filter brightness-100 contrast-[1.02] saturate-[1.05] ${
                   isActive ? "animate-ken-burns" : ""
                 }`}

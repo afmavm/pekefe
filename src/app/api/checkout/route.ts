@@ -557,139 +557,95 @@ export async function POST(request: NextRequest) {
       return order;
     }, { maxWait: 10000, timeout: 30000 });
 
-    // 3. E-posta bildirimi (Kuyruğa al) — Müşteriye sipariş onayı
-    if (customerEmail !== "guest@nexab2b.com") {
+    // 3. Arka Planda E-posta, WhatsApp ve Webhook Bildirimleri (Müşteriye anında yıldırım hızında onay sunar)
+    (async () => {
       try {
-        // Sipariş içeriği — her ürünü satır satır listele
-        const customerOrderItemsText = cart
-          .map((item: any) => `• ${item.name} × ${item.quantity} adet — ₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}`)
-          .join("\n");
+        if (customerEmail !== "guest@nexab2b.com") {
+          const customerOrderItemsText = cart
+            .map((item: any) => `• ${item.name} × ${item.quantity} adet — ₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}`)
+            .join("\n");
 
-        // Teslimat adresi
-        const shippingAddr = shippingAddress
-          ? `${shippingAddress.firstName} ${shippingAddress.lastName}\n${shippingAddress.fullAddress}\n${shippingAddress.district} / ${shippingAddress.city}\nTel: ${shippingAddress.phone}`
-          : address;
+          const shippingAddr = shippingAddress
+            ? `${shippingAddress.firstName} ${shippingAddress.lastName}\n${shippingAddress.fullAddress}\n${shippingAddress.district} / ${shippingAddress.city}\nTel: ${shippingAddress.phone}`
+            : address;
 
-        const paymentLabel =
-          paymentMethod === "creditCard" ? "Kredi Kartı" :
-          paymentMethod === "bankTransfer" ? "Banka Havalesi / EFT" :
-          "Açık Hesap (Vadeli)";
+          const paymentLabel =
+            paymentMethod === "creditCard" ? "Kredi Kartı" :
+            paymentMethod === "bankTransfer" ? "Banka Havalesi / EFT" :
+            "Açık Hesap (Vadeli)";
 
-        const orderDateStr = new Date().toLocaleDateString("tr-TR", {
-          day: "2-digit", month: "long", year: "numeric",
-          hour: "2-digit", minute: "2-digit"
+          const orderDateStr = new Date().toLocaleDateString("tr-TR", {
+            day: "2-digit", month: "long", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          });
+
+          await emailNotificationService.queueEmail(customerEmail, "order_received", {
+            kullanici_adi: name,
+            siparis_no: result.id,
+            siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            siparis_icerik: customerOrderItemsText,
+            odeme_yontemi: paymentLabel,
+            kargo_adresi: shippingAddr,
+            kargo_sirketi: selectedCarrierName || "Standart Kargo",
+            tarih: orderDateStr,
+            detay_linki: `${hostUrl}/hesap`
+          });
+        }
+
+        const adminNotificationEmail = process.env.ADMIN_NOTIFICATION_EMAIL || cmsSettings?.contactEmail;
+        const adminNotificationWhatsapp = process.env.ADMIN_NOTIFICATION_WHATSAPP || cmsSettings?.contactPhone;
+        const orderItemsText = cart.map((item: any) => `• ${item.name} (${item.quantity} adet)`).join("\n");
+        const localDateString = new Date().toLocaleDateString("tr-TR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
         });
 
-        await emailNotificationService.queueEmail(customerEmail, "order_received", {
-          kullanici_adi: name,
-          siparis_no: result.id,
-          siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-          siparis_icerik: customerOrderItemsText,
-          odeme_yontemi: paymentLabel,
-          kargo_adresi: shippingAddr,
-          kargo_sirketi: selectedCarrierName || "Standart Kargo",
-          tarih: orderDateStr,
-          detay_linki: `${hostUrl}/hesap`
-        });
-      } catch (mailErr) {
-        console.error("Failed to queue order received email:", mailErr);
+        if (adminNotificationEmail) {
+          await emailNotificationService.queueEmail(adminNotificationEmail, "admin_new_order", {
+            kullanici_adi: name,
+            siparis_no: result.id,
+            siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            odeme_yontemi: result.method || "Belirtilmedi",
+            detay_linki: `${hostUrl}/admin/orders/${result.id}`,
+            tarih: localDateString,
+            siparis_icerik: orderItemsText
+          });
+        }
+
+        if (adminNotificationWhatsapp) {
+          await WhatsAppNotificationService.sendAdminNewOrderNotification({
+            siparisNo: result.id,
+            kullaniciAdi: name,
+            siparisTutari: verifiedTotal,
+            odemeYontemi: result.method || "Belirtilmedi",
+            orderId: result.id,
+            siparisIcerik: orderItemsText,
+            adminPhone: adminNotificationWhatsapp,
+            hostUrl: hostUrl
+          });
+        }
+
+        const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "http://localhost:5678/webhook/order-received";
+        fetch(n8nWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: result.id,
+            date: result.date,
+            status: result.status,
+            total: verifiedTotal,
+            paymentMethod: result.method,
+            customer: { name, email: customerEmail, phone },
+            items: cart
+          })
+        }).catch(() => {});
+      } catch (asyncErr) {
+        console.error("[ASYNC CHECKOUT NOTIFICATIONS ERROR]:", asyncErr);
       }
-    }
-
-    // Yönetici Bildirimleri (E-posta ve WhatsApp)
-    const adminNotificationEmail = process.env.ADMIN_NOTIFICATION_EMAIL || cmsSettings?.contactEmail;
-    const adminNotificationWhatsapp = process.env.ADMIN_NOTIFICATION_WHATSAPP || cmsSettings?.contactPhone;
-    const orderItemsText = cart.map((item: any) => `• ${item.name} (${item.quantity} adet)`).join("\n");
-    const localDateString = new Date().toLocaleDateString("tr-TR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
-    if (adminNotificationEmail) {
-      try {
-        await emailNotificationService.queueEmail(adminNotificationEmail, "admin_new_order", {
-          kullanici_adi: name,
-          siparis_no: result.id,
-          siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-          odeme_yontemi: result.method || "Belirtilmedi",
-          detay_linki: `${hostUrl}/admin/orders/${result.id}`,
-          tarih: localDateString,
-          siparis_icerik: orderItemsText
-        });
-      } catch (adminMailErr) {
-        console.error("Failed to queue admin order received email:", adminMailErr);
-      }
-    }
-
-    try {
-      await WhatsAppNotificationService.sendAdminNewOrderNotification({
-        siparisNo: result.id,
-        kullaniciAdi: name,
-        siparisTutari: verifiedTotal,
-        odemeYontemi: result.method || "Belirtilmedi",
-        orderId: result.id,
-        siparisIcerik: orderItemsText,
-        adminPhone: adminNotificationWhatsapp,
-        hostUrl: hostUrl
-      });
-    } catch (whatsappErr) {
-      console.error("Failed to send admin order received WhatsApp:", whatsappErr);
-    }
-
-    // 4. n8n Otomasyon Webhook Tetikleyici
-    try {
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "http://localhost:5678/webhook/order-received";
-      const webhookPayload = {
-        orderId: result.id,
-        date: result.date,
-        status: result.status,
-        total: verifiedTotal,
-        paymentMethod: result.method,
-        customer: {
-          name: name,
-          email: customerEmail,
-          phone: phone
-        },
-        shippingAddress: shippingAddress || {
-          addressTitle: "Standart",
-          firstName: name.split(' ')[0] || '',
-          lastName: name.split(' ').slice(1).join(' ') || '',
-          phone: phone,
-          city: address.split('-')[0]?.trim() || '',
-          district: '',
-          fullAddress: address
-        },
-        billingAddress: billingAddress || shippingAddress || {
-          addressTitle: "Standart",
-          firstName: name.split(' ')[0] || '',
-          lastName: name.split(' ').slice(1).join(' ') || '',
-          phone: phone,
-          city: address.split('-')[0]?.trim() || '',
-          district: '',
-          fullAddress: address
-        },
-        items: cart.map((item: any) => ({
-          id: item.id,
-          sku: item.sku,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity || item.qty || 1
-        }))
-      };
-
-      fetch(n8nWebhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(webhookPayload)
-      }).catch(err => {
-        console.error("n8n Webhook connection error:", err.message);
-      });
-    } catch (webhookErr) {
-      console.error("Error building or triggering n8n webhook:", webhookErr);
-    }
+    })();
 
     return NextResponse.json({ success: true, orderId: result.id });
 

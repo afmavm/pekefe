@@ -61,7 +61,7 @@
   },
   {
     "id": "slide-user-4",
-    "tag": "Katkısız %100 Karadut Şırası",
+    "tag": "Katkısız %100 Karadut & Ekşi Sirke Şırası",
     "title": "Ağır Ağır Demlenen,",
     "highlightTitle": "Yoğun Gövdeli Şifa.",
     "subtitle": "İspir dağlarının taze karadutları ve bakır bakraçlarda demlenen aromatik şıralar, hiçbir katkı maddesi olmadan geleneksel kıvamına kavuşur.",
@@ -80,43 +80,43 @@
     }
   },
   {
-    "id": "slide-1",
-    "tag": "Erzurum İspir'in Geleneksel El Emeği Mirası",
-    "title": "Zamanın Yavaş Akışında,",
-    "highlightTitle": "Doğanın Saf İmzası.",
-    "subtitle": "2000 metre rakımlı İspir yaylalarından şafak vakti toplanan saf beyaz dutlar; meşe odun ateşinde ve bakır kazanlarda kaynatılarak asırlık lezzetine kavuşur.",
-    "image": "/ispir-manzara-hero.png",
+    "id": "slide-user-5",
+    "tag": "Güneşte Keten Bezlerde Doğal Olgunlaşma",
+    "title": "Keten Sergilerde İpeksi Doku,",
+    "highlightTitle": "Güneşle Olgunlaşan Pestil.",
+    "subtitle": "Sıcak herlenin keten bezlere milimetrik incelikte serilmesi ve İspir’in nemsiz dağ rüzgârlarında kurumaya bırakılmasıyla elde edilen coğrafi tescilli saray lezzeti.",
+    "image": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
     "active": true,
     "objectPositionX": 50,
     "objectPositionY": 50,
     "imageScale": 1,
     "primaryCta": {
-      "text": "Seçkin Mahsulleri Keşfet",
-      "href": "/kategoriler"
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
     },
     "secondaryCta": {
-      "text": "Hikayemizi İncele",
-      "href": "/hikayemiz"
+      "text": "Geleneksel Üretim",
+      "href": "/tesisimiz"
     }
   },
   {
-    "id": "slide-2",
-    "tag": "Odun Ateşi & Geleneksel Bakır Kazanlar",
-    "title": "Kuşaktan Kuşağa Aktarılan",
-    "highlightTitle": "Asırlık Usuller.",
-    "subtitle": "Hiçbir katkı maddesi, ilave şeker veya koruyucu kimyasal içermeyen %100 saf ve yoğun gövdeli geleneksel Pekefe lezzet şöleni.",
-    "image": "/geleneksel-kazan.png",
+    "id": "slide-user-6",
+    "tag": "6 Adımda Asırlık Zanaatkarlık Rehberi",
+    "title": "Duttan Sergiye Usta Dokunuşlar,",
+    "highlightTitle": "Adım Adım Lezzet Yolculuğu.",
+    "subtitle": "Hasat ➔ Cendere Pres ➔ Bakır Kazan ➔ Keten Döküm ➔ Ahşap Serim ➔ Ceviz Serpimi: Geleneksel İspir usulü katkısız saray pestili üretim serüveni.",
+    "image": "/uploads/ispir-pestil-uretim-yolculugu-6-adim.webp",
     "active": true,
     "objectPositionX": 50,
     "objectPositionY": 50,
     "imageScale": 1,
     "primaryCta": {
-      "text": "Geleneksel Pekmezler",
-      "href": "/kategoriler"
-    },
-    "secondaryCta": {
       "text": "Üretim Tesisimiz",
       "href": "/tesisimiz"
+    },
+    "secondaryCta": {
+      "text": "Hasat Hikayemiz",
+      "href": "/hikayemiz"
     }
   },
   {
@@ -137,46 +137,6 @@
     "secondaryCta": {
       "text": "Sertifikalarımız",
       "href": "/sertifikalar"
-    }
-  },
-  {
-    "id": "slide-3",
-    "tag": "Güneşte Keten Bezlerde Doğal Kurutma",
-    "title": "İpeksi Dokusuyla Güneşte",
-    "highlightTitle": "Olgunlaşan Pestil.",
-    "subtitle": "Keten sergilere milimetrik hassasiyetle dökülen dut herlesi, İspir'in nemsiz dağ rüzgârları ve bol güneşi altında eşsiz aromasına kavuşur.",
-    "image": "/ispir-pestil-kurutma-gercek.png",
-    "active": true,
-    "objectPositionX": 50,
-    "objectPositionY": 50,
-    "imageScale": 1,
-    "primaryCta": {
-      "text": "Sade Dut Pestili İncele",
-      "href": "/urun/pekefe-sade-dut-pestili"
-    },
-    "secondaryCta": {
-      "text": "Tüm Pestil Çeşitleri",
-      "href": "/kategoriler"
-    }
-  },
-  {
-    "id": "slide-4",
-    "tag": "Yerli İspir Cevizi ile Harmanlanmış",
-    "title": "Asil Tatların Zarafet Dolu",
-    "highlightTitle": "Zengin Uyumu.",
-    "subtitle": "İpe dizilmiş yerli cevizlerin kaynayan saf şıra herlesine daldırılmasıyla üretilen coğrafi tescilli saray lezzeti İspir Cevizli Dut Kömesi.",
-    "image": "/ispir-kome-gercek-hasat.jpg",
-    "active": true,
-    "objectPositionX": 50,
-    "objectPositionY": 50,
-    "imageScale": 1,
-    "primaryCta": {
-      "text": "Köme & Tatlı Koleksiyonu",
-      "href": "/kategoriler"
-    },
-    "secondaryCta": {
-      "text": "Rekolte Kulübü",
-      "href": "/rekolte-kulubu"
     }
   }
 ]

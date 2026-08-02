@@ -512,8 +512,12 @@ export async function GET(request: NextRequest) {
       </tr>
     </table>
 
-    <!-- Bank Account Details (IBAN) -->
-    ${(cmsData?.bankName && cmsData?.bankIban) || (banks && banks.length > 0) ? `
+    <!-- Bank Account Details (IBAN) & Custom Invoice Footer HTML -->
+    ${cmsData?.companyInvoiceFooter ? `
+    <div style="margin-top: 15px; font-family: Arial, sans-serif;">
+      ${cmsData.companyInvoiceFooter}
+    </div>
+    ` : (cmsData?.bankName && cmsData?.bankIban) || (banks && banks.length > 0) ? `
     <div style="margin-top: 20px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc; font-family: Arial, sans-serif; text-align: left;">
       <div style="font-size: 10px; font-weight: 800; color: #1e293b; text-transform: uppercase; tracking-wider; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
         BANKA HESAP BİLGİLERİ (ÖDEME İÇİN)

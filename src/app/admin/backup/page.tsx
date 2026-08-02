@@ -51,7 +51,8 @@ import {
   Palette,
   Type,
   Link as LinkIcon,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { turkeyLocations } from "@/data/turkey-locations";
@@ -600,6 +601,74 @@ export default function BackupAdminPage() {
       console.error("Error fetching banks:", err);
     } finally {
       setBanksLoading(false);
+    }
+  };
+
+  const generateBankAccountsHtml = (bankList: any[]) => {
+    const titleName = companyName || "PEKEFE Gıda Sanayi ve Ticaret Ltd. Şti.";
+    let rowsHtml = "";
+
+    if (Array.isArray(bankList) && bankList.length > 0) {
+      rowsHtml = bankList
+        .map(
+          (b) => `<tr>
+  <td style="border: 1px solid #e2e8f0; padding: 8px; font-weight: bold; text-align: left;">
+    ${b.name || "Banka"}
+    ${b.branch ? `<br><span style="font-size: 10px; font-weight: normal; color: #64748b;">Şube: ${b.branch}</span>` : ""}
+    <br><span style="font-size: 10px; font-weight: normal; color: #475569;">Alıcı: ${titleName}</span>
+  </td>
+  <td style="border: 1px solid #e2e8f0; padding: 8px; font-family: monospace; font-weight: bold; text-align: left;">
+    ${b.iban || "IBAN Belirtilmedi"}
+    ${b.currency ? `<span style="font-size: 10px; color: #059669; margin-left: 6px;">(${b.currency})</span>` : ""}
+  </td>
+</tr>`
+        )
+        .join("");
+    } else {
+      rowsHtml = `<tr>
+  <td style="border: 1px solid #e2e8f0; padding: 8px; font-weight: bold; text-align: left;">
+    ${bankName || "Ziraat Bankası"}
+    <br><span style="font-size: 10px; font-weight: normal; color: #475569;">Alıcı: ${titleName}</span>
+  </td>
+  <td style="border: 1px solid #e2e8f0; padding: 8px; font-family: monospace; font-weight: bold; text-align: left;">
+    ${bankIban || "TR44 0001 0001 1307 0233 5050 01"}
+  </td>
+</tr>`;
+    }
+
+    return `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: sans-serif; font-size: 12px; text-align: left;">
+  <tbody>
+    <tr style="background-color: #f8fafc;">
+      <td colspan="2" style="border: 1px solid #e2e8f0; padding: 8px; font-weight: bold; text-align: center; color: #0f172a;">BANKA HESAP NUMARALARIMIZ</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #f1f5f9; color: #334155;">
+      <td style="border: 1px solid #e2e8f0; padding: 8px; width: 40%;">BANKA / ALICI UNVANI</td>
+      <td style="border: 1px solid #e2e8f0; padding: 8px; width: 60%;">IBAN &amp; HESAP BİLGİSİ</td>
+    </tr>
+    ${rowsHtml}
+  </tbody>
+</table>`;
+  };
+
+  const handleAutoSyncBankAccountsHtml = async () => {
+    const toastId = toast.loading("Kayıtlı banka hesapları sistemden çekiliyor...");
+    try {
+      let currentBankList = banks;
+      if (!currentBankList || currentBankList.length === 0) {
+        const res = await fetch("/api/accounting/banks");
+        if (res.ok) {
+          const json = await res.json();
+          currentBankList = Array.isArray(json) ? json : (json?.data || []);
+          setBanks(currentBankList);
+        }
+      }
+      const generatedHtml = generateBankAccountsHtml(currentBankList);
+      setCompanyInvoiceFooter(generatedHtml);
+      toast.dismiss(toastId);
+      toast.success("Banka hesap tablosu sistemdeki bankalarınızdan başarıyla çekildi ve HTML alanına aktarıldı!");
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error(`Banka hesapları çekilemedi: ${err.message}`);
     }
   };
 
@@ -2400,40 +2469,56 @@ export default function BackupAdminPage() {
               </div>
 
               {/* Fatura Alt Bilgi HTML input */}
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider font-semibold">Fatura Alt Bilgi (HTML formatında)</label>
+              <div className="md:col-span-2 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider font-semibold">
+                    Fatura Alt Bilgi (HTML formatında)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAutoSyncBankAccountsHtml}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl font-bold text-[11px] transition shadow-sm cursor-pointer group"
+                    title="Kayıtlı Banka Hesaplarından Otomatik HTML Tablosu Oluştur"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                    <span>⚡ Banka Hesaplarından Otomatik Çek</span>
+                  </button>
+                </div>
+
                 <div className="flex gap-2 items-start">
                   <textarea
                     value={companyInvoiceFooter}
                     onChange={e => setCompanyInvoiceFooter(e.target.value)}
-                    rows={4}
-                    className="w-full px-4 py-2 border border-slate-250 rounded-xl outline-none focus:border-orange-500 bg-white text-slate-800 font-mono text-[11px] leading-relaxed transition text-left"
+                    rows={5}
+                    className="w-full px-4 py-2.5 border border-slate-250 rounded-xl outline-none focus:border-orange-500 bg-white text-slate-800 font-mono text-[11px] leading-relaxed transition text-left shadow-inner"
                     dir="ltr"
-                    placeholder='<table style="height: auto;"> <tbody> <tr> <td> <p style="margin: 0">BANKA HESAP NUMARALARIMIZ</p> </td> </tr> </tbody> </table>'
+                    placeholder='<table style="width: 100%;">...</table>'
                   />
-                  <button 
-                    type="button" 
-                    title="Görsel Editör ile Düzenle"
-                    onClick={() => {
-                      setEditorContent(companyInvoiceFooter);
-                      setIsHtmlEditorOpen(true);
-                      setShowSource(false);
-                    }} 
-                    className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-orange-500 hover:text-orange-600 transition cursor-pointer"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button 
-                    type="button" 
-                    title="Temizle"
-                    onClick={() => setCompanyInvoiceFooter("")} 
-                    className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    <button 
+                      type="button" 
+                      title="Görsel Editör ile Düzenle"
+                      onClick={() => {
+                        setEditorContent(companyInvoiceFooter);
+                        setIsHtmlEditorOpen(true);
+                        setShowSource(false);
+                      }} 
+                      className="p-2.5 border border-slate-200 rounded-xl hover:bg-orange-50 text-orange-500 hover:text-orange-600 transition cursor-pointer shadow-sm"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button 
+                      type="button" 
+                      title="Temizle"
+                      onClick={() => setCompanyInvoiceFooter("")} 
+                      className="p-2.5 border border-slate-200 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition cursor-pointer shadow-sm"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-[10px] text-slate-400 mt-1 leading-normal">
-                  E-Fatura ve E-Arşiv çıktılarının altında gösterilecek resmi banka hesapları, teşekkür metni ve yasal dipnotları HTML formatında ekleyebilirsiniz.
+                  E-Fatura ve E-Arşiv çıktılarının altında gösterilecek resmi banka hesapları, teşekkür metni ve yasal dipnotları HTML formatında ekleyebilirsiniz. Sağ üstteki <strong>"⚡ Banka Hesaplarından Otomatik Çek"</strong> butonuna tıklayarak sistemdeki kayıtlı tüm banka hesaplarınızı anında şık bir HTML tablosuna dönüştürebilirsiniz.
                 </p>
               </div>
             </div>

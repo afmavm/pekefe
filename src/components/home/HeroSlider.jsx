@@ -170,7 +170,10 @@ export function HeroSlider({ customSlides }) {
                 unoptimized
                 style={{
                   objectPosition: `${slide.objectPositionX ?? 50}% ${slide.objectPositionY ?? 50}%`,
-                  transform: `scale(${slide.imageScale ?? 1.0})`,
+                  transform: `scale(${slide.imageScale ?? 1.0}) translateZ(0)`,
+                  imageRendering: "high-quality",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
                 }}
                 className={`object-cover filter brightness-100 contrast-[1.02] saturate-[1.05] ${
                   isActive ? "animate-ken-burns" : ""

@@ -52,15 +52,25 @@ export async function POST(request: NextRequest) {
     let originalSize = file.size;
     let finalSize = buffer.length;
 
-    // 3. Görselleri Otomatik Olarak 1920x1080 WebP Formatına Dönüştür & Optimize Et
+    // 3. Görselleri %100 Stüdyo Netliğinde WebP Formatına Dönüştür & Optimize Et (Sıfır Bulanıklık)
     const isImage = file.type.startsWith("image/") || [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".webp", ".avif", ".heic", ".tiff"].includes(fileExt);
     
     if (isImage && !fileExt.endsWith(".svg")) {
       try {
         const sharp = require("sharp");
         const convertedWebp = await sharp(buffer)
-          .resize(1920, 1080, { fit: "cover", position: "center" })
-          .webp({ quality: 92 })
+          .resize({
+            width: 3840,
+            height: 2160,
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .webp({
+            quality: 98,
+            effort: 6,
+            chromaSubsampling: "4:4:4",
+            smartSubsample: false,
+          })
           .toBuffer();
 
         buffer = convertedWebp;

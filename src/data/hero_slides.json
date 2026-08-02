@@ -20,6 +20,26 @@
     }
   },
   {
+    "id": "slide-user-11",
+    "tag": "3000 Metre Rakımlı İspir Kaçkar Yedi Göller",
+    "title": "Buzul Göllerinin Serinliğinde,",
+    "highlightTitle": "Saf Dağ Havası.",
+    "subtitle": "İspir Kaçkar dağlarının zirvesinde yer alan kristal buzul gölleri ve bakir dağ rüzgârları; meyvelerimizin doğal olgunlaşmasını sağlayan en saf iklim zenginliğidir.",
+    "image": "/uploads/ispir-yedi-goller-kackar-manzara.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Doğal Coğrafyamız",
+      "href": "/hikayemiz"
+    },
+    "secondaryCta": {
+      "text": "Seçkin Mahsuller",
+      "href": "/kategoriler"
+    }
+  },
+  {
     "id": "slide-user-1",
     "tag": "Kuşaktan Kuşağa İspir Dut Bahçeleri Hasadı",
     "title": "Bereketli Topraklarda,",

@@ -494,7 +494,6 @@ export default function BackupAdminPage() {
     const toastId = toast.loading("GİB/Maliyeden mükellef bilgileri sorgulanıyor...");
     try {
       const res = await fetch(`/api/integrations/gib-sorgu?vkn=${vkn}`);
-      toast.dismiss(toastId);
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -522,19 +521,19 @@ export default function BackupAdminPage() {
           setCompanyStreet(data.sokak || "");
           setCompanyPostalCode(data.postaKodu || "");
           setCompanyWebsite(data.website || "");
-          toast.success("Maliye / GİB sisteminden mükellef bilgileri başarıyla çekildi!");
+          toast.success("Maliye / GİB sisteminden mükellef bilgileri başarıyla çekildi!", { id: toastId });
         } else {
-          toast.error(data.error || "GİB sorgusu başarısız oldu.");
+          toast.error(data.error || "GİB sorgusu başarısız oldu.", { id: toastId });
         }
       } else {
         const errJson = await res.json();
-        toast.error(errJson?.error || "GİB entegrasyon hatası oluştu.");
+        toast.error(errJson?.error || "GİB entegrasyon hatası oluştu.", { id: toastId });
       }
     } catch (err: any) {
-      toast.dismiss(toastId);
-      toast.error(`Bağlantı hatası: ${err.message}`);
+      toast.error(`Bağlantı hatası: ${err.message}`, { id: toastId });
     } finally {
       setGibLoading(false);
+      setTimeout(() => toast.dismiss(toastId), 3500);
     }
   };
 
@@ -655,20 +654,22 @@ export default function BackupAdminPage() {
     try {
       let currentBankList = banks;
       if (!currentBankList || currentBankList.length === 0) {
-        const res = await fetch("/api/accounting/banks");
+        const res = await fetch("/api/accounting/banks", { cache: "no-store" });
         if (res.ok) {
           const json = await res.json();
           currentBankList = Array.isArray(json) ? json : (json?.data || []);
           setBanks(currentBankList);
+        } else {
+          throw new Error("Banka hesapları veritabanından çekilemedi.");
         }
       }
       const generatedHtml = generateBankAccountsHtml(currentBankList);
       setCompanyInvoiceFooter(generatedHtml);
-      toast.dismiss(toastId);
-      toast.success("Banka hesap tablosu sistemdeki bankalarınızdan başarıyla çekildi ve HTML alanına aktarıldı!");
+      toast.success("Banka hesap tablosu kayıtlı bankalarınızdan başarıyla çekildi ve HTML alanına aktarıldı!", { id: toastId });
     } catch (err: any) {
-      toast.dismiss(toastId);
-      toast.error(`Banka hesapları çekilemedi: ${err.message}`);
+      toast.error(`Banka hesapları çekilemedi: ${err.message || "Bilinmeyen Hata"}`, { id: toastId });
+    } finally {
+      setTimeout(() => toast.dismiss(toastId), 3500);
     }
   };
 

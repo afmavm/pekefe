@@ -20,6 +20,26 @@
     }
   },
   {
+    "id": "slide-user-2",
+    "tag": "2000m Rakımda Saf Beyaz Dut Seçimi",
+    "title": "Dalından Dalına Özenle,",
+    "highlightTitle": "Saf Dutun En Doğal Hali.",
+    "subtitle": "İspir yaylalarının nemsiz temiz dağ havasında olgunlaşan bal kıvamındaki saf beyaz dutlar, ezilmeden ve zedelenmeden el örgüsü sepetlere tek tek toplanır.",
+    "image": "/uploads/ispir-saf-beyaz-dut-toplama.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
+    },
+    "secondaryCta": {
+      "text": "Doğal Üretim Süreci",
+      "href": "/tesisimiz"
+    }
+  },
+  {
     "id": "slide-1",
     "tag": "Erzurum İspir'in Geleneksel El Emeği Mirası",
     "title": "Zamanın Yavaş Akışında,",

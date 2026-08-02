@@ -100,6 +100,26 @@
     }
   },
   {
+    "id": "slide-user-6",
+    "tag": "6 Adımda Asırlık Zanaatkarlık Rehberi",
+    "title": "Duttan Sergiye Usta Dokunuşlar,",
+    "highlightTitle": "Adım Adım Lezzet Yolculuğu.",
+    "subtitle": "Hasat ➔ Cendere Pres ➔ Bakır Kazan ➔ Keten Döküm ➔ Ahşap Serim ➔ Ceviz Harpimi: Geleneksel İspir usulü katkısız saray pestili üretim serüveni.",
+    "image": "/uploads/ispir-pestil-uretim-yolculugu-6-adim.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    },
+    "secondaryCta": {
+      "text": "Hasat Hikayemiz",
+      "href": "/hikayemiz"
+    }
+  },
+  {
     "id": "slide-1",
     "tag": "Erzurum İspir'in Geleneksel El Emeği Mirası",
     "title": "Zamanın Yavaş Akışında,",

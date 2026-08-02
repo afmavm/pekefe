@@ -383,31 +383,111 @@ export default function AdminHeroSliderPage() {
         ))}
       </div>
 
-      {/* Edit / Add Modal */}
+      {/* Edit / Add Modal with Real-time Live Slide Preview */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-6 border border-slate-100 my-8">
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl space-y-6 border border-slate-100 my-6">
+            
+            {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  {editingSlide ? "Slaytı Düzenle" : "Yeni Slayt Ekle"}
+                <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                  <span>{editingSlide ? "Slaytı Düzenle" : "Yeni Slayt Ekle"}</span>
+                  <span className="text-xs bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md font-mono font-bold">
+                    CANLI ÖNİZLEME MODU
+                  </span>
                 </h3>
-                <p className="text-xs text-slate-500">Ana sayfa Hero slider ayarlarını yapılandırın</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Resim ve metinleri değiştirirken alt taraftaki canlı önizleme alanından vitrin görünümünü anlık takip edebilirsiniz.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer font-bold"
               >
                 ✕
               </button>
             </div>
 
+            {/* LIVE REAL-TIME VISUAL SLIDE PREVIEW BOX */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-amber-600" />
+                  <span>Slayt Vitrin Canlı Önizlemesi (Görsel ve Metin Yerleşimi)</span>
+                </label>
+                <span className="text-[10px] font-mono text-slate-400">1920 x 1080 px Oranlanmış Görünüm</span>
+              </div>
+
+              <div className="relative w-full aspect-[21/9] sm:aspect-[16/7] rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-900 shadow-xl group/preview select-none flex items-end justify-start p-4 sm:p-6 text-white">
+                {/* Background Image Preview */}
+                {form.image ? (
+                  <Image
+                    src={form.image}
+                    alt="Canlı Önizleme"
+                    fill
+                    unoptimized
+                    className="object-cover filter brightness-100 contrast-[1.02] saturate-[1.05]"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-mono">
+                    Görsel Seçilmedi
+                  </div>
+                )}
+
+                {/* Ambient Soft Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/15 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent h-1/2 bottom-0 top-auto"></div>
+
+                {/* Watermark Badge */}
+                <div className="absolute top-3 right-3 px-3 py-1 bg-black/60 backdrop-blur-md text-amber-300 text-[10px] font-bold font-mono rounded-lg border border-white/20 flex items-center gap-1.5 z-20">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>VITRIN CANLI GÖRÜNÜMÜ</span>
+                </div>
+
+                {/* Overlaid Typography Content */}
+                <div className="relative z-20 space-y-2 max-w-lg text-left drop-shadow-md">
+                  {form.tag && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-white">
+                        {form.tag}
+                      </span>
+                    </div>
+                  )}
+
+                  <h2 className="text-base sm:text-2xl font-bold leading-tight drop-shadow-lg">
+                    {form.title || "Başlık Giriniz"} <br />
+                    <span className="text-amber-300 italic font-serif font-normal">
+                      {form.highlightTitle}
+                    </span>
+                  </h2>
+
+                  {form.subtitle && (
+                    <p className="text-[10px] sm:text-xs text-white/90 line-clamp-2 leading-relaxed font-light drop-shadow">
+                      {form.subtitle}
+                    </p>
+                  )}
+
+                  <div className="pt-1 flex items-center gap-2">
+                    <span className="px-3 py-1 bg-amber-700 text-white rounded-md text-[10px] font-bold shadow">
+                      {form.primaryCta?.text || "Buton 1"}
+                    </span>
+                    <span className="px-3 py-1 bg-black/40 border border-white/30 text-white rounded-md text-[10px] font-bold backdrop-blur-md">
+                      {form.secondaryCta?.text || "Buton 2"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* FORM INPUTS */}
             <form onSubmit={handleSaveSlide} className="space-y-4 text-xs font-semibold text-slate-700">
               
               {/* Görsel Yükleme / URL */}
               <div className="space-y-2">
-                <label className="block font-bold">Slayt Arka Plan Görseli *</label>
+                <label className="block font-bold text-slate-900">Slayt Arka Plan Görseli *</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -421,10 +501,10 @@ export default function AdminHeroSliderPage() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <UploadCloud className="w-4 h-4 text-amber-400" />
-                    <span>{isUploading ? "Yükleniyor..." : "Görsel Yükle"}</span>
+                    <span>{isUploading ? "Dönüştürülüyor..." : "Görsel Seç & Yükle"}</span>
                   </button>
                   <input
                     type="file"
@@ -477,7 +557,7 @@ export default function AdminHeroSliderPage() {
               <div className="space-y-1">
                 <label className="block font-bold">Açıklama Metni (Subtitle)</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={form.subtitle}
                   onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
                   placeholder="İspir yaylalarından toplanan saf beyaz dutlar..."

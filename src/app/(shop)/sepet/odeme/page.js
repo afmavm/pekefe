@@ -42,6 +42,26 @@ export default function Odeme() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [siteSettings, setSiteSettings] = useState(null);
+
+  // Fetch Bank Accounts and CMS Settings from management backend
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) setSiteSettings(data);
+      })
+      .catch((e) => console.error("Error loading settings:", e));
+
+    fetch("/api/accounting/banks")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        setBankAccounts(list);
+      })
+      .catch((e) => console.error("Error loading bank accounts:", e));
+  }, []);
 
   // Pre-fill user data if logged in
   useEffect(() => {
@@ -120,8 +140,9 @@ export default function Odeme() {
   const isShippingFree = subtotal >= shippingThreshold || shippingMethod === "standard";
   const shippingCost = shippingMethod === "standard" ? (subtotal >= shippingThreshold ? 0 : 35) : 45;
 
-  // Bank Transfer 2% Extra Discount
-  const bankDiscount = paymentMethod === "bankTransfer" ? subtotal * 0.02 : 0;
+  // Bank Transfer Extra Discount (Dynamic from Management Settings)
+  const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
+  const bankDiscount = paymentMethod === "bankTransfer" ? subtotal * (bankDiscountRate / 100) : 0;
   const grandTotal = Math.max(0, subtotal - bankDiscount + shippingCost);
 
   // Card brand icon check
@@ -494,9 +515,11 @@ export default function Odeme() {
                     : "border-gray-200 text-gray-600 hover:border-gray-300"
                 }`}
               >
-                <span className="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  %2 İndirimli
-                </span>
+                {bankDiscountRate > 0 && (
+                  <span className="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    %{bankDiscountRate} İndirimli
+                  </span>
+                )}
                 <span className="material-symbols-outlined text-2xl">account_balance</span>
                 <span className="font-bold text-xs">Banka Havalesi / EFT</span>
               </button>
@@ -585,23 +608,59 @@ export default function Odeme() {
               <div className="p-6 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-4 animate-in fade-in duration-200">
                 <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
                   <span className="material-symbols-outlined text-amber-700">account_balance</span>
-                  <span>Pekefe Resmi Banka Hesap Bilgileri (%2 Ekstra İndirim Uygulandı)</span>
+                  <span>
+                    Pekefe Resmi Banka Hesap Bilgileri {bankDiscountRate > 0 ? `(%${bankDiscountRate} Ekstra İndirim Uygulandı)` : ""}
+                  </span>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-amber-200/80 space-y-2 text-xs font-mono">
-                  <div className="flex justify-between border-b border-gray-100 pb-2">
-                    <span className="text-gray-500 font-sans">Banka:</span>
-                    <span className="font-bold text-[#1a0a10]">Ziraat Bankası - İspir Şubesi</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-100 pb-2">
-                    <span className="text-gray-500 font-sans">Alıcı Ünvanı:</span>
-                    <span className="font-bold text-[#1a0a10]">Pekefe Gıda San. ve Tic. Ltd. Şti.</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500 font-sans">IBAN:</span>
-                    <span className="font-bold text-[#6b1d2f] select-all">TR42 0001 0002 0003 0004 0005 01</span>
-                  </div>
+                
+                <div className="bg-white p-4 rounded-xl border border-amber-200/80 space-y-3 text-xs font-mono">
+                  {bankAccounts && bankAccounts.length > 0 ? (
+                    bankAccounts.map((bank, idx) => (
+                      <div key={bank.id || idx} className={`space-y-1.5 ${idx > 0 ? "pt-3 border-t border-amber-100" : ""}`}>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="text-gray-500 font-sans font-medium">Banka:</span>
+                          <span className="font-bold text-[#1a0a10]">{bank.name} {bank.branch ? `- ${bank.branch}` : ""}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="text-gray-500 font-sans font-medium">Alıcı Ünvanı:</span>
+                          <span className="font-bold text-[#1a0a10]">
+                            {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center pt-0.5">
+                          <span className="text-gray-500 font-sans font-medium">IBAN:</span>
+                          <span className="font-bold text-[#6b1d2f] text-sm tracking-wider select-all">
+                            {bank.iban || "TR42 0001 0002 0003 0004 0005 01"}
+                            {bank.currency && bank.currency !== "TRY" ? ` (${bank.currency})` : ""}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-gray-500 font-sans">Banka:</span>
+                        <span className="font-bold text-[#1a0a10]">
+                          {siteSettings?.bankName || "Ziraat Bankası - İspir Şubesi"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-gray-500 font-sans">Alıcı Ünvanı:</span>
+                        <span className="font-bold text-[#1a0a10]">
+                          {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500 font-sans">IBAN:</span>
+                        <span className="font-bold text-[#6b1d2f] text-sm tracking-wider select-all">
+                          {siteSettings?.bankIban || "TR42 0001 0002 0003 0004 0005 01"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
+
+                <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
                   * Siparişinizi onayladıktan sonra üretilecek Sipariş Numarasını havale açıklama kısmına yazmanız gerekmektedir. Ödeme onayınızın ardından siparişiniz kargoya verilecektir.
                 </p>
               </div>

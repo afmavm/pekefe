@@ -253,6 +253,7 @@ const navGroups: NavGroup[] = [
         icon: Layers,
         description: "Blok Tabanlı İçerik Yönetimi & CMS",
         subItems: [
+          { name: "Hero Slider (Slaytlar)", href: "/admin/hero-slider", icon: Sliders },
           { name: "Site Editörü", href: "/admin/site-editor", icon: Layers },
           { name: "Sayfalar", href: "/admin/pages", icon: FileText },
           { name: "Navbar Düzenle", href: "/admin/navbar", icon: Navigation },

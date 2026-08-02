@@ -16,24 +16,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Dosya türü ve uzantı doğrulaması
-    const allowedMimeTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "video/mp4",
-      "video/webm",
-      "video/ogg",
-      "video/quicktime"
+    const allowedExtensions = [
+      ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg", ".jfif", ".bmp", ".heic",
+      ".pdf", ".xlsx", ".xls", ".mp4", ".webm", ".ogg", ".mov"
     ];
-    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".xlsx", ".mp4", ".webm", ".ogg", ".mov"];
     const fileExt = path.extname(file.name).toLowerCase();
 
-    if (!allowedMimeTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
+    const isImageOrVideoMime = file.type.startsWith("image/") || file.type.startsWith("video/") || file.type.includes("pdf") || file.type.includes("excel") || file.type.includes("spreadsheet");
+    const isExtensionAllowed = allowedExtensions.includes(fileExt);
+
+    if (!isExtensionAllowed && !isImageOrVideoMime) {
       return NextResponse.json(
-        { error: "Geçersiz dosya türü. Sadece resim, video, PDF ve Excel dosyaları yüklenebilir." },
+        { error: "Geçersiz dosya türü. Sadece resim (JPEG, PNG, WEBP, AVIF), video, PDF ve Excel dosyaları yüklenebilir." },
         { status: 400 }
       );
     }

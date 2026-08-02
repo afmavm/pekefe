@@ -58,20 +58,30 @@ export function HeroSlider({ customSlides }) {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Sync customSlides or localStorage
+  // Sync customSlides or localStorage & listen for live changes
   useEffect(() => {
-    if (customSlides && Array.isArray(customSlides) && customSlides.length > 0) {
-      setSlides(customSlides);
-    } else if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("pekefe_hero_slides");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSlides(parsed);
-          }
-        } catch (e) {}
+    const loadSlides = () => {
+      if (customSlides && Array.isArray(customSlides) && customSlides.length > 0) {
+        setSlides(customSlides);
+      } else if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("pekefe_hero_slides");
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const activeOnly = parsed.filter((s) => s.active !== false);
+              setSlides(activeOnly.length > 0 ? activeOnly : parsed);
+            }
+          } catch (e) {}
+        }
       }
+    };
+
+    loadSlides();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("pekefe_hero_slides_changed", loadSlides);
+      return () => window.removeEventListener("pekefe_hero_slides_changed", loadSlides);
     }
   }, [customSlides]);
 
@@ -147,7 +157,7 @@ export function HeroSlider({ customSlides }) {
                 alt={slide.title || "Pekefe Hasat Görseli"}
                 fill
                 priority={index === 0}
-                className={`object-cover filter brightness-[0.92] contrast-[1.05] saturate-[1.08] ${
+                className={`object-cover filter brightness-100 contrast-100 saturate-[1.05] ${
                   isActive ? "animate-ken-burns" : ""
                 }`}
                 sizes="100vw"
@@ -155,9 +165,9 @@ export function HeroSlider({ customSlides }) {
               />
             </div>
 
-            {/* Soft Left Gradient Overlay — Protects Text Readability Without Masking Image Center/Right */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent w-full md:w-3/4"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/20 to-transparent h-1/2 bottom-0 top-auto"></div>
+            {/* Ultra-Soft Subtle Vignette — 100% Bright Unshaded Image Left & Right */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/10 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent h-1/3 bottom-0 top-auto"></div>
           </div>
         );
       })}

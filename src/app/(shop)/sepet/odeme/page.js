@@ -135,10 +135,11 @@ export default function Odeme() {
     setCvv(value);
   };
 
-  // Calculations
-  const shippingThreshold = 750;
-  const isShippingFree = subtotal >= shippingThreshold || shippingMethod === "standard";
-  const shippingCost = shippingMethod === "standard" ? (subtotal >= shippingThreshold ? 0 : 35) : 45;
+  // Dynamic Shipping calculations from Management / CMS Settings
+  const shippingThreshold = Number(siteSettings?.shippingThreshold ?? 5000);
+  const baseShippingFee = Number(siteSettings?.shippingFee ?? 150);
+  const isShippingFree = subtotal >= shippingThreshold;
+  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : (shippingMethod === "express" ? baseShippingFee + 35 : baseShippingFee);
 
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;

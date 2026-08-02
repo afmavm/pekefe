@@ -154,9 +154,10 @@ export default function Sepet() {
   };
 
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const shippingThreshold = 750;
+  const shippingThreshold = Number(settings?.shippingThreshold ?? 5000);
+  const baseShippingFee = Number(settings?.shippingFee ?? 150);
   const isShippingFree = subtotal >= shippingThreshold;
-  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : 35;
+  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : baseShippingFee;
   const total = Math.max(0, subtotal - discountAmount + shippingCost);
   const remainingForFreeShipping = Math.max(0, shippingThreshold - subtotal);
   const progressPercent = Math.min(100, (subtotal / shippingThreshold) * 100);

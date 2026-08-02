@@ -216,7 +216,11 @@ export default function AdminHeroSliderPage() {
       const data = await res.json();
       if (res.ok && data.url) {
         setForm((prev) => ({ ...prev, image: data.url }));
-        toast.success("Görsel başarıyla yüklendi!");
+        if (data.optimized) {
+          toast.success(`⚡ Görsel otomatik olarak tavsiye edilen 1920x1080 WebP formatına çevrildi ve optimize edildi!`);
+        } else {
+          toast.success("Görsel başarıyla yüklendi!");
+        }
       } else {
         toast.error(data.error || "Görsel yüklenirken hata oluştu.");
       }
@@ -233,9 +237,9 @@ export default function AdminHeroSliderPage() {
       {/* Header */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-800 text-xs font-bold rounded-full border border-amber-200/60">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Ana Sayfa Hero Görsel Yönetimi</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200/60">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Otomatik 1920x1080 WebP Dönüştürücü Aktif</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Hero Slayt Yönetimi</h1>
           <p className="text-sm text-slate-500 max-w-2xl">
@@ -262,15 +266,18 @@ export default function AdminHeroSliderPage() {
         </div>
       </div>
 
-      {/* Recommended Image Sizes Banner */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-amber-600/5 to-transparent border border-amber-200/80 rounded-2xl p-5 flex items-start gap-4 text-slate-800">
-        <div className="w-10 h-10 rounded-full bg-amber-500/15 text-amber-700 flex items-center justify-center shrink-0 border border-amber-300/40">
-          <AlertCircle className="w-5 h-5" />
+      {/* Recommended Image Sizes & Auto Converter Banner */}
+      <div className="bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 rounded-2xl p-5 flex items-start gap-4 text-slate-800 shadow-sm">
+        <div className="w-10 h-10 rounded-full bg-emerald-500/15 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-300/40 font-bold">
+          ⚡
         </div>
         <div className="space-y-1 text-xs">
-          <h4 className="font-bold text-slate-900 text-sm">Tavsiye Edilen Görsel Standartları</h4>
+          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <span>Otomatik 1920x1080 px (WebP) Görsel Dönüştürücü Sistemde Aktiftir</span>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">OTOMATİK KORUMA</span>
+          </h4>
           <p className="text-slate-600 leading-relaxed">
-            Slaytların kristal berraklığında görünmesi için <strong>1920x1080 px (WebP)</strong> formatı önerilir. Görseller sunucuya yüklendiğinde otomatik olarak optimize edilip vitrinde Ken Burns yakınlaşma efektiyle görüntülenir.
+            Hangi formatta (PNG, JPG, BMP, HEIC) veya boyutta olursa olsun, yüklediğiniz her görsel arka planda otomatik olarak <strong>1920x1080 px WebP</strong> formatına dönüştürülür ve piksel kaybı yaşanmadan sıkıştırılır. Kullanıcıların teknik detay bilmesine gerek kalmadan ana sayfa slaytları ışık hızında açılır.
           </p>
         </div>
       </div>

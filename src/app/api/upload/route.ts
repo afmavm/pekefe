@@ -42,21 +42,43 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let buffer = Buffer.from(bytes);
 
-    // 3. Rastgele güvenli dosya adı oluştur
     const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-    const filename = `${uniqueId}${fileExt}`;
     const originalName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "");
+
+    let finalFilename = `${uniqueId}${fileExt}`;
+    let isOptimized = false;
+    let originalSize = file.size;
+    let finalSize = buffer.length;
+
+    // 3. Görselleri Otomatik Olarak 1920x1080 WebP Formatına Dönüştür & Optimize Et
+    const isImage = file.type.startsWith("image/") || [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".webp", ".avif", ".heic", ".tiff"].includes(fileExt);
+    
+    if (isImage && !fileExt.endsWith(".svg")) {
+      try {
+        const sharp = require("sharp");
+        const convertedWebp = await sharp(buffer)
+          .resize(1920, 1080, { fit: "cover", position: "center" })
+          .webp({ quality: 92 })
+          .toBuffer();
+
+        buffer = convertedWebp;
+        finalFilename = `${uniqueId}.webp`;
+        isOptimized = true;
+        finalSize = convertedWebp.length;
+      } catch (sharpError) {
+        console.warn("Sharp WebP dönüştürme uyarısı (orijinal dosya saklandı):", sharpError);
+      }
+    }
     
     const localUploadDir = path.join(process.cwd(), "public", "uploads");
     
-    // Local / varsayılan dizinin varlığını garanti et
     if (!fs.existsSync(localUploadDir)) {
       fs.mkdirSync(localUploadDir, { recursive: true });
     }
 
-    const localFilePath = path.join(localUploadDir, filename);
+    const localFilePath = path.join(localUploadDir, finalFilename);
     await writeFile(localFilePath, buffer);
 
     // Eğer cPanel ortamındaysak, doğrudan public_html/uploads altına da kopyala/yaz
@@ -65,17 +87,20 @@ export async function POST(request: NextRequest) {
       if (!fs.existsSync(cpanelDir)) {
         fs.mkdirSync(cpanelDir, { recursive: true });
       }
-      const cpanelFilePath = path.join(cpanelDir, filename);
+      const cpanelFilePath = path.join(cpanelDir, finalFilename);
       await writeFile(cpanelFilePath, buffer);
     }
 
-    // URL döndür
-    const fileUrl = `/uploads/${filename}`;
+    const fileUrl = `/uploads/${finalFilename}`;
 
     return NextResponse.json({ 
       success: true, 
       url: fileUrl,
-      name: originalName
+      name: originalName,
+      optimized: isOptimized,
+      format: isOptimized ? "WebP (1920x1080 px)" : fileExt.toUpperCase(),
+      originalSize,
+      finalSize
     });
 
   } catch (error: any) {

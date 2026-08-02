@@ -135,11 +135,25 @@ export default function Odeme() {
     setCvv(value);
   };
 
-  // Dynamic Shipping calculations from Management / CMS Settings
-  const shippingThreshold = Number(siteSettings?.shippingThreshold ?? 5000);
-  const baseShippingFee = Number(siteSettings?.shippingFee ?? 150);
-  const isShippingFree = subtotal >= shippingThreshold;
-  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : (shippingMethod === "express" ? baseShippingFee + 35 : baseShippingFee);
+  // Dynamic Shipping calculations from Management / CMS Settings per Selected Carrier
+  const defaultCarriers = [
+    { id: "yurtici", name: "Yurtiçi Kargo", fallbackFee: 150, freeThreshold: 5000 },
+    { id: "aras", name: "Aras Kargo", fallbackFee: 140, freeThreshold: 5000 },
+    { id: "mng", name: "MNG Kargo", fallbackFee: 130, freeThreshold: 5000 }
+  ];
+
+  const activeCarriers = (siteSettings?.shippingCarriers && Array.isArray(siteSettings.shippingCarriers) && siteSettings.shippingCarriers.length > 0)
+    ? siteSettings.shippingCarriers.filter(c => c.isActive !== false)
+    : defaultCarriers;
+
+  const currentCarrierObj = activeCarriers.find(
+    c => c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr')) || selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
+  ) || activeCarriers[0];
+
+  const carrierFreeThreshold = Number(currentCarrierObj?.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
+  const carrierFee = Number(currentCarrierObj?.fallbackFee ?? siteSettings?.shippingFee ?? 150);
+  const isShippingFree = subtotal >= carrierFreeThreshold;
+  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : carrierFee;
 
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
@@ -455,21 +469,29 @@ export default function Odeme() {
             {/* Carrier Selection */}
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kargo Firması Tercihi</label>
-              <div className="grid grid-cols-3 gap-3">
-                {["Yurtiçi Kargo", "Aras Kargo", "MNG Kargo"].map((carrier) => (
-                  <button
-                    key={carrier}
-                    type="button"
-                    onClick={() => setSelectedCarrier(carrier)}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                      selectedCarrier === carrier
-                        ? "border-[#6b1d2f] bg-[#6b1d2f] text-white shadow-sm"
-                        : "border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100"
-                    }`}
-                  >
-                    {carrier}
-                  </button>
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {activeCarriers.map((c) => {
+                  const fee = Number(c.fallbackFee ?? siteSettings?.shippingFee ?? 150);
+                  const isFree = subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
+                  const isSelected = selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr')) || c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr'));
+                  return (
+                    <button
+                      key={c.id || c.name}
+                      type="button"
+                      onClick={() => setSelectedCarrier(c.name)}
+                      className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                        isSelected
+                          ? "border-[#6b1d2f] bg-[#6b1d2f] text-white shadow-md scale-[1.02]"
+                          : "border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>{c.name}</span>
+                      <span className={`text-[10px] font-bold ${isSelected ? "text-amber-300" : isFree ? "text-emerald-600" : "text-gray-500"}`}>
+                        {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </section>

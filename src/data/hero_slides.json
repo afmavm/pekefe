@@ -80,6 +80,26 @@
     }
   },
   {
+    "id": "slide-user-5",
+    "tag": "Güneşte Keten Bezlerde Doğal Olgunlaşma",
+    "title": "Keten Sergilerde İpeksi Doku,",
+    "highlightTitle": "Güneşle Olgunlaşan Pestil.",
+    "subtitle": "Sıcak herlenin keten bezlere milimetrik incelikte serilmesi ve İspir’in nemsiz dağ rüzgârlarında kurumaya bırakılmasıyla elde edilen coğrafi tescilli saray lezzeti.",
+    "image": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
+    },
+    "secondaryCta": {
+      "text": "Geleneksel Üretim",
+      "href": "/tesisimiz"
+    }
+  },
+  {
     "id": "slide-1",
     "tag": "Erzurum İspir'in Geleneksel El Emeği Mirası",
     "title": "Zamanın Yavaş Akışında,",

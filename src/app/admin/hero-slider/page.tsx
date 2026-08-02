@@ -24,6 +24,20 @@ export interface HeroSlide {
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
+    id: "slide-user-1",
+    tag: "Kuşaktan Kuşağa İspir Dut Bahçeleri Hasadı",
+    title: "Bereketli Topraklarda,",
+    highlightTitle: "Baba Ve Oğulun Mirası.",
+    subtitle: "İspir’in güneşle dolup taşan kadim dut bahçelerinde, usta ellerin özenli seçimiyle dalından sepetlere toplanan %100 saf ve doğal mahsullerin lezzet dolu ilk adım bereketi.",
+    image: "/uploads/ispir-dut-bahcesi-hasat.webp",
+    active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
+    primaryCta: { text: "Hasat Hikayemizi İncele", href: "/hikayemiz" },
+    secondaryCta: { text: "Tüm Koleksiyon", href: "/kategoriler" },
+  },
+  {
     id: "slide-1",
     tag: "Erzurum İspir'in Geleneksel El Emeği Mirası",
     title: "Zamanın Yavaş Akışında,",
@@ -108,31 +122,39 @@ export default function AdminHeroSliderPage() {
     secondaryCta: { text: "Hikayemiz", href: "/hikayemiz" },
   });
 
-  // Load initial slides
+  // Load initial slides from server API
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("pekefe_hero_slides");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSlides(parsed);
-            setLoading(false);
-            return;
+    fetch(`/api/hero-slides?t=${Date.now()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSlides(data);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("pekefe_hero_slides", JSON.stringify(data));
           }
-        } catch (e) {}
-      }
-      setSlides(DEFAULT_SLIDES);
-      setLoading(false);
-    }
+        } else {
+          setSlides(DEFAULT_SLIDES);
+        }
+      })
+      .catch(() => setSlides(DEFAULT_SLIDES))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Save slides to localStorage & dispatch change event
-  const saveAllSlides = (updatedSlides: HeroSlide[]) => {
+  // Save slides to server API, localStorage & dispatch change event
+  const saveAllSlides = async (updatedSlides: HeroSlide[]) => {
     setSlides(updatedSlides);
     if (typeof window !== "undefined") {
       localStorage.setItem("pekefe_hero_slides", JSON.stringify(updatedSlides));
       window.dispatchEvent(new Event("pekefe_hero_slides_changed"));
+    }
+    try {
+      await fetch("/api/hero-slides", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedSlides),
+      });
+    } catch (e) {
+      console.error("Server slide save error:", e);
     }
   };
 

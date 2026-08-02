@@ -7,6 +7,20 @@ import { Button } from "@/components/ui/Button";
 
 const HERO_SLIDES = [
   {
+    id: "slide-user-1",
+    tag: "Kuşaktan Kuşağa İspir Dut Bahçeleri Hasadı",
+    title: "Bereketli Topraklarda,",
+    highlightTitle: "Baba Ve Oğulun Mirası.",
+    subtitle: "İspir’in güneşle dolup taşan kadim dut bahçelerinde, usta ellerin özenli seçimiyle dalından sepetlere toplanan %100 saf ve doğal mahsullerin lezzet dolu ilk adım bereketi.",
+    image: "/uploads/ispir-dut-bahcesi-hasat.webp",
+    active: true,
+    objectPositionX: 50,
+    objectPositionY: 50,
+    imageScale: 1.0,
+    primaryCta: { text: "Hasat Hikayemizi İncele", href: "/hikayemiz" },
+    secondaryCta: { text: "Tüm Koleksiyon", href: "/kategoriler" },
+  },
+  {
     id: "slide-1",
     tag: "Erzurum İspir'in Geleneksel El Emeği Mirası",
     title: "Zamanın Yavaş Akışında,",
@@ -58,12 +72,28 @@ export function HeroSlider({ customSlides }) {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Sync customSlides or localStorage & listen for live changes
+  // Sync customSlides, /api/hero-slides or localStorage & listen for live changes
   useEffect(() => {
-    const loadSlides = () => {
+    const loadSlides = async () => {
       if (customSlides && Array.isArray(customSlides) && customSlides.length > 0) {
         setSlides(customSlides);
-      } else if (typeof window !== "undefined") {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/hero-slides?t=${Date.now()}`);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const activeOnly = data.filter((s) => s.active !== false);
+          setSlides(activeOnly.length > 0 ? activeOnly : data);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("pekefe_hero_slides", JSON.stringify(data));
+          }
+          return;
+        }
+      } catch (e) {}
+
+      if (typeof window !== "undefined") {
         const saved = localStorage.getItem("pekefe_hero_slides");
         if (saved) {
           try {

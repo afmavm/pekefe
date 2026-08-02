@@ -717,8 +717,8 @@ export default function Odeme() {
 
               {bankDiscount > 0 && (
                 <div className="flex justify-between text-amber-700 font-semibold">
-                  <span>Havale / EFT İndirimi (%2)</span>
-                  <span>-₺{bankDiscount.toLocaleString("tr-TR")}</span>
+                  <span>Havale / EFT İndirimi (%{bankDiscountRate})</span>
+                  <span>-₺{bankDiscount.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
 
@@ -731,11 +731,13 @@ export default function Odeme() {
 
               <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline">
                 <span className="text-base font-bold text-[#1a0a10]">Genel Toplam</span>
-                <span className="text-2xl font-bold text-[#6b1d2f]">₺{grandTotal.toLocaleString("tr-TR")}</span>
+                <span className="text-2xl font-bold text-[#6b1d2f]">
+                  ₺{grandTotal.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-gray-50 text-[10px] text-gray-500 text-center font-semibold border border-gray-200/80">
-                Tüm Fiyatlara %10 Gıda KDV'si Dâhildir
+                Tüm Fiyatlara %{siteSettings?.companyDefaultKdv ?? 10} Gıda KDV'si Dâhildir
               </div>
             </div>
 
@@ -774,7 +776,7 @@ export default function Odeme() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#6b1d2f] text-base">assignment_return</span>
-                <span>14 gün içinde koşulsuz ücretsiz iade garantisi.</span>
+                <span>{siteSettings?.companyDefaultReturnDays ?? 14} gün içinde koşulsuz ücretsiz iade garantisi.</span>
               </div>
             </div>
           </div>

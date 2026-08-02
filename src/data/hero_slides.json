@@ -1,5 +1,25 @@
 [
   {
+    "id": "slide-user-10",
+    "tag": "2000 Metre Rakımlı İspir Kaçkar Dağları",
+    "title": "Zamanın Yavaş Akışında,",
+    "highlightTitle": "Doğanın Saf İmzası.",
+    "subtitle": "Karlı dağ zirveleri, nemsiz yüksek dağ rüzgârları ve bol güneşli vadileriyle İspir Kaçkar yaylaları; Pekefe’nin eşsiz aromatik lezzetlerinin doğduğu kadim topraklardır.",
+    "image": "/uploads/ispir-kackar-yaylalari-manzara.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 40,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Seçkin Mahsulleri Keşfet",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "İspir Mirasımız",
+      "href": "/hikayemiz"
+    }
+  },
+  {
     "id": "slide-user-1",
     "tag": "Kuşaktan Kuşağa İspir Dut Bahçeleri Hasadı",
     "title": "Bereketli Topraklarda,",
@@ -125,7 +145,7 @@
     "title": "Zanaatkar Ruh,",
     "highlightTitle": "Steril Standartlar.",
     "subtitle": "Asırlık geleneksel tarifler; paslanmaz krom tanklar, hassas sıcaklık sensörleri ve el değmeden steril cam kavanozlama sistemiyle güvenle sofralarınıza ulaşır.",
-    "image": "/uploads/1785703207712-7vwrvuoh8.webp",
+    "image": "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
     "active": true,
     "objectPositionX": 50,
     "objectPositionY": 50,

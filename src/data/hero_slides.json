@@ -40,6 +40,26 @@
     }
   },
   {
+    "id": "slide-user-3",
+    "tag": "Geleneksel Meşe Odunu Ateşi & Bakır Kazanlar",
+    "title": "Odun Ateşi ve Cendere Usulü,",
+    "highlightTitle": "Asırlık Lezzet Ritüeli.",
+    "subtitle": "Ahşap pres cenderelerde sıkılan saf şıra, taş ocaklarda yanan meşe odunu ateşinde kaynayan dev bakır kazanlarda ağır ağır pişerek eşsiz aromasına kavuşur.",
+    "image": "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Geleneksel Pekmezler",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    }
+  },
+  {
     "id": "slide-1",
     "tag": "Erzurum İspir'in Geleneksel El Emeği Mirası",
     "title": "Zamanın Yavaş Akışında,",

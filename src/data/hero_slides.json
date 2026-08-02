@@ -158,5 +158,25 @@
       "text": "Üretim Tesisimiz",
       "href": "/tesisimiz"
     }
+  },
+  {
+    "id": "slide-user-9",
+    "tag": "Geleneksel Muska Pestil & İspir Köme Seçkisi",
+    "title": "Asırlık Saray Tarifi,",
+    "highlightTitle": "Zerafet Dolu Köme Ve Muska.",
+    "subtitle": "İspir cevizi ve fındık ezmesiyle doldurulan Muska Pestil, Cevizli Köme ve özel dolgulu gurme saray tatlılarımız; damaklarda unutulmaz bir lezzet izi bırakır.",
+    "image": "/uploads/ispir-muska-kome-saray-tatlilari.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Köme & Muska Koleksiyonu",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Seçkin Mahsuller",
+      "href": "/kategoriler"
+    }
   }
 ]

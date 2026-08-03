@@ -193,7 +193,7 @@ export default function Home() {
       months: "Aralık - Mart",
       climate: "Rakım: 2000m+ | Sıcaklık: -15°C - 2°C",
       story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Biz de bu sürede depolanan pestil, köme ve pekmezlerimizin nem bariyerli ortamlarda asaletini korumasını sağlıyor, bahar dönemi için planlarımızı yapıyoruz.",
-      image: "/uploads/1785710026606-l95h5vlp5.webp",
+      image: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
       action: "Soğuk Depolama & Kalite Kontrol",
     },
   };

@@ -220,10 +220,10 @@ export const DEFAULT_PRODUCTS = [
     desc: "İncecik kesilen sade dut pestilinin içerisine yerli ceviz, bal ve pekmez karışımı muska şeklinde sarılarak elde edilen enfes saray tatlısı.",
     meta: "350g · Özel Sunum Kabı",
     price: 200,
-    image: "/ispir-vakum-sade-pestil-beyaz.png",
+    image: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
     images: [
+      "/uploads/ispir-muska-kome-saray-tatlilari.webp",
       "/ispir-vakum-sade-pestil-beyaz.png",
-      "/ispir-pestil-kurutma-gercek.png",
       "/geleneksel-pekmez.png"
     ],
     sku: "PRD-TT-201",
@@ -251,11 +251,11 @@ export const DEFAULT_PRODUCTS = [
     desc: "Dut pestilinin içerisine bol miktarda dövülmüş ceviz ve antep fıstığı kreması sarılarak hazırlanan gurme lezzet dilimleri.",
     meta: "400g · Premium Sunum Kutusu",
     price: 210,
-    image: "/ispir-vakum-cevizli-pestil-beyaz.png",
+    image: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
     images: [
-      "/ispir-vakum-cevizli-pestil-beyaz.png",
-      "/ispir-pestil-kurutma-gercek.png",
-      "/premium-pekefe-kavanoz.png"
+      "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
+      "/sarma-pestil-tatlisi.jpg",
+      "/ispir-vakum-cevizli-pestil-beyaz.png"
     ],
     sku: "PRD-TT-202",
     stock: 19,

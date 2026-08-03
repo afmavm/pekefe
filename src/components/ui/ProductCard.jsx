@@ -71,8 +71,8 @@ export function ProductCard({
 
   return (
     <div className={`flex flex-col md:flex-row gap-8 items-center border-b border-outline-variant/10 pb-12 ${className}`}>
-      {/* Image Frame - Perfect Fit Aspect Ratio */}
-      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low/60 rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all flex items-center justify-center p-2">
+      {/* Image Frame - Luxury Editorial Full-Bleed Presentation */}
+      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all">
         {tag && (
           <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
             {tag}
@@ -89,7 +89,7 @@ export function ProductCard({
             alt={name || "Pekefe Ürünü"}
             fill
             sizes="(max-width: 768px) 100vw, 35vw"
-            className="object-contain p-1 transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             unoptimized={typeof image === "string" && (image.startsWith("http://") || image.startsWith("https://"))}
             onError={() => setImgError(true)}
           />

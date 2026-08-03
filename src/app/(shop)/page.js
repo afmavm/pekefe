@@ -850,74 +850,74 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
-                src="/ispir-dut-hasadi.png"
-                alt="Dut Hasadı"
+                src="/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg"
+                alt="İspir Dut Hasadı"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Dut Hasadı</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">İspir Dut Hasadı</span>
               </div>
             </div>
             <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group row-span-2">
               <Image
-                src="/ispir-modern-tesis.png"
-                alt="Pekefe Üretim Atölyesi"
+                src="/uploads/ispir-modern-hijyenik-tesis-dolum.webp"
+                alt="Pekefe Steril Üretim Tesisimiz"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Üretim Tesisimiz</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Steril Tesisimiz</span>
               </div>
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
-                src="/pekefe-dut-pekmezi-kavanoz.jpg"
+                src="/pekefe-dut-pekmezi-kavanoz-tr.jpg"
                 alt="Pekefe Cam Kavanoz Dolum"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Pekmez Kavanozu</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Cam Kavanoz Dolum</span>
               </div>
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
-                src="/ispir-pestil-kurutma-gercek.png"
-                alt="Güneşte Pestil Sergileri"
+                src="/uploads/ispir-keten-bezde-pestil-serimi.webp"
+                alt="Güneşte Keten Bez Pestil Sergisi"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Pestil Sergisi</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Keten Bez Serimi</span>
               </div>
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
-                src="/ispir-kome-gercek-hasat.jpg"
-                alt="Cevizli Köme Kurutma"
+                src="/uploads/ispir-muska-kome-saray-tatlilari.webp"
+                alt="Geleneksel Muska & Cevizli Köme"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Cevizli Köme Dizimi</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Köme & Muska Seçkisi</span>
               </div>
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
-                src="/geleneksel-kazan.png"
-                alt="Bakır Kazan Odun Ateşi"
+                src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
+                alt="Geleneksel Bakır Kazan & Odun Ateşi"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase">Geleneksel Kazan</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Meşe Ateşi Bakır Kazan</span>
               </div>
             </div>
           </div>

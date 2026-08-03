@@ -38,7 +38,7 @@ export default function Hikayemiz() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('/ispir-manzara-hero.png')",
+              "url('/uploads/ispir-yedi-goller-kackar-manzara.webp')",
           }}
         ></div>
         <div className="absolute inset-0 hero-gradient"></div>

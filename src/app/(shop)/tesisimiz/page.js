@@ -38,7 +38,7 @@ export default function Tesisimiz() {
           <Image
             alt="Pekefe İspir Üretim Tesisi"
             className="object-cover object-center brightness-[0.65] scale-102"
-            src="/ispir-manzara-hero.png"
+            src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
             fill
             sizes="100vw"
             priority
@@ -214,7 +214,7 @@ export default function Tesisimiz() {
               <Image
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 alt="İspir Dağları ve Pekefe Tesisimiz"
-                src="/ispir-manzara-hero.png"
+                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
               />

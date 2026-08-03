@@ -188,7 +188,7 @@ export default function Iletisim() {
                 <Image
                   className="object-cover opacity-50"
                   alt="İspir Erzurum Haritası"
-                  src="/ispir-manzara-hero.png"
+                  src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />

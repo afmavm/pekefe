@@ -259,8 +259,8 @@ export default function Kategoriler() {
           <div className="absolute inset-0 z-0">
             <Image
               alt="Pekefe Geleneksel Ürünler"
-              className="object-cover filter brightness-[0.45] contrast-105 scale-105"
-              src="/ispir-manzara-hero.png"
+              className="object-cover filter brightness-[0.65] contrast-105"
+              src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
               fill
               sizes="100vw"
               priority

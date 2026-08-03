@@ -30,7 +30,7 @@ export default function Kampanyalar() {
             <div
               className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
               style={{
-                backgroundImage: "url('/ispir-manzara-hero.png')",
+                backgroundImage: "url('/uploads/ispir-yedi-goller-kackar-manzara.webp')",
               }}
             ></div>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent"></div>

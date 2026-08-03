@@ -391,7 +391,7 @@ export default function B2b() {
           {/* Banner */}
           <div className="bg-gradient-to-r from-[#6b1d2f] via-[#4a1220] to-[#1a0a10] rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
             <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-15 pointer-events-none">
-              <Image src="/ispir-manzara-hero.png" alt="Pekefe" fill className="object-cover" />
+              <Image src="/uploads/ispir-yedi-goller-kackar-manzara.webp" alt="Pekefe" fill className="object-cover" />
             </div>
             <div className="relative z-10 max-w-xl">
               <div className="inline-flex items-center gap-2 bg-amber-400/20 backdrop-blur-md border border-amber-400/30 rounded-full px-3.5 py-1 text-amber-300 text-xs font-semibold uppercase tracking-widest mb-4">
@@ -672,7 +672,7 @@ export default function B2b() {
         {/* Banner */}
         <div className="bg-gradient-to-r from-primary via-primary/95 to-secondary p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none">
-            <Image src="/ispir-manzara-hero.png" alt="Pekefe" fill className="object-cover" />
+            <Image src="/uploads/ispir-yedi-goller-kackar-manzara.webp" alt="Pekefe" fill className="object-cover" />
           </div>
           <div className="relative z-10 max-w-xl">
             <div className="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3">

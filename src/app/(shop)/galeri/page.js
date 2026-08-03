@@ -167,7 +167,7 @@ export default function Galeri() {
               <Image
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 alt="İspir'in Doğası"
-                src="/ispir-manzara-hero.png"
+                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
@@ -195,7 +195,7 @@ export default function Galeri() {
               <Image
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                 alt="Pekefe İspir Hasadı Instagram Gönderisi"
-                src="/ispir-manzara-hero.png"
+                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
               />

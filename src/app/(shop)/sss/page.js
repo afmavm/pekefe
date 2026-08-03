@@ -153,7 +153,7 @@ export default function SSS() {
           <div
             className="w-full h-full bg-cover bg-center opacity-10"
             style={{
-              backgroundImage: "url('/ispir-manzara-hero.png')",
+              backgroundImage: "url('/uploads/ispir-yedi-goller-kackar-manzara.webp')",
             }}
           ></div>
         </div>

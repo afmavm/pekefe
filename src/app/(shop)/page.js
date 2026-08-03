@@ -165,32 +165,36 @@ export default function Home() {
 
   const seasons = {
     ilkbahar: {
+      label: "İlkbahar",
       name: "İlkbahar (Doğanın Uyanışı)",
-      months: "Nisan - Mayıs",
+      months: "NİSAN - MAYIS",
       climate: "Rakım: 1200m - 1800m | Sıcaklık: 8°C - 18°C",
       story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık yabani dut ağaçlarının uyandığı dönemdir. Toprak organik gübrelerle beslenir, budama işlemleri el makaslarıyla tamamlanır.",
       image: "/uploads/ispir-kackar-yaylalari-manzara.webp",
       action: "Budama & Toprak Hazırlığı",
     },
     yaz: {
+      label: "Yaz",
       name: "Yaz (Altın Hasat Dönemi)",
-      months: "Haziran - Ağustos",
+      months: "HAZİRAN - AĞUSTOS",
       climate: "Rakım: 1800m - 2200m | Sıcaklık: 24°C - 32°C",
       story: "Dutların en tatlı ve dolgun olduğu dönem. Şafak vakti çarşaflar gerilerek hasat başlar. Odun ateşinde kaynatılan herleler (şıralar) keten bezlerin üzerine dökülerek İspir güneşi altında kurumaya bırakılır.",
       image: "/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg",
       action: "Hasat & Odun Ateşinde Kaynatma",
     },
     sonbahar: {
+      label: "Sonbahar",
       name: "Sonbahar (Hasat Toplama)",
-      months: "Eylül - Kasım",
+      months: "EYLÜL - KASIM",
       climate: "Rakım: 1500m - 2000m | Sıcaklık: 12°C - 20°C",
       story: "Yerli İspir cevizlerinin kabuklarından ayrılıp ipe dizildiği, dut kömelerinin (cevizli sucuk) şıra banyolarıyla hazırlandığı ve sonbahar hasadının toplandığı dönem.",
       image: "/ispir-kome-gercek-hasat.jpg",
       action: "Ceviz Hasadı & Köme Yapımı",
     },
     kis: {
+      label: "Kış",
       name: "Kış (Dinlenme & Olgunlaşma)",
-      months: "Aralık - Mart",
+      months: "ARALIK - MART",
       climate: "Rakım: 2000m+ | Sıcaklık: -15°C - 2°C",
       story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Biz de bu sürede depolanan pestil, köme ve pekmezlerimizin nem bariyerli ortamlarda asaletini korumasını sağlıyor, bahar dönemi için planlarımızı yapıyoruz.",
       image: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
@@ -437,7 +441,7 @@ export default function Home() {
                     {seasons[key].months}
                   </span>
                   <span className="font-display-lg text-sm font-bold block mt-0.5">
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {seasons[key].label || key}
                   </span>
                 </button>
               ))}

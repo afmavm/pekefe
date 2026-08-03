@@ -637,11 +637,12 @@ export default function Home() {
           <div className="lg:col-span-7">
             <div className="relative rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm aspect-[16/9]">
               <Image
-                src="/ispir-manzara-hero.png"
-                alt="İspir Heritage"
+                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
+                alt="İspir Kaçkar Yedi Göller & Çoruh Vadisi Mikrokliması"
                 fill
                 sizes="(max-width: 1200px) 100vw, 58vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-700 hover:scale-105"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/35 to-transparent z-10"></div>
             </div>

@@ -169,7 +169,7 @@ export default function Home() {
       months: "Nisan - Mayıs",
       climate: "Rakım: 1200m - 1800m | Sıcaklık: 8°C - 18°C",
       story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık yabani dut ağaçlarının uyandığı dönemdir. Toprak organik gübrelerle beslenir, budama işlemleri el makaslarıyla tamamlanır.",
-      image: "/ispir-manzara-hero.png",
+      image: "/uploads/ispir-kackar-yaylalari-manzara.webp",
       action: "Budama & Toprak Hazırlığı",
     },
     yaz: {
@@ -177,7 +177,7 @@ export default function Home() {
       months: "Haziran - Ağustos",
       climate: "Rakım: 1800m - 2200m | Sıcaklık: 24°C - 32°C",
       story: "Dutların en tatlı ve dolgun olduğu dönem. Şafak vakti çarşaflar gerilerek hasat başlar. Odun ateşinde kaynatılan herleler (şıralar) keten bezlerin üzerine dökülerek İspir güneşi altında kurumaya bırakılır.",
-      image: "/ispir-dut-hasadi.png",
+      image: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
       action: "Hasat & Odun Ateşinde Kaynatma",
     },
     sonbahar: {
@@ -192,8 +192,8 @@ export default function Home() {
       name: "Kış (Dinlenme & Olgunlaşma)",
       months: "Aralık - Mart",
       climate: "Rakım: 2000m+ | Sıcaklık: -15°C - 2°C",
-      story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Biz de bu sürede depolanan pestil, köme ve pekmezlerimizin nem bariyerli ortamlarda asaletini korumasını sağlıyor, bahar dönemi için planlarimizi yapıyoruz.",
-      image: "/premium-pekefe-kavanoz-tr.png",
+      story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Biz de bu sürede depolanan pestil, köme ve pekmezlerimizin nem bariyerli ortamlarda asaletini korumasını sağlıyor, bahar dönemi için planlarımızı yapıyoruz.",
+      image: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
       action: "Soğuk Depolama & Kalite Kontrol",
     },
   };

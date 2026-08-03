@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
+import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 
 export default function Footer() {
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [settings, setSettings] = useState(getSettings());
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -205,25 +205,25 @@ export default function Footer() {
           <ul className="space-y-4">
             <li className="flex gap-3 text-on-surface-variant">
               <span className="material-symbols-outlined text-primary" aria-hidden="true">mail</span>
-              <a href={`mailto:${settings.email}`} className="hover:text-primary transition-colors">
-                {settings.email}
+              <a href={`mailto:${settings.email || "info@pekefe.com"}`} className="hover:text-primary transition-colors">
+                {settings.email || "info@pekefe.com"}
               </a>
             </li>
             <li className="flex gap-3 text-on-surface-variant">
               <span className="material-symbols-outlined text-primary" aria-hidden="true">phone</span>
-              <a href={`tel:${settings.phone.replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">
-                {settings.phone}
+              <a href={`tel:${(settings.phone || "05342709140").replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">
+                {settings.phone || "0534 270 91 40"}
               </a>
             </li>
             <li className="flex gap-3 text-on-surface-variant">
               <span className="material-symbols-outlined text-primary" aria-hidden="true">location_on</span>
               <a
-                href={settings.mapsLink}
+                href={settings.mapsLink || "https://maps.google.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors whitespace-pre-line"
               >
-                {settings.address}
+                {settings.address || "Çamlıca Mahallesi, İspir / Erzurum"}
               </a>
             </li>
           </ul>

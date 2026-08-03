@@ -10,7 +10,7 @@ import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 
 export default function Sepet() {
   const [cartItems, setCartItems] = useState([]);
-  const [settings, setSettings] = useState(getSettings());
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [allProducts, setAllProducts] = useState([]);
   const [recIndex, setRecIndex] = useState(0);
 

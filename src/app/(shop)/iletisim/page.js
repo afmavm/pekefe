@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
-import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
+import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 
 export default function Iletisim() {
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
-  const [settings, setSettings] = useState(getSettings());
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     setSettings(getSettings());

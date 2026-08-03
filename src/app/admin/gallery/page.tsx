@@ -634,7 +634,7 @@ export default function AdminGalleryPage() {
                   <input
                     type="text"
                     required
-                    placeholder="Örn: İspir Aktaş Vadisi Dut Hasadı"
+                    placeholder="Örn: İspirin bereketli topraklarında Dut Hasadı"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"

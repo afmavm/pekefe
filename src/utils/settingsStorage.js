@@ -4,13 +4,13 @@ const SETTINGS_KEY = "pekefe_global_settings";
 
 export const DEFAULT_SETTINGS = {
   email: "info@pekefe.com",
-  phone: "+90 (442) 511 00 00",
-  address: "Atatürk Cad. No:42, İspir, Erzurum, Türkiye",
+  phone: "0534 270 91 40",
+  address: "Çamlıca Mahallesi, İspir / Erzurum",
   companyTitle: "Pekefe Geleneksel Gıda Ürünleri Ltd. Şti.",
   shippingNote: "Pazartesi-Perşembe günleri saat 14:00'e kadar verilen siparişler aynı gün, diğer günlerdeki siparişler ise ürünlerin tazeliğini korumak amacıyla takip eden ilk iş günü kargoya teslim edilir.",
-  mapsLink: "https://maps.google.com/?q=Atatürk+Caddesi+No:42+İspir+Erzurum+Türkiye",
+  mapsLink: "https://maps.google.com/?q=Çamlıca+Mahallesi+İspir+Erzurum",
   instagram: "https://instagram.com/pekefe",
-  whatsapp: "https://wa.me/904425110000",
+  whatsapp: "https://wa.me/905342709140",
   facebook: "https://facebook.com/pekefe",
   youtube: "https://youtube.com/@pekefe",
 };

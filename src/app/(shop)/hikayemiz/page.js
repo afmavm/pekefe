@@ -78,7 +78,7 @@ export default function Hikayemiz() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10 opacity-90"></div>
               <div className="absolute bottom-6 left-6 right-6 text-white z-20 space-y-1">
-                <span className="text-amber-300 text-xs font-mono tracking-widest uppercase block font-bold">İspir Aktaş Vadisi · Hasat Sezonu</span>
+                <span className="text-amber-300 text-xs font-mono tracking-widest uppercase block font-bold">İspirin bereketli toprakları · Hasat Sezonu</span>
                 <h3 className="font-display-lg text-xl font-bold">İlhan Efe ve Okan Efe</h3>
                 <p className="text-xs text-slate-200 font-body">Asırlık beyaz dut ağaçlarının gölgesinde baba-oğul omuz omuza.</p>
               </div>

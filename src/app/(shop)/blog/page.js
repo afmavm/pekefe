@@ -1,62 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
 
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
+  const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  const articles = [
-    {
-      id: 1,
-      category: "recipe",
-      categoryName: "Geleneksel Tarif",
-      badgeColor: "bg-secondary-container text-on-secondary-container",
-      title: "Pekmezli Kurabiye Püf Noktaları",
-      desc: "Gerçek bir İspir dut pekmezli kurabiye nasıl pişirilir? İpeksi kıvamı yakalamak için uymanız gereken 5 altın kuralı bir araya getirdik.",
-      img: "/ispir-dut-hasadi.png",
-      meta: "45 Dakika • Orta Seviye",
-    },
-    {
-      id: 2,
-      category: "story",
-      categoryName: "Hikayemiz",
-      badgeColor: "bg-secondary-fixed text-on-secondary-fixed",
-      title: "Hasat Vakti: Bağdan Sofraya Yolculuk",
-      desc: "Pekefe ailesi olarak her yıl aynı heyecanla başladığımız bağ bozumu hikayemizi ve geleneksel yöntemlerle pekmez üretimimizi dinleyin.",
-      img: "/geleneksel-kazan.png",
-      meta: "12 Mart 2026 • 1.2k Okunma",
-    },
-    {
-      id: 3,
-      category: "health",
-      categoryName: "Sağlıklı Yaşam",
-      badgeColor: "bg-surface-container-high text-on-surface",
-      title: "Doğal Enerji Deposu: Pekmez ve Ceviz",
-      desc: "Modern yaşamın yorgunluğuna karşı doğanın sunduğu en güçlü karışımlardan birinin bilinmeyen faydalarını anlatıyoruz.",
-      img: "/premium-pekefe-kavanoz.png",
-      meta: "5 Dakika Okuma",
-    },
-    {
-      id: 4,
-      category: "recipe",
-      categoryName: "Geleneksel Tarif",
-      badgeColor: "bg-secondary-container text-on-secondary-container",
-      title: "Geleneksel Cevizli Pestil Yapımı",
-      desc: "Pekefe'nin özel reçetesiyle hazırlanan, her sofranın vazgeçilmezi olacak pratik ve lezzetli pestil tarifimiz burada.",
-      img: "/el-emegi.png",
-      meta: "20 Dakika • Kolay",
-    },
-  ];
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const res = await fetch("/api/blog");
+        if (res.ok) {
+          const data = await res.json();
+          setArticles(data);
+        }
+      } catch (err) {
+        console.error("Blog get hatası:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPosts();
+  }, []);
 
+  const categoryNames = Array.from(new Set(articles.map((a) => a.category).filter(Boolean)));
   const categories = [
     { id: "all", name: "Tüm Yazılar" },
-    { id: "recipe", name: "Geleneksel Tarifler" },
-    { id: "story", name: "Pekefe Hikayeleri" },
-    { id: "health", name: "Sağlıklı Yaşam" },
+    ...categoryNames.map((c) => ({ id: c, name: c })),
   ];
 
   const filteredArticles =
@@ -64,12 +41,13 @@ export default function Blog() {
       ? articles
       : articles.filter((art) => art.category === selectedCategory);
 
-  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const heroArticle = articles.length > 0 ? articles[0] : null;
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!newsletterEmail) return;
 
+    setSubmitting(true);
     try {
       const res = await fetch("/api/newsletter/subscribe", {
         method: "POST",
@@ -89,7 +67,7 @@ export default function Blog() {
 
       setToast({
         isOpen: true,
-        message: "Bültene başarıyla kaydoldunuz! En yeni tarifler e-postanıza gönderilecektir.",
+        message: data.message || "Bültene başarıyla kaydoldunuz! En yeni hikayeler e-postanıza gönderilecektir.",
         type: "success",
       });
       setNewsletterEmail("");
@@ -100,43 +78,46 @@ export default function Blog() {
         message: "Bağlantı hatası oluştu. Lütfen tekrar deneyin.",
         type: "error",
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <>
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-12 mb-section-gap">
-        {/* Hero Section */}
-        <section className="mb-section-gap">
-          <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm group min-h-[350px]">
-            <div
-              className="absolute inset-0 bg-cover bg-center transform group-hover:scale-105 transition-transform duration-[2000ms]"
-              style={{
-                backgroundImage: "url('/ispir-dut-hasadi.png')",
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/30 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-6 md:p-12 max-w-2xl text-white">
-              <span className="bg-secondary text-white px-3 py-1 rounded-full text-label-sm font-label-sm mb-4 inline-block uppercase tracking-widest">
-                Öne Çıkan Tarif
-              </span>
-              <h1 className="font-display-lg text-[24px] md:text-display-lg mb-4 md:mb-6 leading-tight">
-                Geleneksel Pekmezli Kurabiyenin Sırrı
-              </h1>
-              <p className="font-body-lg text-body-md md:text-body-lg mb-6 md:mb-8 opacity-90 line-clamp-2">
-                Anadolu'nun kalbinden gelen doğal üzüm pekmezi ile hazırlanan, ağızda dağılan bu kurabiyelerin
-                nesiller boyu saklanan gizli tarifini keşfedin.
-              </p>
-              <Link
-                className="inline-flex items-center gap-2 bg-white text-primary px-8 py-4 rounded-lg font-label-md hover:translate-y-[-2px] transition-all shadow-lg active:scale-95 cursor-pointer"
-                href="/blog/pekmezli-kurabiye"
-              >
-                Tarifi İncele
-                <span className="material-symbols-outlined">arrow_right_alt</span>
-              </Link>
+        {/* Hero Section - Öne Çıkan Yazı */}
+        {heroArticle && (
+          <section className="mb-section-gap">
+            <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm group min-h-[350px]">
+              <div
+                className="absolute inset-0 bg-cover bg-center transform group-hover:scale-105 transition-transform duration-[2000ms]"
+                style={{
+                  backgroundImage: `url('${heroArticle.image || "/ispir-dut-hasadi.png"}')`,
+                }}
+              ></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#7f1d1d]/90 via-[#7f1d1d]/40 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-6 md:p-12 max-w-2xl text-white">
+                <span className="bg-[#d97706] text-white px-3 py-1 rounded-full text-label-sm font-label-sm mb-4 inline-block uppercase tracking-widest font-bold">
+                  {heroArticle.category || "Öne Çıkan"}
+                </span>
+                <h1 className="font-display text-[24px] md:text-4xl font-bold mb-4 md:mb-6 leading-tight text-white">
+                  {heroArticle.title}
+                </h1>
+                <p className="font-body-lg text-body-md md:text-body-lg mb-6 md:mb-8 opacity-90 line-clamp-2">
+                  {heroArticle.metaDesc || heroArticle.title}
+                </p>
+                <Link
+                  className="inline-flex items-center gap-2 bg-white text-[#7f1d1d] px-8 py-4 rounded-lg font-bold hover:translate-y-[-2px] transition-all shadow-lg active:scale-95 cursor-pointer"
+                  href={`/blog/${heroArticle.slug}`}
+                >
+                  Yazıyı İncele
+                  <span className="material-symbols-outlined">arrow_right_alt</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-gutter">
           {/* Main Content Area */}
@@ -149,8 +130,8 @@ export default function Blog() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`font-label-md pb-2 whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === cat.id
-                      ? "text-primary border-b-2 border-primary font-bold"
-                      : "text-on-surface-variant hover:text-primary"
+                      ? "text-[#7f1d1d] border-b-2 border-[#7f1d1d] font-bold"
+                      : "text-slate-600 hover:text-[#7f1d1d]"
                   }`}
                 >
                   {cat.name}
@@ -159,172 +140,127 @@ export default function Blog() {
             </nav>
 
             {/* Article Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-              {filteredArticles.map((art) => (
-                <article
-                  key={art.id}
-                  className="bg-surface-container-lowest rounded-xl overflow-hidden premium-shadow group hover:shadow-md transition-all duration-300 border border-outline-variant/10"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      alt={art.title}
-                      src={art.img}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                    <span
-                      className={`absolute top-4 left-4 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-tighter ${art.badgeColor}`}
-                    >
-                      {art.categoryName}
-                    </span>
-                  </div>
-                  <div className="p-8">
-                    <div className="flex items-center gap-4 mb-4 text-on-surface-variant/60 text-label-sm">
-                      <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[16px]">schedule</span> {art.meta}
-                      </span>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="bg-slate-100 h-80 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : filteredArticles.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-slate-500 font-medium">Bu kategoride henüz yazı bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {filteredArticles.map((art) => (
+                  <article
+                    key={art.id}
+                    className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200/80 flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+                        <Image
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          alt={art.title}
+                          src={art.image || "/ispir-dut-hasadi.png"}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                        <span className="absolute top-4 left-4 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#7f1d1d] text-white">
+                          {art.category || "Genel"}
+                        </span>
+                      </div>
+                      <div className="p-6 md:p-8">
+                        <div className="flex items-center gap-4 mb-3 text-slate-400 text-xs">
+                          <span className="flex items-center gap-1 font-medium">
+                            <span className="material-symbols-outlined text-[16px]">schedule</span>{" "}
+                            {new Date(art.createdAt).toLocaleDateString("tr-TR", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-[#7f1d1d] transition-colors leading-snug">
+                          <Link href={`/blog/${art.slug}`}>{art.title}</Link>
+                        </h3>
+                        <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
+                          {art.metaDesc || art.title}
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="font-headline-md text-headline-md text-primary mb-4 group-hover:text-secondary transition-colors">
-                      {art.title}
-                    </h3>
-                    <p className="font-body-md text-on-surface-variant mb-6 line-clamp-2">{art.desc}</p>
-                    <Link
-                      className="inline-flex items-center gap-2 text-primary font-bold hover:translate-x-1 transition-transform group/link"
-                      href="/blog"
-                    >
-                      <span className="text-label-md">Devamını Oku</span>
-                      <span className="material-symbols-outlined text-[18px]">east</span>
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
+                    <div className="px-6 md:px-8 pb-6 pt-0">
+                      <Link
+                        className="inline-flex items-center gap-2 text-[#7f1d1d] font-bold hover:translate-x-1 transition-transform group/link text-sm"
+                        href={`/blog/${art.slug}`}
+                      >
+                        <span>Devamını Oku</span>
+                        <span className="material-symbols-outlined text-[18px]">east</span>
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 space-y-12">
-            {/* Search */}
-            <div className="relative group">
-              <input
-                className="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 pl-12 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none"
-                placeholder="Tarif veya makale ara..."
-                type="text"
-              />
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40">
-                search
-              </span>
-            </div>
-
             {/* Newsletter Signup (Sidebar) */}
-            <div className="bg-primary p-8 rounded-xl text-white relative overflow-hidden">
+            <div className="bg-[#7f1d1d] p-8 rounded-xl text-white relative overflow-hidden shadow-sm">
               <div className="relative z-10">
-                <h4 className="font-display-lg text-headline-md mb-4 leading-tight">Tarifleri Kaçırmayın</h4>
-                <p className="font-body-md opacity-80 mb-6">
-                  Her hafta en taze tarifleri ve hikayeleri e-postanıza gönderelim.
+                <h4 className="font-display text-2xl font-bold mb-3 leading-tight text-white">
+                  Hikayeleri Kaçırmayın
+                </h4>
+                <p className="text-sm opacity-90 mb-6 leading-relaxed">
+                  İspir'in geleneksel lezzetlerini, özel üretim hikayelerini ve yöresel tarifleri ilk siz öğrenin.
                 </p>
                 <form onSubmit={handleNewsletterSubmit} className="space-y-4">
                   <input
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:bg-white/20 outline-none transition-all"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/60 focus:bg-white/20 outline-none transition-all text-sm"
                     placeholder="E-posta adresiniz"
                     type="email"
                     required
                   />
                   <button
-                    className="w-full bg-secondary text-white font-bold py-3 rounded-lg hover:opacity-95 transition-colors active:scale-95 cursor-pointer"
+                    disabled={submitting}
+                    className="w-full bg-[#d97706] text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors active:scale-95 cursor-pointer text-sm disabled:opacity-50"
                     type="submit"
                   >
-                    Kayıt Ol
+                    {submitting ? "Kayıt Olunuyor..." : "Kayıt Ol"}
                   </button>
                 </form>
               </div>
-              <div className="absolute -right-10 -bottom-10 opacity-10">
-                <span className="material-symbols-outlined text-[120px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  restaurant
-                </span>
-              </div>
             </div>
 
-            {/* Most Popular */}
+            {/* Most Popular / Son Eklenenler */}
             <div>
-              <h4 className="font-headline-md text-primary mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  local_fire_department
-                </span>
-                En Popülerler
+              <h4 className="font-bold text-slate-900 text-lg mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#d97706]">auto_awesome</span>
+                Öne Çıkan Yazılar
               </h4>
               <div className="space-y-6">
-                <Link className="group flex gap-4 items-center" href="/blog">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-variant relative">
-                    <Image
-                      className="object-cover group-hover:scale-110 transition-transform"
-                      alt="Dut Pekmezi Faydaları"
-                      src="/geleneksel-pekmez.png"
-                      fill
-                      sizes="80px"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-secondary tracking-widest block mb-1">
-                      Sağlık
-                    </span>
-                    <h5 className="font-label-md text-on-surface leading-tight group-hover:text-primary transition-colors">
-                      Geleneksel Dut Pekmezinin 10 Faydası
-                    </h5>
-                  </div>
-                </Link>
-                <Link className="group flex gap-4 items-center" href="/blog">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-variant relative">
-                    <Image
-                      className="object-cover group-hover:scale-110 transition-transform"
-                      alt="Pekmezli Kurabiye"
-                      src="/ispir-pestil-kurutma-gercek.png"
-                      fill
-                      sizes="80px"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-secondary tracking-widest block mb-1">
-                      Tarif
-                    </span>
-                    <h5 className="font-label-md text-on-surface leading-tight group-hover:text-primary transition-colors">
-                      Pekmezli Kurabiye Yapımı
-                    </h5>
-                  </div>
-                </Link>
-                <Link className="group flex gap-4 items-center" href="/blog">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-variant relative">
-                    <Image
-                      className="object-cover group-hover:scale-110 transition-transform"
-                      alt="Kiler Hazırlığı"
-                      src="/vakumlu-uretim.png"
-                      fill
-                      sizes="80px"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-secondary tracking-widest block mb-1">
-                      Yaşam
-                    </span>
-                    <h5 className="font-label-md text-on-surface leading-tight group-hover:text-primary transition-colors">
-                      Mutfak Düzeni: Kiler Hazırlığı
-                    </h5>
-                  </div>
-                </Link>
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <h4 className="font-headline-md text-primary mb-6">Popüler Etiketler</h4>
-              <div className="flex flex-wrap gap-2">
-                {["organik", "geleneksel", "kahvaltı", "ispir", "tarif", "pekmez"].map((tag) => (
-                  <Link
-                    key={tag}
-                    className="bg-surface-container-low text-on-surface-variant text-label-sm px-4 py-2 rounded-full hover:bg-primary hover:text-white transition-all"
-                    href="/blog"
-                  >
-                    #{tag}
+                {articles.slice(0, 3).map((art) => (
+                  <Link key={art.id} className="group flex gap-4 items-center" href={`/blog/${art.slug}`}>
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 relative">
+                      <Image
+                        className="object-cover group-hover:scale-110 transition-transform"
+                        alt={art.title}
+                        src={art.image || "/ispir-dut-hasadi.png"}
+                        fill
+                        sizes="64px"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-[#7f1d1d] tracking-wider block mb-1">
+                        {art.category || "Genel"}
+                      </span>
+                      <h5 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-[#7f1d1d] transition-colors line-clamp-2">
+                        {art.title}
+                      </h5>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -333,32 +269,6 @@ export default function Blog() {
         </div>
       </main>
 
-      {/* Bottom CTA / Refined Newsletter */}
-      <section className="bg-surface-container-low py-section-gap">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
-          <h2 className="font-display-lg text-display-lg text-primary mb-6">Hikayemize Ortak Olun</h2>
-          <p className="font-body-lg text-on-surface-variant max-w-2xl mx-auto mb-10">
-            Pekefe dünyasından en özel haberler, yeni ürün lansmanları ve sadece abonelerimize özel geleneksel tarifler
-            için bültenimize katılın.
-          </p>
-          <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto flex gap-2">
-            <input
-              value={newsletterEmail}
-              onChange={(e) => setNewsletterEmail(e.target.value)}
-              className="flex-1 bg-white border border-outline-variant/30 rounded-lg px-6 py-4 focus:ring-1 focus:ring-primary outline-none transition-all text-slate-800"
-              placeholder="E-posta adresiniz"
-              type="email"
-              required
-            />
-            <button
-              className="bg-primary text-white px-8 py-4 rounded-lg font-bold hover:opacity-95 transition-all active:scale-95 shadow-lg cursor-pointer"
-              type="submit"
-            >
-              Katıl
-            </button>
-          </form>
-        </div>
-      </section>
       <Toast
         isOpen={toast.isOpen}
         message={toast.message}

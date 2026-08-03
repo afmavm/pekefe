@@ -30,12 +30,7 @@ const createPrismaClient = () => {
     },
   });
 
-  // Enable WAL mode for SQLite to support concurrent read/write locks
-  if (dbUrl.includes(".db") || dbUrl.startsWith("file:")) {
-    basePrisma.$queryRawUnsafe('PRAGMA journal_mode=WAL;').catch((err: any) => {
-      console.warn("Failed to enable WAL mode:", err);
-    });
-  }
+
 
   const tenantIsolatedModels = [
     "Product",

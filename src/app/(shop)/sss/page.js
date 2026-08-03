@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { getSettings, fetchLiveSettings } from "@/utils/settingsStorage";
+import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 
 const faqData = [
   {
@@ -91,7 +91,7 @@ const faqData = [
 ];
 
 export default function SSS() {
-  const [settings, setSettings] = useState(getSettings());
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     setSettings(getSettings());

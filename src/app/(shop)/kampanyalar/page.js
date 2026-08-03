@@ -2,209 +2,310 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
 
 export default function Kampanyalar() {
-  const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState("");
-  const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
+  const [submitting, setSubmitting] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (email) {
+    if (!email) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setToast({
+          isOpen: true,
+          message: data.error || "Abonelik oluşturulurken bir hata oluştu.",
+          type: "error",
+        });
+        return;
+      }
+
       setSubscribed(true);
       setToast({
         isOpen: true,
-        message: "Bültene başarıyla abone olundu! Fırsatlar e-postanıza iletilecektir.",
+        message: data.message || "Ayrıcalık bültenimize kaydoldunuz. Teşekkür ederiz.",
         type: "success",
       });
+      setEmail("");
+    } catch (err) {
+      console.error("Newsletter error:", err);
+      setToast({
+        isOpen: true,
+        message: "Bağlantı hatası oluştu. Lütfen tekrar deneyin.",
+        type: "error",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const giftBundles = [
+    {
+      id: 1,
+      title: "İspir Vadisi Zanaat Sandığı",
+      category: "Özel Hediye Koleksiyonu",
+      desc: "İspirin bereketli topraklarından sınırlı sayıda derlenen organik beyaz dut pekmezi, özel cevizli pestil ve el yapımı tahta kaşık ikram seti.",
+      image: "/uploads/ispir_hikayemiz_ilhan_efe_beyaz_dut.jpg",
+      badge: "Sınırlı Hasat",
+      href: "/kategoriler",
+    },
+    {
+      id: 2,
+      title: "Geleneksel Sofra İkilisi: Tahin & Pekmez",
+      category: "İkramlık Seçki",
+      desc: "Bakır kazanlarda 60°C'de yoğunlaştırılan saf İspir dut pekmezi ile taş değirmen yerli susam tahininin muazzam dengesi.",
+      image: "/geleneksel-kazan.png",
+      badge: "Özel Seçki",
+      href: "/kategoriler",
+    },
+    {
+      id: 3,
+      title: "Dağ Karadutu Özü & İncir Reçeli İkramı",
+      category: "Şifalı İksirler",
+      desc: "Toplanması büyük sabır gerektiren yabani Karadeniz karadut özü ve taze incir reçelinden oluşan bağışıklık koruyucu özel paket.",
+      image: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
+      badge: "Özel Hasat",
+      href: "/kategoriler",
+    },
+  ];
+
   return (
-    <div className="w-full bg-background text-on-surface font-body-md antialiased pb-section-gap">
-      {/* 1. Hero Seasonal Banner: Harvest Festival */}
-      <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mt-8">
-        <div className="relative w-full rounded-2xl overflow-hidden min-h-[500px] md:min-h-[600px] flex items-center group shadow-lg">
-          <div className="absolute inset-0 z-0">
-            <div
-              className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-              style={{
-                backgroundImage: "url('/uploads/ispir-yedi-goller-kackar-manzara.webp')",
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent"></div>
-          </div>
-          <div className="relative z-10 p-8 md:p-16 max-w-2xl text-white">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary text-white font-label-sm text-xs uppercase tracking-widest mb-6">
-              Geleneksel Hasat
-            </span>
-            <h1 className="font-display-lg text-[32px] sm:text-[44px] md:text-display-lg mb-6 leading-tight font-bold">
-              Hasat Festivali: <br />
-              İspir Dut Pekmezi
-            </h1>
-            <p className="font-body-lg text-white/90 mb-8 text-base md:text-lg leading-relaxed">
-              Anadolu'nun bereketli topraklarından, geleneksel yöntemlerle hazırlanan en taze dut
-              pekmezlerimizle tanışın. Doğal enerji ve sağlık şimdi sofranızda.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/kategoriler"
-                className="px-8 py-4 bg-white text-primary font-label-md rounded-lg hover:bg-primary hover:text-white transition-all duration-300 premium-shadow active:scale-95 text-center font-bold text-sm"
-              >
-                Hemen Keşfet
-              </Link>
-              <Link
-                href="/hikayemiz"
-                className="px-8 py-4 border-2 border-white/30 text-white font-label-md rounded-lg hover:bg-white/10 backdrop-blur-sm transition-all duration-300 active:scale-95 text-center font-bold text-sm"
-              >
-                Üretim Hikayemiz
-              </Link>
-            </div>
-          </div>
+    <div className="w-full bg-[#FAF9F6] text-slate-800 antialiased min-h-screen">
+      {/* 1. HERO SECTION: Quiet Luxury Editorial Banner */}
+      <section className="relative h-[60vh] min-h-[480px] max-h-[650px] flex items-center justify-center overflow-hidden">
+        <Image
+          src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
+          alt="İspir Vadisi Manzarası"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover filter brightness-[0.5] contrast-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#4A0E17]/85 via-[#4A0E17]/40 to-transparent z-10"></div>
+
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-6">
+          <span className="inline-block text-amber-200 text-xs font-semibold tracking-[0.3em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+            KÜLTÜR & HASAT AYRICALIKLARI
+          </span>
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-white font-bold leading-tight">
+            Özel Seçkiler ve Hasat Ayrıcalıkları
+          </h1>
+          <p className="font-light text-amber-100/90 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            İspir'in bereketli topraklarından sınırlı sayıda hazırlanan geleneksel ikramlık paketlerimizi ve sezonluk mahsul önceliklerini keşfedin.
+          </p>
+          <div className="w-16 h-[1px] bg-amber-400 mx-auto pt-2"></div>
         </div>
       </section>
 
-      {/* 2. Lifestyle Banner: Loyalty Program */}
-      <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mt-section-gap">
-        <div className="grid grid-cols-1 lg:grid-cols-2 bg-surface-container-low rounded-2xl overflow-hidden premium-shadow border border-outline-variant/10">
-          <div className="order-2 lg:order-1 p-8 md:p-16 flex flex-col justify-center">
-            <span className="text-secondary font-label-md text-xs uppercase tracking-[0.2em] font-semibold mb-2 block">
-              Ayrıcalıklı Kulüp
-            </span>
-            <h2 className="font-headline-lg text-primary text-3xl md:text-headline-lg mb-6 font-bold">
-              Pekefe Dostu Olun
-            </h2>
-            <p className="font-body-md text-on-surface-variant mb-8 leading-relaxed text-base">
-              Her alışverişinizde puan kazanın, size özel indirimlerden ve sınırlı üretim
-              ürünlerimizden ilk siz haberdar olun. Geleneksel lezzet yolculuğunda sadık
-              dostlarımıza özel ayrıcalıklar sizi bekliyor.
-            </p>
-            <ul className="space-y-4 mb-8">
-              <li className="flex items-center gap-3 text-secondary font-label-md font-bold text-sm">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  stars
-                </span>
-                Her siparişte %5 Lezzet Puanı
-              </li>
-              <li className="flex items-center gap-3 text-secondary font-label-md font-bold text-sm">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  local_shipping
-                </span>
-                Ücretsiz Kargo Ayrıcalığı
-              </li>
-            </ul>
-            <Link
-              className="inline-flex items-center gap-2 text-primary font-label-md border-b-2 border-primary w-fit pb-1 hover:gap-4 transition-all duration-300 font-bold text-sm"
-              href="/kayit"
+      {/* 2. HASAT SEÇKİLERİ & HEDİYE KOLEKSİYONLARI */}
+      <section className="py-20 md:py-28 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+          <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+            ÖZEL GURME SEÇKİLERİ
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900">
+            Zanaatkar Ustalığıyla Hazırlanan İkramlıklar
+          </h2>
+          <div className="w-12 h-[1px] bg-[#d97706] mx-auto"></div>
+          <p className="text-slate-600 text-base leading-relaxed">
+            Pekefe ürünleri sadece bir besin değil; sevdiklerinize armağan edebileceğiniz zamansız bir sofra deneyimidir.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {giftBundles.map((bundle) => (
+            <article
+              key={bundle.id}
+              className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
             >
-              Hemen Katılın{" "}
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </Link>
-          </div>
-          <div className="order-1 lg:order-2 relative min-h-[400px]">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: "url('/ispir-dut-hasadi.png')",
-              }}
-            ></div>
-          </div>
-        </div>
-      </section>
+              <div>
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                  <Image
+                    src={bundle.image}
+                    alt={bundle.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <span className="absolute top-4 left-4 bg-[#7f1d1d] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
+                    {bundle.badge}
+                  </span>
+                </div>
 
-      {/* 3. Secondary Banners: New Arrivals & Best Sellers */}
-      <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mt-section-gap mb-section-gap">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-          {/* New Arrivals */}
-          <Link href="/kategoriler" className="relative h-[380px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl border border-outline-variant/10 block">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-              style={{
-                backgroundImage: "url('/geleneksel-kazan.png')",
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent group-hover:via-black/25 transition-all duration-500"></div>
-            <div className="absolute inset-0 p-8 flex flex-col justify-end text-white z-10">
-              <span className="font-label-sm text-xs text-white bg-secondary/90 w-fit px-4 py-1.5 rounded-full mb-4 font-bold uppercase tracking-wider">
-                YENİ
-              </span>
-              <h3 className="font-display-lg text-2xl sm:text-3xl mb-2 font-bold">Yeni Gelenler</h3>
-              <p className="font-body-md text-sm text-white/85 mb-4 max-w-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                İspir yaylalarının en taze mahsulleri ve yeni sezon ürünleri raflarda yerini aldı.
-              </p>
-              <span className="material-symbols-outlined text-2xl group-hover:translate-x-3 transition-transform duration-300 w-fit">
-                arrow_right_alt
-              </span>
-            </div>
-          </Link>
-
-          {/* Best Sellers */}
-          <Link href="/kategoriler" className="relative h-[380px] rounded-3xl overflow-hidden group cursor-pointer shadow-xl border border-outline-variant/10 block">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-              style={{
-                backgroundImage: "url('/vakumlu-uretim.png')",
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent group-hover:via-black/25 transition-all duration-500"></div>
-            <div className="absolute inset-0 p-8 flex flex-col justify-end text-white z-10">
-              <span className="font-label-sm text-xs text-white bg-secondary/90 w-fit px-4 py-1.5 rounded-full mb-4 font-bold uppercase tracking-wider">
-                POPÜLER
-              </span>
-              <h3 className="font-display-lg text-2xl sm:text-3xl mb-2 font-bold">En Çok Tercih Edilenler</h3>
-              <p className="font-body-md text-sm text-white/85 mb-4 max-w-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                Binlerce sofranın vazgeçilmez klasiği haline gelen geleneksel lezzetlerimiz.
-              </p>
-              <span className="material-symbols-outlined text-2xl group-hover:translate-x-3 transition-transform duration-300 w-fit">
-                arrow_right_alt
-              </span>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* 4. Newsletter / Micro-interaction Section */}
-      <section className="bg-primary text-white py-20 px-margin-mobile rounded-2xl max-w-container-max mx-auto overflow-hidden relative shadow-md">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 border-4 border-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 border-4 border-white rounded-full translate-x-1/3 translate-y-1/3"></div>
-        </div>
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          {!subscribed ? (
-            <>
-              <h2 className="font-display-lg text-3xl md:text-display-lg mb-4 font-bold">
-                Gelenekten Haberdar Olun
-              </h2>
-              <p className="font-body-md text-white/80 mb-10 text-base">
-                En taze hasat dönemleri ve özel indirimlerden haberdar olmak için bültenimize kayıt olun.
-              </p>
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                <input
-                  className="flex-grow px-6 py-4 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-secondary-container transition-all placeholder:text-white/50 text-white outline-none"
-                  placeholder="E-posta adresiniz"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <button
-                  className="px-8 py-4 bg-secondary text-white font-label-md text-sm rounded-lg hover:bg-secondary-container transition-all active:scale-95 font-bold cursor-pointer"
-                  type="submit"
-                >
-                  Abone Ol
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="animate-fade-in py-6 space-y-4 max-w-md mx-auto">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 border border-white/20 text-secondary mb-2">
-                <span className="material-symbols-outlined text-white text-3xl">mark_email_read</span>
+                <div className="p-6 md:p-8 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#d97706] block">
+                    {bundle.category}
+                  </span>
+                  <h3 className="font-display text-2xl font-bold text-slate-900 group-hover:text-[#7f1d1d] transition-colors leading-snug">
+                    {bundle.title}
+                  </h3>
+                  <p className="text-slate-600 text-sm leading-relaxed font-light">
+                    {bundle.desc}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-display-lg text-white text-2xl font-bold">Harika! Bültene Abone Oldunuz.</h3>
-              <p className="font-body-md text-white/85 leading-relaxed text-base">
-                Kayıt işleminiz <strong className="text-secondary font-bold">{email}</strong> adresiyle başarıyla tamamlandı. En yeni kampanyalar ve indirimler e-postanıza gelecektir.
+
+              <div className="p-6 md:p-8 pt-0">
+                <Link
+                  href={bundle.href}
+                  className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#7f1d1d] font-bold hover:translate-x-1 transition-transform"
+                >
+                  <span>Koleksiyonu İncele</span>
+                  <span className="material-symbols-outlined text-sm">east</span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. PEKEFE DOSTU & SADAQAT / ÖNCELİKLİ MAHSUL KULÜBÜ */}
+      <section className="py-20 bg-[#F5F2EC] border-y border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div className="lg:col-span-6 space-y-6">
+              <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+                PEKEFE CEMAATİ & KULÜBÜ
+              </span>
+              <h2 className="font-display text-3xl md:text-5xl font-bold text-slate-900 leading-tight">
+                Erken Hasat Daveti & Dostluk Ayrıcalığı
+              </h2>
+              <p className="text-slate-700 text-base md:text-lg leading-relaxed font-light">
+                Doğanın döngüsü sınırlıdır. İspirin bereketli topraklarından toplanan ilk mahsullerimiz her yıl sınırlı miktarda hazırlanır. Pekefe dostu olarak kaydolan misafirlerimiz, yeni sezon mahsullerine ilk erişim hakkına sahip olurlar.
               </p>
+
+              <div className="space-y-4 pt-2">
+                <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
+                  <div className="w-10 h-10 rounded-lg bg-[#7f1d1d]/10 text-[#7f1d1d] flex items-center justify-center shrink-0 font-bold">
+                    <span className="material-symbols-outlined">nature_people</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base">Erken Hasat Önceliği</h4>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Temmuz ve Ağustos aylarında toplanan ilk sıkım pekmez ve taze pestil mahsullerinden öncelikli haberdar olma hakkı.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
+                  <div className="w-10 h-10 rounded-lg bg-[#d97706]/10 text-[#d97706] flex items-center justify-center shrink-0 font-bold">
+                    <span className="material-symbols-outlined">card_giftcard</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base">Özel Kutulu İkram Paketleri</h4>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Özel günlerde sevdiklerinize gönderebileceğiniz isimli ve ahşap kutulu gastronomi sunum ayrıcalığı.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Link
+                  href="/kayit"
+                  className="inline-flex items-center gap-3 bg-[#7f1d1d] text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all shadow-md active:scale-95"
+                >
+                  <span>Pekefe Dostu Olun</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-slate-200">
+                <Image
+                  src="/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg"
+                  alt="İlhan Efe ve Okan Efe"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div className="absolute bottom-6 left-6 text-white space-y-1">
+                  <span className="text-amber-200 text-xs font-mono tracking-widest uppercase font-bold block">İspirin bereketli toprakları</span>
+                  <p className="text-sm font-display italic">"Topraktan sofraya uzanan dürüst üretim ve sadakat mirası."</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 4. KURUMSAL & RESTORAN GASTRONOMİ TEDARİĞİ */}
+      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-[#7f1d1d] text-white rounded-3xl p-8 md:p-16 relative overflow-hidden shadow-lg">
+          <div className="relative z-10 max-w-3xl space-y-6">
+            <span className="text-amber-200 font-bold text-xs uppercase tracking-[0.25em] block">
+              B2B & KURUMSAL TEDARİK
+            </span>
+            <h2 className="font-display text-3xl md:text-5xl font-bold leading-tight text-white">
+              Gurme Restoran ve Oteller İçin Özel Hacimli Üretim
+            </h2>
+            <p className="text-amber-100/90 text-base md:text-lg font-light leading-relaxed">
+              Özel mutfaklar, butik oteller ve kurumsal hediye çözümleri için İspir vadisinin en saf ürünlerini istenilen ambalaj ve hacimde hazırlıyoruz. Toplu ikramlık talepleriniz için ekibimizle iletişime geçebilirsiniz.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/iletisim"
+                className="inline-flex items-center gap-3 bg-white text-[#7f1d1d] px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-amber-100 transition-all shadow-md active:scale-95"
+              >
+                <span>Kurumsal İletişime Geçin</span>
+                <span className="material-symbols-outlined text-sm">mail</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. E-POSTA AYRICALIK BÜLTENİ */}
+      <section className="py-20 bg-white border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 text-center space-y-6">
+          <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+            BÜLTEN ABONELİĞİ
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900">
+            Hasat Dönemlerini İlk Siz Öğrenin
+          </h2>
+          <p className="text-slate-600 text-sm md:text-base leading-relaxed font-light">
+            Erzurum İspir'in yeni sezon üretim takvimi, özel ikramlık seçkileri ve editoryal tarif bültenimiz için e-posta adresinizi bırakabilirsiniz.
+          </p>
+
+          {!subscribed ? (
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="E-posta adresiniz"
+                className="flex-1 bg-[#FAF9F6] border border-slate-300 rounded-xl px-5 py-4 text-slate-800 placeholder:text-slate-400 focus:ring-1 focus:ring-[#7f1d1d] outline-none text-sm"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="bg-[#7f1d1d] text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all disabled:opacity-50 active:scale-95"
+              >
+                {submitting ? "Kaydediliyor..." : "Kayıt Ol"}
+              </button>
+            </form>
+          ) : (
+            <div className="p-6 bg-[#fdfbf7] border border-[#f3eee3] rounded-2xl max-w-md mx-auto text-emerald-800 font-medium text-sm">
+              ✓ Ayrıcalık bültenimize kaydoldunuz. Yeni sezon gelişmelerini e-postanıza ileteceğiz.
             </div>
           )}
         </div>

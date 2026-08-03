@@ -87,19 +87,10 @@ export default function SeoAdminPage() {
       .then((data) => {
         if (data && !data.error) {
           let nameField = data.companyName || "";
-          let vkn = "";
-          let taxOffice = "";
-          let mersis = "";
-          
-          if (data.companyName && data.companyName.trim().startsWith("{")) {
-            try {
-              const parsed = JSON.parse(data.companyName);
-              nameField = parsed.name || "";
-              vkn = parsed.vkn || "";
-              taxOffice = parsed.taxOffice || "";
-              mersis = parsed.mersis || "";
-            } catch (e) {}
-          }
+          // Firma Ayarları kısmında kayıtlı alanlardan doğrudan oku
+          let vkn = data.companyTaxNo || "";
+          let taxOffice = data.companyTaxOffice || "";
+          let mersis = data.companyMersisNo || "";
 
           setSeo({
             siteName: data.siteName ?? defaults.siteName,
@@ -236,13 +227,6 @@ export default function SeoAdminPage() {
 
     setSaving(true);
     try {
-      const serializedCompanyName = JSON.stringify({
-        name: seo.companyNameField,
-        vkn: seo.companyVkn,
-        taxOffice: seo.companyTaxOffice,
-        mersis: seo.companyMersis
-      });
-
       const payload = {
         siteName: seo.siteName,
         siteDescription: seo.siteDescription,
@@ -253,7 +237,11 @@ export default function SeoAdminPage() {
         contactPhone: seo.contactPhone,
         contactEmail: seo.contactEmail,
         contactAddress: seo.contactAddress,
-        companyName: serializedCompanyName
+        // Firma Ayarları ile uyumlu — ayrı alanlar olarak kaydet
+        companyName: seo.companyNameField,
+        companyTaxNo: seo.companyVkn,
+        companyTaxOffice: seo.companyTaxOffice,
+        companyMersisNo: seo.companyMersis,
       };
 
       const res = await fetch("/api/settings", {

@@ -31,10 +31,13 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  turbopack: {
+    root: process.cwd(),
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   compress: true,
-  serverExternalPackages: ["iyzipay"],
+  serverExternalPackages: ["iyzipay", "@prisma/client"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [100, 90, 75],

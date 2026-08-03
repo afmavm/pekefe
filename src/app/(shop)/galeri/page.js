@@ -32,7 +32,7 @@ export default function Galeri() {
   }, []);
 
   const instagramPosts = [
-    { src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg", likes: 482, caption: "İspir Aktaş vadisinde şafak vakti baba-oğul dut hasadı." },
+    { src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg", likes: 482, caption: "İspirin bereketli topraklarında şafak vakti baba-oğul dut hasadı." },
     { src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp", likes: 620, caption: "Meşe odunu ateşinde bakır kazanların tütüşü." },
     { src: "/uploads/ispir-keten-bezde-pestil-serimi.webp", likes: 534, caption: "İspir güneşi altında keten bezlerde kuruyan ipeksi pestil." },
     { src: "/pekefe-dut-pekmezi-kavanoz-tr.jpg", likes: 710, caption: "Katkısız %100 saf İspir dut pekmezi cam kavanozlarımız." },

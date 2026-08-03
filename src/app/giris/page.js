@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Toast } from "@/components/ui/Toast";
 import { signIn } from "next-auth/react";
 
-export default function Giris() {
+function GirisForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -278,5 +278,13 @@ export default function Giris() {
         onClose={() => setToast({ ...toast, isOpen: false })}
       />
     </main>
+  );
+}
+
+export default function Giris() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-slate-500 text-sm">Yükleniyor...</div>}>
+      <GirisForm />
+    </Suspense>
   );
 }

@@ -177,7 +177,7 @@ export default function Home() {
       months: "Haziran - Ağustos",
       climate: "Rakım: 1800m - 2200m | Sıcaklık: 24°C - 32°C",
       story: "Dutların en tatlı ve dolgun olduğu dönem. Şafak vakti çarşaflar gerilerek hasat başlar. Odun ateşinde kaynatılan herleler (şıralar) keten bezlerin üzerine dökülerek İspir güneşi altında kurumaya bırakılır.",
-      image: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
+      image: "/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg",
       action: "Hasat & Odun Ateşinde Kaynatma",
     },
     sonbahar: {

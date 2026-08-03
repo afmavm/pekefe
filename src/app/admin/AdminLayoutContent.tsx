@@ -261,6 +261,7 @@ const navGroups: NavGroup[] = [
           { name: "Popup Yönetimi", href: "/admin/popup", icon: Megaphone },
           { name: "SEO Ayarları", href: "/admin/seo", icon: Search },
           { name: "Medya Kütüphanesi", href: "/admin/media", icon: ImageIcon },
+          { name: "Galeri Yönetimi", href: "/admin/gallery", icon: ImageIcon },
           { name: "Blog Yönetimi", href: "/admin/blog", icon: BookOpen },
         ],
       },

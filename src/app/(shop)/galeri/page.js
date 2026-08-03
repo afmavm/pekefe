@@ -9,107 +9,27 @@ export default function Galeri() {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
 
-  const mediaItems = [
-    {
-      id: "trt-belgesel",
-      type: "video",
-      category: "medya",
-      categoryLabel: "Belgesel & Medya",
-      title: "TRT Haber: İspir'in Saklı Altını",
-      desc: "Yarım asırlık geleneksel pekmez zanaatımızın ulusal TV ekranlarına yansıyan belgeseli.",
-      src: "/pekefe_tanitim.mp4",
-      thumb: "/ilhan-efe-trt.jpg",
-      badge: "TRT Haber Özel",
-    },
-    {
-      id: "hasat-baba-ogul",
-      type: "image",
-      category: "hasat",
-      categoryLabel: "Hasat & Doğal Yaşam",
-      title: "İspir Aktaş Vadisi Dut Hasadı",
-      desc: "İlhan Efe ve oğlu Okan Efe asırlık beyaz dut ağaçlarının gölgesinde el örmesi sepetlerle taze mahsul toplarken.",
-      src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg",
-      thumb: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg",
-      badge: "Hasat Sezonu",
-    },
-    {
-      id: "bakir-kazan-pişirme",
-      type: "image",
-      category: "uretim",
-      categoryLabel: "Geleneksel Üretim",
-      title: "Meşe Ateşinde Bakır Kazan Kaynatma",
-      desc: "Geleneksel ahşap cenderelerle karıştırılan saf meyve şırasının meşe odunu ateşinde yavaşça kıvam alması.",
-      src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
-      thumb: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
-      badge: "Bakır Kazan Zanaatı",
-    },
-    {
-      id: "video-kurutma",
-      type: "video",
-      category: "uretim",
-      categoryLabel: "Geleneksel Üretim",
-      title: "Güneşte Keten Bezde Pestil Serimi",
-      desc: "Keten bezlere serilen ipeksi pestil harcının İspir güneşi ve yüksek dağ rüzgarında doğal kuruması.",
-      src: "/pestil_yapimi.mp4",
-      thumb: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
-      badge: "Doğal Kurutma",
-    },
-    {
-      id: "karadut-hasat-ilhan-efe",
-      type: "image",
-      category: "hasat",
-      categoryLabel: "Hasat & Doğal Yaşam",
-      title: "Yabani Karadut Hasadı",
-      desc: "İlhan Efe yüksek vadilerdeki şifalı Karadeniz karadutlarını el örmesi sepete teker teker toplarken.",
-      src: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
-      thumb: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
-      badge: "Karadut Hasadı",
-    },
-    {
-      id: "steril-tesis-dolum",
-      type: "image",
-      category: "dolum",
-      categoryLabel: "Hijyen & Dolum",
-      title: "Steril Dolum & Kalite Kontrol Tesisimiz",
-      desc: "TKDK desteğiyle kurulan modern tesislerimizde el değmeden hijyenik şartlarda cam kavanoz dolumu.",
-      src: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
-      thumb: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
-      badge: "ISO 22000 & Helal",
-    },
-    {
-      id: "video-dolum",
-      type: "video",
-      category: "dolum",
-      categoryLabel: "Hijyen & Dolum",
-      title: "Vakumlu Düşük Sıcaklık Yoğunlaştırma",
-      desc: "HMF oluşumunu önleyen ve vitamin değerlerini saklı tutan kapalı sistem vakumlu pişirme.",
-      src: "/karisim.mp4",
-      thumb: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-      badge: "Vakumlu Hassas Dolum",
-    },
-    {
-      id: "muska-kome-sec kisi",
-      type: "image",
-      category: "uretim",
-      categoryLabel: "Geleneksel Üretim",
-      title: "Geleneksel İspir Muska Pestili & Köme",
-      desc: "Dövülmüş ceviz ve saf bal dolgulu üçgen muska pestiller ile defalarca şıra banyosundan geçen kömeler.",
-      src: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
-      thumb: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
-      badge: "Coğrafi Tescilli Zanaat",
-    },
-    {
-      id: "sarma-pestil-gurme",
-      type: "image",
-      category: "uretim",
-      categoryLabel: "Geleneksel Üretim",
-      title: "El Sarımı Cevizli & Fıstıklı Sarma Pestil",
-      desc: "Katkısız Antep fıstığı ezmesi ve yerli İspir cevizleri sarılarak hazırlanan gurme lokum dilimleri.",
-      src: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
-      thumb: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
-      badge: "Gurme Seçki",
-    },
-  ];
+  const [mediaItems, setMediaItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadGalleryData() {
+      try {
+        const res = await fetch("/api/gallery", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setMediaItems(data.filter((item) => item.active !== false));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load gallery items from API", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadGalleryData();
+  }, []);
 
   const instagramPosts = [
     { src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg", likes: 482, caption: "İspir Aktaş vadisinde şafak vakti baba-oğul dut hasadı." },
@@ -117,6 +37,8 @@ export default function Galeri() {
     { src: "/uploads/ispir-keten-bezde-pestil-serimi.webp", likes: 534, caption: "İspir güneşi altında keten bezlerde kuruyan ipeksi pestil." },
     { src: "/pekefe-dut-pekmezi-kavanoz-tr.jpg", likes: 710, caption: "Katkısız %100 saf İspir dut pekmezi cam kavanozlarımız." },
   ];
+
+  const featuredMedia = mediaItems.find((item) => item.isFeatured) || mediaItems[0];
 
   const filteredMedia = activeTab === "all"
     ? mediaItems
@@ -145,7 +67,7 @@ export default function Galeri() {
     return () => {
       animatedElements.forEach((el) => observer.unobserve(el));
     };
-  }, []);
+  }, [mediaItems]);
 
   return (
     <div className="relative w-full min-h-screen bg-[#FAF9F6] text-on-surface overflow-hidden pb-24">

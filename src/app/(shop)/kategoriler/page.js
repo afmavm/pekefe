@@ -254,27 +254,89 @@ export default function Kategoriler() {
 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 space-y-12 relative z-10">
         
-        {/* Premium Visual Category Header Banner */}
-        <header className="relative w-full h-[240px] rounded-3xl overflow-hidden shadow-md flex items-center justify-center">
-          <div className="absolute inset-0 z-0">
-            <Image
-              alt="Pekefe Geleneksel Ürünler"
-              className="object-cover filter brightness-[0.65] contrast-105"
-              src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
-              fill
-              sizes="100vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-black/30 z-10"></div>
+        {/* Premium Visual Category Journey Collage Banner */}
+        <header className="relative w-full min-h-[260px] md:h-[300px] rounded-3xl overflow-hidden shadow-xl flex items-center justify-center border border-outline-variant/20 group">
+          {/* 4-Stage Product Journey Collage Grid */}
+          <div className="absolute inset-0 z-0 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/15">
+            <div className="relative h-full overflow-hidden group/item">
+              <Image
+                alt="1. İspir Dut Hasadı"
+                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
+                src="/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg"
+                fill
+                sizes="25vw"
+                priority
+              />
+              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
+                1. Doğal Hasat
+              </div>
+            </div>
+            <div className="relative h-full overflow-hidden group/item">
+              <Image
+                alt="2. Odun Ateşinde Bakır Kazan"
+                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
+                src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
+                fill
+                sizes="25vw"
+                priority
+              />
+              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
+                2. Meşe Ateşi
+              </div>
+            </div>
+            <div className="relative h-full overflow-hidden group/item">
+              <Image
+                alt="3. Güneşte Keten Bez Serimi"
+                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
+                src="/uploads/ispir-keten-bezde-pestil-serimi.webp"
+                fill
+                sizes="25vw"
+                priority
+              />
+              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
+                3. Doğal Kurutma
+              </div>
+            </div>
+            <div className="relative h-full overflow-hidden group/item">
+              <Image
+                alt="4. Vakumlu Gurme Lezzetler"
+                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
+                src="/uploads/ispir-el-sarimi-pestil-cesitleri.webp"
+                fill
+                sizes="25vw"
+                priority
+              />
+              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
+                4. Gurme Mahsul
+              </div>
+            </div>
           </div>
-          <div className="relative z-10 text-center px-6">
-            <span className="inline-block text-secondary-fixed text-xs font-semibold tracking-[0.25em] uppercase mb-3 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-              Pekefe Butik Mağaza
+
+          {/* Cinematic Overlay & Center Copy */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/50 to-primary/70 z-10"></div>
+          
+          <div className="relative z-20 text-center px-6 py-8 max-w-2xl space-y-3">
+            <span className="inline-flex items-center gap-2 text-secondary-fixed text-[11px] font-semibold tracking-[0.25em] uppercase px-4 py-1.5 bg-white/15 backdrop-blur-md rounded-full border border-white/20 shadow-md">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              PEKEFE BUTİK MAĞAZA · MAHSULÜN SERÜVENİ
             </span>
-            <h1 className="font-display-lg text-[32px] md:text-[44px] text-white leading-tight font-bold drop-shadow-md">
+
+            <h1 className="font-display-lg text-[34px] md:text-[48px] text-white leading-tight font-bold drop-shadow-md">
               {dynamicCategories.find((c) => c.value === selectedCategory)?.name || "Tüm Ürünler"}
             </h1>
-            <div className="w-16 h-[1px] bg-secondary mx-auto mt-4 rounded-full"></div>
+
+            {/* Journey steps pill bar */}
+            <div className="hidden sm:flex items-center justify-center gap-2 pt-1">
+              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">1. Hasat</span>
+              <span className="text-amber-300 text-xs">→</span>
+              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">2. Bakır Kazan</span>
+              <span className="text-amber-300 text-xs">→</span>
+              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">3. İspir Güneşi</span>
+              <span className="text-amber-300 text-xs">→</span>
+              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">4. Sofra</span>
+            </div>
+            
+            <div className="w-16 h-[1px] bg-secondary mx-auto mt-3 rounded-full"></div>
           </div>
         </header>
 

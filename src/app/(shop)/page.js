@@ -284,27 +284,27 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
               <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                 <Image
-                  src="/ispir-manzara-hero.png"
-                  alt="İspir Dağları"
+                  src="/uploads/ispir-kackar-yaylalari-manzara.webp"
+                  alt="İspir Kaçkar Yaylaları"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 hover:scale-105"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20">İspir Yaylaları</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10"></div>
+                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20 drop-shadow">İspir Yaylaları</span>
               </div>
               <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all sm:mt-12">
                 <Image
-                  src="/ispir-modern-tesis.png"
-                  alt="Traditional cauldrons"
+                  src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
+                  alt="Geleneksel Bakır Kazanlar"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 hover:scale-105"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20">Geleneksel Kazanlar</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10"></div>
+                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20 drop-shadow">Geleneksel Kazanlar</span>
               </div>
             </div>
           </div>

@@ -102,7 +102,7 @@ export default function Tesisimiz() {
             <Image
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               alt="Pekefe Üretim Tesis İçi"
-              src="/ispir-modern-tesis.png"
+              src="/uploads/ispir-modern-hijyenik-tesis-dolum.webp"
               fill
               sizes="(max-width: 1024px) 100vw, 42vw"
             />

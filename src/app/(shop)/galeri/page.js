@@ -5,31 +5,122 @@ import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
 
 export default function Galeri() {
-  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedMedia, setSelectedMedia] = useState(null);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
 
-  const videos = {
-    trt: {
+  const mediaItems = [
+    {
+      id: "trt-belgesel",
+      type: "video",
+      category: "medya",
+      categoryLabel: "Belgesel & Medya",
       title: "TRT Haber: İspir'in Saklı Altını",
-      desc: "Yarım asırlık pekmez geleneğimizin ulusal ekranlara yansıyan yolculuğu.",
+      desc: "Yarım asırlık geleneksel pekmez zanaatımızın ulusal TV ekranlarına yansıyan belgeseli.",
       src: "/pekefe_tanitim.mp4",
+      thumb: "/ilhan-efe-trt.jpg",
+      badge: "TRT Haber Özel",
     },
-    kurutma: {
-      title: "Güneşte Kurutma İşlemi",
-      desc: "Geleneksel yöntemlerle dutların güneşte süzülme süreci.",
+    {
+      id: "hasat-baba-ogul",
+      type: "image",
+      category: "hasat",
+      categoryLabel: "Hasat & Doğal Yaşam",
+      title: "İspir Aktaş Vadisi Dut Hasadı",
+      desc: "İlhan Efe ve oğlu Okan Efe asırlık beyaz dut ağaçlarının gölgesinde el örmesi sepetlerle taze mahsul toplarken.",
+      src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg",
+      thumb: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg",
+      badge: "Hasat Sezonu",
+    },
+    {
+      id: "bakir-kazan-pişirme",
+      type: "image",
+      category: "uretim",
+      categoryLabel: "Geleneksel Üretim",
+      title: "Meşe Ateşinde Bakır Kazan Kaynatma",
+      desc: "Geleneksel ahşap cenderelerle karıştırılan saf meyve şırasının meşe odunu ateşinde yavaşça kıvam alması.",
+      src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
+      thumb: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
+      badge: "Bakır Kazan Zanaatı",
+    },
+    {
+      id: "video-kurutma",
+      type: "video",
+      category: "uretim",
+      categoryLabel: "Geleneksel Üretim",
+      title: "Güneşte Keten Bezde Pestil Serimi",
+      desc: "Keten bezlere serilen ipeksi pestil harcının İspir güneşi ve yüksek dağ rüzgarında doğal kuruması.",
       src: "/pestil_yapimi.mp4",
+      thumb: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+      badge: "Doğal Kurutma",
     },
-    dolum: {
-      title: "Kıvam ve Dolum Süreci",
-      desc: "Hijyenik koşullarda el değmeden ambalajlama ve vakumlu pişirme dolumu.",
+    {
+      id: "karadut-hasat-ilhan-efe",
+      type: "image",
+      category: "hasat",
+      categoryLabel: "Hasat & Doğal Yaşam",
+      title: "Yabani Karadut Hasadı",
+      desc: "İlhan Efe yüksek vadilerdeki şifalı Karadeniz karadutlarını el örmesi sepete teker teker toplarken.",
+      src: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
+      thumb: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
+      badge: "Karadut Hasadı",
+    },
+    {
+      id: "steril-tesis-dolum",
+      type: "image",
+      category: "dolum",
+      categoryLabel: "Hijyen & Dolum",
+      title: "Steril Dolum & Kalite Kontrol Tesisimiz",
+      desc: "TKDK desteğiyle kurulan modern tesislerimizde el değmeden hijyenik şartlarda cam kavanoz dolumu.",
+      src: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
+      thumb: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
+      badge: "ISO 22000 & Helal",
+    },
+    {
+      id: "video-dolum",
+      type: "video",
+      category: "dolum",
+      categoryLabel: "Hijyen & Dolum",
+      title: "Vakumlu Düşük Sıcaklık Yoğunlaştırma",
+      desc: "HMF oluşumunu önleyen ve vitamin değerlerini saklı tutan kapalı sistem vakumlu pişirme.",
       src: "/karisim.mp4",
+      thumb: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+      badge: "Vakumlu Hassas Dolum",
     },
-    dogasi: {
-      title: "İspir'in Eşsiz Doğası",
-      desc: "2000 rakımlı İspir dağlarında doğal hammadde kaynağımız.",
-      src: "/magaza.mp4",
+    {
+      id: "muska-kome-sec kisi",
+      type: "image",
+      category: "uretim",
+      categoryLabel: "Geleneksel Üretim",
+      title: "Geleneksel İspir Muska Pestili & Köme",
+      desc: "Dövülmüş ceviz ve saf bal dolgulu üçgen muska pestiller ile defalarca şıra banyosundan geçen kömeler.",
+      src: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
+      thumb: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
+      badge: "Coğrafi Tescilli Zanaat",
     },
-  };
+    {
+      id: "sarma-pestil-gurme",
+      type: "image",
+      category: "uretim",
+      categoryLabel: "Geleneksel Üretim",
+      title: "El Sarımı Cevizli & Fıstıklı Sarma Pestil",
+      desc: "Katkısız Antep fıstığı ezmesi ve yerli İspir cevizleri sarılarak hazırlanan gurme lokum dilimleri.",
+      src: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
+      thumb: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
+      badge: "Gurme Seçki",
+    },
+  ];
+
+  const instagramPosts = [
+    { src: "/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg", likes: 482, caption: "İspir Aktaş vadisinde şafak vakti baba-oğul dut hasadı." },
+    { src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp", likes: 620, caption: "Meşe odunu ateşinde bakır kazanların tütüşü." },
+    { src: "/uploads/ispir-keten-bezde-pestil-serimi.webp", likes: 534, caption: "İspir güneşi altında keten bezlerde kuruyan ipeksi pestil." },
+    { src: "/pekefe-dut-pekmezi-kavanoz-tr.jpg", likes: 710, caption: "Katkısız %100 saf İspir dut pekmezi cam kavanozlarımız." },
+  ];
+
+  const filteredMedia = activeTab === "all"
+    ? mediaItems
+    : mediaItems.filter((item) => item.category === activeTab);
 
   useEffect(() => {
     const observerOptions = {
@@ -57,234 +148,256 @@ export default function Galeri() {
   }, []);
 
   return (
-    <div className="w-full bg-background text-on-surface font-body-md antialiased pb-section-gap">
-      <main>
-        {/* Header */}
-        <header className="pt-section-gap pb-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
-          <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-primary mb-4 leading-tight">
-            Görsel ve Video Galeri
-          </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
-            Geleneksel üretimimizin ardındaki emeği, kaliteyi ve markamızın yolculuğunu keşfedin.
-          </p>
-        </header>
+    <div className="relative w-full min-h-screen bg-[#FAF9F6] text-on-surface overflow-hidden pb-24">
+      {/* Subtle background grain grid */}
+      <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
 
-        {/* Feature Video: TRT Haber */}
-        <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mb-section-gap">
-          <h2 className="font-headline-md text-on-surface mb-6 border-l-4 border-primary pl-4">
-            Hikayemizin İzinde
-          </h2>
+      {/* ─── HERO HEADER BANNER ─── */}
+      <header className="relative h-[48vh] min-h-[380px] flex items-center justify-center overflow-hidden">
+        <Image
+          src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
+          alt="İspir Kaçkar Dağları Manzarası"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover filter brightness-[0.55] contrast-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#4A0E17]/85 via-[#4A0E17]/40 to-transparent z-10"></div>
+        
+        <div className="relative z-20 text-center px-margin-mobile md:px-margin-desktop max-w-3xl mx-auto space-y-4">
+          <span className="inline-block text-amber-200 text-xs font-semibold tracking-[0.3em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+            PEKEFE GÖRSEL MİRAS · SİNEMATİK GALERİ
+          </span>
+          <h1 className="font-display-lg text-[36px] sm:text-[48px] md:text-[56px] text-white leading-tight font-bold drop-shadow-md">
+            Geleneksel Zanaat ve Üretim Galerisi
+          </h1>
+          <p className="font-body-md text-amber-100/90 text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-light">
+            Erzurum İspir yaylalarındaki doğal meşe ateşinden hijyenik ambalajlama tesislerimize uzanan lezzet belgeseli.
+          </p>
+          <div className="w-16 h-[1px] bg-secondary mx-auto rounded-full pt-1"></div>
+        </div>
+      </header>
+
+      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 space-y-16 relative z-10">
+
+        {/* ─── FEATURED DOCUMENTARY BANNER (TRT HABER) ─── */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary font-label-md text-xs uppercase tracking-[0.2em] font-bold">
+              ÖNE ÇIKAN MEDYA
+            </span>
+            <span className="text-xs text-on-surface-variant font-mono">Ulusal Basın &amp; Belgesel</span>
+          </div>
+
           <div
-            onClick={() => setSelectedVideo(videos.trt)}
-            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(139,0,0,0.08)] group cursor-pointer bg-surface-container-highest"
+            onClick={() => setSelectedMedia(mediaItems[0])}
+            className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/20 group cursor-pointer"
           >
             <Image
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 group-hover:scale-105 filter brightness-[0.70]"
               alt="TRT Haber İspir'in Saklı Altını"
               src="/ilhan-efe-trt.jpg"
               fill
               sizes="100vw"
+              priority
             />
-            <div className="absolute inset-0 video-overlay-gradient"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 bg-primary/95 backdrop-blur-sm rounded-full flex items-center justify-center text-white shadow-lg transform transition-transform duration-300 group-hover:scale-110">
-                <span className="material-symbols-outlined text-[40px] ml-1" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-10"></div>
+            
+            {/* Center Animated Play Button */}
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-primary/90 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-500 group-hover:scale-110 group-hover:bg-primary border-2 border-white/30">
+                <span className="material-symbols-outlined text-[44px] ml-1" style={{ fontVariationSettings: "'FILL' 1" }}>
                   play_arrow
                 </span>
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 p-8 w-full">
-              <div className="inline-block px-3 py-1 bg-secondary-container/90 text-on-secondary-container font-label-sm text-xs uppercase rounded-full mb-3 backdrop-blur-md">
-                Belgesel
-              </div>
-              <h3 className="font-headline-md text-headline-lg-mobile text-white drop-shadow-md">
-                TRT Haber: İspir'in Saklı Altını
+
+            <div className="absolute bottom-0 left-0 p-6 sm:p-10 w-full z-20 space-y-2">
+              <span className="inline-block px-3 py-1 bg-amber-400 text-amber-950 font-label-sm text-[10px] uppercase font-bold rounded-full tracking-widest backdrop-blur-md">
+                TRT Haber Belgeseli
+              </span>
+              <h3 className="font-display-lg text-2xl sm:text-3xl md:text-4xl text-white font-bold drop-shadow-md">
+                TRT Haber: İspir'in Saklı Altını Pekefe Dut Pekmezi
               </h3>
-              <p className="font-body-md text-body-md text-surface-container mt-2 max-w-3xl drop-shadow-sm">
-                Yarım asırlık pekmez geleneğimizin ulusal ekranlara yansıyan yolculuğu.
+              <p className="font-body-md text-amber-100/90 text-xs sm:text-sm max-w-2xl drop-shadow-sm font-light">
+                İlhan Efe'nin öğretmenlikten geleneksel zanaata uzanan yarım asırlık pekmez serüveninin TRT Haber ekranlarındaki belgeseli.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Video Cards Grid */}
-        <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mb-section-gap bg-surface-container-low py-16 rounded-3xl">
-          <h2 className="font-headline-md text-on-surface mb-10 px-8 text-center">Üretimden Kareler</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter px-8">
-            {/* Card 1 */}
-            <div
-              onClick={() => setSelectedVideo(videos.kurutma)}
-              className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(139,0,0,0.04)] group cursor-pointer bg-surface-container-lowest transition-all duration-300"
-            >
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                alt="Güneşte Kurutma"
-                src="/ispir-pestil-kurutma-gercek.png"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-on-background/20 group-hover:bg-on-background/40 transition-colors duration-300 z-10"></div>
-              <div className="absolute top-4 right-4 bg-surface/80 backdrop-blur-md rounded-full p-2 text-primary z-20">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_circle
-                </span>
-              </div>
-              <div className="absolute bottom-0 left-0 p-6 w-full video-overlay-gradient z-20">
-                <h4 className="font-label-md text-on-primary font-bold">Güneşte Kurutma</h4>
-                <p className="font-label-sm text-surface-variant mt-1 text-xs">Geleneksel yöntem</p>
-              </div>
-            </div>
+        {/* ─── CATEGORY FILTER TABS ─── */}
+        <section className="space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
+            <h2 className="font-display-lg text-primary text-2xl sm:text-3xl font-bold">
+              Görsel &amp; Video Koleksiyonu
+            </h2>
 
-            {/* Card 2 */}
-            <div
-              onClick={() => setSelectedVideo(videos.dolum)}
-              className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(139,0,0,0.04)] group cursor-pointer bg-surface-container-lowest md:-translate-y-4 transition-transform duration-300"
-            >
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                alt="Kıvam ve Dolum"
-                src="/vakumlu-uretim.png"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-on-background/20 group-hover:bg-on-background/40 transition-colors duration-300 z-10"></div>
-              <div className="absolute top-4 right-4 bg-surface/80 backdrop-blur-md rounded-full p-2 text-primary z-20">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_circle
-                </span>
-              </div>
-              <div className="absolute bottom-0 left-0 p-6 w-full video-overlay-gradient z-20">
-                <h4 className="font-label-md text-on-primary font-bold">Kıvam ve Dolum</h4>
-                <p className="font-label-sm text-surface-variant mt-1 text-xs">Saf kalite</p>
-              </div>
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { id: "all", label: "Tüm Medyalar" },
+                { id: "medya", label: "Belgesel & Medya" },
+                { id: "hasat", label: "Hasat & Doğal Yaşam" },
+                { id: "uretim", label: "Geleneksel Üretim" },
+                { id: "dolum", label: "Hijyen & Dolum" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                    activeTab === tab.id
+                      ? "bg-primary border-primary text-white shadow-md scale-105"
+                      : "bg-white border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:text-primary"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Card 3 */}
-            <div
-              onClick={() => setSelectedVideo(videos.dogasi)}
-              className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(139,0,0,0.04)] group cursor-pointer bg-surface-container-lowest"
-            >
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                alt="İspir'in Doğası"
-                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-on-background/20 group-hover:bg-on-background/40 transition-colors duration-300 z-10"></div>
-              <div className="absolute top-4 right-4 bg-surface/80 backdrop-blur-md rounded-full p-2 text-primary z-20">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_circle
-                </span>
+          {/* ─── MEDIA GRID ─── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredMedia.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedMedia(item)}
+                className="bg-white rounded-3xl overflow-hidden border border-outline-variant/15 shadow-sm group hover:shadow-xl transition-all duration-500 cursor-pointer flex flex-col justify-between"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-900">
+                  <Image
+                    className="object-cover transition-transform duration-700 group-hover:scale-108"
+                    alt={item.title}
+                    src={item.thumb}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
+                  
+                  {/* Top Badge */}
+                  <span className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-md text-amber-200 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/10">
+                    {item.badge}
+                  </span>
+
+                  {/* Icon Indicator (Video Play vs Image Expand) */}
+                  <div className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-lg">
+                      {item.type === "video" ? "play_arrow" : "fullscreen"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-2">
+                  <span className="text-[10px] text-secondary font-mono tracking-widest uppercase font-bold">
+                    {item.categoryLabel}
+                  </span>
+                  <h3 className="font-display-lg text-primary text-xl font-bold leading-snug group-hover:text-amber-700 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant font-body leading-relaxed line-clamp-2">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 p-6 w-full video-overlay-gradient z-20">
-                <h4 className="font-label-md text-on-primary font-bold">İspir'in Doğası</h4>
-                <p className="font-label-sm text-surface-variant mt-1 text-xs">Kaynağımız</p>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Instagram Grid */}
-        <section className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto mb-section-gap">
-          <h2 className="font-headline-md text-on-surface mb-8 border-l-4 border-secondary pl-4">
-            Instagram Akışı
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="relative aspect-square group overflow-hidden rounded-lg bg-surface-container-low cursor-pointer">
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                alt="Pekefe İspir Hasadı Instagram Gönderisi"
-                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
-                <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  favorite
-                </span>
-                <span className="text-white font-bold ml-2">342</span>
-              </div>
+        {/* ─── INSTAGRAM SOCIAL GALLERY ─── */}
+        <section className="bg-white p-8 md:p-12 rounded-3xl border border-outline-variant/15 shadow-sm space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-outline-variant/10 pb-6">
+            <div>
+              <span className="text-secondary font-label-md text-xs uppercase tracking-[0.25em] font-bold block">
+                CANLI TOPLULUK AKIŞI
+              </span>
+              <h2 className="font-display-lg text-primary text-2xl sm:text-3xl font-bold mt-1">
+                @pekefegida Instagram Kareleri
+              </h2>
             </div>
-
-            <div className="relative aspect-square group overflow-hidden rounded-lg bg-surface-container-low cursor-pointer">
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                alt="Geleneksel Bakır Kazan Kaynatma Instagram Gönderisi"
-                src="/geleneksel-kazan.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
-                <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  favorite
-                </span>
-                <span className="text-white font-bold ml-2">512</span>
-              </div>
-            </div>
-
-            <div className="relative aspect-square group overflow-hidden rounded-lg bg-surface-container-low cursor-pointer">
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                alt="Vakumlu Üretim Teknolojisi Instagram Gönderisi"
-                src="/vakumlu-uretim.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
-                <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  favorite
-                </span>
-                <span className="text-white font-bold ml-2">298</span>
-              </div>
-            </div>
-
-            <div className="relative aspect-square group overflow-hidden rounded-lg bg-surface-container-low cursor-pointer">
-              <Image
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                alt="Geleneksel İspir Dut Pekmezi Instagram Gönderisi"
-                src="/pekefe-dut-pekmezi-kavanoz.jpg"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
-                <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  favorite
-                </span>
-                <span className="text-white font-bold ml-2">405</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 text-center">
             <button
               onClick={() => setToast({ isOpen: true, message: "@pekefegida Instagram sayfamıza yönlendiriliyorsunuz...", type: "info" })}
-              className="inline-flex items-center gap-2 bg-transparent border-2 border-outline hover:border-primary text-on-surface hover:text-primary font-label-md px-6 py-3 rounded-full transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 bg-primary text-white hover:bg-primary/90 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full transition-all cursor-pointer shadow-sm"
             >
-              <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-              Bizi Takip Edin
+              <span className="material-symbols-outlined text-base">photo_camera</span>
+              <span>Bizi Takip Edin</span>
             </button>
           </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {instagramPosts.map((post, idx) => (
+              <div
+                key={idx}
+                onClick={() => setToast({ isOpen: true, message: `@pekefegida: ${post.caption}`, type: "info" })}
+                className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer border border-outline-variant/15 shadow-sm"
+              >
+                <Image
+                  src={post.src}
+                  alt={`Pekefe Instagram Paylaşımı ${idx + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-4 text-center z-10 space-y-2">
+                  <div className="flex items-center gap-1 font-bold text-sm">
+                    <span className="material-symbols-outlined text-rose-300" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      favorite
+                    </span>
+                    <span>{post.likes}</span>
+                  </div>
+                  <p className="text-[11px] font-body line-clamp-3 text-amber-100">{post.caption}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
+
       </main>
 
-      {/* Video Lightbox Modal */}
-      {selectedVideo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
-          <div className="relative w-full max-w-4xl bg-surface-container-lowest rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-outline-variant/30">
-              <h3 className="font-headline-md text-primary text-lg font-bold">{selectedVideo.title}</h3>
+      {/* ─── INTERACTIVE LIGHTBOX MODAL (VIDEO & IMAGE) ─── */}
+      {selectedMedia && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in"
+          onClick={() => setSelectedMedia(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl bg-surface-container-lowest rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center px-6 py-4 bg-primary text-white border-b border-white/10">
+              <div>
+                <span className="text-[10px] text-amber-300 font-mono tracking-widest uppercase font-bold block">
+                  {selectedMedia.categoryLabel || "Pekefe Galeri"}
+                </span>
+                <h3 className="font-display-lg text-lg font-bold">{selectedMedia.title}</h3>
+              </div>
               <button
-                onClick={() => setSelectedVideo(null)}
-                className="text-on-surface-variant hover:text-error transition-colors cursor-pointer"
+                onClick={() => setSelectedMedia(null)}
+                className="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors cursor-pointer"
+                aria-label="Kapat"
               >
-                <span className="material-symbols-outlined text-2xl">close</span>
+                <span className="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
-            <div className="aspect-video bg-black flex items-center justify-center">
-              <video src={selectedVideo.src} controls autoPlay className="w-full h-full object-contain" />
+
+            <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+              {selectedMedia.type === "video" ? (
+                <video src={selectedMedia.src} controls autoPlay className="w-full h-full object-contain" />
+              ) : (
+                <Image
+                  src={selectedMedia.src}
+                  alt={selectedMedia.title}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              )}
             </div>
-            <div className="px-6 py-4 bg-surface-container-low">
-              <p className="font-body-md text-on-surface-variant">{selectedVideo.desc}</p>
+
+            <div className="px-6 py-4 bg-white space-y-1">
+              <p className="font-body-md text-on-surface-variant text-sm leading-relaxed">
+                {selectedMedia.desc}
+              </p>
             </div>
           </div>
         </div>
@@ -299,3 +412,4 @@ export default function Galeri() {
     </div>
   );
 }
+

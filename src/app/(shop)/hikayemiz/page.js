@@ -100,7 +100,7 @@ export default function Hikayemiz() {
 
             <div className="text-on-surface-variant text-base leading-relaxed space-y-4 font-body">
               <p>
-                1952 yılında Erzurum'un İspir ilçesinde doğan <strong className="text-primary font-bold">İlhan Efe</strong>, Gümüşhane Öğretmen Lisesi'nden mezun olduktan sonra Van ve İspir'in Değirmenli Köyü'nde uzun yıllar köy öğretmenliği yaptı. İspir Halk Eğitim Müdürlüğü görevinden emekli olduktan sonra, çocukluğundan beri tutkusu olan İspir'in asırlık yabani dutlarını doğal yöntemlerle insanlara ulaştırma hayalini gerçeğe dönüştürdü.
+                1952 yılında Erzurum'un İspir ilçesinde doğan <strong className="text-primary font-bold">İlhan Efe</strong>, Gümüşhane Öğretmen Lisesi'nden mezun olduktan sonra Van ve İspir'in Değirmenli Köyü'nde uzun yıllar köy öğretmenliği yaptı. İspir Halk Eğitim Müdürlüğü görevinden emekli olduktan sonra, çocukluğundan beri tutkusu olan İspir'in asırlık organik dutlarını doğal yöntemlerle insanlara ulaştırma hayalini gerçeğe dönüştürdü.
               </p>
               <p>
                 O dönem üretilen pekmezlerin yüksek ısıda odun ateşinde aşırı kaynatılarak besin değerlerini yitirdiğini fark eden İlhan Efe, dutun yapısındaki değerli mineralleri ve vitaminleri koruyan özel bir doğal yoğunlaştırma sistemi geliştirdi. İlk üretimler ailesi ve dostları içindi.
@@ -125,7 +125,7 @@ export default function Hikayemiz() {
             </h2>
             <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
             <p className="text-on-surface-variant text-sm sm:text-base leading-relaxed font-body">
-              İspir'in 2000 rakımlı temiz dağ havasında yetişen yabani beyaz dutlar ve yüksek vadilerdeki şifalı Karadeniz karadutları.
+              İspir'in 2000 rakımlı temiz dağ havasında organik tarımla yetişen İspir beyaz dutları ve yüksek vadilerdeki şifalı Karadeniz karadutları.
             </p>
           </div>
 
@@ -146,10 +146,10 @@ export default function Hikayemiz() {
                   Geleneksel Beyaz Dut Hasadı
                 </span>
                 <h3 className="font-display-lg text-primary text-2xl font-bold">
-                  Güneşte Olgunlaşan Yabani Beyaz Dut
+                  Güneşte Olgunlaşan Organik İspir Dutları
                 </h3>
                 <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-                  Şafak vakti ağaçların altına gerilen keten çarşaflarla silkelenerek toplanan İspir beyaz dutları, yüksek meyve şekeri ve doğal aromasıyla Pekefe dut pekmezinin ve ipeksi pestilin temelini oluşturur.
+                  Şafak vakti ağaçların altına gerilen keten çarşaflarla silkelenerek toplanan İspir beyaz dutları, yüksek meyve şekeri ve doğal aromasııyla Pekefe dut pekmezinin ve ipeksi pestilin temelini oluşturur.
                 </p>
               </div>
             </div>
@@ -167,13 +167,13 @@ export default function Hikayemiz() {
               </div>
               <div className="space-y-3">
                 <span className="text-[10px] bg-rose-100 text-rose-900 font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Yabani Karadut Özü
+                  Organik Karadut Özü
                 </span>
                 <h3 className="font-display-lg text-primary text-2xl font-bold">
                   Yüksek Polifenollü Dağ Karadutu
                 </h3>
                 <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-                  Toplanması büyük sabır gerektiren yabani karadutlar, el ile teker teker ayıklanır. Düşük sıcaklıkta vakumlu yöntemle yoğunlaştırılan karadut özümüz, ağız sağlığı ve bağışıklık için doğanın sunduğu en güçlü iksirdir.
+                  Toplanması büyük sabır gerektiren organik karadutlar, el ile teker teker ayıklanır. Düşük sıcaklıkta vakumlu yöntemle yoğunlaştırılan karadut özümüz, ağız sağlığı ve bağışıklık için doğanın sunduğu en güçlü iksirdir.
                 </p>
               </div>
             </div>
@@ -271,7 +271,7 @@ export default function Hikayemiz() {
                 Topraktan Sofranıza Güvenle Ulaşan Asil Dokunuş
               </h2>
               <p className="text-on-surface-variant text-base leading-relaxed font-body">
-                İlk günkü tutkuyu hiç kaybetmeden, İspir'in bereketli topraklarındaki yabani meyveleri en saf haliyle sunuyoruz. Paketlediğimiz her ürünü nem, ışık ve dış etkenlerden koruyan özel şeffaf hijyen vakumlarıyla ambalajlıyoruz.
+                İlk günkü tutkuyu hiç kaybetmeden, İspir'in bereketli topraklarında organik ve geleneksel yöntemlerle yetiştirilen doğal mahsulleri en saf haliyle sunuyoruz. Paketlediğimiz her ürünü nem, ışık ve dış etkenlerden koruyan özel şeffaf hijyen vakumlarıyla ambalajlıyoruz.
               </p>
               
               <div className="space-y-4 pt-2">

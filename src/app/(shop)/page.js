@@ -134,27 +134,27 @@ export default function Home() {
     {
       title: "Hasat",
       desc: "İspir vadisindeki yaşlı dut ağaçlarından, şafak vakti çadırlar gerilerek sallama yöntemiyle toplanan en olgun ve tatlı dutlar seçilir.",
-      image: "/ispir-dut-hasadi.png",
+      image: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
     },
     {
       title: "Hazırlık",
       desc: "Toplanan dutlar soğuk kaynak sularıyla yıkanarak preslenir ve posasından arındırılmış berrak, tatlı şıra elde edilir.",
-      image: "/vakumlu-uretim.png",
+      image: "/uploads/ispir-karadut-kaynatma-bakir-kazan.webp",
     },
     {
       title: "Geleneksel Pişirme (Odun Ateşi)",
       desc: "Dut şırası odun ateşinde, geleneksel el yapımı kalın bakır kazanlarda (herle) yavaşça karıştırılarak ideal pekmez kıvamına gelene dek kaynatılır.",
-      image: "/geleneksel-kazan.png",
+      image: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
     },
     {
       title: "Güneşte Doğal Kurutma",
       desc: "İncecik keten sergiler üzerine dökülen pestil harcı, İspir'in yüksek rakımlı kuru havası ve bol güneşi altında 2 gün boyunca doğal olarak kurutulur.",
-      image: "/ispir-pestil-kurutma-gercek.png",
+      image: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
     },
     {
       title: "Vakumlu Koruma & Hijyenik Paketleme",
       desc: "Güneş altında olgunlaşan cevizli ve sade dut pestillerimiz ile taze kömelerimiz; nem, hava ve dış etkenlerle teması tamamen kesecek biçimde şeffaf hijyenik koruma vakumlarına el işçiliğiyle ambalajlanır. Ürünlerimizin tazeliği, ipeksi esnekliği ve aroması ilk günkü tazeliğiyle muhafaza edilir.",
-      image: "/ispir-vakum-cevizli-pestil-beyaz.png",
+      image: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
       gallery: [
         { label: "Vakumlu Cevizli Pestil", src: "/ispir-vakum-cevizli-pestil-beyaz.png" },
         { label: "Vakumlu Sade Pestil", src: "/ispir-vakum-sade-pestil-beyaz.png" },

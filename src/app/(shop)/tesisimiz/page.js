@@ -204,50 +204,74 @@ export default function Tesisimiz() {
           </div>
         </section>
 
-        {/* Galeri */}
+        {/* Galeri - Tesisimizden Kareler */}
         <section className="space-y-8 pt-8">
-          <h2 className="font-display-lg text-primary text-3xl sm:text-4xl lg:text-[48px] font-bold text-center">
-            Tesisimizden Kareler
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-            <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md relative group">
+          <div className="text-center max-w-xl mx-auto space-y-3">
+            <span className="text-secondary font-label-md text-xs uppercase tracking-[0.25em] font-bold block">
+              ZANAAT VE HİJYEN
+            </span>
+            <h2 className="font-display-lg text-primary text-3xl sm:text-4xl lg:text-[48px] font-bold">
+              Tesisimizden Kareler
+            </h2>
+            <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[220px]">
+            {/* Main Facility Photo */}
+            <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md relative group border border-outline-variant/20">
               <Image
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
-                alt="İspir Dağları ve Pekefe Tesisimiz"
-                src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
+                alt="Pekefe Steril Üretim ve Dolum Tesisimiz"
+                src="/uploads/ispir-modern-hijyenik-tesis-dolum.webp"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 z-10">
+                <span className="text-white font-display-lg text-lg font-bold">Pekefe Steril Üretim ve Dolum Tesisimiz</span>
+              </div>
+            </div>
+
+            {/* Harvest Photo */}
+            <div className="rounded-2xl overflow-hidden shadow-md relative group border border-outline-variant/20">
+              <Image
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                alt="İspir Dut Bahçesi Doğal Hasadı"
+                src="/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg"
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 z-10">
+                <span className="text-white text-xs font-bold font-body">İspir Dut Bahçesi Hasadı</span>
+              </div>
+            </div>
+
+            {/* Copper Cauldron Photo */}
+            <div className="rounded-2xl overflow-hidden shadow-md relative group border border-outline-variant/20">
+              <Image
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                alt="Odun Ateşinde Bakır Kazanlar"
+                src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 z-10">
+                <span className="text-white text-xs font-bold font-body">Odun Ateşi Bakır Kazanlar</span>
+              </div>
+            </div>
+
+            {/* Linen Sun Drying Photo */}
+            <div className="col-span-2 rounded-2xl overflow-hidden shadow-md relative group border border-outline-variant/20">
+              <Image
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                alt="Güneşte Keten Bezde Pestil Kurutma"
+                src="/uploads/ispir-keten-bezde-pestil-serimi.webp"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 z-10">
-                <span className="text-white font-headline-md font-bold">İspir Dağları ve Tesisimiz</span>
+                <span className="text-white font-display-lg text-lg font-bold">Keten Bezlerde Güneşte Doğal Kurutma</span>
               </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-md relative group">
-              <Image
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                alt="Dut Toplama Aşaması"
-                src="/ispir-dut-hasadi.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-md relative group">
-              <Image
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                alt="Vakum Kazan Gözetleme Camı"
-                src="/vakumlu-uretim.png"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-            </div>
-            <div className="col-span-2 rounded-2xl overflow-hidden shadow-md relative group">
-              <Image
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                alt="Hazır Ürün Ambalajlama"
-                src="/premium-pekefe-kavanoz.png"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
             </div>
           </div>
         </section>

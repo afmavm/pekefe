@@ -235,21 +235,21 @@ export default function Home() {
       quote: "Sessiz bir sabah kahvaltısının en asil ritüeli.",
       description: "İspir'in yoğun gövdeli, karamelize dut pekmezi ile kepeği alınmış susamdan taş değirmende çekilen sıcak tahinin %40'a %60 oranında asimetrik birleşimi. Üzerine eklenen hafif kavrulmuş İspir cevizi, pekmezin yoğun tatlılığını dengeler ve mükemmel bir tekstür uyumu sunar.",
       tips: "Karıştırma işlemini seramik veya ahşap kaşık kullanarak dairesel hareketlerle yapın; metal kaşık pekmezin doğal asiditesini bozabilir.",
-      bg: "/pekmez-tahin-eslesme.png",
+      bg: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
     },
     kaymak: {
       title: "Çıtır Karadeniz Fındığı & Doğal Bal ile Tatlandırılmış Pestil",
       quote: "Şeker ilavesiz, %100 saf ham çiçek balı tatlandırmalı.",
       description: "İspir yaylalarının 2200m+ rakımlı el değmemiş çiçeklerinden toplanan %100 saf ham bal ile doğal olarak tatlandırılan incecik dut pestili, özenle çifte kavrulmuş çıtır Karadeniz fındığı ile buluşuyor. Yapay şeker veya ilave tatlandırıcı kullanılmaksızın sadece doğal ham balın saf aromasıyla hazırlanan bu lezzet, mükemmel bir doku ve enerji sunar.",
       tips: "Pestil dilimlerini servis etmeden önce oda sıcaklığında 5 dakika dinlendirerek doğal bal ve taze fındık aromalarının damakta tam olarak açılmasını sağlayabilirsiniz.",
-      bg: "/sarma-pestil-tatlisi.jpg",
+      bg: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
     },
     cheese: {
       title: "İspir Dut Kömesi & Olgunlaştırılmış Keçi Peyniri",
       quote: "Zıt kutupların muhteşem lezzet harmonisi.",
       description: "Dut kömesinin (cevizli sucuk) içerdiği ceviz aroması ve yoğun tatlı şıra kaplaması, hafif tuzlu ve sert karakterdeki olgun keçi peyniri ile eşsiz bir kontrast oluşturur. Şarküteri tahtalarının gizli yıldızı olan bu ikili, slow food gurmelerinin favori eşleşmesidir.",
       tips: "Keçi peynirini ince dilimler halinde kesin ve oda sıcaklığında, ince halkalar şeklinde dilimlenmiş kömelerle birlikte servis edin.",
-      bg: "/kome-keci-peyniri.jpg",
+      bg: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
     },
   };
 

@@ -114,6 +114,25 @@ export default function UrunDetay({ params }) {
   const [activeTab, setActiveTab] = useState("urun_aciklamasi");
   const [failedImages, setFailedImages] = useState({});
 
+  // Image Zoom Lightbox Modal States
+  const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isHoveringZoom, setIsHoveringZoom] = useState(false);
+
+  // Keyboard navigation for image lightbox modal (Esc to close)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isZoomModalOpen) return;
+      if (e.key === "Escape") {
+        setIsZoomModalOpen(false);
+        setZoomScale(1);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isZoomModalOpen]);
+
   useEffect(() => {
     if (variantsList.length > 0) {
       setSelectedVariant((prev) => {
@@ -438,7 +457,16 @@ export default function UrunDetay({ params }) {
           
           {/* LEFT: Spacious Gallery Display (7 Columns) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] md:aspect-square max-h-[650px] w-full relative shadow-md group">
+            <div 
+              onClick={() => {
+                if (selectedMedia?.type !== "video" && !isVideoUrl(selectedMedia?.url)) {
+                  setIsZoomModalOpen(true);
+                  setZoomScale(1);
+                }
+              }}
+              className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] md:aspect-square max-h-[650px] w-full relative shadow-md group cursor-zoom-in"
+              title="Görseli büyütmek için tıklayın"
+            >
               {product?.tag && (
                 <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest z-10">
                   {product.tag}
@@ -457,14 +485,23 @@ export default function UrunDetay({ params }) {
                   />
                 </div>
               ) : (
-                <Image
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
-                  alt={product?.name || "Ürün Görseli"}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
+                <>
+                  <Image
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
+                    alt={product?.name || "Ürün Görseli"}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                  {/* Hover Zoom Badge Overlay */}
+                  <div className="absolute inset-0 bg-slate-900/25 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
+                    <div className="bg-white/95 text-slate-900 px-4 py-2.5 rounded-full text-xs font-extrabold shadow-xl border border-white/50 flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <span className="material-symbols-outlined text-lg text-amber-600">zoom_in</span>
+                      <span>Tıkla & Detaylı İncele</span>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
             
@@ -1070,6 +1107,176 @@ export default function UrunDetay({ params }) {
             )}
           </div>
         </div>
+
+        {/* ─── FULLSCREEN IMAGE ZOOM & INSPECTION LIGHTBOX MODAL ─── */}
+        {isZoomModalOpen && (
+          <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-2xl flex flex-col justify-between p-4 md:p-8 animate-in fade-in duration-200">
+            
+            {/* Lightbox Top Header */}
+            <div className="flex justify-between items-center z-10 border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <span className="material-symbols-outlined text-xl">zoom_in</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-base md:text-lg font-display-lg leading-tight">
+                    {product?.name}
+                  </h3>
+                  <p className="text-slate-400 text-xs font-mono">
+                    Fareyi görsel üzerinde gezdirerek detayları inceleyebilirsiniz
+                  </p>
+                </div>
+              </div>
+
+              {/* Control Buttons */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-white/10 rounded-xl border border-white/15 p-1 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setZoomScale(prev => Math.max(1, prev - 0.5))}
+                    className="w-8 h-8 rounded-lg text-white hover:bg-white/20 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
+                    title="Uzaklaştır (-)"
+                  >
+                    <span className="material-symbols-outlined text-base">zoom_out</span>
+                  </button>
+                  <span className="text-xs font-mono font-bold text-amber-400 px-2 min-w-[45px] text-center">
+                    {Math.round((zoomScale === 1 && isHoveringZoom ? 2.2 : zoomScale) * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setZoomScale(prev => Math.min(3.5, prev + 0.5))}
+                    className="w-8 h-8 rounded-lg text-white hover:bg-white/20 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
+                    title="Yakınlaştır (+)"
+                  >
+                    <span className="material-symbols-outlined text-base">zoom_in</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setZoomScale(1)}
+                    className="px-2.5 py-1 text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-white/20 rounded-lg cursor-pointer transition-colors"
+                    title="Sıfırla"
+                  >
+                    1:1
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsZoomModalOpen(false);
+                    setZoomScale(1);
+                  }}
+                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-white/15 flex items-center justify-center cursor-pointer transition-colors"
+                  title="Kapat (Esc)"
+                >
+                  <span className="material-symbols-outlined text-2xl">close</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Center Inspection Stage with Dynamic Lens & Mouse Magnifier */}
+            <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden select-none">
+              
+              {/* Left Arrow Navigation */}
+              {(mediaList.length > 1 || (product?.images && product.images.length > 1)) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = mediaList.length > 0 ? mediaList : (product?.images || []).map(img => ({ type: "image", url: img }));
+                    const currentIdx = list.findIndex(m => (m.url || m) === (selectedMedia?.url || mainImage));
+                    const prevIdx = (currentIdx - 1 + list.length) % list.length;
+                    setSelectedMedia(list[prevIdx]);
+                  }}
+                  className="absolute left-2 md:left-6 z-20 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-amber-600 text-white border border-white/20 flex items-center justify-center cursor-pointer shadow-2xl backdrop-blur-md transition-all hover:scale-110"
+                >
+                  <span className="material-symbols-outlined text-2xl">chevron_left</span>
+                </button>
+              )}
+
+              {/* Main Image Stage */}
+              <div 
+                onMouseEnter={() => setIsHoveringZoom(true)}
+                onMouseLeave={() => {
+                  setIsHoveringZoom(false);
+                  setMousePos({ x: 50, y: 50 });
+                }}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  setMousePos({ x, y });
+                }}
+                className="relative max-w-4xl w-full h-[65vh] md:h-[75vh] flex items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-slate-900/60 shadow-2xl cursor-crosshair group"
+              >
+                <Image
+                  src={selectedMedia?.url || mainImage || "/premium-pekefe-kavanoz.png"}
+                  alt={product?.name || "Detaylı Ürün Görseli"}
+                  fill
+                  priority
+                  className="object-contain transition-transform duration-150 ease-out"
+                  style={{
+                    transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+                    transform: `scale(${isHoveringZoom && zoomScale === 1 ? 2.2 : zoomScale})`,
+                  }}
+                />
+
+                {/* Floating Hint Overlay */}
+                {!isHoveringZoom && (
+                  <div className="absolute bottom-6 bg-slate-950/80 text-amber-300 border border-amber-500/30 px-5 py-2 rounded-full text-xs font-bold flex items-center gap-2 backdrop-blur-md shadow-2xl pointer-events-none animate-pulse">
+                    <span className="material-symbols-outlined text-base">center_focus_strong</span>
+                    <span>Büyüteç etkisi için imleci görsel üzerinde gezdirin</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Arrow Navigation */}
+              {(mediaList.length > 1 || (product?.images && product.images.length > 1)) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = mediaList.length > 0 ? mediaList : (product?.images || []).map(img => ({ type: "image", url: img }));
+                    const currentIdx = list.findIndex(m => (m.url || m) === (selectedMedia?.url || mainImage));
+                    const nextIdx = (currentIdx + 1) % list.length;
+                    setSelectedMedia(list[nextIdx]);
+                  }}
+                  className="absolute right-2 md:right-6 z-20 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-amber-600 text-white border border-white/20 flex items-center justify-center cursor-pointer shadow-2xl backdrop-blur-md transition-all hover:scale-110"
+                >
+                  <span className="material-symbols-outlined text-2xl">chevron_right</span>
+                </button>
+              )}
+
+            </div>
+
+            {/* Bottom Thumbnail Strip */}
+            <div className="z-10 border-t border-white/10 pt-4 flex justify-center">
+              <div className="flex gap-3 overflow-x-auto no-scrollbar p-1 max-w-2xl">
+                {(mediaList.length > 0 ? mediaList : (product?.images || [mainImage]).map(img => ({ type: "image", url: img }))).map((item, index) => {
+                  const itemUrl = typeof item === "string" ? item : item.url;
+                  const isCurrent = (selectedMedia?.url || mainImage) === itemUrl;
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setSelectedMedia(typeof item === "string" ? { type: "image", url: item } : item)}
+                      className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden cursor-pointer shrink-0 transition-all ${
+                        isCurrent ? "border-amber-400 scale-105 shadow-lg shadow-amber-500/30" : "border-white/20 opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <Image
+                        src={itemUrl}
+                        alt={`Görsel ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+        )}
 
         {/* ─── YORUM GÖNDER MODAL ─── */}
         {isReviewModalOpen && (

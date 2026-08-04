@@ -1296,9 +1296,20 @@ function EnterpriseStockFormPage() {
   // Modal / Input Management States
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
+  const [editingCategoryNewValue, setEditingCategoryNewValue] = useState("");
 
   const [isUnitManagerOpen, setIsUnitManagerOpen] = useState(false);
   const [newUnitName, setNewUnitName] = useState("");
+  const [editingUnitName, setEditingUnitName] = useState<string | null>(null);
+  const [editingUnitNewValue, setEditingUnitNewValue] = useState("");
+
+  // Edit states for Size & Color options
+  const [editingSizeName, setEditingSizeName] = useState<string | null>(null);
+  const [editingSizeNewValue, setEditingSizeNewValue] = useState("");
+
+  const [editingColorName, setEditingColorName] = useState<string | null>(null);
+  const [editingColorNewValue, setEditingColorNewValue] = useState("");
 
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [variantForm, setVariantForm] = useState({
@@ -1739,7 +1750,7 @@ function EnterpriseStockFormPage() {
     }
   };
 
-  // Add/Remove Custom Size/Ebat Options
+  // Add/Edit/Remove Custom Size/Ebat Options
   const addSizeOption = () => {
     if (!newSizeName.trim()) return;
     if (sizes.includes(newSizeName.trim())) {
@@ -1750,6 +1761,30 @@ function EnterpriseStockFormPage() {
     setVariantForm(prev => ({ ...prev, size: newSizeName.trim() }));
     setNewSizeName("");
     toast.success("Ebat seçeneği başarıyla eklendi.");
+  };
+
+  const saveSizeEdit = (oldName: string) => {
+    const val = editingSizeNewValue.trim();
+    if (!val) {
+      toast.warning("Lütfen geçerli bir ebat/gramaj adı giriniz.");
+      return;
+    }
+    if (val === oldName) {
+      setEditingSizeName(null);
+      return;
+    }
+    if (sizes.includes(val)) {
+      toast.warning("Bu ebat seçeneği zaten mevcut.");
+      return;
+    }
+    setSizes(prev => prev.map(s => s === oldName ? val : s));
+    if (variantForm.size === oldName) {
+      setVariantForm(prev => ({ ...prev, size: val }));
+    }
+    setVariants(prev => prev.map(v => v.size === oldName ? { ...v, size: val } : v));
+    setEditingSizeName(null);
+    setEditingSizeNewValue("");
+    toast.success("Gramaj/ambalaj seçeneği başarıyla güncellendi.");
   };
 
   const removeSizeOption = (name: string) => {
@@ -1764,7 +1799,7 @@ function EnterpriseStockFormPage() {
     toast.success("Ebat seçeneği kaldırıldı.");
   };
 
-  // Add/Remove Custom Color/Deri Tipi Options
+  // Add/Edit/Remove Custom Color/Deri Tipi Options
   const addColorOption = () => {
     if (!newColorName.trim()) return;
     if (colors.includes(newColorName.trim())) {
@@ -1775,6 +1810,30 @@ function EnterpriseStockFormPage() {
     setVariantForm(prev => ({ ...prev, color: newColorName.trim() }));
     setNewColorName("");
     toast.success("Deri tipi/renk seçeneği başarıyla eklendi.");
+  };
+
+  const saveColorEdit = (oldName: string) => {
+    const val = editingColorNewValue.trim();
+    if (!val) {
+      toast.warning("Lütfen geçerli bir ürün çeşidi adı giriniz.");
+      return;
+    }
+    if (val === oldName) {
+      setEditingColorName(null);
+      return;
+    }
+    if (colors.includes(val)) {
+      toast.warning("Bu ürün çeşidi zaten mevcut.");
+      return;
+    }
+    setColors(prev => prev.map(c => c === oldName ? val : c));
+    if (variantForm.color === oldName) {
+      setVariantForm(prev => ({ ...prev, color: val }));
+    }
+    setVariants(prev => prev.map(v => v.color === oldName ? { ...v, color: val } : v));
+    setEditingColorName(null);
+    setEditingColorNewValue("");
+    toast.success("Ürün çeşidi/tipi adı başarıyla güncellendi.");
   };
 
   const removeColorOption = (name: string) => {
@@ -1844,7 +1903,51 @@ function EnterpriseStockFormPage() {
     toast.success("Kategori silindi.");
   };
 
-  // Add/Remove Units
+  const saveCategoryEdit = async (oldName: string) => {
+    const val = editingCategoryNewValue.trim();
+    if (!val) {
+      toast.warning("Lütfen geçerli bir kategori adı giriniz.");
+      return;
+    }
+    if (val === oldName) {
+      setEditingCategoryName(null);
+      return;
+    }
+    if (categories.includes(val)) {
+      toast.warning("Bu kategori zaten mevcut.");
+      return;
+    }
+    const targetObj = categoryObjects.find(c => c.name === oldName);
+    if (targetObj?.id) {
+      try {
+        const res = await fetch(`/api/categories?id=${targetObj.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: val })
+        });
+        if (res.ok) {
+          toast.success("Kategori adı veritabanında güncellendi.");
+          await loadCategoriesFromApi();
+          await refreshCategories();
+          if (form.category === oldName) {
+            setForm(prev => ({ ...prev, category: val }));
+          }
+          setEditingCategoryName(null);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setCategories(prev => prev.map(c => c === oldName ? val : c));
+    if (form.category === oldName) {
+      setForm(prev => ({ ...prev, category: val }));
+    }
+    setEditingCategoryName(null);
+    toast.success("Kategori adı güncellendi.");
+  };
+
+  // Add/Edit/Remove Units
   const addUnit = async () => {
     if (!newUnitName.trim()) return;
     const name = newUnitName.trim();
@@ -1869,6 +1972,28 @@ function EnterpriseStockFormPage() {
     } catch (e) {
       toast.error("Birim eklenirken hata oluştu.");
     }
+  };
+
+  const saveUnitEdit = (oldName: string) => {
+    const val = editingUnitNewValue.trim();
+    if (!val) {
+      toast.warning("Lütfen geçerli bir birim adı giriniz.");
+      return;
+    }
+    if (val === oldName) {
+      setEditingUnitName(null);
+      return;
+    }
+    if (units.includes(val)) {
+      toast.warning("Bu birim zaten mevcut.");
+      return;
+    }
+    setUnits(prev => prev.map(u => u === oldName ? val : u));
+    if (form.unit === oldName) {
+      setForm(prev => ({ ...prev, unit: val }));
+    }
+    setEditingUnitName(null);
+    toast.success("Birim adı güncellendi.");
   };
 
   const removeUnit = async (unitName: string) => {
@@ -5055,18 +5180,65 @@ function EnterpriseStockFormPage() {
               </div>
 
               {/* Sizes list */}
-              <div className="max-h-[220px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
                 {sizes.map(size => (
-                  <div key={size} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition">
-                    <span className="text-sm font-semibold text-slate-700">{size}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSizeOption(size)}
-                      className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
-                      title="Seçeneği Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={size} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                    {editingSizeName === size ? (
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <input
+                          type="text"
+                          value={editingSizeNewValue}
+                          onChange={e => setEditingSizeNewValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter") saveSizeEdit(size);
+                            if (e.key === "Escape") setEditingSizeName(null);
+                          }}
+                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveSizeEdit(size)}
+                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          title="Kaydet"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingSizeName(null)}
+                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          title="Vazgeç"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-slate-700">{size}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSizeName(size);
+                              setEditingSizeNewValue(size);
+                            }}
+                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            title="İsmi Düzenle"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeSizeOption(size)}
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            title="Seçeneği Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -5128,18 +5300,65 @@ function EnterpriseStockFormPage() {
               </div>
 
               {/* Colors list */}
-              <div className="max-h-[220px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
                 {colors.map(color => (
-                  <div key={color} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition">
-                    <span className="text-sm font-semibold text-slate-700">{color}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeColorOption(color)}
-                      className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
-                      title="Seçeneği Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={color} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                    {editingColorName === color ? (
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <input
+                          type="text"
+                          value={editingColorNewValue}
+                          onChange={e => setEditingColorNewValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter") saveColorEdit(color);
+                            if (e.key === "Escape") setEditingColorName(null);
+                          }}
+                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveColorEdit(color)}
+                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          title="Kaydet"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingColorName(null)}
+                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          title="Vazgeç"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-slate-700">{color}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingColorName(color);
+                              setEditingColorNewValue(color);
+                            }}
+                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            title="İsmi Düzenle"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeColorOption(color)}
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            title="Seçeneği Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -5201,18 +5420,65 @@ function EnterpriseStockFormPage() {
               </div>
 
               {/* Categories list */}
-              <div className="max-h-[220px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
                 {categories.map(cat => (
-                  <div key={cat} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition">
-                    <span className="text-sm font-semibold text-slate-700">{cat}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeCategory(cat)}
-                      className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
-                      title="Kategoriyi Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={cat} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                    {editingCategoryName === cat ? (
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <input
+                          type="text"
+                          value={editingCategoryNewValue}
+                          onChange={e => setEditingCategoryNewValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter") saveCategoryEdit(cat);
+                            if (e.key === "Escape") setEditingCategoryName(null);
+                          }}
+                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveCategoryEdit(cat)}
+                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          title="Kaydet"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingCategoryName(null)}
+                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          title="Vazgeç"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-slate-700">{cat}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryName(cat);
+                              setEditingCategoryNewValue(cat);
+                            }}
+                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            title="İsmi Düzenle"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeCategory(cat)}
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            title="Kategoriyi Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -5275,18 +5541,65 @@ function EnterpriseStockFormPage() {
               </div>
 
               {/* Units list */}
-              <div className="max-h-[220px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
                 {units.map(u => (
-                  <div key={u} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition">
-                    <span className="text-sm font-semibold text-slate-700">{u}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeUnit(u)}
-                      className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
-                      title="Birimi Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={u} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                    {editingUnitName === u ? (
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <input
+                          type="text"
+                          value={editingUnitNewValue}
+                          onChange={e => setEditingUnitNewValue(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter") saveUnitEdit(u);
+                            if (e.key === "Escape") setEditingUnitName(null);
+                          }}
+                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveUnitEdit(u)}
+                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          title="Kaydet"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingUnitName(null)}
+                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          title="Vazgeç"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-slate-700">{u}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingUnitName(u);
+                              setEditingUnitNewValue(u);
+                            }}
+                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            title="İsmi Düzenle"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeUnit(u)}
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            title="Birimi Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

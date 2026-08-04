@@ -111,7 +111,7 @@ export default function UrunDetay({ params }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(product && product.images && product.images[0] ? product.images[0] : (product ? product.image : "/premium-pekefe-kavanoz.png"));
-  const [activeTab, setActiveTab] = useState("aciklama");
+  const [activeTab, setActiveTab] = useState("urun_aciklamasi");
   const [failedImages, setFailedImages] = useState({});
 
   useEffect(() => {
@@ -344,6 +344,16 @@ export default function UrunDetay({ params }) {
   } : null;
 
   // Dynamic tab data fetched directly from Admin Management page attributes with robust fallback
+  const fullDescriptionText = useMemo(() => {
+    if (!product) return "";
+    const attrs = product.attributes || {};
+    const candidate = product.desc || attrs.desc || product.description || attrs.description || product.recipeDetails || attrs.recipeDetails || attrs.harvestStory || product.details;
+    if (candidate && typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate.trim();
+    }
+    return `${product.name || "PEKEFE Geleneksel Mahsulü"}, İspir'in 2000 rakımlı yüksek yaylalarındaki yabani dut ağaçlarından toplanıp geleneksel yöntemlerle kısık meşe odunu ateşinde ve el yapımı bakır kazanlarda kaynatılarak üretilmiştir. Hiçbir katkı maddesi, ilave şeker, koruyucu veya aroma verici sentetik içermez. %100 saf ve doğal besleyici özelliğe sahiptir.`;
+  }, [product]);
+
   const summaryDescription = useMemo(() => {
     if (!product) return "";
     const attrs = product.attributes || {};
@@ -649,6 +659,14 @@ export default function UrunDetay({ params }) {
         <div className="border-t border-outline-variant/15 pt-12">
           <div className="flex border-b border-outline-variant/10 gap-10 overflow-x-auto no-scrollbar">
             <button
+              onClick={() => setActiveTab("urun_aciklamasi")}
+              className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                activeTab === "urun_aciklamasi" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
+              }`}
+            >
+              Ürün Açıklaması
+            </button>
+            <button
               onClick={() => setActiveTab("aciklama")}
               className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
                 activeTab === "aciklama" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
@@ -675,6 +693,106 @@ export default function UrunDetay({ params }) {
           </div>
 
           <div className="py-12 min-h-[350px]">
+            {/* DEDICATED TAB 1: ÜRÜN AÇIKLAMASI */}
+            {activeTab === "urun_aciklamasi" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start animate-in fade-in duration-300">
+                {/* Left Column: Rich Product Description */}
+                <div className="lg:col-span-8 space-y-8">
+                  <div className="space-y-4">
+                    <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
+                      {product?.name} Hakkında Detaylı Açıklama
+                    </h3>
+                    
+                    {/* Rich HTML / Detailed Description Body */}
+                    {fullDescriptionText && /<[a-z][\s\S]*>/i.test(fullDescriptionText) ? (
+                      <div 
+                        className="text-on-surface-variant font-body-md leading-relaxed font-light text-base prose max-w-none dark:prose-invert"
+                        dangerouslySetInnerHTML={{ __html: fullDescriptionText }}
+                      />
+                    ) : (
+                      <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-base whitespace-pre-line space-y-4">
+                        {fullDescriptionText}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Highlights / Quick Pillar Badges */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-outline-variant/10">
+                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
+                      <span className="material-symbols-outlined text-primary text-2xl">verified</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">%100 Doğal İçerik</h4>
+                        <p className="text-xs text-on-surface-variant font-light mt-0.5">Katkı maddesi, koruyucu veya ilave şeker içermez.</p>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
+                      <span className="material-symbols-outlined text-secondary text-2xl">terrain</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">İspir Yöresi Hasadı</h4>
+                        <p className="text-xs text-on-surface-variant font-light mt-0.5">İspirin bereketli yaylalarında yetişen asırlık mahsuller.</p>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
+                      <span className="material-symbols-outlined text-primary text-2xl">local_fire_department</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Odun Ateşinde Bakır Kazan</h4>
+                        <p className="text-xs text-on-surface-variant font-light mt-0.5">Geleneksel yöntemlerle kısık ateşte yavaş pişirme.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Key Summary & Attributes Card */}
+                <div className="lg:col-span-4 space-y-6 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/15 shadow-md">
+                  <div className="flex items-center gap-3 border-b border-outline-variant/10 pb-4">
+                    <span className="material-symbols-outlined text-primary text-2xl">info</span>
+                    <div>
+                      <h4 className="font-display-lg text-primary text-lg font-bold">Ürün Özet Nitelikleri</h4>
+                      <p className="text-xs text-on-surface-variant font-light">Öne çıkan temel teknik bilgiler</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                      <span className="text-xs text-on-surface-variant font-semibold">Kategori</span>
+                      <span className="text-xs text-primary font-bold">{product?.categoryDisplay || product?.category || "Geleneksel"}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                      <span className="text-xs text-on-surface-variant font-semibold">Stok Kodu (SKU)</span>
+                      <span className="text-xs text-primary font-bold font-mono">{product?.sku || "PRD-PKF-001"}</span>
+                    </div>
+
+                    {product?.barcode && (
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                        <span className="text-xs text-on-surface-variant font-semibold">Barkod</span>
+                        <span className="text-xs text-primary font-bold font-mono">{product.barcode}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                      <span className="text-xs text-on-surface-variant font-semibold">Hasat Yeri</span>
+                      <span className="text-xs text-primary font-bold">Erzurum / İspir</span>
+                    </div>
+
+                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                      <span className="text-xs text-on-surface-variant font-semibold">Yayla Yüksekliği</span>
+                      <span className="text-xs text-primary font-bold font-mono">{product?.attributes?.altitude || product?.altitude || "2200 Metre"}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
+                      <span className="text-xs text-on-surface-variant font-semibold">Stok Durumu</span>
+                      <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-mono">
+                        {product?.status || "Stokta Var"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeTab === "aciklama" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                 <div className="lg:col-span-7 space-y-6">

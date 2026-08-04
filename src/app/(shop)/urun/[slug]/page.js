@@ -833,141 +833,239 @@ export default function UrunDetay({ params }) {
               </div>
             )}
 
+            {/* TAB 2: MAHSUL HİKAYESİ & DETAYLAR */}
             {activeTab === "aciklama" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                <div className="lg:col-span-7 space-y-6">
-                  <h3 className="font-display-lg text-primary text-2xl font-bold">Asırlık Zanaatkarlık ve Yavaş Üretim</h3>
-                  {typeof harvestStoryText === "string" && /<[a-z][\s\S]*>/i.test(harvestStoryText) ? (
-                    <div 
-                      className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base prose max-w-none"
-                      dangerouslySetInnerHTML={{ __html: harvestStoryText }}
-                    />
-                  ) : (
-                    <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-sm sm:text-base whitespace-pre-line">
-                      {harvestStoryText}
+              <div className="bg-white dark:bg-slate-900 border-2 border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl space-y-8 animate-in fade-in duration-300">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/15 pb-6">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                      <span className="material-symbols-outlined text-2xl">auto_stories</span>
                     </div>
-                  )}
-                  
-                  <div className="p-6 bg-surface-container-low border border-outline-variant/10 rounded-xl space-y-3">
-                    <span className="text-[10px] text-secondary font-bold uppercase tracking-widest block">İçindekiler Temizliği</span>
-                    <p className="text-sm font-bold text-primary">{ingredientsText}</p>
-                    <p className="text-xs text-on-surface-variant font-light">Renklendirici, koruyucu, nişasta bazlı glikoz veya aroma verici sentetikler içermez.</p>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-secondary block">
+                        PEKEFE ZANAATKARLIK VE YAVAŞ ÜRETİM
+                      </span>
+                      <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
+                        Asırlık Zanaatkarlık ve Yavaş Üretim
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full border border-amber-200 text-xs font-bold font-mono">
+                    <span className="material-symbols-outlined text-base text-amber-600">local_fire_department</span>
+                    <span>Geleneksel Odun Ateşi</span>
                   </div>
                 </div>
 
-                <div className="lg:col-span-5 space-y-6 bg-white p-8 rounded-2xl border border-outline-variant/15 shadow-sm">
-                  <h4 className="font-display-lg text-primary text-lg font-bold">Teknik Spesifikasyonlar</h4>
-                  <div className="space-y-4">
-                    {specificationsList.map((spec, i) => (
-                      <div key={i} className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                        <span className="text-xs text-on-surface-variant font-semibold">{spec.key}</span>
-                        <span className="text-xs text-primary font-bold font-mono">{spec.value}</span>
+                {/* Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                  <div className="lg:col-span-7 space-y-6">
+                    {typeof harvestStoryText === "string" && /<[a-z][\s\S]*>/i.test(harvestStoryText) ? (
+                      <div 
+                        className="text-on-surface-variant font-body-md leading-relaxed font-light text-base md:text-lg prose max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-primary prose-strong:font-bold"
+                        dangerouslySetInnerHTML={{ __html: harvestStoryText }}
+                      />
+                    ) : (
+                      <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-base md:text-lg whitespace-pre-line">
+                        {harvestStoryText}
+                      </div>
+                    )}
+                    
+                    <div className="p-6 bg-surface-container-low border border-outline-variant/15 rounded-2xl space-y-2.5 shadow-xs">
+                      <span className="text-[10px] text-secondary font-extrabold uppercase tracking-widest block">İçindekiler Temizliği</span>
+                      <p className="text-base font-bold text-primary">{ingredientsText}</p>
+                      <p className="text-xs text-on-surface-variant font-light">Renklendirici, koruyucu, nişasta bazlı glikoz veya aroma verici sentetikler içermez.</p>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-6 bg-surface-container-low/70 p-7 rounded-2xl border border-outline-variant/20 shadow-inner">
+                    <div className="flex items-center gap-3 border-b border-outline-variant/10 pb-4">
+                      <span className="material-symbols-outlined text-primary text-2xl">tune</span>
+                      <div>
+                        <h4 className="font-display-lg text-primary text-base font-bold">Teknik Spesifikasyonlar</h4>
+                        <p className="text-xs text-on-surface-variant font-light">Laboratuvar & ambalaj detayları</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3.5">
+                      {specificationsList.map((spec, i) => (
+                        <div key={i} className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                          <span className="text-xs text-on-surface-variant font-semibold">{spec.key}</span>
+                          <span className="text-xs text-primary font-bold font-mono">{spec.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 3: ANALİZ & BESİN DEĞERLERİ */}
+            {activeTab === "besin" && (
+              <div className="bg-white dark:bg-slate-900 border-2 border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl space-y-8 animate-in fade-in duration-300">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/15 pb-6">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                      <span className="material-symbols-outlined text-2xl">science</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-secondary block">
+                        PEKEFE LABORATUVAR VE BESİN ANALİZİ
+                      </span>
+                      <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
+                        100g Besin Değerleri ve Analiz Raporu
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full border border-amber-200 text-xs font-bold font-mono">
+                    <span className="material-symbols-outlined text-base text-amber-600">verified</span>
+                    <span>Akredite Laboratuvar Raporlu</span>
+                  </div>
+                </div>
+
+                {/* Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                  {/* Nutrients Table */}
+                  <div className="lg:col-span-6 bg-surface-container-low/70 p-7 rounded-2xl border border-outline-variant/20 shadow-inner">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-outline-variant/20">
+                          <th className="py-3.5 font-display-lg text-xs uppercase tracking-wider font-extrabold text-primary">Besin Ögesi</th>
+                          <th className="py-3.5 font-display-lg text-xs uppercase tracking-wider font-extrabold text-primary text-right">100g Değeri</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-xs font-mono text-on-surface-variant">
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">Enerji (Energy)</td>
+                          <td className="py-3 text-right font-bold text-primary">{nutrientsData.energy}</td>
+                        </tr>
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">Karbonhidrat (Carbohydrate)</td>
+                          <td className="py-3 text-right font-bold text-primary">{nutrientsData.carb}</td>
+                        </tr>
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">Protein (Protein)</td>
+                          <td className="py-3 text-right font-bold text-primary">{nutrientsData.protein}</td>
+                        </tr>
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">Kalsiyum (Calcium)</td>
+                          <td className="py-3 text-right font-bold text-primary">{nutrientsData.calcium}</td>
+                        </tr>
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">Demir (Iron)</td>
+                          <td className="py-3 text-right font-bold text-primary">{nutrientsData.iron}</td>
+                        </tr>
+                        <tr className="border-b border-outline-variant/10">
+                          <td className="py-3 font-semibold text-slate-700">HMF Değeri (Analiz)</td>
+                          <td className="py-3 text-right font-bold text-amber-600">{hmfLevelText}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Ritual & High-Contrast Info Banner */}
+                  <div className="lg:col-span-6 space-y-6">
+                    <div className="p-7 bg-surface-container-low/70 border border-outline-variant/20 rounded-2xl shadow-inner space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-secondary text-2xl">restaurant_menu</span>
+                        <h4 className="font-display-lg text-primary text-base font-bold">Tüketim & Servis Ritüeli</h4>
+                      </div>
+                      <p className="text-sm text-on-surface-variant leading-relaxed font-light">
+                        {ritualText}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3.5 bg-amber-500/10 border-2 border-amber-600/40 p-4.5 rounded-2xl shadow-sm">
+                      <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <span className="material-symbols-outlined text-xl">info</span>
+                      </div>
+                      <span className="text-xs md:text-sm font-bold text-amber-950 dark:text-amber-200 leading-relaxed">
+                        Yukarıdaki değerler akredite gıda laboratuvarı mevsimsel analiz raporlarına dayanmaktadır.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 4: MÜŞTERİ YORUMLARI */}
+            {activeTab === "yorumlar" && (
+              <div className="bg-white dark:bg-slate-900 border-2 border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl space-y-8 animate-in fade-in duration-300">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/15 pb-6">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                      <span className="material-symbols-outlined text-2xl">rate_review</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-secondary block">
+                        PEKEFE MÜŞTERİ DENEYİMİ VE DEĞERLENDİRMELERİ
+                      </span>
+                      <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
+                        Doğrulanmış Müşteri Yorumları ({reviewsList.length})
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full border border-amber-200 text-xs font-bold font-mono">
+                    <span className="material-symbols-outlined text-base text-amber-600">star</span>
+                    <span>5.0 / 5 Tam Puan</span>
+                  </div>
+                </div>
+
+                {/* Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                  <div className="lg:col-span-4 space-y-6">
+                    <div className="bg-surface-container-low/70 p-7 rounded-2xl border border-outline-variant/20 text-center shadow-inner space-y-4">
+                      <div className="text-5xl font-display-lg text-primary font-bold">5.0</div>
+                      <div className="flex justify-center text-amber-500 gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                        ))}
+                      </div>
+                      <div className="text-on-surface-variant text-xs font-bold uppercase tracking-wider">{reviewsList.length} Doğrulanmış Müşteri</div>
+                      <Button
+                        className="w-full py-3.5 cursor-pointer shadow-md"
+                        onClick={() => setIsReviewModalOpen(true)}
+                      >
+                        Yorum Gönder
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="lg:col-span-8 space-y-4">
+                    {reviewsList.map(rev => (
+                      <div key={rev.id} className="p-6 bg-surface-container-low/50 border border-outline-variant/15 rounded-2xl space-y-3 shadow-xs">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex text-amber-500 gap-0.5 mb-1">
+                              {[...Array(5)].map((_, i) => (
+                                <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: i < rev.rating ? "'FILL' 1" : "'FILL' 0" }}>star</span>
+                              ))}
+                            </div>
+                            <div className="font-bold text-xs text-primary uppercase tracking-wide flex items-center gap-1.5">
+                              <span>{rev.author}</span>
+                              <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 font-mono font-bold">Doğrulanmış Alıcı</span>
+                            </div>
+                          </div>
+                          <span className="text-on-surface-variant/80 text-[10px] font-mono">{rev.date}</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-light">
+                          {rev.comment}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
 
-            {activeTab === "besin" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                <div className="lg:col-span-6 bg-white p-8 rounded-2xl border border-outline-variant/15 shadow-sm">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-outline-variant/20">
-                        <th className="py-4 font-display-lg text-sm uppercase tracking-wider font-bold text-primary">Besin Ögesi</th>
-                        <th className="py-4 font-display-lg text-sm uppercase tracking-wider font-bold text-primary text-right">100g Değeri</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-xs font-mono text-on-surface-variant">
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">Enerji (Energy)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.energy}</td>
-                      </tr>
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">Karbonhidrat (Carbohydrate)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.carb}</td>
-                      </tr>
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">Protein (Protein)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.protein}</td>
-                      </tr>
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">Kalsiyum (Calcium)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.calcium}</td>
-                      </tr>
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">Demir (Iron)</td>
-                        <td className="py-3.5 text-right font-bold text-primary">{nutrientsData.iron}</td>
-                      </tr>
-                      <tr className="border-b border-outline-variant/10">
-                        <td className="py-3.5">HMF Değeri (Analiz)</td>
-                        <td className="py-3.5 text-right font-bold text-amber-600">{hmfLevelText}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="lg:col-span-6 space-y-6">
-                  <div className="p-8 bg-surface-container-low border border-outline-variant/10 rounded-2xl">
-                    <span className="material-symbols-outlined text-secondary text-3xl mb-3">restaurant_menu</span>
-                    <h4 className="font-display-lg text-primary text-lg font-bold mb-3">Tüketim & Servis Ritüeli</h4>
-                    <p className="text-sm text-on-surface-variant leading-relaxed font-light">
-                      {ritualText}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3.5 bg-amber-500/10 border-2 border-amber-600/40 p-4.5 rounded-2xl shadow-sm">
-                    <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <span className="material-symbols-outlined text-xl">info</span>
-                    </div>
-                    <span className="text-xs md:text-sm font-bold text-amber-950 dark:text-amber-200 leading-relaxed">
-                      Yukarıdaki değerler akredite gıda laboratuvarı mevsimsel analiz raporlarına dayanmaktadır.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "yorumlar" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-white p-8 rounded-2xl border border-outline-variant/15 text-center shadow-sm">
-                    <div className="text-5xl font-display-lg text-primary font-bold">5.0</div>
-                    <div className="flex justify-center text-secondary my-3">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                      ))}
-                    </div>
-                    <div className="text-on-surface-variant text-xs uppercase tracking-wider">{reviewsList.length} Doğrulanmış Müşteri</div>
-                    <Button
-                      className="mt-6 w-full py-3 cursor-pointer"
-                      onClick={() => setIsReviewModalOpen(true)}
-                    >
-                      Yorum Gönder
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="lg:col-span-8 space-y-6">
-                  {reviewsList.map(rev => (
-                    <div key={rev.id} className="border-b border-outline-variant/10 pb-6 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex text-secondary gap-0.5 mb-1">
-                            {[...Array(5)].map((_, i) => (
-                              <span key={i} className="material-symbols-outlined text-xs" style={{ fontVariationSettings: i < rev.rating ? "'FILL' 1" : "'FILL' 0" }}>star</span>
-                            ))}
-                          </div>
-                          <div className="font-bold text-xs text-on-surface uppercase tracking-wide">{rev.author}</div>
-                        </div>
-                        <span className="text-on-surface-variant/80 text-[10px] font-mono">{rev.date}</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-light">
-                        {rev.comment}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>

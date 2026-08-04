@@ -916,9 +916,13 @@ export default function UrunDetay({ params }) {
                       {ritualText}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-secondary-fixed bg-secondary-fixed/5 border border-secondary-fixed/20 p-4 rounded-xl">
-                    <span className="material-symbols-outlined">info</span>
-                    <span>Yukarıdaki değerler akredite gıda laboratuvarı mevsimsel analiz raporlarına dayanmaktadır.</span>
+                  <div className="flex items-center gap-3.5 bg-amber-500/10 border-2 border-amber-600/40 p-4.5 rounded-2xl shadow-sm">
+                    <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <span className="material-symbols-outlined text-xl">info</span>
+                    </div>
+                    <span className="text-xs md:text-sm font-bold text-amber-950 dark:text-amber-200 leading-relaxed">
+                      Yukarıdaki değerler akredite gıda laboratuvarı mevsimsel analiz raporlarına dayanmaktadır.
+                    </span>
                   </div>
                 </div>
               </div>

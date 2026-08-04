@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import { getProductBySlug, fetchProductsFromApi, generateSlug } from "@/utils/productsStorage";
+import { getProductBySlug, fetchProductsFromApi, formatDbProductToStorefront, generateSlug, getProducts } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import JsonLd from "@/components/seo/JsonLd";
 import { resolveProductMediaItems, isVideoUrl } from "@/lib/utils";
@@ -18,14 +18,47 @@ export default function UrunDetay({ params }) {
   const router = useRouter();
   const slugOrId = resolvedParams?.slug || resolvedParams?.id;
 
-  const [productState, setProductState] = useState(() => getProductBySlug(slugOrId));
+  const [productState, setProductState] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch fresh data immediately
-    fetchProductsFromApi().then(() => {
-      const fresh = getProductBySlug(slugOrId);
-      if (fresh) setProductState(fresh);
-    });
+    // 1. Try localStorage first (instant)
+    const cached = getProductBySlug(slugOrId);
+    if (cached) {
+      setProductState(cached);
+      setIsLoading(false);
+    }
+
+    // 2. Fetch fresh from API — try direct endpoint first then full list
+    const loadProduct = async () => {
+      try {
+        // Try direct product API by ID/slug first
+        const directRes = await fetch(`/api/products/${slugOrId}?t=${Date.now()}`, { cache: 'no-store' });
+        if (directRes.ok) {
+          const raw = await directRes.json();
+          if (raw && raw.id) {
+            const formatted = formatDbProductToStorefront(raw);
+            setProductState(formatted);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch {}
+
+      // Fallback: load all products then find
+      const all = await fetchProductsFromApi();
+      const found = getProductBySlug(slugOrId);
+      if (found) {
+        setProductState(found);
+      } else if (Array.isArray(all)) {
+        // Last resort: match by id in fresh data
+        const byId = all.find(p => String(p.id) === String(slugOrId));
+        if (byId) setProductState(byId);
+      }
+      setIsLoading(false);
+    };
+
+    loadProduct();
 
     // Re-fetch when tab becomes active again
     const handleVisibility = () => {
@@ -442,6 +475,39 @@ export default function UrunDetay({ params }) {
     list.push({ key: "HMF Seviyesi", value: hmfLevelText });
     return list;
   }, [product, hmfLevelText]);
+
+  // ── Loading / Not-Found Guards ──────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="relative w-full min-h-screen bg-background flex flex-col items-center justify-center gap-6">
+        <div className="animate-pulse flex flex-col lg:flex-row gap-10 w-full max-w-5xl px-6">
+          <div className="bg-surface-container-low rounded-2xl w-full lg:w-1/2 aspect-square" />
+          <div className="flex flex-col gap-4 flex-1 py-4">
+            <div className="h-4 bg-surface-container-low rounded-full w-1/3" />
+            <div className="h-8 bg-surface-container-low rounded-full w-3/4" />
+            <div className="h-4 bg-surface-container-low rounded-full w-1/2" />
+            <div className="h-12 bg-surface-container-low rounded-2xl w-1/4 mt-4" />
+            <div className="h-10 bg-surface-container rounded-2xl w-full mt-4" />
+            <div className="h-10 bg-primary/20 rounded-2xl w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="relative w-full min-h-screen bg-background flex flex-col items-center justify-center gap-6 text-center px-6">
+        <span className="material-symbols-outlined text-6xl text-outline-variant">inventory_2</span>
+        <h1 className="font-display text-2xl text-on-surface">Ürün Bulunamadı</h1>
+        <p className="text-on-surface-variant">Bu ürün mevcut değil veya kaldırılmış olabilir.</p>
+        <Link href="/kategoriler" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-2xl font-label-md hover:bg-primary/90 transition-colors">
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Tüm Ürünlere Dön
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full min-h-screen bg-background text-on-surface pb-24 overflow-hidden">

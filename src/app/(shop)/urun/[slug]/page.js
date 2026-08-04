@@ -657,139 +657,179 @@ export default function UrunDetay({ params }) {
 
         {/* ─── TECHNICAL TABS & INGREDIENT TRANSPARENCY ─── */}
         <div className="border-t border-outline-variant/15 pt-12">
-          <div className="flex border-b border-outline-variant/10 gap-10 overflow-x-auto no-scrollbar">
+          
+          {/* High-Contrast Segmented Luxury Tab Bar */}
+          <div className="bg-surface-container-low/90 p-2 rounded-2xl border border-outline-variant/20 shadow-inner flex overflow-x-auto gap-2.5 no-scrollbar backdrop-blur-md mb-8">
             <button
               onClick={() => setActiveTab("urun_aciklamasi")}
-              className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
-                activeTab === "urun_aciklamasi" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
+              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "urun_aciklamasi"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              Ürün Açıklaması
+              <span className="material-symbols-outlined text-lg">description</span>
+              <span>Ürün Açıklaması</span>
+              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold ${activeTab === "urun_aciklamasi" ? "bg-amber-400 text-slate-950" : "bg-primary/10 text-primary"}`}>
+                Özel Reçete
+              </span>
             </button>
+
             <button
               onClick={() => setActiveTab("aciklama")}
-              className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
-                activeTab === "aciklama" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
+              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "aciklama"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              Mahsul Hikayesi & Detaylar
+              <span className="material-symbols-outlined text-lg">auto_stories</span>
+              <span>Mahsul Hikayesi & Detaylar</span>
             </button>
+
             <button
               onClick={() => setActiveTab("besin")}
-              className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
-                activeTab === "besin" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
+              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "besin"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              Analiz & Besin Değerleri
+              <span className="material-symbols-outlined text-lg">science</span>
+              <span>Analiz & Besin Değerleri</span>
             </button>
+
             <button
               onClick={() => setActiveTab("yorumlar")}
-              className={`pb-4 font-label-md text-xs uppercase tracking-widest font-bold whitespace-nowrap cursor-pointer transition-colors ${
-                activeTab === "yorumlar" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant hover:text-primary"
+              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "yorumlar"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              Müşteri Değerlendirmeleri ({reviewsList.length})
+              <span className="material-symbols-outlined text-lg">rate_review</span>
+              <span>Müşteri Değerlendirmeleri ({reviewsList.length})</span>
             </button>
           </div>
 
-          <div className="py-12 min-h-[350px]">
+          <div className="py-4 min-h-[350px]">
             {/* DEDICATED TAB 1: ÜRÜN AÇIKLAMASI */}
             {activeTab === "urun_aciklamasi" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start animate-in fade-in duration-300">
-                {/* Left Column: Rich Product Description */}
-                <div className="lg:col-span-8 space-y-8">
-                  <div className="space-y-4">
-                    <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
-                      {product?.name} Hakkında Detaylı Açıklama
-                    </h3>
-                    
-                    {/* Rich HTML / Detailed Description Body */}
+              <div className="bg-white dark:bg-slate-900 border-2 border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl space-y-8 animate-in fade-in duration-300">
+                
+                {/* Prominent Header Banner inside Card */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/15 pb-6">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                      <span className="material-symbols-outlined text-2xl">description</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-secondary block">
+                        PEKEFE ÖZEL REÇETE VE AÇIKLAMA
+                      </span>
+                      <h3 className="font-display-lg text-primary text-2xl md:text-3xl font-bold tracking-tight">
+                        {product?.name} Hakkında Detaylı Açıklama
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full border border-amber-200 text-xs font-bold font-mono">
+                    <span className="material-symbols-outlined text-base text-amber-600">verified</span>
+                    <span>%100 Doğal İspir Hasadı</span>
+                  </div>
+                </div>
+
+                {/* Two-Column Content Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                  {/* Left Column: Rich HTML Description Body */}
+                  <div className="lg:col-span-8 space-y-8">
                     {fullDescriptionText && /<[a-z][\s\S]*>/i.test(fullDescriptionText) ? (
                       <div 
-                        className="text-on-surface-variant font-body-md leading-relaxed font-light text-base prose max-w-none dark:prose-invert"
+                        className="text-on-surface-variant font-body-md leading-relaxed font-light text-base md:text-lg prose max-w-none dark:prose-invert prose-headings:text-primary prose-strong:text-primary prose-strong:font-bold"
                         dangerouslySetInnerHTML={{ __html: fullDescriptionText }}
                       />
                     ) : (
-                      <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-base whitespace-pre-line space-y-4">
+                      <div className="text-on-surface-variant font-body-md leading-relaxed font-light text-base md:text-lg whitespace-pre-line space-y-4">
                         {fullDescriptionText}
                       </div>
                     )}
+
+                    {/* Highlights / Quick Pillar Badges */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-outline-variant/15">
+                      <div className="p-5 bg-surface-container-low border border-outline-variant/15 rounded-2xl flex items-start gap-3 shadow-xs">
+                        <span className="material-symbols-outlined text-primary text-2xl">verified</span>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-primary uppercase tracking-wider">%100 Doğal İçerik</h4>
+                          <p className="text-xs text-on-surface-variant font-light mt-0.5">Katkı maddesi, koruyucu veya ilave şeker içermez.</p>
+                        </div>
+                      </div>
+
+                      <div className="p-5 bg-surface-container-low border border-outline-variant/15 rounded-2xl flex items-start gap-3 shadow-xs">
+                        <span className="material-symbols-outlined text-secondary text-2xl">terrain</span>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-primary uppercase tracking-wider">İspir Yöresi Hasadı</h4>
+                          <p className="text-xs text-on-surface-variant font-light mt-0.5">İspirin bereketli yaylalarında yetişen asırlık mahsuller.</p>
+                        </div>
+                      </div>
+
+                      <div className="p-5 bg-surface-container-low border border-outline-variant/15 rounded-2xl flex items-start gap-3 shadow-xs">
+                        <span className="material-symbols-outlined text-primary text-2xl">local_fire_department</span>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-primary uppercase tracking-wider">Odun Ateşinde Bakır Kazan</h4>
+                          <p className="text-xs text-on-surface-variant font-light mt-0.5">Geleneksel yöntemlerle kısık ateşte yavaş pişirme.</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Highlights / Quick Pillar Badges */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-outline-variant/10">
-                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
-                      <span className="material-symbols-outlined text-primary text-2xl">verified</span>
+                  {/* Right Column: Key Summary & Attributes Card */}
+                  <div className="lg:col-span-4 space-y-6 bg-surface-container-low/70 p-7 rounded-2xl border border-outline-variant/20 shadow-inner">
+                    <div className="flex items-center gap-3 border-b border-outline-variant/10 pb-4">
+                      <span className="material-symbols-outlined text-primary text-2xl">info</span>
                       <div>
-                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">%100 Doğal İçerik</h4>
-                        <p className="text-xs text-on-surface-variant font-light mt-0.5">Katkı maddesi, koruyucu veya ilave şeker içermez.</p>
+                        <h4 className="font-display-lg text-primary text-base font-bold">Ürün Özet Nitelikleri</h4>
+                        <p className="text-xs text-on-surface-variant font-light">Öne çıkan temel teknik bilgiler</p>
                       </div>
                     </div>
 
-                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
-                      <span className="material-symbols-outlined text-secondary text-2xl">terrain</span>
-                      <div>
-                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">İspir Yöresi Hasadı</h4>
-                        <p className="text-xs text-on-surface-variant font-light mt-0.5">İspirin bereketli yaylalarında yetişen asırlık mahsuller.</p>
+                    <div className="space-y-3.5">
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                        <span className="text-xs text-on-surface-variant font-semibold">Kategori</span>
+                        <span className="text-xs text-primary font-bold">{product?.categoryDisplay || product?.category || "Geleneksel"}</span>
                       </div>
-                    </div>
 
-                    <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl flex items-start gap-3 shadow-xs">
-                      <span className="material-symbols-outlined text-primary text-2xl">local_fire_department</span>
-                      <div>
-                        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Odun Ateşinde Bakır Kazan</h4>
-                        <p className="text-xs text-on-surface-variant font-light mt-0.5">Geleneksel yöntemlerle kısık ateşte yavaş pişirme.</p>
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                        <span className="text-xs text-on-surface-variant font-semibold">Stok Kodu (SKU)</span>
+                        <span className="text-xs text-primary font-bold font-mono">{product?.sku || "PRD-PKF-001"}</span>
+                      </div>
+
+                      {product?.barcode && (
+                        <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                          <span className="text-xs text-on-surface-variant font-semibold">Barkod</span>
+                          <span className="text-xs text-primary font-bold font-mono">{product.barcode}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                        <span className="text-xs text-on-surface-variant font-semibold">Hasat Yeri</span>
+                        <span className="text-xs text-primary font-bold">Erzurum / İspir</span>
+                      </div>
+
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                        <span className="text-xs text-on-surface-variant font-semibold">Yayla Yüksekliği</span>
+                        <span className="text-xs text-primary font-bold font-mono">{product?.attributes?.altitude || product?.altitude || "2200 Metre"}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
+                        <span className="text-xs text-on-surface-variant font-semibold">Stok Durumu</span>
+                        <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-mono">
+                          {product?.status || "Stokta Var"}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column: Key Summary & Attributes Card */}
-                <div className="lg:col-span-4 space-y-6 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/15 shadow-md">
-                  <div className="flex items-center gap-3 border-b border-outline-variant/10 pb-4">
-                    <span className="material-symbols-outlined text-primary text-2xl">info</span>
-                    <div>
-                      <h4 className="font-display-lg text-primary text-lg font-bold">Ürün Özet Nitelikleri</h4>
-                      <p className="text-xs text-on-surface-variant font-light">Öne çıkan temel teknik bilgiler</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                      <span className="text-xs text-on-surface-variant font-semibold">Kategori</span>
-                      <span className="text-xs text-primary font-bold">{product?.categoryDisplay || product?.category || "Geleneksel"}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                      <span className="text-xs text-on-surface-variant font-semibold">Stok Kodu (SKU)</span>
-                      <span className="text-xs text-primary font-bold font-mono">{product?.sku || "PRD-PKF-001"}</span>
-                    </div>
-
-                    {product?.barcode && (
-                      <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                        <span className="text-xs text-on-surface-variant font-semibold">Barkod</span>
-                        <span className="text-xs text-primary font-bold font-mono">{product.barcode}</span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                      <span className="text-xs text-on-surface-variant font-semibold">Hasat Yeri</span>
-                      <span className="text-xs text-primary font-bold">Erzurum / İspir</span>
-                    </div>
-
-                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                      <span className="text-xs text-on-surface-variant font-semibold">Yayla Yüksekliği</span>
-                      <span className="text-xs text-primary font-bold font-mono">{product?.attributes?.altitude || product?.altitude || "2200 Metre"}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center border-b border-outline-variant/10 pb-3">
-                      <span className="text-xs text-on-surface-variant font-semibold">Stok Durumu</span>
-                      <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-mono">
-                        {product?.status || "Stokta Var"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 

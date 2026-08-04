@@ -3947,8 +3947,8 @@ function EnterpriseStockFormPage() {
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                             <th className="p-4">Varyant Kodu (SKU)</th>
-                            <th className="p-4">Ebat / Ölçü</th>
-                            <th className="p-4">Deri / Renk</th>
+                            <th className="p-4">Gramaj / Ambalaj Ölçüsü</th>
+                            <th className="p-4">Ürün Çeşidi / Tipi</th>
                             <th className="p-4 text-center">Stok Miktarı</th>
                             <th className="p-4 text-right">Özel Fiyat</th>
                             <th className="p-4 text-center">İşlem</th>
@@ -4438,38 +4438,56 @@ function EnterpriseStockFormPage() {
               <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
                 {variantForm.modalTab === "single" ? (
                   <>
-                    {/* Size & Color Pickers */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Gramaj/Ölçü & Ürün Çeşidi Pickers with Direct Input */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      {/* 1. Gramaj / Ambalaj Ölçüsü */}
                       <div className="space-y-1.5">
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          <span>Ebat / Boyut</span>
+                          <span>Gramaj / Ambalaj Ölçüsü</span>
                           <button type="button" onClick={() => setIsSizeManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
                             <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
                           </button>
                         </label>
-                        <div className="relative">
-                          <select
+                        <div className="space-y-2">
+                          <input
+                            type="text"
                             value={variantForm.size}
                             onChange={e => handleVariantSizeChange(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
-                          >
-                            {sizes.map(size => (
-                              <option key={size} value={size}>{size}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                            placeholder="Örn: 500 Gr, 400g Cam Kavanoz, 1 Kg"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
+                          />
+                          <div className="relative">
+                            <select
+                              value={sizes.includes(variantForm.size) ? variantForm.size : "custom"}
+                              onChange={e => {
+                                if (e.target.value !== "custom") {
+                                  handleVariantSizeChange(e.target.value);
+                                }
+                              }}
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 outline-none cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="custom">⚡ Hazır Ölçü Seçin veya Yukarıya Yazın...</option>
+                              {sizes.map(size => (
+                                <option key={size} value={size}>{size}</option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                          </div>
                         </div>
                       </div>
 
+                      {/* 2. Ürün Çeşidi / Tipi */}
                       <div className="space-y-1.5">
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          <span>Deri Tipi / Renk</span>
+                          <span>Ürün Çeşidi / Tipi</span>
                           <button type="button" onClick={() => setIsColorManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
                             <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
                           </button>
                         </label>
-                        <div className="relative">
-                          <select
+                        <div className="space-y-2">
+                          <input
+                            type="text"
                             value={variantForm.color}
                             onChange={e => {
                               const newColor = e.target.value;
@@ -4481,15 +4499,36 @@ function EnterpriseStockFormPage() {
                                 barcode: prev.barcode || codes.barcode,
                               }));
                             }}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
-                          >
-                            {colors.map(color => (
-                              <option key={color} value={color}>{color}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                            placeholder="Örn: Sade, Cevizli, Fındıklı, Süzme"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
+                          />
+                          <div className="relative">
+                            <select
+                              value={colors.includes(variantForm.color) ? variantForm.color : "custom"}
+                              onChange={e => {
+                                if (e.target.value !== "custom") {
+                                  const newColor = e.target.value;
+                                  const codes = generateSkuAndBarcode(variantForm.size, newColor);
+                                  setVariantForm(prev => ({
+                                    ...prev,
+                                    color: newColor,
+                                    sku: prev.sku || codes.sku,
+                                    barcode: prev.barcode || codes.barcode,
+                                  }));
+                                }
+                              }}
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 outline-none cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="custom">⚡ Hazır Çeşit Seçin veya Yukarıya Yazın...</option>
+                              {colors.map(color => (
+                                <option key={color} value={color}>{color}</option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                          </div>
                         </div>
                       </div>
+
                     </div>
 
                     {/* Stock & Price Inputs */}
@@ -4613,7 +4652,7 @@ function EnterpriseStockFormPage() {
                     {/* Size Checkboxes */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Üretilecek Ebatlar ({variantForm.selectedBulkSizes.length} Seçili)
+                        Üretilecek Gramaj & Ambalaj Ölçüleri ({variantForm.selectedBulkSizes.length} Seçili)
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {sizes.map(s => {
@@ -4649,7 +4688,7 @@ function EnterpriseStockFormPage() {
                     {/* Color Checkboxes */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Üretilecek Renk / Tipler ({variantForm.selectedBulkColors.length} Seçili)
+                        Üretilecek Ürün Çeşitleri / Tipleri ({variantForm.selectedBulkColors.length} Seçili)
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {colors.map(c => {
@@ -4749,7 +4788,7 @@ function EnterpriseStockFormPage() {
                 <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
                   <Settings2 className="w-5 h-5 text-orange-500" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Ebat Seçeneklerini Yönet</h3>
+                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Gramaj & Ambalaj Seçeneklerini Yönet</h3>
               </div>
               <button
                 onClick={() => setIsSizeManagerOpen(false)}
@@ -4764,7 +4803,7 @@ function EnterpriseStockFormPage() {
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Yeni ebat seçeneği adı..."
+                  placeholder="Yeni gramaj/ambalaj seçeneği adı (Örn: 500 Gr)..."
                   value={newSizeName}
                   onChange={e => setNewSizeName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addSizeOption(); }}
@@ -4822,7 +4861,7 @@ function EnterpriseStockFormPage() {
                 <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
                   <Settings2 className="w-5 h-5 text-orange-500" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Renk Seçeneklerini Yönet</h3>
+                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Ürün Çeşitleri & Tipleri Yönetimi</h3>
               </div>
               <button
                 onClick={() => setIsColorManagerOpen(false)}
@@ -4837,7 +4876,7 @@ function EnterpriseStockFormPage() {
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Yeni renk/deri seçeneği adı..."
+                  placeholder="Yeni ürün çeşidi adı (Örn: Sade, Cevizli, Süzme)..."
                   value={newColorName}
                   onChange={e => setNewColorName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addColorOption(); }}

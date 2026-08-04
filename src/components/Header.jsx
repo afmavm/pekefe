@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import { getCart, updateCartQty, removeFromCart } from "@/utils/cartStorage";
 import { useSession, signOut } from "next-auth/react";
+import GlobalSearchModal from "@/components/GlobalSearchModal";
 
 const translateImage = (url) => {
   if (!url) return url;
@@ -26,8 +27,15 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleOpenSearch = () => setSearchOpen(true);
+    window.addEventListener("open_global_search", handleOpenSearch);
+    return () => window.removeEventListener("open_global_search", handleOpenSearch);
+  }, []);
 
   const sessionResult = useSession() || {};
   const session = sessionResult.data;
@@ -218,6 +226,18 @@ export default function Header() {
               )}
             </div>
 
+            {/* Global Advanced Search Trigger Button */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low hover:border-primary/40 transition-all cursor-pointer text-primary"
+              aria-label="Gelişmiş Arama Motoru"
+              title="Gelişmiş Arama Motoru (Ctrl + K)"
+            >
+              <span className="material-symbols-outlined text-primary text-xl">search</span>
+              <span className="hidden lg:inline text-xs font-semibold text-on-surface-variant">Arama Yap...</span>
+              <kbd className="hidden xl:inline-block px-1.5 py-0.5 bg-surface-container-high border border-outline-variant/20 rounded text-[9px] font-mono text-on-surface-variant font-bold">⌘K</kbd>
+            </button>
+
             {/* Cart Button */}
             <button
               onClick={() => setCartOpen(true)}
@@ -370,6 +390,9 @@ export default function Header() {
           )}
         </div>
       </Drawer>
+
+      {/* Global Advanced Search Engine Modal */}
+      <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

@@ -1715,6 +1715,12 @@ function EnterpriseStockFormPage() {
         // Refresh products context to ensure client side is updated instantly
         await refreshProducts();
         await refreshCategories();
+
+        // Broadcast real-time search auto-indexing events across all open tabs/pages
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("pekefe_products_changed"));
+          window.dispatchEvent(new CustomEvent("pekefe_search_index_updated"));
+        }
         
         // Refresh server components router cache to update server-rendered pages (like /tr)
         router.refresh();

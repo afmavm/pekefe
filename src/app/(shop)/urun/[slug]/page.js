@@ -343,8 +343,27 @@ export default function UrunDetay({ params }) {
     }
   } : null;
 
-  // Dynamic tab data fetched directly from Admin Management page attributes with fallback
-  const harvestStoryText = product?.attributes?.harvestStory || product?.attributes?.details || product?.details || product?.desc || product?.description || "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
+  // Dynamic tab data fetched directly from Admin Management page attributes with robust fallback
+  const summaryDescription = useMemo(() => {
+    if (!product) return "";
+    const attrs = product.attributes || {};
+    const candidate = product.shortDesc || attrs.shortDesc || product.desc || attrs.desc || product.description || attrs.harvestStory || attrs.details || product.details;
+    if (candidate && typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+    }
+    return "İspir'in 2000 rakımlı yüksek yaylalarında doğal yöntemlerle hazırlanan katkısız ve saf geleneksel lezzet.";
+  }, [product]);
+
+  const harvestStoryText = useMemo(() => {
+    if (!product) return "";
+    const attrs = product.attributes || {};
+    const candidate = attrs.harvestStory || product.harvestStory || attrs.details || product.details || product.desc || attrs.desc || product.description;
+    if (candidate && typeof candidate === "string" && candidate.trim().length > 0) {
+      return candidate.trim();
+    }
+    return "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
+  }, [product]);
+
   const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "%100 Saf Katkısız Ve İlave Şekersiz İspir Hasadı";
   const ritualText = product?.attributes?.ritual || product?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
   
@@ -541,7 +560,7 @@ export default function UrunDetay({ params }) {
             </div>
 
             <p className="text-on-surface-variant font-body-md text-sm md:text-base leading-relaxed font-light">
-              {product?.shortDesc || product?.description || product?.desc}
+              {summaryDescription}
             </p>
 
             {/* Micro Pillars */}

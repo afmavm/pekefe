@@ -17,6 +17,14 @@ function getVariantLabel(v) {
   return v.size || v.name || "";
 }
 
+function stripHtmlTags(str) {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function ProductCard({
   id,
   name,
@@ -106,8 +114,8 @@ export function ProductCard({
         <h3 className="font-display-lg text-primary text-xl font-bold leading-snug">
           {name}
         </h3>
-        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-          {desc}
+        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed line-clamp-3">
+          {stripHtmlTags(desc)}
         </p>
 
         {/* Interactive Variant Pills */}

@@ -278,6 +278,14 @@ export const DEFAULT_PRODUCTS = [
 
 const STORAGE_KEY = "pekefe_products_state";
 
+export function stripHtml(str) {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function formatDbProductToStorefront(p) {
   let attrs = {};
   try {
@@ -320,6 +328,8 @@ export function formatDbProductToStorefront(p) {
     }
   }
 
+  const cleanRawDesc = p.desc || attrs.desc || "Asırlık İspir kalitesiyle hazırlanan katkısız ve saf mahsul.";
+
   return {
     id: String(p.id),
     slug: p.slug || generateSlug(p.name),
@@ -332,8 +342,9 @@ export function formatDbProductToStorefront(p) {
     category: catLower,
     categoryDisplay: p.category || "Genel",
     subCategory: p.subCategory || "",
-    desc: p.desc || attrs.desc || "Asırlık İspir kalitesiyle hazırlanan katkısız ve saf mahsul.",
-    shortDesc: attrs.shortDesc || p.desc || "",
+    rawDesc: cleanRawDesc,
+    desc: stripHtml(cleanRawDesc),
+    shortDesc: stripHtml(attrs.shortDesc || cleanRawDesc),
     meta: attrs.meta || `${p.category || 'Doğal Mahsul'} · İspir`,
     price: defaultPrice,
     priceMin,

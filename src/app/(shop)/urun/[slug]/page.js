@@ -658,57 +658,57 @@ export default function UrunDetay({ params }) {
         {/* ─── TECHNICAL TABS & INGREDIENT TRANSPARENCY ─── */}
         <div className="border-t border-outline-variant/15 pt-12">
           
-          {/* High-Contrast Segmented Luxury Tab Bar */}
-          <div className="bg-surface-container-low/90 p-2 rounded-2xl border border-outline-variant/20 shadow-inner flex overflow-x-auto gap-2.5 no-scrollbar backdrop-blur-md mb-8">
+          {/* High-Contrast Segmented Luxury Tab Bar (Zero Native Scrollbar) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 p-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low/90 shadow-sm mb-8">
             <button
               onClick={() => setActiveTab("urun_aciklamasi")}
-              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center ${
                 activeTab === "urun_aciklamasi"
-                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 ring-2 ring-primary/40"
                   : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              <span className="material-symbols-outlined text-lg">description</span>
-              <span>Ürün Açıklaması</span>
-              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold ${activeTab === "urun_aciklamasi" ? "bg-amber-400 text-slate-950" : "bg-primary/10 text-primary"}`}>
+              <span className="material-symbols-outlined text-lg shrink-0">description</span>
+              <span className="truncate">Ürün Açıklaması</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold shrink-0 ${activeTab === "urun_aciklamasi" ? "bg-amber-400 text-slate-950" : "bg-primary/10 text-primary"}`}>
                 Özel Reçete
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("aciklama")}
-              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center ${
                 activeTab === "aciklama"
-                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 ring-2 ring-primary/40"
                   : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              <span className="material-symbols-outlined text-lg">auto_stories</span>
-              <span>Mahsul Hikayesi & Detaylar</span>
+              <span className="material-symbols-outlined text-lg shrink-0">auto_stories</span>
+              <span className="truncate">Mahsul Hikayesi & Detaylar</span>
             </button>
 
             <button
               onClick={() => setActiveTab("besin")}
-              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center ${
                 activeTab === "besin"
-                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 ring-2 ring-primary/40"
                   : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              <span className="material-symbols-outlined text-lg">science</span>
-              <span>Analiz & Besin Değerleri</span>
+              <span className="material-symbols-outlined text-lg shrink-0">science</span>
+              <span className="truncate">Analiz & Besin Değerleri</span>
             </button>
 
             <button
               onClick={() => setActiveTab("yorumlar")}
-              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center ${
                 activeTab === "yorumlar"
-                  ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/40"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25 ring-2 ring-primary/40"
                   : "text-on-surface-variant hover:text-primary hover:bg-white/70"
               }`}
             >
-              <span className="material-symbols-outlined text-lg">rate_review</span>
-              <span>Müşteri Değerlendirmeleri ({reviewsList.length})</span>
+              <span className="material-symbols-outlined text-lg shrink-0">rate_review</span>
+              <span className="truncate">Müşteri Yorumları ({reviewsList.length})</span>
             </button>
           </div>
 

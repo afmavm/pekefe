@@ -11,7 +11,7 @@ import {
   UploadCloud, Sparkles, Coins, FileText, Database, RefreshCw, Lock, Unlock, 
   ShoppingBag, Globe, Percent, Calendar, FileCheck, ArrowUpRight, BarChart3, 
   AlertTriangle, Eye, Printer, Layers3, CheckSquare, Square, Tag, ExternalLink, 
-  HelpCircle, Video, Key, PlusCircle, Trash, Store
+  HelpCircle, Video, Key, PlusCircle, Trash, Store, SlidersHorizontal
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
@@ -1302,10 +1302,18 @@ function EnterpriseStockFormPage() {
 
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [variantForm, setVariantForm] = useState({
-    size: "800g Cam Kavanoz",
-    color: "Cevizli",
-    stock: 50,
-    price: 340,
+    id: "",
+    size: "400g Cam Kavanoz",
+    color: "Sade",
+    stock: 1000,
+    price: 320,
+    sku: "",
+    barcode: "",
+    packagingMarkupPercent: 0,
+    isEditing: false,
+    modalTab: "single" as "single" | "bulk",
+    selectedBulkSizes: [] as string[],
+    selectedBulkColors: [] as string[],
   });
 
   // Dynamic Warehouse Modal States
@@ -1874,86 +1882,245 @@ function EnterpriseStockFormPage() {
     }
   };
 
-  // Automatic variant price calculation from Web Perakende price & grammage/unit ratio
-  const calculateVariantPriceFromWebPrice = (
+  // Automatic variant calculation breakdown detail (Formula Transparency Engine)
+  const getVariantCalculationDetail = (
     sizeStr: string,
     webPrice: number,
-    baseUnit: string = "Kg"
-  ): number => {
-    if (!webPrice || webPrice <= 0 || !sizeStr) return 0;
+    baseUnit: string = "Kg",
+    packagingMarkupPercent: number = 0
+  ) => {
+    if (!webPrice || webPrice <= 0 || !sizeStr) {
+      return {
+        baseWebPrice: webPrice || 0,
+        baseUnit: baseUnit || "Kg",
+        sizeStr: sizeStr || "",
+        multiplier: 1,
+        calculatedPrice: webPrice || 0,
+        packagingMarkupPercent: packagingMarkupPercent || 0,
+        finalPrice: webPrice || 0,
+        extractedUnitText: "1 Birim",
+      };
+    }
     const normalized = sizeStr.toLowerCase().trim();
+    let multiplier = 1;
+    let unitText = "1 Birim";
 
     // 1. Kg / Kilo / Kilogram
     const kgMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:kg|kilo|kilogram)\b/);
     if (kgMatch) {
       const val = parseFloat(kgMatch[1].replace(",", "."));
-      if (!isNaN(val)) return Math.round(webPrice * val);
-    }
-
-    // 2. Gr / Gram / g
-    const grMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:gr|g|gram)\b/);
-    if (grMatch) {
-      const val = parseFloat(grMatch[1].replace(",", "."));
-      if (!isNaN(val)) return Math.round(webPrice * (val / 1000));
-    }
-
-    // 3. Lt / Liter / Litre / L
-    const ltMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:lt|litre|liter|l)\b/);
-    if (ltMatch) {
-      const val = parseFloat(ltMatch[1].replace(",", "."));
-      if (!isNaN(val)) return Math.round(webPrice * val);
-    }
-
-    // 4. Ml / Mililitre / Mililiter
-    const mlMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:ml|mililitre|mililiter)\b/);
-    if (mlMatch) {
-      const val = parseFloat(mlMatch[1].replace(",", "."));
-      if (!isNaN(val)) return Math.round(webPrice * (val / 1000));
-    }
-
-    // 5. Adet / Tane / Paket / Pk / Kavanoz / Teneke
-    const adetMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:adet|tane|pk|paket|kavanoz|teneke|kut|kutu)\b/);
-    if (adetMatch) {
-      const val = parseFloat(adetMatch[1].replace(",", "."));
-      const baseMatch = (baseUnit || "").toLowerCase().match(/(\d+(?:[\.,]\d+)?)/);
-      const baseQty = baseMatch ? parseFloat(baseMatch[1].replace(",", ".")) : 1;
-      const ratio = baseQty > 0 ? val / baseQty : val;
-      return Math.round(webPrice * ratio);
-    }
-
-    // 6. Generic number fallback
-    const genericMatch = normalized.match(/(\d+(?:[\.,]\d+)?)/);
-    if (genericMatch) {
-      const val = parseFloat(genericMatch[1].replace(",", "."));
       if (!isNaN(val)) {
-        if (val >= 50) return Math.round(webPrice * (val / 1000));
-        return Math.round(webPrice * val);
+        multiplier = val;
+        unitText = `${val} Kg (${val * 1000}g)`;
+      }
+    } else {
+      // 2. Gr / Gram / g
+      const grMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:gr|g|gram)\b/);
+      if (grMatch) {
+        const val = parseFloat(grMatch[1].replace(",", "."));
+        if (!isNaN(val)) {
+          multiplier = val / 1000;
+          unitText = `${val}g (${(val / 1000).toFixed(3).replace(/\.?0+$/, "")} Kg)`;
+        }
+      } else {
+        // 3. Lt / Liter / Litre / L
+        const ltMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:lt|litre|liter|l)\b/);
+        if (ltMatch) {
+          const val = parseFloat(ltMatch[1].replace(",", "."));
+          if (!isNaN(val)) {
+            multiplier = val;
+            unitText = `${val} Lt (${val * 1000}ml)`;
+          }
+        } else {
+          // 4. Ml / Mililitre / Mililiter
+          const mlMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:ml|mililitre|mililiter)\b/);
+          if (mlMatch) {
+            const val = parseFloat(mlMatch[1].replace(",", "."));
+            if (!isNaN(val)) {
+              multiplier = val / 1000;
+              unitText = `${val}ml (${(val / 1000).toFixed(3).replace(/\.?0+$/, "")} Lt)`;
+            }
+          } else {
+            // 5. Adet / Tane / Paket / Pk / Kavanoz / Teneke
+            const adetMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:adet|tane|pk|paket|kavanoz|teneke|kut|kutu)\b/);
+            if (adetMatch) {
+              const val = parseFloat(adetMatch[1].replace(",", "."));
+              const baseMatch = (baseUnit || "").toLowerCase().match(/(\d+(?:[\.,]\d+)?)/);
+              const baseQty = baseMatch ? parseFloat(baseMatch[1].replace(",", ".")) : 1;
+              multiplier = baseQty > 0 ? val / baseQty : val;
+              unitText = `${val} Adet (Birim Oranı: ${multiplier.toFixed(2)})`;
+            } else {
+              // 6. Generic number fallback
+              const genericMatch = normalized.match(/(\d+(?:[\.,]\d+)?)/);
+              if (genericMatch) {
+                const val = parseFloat(genericMatch[1].replace(",", "."));
+                if (!isNaN(val)) {
+                  if (val >= 50) {
+                    multiplier = val / 1000;
+                    unitText = `${val}g (${val / 1000} Kg)`;
+                  } else {
+                    multiplier = val;
+                    unitText = `${val} Katı`;
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
-    return webPrice;
+    const rawCalculated = webPrice * multiplier;
+    const markupMultiplier = 1 + (packagingMarkupPercent / 100);
+    const finalPrice = Math.round(rawCalculated * markupMultiplier);
+
+    return {
+      baseWebPrice: webPrice,
+      baseUnit,
+      sizeStr,
+      multiplier,
+      calculatedPrice: Math.round(rawCalculated),
+      packagingMarkupPercent,
+      finalPrice,
+      extractedUnitText: unitText,
+    };
   };
 
-  const openVariantModal = () => {
-    const initialSize = sizes[0] || "1 Kg";
-    const initialColor = colors[0] || "Sade";
-    const calcPrice = calculateVariantPriceFromWebPrice(initialSize, form.webPrice, form.unit);
-    setVariantForm({
-      size: initialSize,
-      color: initialColor,
-      stock: 1000,
-      price: calcPrice > 0 ? calcPrice : (form.webPrice || 0),
-    });
+  const calculateVariantPriceFromWebPrice = (
+    sizeStr: string,
+    webPrice: number,
+    baseUnit: string = "Kg"
+  ): number => {
+    return getVariantCalculationDetail(sizeStr, webPrice, baseUnit, 0).finalPrice;
+  };
+
+  const generateSkuAndBarcode = (sizeStr: string, colorStr: string) => {
+    const baseSku = form.sku || "PKF-PROD";
+    const cleanSize = sizeStr.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 4);
+    const cleanColor = colorStr.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 3);
+    const sku = `${baseSku}-${cleanSize || "VAR"}-${cleanColor || "SAD"}`;
+    const barcode = "868" + Math.floor(1000000000 + Math.random() * 9000000000);
+    return { sku, barcode };
+  };
+
+  const openVariantModal = (variantToEdit?: Variant) => {
+    if (variantToEdit) {
+      setVariantForm({
+        id: variantToEdit.id,
+        size: variantToEdit.size,
+        color: variantToEdit.color,
+        stock: variantToEdit.stock,
+        price: variantToEdit.price,
+        sku: variantToEdit.sku || "",
+        barcode: variantToEdit.barcode || "",
+        packagingMarkupPercent: 0,
+        isEditing: true,
+        modalTab: "single",
+        selectedBulkSizes: [],
+        selectedBulkColors: [],
+      });
+    } else {
+      const initialSize = sizes[0] || "400g Cam Kavanoz";
+      const initialColor = colors[0] || "Sade";
+      const detail = getVariantCalculationDetail(initialSize, form.webPrice, form.unit, 0);
+      const codes = generateSkuAndBarcode(initialSize, initialColor);
+      setVariantForm({
+        id: "",
+        size: initialSize,
+        color: initialColor,
+        stock: 1000,
+        price: detail.finalPrice > 0 ? detail.finalPrice : (form.webPrice || 0),
+        sku: codes.sku,
+        barcode: codes.barcode,
+        packagingMarkupPercent: 0,
+        isEditing: false,
+        modalTab: "single",
+        selectedBulkSizes: sizes.length > 0 ? [sizes[0]] : [initialSize],
+        selectedBulkColors: colors.length > 0 ? [colors[0]] : [initialColor],
+      });
+    }
     setIsVariantModalOpen(true);
   };
 
-  const handleVariantSizeChange = (newSize: string) => {
-    const calcPrice = calculateVariantPriceFromWebPrice(newSize, form.webPrice, form.unit);
+  const handleVariantSizeChange = (newSize: string, markup: number = variantForm.packagingMarkupPercent) => {
+    const detail = getVariantCalculationDetail(newSize, form.webPrice, form.unit, markup);
+    const codes = generateSkuAndBarcode(newSize, variantForm.color);
     setVariantForm(prev => ({
       ...prev,
       size: newSize,
-      price: calcPrice > 0 ? calcPrice : prev.price,
+      price: detail.finalPrice > 0 ? detail.finalPrice : prev.price,
+      packagingMarkupPercent: markup,
+      sku: prev.sku || codes.sku,
+      barcode: prev.barcode || codes.barcode,
     }));
+  };
+
+  const saveVariant = () => {
+    if (variantForm.modalTab === "bulk") {
+      if (variantForm.selectedBulkSizes.length === 0 || variantForm.selectedBulkColors.length === 0) {
+        toast.error("Lütfen en az 1 ebat ve 1 renk seçin.");
+        return;
+      }
+      const newCreated: Variant[] = [];
+      variantForm.selectedBulkSizes.forEach(s => {
+        variantForm.selectedBulkColors.forEach(c => {
+          const detail = getVariantCalculationDetail(s, form.webPrice, form.unit, variantForm.packagingMarkupPercent);
+          const codes = generateSkuAndBarcode(s, c);
+          newCreated.push({
+            id: Math.random().toString(),
+            sku: codes.sku,
+            barcode: codes.barcode,
+            name: `${s} - ${c}`,
+            size: s,
+            color: c,
+            stock: variantForm.stock,
+            price: detail.finalPrice > 0 ? detail.finalPrice : form.webPrice,
+          });
+        });
+      });
+      setVariants(prev => {
+        const existingNames = new Set(prev.map(v => v.name));
+        const filtered = newCreated.filter(v => !existingNames.has(v.name));
+        return [...prev, ...filtered];
+      });
+      setIsVariantModalOpen(false);
+      toast.success(`${newCreated.length} adet varyant matrisi üretildi.`);
+      return;
+    }
+
+    if (!variantForm.size || !variantForm.color) {
+      toast.error("Lütfen ebat ve renk seçimlerini yapın.");
+      return;
+    }
+
+    if (variantForm.isEditing && variantForm.id) {
+      setVariants(prev => prev.map(v => v.id === variantForm.id ? {
+        ...v,
+        size: variantForm.size,
+        color: variantForm.color,
+        stock: variantForm.stock,
+        price: variantForm.price,
+        sku: variantForm.sku || v.sku,
+        barcode: variantForm.barcode || v.barcode,
+        name: `${variantForm.size} - ${variantForm.color}`,
+      } : v));
+      toast.success("Varyant başarıyla güncellendi.");
+    } else {
+      const codes = generateSkuAndBarcode(variantForm.size, variantForm.color);
+      const newVar: Variant = {
+        id: Math.random().toString(),
+        sku: variantForm.sku || codes.sku,
+        barcode: variantForm.barcode || codes.barcode,
+        name: `${variantForm.size} - ${variantForm.color}`,
+        size: variantForm.size,
+        color: variantForm.color,
+        stock: variantForm.stock,
+        price: variantForm.price,
+      };
+      setVariants(prev => [...prev, newVar]);
+      toast.success("Yeni varyant eklendi.");
+    }
+    setIsVariantModalOpen(false);
   };
 
   const autoCalculateAllVariantPrices = () => {
@@ -1966,30 +2133,13 @@ function EnterpriseStockFormPage() {
       return;
     }
     setVariants(prev => prev.map(v => {
-      const calc = calculateVariantPriceFromWebPrice(v.size, form.webPrice, form.unit);
+      const detail = getVariantCalculationDetail(v.size, form.webPrice, form.unit, 0);
       return {
         ...v,
-        price: calc > 0 ? calc : v.price
+        price: detail.finalPrice > 0 ? detail.finalPrice : v.price
       };
     }));
     toast.success(`Tüm varyant fiyatları Web Perakende fiyatına (₺${form.webPrice}) göre yeniden hesaplandı.`);
-  };
-
-  // Add/Remove Variants
-  const addVariant = () => {
-    const newVariant: Variant = {
-      id: Math.random().toString(),
-      sku: `${form.sku}-${variantForm.size.substring(0,2).toUpperCase()}-${variantForm.color.substring(0,2).toUpperCase()}`,
-      barcode: "868" + Math.floor(1000000000 + Math.random() * 9000000000),
-      name: `${variantForm.size} - ${variantForm.color}`,
-      size: variantForm.size,
-      color: variantForm.color,
-      stock: variantForm.stock,
-      price: variantForm.price,
-    };
-    setVariants(prev => [...prev, newVariant]);
-    setIsVariantModalOpen(false);
-    toast.success("Yeni varyant eklendi.");
   };
 
   const deleteVariant = (id: string) => {
@@ -3769,7 +3919,7 @@ function EnterpriseStockFormPage() {
                         </button>
                       )}
                       <button
-                        onClick={openVariantModal}
+                        onClick={() => openVariantModal()}
                         className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
                       >
                         <Plus className="w-3.5 h-3.5 text-orange-500" /> Varyant Ekle
@@ -3813,13 +3963,22 @@ function EnterpriseStockFormPage() {
                               <td className="p-4 text-sm font-black text-slate-800 text-center">{v.stock} Adet</td>
                               <td className="p-4 text-sm font-black text-orange-600 text-right">₺{v.price}</td>
                               <td className="p-4 text-center">
-                                <button 
-                                  onClick={() => deleteVariant(v.id)}
-                                  className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
-                                  title="Sil"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center justify-center gap-1">
+                                  <button 
+                                    onClick={() => openVariantModal(v)}
+                                    className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-lg transition border-none cursor-pointer"
+                                    title="Düzenle"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button 
+                                    onClick={() => deleteVariant(v.id)}
+                                    className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                                    title="Sil"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -3836,7 +3995,7 @@ function EnterpriseStockFormPage() {
                         Ürüne ait farklı beden, renk veya ölçü seçenekleri oluşturarak stok durumlarını ayrıştırabilirsiniz.
                       </p>
                       <button
-                        onClick={() => setIsVariantModalOpen(true)}
+                        onClick={() => openVariantModal()}
                         className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-orange-500/10"
                       >
                         <Plus className="w-4 h-4" /> İlk Varyantı Ekle
@@ -4210,134 +4369,373 @@ function EnterpriseStockFormPage() {
       </div>
 
       {/* ────────────────────────────────────────────────────────
-           DİNAMİK VARYANT OLUŞTURUCU MODAL (VARIANT BUILDER)
+           DİNAMİK PROFESYONEL VARYANT OLUŞTURUCU & MATRİS MODALI
          ──────────────────────────────────────────────────────── */}
-      {isVariantModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
-            
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Layers className="w-5 h-5 text-orange-500" />
-                </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Yeni Varyant Tanımla</h3>
-              </div>
-              <button
-                onClick={() => setIsVariantModalOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      {isVariantModalOpen && (() => {
+        const detail = getVariantCalculationDetail(
+          variantForm.size,
+          form.webPrice,
+          form.unit,
+          variantForm.packagingMarkupPercent
+        );
 
-            <div className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                    <span>Ebat / Boyut</span>
-                    <button type="button" onClick={() => setIsSizeManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
-                      <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
-                    </button>
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={variantForm.size}
-                      onChange={e => handleVariantSizeChange(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
-                    >
-                      {sizes.map(size => (
-                        <option key={size} value={size}>{size}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+        return (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <div className="w-full max-w-[540px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+              
+              {/* Header Bar */}
+              <div className="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-500/20 rounded-2xl flex items-center justify-center border border-orange-500/30">
+                    <Layers className="w-5 h-5 text-orange-400" />
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                    <span>Deri Tipi / Renk</span>
-                    <button type="button" onClick={() => setIsColorManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
-                      <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
-                    </button>
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={variantForm.color}
-                      onChange={e => setVariantForm({ ...variantForm, color: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
-                    >
-                      {colors.map(color => (
-                        <option key={color} value={color}>{color}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Başlangıç Stoku</label>
-                  <input
-                    type="number"
-                    value={variantForm.stock}
-                    onChange={e => setVariantForm({ ...variantForm, stock: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Özel Fiyatı (₺)</label>
-                    {form.webPrice > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleVariantSizeChange(variantForm.size)}
-                        className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0"
-                        title="Web Perakende fiyatına göre tekrar hesapla"
-                      >
-                        <Sparkles className="w-3 h-3 text-orange-500" /> Otomatik Hesapla
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="number"
-                    value={variantForm.price}
-                    onChange={e => setVariantForm({ ...variantForm, price: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-orange-600"
-                  />
-                  {form.webPrice > 0 && (
-                    <p className="text-[10px] text-slate-400 font-semibold text-right">
-                      💡 Web Perakende: ₺{form.webPrice} ({variantForm.size} oranında)
+                  <div>
+                    <h3 className="text-base font-extrabold uppercase tracking-wider text-left text-white">
+                      {variantForm.isEditing ? "Varyant Kartını Düzenle" : "Yeni Varyant Tanımla"}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-medium text-left">
+                      Web Perakende fiyatı (₺{form.webPrice || 0}) baz alınarak otomatik oranlanır
                     </p>
-                  )}
+                  </div>
                 </div>
-
+                <button
+                  onClick={() => setIsVariantModalOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-            </div>
 
-            <div className="p-5 border-t border-slate-100 flex gap-3">
-              <button
-                onClick={() => setIsVariantModalOpen(false)}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
-              >
-                İptal
-              </button>
-              <button
-                onClick={addVariant}
-                className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer border-none"
-              >
-                <Plus className="w-4 h-4" /> Varyant Oluştur
-              </button>
-            </div>
+              {/* Mode Tabs (Tekli vs Toplu Matris) - Only show if not editing */}
+              {!variantForm.isEditing && (
+                <div className="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "single" }))}
+                    className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+                      variantForm.modalTab === "single"
+                        ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
+                        : "text-slate-500 hover:text-slate-800 bg-transparent"
+                    }`}
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500" /> Tekli Varyant Formu
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "bulk" }))}
+                    className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+                      variantForm.modalTab === "bulk"
+                        ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
+                        : "text-slate-500 hover:text-slate-800 bg-transparent"
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-orange-500" /> Toplu Matris Üretici
+                  </button>
+                </div>
+              )}
 
+              {/* Modal Body */}
+              <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                {variantForm.modalTab === "single" ? (
+                  <>
+                    {/* Size & Color Pickers */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                          <span>Ebat / Boyut</span>
+                          <button type="button" onClick={() => setIsSizeManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
+                            <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
+                          </button>
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={variantForm.size}
+                            onChange={e => handleVariantSizeChange(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
+                          >
+                            {sizes.map(size => (
+                              <option key={size} value={size}>{size}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                          <span>Deri Tipi / Renk</span>
+                          <button type="button" onClick={() => setIsColorManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
+                            <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
+                          </button>
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={variantForm.color}
+                            onChange={e => {
+                              const newColor = e.target.value;
+                              const codes = generateSkuAndBarcode(variantForm.size, newColor);
+                              setVariantForm(prev => ({
+                                ...prev,
+                                color: newColor,
+                                sku: prev.sku || codes.sku,
+                                barcode: prev.barcode || codes.barcode,
+                              }));
+                            }}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
+                          >
+                            {colors.map(color => (
+                              <option key={color} value={color}>{color}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stock & Price Inputs */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Başlangıç Stoku</label>
+                        <input
+                          type="number"
+                          value={variantForm.stock}
+                          onChange={e => setVariantForm({ ...variantForm, stock: parseInt(e.target.value) || 0 })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Özel Fiyatı (₺)</label>
+                          {form.webPrice > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleVariantSizeChange(variantForm.size)}
+                              className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0"
+                              title="Web Perakende fiyatına göre tekrar hesapla"
+                            >
+                              <Sparkles className="w-3 h-3 text-orange-500" /> Otomatik Hesapla
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          value={variantForm.price}
+                          onChange={e => setVariantForm({ ...variantForm, price: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-orange-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* FORMULA TRANSPARENCY CARD (MATEMATİKSEL OTO-HESAPLAMA MATRİSİ) */}
+                    {form.webPrice > 0 && (
+                      <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                            <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                            <span>Web Fiyat Hesaplama Matrisi</span>
+                          </div>
+                          <span className="text-[10px] font-extrabold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200/60">
+                            ₺{form.webPrice} Baz Fiyat
+                          </span>
+                        </div>
+
+                        <div className="text-[11px] text-slate-600 space-y-1 bg-white p-2.5 rounded-lg border border-slate-100 font-mono">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Algılanan Ölçü:</span>
+                            <span className="font-bold text-slate-800">{detail.extractedUnitText}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Birim Oranı:</span>
+                            <span className="font-bold text-slate-800">{detail.multiplier}x</span>
+                          </div>
+                          <div className="flex justify-between border-t border-slate-100 pt-1">
+                            <span className="text-slate-500 font-sans font-semibold">Oransal Taban Fiyat:</span>
+                            <span className="font-bold text-slate-900">₺{form.webPrice} × {detail.multiplier} = ₺{detail.calculatedPrice}</span>
+                          </div>
+                        </div>
+
+                        {/* Ambalaj / İşçilik Farkı Selector */}
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[10px] font-bold text-slate-500">Ambalaj & İşçilik Farkı:</span>
+                          <div className="flex gap-1">
+                            {[0, 5, 10, 15].map(pct => (
+                              <button
+                                key={pct}
+                                type="button"
+                                onClick={() => handleVariantSizeChange(variantForm.size, pct)}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer ${
+                                  variantForm.packagingMarkupPercent === pct
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                                }`}
+                              >
+                                {pct === 0 ? "Standart" : `+${pct}%`}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SKU & Barcode Row */}
+                    <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Stok Kodu (SKU)</label>
+                        <input
+                          type="text"
+                          value={variantForm.sku}
+                          onChange={e => setVariantForm({ ...variantForm, sku: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:bg-white outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Barkod</label>
+                        <input
+                          type="text"
+                          value={variantForm.barcode}
+                          onChange={e => setVariantForm({ ...variantForm, barcode: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* BULK MATRIX GENERATOR MODE */
+                  <div className="space-y-5">
+                    <div className="bg-orange-50/70 border border-orange-200/60 rounded-xl p-3 text-xs text-orange-900 font-medium flex gap-2">
+                      <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                      <span>
+                        Seçeceğiniz tüm ebat ve renk kombinasyonları için Web Perakende fiyatı (₺{form.webPrice}) üzerinden otomatik orantılı varyant kartları topluca üretilecektir.
+                      </span>
+                    </div>
+
+                    {/* Size Checkboxes */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Üretilecek Ebatlar ({variantForm.selectedBulkSizes.length} Seçili)
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {sizes.map(s => {
+                          const checked = variantForm.selectedBulkSizes.includes(s);
+                          return (
+                            <label
+                              key={s}
+                              className={`p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition flex items-center justify-between ${
+                                checked
+                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                              }`}
+                            >
+                              <span>{s}</span>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={e => {
+                                  if (e.target.checked) {
+                                    setVariantForm(prev => ({ ...prev, selectedBulkSizes: [...prev.selectedBulkSizes, s] }));
+                                  } else {
+                                    setVariantForm(prev => ({ ...prev, selectedBulkSizes: prev.selectedBulkSizes.filter(x => x !== s) }));
+                                  }
+                                }}
+                                className="accent-orange-500 w-4 h-4"
+                              />
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Color Checkboxes */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Üretilecek Renk / Tipler ({variantForm.selectedBulkColors.length} Seçili)
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {colors.map(c => {
+                          const checked = variantForm.selectedBulkColors.includes(c);
+                          return (
+                            <label
+                              key={c}
+                              className={`p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition flex items-center justify-between ${
+                                checked
+                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                              }`}
+                            >
+                              <span>{c}</span>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={e => {
+                                  if (e.target.checked) {
+                                    setVariantForm(prev => ({ ...prev, selectedBulkColors: [...prev.selectedBulkColors, c] }));
+                                  } else {
+                                    setVariantForm(prev => ({ ...prev, selectedBulkColors: prev.selectedBulkColors.filter(x => x !== c) }));
+                                  }
+                                }}
+                                className="accent-orange-500 w-4 h-4"
+                              />
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Stock Input */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Başına Başlangıç Stoku</label>
+                      <input
+                        type="number"
+                        value={variantForm.stock}
+                        onChange={e => setVariantForm({ ...variantForm, stock: parseInt(e.target.value) || 0 })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black"
+                      />
+                    </div>
+
+                    <div className="bg-slate-900 text-white p-3.5 rounded-xl text-center">
+                      <span className="text-xs font-extrabold text-orange-400">
+                        ⚡ Toplam {variantForm.selectedBulkSizes.length * variantForm.selectedBulkColors.length} Adet Varyant Kartı Üretilecek
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-5 border-t border-slate-100 flex gap-3 bg-slate-50/50">
+                <button
+                  type="button"
+                  onClick={() => setIsVariantModalOpen(false)}
+                  className="flex-1 py-3 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                >
+                  İptal
+                </button>
+                <button
+                  type="button"
+                  onClick={saveVariant}
+                  className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-extrabold transition-all flex justify-center items-center gap-2 shadow-lg shadow-orange-500/20 cursor-pointer border-none"
+                >
+                  {variantForm.modalTab === "bulk" ? (
+                    <>
+                      <Sparkles className="w-4 h-4" /> Toplu Matrisi Üret ve Ekle
+                    </>
+                  ) : variantForm.isEditing ? (
+                    <>
+                      <Check className="w-4 h-4" /> Varyantı Güncelle
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" /> Varyant Oluştur
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ────────────────────────────────────────────────────────
            DİNAMİK EBAT/BOYUT YÖNETİCİSİ MODAL (SIZE MANAGER)

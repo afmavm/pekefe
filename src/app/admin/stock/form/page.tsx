@@ -560,26 +560,64 @@ function EnterpriseStockFormPage() {
   const [newSizeName, setNewSizeName] = useState("");
   const [newColorName, setNewColorName] = useState("");
 
-  // Load initial sizes & colors from localStorage
+  // Load initial sizes & colors from localStorage AND API/database catalog
   useEffect(() => {
-    try {
-      const savedSizes = localStorage.getItem("pekefe_stock_sizes");
-      if (savedSizes) {
-        const parsed = JSON.parse(savedSizes);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setSizes(parsed);
+    const loadGlobalOptions = async () => {
+      try {
+        const savedSizes = localStorage.getItem("pekefe_stock_sizes");
+        const savedColors = localStorage.getItem("pekefe_stock_colors");
+        
+        let initialSizes: string[] = savedSizes ? JSON.parse(savedSizes) : ["400g Cam Kavanoz", "800g Cam Kavanoz", "1 kg Vakum", "5 kg Teneke"];
+        let initialColors: string[] = savedColors ? JSON.parse(savedColors) : ["Sade", "Cevizli", "Fındıklı", "Antep Fıstıklı"];
+
+        if (!Array.isArray(initialSizes) || initialSizes.length === 0) {
+          initialSizes = ["400g Cam Kavanoz", "800g Cam Kavanoz", "1 kg Vakum", "5 kg Teneke"];
         }
-      }
-      const savedColors = localStorage.getItem("pekefe_stock_colors");
-      if (savedColors) {
-        const parsed = JSON.parse(savedColors);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setColors(parsed);
+        if (!Array.isArray(initialColors) || initialColors.length === 0) {
+          initialColors = ["Sade", "Cevizli", "Fındıklı", "Antep Fıstıklı"];
         }
+
+        // Fetch product catalog to harvest all custom sizes & colors ever created in DB
+        const res = await fetch("/api/products");
+        if (res.ok) {
+          const products = await res.json();
+          if (Array.isArray(products)) {
+            const dbSizes: string[] = [];
+            const dbColors: string[] = [];
+            
+            products.forEach((p: any) => {
+              const attrs = typeof p.attributes === "string" ? JSON.parse(p.attributes) : (p.attributes || {});
+              if (attrs.sizes && Array.isArray(attrs.sizes)) {
+                dbSizes.push(...attrs.sizes);
+              }
+              if (attrs.colors && Array.isArray(attrs.colors)) {
+                dbColors.push(...attrs.colors);
+              }
+              if (p.variants && Array.isArray(p.variants)) {
+                p.variants.forEach((v: any) => {
+                  const va = typeof v.attributes === "string" ? JSON.parse(v.attributes) : (v.attributes || {});
+                  if (va.size || v.size) dbSizes.push(va.size || v.size);
+                  if (va.color || v.color) dbColors.push(va.color || v.color);
+                });
+              }
+            });
+
+            initialSizes = Array.from(new Set([...initialSizes, ...dbSizes])).filter(Boolean);
+            initialColors = Array.from(new Set([...initialColors, ...dbColors])).filter(Boolean);
+          }
+        }
+
+        setSizes(initialSizes);
+        setColors(initialColors);
+
+        localStorage.setItem("pekefe_stock_sizes", JSON.stringify(initialSizes));
+        localStorage.setItem("pekefe_stock_colors", JSON.stringify(initialColors));
+      } catch (e) {
+        console.error("Error loading global stock options:", e);
       }
-    } catch (e) {
-      console.error("Error reading sizes/colors from localStorage:", e);
-    }
+    };
+
+    loadGlobalOptions();
   }, []);
 
   // Sync sizes with localStorage
@@ -2288,6 +2326,24 @@ function EnterpriseStockFormPage() {
     if (!variantForm.size || !variantForm.color) {
       toast.error("Lütfen ebat ve renk seçimlerini yapın.");
       return;
+    }
+
+    // Auto-register typed custom size & color if not in list
+    const typedSize = variantForm.size.trim();
+    const typedColor = variantForm.color.trim();
+    if (typedSize && !sizes.includes(typedSize)) {
+      setSizes(prev => {
+        const next = Array.from(new Set([...prev, typedSize]));
+        try { localStorage.setItem("pekefe_stock_sizes", JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    }
+    if (typedColor && !colors.includes(typedColor)) {
+      setColors(prev => {
+        const next = Array.from(new Set([...prev, typedColor]));
+        try { localStorage.setItem("pekefe_stock_colors", JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
     }
 
     if (variantForm.isEditing && variantForm.id) {
@@ -4881,7 +4937,17 @@ function EnterpriseStockFormPage() {
                             type="text"
                             value={variantForm.size}
                             onChange={e => handleVariantSizeChange(e.target.value)}
-                            placeholder="Örn: 500 Gr, 400g Cam Kavanoz, 1 Kg"
+                            onBlur={e => {
+                              const val = e.target.value.trim();
+                              if (val && !sizes.includes(val)) {
+                                setSizes(prev => {
+                                  const next = Array.from(new Set([...prev, val]));
+                                  try { localStorage.setItem("pekefe_stock_sizes", JSON.stringify(next)); } catch (err) {}
+                                  return next;
+                                });
+                              }
+                            }}
+                            placeholder="✏️ Elle miktar/ölçü yazın (Örn: 1 Kg, 500 Gr)..."
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
                           />
                           <div className="relative">
@@ -4926,7 +4992,17 @@ function EnterpriseStockFormPage() {
                                 barcode: prev.barcode || codes.barcode,
                               }));
                             }}
-                            placeholder="Örn: Sade, Cevizli, Fındıklı, Süzme"
+                            onBlur={e => {
+                              const val = e.target.value.trim();
+                              if (val && !colors.includes(val)) {
+                                setColors(prev => {
+                                  const next = Array.from(new Set([...prev, val]));
+                                  try { localStorage.setItem("pekefe_stock_colors", JSON.stringify(next)); } catch (err) {}
+                                  return next;
+                                });
+                              }
+                            }}
+                            placeholder="✏️ Elle ürün çeşidi/tipi yazın (Örn: Sade, Cevizli)..."
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
                           />
                           <div className="relative">

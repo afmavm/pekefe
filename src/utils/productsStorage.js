@@ -331,7 +331,15 @@ export function formatDbProductToStorefront(p) {
     if (typeof vAttrs === 'string') {
       try { vAttrs = JSON.parse(vAttrs); } catch (e) {}
     }
-    const label = (vAttrs && (vAttrs.size || vAttrs.name)) || v.name || v.size || `${v.price} TL`;
+    const sizeVal  = ((vAttrs && vAttrs.size)  || v.size  || '').trim();
+    const colorVal = ((vAttrs && vAttrs.color) || v.color || '').trim();
+    // Combine size + color for the display label (e.g. "500 Gr · Cevizli")
+    let label;
+    if (sizeVal && colorVal && sizeVal !== colorVal) {
+      label = `${sizeVal} · ${colorVal}`;
+    } else {
+      label = sizeVal || colorVal || (vAttrs && (vAttrs.name)) || v.name || `${v.price} TL`;
+    }
     return {
       ...v,
       id: v.id || `${p.id}-${label}`,
@@ -339,9 +347,10 @@ export function formatDbProductToStorefront(p) {
       price: v.price != null && Number(v.price) > 0 ? Number(v.price) : Number(p.price || p.sale_price || 0),
       oldPrice: v.oldPrice ? Number(v.oldPrice) : null,
       stock: v.stock != null ? Number(v.stock) : Number(p.stock || p.stock_quantity || 0),
-      attributes: vAttrs || { size: label, name: label },
+      attributes: vAttrs || { size: sizeVal, color: colorVal, name: label },
       name: label,
-      size: (vAttrs && vAttrs.size) || label
+      size: sizeVal || label,
+      color: colorVal
     };
   });
 

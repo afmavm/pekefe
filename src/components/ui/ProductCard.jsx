@@ -12,7 +12,13 @@ function getVariantLabel(v) {
     try { attrs = JSON.parse(attrs); } catch (e) {}
   }
   if (attrs && typeof attrs === "object") {
-    return attrs.size || attrs.name || v.name || v.size || "";
+    const size  = (attrs.size  || "").trim();
+    const color = (attrs.color || "").trim();
+    // If only one field exists, show it alone; if both exist combine with bullet
+    if (size && color && size !== color) return `${size} · ${color}`;
+    if (size)  return size;
+    if (color) return color;
+    return attrs.name || v.name || v.size || "";
   }
   return v.size || v.name || "";
 }
@@ -121,7 +127,7 @@ export function ProductCard({
         {/* Interactive Variant Pills */}
         {hasVariants && (
           <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Seçenek:</span>
+            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Ürün Çeşidi:</span>
             <div className="flex flex-wrap gap-2">
               {variants.map((v, i) => {
                 const label = getVariantLabel(v);

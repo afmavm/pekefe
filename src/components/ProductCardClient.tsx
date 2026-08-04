@@ -87,7 +87,12 @@ export default function ProductCardClient({
       try { attrs = JSON.parse(attrs); } catch (e) {}
     }
     if (attrs && typeof attrs === "object") {
-      return attrs.size || attrs.name || v.name || v.size || "";
+      const size  = (attrs.size  || "").trim();
+      const color = (attrs.color || "").trim();
+      if (size && color && size !== color) return `${size} · ${color}`;
+      if (size)  return size;
+      if (color) return color;
+      return attrs.name || v.name || v.size || "";
     }
     return v.size || v.name || "";
   };

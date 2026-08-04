@@ -147,7 +147,13 @@ export default function UrunDetay({ params }) {
       try { attrs = JSON.parse(attrs); } catch (e) {}
     }
     if (attrs && typeof attrs === "object") {
-      return attrs.size || attrs.name || v.name || v.size || "";
+      const size  = (attrs.size  || "").trim();
+      const color = (attrs.color || "").trim();
+      // Show both gramaj and ürün çeşidi separated by bullet
+      if (size && color && size !== color) return `${size} · ${color}`;
+      if (size)  return size;
+      if (color) return color;
+      return attrs.name || v.name || v.size || "";
     }
     return v.size || v.name || "";
   };
@@ -638,13 +644,12 @@ export default function UrunDetay({ params }) {
               </div>
             </div>
 
-            {/* Ölçü / Gramaj Varyant Seçimi */}
             {variantsList.length > 0 && (
               <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-base text-amber-600">straighten</span>
-                    Ölçü / Gramaj Seçimi:
+                    Gramaj / Ürün Çeşidi:
                   </label>
                   <span className="text-xs text-amber-700 font-bold font-mono">
                     {getVariantLabel(selectedVariant)}
@@ -654,19 +659,32 @@ export default function UrunDetay({ params }) {
                   {variantsList.map((v, i) => {
                     const label = getVariantLabel(v);
                     const isSelected = selectedVariant ? (selectedVariant.id === v.id || getVariantLabel(selectedVariant) === label) : i === 0;
+                    // Extract parts for two-line display inside pill
+                    let attrs = v.attributes;
+                    if (typeof attrs === 'string') { try { attrs = JSON.parse(attrs); } catch(e) {} }
+                    const sizeText  = (attrs?.size  || v.size  || "").trim();
+                    const colorText = (attrs?.color || v.color || "").trim();
+                    const hasBoth   = sizeText && colorText && sizeText !== colorText;
                     return (
                       <button
                         key={v.id || i}
                         type="button"
                         onClick={() => setSelectedVariant(v)}
-                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-start gap-0.5 cursor-pointer ${
                           isSelected
                             ? "border-amber-600 bg-amber-600 text-white shadow-md shadow-amber-600/20 scale-102"
                             : "border-slate-200 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50"
                         }`}
                       >
-                        <span>{label}</span>
-                        <span className={`font-mono font-extrabold ${isSelected ? "text-white" : "text-amber-700"}`}>
+                        {hasBoth ? (
+                          <>
+                            <span className="font-extrabold leading-tight">{sizeText}</span>
+                            <span className={`text-[10px] font-semibold ${isSelected ? "text-amber-100" : "text-amber-700"}`}>{colorText}</span>
+                          </>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                        <span className={`font-mono font-extrabold mt-0.5 ${isSelected ? "text-white" : "text-amber-700"}`}>
                           ₺{v.price}
                         </span>
                       </button>

@@ -534,15 +534,29 @@ export async function POST(request: NextRequest) {
 
     if (body.variants && Array.isArray(body.variants)) {
       const processedSkus = new Set<string>();
-      for (const variant of body.variants) {
-        if (!variant.sku) continue;
-        let safeSku = variant.sku;
+      const productSku = (body.sku || product.id).replace(/[^a-zA-Z0-9-]/g, '').slice(0, 20);
+
+      for (let i = 0; i < body.variants.length; i++) {
+        const variant = body.variants[i];
+
+        // Guarantee a non-empty SKU
+        let baseSku = (variant.sku || '').trim();
+        if (!baseSku) {
+          const sizeSlug = (variant.size || variant.name || 'VAR')
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .toUpperCase()
+            .slice(0, 8);
+          baseSku = `${productSku}-${sizeSlug}-V${i + 1}`;
+        }
+
+        // Ensure uniqueness within this batch AND the entire DB
+        let safeSku = baseSku;
         let counter = 1;
         while (
           processedSkus.has(safeSku) ||
           (await prisma.productVariant.findFirst({ where: { sku: safeSku } }))
         ) {
-          safeSku = `${variant.sku}-${counter++}`;
+          safeSku = `${baseSku}-${counter++}`;
         }
         processedSkus.add(safeSku);
 
@@ -550,13 +564,13 @@ export async function POST(request: NextRequest) {
           data: {
             productId: product.id,
             sku: safeSku,
-            stock: Number(variant.stock || 0),
-            price: Number(variant.price || 0),
+            stock: Number(variant.stock ?? 0),
+            price: Number(variant.price ?? 0),
             attributes: {
-              size: variant.size,
-              color: variant.color,
-              barcode: variant.barcode,
-              name: variant.name
+              size: variant.size || '',
+              color: variant.color || '',
+              barcode: variant.barcode || '',
+              name: variant.name || `${variant.size || ''} - ${variant.color || ''}`.trim()
             }
           }
         });

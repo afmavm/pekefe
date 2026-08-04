@@ -431,60 +431,61 @@ export async function PUT(
         });
       }
 
-      // 2. Add or Update incoming variants
+      // 2. Add or Update ALL incoming variants (never skip)
       const processedSkus = new Set<string>();
+      const productSku = (body.sku || realId).replace(/[^a-zA-Z0-9-]/g, '').slice(0, 20);
 
-      for (const variant of body.variants) {
-        if (!variant.sku) continue;
+      for (let i = 0; i < body.variants.length; i++) {
+        const variant = body.variants[i];
+
+        // --- Guarantee a non-empty SKU ---
+        let baseSku = (variant.sku || '').trim();
+        if (!baseSku) {
+          // Auto-generate from product SKU + size slug + index
+          const sizeSlug = (variant.size || variant.name || 'VAR')
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .toUpperCase()
+            .slice(0, 8);
+          baseSku = `${productSku}-${sizeSlug}-V${i + 1}`;
+        }
+
+        // Ensure uniqueness within this batch AND across the entire table
+        let safeSku = baseSku;
+        let counter = 1;
+        while (
+          processedSkus.has(safeSku) ||
+          (await prisma.productVariant.findFirst({ where: { sku: safeSku, productId: { not: realId } } }))
+        ) {
+          safeSku = `${baseSku}-${counter++}`;
+        }
+        processedSkus.add(safeSku);
+
         const variantData = {
-          stock: Number(variant.stock || 0),
-          price: Number(variant.price || 0),
+          stock: Number(variant.stock ?? 0),
+          price: Number(variant.price ?? 0),
           attributes: {
-            size: variant.size,
-            color: variant.color,
-            barcode: variant.barcode,
-            name: variant.name
+            size: variant.size || '',
+            color: variant.color || '',
+            barcode: variant.barcode || '',
+            name: variant.name || `${variant.size || ''} - ${variant.color || ''}`.trim()
           }
         };
 
         const existingById = variant.id ? existingVariants.find((v: any) => v.id === variant.id) : null;
-        const existingBySku = existingVariants.find((v: any) => v.sku === variant.sku);
+        const existingBySku = existingVariants.find((v: any) => v.sku === baseSku || v.sku === safeSku);
         const targetVariant = existingById || existingBySku;
 
         if (targetVariant) {
-          // Update existing variant record
           await prisma.productVariant.update({
             where: { id: targetVariant.id },
-            data: {
-              ...variantData,
-              sku: variant.sku
-            }
+            data: { ...variantData, sku: safeSku }
           });
-          processedSkus.add(variant.sku);
         } else {
-          // Create new variant, ensuring SKU uniqueness across database and current batch
-          let safeSku = variant.sku;
-          let counter = 1;
-          while (
-            processedSkus.has(safeSku) ||
-            (await prisma.productVariant.findFirst({ where: { sku: safeSku } }))
-          ) {
-            safeSku = `${variant.sku}-${counter++}`;
-          }
-          processedSkus.add(safeSku);
-
           await prisma.productVariant.create({
             data: {
               productId: realId,
               sku: safeSku,
-              stock: Number(variant.stock || 0),
-              price: Number(variant.price || 0),
-              attributes: {
-                size: variant.size,
-                color: variant.color,
-                barcode: variant.barcode,
-                name: variant.name
-              }
+              ...variantData
             }
           });
         }

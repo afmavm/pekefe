@@ -2237,9 +2237,12 @@ function EnterpriseStockFormPage() {
       'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U'
     };
     const normalize = (str: string) => (str || "").replace(/[çÇğĞıİöÖşŞüÜ]/g, match => trMap[match] || match);
-    const cleanSize = normalize(sizeStr).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6);
+    // Build a clean, deterministic token from size + color (max 8 chars total)
+    const cleanSize = normalize(sizeStr).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 5);
     const cleanColor = normalize(colorStr).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 4);
-    const sku = `${baseSku}-${cleanSize || "VAR"}-${cleanColor || "SAD"}`;
+    // Add a 4-char random hex suffix to guarantee uniqueness across variants of the same product
+    const uniqueSuffix = Math.random().toString(16).slice(2, 6).toUpperCase();
+    const sku = `${baseSku}-${cleanSize || "VAR"}-${cleanColor || "SAD"}-${uniqueSuffix}`;
     const barcode = "868" + Math.floor(1000000000 + Math.random() * 9000000000);
     return { sku, barcode };
   };
@@ -2291,8 +2294,9 @@ function EnterpriseStockFormPage() {
       size: newSize,
       price: detail.finalPrice > 0 ? detail.finalPrice : prev.price,
       packagingMarkupPercent: markup,
-      sku: prev.sku || codes.sku,
-      barcode: prev.barcode || codes.barcode,
+      // Only regenerate SKU for new variants (not editing existing ones)
+      sku: prev.isEditing ? prev.sku : codes.sku,
+      barcode: prev.isEditing ? prev.barcode : codes.barcode,
     }));
   };
 
@@ -5014,8 +5018,9 @@ function EnterpriseStockFormPage() {
                               setVariantForm(prev => ({
                                 ...prev,
                                 color: newColor,
-                                sku: prev.sku || codes.sku,
-                                barcode: prev.barcode || codes.barcode,
+                                // Only regenerate SKU for new variants (not editing existing ones)
+                                sku: prev.isEditing ? prev.sku : codes.sku,
+                                barcode: prev.isEditing ? prev.barcode : codes.barcode,
                               }));
                             }}
                             onBlur={e => {
@@ -5041,8 +5046,9 @@ function EnterpriseStockFormPage() {
                                   setVariantForm(prev => ({
                                     ...prev,
                                     color: newColor,
-                                    sku: prev.sku || codes.sku,
-                                    barcode: prev.barcode || codes.barcode,
+                                    // Only regenerate SKU for new variants (not editing existing ones)
+                                    sku: prev.isEditing ? prev.sku : codes.sku,
+                                    barcode: prev.isEditing ? prev.barcode : codes.barcode,
                                   }));
                                 }
                               }}

@@ -1953,11 +1953,11 @@ function EnterpriseStockFormPage() {
   };
 
   // Add/Remove Categories synced with DB API
-  const addCategory = async () => {
-    const catName = newCategoryName.trim();
+  const addCategory = async (customName?: string) => {
+    const catName = (customName || newCategoryName).trim();
     if (!catName) return;
     if (categories.includes(catName)) {
-      toast.warning("Bu kategori zaten mevcut.");
+      setForm(prev => ({ ...prev, category: catName }));
       return;
     }
     try {
@@ -1967,7 +1967,7 @@ function EnterpriseStockFormPage() {
         body: JSON.stringify({ name: catName })
       });
       if (res.ok) {
-        toast.success("Yeni kategori veritabanına başarıyla eklendi.");
+        toast.success(`"${catName}" kategorisi veritabanına eklendi.`);
         setNewCategoryName("");
         await loadCategoriesFromApi();
         await refreshCategories();
@@ -2643,25 +2643,45 @@ function EnterpriseStockFormPage() {
                   {/* Grid fields */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    {/* Category Selection */}
+                    {/* Category Selection with Direct Typing & DB Auto-Sync */}
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700 flex justify-between">
+                      <label className="block text-xs font-bold text-slate-700 flex justify-between items-center">
                         <span>Kategori *</span>
-                        <button type="button" onClick={() => setIsCategoryManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer">
+                        <button type="button" onClick={() => setIsCategoryManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
                           <Settings2 className="w-3.5 h-3.5 text-orange-500" /> Düzenle
                         </button>
                       </label>
-                      <div className="relative">
-                        <select
+                      <div className="space-y-2">
+                        <input
+                          type="text"
                           value={form.category}
                           onChange={e => setForm({ ...form, category: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all cursor-pointer appearance-none text-slate-800"
-                        >
-                          {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                          onBlur={e => {
+                            const val = e.target.value.trim();
+                            if (val && !categories.includes(val)) {
+                              addCategory(val);
+                            }
+                          }}
+                          placeholder="✏️ Elle kategori yazın (Örn: Pekmez ÇeşitLeri)..."
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all text-slate-800"
+                        />
+                        <div className="relative">
+                          <select
+                            value={categories.includes(form.category) ? form.category : "custom"}
+                            onChange={e => {
+                              if (e.target.value !== "custom") {
+                                setForm({ ...form, category: e.target.value });
+                              }
+                            }}
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 outline-none cursor-pointer appearance-none pr-8"
+                          >
+                            <option value="custom">⚡ Hazır Kategori Seçin veya Yukarıya Yazın...</option>
+                            {categories.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                        </div>
                       </div>
                     </div>
 
@@ -5554,7 +5574,7 @@ function EnterpriseStockFormPage() {
                 />
                 <button
                   type="button"
-                  onClick={addCategory}
+                  onClick={() => addCategory()}
                   className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition cursor-pointer border-none"
                 >
                   Ekle

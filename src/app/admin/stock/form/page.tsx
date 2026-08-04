@@ -560,6 +560,46 @@ function EnterpriseStockFormPage() {
   const [newSizeName, setNewSizeName] = useState("");
   const [newColorName, setNewColorName] = useState("");
 
+  // Load initial sizes & colors from localStorage
+  useEffect(() => {
+    try {
+      const savedSizes = localStorage.getItem("pekefe_stock_sizes");
+      if (savedSizes) {
+        const parsed = JSON.parse(savedSizes);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSizes(parsed);
+        }
+      }
+      const savedColors = localStorage.getItem("pekefe_stock_colors");
+      if (savedColors) {
+        const parsed = JSON.parse(savedColors);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setColors(parsed);
+        }
+      }
+    } catch (e) {
+      console.error("Error reading sizes/colors from localStorage:", e);
+    }
+  }, []);
+
+  // Sync sizes with localStorage
+  useEffect(() => {
+    if (sizes.length > 0) {
+      try {
+        localStorage.setItem("pekefe_stock_sizes", JSON.stringify(sizes));
+      } catch (e) {}
+    }
+  }, [sizes]);
+
+  // Sync colors with localStorage
+  useEffect(() => {
+    if (colors.length > 0) {
+      try {
+        localStorage.setItem("pekefe_stock_colors", JSON.stringify(colors));
+      } catch (e) {}
+    }
+  }, [colors]);
+
   // Dynamic actions state variables
   const [status, setStatus] = useState<"Yayında" | "Arşivlendi">("Yayında");
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -1001,6 +1041,30 @@ function EnterpriseStockFormPage() {
         const loadedUnit = attrs.unit || product.unit || "Adet";
         if (loadedUnit) {
           setUnits(prev => prev.includes(loadedUnit) ? prev : [...prev, loadedUnit]);
+        }
+
+        // Ensure loaded sizes & colors are merged into option lists
+        if (attrs.sizes && Array.isArray(attrs.sizes) && attrs.sizes.length > 0) {
+          setSizes(prev => Array.from(new Set([...prev, ...attrs.sizes])));
+        }
+        if (attrs.colors && Array.isArray(attrs.colors) && attrs.colors.length > 0) {
+          setColors(prev => Array.from(new Set([...prev, ...attrs.colors])));
+        }
+        if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+          const varSizes = product.variants.map((v: any) => {
+            const va = typeof v.attributes === "string" ? JSON.parse(v.attributes) : (v.attributes || {});
+            return va.size || v.size;
+          }).filter(Boolean);
+          const varColors = product.variants.map((v: any) => {
+            const va = typeof v.attributes === "string" ? JSON.parse(v.attributes) : (v.attributes || {});
+            return va.color || v.color;
+          }).filter(Boolean);
+          if (varSizes.length > 0) {
+            setSizes(prev => Array.from(new Set([...prev, ...varSizes])));
+          }
+          if (varColors.length > 0) {
+            setColors(prev => Array.from(new Set([...prev, ...varColors])));
+          }
         }
 
         setForm({
@@ -1634,6 +1698,8 @@ function EnterpriseStockFormPage() {
         seoDesc: form.seoDesc,
         seoKeywords: form.seoKeywords,
         attributes: {
+          sizes: sizes,
+          colors: colors,
           barcode: form.barcode,
           unit: form.unit,
           manufacturerCode: form.manufacturerCode,

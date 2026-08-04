@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import { getProductBySlug, getProductById, getProducts, fetchLiveProducts, generateSlug } from "@/utils/productsStorage";
+import { getProductBySlug, fetchProductsFromApi, generateSlug } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import JsonLd from "@/components/seo/JsonLd";
 import { resolveProductMediaItems, isVideoUrl } from "@/lib/utils";
@@ -21,22 +21,33 @@ export default function UrunDetay({ params }) {
   const [productState, setProductState] = useState(() => getProductBySlug(slugOrId));
 
   useEffect(() => {
-    // Clear stale localStorage cache and fetch fresh data from DB
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("pekefe_products_state");
-    }
-    fetchLiveProducts().then(() => {
+    // Fetch fresh data immediately
+    fetchProductsFromApi().then(() => {
       const fresh = getProductBySlug(slugOrId);
       if (fresh) setProductState(fresh);
     });
 
-    const handleProductsChange = () => {
+    // Re-fetch when tab becomes active again
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchProductsFromApi().then(() => {
+          const fresh = getProductBySlug(slugOrId);
+          if (fresh) setProductState(fresh);
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Listen to admin updates broadcast
+    const handleUpdated = () => {
       const fresh = getProductBySlug(slugOrId);
       if (fresh) setProductState(fresh);
     };
-    window.addEventListener("pekefe_products_changed", handleProductsChange);
+    window.addEventListener("pekefe_products_updated", handleUpdated);
+
     return () => {
-      window.removeEventListener("pekefe_products_changed", handleProductsChange);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pekefe_products_updated", handleUpdated);
     };
   }, [slugOrId]);
 

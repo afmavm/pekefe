@@ -309,8 +309,42 @@ export function formatDbProductToStorefront(p) {
   const catLower = p.category ? String(p.category).toLowerCase().trim() : "all";
   const stockVal = p.stock_quantity ?? p.stock ?? 0;
 
-  // --- Price Logic ---
-  const variants = p.variants || attrs.variants || [];
+  // --- Price and Variant Logic ---
+  let rawVariants = Array.isArray(p.variants) && p.variants.length > 0
+    ? p.variants
+    : (attrs.variants && Array.isArray(attrs.variants) ? attrs.variants : []);
+
+  if (rawVariants.length === 0 && attrs.sizes && Array.isArray(attrs.sizes) && attrs.sizes.length > 0) {
+    rawVariants = attrs.sizes.map((sizeName, idx) => ({
+      id: `${p.id}-var-${idx}`,
+      sku: `${p.sku || 'PKF'}-${sizeName.replace(/\s+/g, '')}`,
+      price: Number(p.price || p.sale_price || 0),
+      stock: Number(p.stock || p.stock_quantity || 0),
+      attributes: { size: sizeName, color: (attrs.colors && attrs.colors[0]) || "Sade", name: sizeName },
+      name: sizeName,
+      size: sizeName
+    }));
+  }
+
+  const variants = rawVariants.map(v => {
+    let vAttrs = v.attributes;
+    if (typeof vAttrs === 'string') {
+      try { vAttrs = JSON.parse(vAttrs); } catch (e) {}
+    }
+    const label = (vAttrs && (vAttrs.size || vAttrs.name)) || v.name || v.size || `${v.price} TL`;
+    return {
+      ...v,
+      id: v.id || `${p.id}-${label}`,
+      sku: v.sku || `${p.sku || 'PKF'}-${label}`,
+      price: v.price != null && Number(v.price) > 0 ? Number(v.price) : Number(p.price || p.sale_price || 0),
+      oldPrice: v.oldPrice ? Number(v.oldPrice) : null,
+      stock: v.stock != null ? Number(v.stock) : Number(p.stock || p.stock_quantity || 0),
+      attributes: vAttrs || { size: label, name: label },
+      name: label,
+      size: (vAttrs && vAttrs.size) || label
+    };
+  });
+
   const basePrice = Number(p.sale_price ?? p.price ?? 0);
   const listPrice = (p.list_price || p.oldPrice) ? Number(p.list_price || p.oldPrice) : null;
   const b2bPrice = p.b2b_price ? Number(p.b2b_price) : null;
@@ -402,22 +436,38 @@ export function getProducts() {
   }
 }
 
-export async function fetchLiveProducts() {
+let _fetchingInProgress = false;
+
+/** Fetch live products from DB API and update localStorage cache.
+ *  Does NOT dispatch pekefe_products_changed – caller controls that.
+ */
+export async function fetchProductsFromApi() {
   if (typeof window === "undefined") return DEFAULT_PRODUCTS;
+  if (_fetchingInProgress) return getProducts();
+  _fetchingInProgress = true;
   try {
     const res = await fetch('/api/products?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return getProducts();
     const dbProducts = await res.json();
     if (!Array.isArray(dbProducts)) return getProducts();
-
     const formatted = dbProducts.map(formatDbProductToStorefront);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formatted));
-    window.dispatchEvent(new Event("pekefe_products_changed"));
     return formatted;
   } catch (err) {
-    console.error("fetchLiveProducts error:", err);
+    console.error("fetchProductsFromApi error:", err);
     return getProducts();
+  } finally {
+    _fetchingInProgress = false;
   }
+}
+
+/** Legacy wrapper – kept for backward compatibility. */
+export async function fetchLiveProducts() {
+  const formatted = await fetchProductsFromApi();
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("pekefe_products_updated", { detail: formatted }));
+  }
+  return formatted;
 }
 
 export function saveProducts(newProducts) {

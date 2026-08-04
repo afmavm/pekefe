@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
-import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { fetchProductsFromApi } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 
 const initialProducts = [
@@ -93,92 +93,80 @@ const initialProducts = [
   }
 ];
 
-const categories = [
-  { name: "Tüm Ürünler", value: "all" },
-  { name: "Geleneksel Pekmezler", value: "pekmez" },
-  { name: "Pestil Çeşitleri", value: "pestil" },
-  { name: "Cevizli Kömeler", value: "kome" },
-  { name: "Gurme Tatlılar", value: "tatli" }
-];
-
 export default function Kategoriler() {
   const [products, setProducts] = useState([]);
-  const [dbCategories, setDbCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const loadLiveData = async () => {
+  const loadProducts = useCallback(async () => {
     try {
-      const [catRes, prodData] = await Promise.all([
-        fetch("/api/categories?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : []),
-        fetchLiveProducts()
+      const [prodData, catData] = await Promise.all([
+        fetchProductsFromApi(),
+        fetch("/api/categories?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : [])
       ]);
-      if (Array.isArray(catRes)) setDbCategories(catRes);
-      if (Array.isArray(prodData) && prodData.length > 0) setProducts(prodData);
+      // Merge category display names from categories API
+      if (Array.isArray(prodData)) {
+        const catMap = {};
+        if (Array.isArray(catData)) {
+          catData.forEach(c => { if (c?.name) catMap[c.name.toLowerCase().trim()] = c.name.trim(); });
+        }
+        setProducts(prodData.map(p => ({
+          ...p,
+          categoryDisplay: catMap[String(p.categoryDisplay || p.category || "").toLowerCase().trim()] || p.categoryDisplay || p.category
+        })));
+      }
     } catch (e) {
-      console.error("loadLiveData error:", e);
+      console.error("loadProducts error:", e);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadLiveData();
+    // Initial load
+    loadProducts();
 
-    const handleProductsChange = () => {
-      loadLiveData();
+    // Reload when admin stock page dispatches update signal
+    const handleUpdated = () => loadProducts();
+    window.addEventListener("pekefe_products_updated", handleUpdated);
+
+    // Reload when user returns to this tab (e.g. from admin panel)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") loadProducts();
     };
+    document.addEventListener("visibilitychange", handleVisibility);
 
-    window.addEventListener("pekefe_products_changed", handleProductsChange);
-    window.addEventListener("focus", handleProductsChange);
-
-    // Auto-sync polling every 3 seconds
-    const interval = setInterval(() => {
-      loadLiveData();
-    }, 3000);
+    // Polling every 5 seconds – safe because fetchProductsFromApi has a guard flag
+    const interval = setInterval(loadProducts, 5000);
 
     return () => {
-      window.removeEventListener("pekefe_products_changed", handleProductsChange);
-      window.removeEventListener("focus", handleProductsChange);
+      window.removeEventListener("pekefe_products_updated", handleUpdated);
+      document.removeEventListener("visibilitychange", handleVisibility);
       clearInterval(interval);
     };
-  }, []);
+  }, [loadProducts]);
 
   const dynamicCategories = useMemo(() => {
     const catMap = new Map();
     catMap.set("all", "Tüm Ürünler");
-
-    // 1. Harvest from DB Categories table (/api/categories)
-    if (Array.isArray(dbCategories) && dbCategories.length > 0) {
-      dbCategories.forEach(c => {
-        if (c && c.name) {
-          const key = String(c.name).toLowerCase().trim();
-          catMap.set(key, c.name.trim());
-        }
-      });
-    }
-
-    // 2. Harvest from live product catalog (/api/products)
-    if (Array.isArray(products) && products.length > 0) {
+    if (Array.isArray(products)) {
       products.forEach(p => {
-        const rawCat = p.categoryDisplay || p.category;
-        if (rawCat && typeof rawCat === "string" && rawCat.trim()) {
-          const key = String(rawCat).toLowerCase().trim();
-          if (!catMap.has(key)) {
-            catMap.set(key, rawCat.trim());
-          }
+        const display = p.categoryDisplay || p.category;
+        if (display && typeof display === "string" && display.trim()) {
+          const key = display.toLowerCase().trim();
+          if (!catMap.has(key)) catMap.set(key, display.trim());
         }
       });
     }
-
     const result = [];
-    catMap.forEach((displayName, categoryKey) => {
-      result.push({ name: displayName, value: categoryKey });
-    });
+    catMap.forEach((name, value) => result.push({ name, value }));
     return result;
-  }, [dbCategories, products]);
+  }, [products]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [maxPrice, setMaxPrice] = useState(5000);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("recommended"); // recommended, price-asc, price-desc
-  
+  const [sortBy, setSortBy] = useState("recommended");
+
   // Toast States
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -188,64 +176,44 @@ export default function Kategoriler() {
     setToastOpen(true);
   };
 
-  const productsWithBust = useMemo(() => {
-    if (!Array.isArray(products)) return [];
-    const translateImage = (url) => {
-      if (!url || typeof url !== "string") return "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
-      if (url.includes("/pekefe-dut-pekmezi-kavanoz.jpg") || url.includes("/geleneksel-pekmez.jpg") || url.includes("/geleneksel-pekmez.png")) {
-        return "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
-      }
-      if (url.includes("/premium-pekefe-kavanoz.png")) {
-        return "/premium-pekefe-kavanoz-tr.png";
-      }
-      return url;
-    };
-    return products.filter(Boolean).map(p => ({
+  const translateImage = (url) => {
+    if (!url || typeof url !== "string") return "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
+    if (url.includes("/pekefe-dut-pekmezi-kavanoz.jpg") || url.includes("/geleneksel-pekmez.png")) return "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
+    if (url.includes("/premium-pekefe-kavanoz.png")) return "/premium-pekefe-kavanoz-tr.png";
+    return url;
+  };
+
+  const productsWithBust = useMemo(() =>
+    products.filter(Boolean).map(p => ({
       ...p,
       image: translateImage(p.image),
       images: Array.isArray(p.images) ? p.images.map(translateImage) : [translateImage(p.image)]
-    }));
-  }, [products]);
+    })),
+  [products]);
 
   const filteredProducts = useMemo(() => {
-    if (!Array.isArray(productsWithBust)) return [];
     let result = [...productsWithBust];
-
-    // Filter by Category (Flexible matching by slug or name)
     if (selectedCategory !== "all") {
-      const selectedKey = String(selectedCategory).toLowerCase().trim();
-      result = result.filter((p) => {
-        if (!p) return false;
-        const pCatKey = String(p.category || p.categoryDisplay || "").toLowerCase().trim();
-        const pCatDisplayKey = String(p.categoryDisplay || p.category || "").toLowerCase().trim();
-        return pCatKey === selectedKey || pCatDisplayKey === selectedKey;
+      const sel = selectedCategory.toLowerCase().trim();
+      result = result.filter(p => {
+        const c1 = String(p.category || "").toLowerCase().trim();
+        const c2 = String(p.categoryDisplay || "").toLowerCase().trim();
+        return c1 === sel || c2 === sel;
       });
     }
-
-    // Filter by Search Query
-    if (searchQuery && searchQuery.trim() !== "") {
+    if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p && (
-            (p.name && String(p.name).toLowerCase().includes(q)) ||
-            (p.desc && String(p.desc).toLowerCase().includes(q))
-          )
+      result = result.filter(p =>
+        String(p.name || "").toLowerCase().includes(q) ||
+        String(p.desc || "").toLowerCase().includes(q)
       );
     }
-
-    // Filter by Price
-    result = result.filter((p) => p && typeof p.price === "number" && p.price <= maxPrice);
-
-    // Sort Products
-    if (sortBy === "price-asc") {
-      result.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sortBy === "price-desc") {
-      result.sort((a, b) => (b.price || 0) - (a.price || 0));
-    }
-
+    result = result.filter(p => typeof p.price === "number" && p.price <= maxPrice);
+    if (sortBy === "price-asc") result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    if (sortBy === "price-desc") result.sort((a, b) => (b.price || 0) - (a.price || 0));
     return result;
   }, [productsWithBust, selectedCategory, searchQuery, maxPrice, sortBy]);
+
 
   // Scroll Reveal Animations hook
   useEffect(() => {

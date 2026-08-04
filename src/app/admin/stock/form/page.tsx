@@ -1835,6 +1835,7 @@ function EnterpriseStockFormPage() {
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("pekefe_products_changed"));
           window.dispatchEvent(new CustomEvent("pekefe_search_index_updated"));
+          window.dispatchEvent(new CustomEvent("pekefe_products_updated"));
         }
         
         // Refresh server components router cache to update server-rendered pages (like /tr)

@@ -105,32 +105,38 @@ export default function Kategoriler() {
   const [products, setProducts] = useState([]);
   const [dbCategories, setDbCategories] = useState([]);
 
-  const fetchCategories = async () => {
+  const loadLiveData = async () => {
     try {
-      const res = await fetch("/api/categories?t=" + Date.now(), { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) setDbCategories(data);
-      }
+      const [catRes, prodData] = await Promise.all([
+        fetch("/api/categories?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : []),
+        fetchLiveProducts()
+      ]);
+      if (Array.isArray(catRes)) setDbCategories(catRes);
+      if (Array.isArray(prodData) && prodData.length > 0) setProducts(prodData);
     } catch (e) {
-      console.error("fetchCategories error:", e);
+      console.error("loadLiveData error:", e);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
-    fetchLiveProducts().then((live) => {
-      if (live && live.length > 0) setProducts(live);
-    });
-    setProducts(getProducts());
+    loadLiveData();
 
     const handleProductsChange = () => {
-      fetchCategories();
-      setProducts(getProducts());
+      loadLiveData();
     };
+
     window.addEventListener("pekefe_products_changed", handleProductsChange);
+    window.addEventListener("focus", handleProductsChange);
+
+    // Auto-sync polling every 3 seconds
+    const interval = setInterval(() => {
+      loadLiveData();
+    }, 3000);
+
     return () => {
       window.removeEventListener("pekefe_products_changed", handleProductsChange);
+      window.removeEventListener("focus", handleProductsChange);
+      clearInterval(interval);
     };
   }, []);
 
@@ -138,24 +144,38 @@ export default function Kategoriler() {
     const catMap = new Map();
     catMap.set("all", "Tüm Ürünler");
 
+    // 1. Harvest from DB Categories table (/api/categories)
     if (Array.isArray(dbCategories) && dbCategories.length > 0) {
       dbCategories.forEach(c => {
         if (c && c.name) {
-          const val = String(c.name).toLowerCase().trim();
-          catMap.set(val, c.name);
+          const key = String(c.name).toLowerCase().trim();
+          catMap.set(key, c.name.trim());
+        }
+      });
+    }
+
+    // 2. Harvest from live product catalog (/api/products)
+    if (Array.isArray(products) && products.length > 0) {
+      products.forEach(p => {
+        const rawCat = p.categoryDisplay || p.category;
+        if (rawCat && typeof rawCat === "string" && rawCat.trim()) {
+          const key = String(rawCat).toLowerCase().trim();
+          if (!catMap.has(key)) {
+            catMap.set(key, rawCat.trim());
+          }
         }
       });
     }
 
     const result = [];
-    catMap.forEach((name, value) => {
-      result.push({ name, value });
+    catMap.forEach((displayName, categoryKey) => {
+      result.push({ name: displayName, value: categoryKey });
     });
     return result;
-  }, [dbCategories]);
+  }, [dbCategories, products]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [maxPrice, setMaxPrice] = useState(500);
+  const [maxPrice, setMaxPrice] = useState(5000);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recommended"); // recommended, price-asc, price-desc
   
@@ -191,9 +211,15 @@ export default function Kategoriler() {
     if (!Array.isArray(productsWithBust)) return [];
     let result = [...productsWithBust];
 
-    // Filter by Category
+    // Filter by Category (Flexible matching by slug or name)
     if (selectedCategory !== "all") {
-      result = result.filter((p) => p && p.category === selectedCategory);
+      const selectedKey = String(selectedCategory).toLowerCase().trim();
+      result = result.filter((p) => {
+        if (!p) return false;
+        const pCatKey = String(p.category || p.categoryDisplay || "").toLowerCase().trim();
+        const pCatDisplayKey = String(p.categoryDisplay || p.category || "").toLowerCase().trim();
+        return pCatKey === selectedKey || pCatDisplayKey === selectedKey;
+      });
     }
 
     // Filter by Search Query
@@ -391,16 +417,16 @@ export default function Kategoriler() {
               </div>
               <input
                 type="range"
-                min="100"
-                max="500"
-                step="20"
+                min="0"
+                max="5000"
+                step="50"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="w-full accent-primary h-1 bg-surface-container rounded-lg appearance-none cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-on-surface-variant font-mono">
-                <span>₺100</span>
-                <span>₺500</span>
+                <span>₺0</span>
+                <span>₺5000</span>
               </div>
             </div>
 

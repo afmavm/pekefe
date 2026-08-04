@@ -432,10 +432,11 @@ export async function PUT(
       }
 
       // 2. Add or Update incoming variants
+      const processedSkus = new Set<string>();
+
       for (const variant of body.variants) {
         if (!variant.sku) continue;
         const variantData = {
-          sku: variant.sku,
           stock: Number(variant.stock || 0),
           price: Number(variant.price || 0),
           attributes: {
@@ -446,18 +447,36 @@ export async function PUT(
           }
         };
 
-        if (variant.id && existingVariantIds.includes(variant.id)) {
-          // Update existing
+        const existingById = variant.id ? existingVariants.find((v: any) => v.id === variant.id) : null;
+        const existingBySku = existingVariants.find((v: any) => v.sku === variant.sku);
+        const targetVariant = existingById || existingBySku;
+
+        if (targetVariant) {
+          // Update existing variant record
           await prisma.productVariant.update({
-            where: { id: variant.id },
-            data: variantData
+            where: { id: targetVariant.id },
+            data: {
+              ...variantData,
+              sku: variant.sku
+            }
           });
+          processedSkus.add(variant.sku);
         } else {
-          // Create new
+          // Create new variant, ensuring SKU uniqueness across database and current batch
+          let safeSku = variant.sku;
+          let counter = 1;
+          while (
+            processedSkus.has(safeSku) ||
+            (await prisma.productVariant.findFirst({ where: { sku: safeSku } }))
+          ) {
+            safeSku = `${variant.sku}-${counter++}`;
+          }
+          processedSkus.add(safeSku);
+
           await prisma.productVariant.create({
             data: {
               productId: realId,
-              sku: variant.sku,
+              sku: safeSku,
               stock: Number(variant.stock || 0),
               price: Number(variant.price || 0),
               attributes: {

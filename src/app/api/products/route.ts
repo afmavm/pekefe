@@ -533,12 +533,23 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.variants && Array.isArray(body.variants)) {
+      const processedSkus = new Set<string>();
       for (const variant of body.variants) {
         if (!variant.sku) continue;
+        let safeSku = variant.sku;
+        let counter = 1;
+        while (
+          processedSkus.has(safeSku) ||
+          (await prisma.productVariant.findFirst({ where: { sku: safeSku } }))
+        ) {
+          safeSku = `${variant.sku}-${counter++}`;
+        }
+        processedSkus.add(safeSku);
+
         await prisma.productVariant.create({
           data: {
             productId: product.id,
-            sku: variant.sku,
+            sku: safeSku,
             stock: Number(variant.stock || 0),
             price: Number(variant.price || 0),
             attributes: {

@@ -2231,8 +2231,13 @@ function EnterpriseStockFormPage() {
 
   const generateSkuAndBarcode = (sizeStr: string, colorStr: string) => {
     const baseSku = form.sku || "PKF-PROD";
-    const cleanSize = sizeStr.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 4);
-    const cleanColor = colorStr.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 3);
+    const trMap: Record<string, string> = {
+      'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I',
+      'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U'
+    };
+    const normalize = (str: string) => (str || "").replace(/[çÇğĞıİöÖşŞüÜ]/g, match => trMap[match] || match);
+    const cleanSize = normalize(sizeStr).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6);
+    const cleanColor = normalize(colorStr).replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 4);
     const sku = `${baseSku}-${cleanSize || "VAR"}-${cleanColor || "SAD"}`;
     const barcode = "868" + Math.floor(1000000000 + Math.random() * 9000000000);
     return { sku, barcode };

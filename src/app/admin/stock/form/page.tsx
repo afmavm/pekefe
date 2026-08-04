@@ -1874,6 +1874,107 @@ function EnterpriseStockFormPage() {
     }
   };
 
+  // Automatic variant price calculation from Web Perakende price & grammage/unit ratio
+  const calculateVariantPriceFromWebPrice = (
+    sizeStr: string,
+    webPrice: number,
+    baseUnit: string = "Kg"
+  ): number => {
+    if (!webPrice || webPrice <= 0 || !sizeStr) return 0;
+    const normalized = sizeStr.toLowerCase().trim();
+
+    // 1. Kg / Kilo / Kilogram
+    const kgMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:kg|kilo|kilogram)\b/);
+    if (kgMatch) {
+      const val = parseFloat(kgMatch[1].replace(",", "."));
+      if (!isNaN(val)) return Math.round(webPrice * val);
+    }
+
+    // 2. Gr / Gram / g
+    const grMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:gr|g|gram)\b/);
+    if (grMatch) {
+      const val = parseFloat(grMatch[1].replace(",", "."));
+      if (!isNaN(val)) return Math.round(webPrice * (val / 1000));
+    }
+
+    // 3. Lt / Liter / Litre / L
+    const ltMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:lt|litre|liter|l)\b/);
+    if (ltMatch) {
+      const val = parseFloat(ltMatch[1].replace(",", "."));
+      if (!isNaN(val)) return Math.round(webPrice * val);
+    }
+
+    // 4. Ml / Mililitre / Mililiter
+    const mlMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:ml|mililitre|mililiter)\b/);
+    if (mlMatch) {
+      const val = parseFloat(mlMatch[1].replace(",", "."));
+      if (!isNaN(val)) return Math.round(webPrice * (val / 1000));
+    }
+
+    // 5. Adet / Tane / Paket / Pk / Kavanoz / Teneke
+    const adetMatch = normalized.match(/(\d+(?:[\.,]\d+)?)\s*(?:adet|tane|pk|paket|kavanoz|teneke|kut|kutu)\b/);
+    if (adetMatch) {
+      const val = parseFloat(adetMatch[1].replace(",", "."));
+      const baseMatch = (baseUnit || "").toLowerCase().match(/(\d+(?:[\.,]\d+)?)/);
+      const baseQty = baseMatch ? parseFloat(baseMatch[1].replace(",", ".")) : 1;
+      const ratio = baseQty > 0 ? val / baseQty : val;
+      return Math.round(webPrice * ratio);
+    }
+
+    // 6. Generic number fallback
+    const genericMatch = normalized.match(/(\d+(?:[\.,]\d+)?)/);
+    if (genericMatch) {
+      const val = parseFloat(genericMatch[1].replace(",", "."));
+      if (!isNaN(val)) {
+        if (val >= 50) return Math.round(webPrice * (val / 1000));
+        return Math.round(webPrice * val);
+      }
+    }
+
+    return webPrice;
+  };
+
+  const openVariantModal = () => {
+    const initialSize = sizes[0] || "1 Kg";
+    const initialColor = colors[0] || "Sade";
+    const calcPrice = calculateVariantPriceFromWebPrice(initialSize, form.webPrice, form.unit);
+    setVariantForm({
+      size: initialSize,
+      color: initialColor,
+      stock: 1000,
+      price: calcPrice > 0 ? calcPrice : (form.webPrice || 0),
+    });
+    setIsVariantModalOpen(true);
+  };
+
+  const handleVariantSizeChange = (newSize: string) => {
+    const calcPrice = calculateVariantPriceFromWebPrice(newSize, form.webPrice, form.unit);
+    setVariantForm(prev => ({
+      ...prev,
+      size: newSize,
+      price: calcPrice > 0 ? calcPrice : prev.price,
+    }));
+  };
+
+  const autoCalculateAllVariantPrices = () => {
+    if (variants.length === 0) {
+      toast.error("Güncellenecek varyant bulunmuyor.");
+      return;
+    }
+    if (!form.webPrice || form.webPrice <= 0) {
+      toast.error("Lütfen önce ana formdaki Web Perakende fiyatını girin.");
+      return;
+    }
+    setVariants(prev => prev.map(v => {
+      const calc = calculateVariantPriceFromWebPrice(v.size, form.webPrice, form.unit);
+      return {
+        ...v,
+        price: calc > 0 ? calc : v.price
+      };
+    }));
+    toast.success(`Tüm varyant fiyatları Web Perakende fiyatına (₺${form.webPrice}) göre yeniden hesaplandı.`);
+  };
+
   // Add/Remove Variants
   const addVariant = () => {
     const newVariant: Variant = {
@@ -3656,12 +3757,24 @@ function EnterpriseStockFormPage() {
 
                 <div className="pb-3">
                   {activeSubTab === "varyantlar" && (
-                    <button
-                      onClick={() => setIsVariantModalOpen(true)}
-                      className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                    >
-                      <Plus className="w-3.5 h-3.5 text-orange-500" /> Varyant Ekle
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {variants.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={autoCalculateAllVariantPrices}
+                          className="px-3 py-2 bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          title="Tüm varyant fiyatlarını Web Perakende fiyatına göre yeniden hesaplar"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-orange-500" /> Web Fiyatından Güncelle
+                        </button>
+                      )}
+                      <button
+                        onClick={openVariantModal}
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-orange-500" /> Varyant Ekle
+                      </button>
+                    </div>
                   )}
 
                   {activeSubTab === "xml" && (
@@ -4131,7 +4244,7 @@ function EnterpriseStockFormPage() {
                   <div className="relative">
                     <select
                       value={variantForm.size}
-                      onChange={e => setVariantForm({ ...variantForm, size: e.target.value })}
+                      onChange={e => handleVariantSizeChange(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none cursor-pointer appearance-none text-slate-800 pr-9"
                     >
                       {sizes.map(size => (
@@ -4178,13 +4291,30 @@ function EnterpriseStockFormPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Özel Fiyatı (₺)</label>
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Özel Fiyatı (₺)</label>
+                    {form.webPrice > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleVariantSizeChange(variantForm.size)}
+                        className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0"
+                        title="Web Perakende fiyatına göre tekrar hesapla"
+                      >
+                        <Sparkles className="w-3 h-3 text-orange-500" /> Otomatik Hesapla
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="number"
                     value={variantForm.price}
                     onChange={e => setVariantForm({ ...variantForm, price: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-orange-600"
                   />
+                  {form.webPrice > 0 && (
+                    <p className="text-[10px] text-slate-400 font-semibold text-right">
+                      💡 Web Perakende: ₺{form.webPrice} ({variantForm.size} oranında)
+                    </p>
+                  )}
                 </div>
 
               </div>

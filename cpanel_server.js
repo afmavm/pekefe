@@ -1,14 +1,13 @@
 /**
  * PEKEFE ERP & Web Application — cPanel Node.js Selector Entry Point
  * 
- * Configured for port 3001 to prevent port collisions with atakaricilik.com (port 3000).
+ * Complies with Phusion Passenger dynamic socket / port allocation.
  */
 
 const path = require("path");
 const fs = require("fs");
 
 process.env.NODE_ENV = "production";
-process.env.PORT = process.env.PORT || "3001";
 
 const standaloneServer = path.join(__dirname, ".next", "standalone", "server.js");
 const rootServer = path.join(__dirname, "server.js");

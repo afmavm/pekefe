@@ -9,6 +9,7 @@ import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settin
 export default function Iletisim() {
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [showLiveMap, setShowLiveMap] = useState(false);
@@ -28,15 +29,48 @@ export default function Iletisim() {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setToast({
-      isOpen: true,
-      message: "Mesajınız iletildi! En kısa sürede sizinle iletişime geçeceğiz.",
-      type: "success",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    if (isSubmitting) return;
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setToast({
+        isOpen: true,
+        message: "Lütfen adınız, e-posta adresiniz ve mesajınızı doldurunuz.",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Mesaj gönderilirken bir hata oluştu.");
+      }
+
+      setSubmitted(true);
+      setToast({
+        isOpen: true,
+        message: "Mesajınız başarıyla iletildi ve kayda alındı. Teşekkür ederiz!",
+        type: "success",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setToast({
+        isOpen: true,
+        message: err.message || "Mesaj gönderilirken bir sunucu hatası oluştu.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -248,6 +282,8 @@ export default function Iletisim() {
                     <input
                       className="w-full px-4 py-3 rounded-lg bg-surface-container-low border-transparent focus:border-primary focus:ring-0 transition-all font-body-md outline-none"
                       placeholder="Adınız Soyadınız"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                       type="text"
                     />
@@ -259,6 +295,8 @@ export default function Iletisim() {
                     <input
                       className="w-full px-4 py-3 rounded-lg bg-surface-container-low border-transparent focus:border-primary focus:ring-0 transition-all font-body-md outline-none"
                       placeholder="ornek@mail.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                       type="email"
                     />
@@ -271,6 +309,8 @@ export default function Iletisim() {
                   <input
                     className="w-full px-4 py-3 rounded-lg bg-surface-container-low border-transparent focus:border-primary focus:ring-0 transition-all font-body-md outline-none"
                     placeholder="Mesajınızın konusu"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     required
                     type="text"
                   />
@@ -290,16 +330,20 @@ export default function Iletisim() {
                 </div>
                 {submitted && (
                   <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs font-semibold flex items-center gap-3 animate-fade-in" role="status">
-                    <span className="material-symbols-outlined text-base">check_circle</span>
-                    <span>Mesajınız başarıyla alındı. Teşekkür ederiz!</span>
+                    <span className="material-symbols-outlined text-base text-green-600">check_circle</span>
+                    <span>Mesajınız başarıyla alındı ve kayda geçti. Teşekkür ederiz!</span>
                   </div>
                 )}
                 <div className="pt-4">
                   <button
-                    className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-lg font-label-md uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all duration-300 shadow-lg cursor-pointer"
+                    disabled={isSubmitting}
+                    className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-lg font-label-md uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all duration-300 shadow-lg cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                     type="submit"
                   >
-                    Mesaj Gönder
+                    {isSubmitting && (
+                      <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                    )}
+                    <span>{isSubmitting ? "Gönderiliyor..." : "Mesaj Gönder"}</span>
                   </button>
                 </div>
               </form>

@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+  relationMode = "foreignKeys"
 }
 
 model Company {
@@ -41,12 +42,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?  
-  access_token      String?  
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?  
+  id_token          String?  @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -147,9 +148,9 @@ model Product {
   cost              Decimal               @default(0.0) 
   image             String?
   images            Json
-  desc              String?              
+  desc              String?              @db.Text
   seoTitle          String?
-  seoDesc           String?              
+  seoDesc           String?              @db.Text
   seoKeywords       String?
   videoUrl          String?
   attributes        Json
@@ -1342,7 +1343,7 @@ model EmailTemplate {
   eventType String   @unique @map("event_type")
   name      String
   subject   String
-  bodyHtml  String    @map("body_html")
+  bodyHtml  String   @db.Text @map("body_html")
   variables String
   status    String   @default("ACTIVE")
   createdAt DateTime @default(now()) @map("created_at")
@@ -1355,10 +1356,10 @@ model EmailLog {
   id           String   @id @default(uuid())
   recipient    String
   subject      String
-  bodyHtml     String    @map("body_html")
+  bodyHtml     String   @db.Text @map("body_html")
   eventType    String?  @map("event_type")
   status       String
-  errorMessage String?   @map("error_message")
+  errorMessage String?  @db.Text @map("error_message")
   retryCount   Int      @default(0) @map("retry_count")
   createdAt    DateTime @default(now()) @map("created_at")
 

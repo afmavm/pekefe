@@ -1,11 +1,15 @@
 /**
  * PEKEFE ERP & Web Application — cPanel Node.js Selector Entry Point
- * 
- * Complies with Phusion Passenger dynamic socket / port allocation.
  */
 
 const path = require("path");
 const fs = require("fs");
+
+// Load .env explicitly before server initialization
+const envPath = path.join(__dirname, ".env");
+if (fs.existsSync(envPath)) {
+  require("dotenv").config({ path: envPath });
+}
 
 process.env.NODE_ENV = "production";
 

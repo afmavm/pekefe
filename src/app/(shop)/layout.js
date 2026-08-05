@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SupportWidget from "@/components/SupportWidget";
 
 export const metadata = {
   metadataBase: new URL('https://www.pekefe.com'),
@@ -40,6 +41,7 @@ export default function ShopLayout({ children }) {
       <Header />
       {children}
       <Footer />
+      <SupportWidget />
     </>
   );
 }

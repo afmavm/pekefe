@@ -269,12 +269,12 @@ export default function Footer() {
       {/* Back to top button */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-8 right-8 bg-primary text-on-primary p-4 rounded-full shadow-2xl transition-opacity duration-300 hover:bg-secondary ${
-          showBackToTop ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        className={`fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-primary text-on-primary w-14 h-14 rounded-full shadow-xl transition-all duration-300 hover:bg-secondary flex items-center justify-center cursor-pointer border border-white/20 z-40 ${
+          showBackToTop ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-90 pointer-events-none"
         }`}
         aria-label="Yukarı Git"
       >
-        <span className="material-symbols-outlined">arrow_upward</span>
+        <span className="material-symbols-outlined text-2xl">arrow_upward</span>
       </button>
     </footer>
   );

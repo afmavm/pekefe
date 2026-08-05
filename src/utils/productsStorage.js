@@ -28,11 +28,11 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Geleneksel Pekmezler",
     desc: "İspir'in 2000 rakımlı yaylalarındaki yabani mulberlerden toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, katkısız saf dut pekmezi.",
     meta: "800g · Cam Kavanoz",
-    price: 280,
-    image: "/pekefe-dut-pekmezi-kavanoz.jpg",
+    price: 360,
+    image: "/uploads/1785870425901-o5xqxfpv2.webp",
     images: [
-      "/pekefe-dut-pekmezi-kavanoz.jpg",
-      "/premium-pekefe-kavanoz.png",
+      "/uploads/1785870425901-o5xqxfpv2.webp",
+      "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
       "/ispir-pestil-kurutma-gercek.png"
     ],
     sku: "PRD-PK-001",
@@ -64,11 +64,11 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Geleneksel Pekmezler",
     desc: "Geleneksel vakumlu kaynatma tekniği ile yüksek HMF değerleri üretilmeden, vitamin ve mineralleri korunarak üretilen premium karadut özü.",
     meta: "450g · Şişe Şeklinde Cam",
-    price: 320,
-    image: "/premium-pekefe-kavanoz.png",
+    price: 450,
+    image: "/uploads/1785877091526-7ah5uox7t.webp",
     images: [
-      "/premium-pekefe-kavanoz.png",
-      "/pekefe-dut-pekmezi-kavanoz.jpg",
+      "/uploads/1785877091526-7ah5uox7t.webp",
+      "/premium-pekefe-kavanoz-tr.png",
       "/ispir-dut-hasadi.png"
     ],
     sku: "PRD-PK-042",
@@ -95,12 +95,12 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Pestil & Köme",
     desc: "Dut şırası ve tam buğday ununun bakır kazanlarda pişirilip keten sergiler üzerinde İspir güneşi altında kurutulmasıyla üretilen incecik sade pestil.",
     meta: "500g · Kraft Kutu",
-    price: 180,
-    image: "/ispir-pestil-kurutma-gercek.png",
+    price: 225,
+    image: "/uploads/1785879506228-y5wufiq7k.webp",
     images: [
+      "/uploads/1785879506228-y5wufiq7k.webp",
       "/ispir-pestil-kurutma-gercek.png",
-      "/ispir-vakum-sade-pestil-beyaz.png",
-      "/premium-pekefe-kavanoz.png"
+      "/ispir-vakum-sade-pestil-beyaz.png"
     ],
     sku: "PRD-PS-001",
     stock: 64,
@@ -126,12 +126,12 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Pestil & Köme",
     desc: "İspir yöresinin yerli cevizleriyle harmanlanan, ipeksi kıvamda serilen geleneksel dut pestilinin rulo haline getirilmiş en asil şekli.",
     meta: "500g · Premium Hediye Kutusu",
-    price: 220,
-    image: "/ispir-vakum-cevizli-pestil-beyaz.png",
+    price: 250,
+    image: "/uploads/1785884108715-kh0virvsq.webp",
     images: [
+      "/uploads/1785884108715-kh0virvsq.webp",
       "/ispir-vakum-cevizli-pestil-beyaz.png",
-      "/ispir-pestil-kurutma-gercek.png",
-      "/premium-pekefe-kavanoz.png"
+      "/ispir-pestil-kurutma-gercek.png"
     ],
     sku: "PRD-PS-002",
     stock: 48,
@@ -157,7 +157,7 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Pestil & Köme",
     desc: "İpe dizilen taze İspir cevizlerinin, kaynayan dut herlesine (şıra karışımı) defalarca batırılarak güneşte kurutulmasıyla elde edilen efsanevi lezzet.",
     meta: "1kg · Pamuk Torba",
-    price: 380,
+    price: 300,
     image: "/ispir-kome-gercek-hasat.jpg",
     images: [
       "/ispir-kome-gercek-hasat.jpg",
@@ -188,7 +188,7 @@ export const DEFAULT_PRODUCTS = [
     categoryDisplay: "Pestil & Köme",
     desc: "Dullerine sadece tek daldırma yapılarak ceviz yoğunluğu en üst seviyede tutulmuş, hafif tatlı butik seri.",
     meta: "500g · Butik Paket",
-    price: 240,
+    price: 325,
     image: "/ispir-kome-beyaz.png",
     images: [
       "/ispir-kome-beyaz.png",
@@ -218,9 +218,9 @@ export const DEFAULT_PRODUCTS = [
     category: "tatli",
     categoryDisplay: "Geleneksel Tatlılar",
     desc: "İncecik kesilen sade dut pestilinin içerisine yerli ceviz, bal ve pekmez karışımı muska şeklinde sarılarak elde edilen enfes saray tatlısı.",
-    meta: "350g · Özel Sunum Kabı",
-    price: 200,
-    image: "/uploads/ispir-muska-kome-saray-tatlilari.webp",
+    meta: "450g · Şeffaf Ambalaj",
+    price: 350,
+    image: "/uploads/1785882201177-v93f9bbpg.webp",
     images: [
       "/uploads/ispir-muska-kome-saray-tatlilari.webp",
       "/ispir-vakum-sade-pestil-beyaz.png",

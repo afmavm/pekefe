@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -76,16 +76,11 @@ export default function Home() {
     };
   }, []);
 
-  const [productsState, setProductsState] = useState([]);
+  const [productsState, setProductsState] = useState(() => getProducts());
 
   useEffect(() => {
-    // Always clear stale localStorage cache and fetch fresh data from DB
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("pekefe_products_state");
-    }
     fetchLiveProducts().then((live) => {
       if (live && live.length > 0) setProductsState(live);
-      else setProductsState(getProducts());
     });
 
     const handleProductsChange = () => {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -633,7 +633,7 @@ export default function Hesap() {
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-bold text-slate-800 text-sm truncate">{fav.name}</h3>
+                          <h3 className="font-bold text-on-surface text-sm truncate">{fav.name}</h3>
                           <p className="text-amber-700 font-bold text-sm font-mono mt-1">{fav.price}</p>
                           {fav.weight && <span className="text-[10px] text-slate-400 font-semibold uppercase">{fav.weight}</span>}
                         </div>
@@ -657,3 +657,4 @@ export default function Hesap() {
     </div>
   );
 }
+

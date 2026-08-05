@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -98,7 +98,7 @@ export default function Blog() {
               ></div>
               <div className="absolute inset-0 bg-gradient-to-t from-[#7f1d1d]/90 via-[#7f1d1d]/40 to-transparent"></div>
               <div className="absolute bottom-0 left-0 p-6 md:p-12 max-w-2xl text-white">
-                <span className="bg-[#d97706] text-white px-3 py-1 rounded-full text-label-sm font-label-sm mb-4 inline-block uppercase tracking-widest font-bold">
+                <span className="bg-secondary text-white px-3 py-1 rounded-full text-label-sm font-label-sm mb-4 inline-block uppercase tracking-widest font-bold">
                   {heroArticle.category || "Öne Çıkan"}
                 </span>
                 <h1 className="font-display text-[24px] md:text-4xl font-bold mb-4 md:mb-6 leading-tight text-white">
@@ -108,7 +108,7 @@ export default function Blog() {
                   {heroArticle.metaDesc || heroArticle.title}
                 </p>
                 <Link
-                  className="inline-flex items-center gap-2 bg-white text-[#7f1d1d] px-8 py-4 rounded-lg font-bold hover:translate-y-[-2px] transition-all shadow-lg active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-2 bg-white text-primary px-8 py-4 rounded-lg font-bold hover:translate-y-[-2px] transition-all shadow-lg active:scale-95 cursor-pointer"
                   href={`/blog/${heroArticle.slug}`}
                 >
                   Yazıyı İncele
@@ -130,8 +130,8 @@ export default function Blog() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`font-label-md pb-2 whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === cat.id
-                      ? "text-[#7f1d1d] border-b-2 border-[#7f1d1d] font-bold"
-                      : "text-slate-600 hover:text-[#7f1d1d]"
+                      ? "text-primary border-b-2 border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary"
                   }`}
                 >
                   {cat.name}
@@ -166,7 +166,7 @@ export default function Blog() {
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
-                        <span className="absolute top-4 left-4 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#7f1d1d] text-white">
+                        <span className="absolute top-4 left-4 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary text-white">
                           {art.category || "Genel"}
                         </span>
                       </div>
@@ -181,17 +181,17 @@ export default function Blog() {
                             })}
                           </span>
                         </div>
-                        <h3 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-[#7f1d1d] transition-colors leading-snug">
+                        <h3 className="font-bold text-xl text-on-surface mb-3 group-hover:text-primary transition-colors leading-snug">
                           <Link href={`/blog/${art.slug}`}>{art.title}</Link>
                         </h3>
-                        <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed">
+                        <p className="text-on-surface-variant text-sm mb-6 line-clamp-3 leading-relaxed">
                           {art.metaDesc || art.title}
                         </p>
                       </div>
                     </div>
                     <div className="px-6 md:px-8 pb-6 pt-0">
                       <Link
-                        className="inline-flex items-center gap-2 text-[#7f1d1d] font-bold hover:translate-x-1 transition-transform group/link text-sm"
+                        className="inline-flex items-center gap-2 text-primary font-bold hover:translate-x-1 transition-transform group/link text-sm"
                         href={`/blog/${art.slug}`}
                       >
                         <span>Devamını Oku</span>
@@ -207,7 +207,7 @@ export default function Blog() {
           {/* Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 space-y-12">
             {/* Newsletter Signup (Sidebar) */}
-            <div className="bg-[#7f1d1d] p-8 rounded-xl text-white relative overflow-hidden shadow-sm">
+            <div className="bg-primary p-8 rounded-xl text-white relative overflow-hidden shadow-sm">
               <div className="relative z-10">
                 <h4 className="font-display text-2xl font-bold mb-3 leading-tight text-white">
                   Hikayeleri Kaçırmayın
@@ -226,7 +226,7 @@ export default function Blog() {
                   />
                   <button
                     disabled={submitting}
-                    className="w-full bg-[#d97706] text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors active:scale-95 cursor-pointer text-sm disabled:opacity-50"
+                    className="w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors active:scale-95 cursor-pointer text-sm disabled:opacity-50"
                     type="submit"
                   >
                     {submitting ? "Kayıt Olunuyor..." : "Kayıt Ol"}
@@ -237,8 +237,8 @@ export default function Blog() {
 
             {/* Most Popular / Son Eklenenler */}
             <div>
-              <h4 className="font-bold text-slate-900 text-lg mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#d97706]">auto_awesome</span>
+              <h4 className="font-bold text-on-surface text-lg mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary">auto_awesome</span>
                 Öne Çıkan Yazılar
               </h4>
               <div className="space-y-6">
@@ -254,10 +254,10 @@ export default function Blog() {
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-[#7f1d1d] tracking-wider block mb-1">
+                      <span className="text-[10px] uppercase font-bold text-primary tracking-wider block mb-1">
                         {art.category || "Genel"}
                       </span>
-                      <h5 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-[#7f1d1d] transition-colors line-clamp-2">
+                      <h5 className="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors line-clamp-2">
                         {art.title}
                       </h5>
                     </div>
@@ -278,3 +278,5 @@ export default function Blog() {
     </>
   );
 }
+
+

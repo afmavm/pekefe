@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -340,12 +340,12 @@ export default function Odeme() {
         </div>
         <div className="w-10 md:w-16 h-[2px] bg-emerald-600"></div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#6b1d2f] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#6b1d2f]/20">2</div>
-          <span className="font-label-md text-[#6b1d2f] font-bold text-xs md:text-sm">Teslimat & Ödeme</span>
+          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#6b1d2f]/20">2</div>
+          <span className="font-label-md text-primary font-bold text-xs md:text-sm">Teslimat & Ödeme</span>
         </div>
         <div className="w-10 md:w-16 h-[2px] bg-gray-200"></div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-bold text-xs">3</div>
+          <div className="w-8 h-8 rounded-full bg-surface-container text-gray-400 flex items-center justify-center font-bold text-xs">3</div>
           <span className="font-label-md text-gray-400 text-xs md:text-sm">Sipariş Onayı</span>
         </div>
       </div>
@@ -355,25 +355,25 @@ export default function Odeme() {
         <div className="lg:col-span-8 space-y-8">
 
           {/* Section 1: Delivery Address */}
-          <section className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-xl">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-              <div className="w-10 h-10 rounded-xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center">
+          <section className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/20">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">local_shipping</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#1a0a10]">Teslimat & İletişim Bilgileri</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Siparişinizin ulaştırılacağı adresi ve iletişim bilgilerini giriniz.</p>
+                <h2 className="text-xl font-bold text-on-surface">Teslimat & İletişim Bilgileri</h2>
+                <p className="text-xs text-on-surface-variant mt-0.5">Siparişinizin ulaştırılacağı adresi ve iletişim bilgilerini giriniz.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">ADINIZ *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">ADINIZ *</label>
                 <input
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
                   placeholder="Ahmet"
                   type="text"
                   required
@@ -381,12 +381,12 @@ export default function Odeme() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">SOYADINIZ *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">SOYADINIZ *</label>
                 <input
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
                   placeholder="Yılmaz"
                   type="text"
                   required
@@ -394,12 +394,12 @@ export default function Odeme() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">TELEFON *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">TELEFON *</label>
                 <input
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
                   placeholder="05XX XXX XX XX"
                   type="tel"
                   required
@@ -407,25 +407,25 @@ export default function Odeme() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">E-POSTA ADRESİ</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">E-POSTA ADRESİ</label>
                 <input
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
                   placeholder="ahmet@example.com"
                   type="email"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">ŞEHİR *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">ŞEHİR *</label>
                 <select
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
                 >
                   <option value="" disabled>İl Seçiniz</option>
                   {Object.keys(turkeyLocations)
@@ -439,14 +439,14 @@ export default function Odeme() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">İLÇE *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">İLÇE *</label>
                 {formData.city && turkeyLocations[formData.city]?.length > 0 ? (
                   <select
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none cursor-pointer"
                   >
                     <option value="" disabled>İlçe Seçiniz</option>
                     {turkeyLocations[formData.city].map((d) => (
@@ -460,7 +460,7 @@ export default function Odeme() {
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
                     placeholder="İlçe giriniz"
                     type="text"
                     required
@@ -469,12 +469,12 @@ export default function Odeme() {
               </div>
 
               <div className="md:col-span-2 space-y-1.5">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">AÇIK ADRES *</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">AÇIK ADRES *</label>
                 <textarea
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none resize-none"
                   placeholder="Mahalle, Sokak, Bina No, Daire No..."
                   rows={3}
                   required
@@ -484,23 +484,23 @@ export default function Odeme() {
           </section>
 
           {/* Section 2: Shipping Method & Cargo Carrier */}
-          <section className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-xl space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="w-10 h-10 rounded-xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center">
+          <section className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-outline-variant/20">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">package_2</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#1a0a10]">Kargo & Gönderim Seçenekleri</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Teslimat hızınızı ve kargo firmanızı belirleyin.</p>
+                <h2 className="text-xl font-bold text-on-surface">Kargo & Gönderim Seçenekleri</h2>
+                <p className="text-xs text-on-surface-variant mt-0.5">Teslimat hızınızı ve kargo firmanızı belirleyin.</p>
               </div>
             </div>
 
             {/* Carrier Selection */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Kargo Firması Tercihi</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Kargo Firması Tercihi</label>
                 {totalCartDesi > 0 && (
-                  <span className="text-[11px] font-semibold text-[#6b1d2f] bg-[#6b1d2f]/5 px-2.5 py-1 rounded-full border border-[#6b1d2f]/10 flex items-center gap-1">
+                  <span className="text-[11px] font-semibold text-primary bg-primary/5 px-2.5 py-1 rounded-full border border-primary/10 flex items-center gap-1">
                     <span className="material-symbols-outlined text-xs">scale</span>
                     <span>Sepet Hacmi: <strong>{totalCartDesi} Desi/Kg</strong></span>
                   </span>
@@ -519,12 +519,12 @@ export default function Odeme() {
                       onClick={() => setSelectedCarrier(c.name)}
                       className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                         isSelected
-                          ? "border-[#6b1d2f] bg-[#6b1d2f] text-white shadow-md scale-[1.02]"
-                          : "border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100"
+                          ? "border-primary bg-primary text-white shadow-md scale-[1.02]"
+                          : "border-outline-variant/30 text-gray-700 bg-surface-container-lowest hover:bg-surface-container"
                       }`}
                     >
                       <span className="text-sm">{c.name}</span>
-                      <span className={`text-[11px] font-extrabold ${isSelected ? "text-amber-300" : isFree ? "text-emerald-600" : "text-[#6b1d2f]"}`}>
+                      <span className={`text-[11px] font-extrabold ${isSelected ? "text-amber-300" : isFree ? "text-emerald-600" : "text-primary"}`}>
                         {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
                       </span>
                     </button>
@@ -535,15 +535,15 @@ export default function Odeme() {
           </section>
 
           {/* Section 3: Payment Method Tabs */}
-          <section className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+          <section className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                   <span className="material-symbols-outlined text-xl">payments</span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-[#1a0a10]">Ödeme Yöntemi Seçimi</h2>
-                  <p className="text-xs text-gray-500 mt-0.5">Tercih ettiğiniz güvenli ödeme yöntemini belirleyin.</p>
+                  <h2 className="text-xl font-bold text-on-surface">Ödeme Yöntemi Seçimi</h2>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Tercih ettiğiniz güvenli ödeme yöntemini belirleyin.</p>
                 </div>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1 text-xs font-bold">
@@ -559,8 +559,8 @@ export default function Odeme() {
                 onClick={() => setPaymentMethod("creditCard")}
                 className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   paymentMethod === "creditCard"
-                    ? "border-[#6b1d2f] bg-[#6b1d2f]/5 shadow-sm text-[#6b1d2f]"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    ? "border-primary bg-primary/5 shadow-sm text-primary"
+                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">credit_card</span>
@@ -572,8 +572,8 @@ export default function Odeme() {
                 onClick={() => setPaymentMethod("bankTransfer")}
                 className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer relative ${
                   paymentMethod === "bankTransfer"
-                    ? "border-[#6b1d2f] bg-[#6b1d2f]/5 shadow-sm text-[#6b1d2f]"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    ? "border-primary bg-primary/5 shadow-sm text-primary"
+                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
                 }`}
               >
                 {bankDiscountRate > 0 && (
@@ -590,8 +590,8 @@ export default function Odeme() {
                 onClick={() => setPaymentMethod("openAccount")}
                 className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   paymentMethod === "openAccount"
-                    ? "border-[#6b1d2f] bg-[#6b1d2f]/5 shadow-sm text-[#6b1d2f]"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    ? "border-primary bg-primary/5 shadow-sm text-primary"
+                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">receipt_long</span>
@@ -603,11 +603,11 @@ export default function Odeme() {
             {paymentMethod === "creditCard" && (
               <div className="space-y-4 pt-2 animate-in fade-in duration-200">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">KART ÜZERİNDEKİ İSİM *</label>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART ÜZERİNDEKİ İSİM *</label>
                   <input
                     value={nameOnCard}
                     onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-semibold outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-semibold outline-none"
                     placeholder="AHMET YILMAZ"
                     type="text"
                     required
@@ -615,19 +615,19 @@ export default function Odeme() {
                 </div>
 
                 <div className="space-y-1.5 relative">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">KART NUMARASI *</label>
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART NUMARASI *</label>
                   <div className="relative">
                     <input
                       value={cardNumber}
                       onChange={handleCardNumberChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono tracking-wider outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono tracking-wider outline-none"
                       placeholder="0000 0000 0000 0000"
                       type="text"
                       maxLength={19}
                       required
                     />
                     {getCardBrand() && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black tracking-widest px-2 py-0.5 bg-[#6b1d2f] text-white rounded">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black tracking-widest px-2 py-0.5 bg-primary text-white rounded">
                         {getCardBrand()}
                       </span>
                     )}
@@ -636,11 +636,11 @@ export default function Odeme() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">SON KULLANMA *</label>
+                    <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">SON KULLANMA *</label>
                     <input
                       value={expiry}
                       onChange={handleExpiryChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
                       placeholder="AA/YY"
                       type="text"
                       maxLength={5}
@@ -649,11 +649,11 @@ export default function Odeme() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">CVV / GÜVENLİK KODU *</label>
+                    <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">CVV / GÜVENLİK KODU *</label>
                     <input
                       value={cvv}
                       onChange={handleCvvChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
                       placeholder="123"
                       type="password"
                       maxLength={3}
@@ -678,19 +678,19 @@ export default function Odeme() {
                   {bankAccounts && bankAccounts.length > 0 ? (
                     bankAccounts.map((bank, idx) => (
                       <div key={bank.id || idx} className={`space-y-1.5 ${idx > 0 ? "pt-3 border-t border-amber-100" : ""}`}>
-                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
-                          <span className="text-gray-500 font-sans font-medium">Banka:</span>
-                          <span className="font-bold text-[#1a0a10]">{bank.name} {bank.branch ? `- ${bank.branch}` : ""}</span>
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1.5">
+                          <span className="text-on-surface-variant font-sans font-medium">Banka:</span>
+                          <span className="font-bold text-on-surface">{bank.name} {bank.branch ? `- ${bank.branch}` : ""}</span>
                         </div>
-                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
-                          <span className="text-gray-500 font-sans font-medium">Alıcı Ünvanı:</span>
-                          <span className="font-bold text-[#1a0a10]">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1.5">
+                          <span className="text-on-surface-variant font-sans font-medium">Alıcı Ünvanı:</span>
+                          <span className="font-bold text-on-surface">
                             {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
                           </span>
                         </div>
                         <div className="flex justify-between items-center pt-0.5">
-                          <span className="text-gray-500 font-sans font-medium">IBAN:</span>
-                          <span className="font-bold text-[#6b1d2f] text-sm tracking-wider select-all">
+                          <span className="text-on-surface-variant font-sans font-medium">IBAN:</span>
+                          <span className="font-bold text-primary text-sm tracking-wider select-all">
                             {bank.iban || "TR42 0001 0002 0003 0004 0005 01"}
                             {bank.currency && bank.currency !== "TRY" ? ` (${bank.currency})` : ""}
                           </span>
@@ -699,21 +699,21 @@ export default function Odeme() {
                     ))
                   ) : (
                     <div className="space-y-1.5">
-                      <div className="flex justify-between border-b border-gray-100 pb-2">
-                        <span className="text-gray-500 font-sans">Banka:</span>
-                        <span className="font-bold text-[#1a0a10]">
+                      <div className="flex justify-between border-b border-outline-variant/20 pb-2">
+                        <span className="text-on-surface-variant font-sans">Banka:</span>
+                        <span className="font-bold text-on-surface">
                           {siteSettings?.bankName || "Ziraat Bankası - İspir Şubesi"}
                         </span>
                       </div>
-                      <div className="flex justify-between border-b border-gray-100 pb-2">
-                        <span className="text-gray-500 font-sans">Alıcı Ünvanı:</span>
-                        <span className="font-bold text-[#1a0a10]">
+                      <div className="flex justify-between border-b border-outline-variant/20 pb-2">
+                        <span className="text-on-surface-variant font-sans">Alıcı Ünvanı:</span>
+                        <span className="font-bold text-on-surface">
                           {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 font-sans">IBAN:</span>
-                        <span className="font-bold text-[#6b1d2f] text-sm tracking-wider select-all">
+                        <span className="text-on-surface-variant font-sans">IBAN:</span>
+                        <span className="font-bold text-primary text-sm tracking-wider select-all">
                           {siteSettings?.bankIban || "TR42 0001 0002 0003 0004 0005 01"}
                         </span>
                       </div>
@@ -729,17 +729,17 @@ export default function Odeme() {
 
             {/* TAB 3: B2B OPEN ACCOUNT */}
             {paymentMethod === "openAccount" && (
-              <div className="p-6 rounded-2xl bg-[#6b1d2f]/5 border border-[#6b1d2f]/20 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-[#6b1d2f] font-bold text-sm">
-                  <span className="material-symbols-outlined text-[#6b1d2f]">verified</span>
+              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                  <span className="material-symbols-outlined text-primary">verified</span>
                   <span>B2B Kurumsal Bayi Vadeli Cari Ödeme</span>
                 </div>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   Bu ödeme yöntemi yalnızca anlaşmalı onaylı B2B kurumsal bayilerimiz için geçerlidir. Sipariş tutarı cari hesabınıza borç olarak yansıtılacak ve belirlenen vadede tahsil edilecektir.
                 </p>
-                <div className="p-3 bg-white rounded-xl border border-gray-200 flex justify-between text-xs">
+                <div className="p-3 bg-surface rounded-xl border border-outline-variant/30 flex justify-between text-xs">
                   <span className="font-semibold text-gray-600">İşlem Türü:</span>
-                  <span className="font-bold text-[#6b1d2f]">Cari Hesap Vadeli Borçlandırma</span>
+                  <span className="font-bold text-primary">Cari Hesap Vadeli Borçlandırma</span>
                 </div>
               </div>
             )}
@@ -748,32 +748,38 @@ export default function Odeme() {
 
         {/* Right Sticky Order Summary */}
         <aside className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
-          <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-xl space-y-6">
-            <h3 className="text-xl font-bold text-[#1a0a10] pb-4 border-b border-gray-100">
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl space-y-6">
+            <h3 className="text-xl font-bold text-on-surface pb-4 border-b border-outline-variant/20">
               Sipariş Özeti ({cartItems.length} Kalem)
             </h3>
 
             {/* Cart Items Thumbnails */}
             <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50 border border-gray-100">
-                  <div className="w-12 h-12 rounded-lg bg-white relative overflow-hidden flex-shrink-0 border border-gray-200">
+                <div key={item.id} className="flex items-center gap-3 p-2 rounded-xl bg-surface-container-lowest border border-outline-variant/20">
+                  <div className="w-12 h-12 rounded-lg bg-surface relative overflow-hidden flex-shrink-0 border border-outline-variant/30">
                     <Image src={item.img || item.image || "/premium-pekefe-kavanoz.png"} alt={item.name} fill className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-[#1a0a10] truncate">{item.name}</div>
-                    <div className="text-[10px] text-gray-500">{item.quantity} Adet</div>
+                    <div className="text-xs font-bold text-on-surface truncate">{item.name}</div>
+                    {item.variantLabel && (
+                      <div className="text-[10px] text-on-surface-variant mt-0.5 flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-primary/50 flex-shrink-0" />
+                        {item.variantLabel}
+                      </div>
+                    )}
+                    <div className="text-[10px] text-on-surface-variant">{item.quantity} Adet</div>
                   </div>
-                  <div className="text-xs font-bold text-[#6b1d2f]">₺{(item.price * item.quantity).toLocaleString("tr-TR")}</div>
+                  <div className="text-xs font-bold text-primary">₺{(item.price * item.quantity).toLocaleString("tr-TR")}</div>
                 </div>
               ))}
             </div>
 
             {/* Cost Breakdown */}
-            <div className="space-y-3 pt-4 border-t border-gray-100 text-xs">
+            <div className="space-y-3 pt-4 border-t border-outline-variant/20 text-xs">
               <div className="flex justify-between text-gray-600">
                 <span>Ürünler Ara Toplamı</span>
-                <span className="font-bold text-[#1a0a10]">₺{subtotal.toLocaleString("tr-TR")}</span>
+                <span className="font-bold text-on-surface">₺{subtotal.toLocaleString("tr-TR")}</span>
               </div>
 
               {bankDiscount > 0 && (
@@ -785,19 +791,19 @@ export default function Odeme() {
 
               <div className="flex justify-between text-gray-600">
                 <span>Kargo Bedeli ({selectedCarrier})</span>
-                <span className="font-bold text-[#1a0a10]">
+                <span className="font-bold text-on-surface">
                   {shippingCost === 0 ? <span className="text-emerald-600 font-bold">ÜCRETSİZ</span> : `₺${shippingCost}`}
                 </span>
               </div>
 
-              <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline">
-                <span className="text-base font-bold text-[#1a0a10]">Genel Toplam</span>
-                <span className="text-2xl font-bold text-[#6b1d2f]">
+              <div className="pt-3 border-t border-outline-variant/20 flex justify-between items-baseline">
+                <span className="text-base font-bold text-on-surface">Genel Toplam</span>
+                <span className="text-2xl font-bold text-primary">
                   ₺{grandTotal.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-gray-50 text-[10px] text-gray-500 text-center font-semibold border border-gray-200/80">
+              <div className="p-2.5 rounded-xl bg-surface-container-lowest text-[10px] text-on-surface-variant text-center font-semibold border border-outline-variant/30/80">
                 Tüm Fiyatlara %{siteSettings?.companyDefaultKdv ?? 10} Gıda KDV'si Dâhildir
               </div>
             </div>
@@ -830,13 +836,13 @@ export default function Odeme() {
             </button>
 
             {/* Security Badges */}
-            <div className="pt-2 space-y-2 text-[11px] text-gray-500">
+            <div className="pt-2 space-y-2 text-[11px] text-on-surface-variant">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#6b1d2f] text-base">verified_user</span>
+                <span className="material-symbols-outlined text-primary text-base">verified_user</span>
                 <span>256-bit SSL şifreleme ile verileriniz %100 güvendedir.</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#6b1d2f] text-base">assignment_return</span>
+                <span className="material-symbols-outlined text-primary text-base">assignment_return</span>
                 <span>{siteSettings?.companyDefaultReturnDays ?? 14} gün içinde koşulsuz ücretsiz iade garantisi.</span>
               </div>
             </div>
@@ -853,3 +859,4 @@ export default function Odeme() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import Link from "next/link";
@@ -31,9 +31,9 @@ export default function Hikayemiz() {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen bg-[#FAF9F6] text-on-surface overflow-hidden">
+    <div className="relative w-full min-h-screen bg-surface text-on-surface overflow-hidden">
       {/* Subtle background grain grid */}
-      <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
+      <div className="absolute inset-0 bg-surface-container-lowest pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
 
       {/* ─── HERO SECTION (Cinematic Editorial Header) ─── */}
       <header className="relative h-[65vh] min-h-[500px] max-h-[700px] flex items-center justify-center overflow-hidden">
@@ -371,3 +371,5 @@ export default function Hikayemiz() {
     </div>
   );
 }
+
+

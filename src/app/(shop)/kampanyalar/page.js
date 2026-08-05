@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -83,7 +83,7 @@ export default function Kampanyalar() {
   ];
 
   return (
-    <div className="w-full bg-[#FAF9F6] text-slate-800 antialiased min-h-screen">
+    <div className="w-full bg-surface text-on-surface antialiased min-h-screen">
       {/* 1. HERO SECTION: Quiet Luxury Editorial Banner */}
       <section className="relative h-[60vh] min-h-[480px] max-h-[650px] flex items-center justify-center overflow-hidden">
         <Image
@@ -113,14 +113,14 @@ export default function Kampanyalar() {
       {/* 2. HASAT SEÇKİLERİ & HEDİYE KOLEKSİYONLARI */}
       <section className="py-20 md:py-28 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+          <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
             ÖZEL GURME SEÇKİLERİ
           </span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface">
             Zanaatkar Ustalığıyla Hazırlanan İkramlıklar
           </h2>
-          <div className="w-12 h-[1px] bg-[#d97706] mx-auto"></div>
-          <p className="text-slate-600 text-base leading-relaxed">
+          <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
+          <p className="text-on-surface-variant text-base leading-relaxed">
             Pekefe ürünleri sadece bir besin değil; sevdiklerinize armağan edebileceğiniz zamansız bir sofra deneyimidir.
           </p>
         </div>
@@ -140,19 +140,19 @@ export default function Kampanyalar() {
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <span className="absolute top-4 left-4 bg-[#7f1d1d] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
+                  <span className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
                     {bundle.badge}
                   </span>
                 </div>
 
                 <div className="p-6 md:p-8 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#d97706] block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-secondary block">
                     {bundle.category}
                   </span>
-                  <h3 className="font-display text-2xl font-bold text-slate-900 group-hover:text-[#7f1d1d] transition-colors leading-snug">
+                  <h3 className="font-display text-2xl font-bold text-on-surface group-hover:text-primary transition-colors leading-snug">
                     {bundle.title}
                   </h3>
-                  <p className="text-slate-600 text-sm leading-relaxed font-light">
+                  <p className="text-on-surface-variant text-sm leading-relaxed font-light">
                     {bundle.desc}
                   </p>
                 </div>
@@ -161,7 +161,7 @@ export default function Kampanyalar() {
               <div className="p-6 md:p-8 pt-0">
                 <Link
                   href={bundle.href}
-                  className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#7f1d1d] font-bold hover:translate-x-1 transition-transform"
+                  className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-primary font-bold hover:translate-x-1 transition-transform"
                 >
                   <span>Koleksiyonu İncele</span>
                   <span className="material-symbols-outlined text-sm">east</span>
@@ -173,15 +173,15 @@ export default function Kampanyalar() {
       </section>
 
       {/* 3. PEKEFE DOSTU & SADAQAT / ÖNCELİKLİ MAHSUL KULÜBÜ */}
-      <section className="py-20 bg-[#F5F2EC] border-y border-slate-200/60">
+      <section className="py-20 bg-surface-container-lowest border-y border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-6 space-y-6">
-              <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+              <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
                 PEKEFE CEMAATİ & KULÜBÜ
               </span>
-              <h2 className="font-display text-3xl md:text-5xl font-bold text-slate-900 leading-tight">
+              <h2 className="font-display text-3xl md:text-5xl font-bold text-on-surface leading-tight">
                 Erken Hasat Daveti & Dostluk Ayrıcalığı
               </h2>
               <p className="text-slate-700 text-base md:text-lg leading-relaxed font-light">
@@ -190,24 +190,24 @@ export default function Kampanyalar() {
 
               <div className="space-y-4 pt-2">
                 <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
-                  <div className="w-10 h-10 rounded-lg bg-[#7f1d1d]/10 text-[#7f1d1d] flex items-center justify-center shrink-0 font-bold">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold">
                     <span className="material-symbols-outlined">nature_people</span>
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base">Erken Hasat Önceliği</h4>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <h4 className="font-bold text-on-surface text-base">Erken Hasat Önceliği</h4>
+                    <p className="text-xs text-on-surface-variant mt-1">
                       Temmuz ve Ağustos aylarında toplanan ilk sıkım pekmez ve taze pestil mahsullerinden öncelikli haberdar olma hakkı.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
-                  <div className="w-10 h-10 rounded-lg bg-[#d97706]/10 text-[#d97706] flex items-center justify-center shrink-0 font-bold">
+                  <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0 font-bold">
                     <span className="material-symbols-outlined">card_giftcard</span>
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base">Özel Kutulu İkram Paketleri</h4>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <h4 className="font-bold text-on-surface text-base">Özel Kutulu İkram Paketleri</h4>
+                    <p className="text-xs text-on-surface-variant mt-1">
                       Özel günlerde sevdiklerinize gönderebileceğiniz isimli ve ahşap kutulu gastronomi sunum ayrıcalığı.
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export default function Kampanyalar() {
               <div className="pt-4">
                 <Link
                   href="/kayit"
-                  className="inline-flex items-center gap-3 bg-[#7f1d1d] text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all shadow-md active:scale-95"
+                  className="inline-flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all shadow-md active:scale-95"
                 >
                   <span>Pekefe Dostu Olun</span>
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -248,7 +248,7 @@ export default function Kampanyalar() {
 
       {/* 4. KURUMSAL & RESTORAN GASTRONOMİ TEDARİĞİ */}
       <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-[#7f1d1d] text-white rounded-3xl p-8 md:p-16 relative overflow-hidden shadow-lg">
+        <div className="bg-primary text-white rounded-3xl p-8 md:p-16 relative overflow-hidden shadow-lg">
           <div className="relative z-10 max-w-3xl space-y-6">
             <span className="text-amber-200 font-bold text-xs uppercase tracking-[0.25em] block">
               B2B & KURUMSAL TEDARİK
@@ -262,7 +262,7 @@ export default function Kampanyalar() {
             <div className="pt-2">
               <Link
                 href="/iletisim"
-                className="inline-flex items-center gap-3 bg-white text-[#7f1d1d] px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-amber-100 transition-all shadow-md active:scale-95"
+                className="inline-flex items-center gap-3 bg-white text-primary px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-amber-100 transition-all shadow-md active:scale-95"
               >
                 <span>Kurumsal İletişime Geçin</span>
                 <span className="material-symbols-outlined text-sm">mail</span>
@@ -275,13 +275,13 @@ export default function Kampanyalar() {
       {/* 5. E-POSTA AYRICALIK BÜLTENİ */}
       <section className="py-20 bg-white border-t border-slate-200">
         <div className="max-w-3xl mx-auto px-4 text-center space-y-6">
-          <span className="text-[#7f1d1d] font-bold text-xs uppercase tracking-[0.25em] block">
+          <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
             BÜLTEN ABONELİĞİ
           </span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface">
             Hasat Dönemlerini İlk Siz Öğrenin
           </h2>
-          <p className="text-slate-600 text-sm md:text-base leading-relaxed font-light">
+          <p className="text-on-surface-variant text-sm md:text-base leading-relaxed font-light">
             Erzurum İspir'in yeni sezon üretim takvimi, özel ikramlık seçkileri ve editoryal tarif bültenimiz için e-posta adresinizi bırakabilirsiniz.
           </p>
 
@@ -293,18 +293,18 @@ export default function Kampanyalar() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="E-posta adresiniz"
-                className="flex-1 bg-[#FAF9F6] border border-slate-300 rounded-xl px-5 py-4 text-slate-800 placeholder:text-slate-400 focus:ring-1 focus:ring-[#7f1d1d] outline-none text-sm"
+                className="flex-1 bg-surface border border-slate-300 rounded-xl px-5 py-4 text-on-surface placeholder:text-slate-400 focus:ring-1 focus:ring-[#7f1d1d] outline-none text-sm"
               />
               <button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#7f1d1d] text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all disabled:opacity-50 active:scale-95"
+                className="bg-primary text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all disabled:opacity-50 active:scale-95"
               >
                 {submitting ? "Kaydediliyor..." : "Kayıt Ol"}
               </button>
             </form>
           ) : (
-            <div className="p-6 bg-[#fdfbf7] border border-[#f3eee3] rounded-2xl max-w-md mx-auto text-emerald-800 font-medium text-sm">
+            <div className="p-6 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl max-w-md mx-auto text-emerald-800 font-medium text-sm">
               ✓ Ayrıcalık bültenimize kaydoldunuz. Yeni sezon gelişmelerini e-postanıza ileteceğiz.
             </div>
           )}
@@ -320,3 +320,5 @@ export default function Kampanyalar() {
     </div>
   );
 }
+
+

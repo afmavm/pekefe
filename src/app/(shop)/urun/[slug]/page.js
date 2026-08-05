@@ -380,13 +380,15 @@ export default function UrunDetay({ params }) {
       ...product,
       id: uniqueCartId,
       productId: product.id,
-      name: variantLabel ? `${product.name} (${variantLabel})` : product.name,
+      name: product.name,
+      variantLabel,                                      // ← varyant bilgisi sepette gösterilecek
       price: finalPrice,
       sku: selectedVariant?.sku || product.sku || product.id
     };
     const success = addToCart(cartItem, quantity);
     if (success !== false) {
-      setToastMsg(`${cartItem.name} (${quantity} adet) sepete eklendi!`);
+      const displayLabel = variantLabel ? ` · ${variantLabel}` : "";
+      setToastMsg(`${product.name}${displayLabel} (${quantity} adet) sepete eklendi!`);
       setToastOpen(true);
     }
   };

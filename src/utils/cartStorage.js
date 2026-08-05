@@ -32,6 +32,7 @@ function normalizeItems(items) {
       id: String(item.id),
       name: cleanName,
       quantity: item.quantity || item.qty || 1,
+      variantLabel: item.variantLabel || "",
       desc: item.desc || `${cleanName} · Premium Kavanoz`,
       badge: item.badge || "Geleneksel",
       img: item.img || item.image || "/premium-pekefe-kavanoz.png",
@@ -90,6 +91,18 @@ export function addToCart(product, quantity = 1) {
       ? product.images[0]
       : (product.image || product.img || "/premium-pekefe-kavanoz.png");
 
+    // Build variant label: prefer explicit variantLabel, then size·color from selected variant attrs
+    let variantLabel = product.variantLabel || "";
+    if (!variantLabel && product.selectedVariant) {
+      const v = product.selectedVariant;
+      let attrs = v.attributes;
+      if (typeof attrs === "string") { try { attrs = JSON.parse(attrs); } catch(e) {} }
+      const size  = (attrs?.size  || "").trim();
+      const color = (attrs?.color || "").trim();
+      if (size && color && size !== color) variantLabel = `${size} · ${color}`;
+      else variantLabel = size || color || "";
+    }
+
     store.addItem({
       id: String(product.id),
       name: product.name,
@@ -97,6 +110,7 @@ export function addToCart(product, quantity = 1) {
       quantity,
       image,
       img: image,
+      variantLabel,
       desc: product.detail || product.meta || product.desc || "Premium Kavanoz",
       badge: product.tag || product.badge || "Doğal"
     });

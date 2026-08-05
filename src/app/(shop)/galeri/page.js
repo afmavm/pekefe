@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -70,9 +70,9 @@ export default function Galeri() {
   }, [mediaItems]);
 
   return (
-    <div className="relative w-full min-h-screen bg-[#FAF9F6] text-on-surface overflow-hidden pb-24">
+    <div className="relative w-full min-h-screen bg-surface text-on-surface overflow-hidden pb-24">
       {/* Subtle background grain grid */}
-      <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
+      <div className="absolute inset-0 bg-surface-container-lowest pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
 
       {/* ─── HERO HEADER BANNER ─── */}
       <header className="relative h-[48vh] min-h-[380px] flex items-center justify-center overflow-hidden">
@@ -334,4 +334,6 @@ export default function Galeri() {
     </div>
   );
 }
+
+
 

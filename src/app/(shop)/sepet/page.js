@@ -207,7 +207,13 @@ export default function Sepet() {
                     {item.badge}
                   </span>
                   <h3 className="font-headline-md text-[20px] md:text-headline-md mt-2">{item.name}</h3>
-                  <p className="text-on-surface-variant font-body-md">{item.desc}</p>
+                  {item.variantLabel && (
+                    <span className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-0.5 rounded-full border border-outline-variant/40 font-label-sm text-on-surface-variant text-xs tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
+                      {item.variantLabel}
+                    </span>
+                  )}
+                  <p className="text-on-surface-variant font-body-md mt-1">{item.desc}</p>
                 </div>
                 <div className="flex items-center gap-4 bg-surface rounded-full px-4 py-2 border border-outline-variant/30">
                   <button

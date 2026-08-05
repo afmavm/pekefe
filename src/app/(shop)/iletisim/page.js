@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -109,7 +109,7 @@ export default function Iletisim() {
                 <div className="flex flex-wrap gap-3 items-center">
                   {/* Instagram */}
                   <a
-                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-gradient-to-br hover:from-[#833ab4] hover:via-[#fd1d1d] hover:to-[#fcb045] hover:border-transparent hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-primary] hover:text-white hover:bg-gradient-to-br hover:from-[#833ab4] hover:via-[#fd1d1d] hover:to-[#fcb045] hover:border-transparent hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                     href={settings.instagram || "https://instagram.com/pekefe"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -125,7 +125,7 @@ export default function Iletisim() {
 
                   {/* WhatsApp Direct Line */}
                   <a
-                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-primary] hover:text-white hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                     href={settings.whatsapp || "https://wa.me/904425110000"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -139,7 +139,7 @@ export default function Iletisim() {
 
                   {/* Facebook */}
                   <a
-                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#1877F2] hover:border-[#1877F2] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-primary] hover:text-white hover:bg-[#1877F2] hover:border-[#1877F2] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                     href={settings.facebook || "https://facebook.com/pekefe"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -153,7 +153,7 @@ export default function Iletisim() {
 
                   {/* YouTube */}
                   <a
-                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#FF0000] hover:border-[#FF0000] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-primary] hover:text-white hover:bg-[#FF0000] hover:border-[#FF0000] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                     href={settings.youtube || "https://youtube.com/@pekefe"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -167,7 +167,7 @@ export default function Iletisim() {
 
                   {/* Location Map Pin */}
                   <a
-                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#EA4335] hover:border-[#EA4335] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-primary] hover:text-white hover:bg-[#EA4335] hover:border-[#EA4335] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                     href={settings.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -305,3 +305,5 @@ export default function Iletisim() {
     </>
   );
 }
+
+

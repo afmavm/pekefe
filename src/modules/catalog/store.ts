@@ -13,6 +13,7 @@ export interface CartItem {
   img?: string;     // B2C fallback
   desc?: string;    // B2C item description
   badge?: string;   // B2C tag badge
+  variantLabel?: string; // e.g. "500g · Cam Kavanoz"
   sku?: string;
 }
 
@@ -203,6 +204,7 @@ export const useCartStore = create<CartStore>()(
             img: item.img || item.image || "/premium-pekefe-kavanoz.png",
             desc: item.desc || "Premium Kavanoz",
             badge: item.badge || "Geleneksel",
+            variantLabel: item.variantLabel || "",
             sku: item.sku || "",
           };
         });

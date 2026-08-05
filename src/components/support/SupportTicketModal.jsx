@@ -8,7 +8,7 @@ import { Send, X, CheckCircle2 } from "lucide-react";
  * Quick modal form for creating a support ticket in the database.
  * Complies with AGENTS.md design tokens and max 400 lines rule.
  */
-export function SupportTicketModal({ isOpen, onClose, setToastMsg, setToastOpen }) {
+export function SupportTicketModal({ isOpen, onClose, setToastMsg = null, setToastOpen = null }) {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "Destek Talebi", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

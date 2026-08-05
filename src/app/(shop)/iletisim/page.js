@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -11,6 +11,7 @@ export default function Iletisim() {
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [showLiveMap, setShowLiveMap] = useState(false);
 
   useEffect(() => {
     setSettings(getSettings());
@@ -182,25 +183,56 @@ export default function Iletisim() {
                 </div>
               </div>
             </div>
-            {/* Map Placeholder */}
-            <div className="w-full h-80 rounded-xl overflow-hidden grayscale contrast-125 hover:grayscale-0 transition-all duration-700 premium-shadow">
-              <div className="w-full h-full bg-surface-container-high flex items-center justify-center relative">
-                <Image
-                  className="object-cover opacity-50"
-                  alt="İspir Erzurum Haritası"
-                  src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
+            {/* Interactive Map Component */}
+            <div className="relative w-full h-80 rounded-2xl overflow-hidden border border-outline-variant/20 shadow-xl group">
+              {showLiveMap ? (
+                <iframe
+                  title="İspir Erzurum Haritası"
+                  src="https://maps.google.com/maps?q=İspir,Erzurum&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                  className="w-full h-full border-0"
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                 />
-                <div className="relative z-10 text-center">
-                  <div className="bg-primary text-white p-4 rounded-full inline-block mb-4 shadow-xl" style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}>
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      location_on
+              ) : (
+                <a
+                  href={settings.mapsLink || "https://maps.google.com/?q=İspir+Erzurum"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full h-full block relative cursor-pointer overflow-hidden group"
+                  title="Google Haritalar'da Aç"
+                >
+                  <Image
+                    className="object-cover opacity-60 group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
+                    alt="İspir Erzurum Haritası"
+                    src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center mb-3 shadow-2xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
+                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        location_on
+                      </span>
+                    </div>
+                    <p className="font-display text-white text-lg font-bold tracking-tight">İspir, Erzurum</p>
+                    <span className="mt-2.5 text-xs text-white/90 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 font-semibold flex items-center gap-1.5 group-hover:bg-primary group-hover:border-primary transition-all">
+                      <span>Google Haritalar'da Aç</span>
+                      <span className="material-symbols-outlined text-sm">open_in_new</span>
                     </span>
                   </div>
-                  <p className="font-label-md text-primary font-bold">İspir, Erzurum</p>
-                </div>
-              </div>
+                </a>
+              )}
+
+              {/* Mode Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowLiveMap(!showLiveMap)}
+                className="absolute top-3 right-3 z-20 bg-surface/90 hover:bg-surface text-primary border border-outline-variant/30 text-xs font-bold px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-md flex items-center gap-1.5 cursor-pointer transition-transform hover:scale-105"
+              >
+                <span className="material-symbols-outlined text-sm">{showLiveMap ? "photo_camera" : "map"}</span>
+                <span>{showLiveMap ? "Fotoğraf Görünümü" : "Canlı Haritaya Geç"}</span>
+              </button>
             </div>
           </div>
           {/* Right Column: Contact Form */}

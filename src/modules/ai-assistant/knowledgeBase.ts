@@ -2,197 +2,107 @@ import { prisma } from "@/lib/prisma";
 
 export interface CorporateKnowledge {
   brandIdentity: string;
-  bellowsDetail: string;
+  productDetail: string;
   businessRules: string;
 }
 
-export const ATAC_CORPORATE_KB: CorporateKnowledge = {
-  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, 2021 yılında Erzurum Palandöken OSB'de kurulan, premium ve patentli arıcı körüğü ile profesyonel yöresel ürünler üreten Türk sanayi kuruluşudur.
-Fabrika adresi: Erzurum Organize Sanayi Bölgesi, Palandöken/Erzurum.
-İletişim: WhatsApp ve destek bilet sistemi üzerinden 09:00–18:00 saatleri arasında (Hafta içi) ulaşılabilir.
-Kuruluş felsefesi: "Fabrikadan Direkt" — Aracısız, en uygun fabrika fiyatı ile kaliteli geleneksel lezzetler ekipmanı.`,
+export const PEKEFE_CORPORATE_KB: CorporateKnowledge = {
+  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, Erzurum İspir'in 2000m+ rakımlı yüksek yaylalarındaki yabani beyaz dut ağaçlarından ve zengin yayla florasından beslenen, katkısız ve geleneksel gastronomi lezzetleri sunan coğrafi işaretli Türk gıda markasıdır.
+İletişim: WhatsApp ve canlı destek hattımız üzerinden hafta içi 09:00–18:00 saatleri arasında kesintisiz hizmet verilmektedir.
+Kuruluş Felsefesi: "Yayla Hasadından Sofranıza" — Asırlık tarifler, meşe odunu ateşi, bakır kazanlar ve keten bezlerde doğal güneş kurutması ile %100 saf lezzetler.`,
 
-  bellowsDetail: `[ÜRÜN DETAYI — PATENTLİ ARICI KÖRÜĞÜ]
-• Malzeme: 304 Kalite Paslanmaz Çelik (Inoks) gövde. Paslanma, erime ve yüksek ısıda deformasyon yapmaz.
-• Teknolojik Avantaj: "Özel Çift Hava Kanallı Tasarım" — körük bırakılsa dahi hava sirkülasyonu kesilmez, körük kesinlikle kendi kendine sönmez. Bu tasarım Türk patent enstitüsü tarafından tescillidir.
-• Modeller:
-  - Büyük Boy Körük: Profesyonel arıcılar için uzun süreli yoğun duman. Uzun saplı, kapasiteli.
-  - Standart Boy Körük: Hobi arıcıları için ergonomik ve hafif. İlk kez arıcılığa başlayanlar için ideal.
-  - Galvaniz Körük: Giriş seviyesi, korozyon dirençli galvaniz kaplama. Bütçe dostu seçenek.
-• Yakıt Önerisi: Doğal talaş, kurutulmuş bitki yaprakları, mukavva karton veya kimyasal içermeyen doğal arıcı pelletleri.
-• Bakım: Kullanım sonrası içindeki külü tamamen boşaltın. Metal gövdeyi hafif nemli bezle silin.
+  productDetail: `[ÜRÜN DETAYI — İSPİR HAM DUT PEKMEZİ]
+• İçerik: %100 Saf İspir Beyaz Dut Şırası. 0% İlave Şeker, 0.0% Glikoz / Glikoz Şurubu, 0% Koruyucu ve Katkı Maddesi.
+• Üretim Yöntemi: İspir yaylalarında toplanan yabani beyaz dutlar bakır kazanlarda kısık meşe odun ateşinde kaynatılır.
+• Kalite Standardı: HMF (Hidroksimetilfurfural) seviyesi < 10 mg/kg (Bağımsız laboratuvar analiz raporlu ve Coğrafi İşaret Tescilli).
 
-[ÜRÜN DETAYI — TAM KORUMA ARICI ELBİSESİ]
-• 3 katmanlı, nefes alabilir kumaş teknolojisi.
-• Arı sokmalarına karşı %100 güvenlik garantisi.
-• Tam yüz maskesi ve fermuar sistemi dahil.
-• Yıkama talimatı: 30°C'de hassas program, çamaşır makinesinde yıkanabilir.
+[ÜRÜN DETAYI — İSPİR HAM ÇİÇEK BALI]
+• İçerik: 2200m+ Kaçkar yayla çiçeklerinin nektarından elde edilmiş %100 saf süzme ham bal.
+• Özellik: Isıl işlem görmemiş, filtrelenmemiş besleyici doğal arı balı.
 
-[ÜRÜN DETAYI — KOVAN BAKIM SETİ]
-• 8 parçalı 304 paslanmaz çelik profesyonel alet seti.
-• Kovan açma aleti, fırça, kovan kancası, kraliçe kafesi vb. dahil.
-• Özel sert taşıma çantası ile birlikte gelir.`,
+[ÜRÜN DETAYI — İSPİR CEVİZLİ KÖME & PESTİL]
+• Malzeme: Yerli İspir cevizi (%35-50 oranında), dut şırası, süzme bal ve tam buğday unu.
+• Kurutma: Keten bezler üzerinde İspir güneşinde doğal yöntemlerle kurutulur. Koruyucu içermez.
+
+[TÜKETİM VE SAKLAMA TAVSİYESİ]
+• Muhafaza: Oda sıcaklığında (18°C – 22°C), serin ve doğrudan güneş ışığı almayan yerde saklayınız.
+• Kaşık Önerisi: Bal ve pekmezlerin lezzetini ve besin değerini korumak için ahşap veya seramik kaşık ile tüketilmesi önerilir.`,
 
   businessRules: `[TİCARİ KURALLAR VE LOJİSTİK]
-• Kargo Politikası: Hafta içi saat 15:00'e kadar gelen siparişler aynı gün kargoya verilir. Teslimat 1-3 iş günüdür.
-• Kargo Firmaları: Yurtiçi Kargo, Aras Kargo, MNG Kargo ile anlaşmalıyız.
-• Ücretsiz Kargo: 500 TL ve üzeri siparişlerde ücretsiz kargo uygulanır.
-• İade Politikası: 14 gün içinde, ürün kullanılmamış ve orijinal ambalajında ise koşulsuz iade. Kargo ücreti müşteriye aittir.
-• Ödeme Yöntemleri: Kredi kartı (taksit imkânı), havale/EFT, kapıda ödeme (seçili bölgeler).
-• Banka Havalesi İndirimi: Havale/EFT ile ödemede %5 ek indirim uygulanır.
+• Kargo Politikası: Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Teslimat süresi 1-3 iş günüdür.
+• Anlaşmalı Kargolar: Yurtiçi Kargo, MNG Kargo, Aras Kargo.
+• Ücretsiz Kargo: 500 TL ve üzeri siparişlerde kargo ücretsizdir.
+• İade Politikası: 14 gün içinde, ambalajı açılmamış ve koruma bandı bozulmamış ürünlerde koşulsuz iade hakkı.
+• Ödeme Yöntemleri: Kredi kartı (taksit seçeneği), Havale/EFT ve kapıda ödeme.
 
-[B2B BAYİLİK ŞARTLARI]
-• Başvuru: Vergi levhası + ticaret sicil belgesi ile B2B Portal'dan online başvuru.
-• Onay Süreci: Belgeler incelendikten sonra 1-3 iş günü içinde yanıt verilir.
-• Minimum Sipariş: Toptan siparişlerde minimum 10 adet/paket.
-• Ödeme Vadesi: Onaylı bayilere 30 gün vade imkânı tanınabilir.
-• Özel Fiyatlar: Bayi grubu ve sipariş büyüklüğüne göre özel fiyat formülü uygulanır.
-
-[GARANTİ VE SERVİS]
-• Körükler: 2 yıl imalat hatası garantisi.
-• Elbiseler: 1 yıl dikişleme ve kumaş kalitesi garantisi.
-• Yedek Parça: Körük derisi, yay, kancalar — fabrikadan temin edilir.
-• Tamir Servisi: Garantisiz arızalar için ücretli tamir hizmeti sunulmaktadır.`
+[B2B VE TOPTAN BAYİLİK]
+• Başvuru: Şarküteri, yöresel gıda mağazası ve kurumsal hediyelik alımları için B2B Portal başvuru formu.
+• İskonto: Onaylı bayilere özel kademeli indirim oranları ve özel toptan fiyat listesi.`
 };
 
 /**
- * Smart context-aware AI assistant reply router based on user roles and queries
+ * Smart context-aware AI assistant reply router for PEKEFE Gastronomi
  */
 export async function queryAiAssistant(message: string, role: string, userEmail?: string): Promise<string> {
   const lowerMsg = message.toLowerCase();
 
-  // Scenario A: Technical Product Queries (Bellows not self-extinguishing)
+  // 1. Pekmez & Şeker Katkısı Soruları
   if (
-    lowerMsg.includes("sönmüyor") || 
-    lowerMsg.includes("sönmez") || 
-    lowerMsg.includes("sönme") || 
-    lowerMsg.includes("hava kanallı") ||
-    lowerMsg.includes("körük neden sönmüyor")
+    lowerMsg.includes("şeker") ||
+    lowerMsg.includes("katkı") ||
+    lowerMsg.includes("glikoz") ||
+    lowerMsg.includes("doğal mı") ||
+    lowerMsg.includes("saf mı")
   ) {
-    return "PEKEFE Geleneksel & Doğal Lezzetler tescilli çift hava kanallı tasarımımız sayesinde hava sirkülasyonu sürekli devam eder, körük içiniz rahat bir şekilde kovan başında sönmeden çalışır.";
+    return "PEKEFE İspir Dut Pekmezimiz %100 saf ve doğal dut şırasından üretilmektedir. Ürünlerimizde 0.0% ilave şeker, glikoz şurubu veya hiçbir koruyucu katkı maddesi bulunmaz. HMF seviyesi < 10 mg/kg olup bağımsız laboratuvar analiz raporludur.";
   }
 
-  // Scenario B: B2B/Dealer Queries
+  // 2. Saklama Koşulları Soruları
   if (
-    lowerMsg.includes("toptan") || 
-    lowerMsg.includes("iskonto") || 
-    lowerMsg.includes("indirim") || 
-    lowerMsg.includes("bayi fiyatı") ||
-    lowerMsg.includes("bayilik")
+    lowerMsg.includes("sakla") ||
+    lowerMsg.includes("bozulur mu") ||
+    lowerMsg.includes("dolap") ||
+    lowerMsg.includes("buzdolabı")
   ) {
-    if (role === "USER" || role === "GUEST") {
-      return "Şu anda perakende hesabıyla giriş yapmış durumdasınız. Toptan alımlara özel iskontolar ve B2B fiyatları için lütfen vergi levhanız ile B2B Portal başvuru formunu doldurun.";
-    }
-
-    if (role === "DEALER" || role === "ADMIN") {
-      if (!userEmail) {
-        return "Onaylı B2B bayimiz olarak giriş yaptınız. Toptan siparişlerinizde size özel tanımlanmış bayi iskontoları ve fiyat formülleriniz sepet adımında otomatik olarak uygulanacaktır.";
-      }
-      try {
-        const account = await prisma.currentAccount.findFirst({
-          where: { email: userEmail }
-        });
-        if (account) {
-          const formula = account.priceFormula || "Standart Bayi Fiyat Listesi";
-          const discount = account.discountRate || 15;
-          return `Onaylı B2B bayimiz olarak giriş yaptınız. Hesabınıza tanımlı fiyat formülü: "${formula}", genel bayi iskonto oranınız: %${discount} olarak aktif durumdadır. Toptan siparişlerinizde sepet adımında bu formül otomatik olarak hesaplanacaktır.`;
-        }
-      } catch (e) {
-        // Fallback
-      }
-      return "Onaylı B2B bayimiz olarak giriş yaptınız. Toptan siparişlerinizde size özel tanımlanmış bayi iskontoları ve fiyat formülleriniz sepet adımında otomatik olarak uygulanacaktır.";
-    }
+    return "Ürünlerimizi oda sıcaklığında (18°C - 22°C), serin ve direkt güneş ışığı görmeyen bir yerde saklamanız yeterlidir. Buzdolabına koymanıza gerek yoktur. Tüketirken ahşap veya seramik kaşık tercih edilmesi önerilir.";
   }
 
-  // Scenario C: Shipping & Order Tracking Queries
+  // 3. Kargo & Teslimat Soruları
   if (
-    lowerMsg.includes("kargo") || 
-    lowerMsg.includes("nerede") || 
-    lowerMsg.includes("takip") || 
-    lowerMsg.includes("sipariş ne zaman") ||
-    lowerMsg.includes("ne zaman gelir")
+    lowerMsg.includes("kargo") ||
+    lowerMsg.includes("nerede") ||
+    lowerMsg.includes("takip") ||
+    lowerMsg.includes("ne zaman gelir") ||
+    lowerMsg.includes("teslimat")
   ) {
     if (userEmail) {
       try {
-        const account = await prisma.currentAccount.findFirst({
-          where: { email: userEmail }
-        });
+        const account = await prisma.currentAccount.findFirst({ where: { email: userEmail } });
         if (account) {
           const lastOrder = await prisma.order.findFirst({
             where: { currentAccountId: account.id, isDeleted: false },
             orderBy: { date: "desc" }
           });
           if (lastOrder) {
-            let cargoCompany = "";
-            let trackingNo = "";
-            if (lastOrder.summary && lastOrder.summary.startsWith("[")) {
-              const carrierMatch = lastOrder.summary.match(/^\[([^\]|]+)(?:\s*\|\s*([^\]]+))?\]/);
-              if (carrierMatch) {
-                cargoCompany = carrierMatch[1].trim();
-                if (carrierMatch[2]) {
-                  trackingNo = carrierMatch[2].trim();
-                }
-              }
-            }
-
-            const orderYear = new Date(lastOrder.date).getFullYear();
-            const orderSuffix = lastOrder.id.slice(-6).toUpperCase();
-            const orderNumber = `ORD-${orderYear}-${orderSuffix}`;
-
-            if (trackingNo) {
-              return `En son siparişiniz (${orderNumber}) ${cargoCompany} (${trackingNo}) ile gönderilmiştir. Kargonuz yoldadır, 1-3 iş günü içerisinde tarafınıza teslim edilecektir.`;
-            } else {
-              return `En son siparişiniz (${orderNumber}) hazırlanmaktadır. Hafta içi saat 15:00'e kadar gelen tüm siparişlerinizi aynı gün kargoya teslim ediyoruz.`;
-            }
+            const orderNo = `ORD-${new Date(lastOrder.date).getFullYear()}-${lastOrder.id.slice(-6).toUpperCase()}`;
+            return `Son siparişiniz (${orderNo}) hazırlanmakta/kargodadır. Hafta içi 15:00 öncesi verdiğiniz siparişler aynı gün kargoya teslim edilmektedir.`;
           }
         }
-      } catch (err) {
-        // Fallback
-      }
+      } catch {}
     }
-    return "Siparişleriniz hafta içi saat 15:00'e kadar geldiğinde aynı iş günü kargoya verilir. Teslimat süresi anlaşmalı kargo firmalarımızla 1-3 iş günüdür.";
+    return "Hafta içi saat 15:00'e kadar verilen tüm siparişleriniz aynı gün kargoya verilir. Anlaşmalı kargolarımızla 1-3 iş günü içerisinde adresinize teslim edilmektedir. 500 TL üzeri kargo ücretsizdir.";
   }
 
-  // Default smart knowledge-based replies using the corporate KB
+  // 4. Bayilik / Toptan Alım Soruları
   if (
-    lowerMsg.includes("kimdir") || 
-    lowerMsg.includes("hakkında") || 
-    lowerMsg.includes("nedir") || 
-    lowerMsg.includes("nerede kuruldu") ||
-    lowerMsg.includes("tarih")
+    lowerMsg.includes("toptan") ||
+    lowerMsg.includes("bayi") ||
+    lowerMsg.includes("iskonto") ||
+    lowerMsg.includes("bayilik")
   ) {
-    return `${ATAC_CORPORATE_KB.brandIdentity} İmalatımız 304 kalite paslanmaz çelik saclar kullanılarak Erzurum OSB fabrikamızda gerçekleştirilmektedir.`;
+    return "PEKEFE yöresel gıda ürünlerimiz için şarküteri, gurme market ve kurumsal hediyelik toptan alımlarda özel B2B bayi iskontoları sunmaktayız. B2B portalımız üzerinden başvuru yapabilir veya müşteri hizmetlerimizle iletişime geçebilirsiniz.";
   }
 
-  if (
-    lowerMsg.includes("garanti") || 
-    lowerMsg.includes("servis") || 
-    lowerMsg.includes("yedek parça") || 
-    lowerMsg.includes("deri") ||
-    lowerMsg.includes("tamir")
-  ) {
-    return "PEKEFE Geleneksel & Doğal Lezzetler olarak ürettiğimiz tüm körükler ve sac ekipmanlar imalat hatalarına karşı 2 yıl garantilidir. Körük derisi, körük körüğü yay değişimi gibi tüm yedek parça ve teknik servis hizmetleri Erzurum fabrikamızca kesintisiz sağlanır.";
-  }
-
-  if (
-    lowerMsg.includes("boy") || 
-    lowerMsg.includes("model") || 
-    lowerMsg.includes("ölçü") || 
-    lowerMsg.includes("standart") ||
-    lowerMsg.includes("büyük")
-  ) {
-    return "Pekefe körüklerimizi iki ana modelde üretiyoruz: Profesyonel arıcılarımız için daha uzun duman sirkülasyonu sağlayan 'Büyük Boy Körük' ve hobi arıcılarımız için daha hafif ve pratik kullanım sunan 'Standart Boy Körük'. Her iki modelimiz de 304 sınıf paslanmaz çelikten üretilmiştir.";
-  }
-
-  if (
-    lowerMsg.includes("yakıt") || 
-    lowerMsg.includes("ne yakılır") || 
-    lowerMsg.includes("talaş") || 
-    lowerMsg.includes("pellet")
-  ) {
-    return "Körüklerimizde yüksek verim ve sağlıklı arı dumanı elde edebilmek için doğal talaş, kurutulmuş bitki yaprakları, temiz mukavva karton veya kimyasal katkı içermeyen preslenmiş doğal arıcı pelletleri yakılmasını tavsiye ediyoruz.";
-  }
-
-  // Strict hallucination block fallback
-  return "Bu konuda size yardımcı olabilmek için destek ekibimize bağlanmanızı veya bir bilet (ticket) oluşturmanızı tavsiye ederim. Ben Pekefe Destek olarak patentli körükler, toptan bayilik şartları, ödeme yöntemleri ve kargo teslimatları hakkında sorularınızı yanıtlayabilirim.";
+  // Default fallback answer
+  return `${PEKEFE_CORPORATE_KB.brandIdentity} İspir ham dut pekmezi, ham bal, cevizli köme ve pestil çeşitlerimiz hakkında detaylı bilgi almak veya sipariş vermek için ürünlerimizi inceleyebilirsiniz.`;
 }

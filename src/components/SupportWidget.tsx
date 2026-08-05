@@ -40,7 +40,7 @@ export default function SupportWidget() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <div className="fixed bottom-24 md:bottom-28 right-6 z-50 flex flex-col items-end">
         {/* Floating Menu / Chatbot Window */}
         <div
           className={`absolute bottom-20 right-0 w-[350px] sm:w-[380px] bg-surface-container-lowest/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-outline-variant/20 transition-all duration-300 origin-bottom-right overflow-hidden flex flex-col ${

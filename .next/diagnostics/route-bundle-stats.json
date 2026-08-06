@@ -2158,7 +2158,7 @@
   },
   {
     "route": "/blog",
-    "firstLoadUncompressedJsBytes": 959542,
+    "firstLoadUncompressedJsBytes": 959860,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\303ob8s1zbi6j.js",
       ".next\\static\\chunks\\1869how29mzpj.js",
@@ -2169,7 +2169,7 @@
       ".next\\static\\chunks\\0qf88nw3za0on.js",
       ".next\\static\\chunks\\21j_ujmewj84i.js",
       ".next\\static\\chunks\\3bbyp2e40p0q4.js",
-      ".next\\static\\chunks\\1clacm4bjukvt.js",
+      ".next\\static\\chunks\\3mm_y9ua528sd.js",
       ".next\\static\\chunks\\37v5ulr6qjozi.js",
       ".next\\static\\chunks\\1rm737diirj6u.js",
       ".next\\static\\chunks\\004uscel7d8j1.js",

@@ -15,6 +15,7 @@ const DEFAULT_CLIENT_POSTS = [
     metaDesc: "İspir yaylalarında 2200m rakımda yetişen saf beyaz dutların bakır kazanlarda odun ateşinde ağır ağır pişirilme hikayesi.",
     content: "İspir'in el değmemiş 2200 metre üzerindeki yaylalarında yetişen saf beyaz dutlar, tam olgunlaşma döneminde silkelenerek keten bezlere toplanır.",
     readTime: "5 dk okuma",
+    createdAt: new Date().toISOString(),
   },
   {
     id: "blog-2",
@@ -25,6 +26,7 @@ const DEFAULT_CLIENT_POSTS = [
     metaDesc: "Pastörize edilmemiş, 45 derece üzerinde ısıtılmamış hakiki ham çiçek balının polen ve canlı enzim zenginliği.",
     content: "Market raflarında gördüğünüz berrak ve akışkan ballar ile doğadan kovan çıkışı elde edilen ham bal arasında hayati besin farkları bulunur.",
     readTime: "4 dk okuma",
+    createdAt: new Date().toISOString(),
   },
   {
     id: "blog-3",
@@ -35,6 +37,7 @@ const DEFAULT_CLIENT_POSTS = [
     metaDesc: "Keten bezlerde güneşte kurutulan doğal dut pestili ve cevizli İspir kömesinin asırlık lezzet sırları.",
     content: "Doğu Anadolu'nun kış aylarındaki en büyük enerji kaynağı olan pestil ve köme, yaz sonu dut hasadıyla başlar.",
     readTime: "6 dk okuma",
+    createdAt: new Date().toISOString(),
   },
   {
     id: "blog-4",
@@ -45,6 +48,7 @@ const DEFAULT_CLIENT_POSTS = [
     metaDesc: "Demir, kalsiyum ve antioksidan deposu geleneksel dut pekmezinin vücut direncine ve enerji seviyesine etkileri.",
     content: "Geleneksel İspir dut pekmezi, zengin mineral ve vitamin içeriğiyle doğal bir şifa kaynağıdır.",
     readTime: "3 dk okuma",
+    createdAt: new Date().toISOString(),
   },
   {
     id: "blog-5",
@@ -55,8 +59,24 @@ const DEFAULT_CLIENT_POSTS = [
     metaDesc: "Kaçkar dağlarının eteklerindeki endemik çiçek türleri ve PEKEFE lezzetlerinin essiz aromatik kaynağı.",
     content: "Erzurum İspir bölgesi, yüksek rakımı, temiz su kaynakları ve sanayi kirliliğinden uzak bakir doğasıyla Türkiye'nin en değerli arıcılık ve meyvecilik merkezlerinden biridir.",
     readTime: "5 dk okuma",
+    createdAt: new Date().toISOString(),
   }
 ];
+
+function formatBlogDate(dateStr) {
+  if (!dateStr) return "6 Ağustos 2026";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "6 Ağustos 2026";
+    return d.toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return "6 Ağustos 2026";
+  }
+}
 
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -229,11 +249,7 @@ export default function Blog() {
                         <div className="flex items-center gap-4 mb-3 text-slate-400 text-xs">
                           <span className="flex items-center gap-1 font-medium">
                             <span className="material-symbols-outlined text-[16px]">schedule</span>{" "}
-                            {new Date(art.createdAt).toLocaleDateString("tr-TR", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
+                            {formatBlogDate(art?.createdAt)}
                           </span>
                         </div>
                         <h3 className="font-bold text-xl text-on-surface mb-3 group-hover:text-primary transition-colors leading-snug">

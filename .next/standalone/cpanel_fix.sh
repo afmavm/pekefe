@@ -1,15 +1,13 @@
 #!/bin/bash
-# PEKEFE Strictly Isolated Passenger .htaccess Generator
-# NEVER TOUCHES public_html or atakaricilik.com!
+# PEKEFE Dynamic Isolated Passenger .htaccess Generator
 
-USER_HOME="/home/ata3a6icilikcom"
-APP_ROOT="$USER_HOME/pekefe.com"
+CURRENT_DIR="$(pwd)"
 
-# Generate Standalone Passenger .htaccess ONLY inside /home/ata3a6icilikcom/pekefe.com
-cat <<EOT > $APP_ROOT/.htaccess
-# Isolated Phusion Passenger Execution for Pekefe (pekefe.com ONLY)
+# Generate Standalone Passenger .htaccess inside CURRENT_DIR
+cat <<EOT > "$CURRENT_DIR/.htaccess"
+# Isolated Phusion Passenger Execution for Pekefe
 PassengerEnabled on
-PassengerAppRoot "$APP_ROOT"
+PassengerAppRoot "$CURRENT_DIR"
 PassengerStartupFile cpanel_server.js
 PassengerAppType node
 PassengerAppEnv production
@@ -20,7 +18,7 @@ PassengerAppEnv production
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
-    # Route all dynamic page requests to Passenger Node.js app
+    # Route all dynamic page requests to Passenger Node.js app (Fixes 404)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ cpanel_server.js [QSA,L]
@@ -38,4 +36,4 @@ PassengerAppEnv production
 </IfModule>
 EOT
 
-echo "[SUCCESS] PEKEFE .htaccess created strictly inside $APP_ROOT/.htaccess without touching public_html!"
+echo "[SUCCESS] PEKEFE .htaccess created strictly inside $CURRENT_DIR/.htaccess!"

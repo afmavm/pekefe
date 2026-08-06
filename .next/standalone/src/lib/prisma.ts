@@ -12,7 +12,7 @@ export const tenantStorage = new AsyncLocalStorage<TenantContext>();
 const globalForPrisma = global as unknown as { prisma: any };
 
 const createPrismaClient = () => {
-  let dbUrl = process.env.DATABASE_URL || "mysql://root:root@localhost:3306/pekefe_db";
+  let dbUrl = process.env.DATABASE_URL || "mysql://ata3a6icilikcom_pekefe_db:J3m3f1c1.@localhost:3306/ata3a6icilikcom_pekefe_db";
   
   if (dbUrl.startsWith("file:") || dbUrl.includes(".db")) {
     if (!dbUrl.includes("busy_timeout")) {

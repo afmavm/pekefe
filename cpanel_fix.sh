@@ -1,12 +1,12 @@
 #!/bin/bash
-# PEKEFE Automatic Passenger & Mobile App Compatibility .htaccess Generator
+# PEKEFE Isolated Passenger .htaccess Generator for /home/ata3a6icilikcom/pekefe.com
 
 USER_HOME="/home/ata3a6icilikcom"
 APP_ROOT="$USER_HOME/pekefe.com"
 
-# Generate Standalone Passenger .htaccess for Mobile App WebViews & HTTPS
-cat <<EOT > $USER_HOME/public_html/.htaccess
-# Automatic Phusion Passenger Execution
+# Generate Standalone Passenger .htaccess ONLY inside APP_ROOT (Never touching public_html)
+cat <<EOT > $APP_ROOT/.htaccess
+# Isolated Phusion Passenger Execution for Pekefe
 PassengerEnabled on
 PassengerAppRoot "$APP_ROOT"
 PassengerStartupFile cpanel_server.js
@@ -35,5 +35,4 @@ PassengerAppEnv production
 </IfModule>
 EOT
 
-cp $USER_HOME/public_html/.htaccess $APP_ROOT/.htaccess 2>/dev/null || true
-echo "[SUCCESS] Mobile App & PassengerEnabled configured in .htaccess"
+echo "[SUCCESS] Isolated .htaccess created inside $APP_ROOT/.htaccess"

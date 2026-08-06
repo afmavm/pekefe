@@ -1,10 +1,10 @@
 #!/bin/bash
-# PEKEFE Automatic Passenger .htaccess Generator
+# PEKEFE Automatic Passenger & Mobile App Compatibility .htaccess Generator
 
 USER_HOME="/home/ata3a6icilikcom"
 APP_ROOT="$USER_HOME/pekefe.com"
 
-# Generate Standalone Passenger .htaccess for cPanel without Setup Node.js App GUI
+# Generate Standalone Passenger .htaccess for Mobile App WebViews & HTTPS
 cat <<EOT > $USER_HOME/public_html/.htaccess
 # Automatic Phusion Passenger Execution
 PassengerEnabled on
@@ -15,11 +15,20 @@ PassengerAppEnv production
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Force HTTPS for mobile apps & webviews
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Allow CORS for mobile app WebViews
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    
     <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js)$">
         Header set Cache-Control "max-age=31536000, public"
     </FilesMatch>
@@ -27,4 +36,4 @@ PassengerAppEnv production
 EOT
 
 cp $USER_HOME/public_html/.htaccess $APP_ROOT/.htaccess 2>/dev/null || true
-echo "[SUCCESS] PassengerEnabled configured in .htaccess"
+echo "[SUCCESS] Mobile App & PassengerEnabled configured in .htaccess"

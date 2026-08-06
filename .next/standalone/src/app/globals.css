@@ -22,13 +22,13 @@
   --color-secondary-fixed: #ffdea5;
   --color-secondary-fixed-dim: #e9c176;
 
-  --font-display-lg: var(--font-playfair), serif;
-  --font-headline-lg: var(--font-playfair), serif;
-  --font-headline-md: var(--font-playfair), serif;
-  --font-body-lg: var(--font-manrope), sans-serif;
-  --font-body-md: var(--font-manrope), sans-serif;
-  --font-label-md: var(--font-manrope), sans-serif;
-  --font-label-sm: var(--font-manrope), sans-serif;
+  --font-display-lg: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-headline-lg: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-headline-md: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-body-lg: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body-md: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-label-md: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-label-sm: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   --text-display-lg: 56px;
   --text-display-lg--line-height: 1.1;

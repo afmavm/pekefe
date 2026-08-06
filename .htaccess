@@ -7,11 +7,20 @@ PassengerAppEnv production
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Force HTTPS for mobile apps & webviews
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Allow CORS for mobile app WebViews & in-app browsers
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
     <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js)$">
         Header set Cache-Control "max-age=31536000, public"
     </FilesMatch>

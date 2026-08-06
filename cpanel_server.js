@@ -9,7 +9,7 @@ if (fs.existsSync(envPath)) {
 process.env.NODE_ENV = "production";
 
 if (!process.env.PORT) {
-  process.env.PORT = "3000";
+  process.env.PORT = "3001";
 }
 
 const standaloneDir = path.join(__dirname, ".next", "standalone");

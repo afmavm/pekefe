@@ -19,8 +19,10 @@ PassengerAppEnv production
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
+    # Route all dynamic page requests to Passenger Node.js app (Fixes 404)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ cpanel_server.js [QSA,L]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -35,4 +37,4 @@ PassengerAppEnv production
 </IfModule>
 EOT
 
-echo "[SUCCESS] Isolated .htaccess created inside $APP_ROOT/.htaccess"
+echo "[SUCCESS] Isolated .htaccess with 404 fix created inside $APP_ROOT/.htaccess"

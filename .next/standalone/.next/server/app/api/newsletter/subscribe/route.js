@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/newsletter/subscribe/route.js")
+R.c("server/chunks/[root-of-the-server]__0bsfuc5._.js")
+R.c("server/chunks/src_lib_email-notification-service_ts_1iz_3g_._.js")
+R.c("server/chunks/node_modules_next_dist_1_lpwll._.js")
+R.c("server/chunks/node_modules_next_1zdbrne._.js")
+R.c("server/chunks/[root-of-the-server]__02_2sm-._.js")
+R.c("server/chunks/node_modules_nodemailer_0lpqvw4._.js")
+R.c("server/chunks/node_modules_zod_v4_15a1sgk._.js")
+R.c("server/chunks/src_0869akk._.js")
+R.c("server/chunks/_next-internal_server_app_api_newsletter_subscribe_route_actions_1p1sb74.js")
+R.m(462134)
+module.exports=R.m(462134).exports

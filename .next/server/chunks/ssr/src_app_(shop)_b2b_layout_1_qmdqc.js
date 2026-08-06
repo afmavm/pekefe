@@ -1,0 +1,3 @@
+module.exports=[731684,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"B2B Bayi Portalı",description:"Pekefe toptan satış ve kurumsal bayi portalı. Restoran, otel, organik market ve ihracat firmalarına özel koli fiyatları, Platinum Bayi ayrıcalıkları.",keywords:["pekefe toptan","b2b bayi","kurumsal sipariş","toptan pekmez","toptan bal","wholesale"],openGraph:{title:"B2B Bayi Portalı | Pekefe",description:"Pekefe kurumsal bayi portalı. Toptan koli fiyatları ve Platinum Bayi ayrıcalıkları.",url:"https://www.pekefe.com/b2b"},robots:{index:!1,follow:!1},alternates:{canonical:"https://www.pekefe.com/b2b"}}])},475473,a=>{a.n(a.i(731684))}];
+
+//# sourceMappingURL=src_app_%28shop%29_b2b_layout_1_qmdqc.js.map

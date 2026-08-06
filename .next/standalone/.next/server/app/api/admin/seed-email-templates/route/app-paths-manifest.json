@@ -1,0 +1,3 @@
+{
+  "/api/admin/seed-email-templates/route": "app/api/admin/seed-email-templates/route.js"
+}

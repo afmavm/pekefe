@@ -1,0 +1,53 @@
+{
+  "node": {
+    "005657d97f8cc7de96735e05527968775abf6e81e4": {
+      "workers": {
+        "app/admin/cargo/page": {
+          "moduleId": 182020,
+          "async": false,
+          "exportedName": "getCompaniesWithPermissionsAction",
+          "filename": "src/modules/cms/super-admin/superActions.ts"
+        }
+      },
+      "exportedName": "getCompaniesWithPermissionsAction",
+      "filename": "src/modules/cms/super-admin/superActions.ts"
+    },
+    "000e43e7304cb61924782c2d18ed24f174c604be61": {
+      "workers": {
+        "app/admin/cargo/page": {
+          "moduleId": 182020,
+          "async": false,
+          "exportedName": "getFeatureModulesAction",
+          "filename": "src/modules/cms/super-admin/superActions.ts"
+        }
+      },
+      "exportedName": "getFeatureModulesAction",
+      "filename": "src/modules/cms/super-admin/superActions.ts"
+    },
+    "709d93f40d4487aee1ce9b8b5221631fc2b2d88b07": {
+      "workers": {
+        "app/admin/cargo/page": {
+          "moduleId": 182020,
+          "async": false,
+          "exportedName": "toggleCompanyPermissionAction",
+          "filename": "src/modules/cms/super-admin/superActions.ts"
+        }
+      },
+      "exportedName": "toggleCompanyPermissionAction",
+      "filename": "src/modules/cms/super-admin/superActions.ts"
+    },
+    "002957d1ae32055cfa2ff64f2304c39558a3f567f0": {
+      "workers": {
+        "app/admin/cargo/page": {
+          "moduleId": 182020,
+          "async": false,
+          "exportedName": "upgradeCompanyToProAction",
+          "filename": "src/modules/cms/super-admin/superActions.ts"
+        }
+      },
+      "exportedName": "upgradeCompanyToProAction",
+      "filename": "src/modules/cms/super-admin/superActions.ts"
+    }
+  },
+  "edge": {}
+}

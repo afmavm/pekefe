@@ -1,0 +1,3 @@
+module.exports=[663287,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Sıkça Sorulan Sorular",description:"Pekefe ürünleri, sipariş süreci, teslimat, iade koşulları, coğrafi işaret ve B2B toptan sipariş hakkında merak ettiğiniz her şey.",keywords:["pekefe sss","sıkça sorulan sorular","sipariş","teslimat","iade","toptan sipariş"],openGraph:{title:"Sıkça Sorulan Sorular | Pekefe",description:"Pekefe ürünleri, sipariş, teslimat ve iade hakkında merak ettiğiniz her şey.",url:"https://www.pekefe.com/sss"},alternates:{canonical:"https://www.pekefe.com/sss"}}])},447e3,a=>{a.n(a.i(663287))}];
+
+//# sourceMappingURL=src_app_%28shop%29_sss_layout_0cmrny8.js.map

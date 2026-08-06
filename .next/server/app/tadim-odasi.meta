@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(shop)/layout,_N_T_/(shop)/tadim-odasi/layout,_N_T_/(shop)/tadim-odasi/page,_N_T_/tadim-odasi"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHNob3Ap/tadim-odasi/__PAGE__",
+    "/!KHNob3Ap/tadim-odasi",
+    "/!KHNob3Ap",
+    "/_index",
+    "/_head"
+  ]
+}

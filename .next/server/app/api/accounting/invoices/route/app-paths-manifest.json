@@ -1,0 +1,3 @@
+{
+  "/api/accounting/invoices/route": "app/api/accounting/invoices/route.js"
+}

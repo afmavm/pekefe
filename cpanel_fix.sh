@@ -1,19 +1,13 @@
 #!/bin/bash
-# PEKEFE Multi-DocumentRoot Passenger .htaccess Sync Generator
+# PEKEFE Strictly Isolated Passenger .htaccess Generator
+# NEVER TOUCHES public_html or atakaricilik.com!
 
 USER_HOME="/home/ata3a6icilikcom"
 APP_ROOT="$USER_HOME/pekefe.com"
 
-# Candidate DocumentRoots in cPanel for pekefe.com
-TARGET_DIRS=(
-  "$APP_ROOT"
-  "$USER_HOME/public_html/pekefe"
-  "$USER_HOME/public_html/pekefe.com"
-)
-
-# Generate Standalone Passenger .htaccess
+# Generate Standalone Passenger .htaccess ONLY inside /home/ata3a6icilikcom/pekefe.com
 cat <<EOT > $APP_ROOT/.htaccess
-# Isolated Phusion Passenger Execution for Pekefe
+# Isolated Phusion Passenger Execution for Pekefe (pekefe.com ONLY)
 PassengerEnabled on
 PassengerAppRoot "$APP_ROOT"
 PassengerStartupFile cpanel_server.js
@@ -26,7 +20,7 @@ PassengerAppEnv production
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
-    # Route all dynamic page requests to Passenger Node.js app (Fixes 404)
+    # Route all dynamic page requests to Passenger Node.js app
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ cpanel_server.js [QSA,L]
@@ -44,11 +38,4 @@ PassengerAppEnv production
 </IfModule>
 EOT
 
-# Sync .htaccess and cpanel_server.js across all candidate DocumentRoot paths
-for dir in "${TARGET_DIRS[@]}"; do
-  mkdir -p "$dir" 2>/dev/null || true
-  cp "$APP_ROOT/.htaccess" "$dir/.htaccess" 2>/dev/null || true
-  cp "$APP_ROOT/cpanel_server.js" "$dir/cpanel_server.js" 2>/dev/null || true
-done
-
-echo "[SUCCESS] Multi-DocumentRoot .htaccess & Passenger sync completed!"
+echo "[SUCCESS] PEKEFE .htaccess created strictly inside $APP_ROOT/.htaccess without touching public_html!"

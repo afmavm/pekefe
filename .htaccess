@@ -1,14 +1,18 @@
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX PASSENGER CONFIGURATION
-<IfModule mod_passenger.c>
-    PassengerAppEnv production
-    PassengerAppRoot "/home/ata3a6icilikcom/pekefe.com"
-    PassengerBaseURI "/"
-    PassengerAppType node
-    PassengerStartupFile cpanel_server.js
-</IfModule>
+# PEKEFE Automatic Phusion Passenger Execution
+PassengerEnabled on
+PassengerAppRoot "/home/ata3a6icilikcom/pekefe.com"
+PassengerStartupFile cpanel_server.js
+PassengerAppType node
+PassengerAppEnv production
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
 </IfModule>

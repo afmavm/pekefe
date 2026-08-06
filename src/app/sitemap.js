@@ -20,6 +20,11 @@ const FALLBACK_PRODUCT_SLUGS = [
 
 const BLOG_SLUGS = [
   'pekmezli-kurabiye',
+  'geleneksel-ispir-dut-pekmezi-nasil-uretilir',
+  'ham-cicek-bali-ve-islenmis-bal-arasindaki-farklar',
+  'pestil-ve-kome-hazirlamanin-incelikleri',
+  'dut-pekmezinin-sagliga-faydalari',
+  'ispir-yaylalarinin-2200m-rakimli-flora-zenginligi',
 ];
 
 export default async function sitemap() {

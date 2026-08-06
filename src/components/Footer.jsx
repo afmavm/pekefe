@@ -38,14 +38,14 @@ export default function Footer() {
 
   return (
     <footer className="bg-surface-container-lowest border-t border-outline-variant mt-auto" aria-label="Site Alt Bilgisi">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop py-section-gap max-w-container-max mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-gutter px-margin-mobile md:px-margin-desktop py-10 md:py-section-gap max-w-container-max mx-auto">
         {/* Brand Column */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           <Link href="/" className="flex items-center gap-3 font-display-lg text-headline-md text-primary hover:opacity-90 transition-opacity">
-            <Image src="/logo.png" alt="PEKEFE Logo" width={56} height={56} className="h-12 w-auto object-contain drop-shadow-md" />
-            <span className="font-bold text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">Pekefe</span>
+            <Image src="/logo.png" alt="PEKEFE Logo" width={56} height={56} className="h-10 md:h-12 w-auto object-contain drop-shadow-md" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">Pekefe</span>
           </Link>
-          <p className="text-on-surface-variant text-body-md">
+          <p className="text-on-surface-variant text-xs md:text-body-md leading-relaxed">
             İspir’in bereketli topraklarından, geleneksel yöntemlerle hazırlanan en doğal lezzetler.
           </p>
           {/* Social Media & Direct Contact Badges */}
@@ -132,8 +132,8 @@ export default function Footer() {
 
         {/* Links Column 1 */}
         <nav aria-label="Kurumsal Linkler">
-          <h4 className="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-widest">Kurumsal</h4>
-          <ul className="space-y-4">
+          <h4 className="font-label-md text-xs sm:text-label-md text-on-surface mb-4 sm:mb-6 uppercase tracking-widest font-bold">Kurumsal</h4>
+          <ul className="space-y-2.5 sm:space-y-4 text-xs sm:text-sm">
             <li>
               <Link className="text-on-surface-variant hover:text-secondary hover:translate-x-1 transition-all inline-block" href="/hikayemiz">
                 Hikayemiz
@@ -174,8 +174,8 @@ export default function Footer() {
 
         {/* Links Column 2 */}
         <nav aria-label="Yardım Linkleri">
-          <h4 className="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-widest">Yardım</h4>
-          <ul className="space-y-4">
+          <h4 className="font-label-md text-xs sm:text-label-md text-on-surface mb-4 sm:mb-6 uppercase tracking-widest font-bold">Yardım</h4>
+          <ul className="space-y-2.5 sm:space-y-4 text-xs sm:text-sm">
             <li>
               <Link className="text-on-surface-variant hover:text-secondary hover:translate-x-1 transition-all inline-block" href="/teslimat">
                 Teslimat ve İade
@@ -201,22 +201,22 @@ export default function Footer() {
 
         {/* Contact Column */}
         <address aria-label="İletişim Bilgileri" style={{ fontStyle: 'normal' }}>
-          <h4 className="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-widest">İletişim</h4>
-          <ul className="space-y-4">
-            <li className="flex gap-3 text-on-surface-variant">
-              <span className="material-symbols-outlined text-primary" aria-hidden="true">mail</span>
-              <a href={`mailto:${settings.email || "info@pekefe.com"}`} className="hover:text-primary transition-colors">
+          <h4 className="font-label-md text-xs sm:text-label-md text-on-surface mb-4 sm:mb-6 uppercase tracking-widest font-bold">İletişim</h4>
+          <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
+            <li className="flex gap-3 text-on-surface-variant items-center">
+              <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">mail</span>
+              <a href={`mailto:${settings.email || "info@pekefe.com"}`} className="hover:text-primary transition-colors truncate">
                 {settings.email || "info@pekefe.com"}
               </a>
             </li>
-            <li className="flex gap-3 text-on-surface-variant">
-              <span className="material-symbols-outlined text-primary" aria-hidden="true">phone</span>
+            <li className="flex gap-3 text-on-surface-variant items-center">
+              <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">phone</span>
               <a href={`tel:${(settings.phone || "05342709140").replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">
                 {settings.phone || "0534 270 91 40"}
               </a>
             </li>
-            <li className="flex gap-3 text-on-surface-variant">
-              <span className="material-symbols-outlined text-primary" aria-hidden="true">location_on</span>
+            <li className="flex gap-3 text-on-surface-variant items-start">
+              <span className="material-symbols-outlined text-primary text-lg shrink-0 mt-0.5" aria-hidden="true">location_on</span>
               <a
                 href={settings.mapsLink || "https://maps.google.com"}
                 target="_blank"
@@ -230,11 +230,11 @@ export default function Footer() {
         </address>
       </div>
 
-      <div className="px-margin-mobile md:px-margin-desktop py-8 border-t border-outline-variant/60 max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-label-sm text-on-surface-variant/80 font-label-sm">
+      <div className="px-margin-mobile md:px-margin-desktop py-6 sm:py-8 border-t border-outline-variant/60 max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 text-center md:text-left">
+        <p className="text-[11px] sm:text-label-sm text-on-surface-variant/80 font-label-sm">
           &copy; 2026 Pekefe Geleneksel Ürünler. Tüm hakları saklıdır.
         </p>
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
           {/* Card Brands */}
           <div className="flex items-center gap-4">
             {/* Visa */}
@@ -257,11 +257,11 @@ export default function Footer() {
           </div>
 
           {/* SSL Protection Badge */}
-          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/70 border-l border-outline-variant/60 pl-5">
-            <span className="material-symbols-outlined text-[18px] text-[#00A86B]" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/70 border-l border-outline-variant/60 pl-4 sm:pl-5">
+            <span className="material-symbols-outlined text-base md:text-[18px] text-[#00A86B]" style={{ fontVariationSettings: "'FILL' 1" }}>
               verified_user
             </span>
-            <span className="font-bold text-[10px] tracking-wider uppercase">256-Bit SSL Güvenli Altyapı</span>
+            <span className="font-bold text-[9px] sm:text-[10px] tracking-wider uppercase">256-Bit SSL Güvenli Altyapı</span>
           </div>
         </div>
       </div>
@@ -269,12 +269,12 @@ export default function Footer() {
       {/* Back to top button */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-primary text-on-primary w-14 h-14 rounded-full shadow-xl transition-all duration-300 hover:bg-secondary flex items-center justify-center cursor-pointer border border-white/20 z-40 ${
+        className={`fixed bottom-20 right-4 md:bottom-8 md:right-8 bg-primary text-on-primary w-11 h-11 md:w-14 md:h-14 rounded-full shadow-xl transition-all duration-300 hover:bg-secondary flex items-center justify-center cursor-pointer border border-white/20 z-40 ${
           showBackToTop ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-90 pointer-events-none"
         }`}
         aria-label="Yukarı Git"
       >
-        <span className="material-symbols-outlined text-2xl">arrow_upward</span>
+        <span className="material-symbols-outlined text-xl md:text-2xl">arrow_upward</span>
       </button>
     </footer>
   );

@@ -220,45 +220,45 @@ export function HeroSlider({ customSlides }) {
       })}
 
       {/* ─── FIT-TO-VIEWPORT TYPOGRAPHY CONTENT (SOL ALT - TAM EKRAN DÜZENİ) ─── */}
-      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-20 pb-20 pt-16 text-white relative">
-        <div className="max-w-2xl text-left space-y-4 animate-fade-in" key={safeIndex}>
+      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-20 pb-16 sm:pb-20 pt-12 text-white relative">
+        <div className="max-w-2xl text-left space-y-3 sm:space-y-4 animate-fade-in" key={safeIndex}>
           
           {/* Animated Live Badge */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg max-w-full">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-black/40 backdrop-blur-md shadow-lg max-w-full">
             <span className="flex h-2 w-2 relative shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
-            <span className="whitespace-nowrap font-label-sm text-[11px] sm:text-xs uppercase tracking-[0.15em] text-white font-extrabold drop-shadow">
+            <span className="truncate font-label-sm text-[10px] sm:text-xs uppercase tracking-[0.12em] text-white font-extrabold drop-shadow">
               {currentSlide.tag}
             </span>
           </div>
 
           {/* Title with Serif Highlight */}
-          <h1 className="font-display-lg text-[28px] sm:text-[38px] md:text-[48px] lg:text-[54px] text-white leading-[1.12] font-bold tracking-tight drop-shadow-xl">
-            {currentSlide.title} <br />
+          <h1 className="font-display-lg text-[24px] sm:text-[36px] md:text-[48px] lg:text-[54px] text-white leading-[1.15] font-bold tracking-tight drop-shadow-xl">
+            {currentSlide.title} <br className="hidden sm:inline" />
             <span className="text-secondary-fixed italic font-normal font-serif relative">
               {currentSlide.highlightTitle}
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="font-body-lg text-xs sm:text-sm md:text-base text-white/90 leading-relaxed font-light max-w-lg drop-shadow-md line-clamp-3 sm:line-clamp-none">
+          <p className="font-body-lg text-xs sm:text-sm md:text-base text-white/90 leading-relaxed font-light max-w-lg drop-shadow-md line-clamp-2 sm:line-clamp-none">
             {currentSlide.subtitle}
           </p>
 
           {/* Action Buttons */}
-          <div className="pt-2 flex flex-wrap items-center gap-3">
-            <Link href={currentSlide.primaryCta.href}>
-              <Button size="lg" className="shadow-2xl shadow-primary/40 font-bold px-6 h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform">
+          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <Link href={currentSlide.primaryCta.href} className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto shadow-2xl shadow-primary/40 font-bold px-6 h-11 sm:h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform justify-center">
                 {currentSlide.primaryCta.text}
               </Button>
             </Link>
-            <Link href={currentSlide.secondaryCta.href}>
+            <Link href={currentSlide.secondaryCta.href} className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/20 backdrop-blur-md px-6 h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform bg-black/30"
+                className="w-full sm:w-auto border-white/30 text-white hover:bg-white/20 backdrop-blur-md px-6 h-11 sm:h-12 text-xs sm:text-sm cursor-pointer hover:scale-102 transition-transform bg-black/30 justify-center"
               >
                 {currentSlide.secondaryCta.text}
               </Button>

@@ -94,14 +94,14 @@ export default function Header() {
 
   return (
     <>
-      <nav className="bg-surface/90 backdrop-blur-md sticky top-0 z-50 transition-all premium-shadow" aria-label="Ana Navigasyon">
-        <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-20 gap-4">
+      <nav className="bg-surface/95 backdrop-blur-md sticky top-0 z-50 transition-all premium-shadow border-b border-outline-variant/10" aria-label="Ana Navigasyon">
+        <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16 md:h-20 gap-2 sm:gap-4">
 
           {/* Brand Logo */}
           <div className="flex items-center shrink-0 z-10">
-            <Link href="/" className="flex items-center gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
-              <Image src="/logo.png" alt="PEKEFE Logo" width={60} height={60} priority className="h-13 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
-              <span className="font-bold text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">Pekefe</span>
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
+              <Image src="/logo.png" alt="PEKEFE Logo" width={52} height={52} priority className="h-10 md:h-13 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
+              <span className="font-bold text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">Pekefe</span>
             </Link>
           </div>
 
@@ -116,19 +116,19 @@ export default function Header() {
           </div>
 
           {/* Trailing Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
 
             {/* User Profile Button */}
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 p-2 rounded-full hover:bg-surface-container-low transition-all relative group cursor-pointer"
+                className="flex items-center gap-1.5 p-2 rounded-full hover:bg-surface-container-low active:bg-surface-container-high transition-all relative group cursor-pointer"
                 aria-label="Kullanıcı Menüsü"
                 aria-expanded={profileOpen}
               >
                 {isLoggedIn ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-white text-xs md:text-sm font-bold flex items-center justify-center ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
                       {userInitial}
                     </div>
                     <svg className={`w-3 h-3 text-primary transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +136,7 @@ export default function Header() {
                     </svg>
                   </div>
                 ) : (
-                  <span className="material-symbols-outlined text-primary">person</span>
+                  <span className="material-symbols-outlined text-primary text-xl md:text-2xl">person</span>
                 )}
               </button>
 
@@ -229,9 +229,9 @@ export default function Header() {
             {/* Global Advanced Search Trigger Button */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low hover:border-primary/40 transition-all cursor-pointer text-primary"
+              className="flex items-center gap-1 px-2 py-1.5 md:px-3 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low hover:border-primary/40 transition-all cursor-pointer text-primary"
               aria-label="Gelişmiş Arama Motoru"
-              title="Gelişmiş Arama Motoru (Ctrl + K)"
+              title="Gelişmiş Arama Motoru"
             >
               <span className="material-symbols-outlined text-primary text-xl">search</span>
               <span className="hidden lg:inline text-xs font-semibold text-on-surface-variant">Arama Yap...</span>
@@ -241,12 +241,12 @@ export default function Header() {
             {/* Cart Button */}
             <button
               onClick={() => setCartOpen(true)}
-              className="p-2 rounded-full hover:bg-surface-container-low transition-all relative cursor-pointer"
+              className="p-2 rounded-full hover:bg-surface-container-low transition-all relative cursor-pointer active:scale-95"
               aria-label="Sepet Çekmecesini Aç"
             >
-              <span className="material-symbols-outlined text-primary">shopping_bag</span>
+              <span className="material-symbols-outlined text-primary text-xl md:text-2xl">shopping_bag</span>
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-label-sm">
+                <span className="absolute top-0.5 right-0.5 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-label-sm font-bold shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -255,36 +255,37 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-full hover:bg-surface-container-low transition-all cursor-pointer"
+              className="md:hidden p-2 rounded-full hover:bg-surface-container-low transition-all cursor-pointer active:scale-95 text-primary"
               aria-label="Menü"
             >
-              <span className="material-symbols-outlined text-primary">{mobileMenuOpen ? "close" : "menu"}</span>
+              <span className="material-symbols-outlined text-2xl">{mobileMenuOpen ? "close" : "menu"}</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-outline-variant/10 bg-surface-container-lowest">
-            <div className="max-w-container-max mx-auto px-margin-mobile py-4 space-y-1">
+          <div className="md:hidden border-t border-outline-variant/10 bg-surface-container-lowest/98 backdrop-blur-xl shadow-2xl animate-in slide-in-from-top duration-300">
+            <div className="max-w-container-max mx-auto px-margin-mobile py-4 space-y-1.5">
               {[
-                { href: "/", label: "Mağaza" },
-                { href: "/kategoriler", label: "Kategoriler" },
-                { href: "/hikayemiz", label: "Hikayemiz" },
-                { href: "/tesisimiz", label: "Tesisimiz" },
-                { href: "/blog", label: "Blog" },
-                { href: "/b2b", label: "B2B Bayilik" },
-              ].map(({ href, label }) => (
+                { href: "/", label: "Mağaza", icon: "storefront" },
+                { href: "/kategoriler", label: "Kategoriler", icon: "grid_view" },
+                { href: "/hikayemiz", label: "Hikayemiz", icon: "history_edu" },
+                { href: "/tesisimiz", label: "Tesisimiz", icon: "factory" },
+                { href: "/blog", label: "Blog & Yazılar", icon: "article" },
+                { href: "/b2b", label: "B2B Bayilik Portalı", icon: "business_center" },
+              ].map(({ href, label, icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     (href === "/" ? pathname === "/" : pathname.startsWith(href))
-                      ? "bg-primary/10 text-primary font-bold"
+                      ? "bg-primary/10 text-primary font-bold shadow-sm"
                       : "text-on-surface hover:bg-surface-container-low"
                   }`}
                 >
-                  {label}
+                  <span className="material-symbols-outlined text-lg text-primary">{icon}</span>
+                  <span>{label}</span>
                 </Link>
               ))}
             </div>

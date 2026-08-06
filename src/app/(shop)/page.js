@@ -473,21 +473,21 @@ export default function Home() {
       </section>
 
       {/* ─── FEATURED PRODUCTS SECTION (Editorial Grid) ─── */}
-      <section id="koleksiyon" className="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-16 reveal-element scroll-mt-20">
-        <div className="text-center space-y-3">
-          <span className="text-secondary font-label-md text-sm uppercase tracking-[0.2em] font-semibold">
+      <section id="koleksiyon" className="py-12 md:py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-10 md:space-y-16 reveal-element scroll-mt-20">
+        <div className="text-center space-y-2.5 md:space-y-3">
+          <span className="text-secondary font-label-md text-xs sm:text-sm uppercase tracking-[0.2em] font-semibold">
             Butik Koleksiyon
           </span>
-          <h2 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold">
+          <h2 className="font-display-lg text-primary text-2xl sm:text-3xl md:text-headline-lg font-bold">
             Özel Reçeteli Mahsullerimiz
           </h2>
           <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
-          <p className="text-sm text-on-surface-variant max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-on-surface-variant max-w-md mx-auto px-4">
             Sınırlı miktarda üretilen, coğrafi tescilli ve analiz raporlu İspir lezzetleri.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 md:gap-x-12 md:gap-y-16">
           {products.map((p, idx) => (
             <ProductCard
               key={p.id}

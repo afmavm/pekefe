@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -93,25 +93,47 @@ const initialProducts = [
   }
 ];
 
+function trNormalize(str = "") {
+  if (!str || typeof str !== "string") return "";
+  const trMap = {
+    'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ı': 'i', 'İ': 'i',
+    'ö': 'o', 'Ö': 'o', 'ş': 's', 'Ş': 's', 'ü': 'u', 'Ü': 'u'
+  };
+  return str
+    .split("")
+    .map((ch) => trMap[ch] || ch)
+    .join("")
+    .toLowerCase()
+    .trim();
+}
+
+function parseNumericPrice(val) {
+  if (typeof val === "number" && !isNaN(val)) return val;
+  if (!val) return 0;
+  const cleaned = String(val).replace(/[^\d.]/g, "");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
 export default function Kategoriler() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(initialProducts);
   const [loading, setLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
     try {
       const [prodData, catData] = await Promise.all([
         fetchProductsFromApi(),
-        fetch("/api/categories?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : [])
+        fetch("/api/categories", { cache: "no-store" }).then(r => r.ok ? r.json() : [])
       ]);
-      // Merge category display names from categories API
-      if (Array.isArray(prodData)) {
+      if (Array.isArray(prodData) && prodData.length > 0) {
         const catMap = {};
         if (Array.isArray(catData)) {
-          catData.forEach(c => { if (c?.name) catMap[c.name.toLowerCase().trim()] = c.name.trim(); });
+          catData.forEach(c => { if (c?.name) catMap[trNormalize(c.name)] = c.name.trim(); });
         }
         setProducts(prodData.map(p => ({
           ...p,
-          categoryDisplay: catMap[String(p.categoryDisplay || p.category || "").toLowerCase().trim()] || p.categoryDisplay || p.category
+          price: parseNumericPrice(p.price),
+          categoryDisplay: catMap[trNormalize(p.categoryDisplay || p.category)] || p.categoryDisplay || p.category
         })));
       }
     } catch (e) {
@@ -122,26 +144,19 @@ export default function Kategoriler() {
   }, []);
 
   useEffect(() => {
-    // Initial load
     loadProducts();
 
-    // Reload when admin stock page dispatches update signal
     const handleUpdated = () => loadProducts();
     window.addEventListener("pekefe_products_updated", handleUpdated);
 
-    // Reload when user returns to this tab (e.g. from admin panel)
     const handleVisibility = () => {
       if (document.visibilityState === "visible") loadProducts();
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
-    // Polling every 5 seconds – safe because fetchProductsFromApi has a guard flag
-    const interval = setInterval(loadProducts, 5000);
-
     return () => {
       window.removeEventListener("pekefe_products_updated", handleUpdated);
       document.removeEventListener("visibilitychange", handleVisibility);
-      clearInterval(interval);
     };
   }, [loadProducts]);
 
@@ -152,7 +167,7 @@ export default function Kategoriler() {
       products.forEach(p => {
         const display = p.categoryDisplay || p.category;
         if (display && typeof display === "string" && display.trim()) {
-          const key = display.toLowerCase().trim();
+          const key = trNormalize(display);
           if (!catMap.has(key)) catMap.set(key, display.trim());
         }
       });
@@ -186,6 +201,7 @@ export default function Kategoriler() {
   const productsWithBust = useMemo(() =>
     products.filter(Boolean).map(p => ({
       ...p,
+      numericPrice: parseNumericPrice(p.price),
       image: translateImage(p.image),
       images: Array.isArray(p.images) ? p.images.map(translateImage) : [translateImage(p.image)]
     })),
@@ -193,24 +209,37 @@ export default function Kategoriler() {
 
   const filteredProducts = useMemo(() => {
     let result = [...productsWithBust];
-    if (selectedCategory !== "all") {
-      const sel = selectedCategory.toLowerCase().trim();
+
+    // Category Filter
+    if (selectedCategory && selectedCategory !== "all") {
+      const sel = trNormalize(selectedCategory);
       result = result.filter(p => {
-        const c1 = String(p.category || "").toLowerCase().trim();
-        const c2 = String(p.categoryDisplay || "").toLowerCase().trim();
-        return c1 === sel || c2 === sel;
+        const c1 = trNormalize(p.category);
+        const c2 = trNormalize(p.categoryDisplay);
+        return c1.includes(sel) || sel.includes(c1) || c2.includes(sel) || sel.includes(c2);
       });
     }
+
+    // Search Tokenization Filter (Turkish Normalized)
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(p =>
-        String(p.name || "").toLowerCase().includes(q) ||
-        String(p.desc || "").toLowerCase().includes(q)
-      );
+      const tokens = trNormalize(searchQuery).split(/\s+/).filter(Boolean);
+      result = result.filter(p => {
+        const searchableText = trNormalize(
+          `${p.name || ""} ${p.desc || ""} ${p.description || ""} ${p.meta || ""} ${p.category || ""} ${p.categoryDisplay || ""} ${p.ingredients || ""}`
+        );
+        return tokens.every(token => searchableText.includes(token));
+      });
     }
-    result = result.filter(p => typeof p.price === "number" && p.price <= maxPrice);
-    if (sortBy === "price-asc") result.sort((a, b) => (a.price || 0) - (b.price || 0));
-    if (sortBy === "price-desc") result.sort((a, b) => (b.price || 0) - (a.price || 0));
+
+    // Max Price Filter
+    result = result.filter(p => p.numericPrice <= maxPrice);
+
+    // Sorting
+    if (sortBy === "price-asc") result.sort((a, b) => a.numericPrice - b.numericPrice);
+    if (sortBy === "price-desc") result.sort((a, b) => b.numericPrice - a.numericPrice);
+    if (sortBy === "name-asc") result.sort((a, b) => (a.name || "").localeCompare(b.name || "", "tr"));
+    if (sortBy === "name-desc") result.sort((a, b) => (b.name || "").localeCompare(a.name || "", "tr"));
+
     return result;
   }, [productsWithBust, selectedCategory, searchQuery, maxPrice, sortBy]);
 
@@ -406,11 +435,13 @@ export default function Kategoriler() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white py-3 px-3 rounded-lg border border-outline-variant/30 text-xs font-body-md focus:outline-none focus:ring-1 focus:ring-primary text-on-surface outline-none"
+                className="w-full bg-white py-3 px-3 rounded-lg border border-outline-variant/30 text-xs font-body-md focus:outline-none focus:ring-1 focus:ring-primary text-on-surface outline-none cursor-pointer"
               >
                 <option value="recommended">Tavsiye Edilen</option>
                 <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
                 <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
+                <option value="name-asc">İsim: A'dan Z'ye</option>
+                <option value="name-desc">İsim: Z'den A'ya</option>
               </select>
             </div>
 
@@ -429,11 +460,12 @@ export default function Kategoriler() {
                   onClick={() => {
                     setSelectedCategory("all");
                     setSearchQuery("");
-                    setMaxPrice(500);
+                    setMaxPrice(5000);
+                    setSortBy("recommended");
                   }}
                   variant="outline"
                   size="sm"
-                  className="mt-2"
+                  className="mt-2 cursor-pointer"
                 >
                   Filtreleri Temizle
                 </Button>

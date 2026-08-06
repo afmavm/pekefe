@@ -84,16 +84,16 @@ export function ProductCard({
   const isOutOfStock = stock === 0;
 
   return (
-    <div className={`flex flex-col md:flex-row gap-8 items-center border-b border-outline-variant/10 pb-12 ${className}`}>
+    <div className={`flex flex-col md:flex-row gap-5 md:gap-8 items-start md:items-center bg-surface-container-lowest/80 md:bg-transparent rounded-2xl md:rounded-none p-4 md:p-0 border border-outline-variant/15 md:border-0 md:border-b border-outline-variant/10 pb-6 md:pb-12 shadow-sm md:shadow-none transition-all ${className}`}>
       {/* Image Frame - Luxury Editorial Full-Bleed Presentation */}
-      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all">
+      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-xl md:rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all">
         {tag && (
-          <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
+          <span className="absolute top-3 left-3 md:top-4 md:left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[9px] md:text-[10px] px-3 py-0.5 md:py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
             {tag}
           </span>
         )}
         {isOutOfStock && (
-          <span className="absolute top-4 right-4 bg-slate-800/90 text-white text-[10px] px-3.5 py-1 rounded-full uppercase font-bold z-10 shadow-md">
+          <span className="absolute top-3 right-3 md:top-4 md:right-4 bg-slate-800/90 text-white text-[9px] md:text-[10px] px-3 py-0.5 md:py-1 rounded-full uppercase font-bold z-10 shadow-md">
             Tükendi
           </span>
         )}
@@ -115,20 +115,20 @@ export function ProductCard({
       </div>
 
       {/* Editorial Description Column */}
-      <div className="w-full md:w-1/2 space-y-4">
-        <span className="text-[10px] text-on-surface-variant uppercase font-mono tracking-widest">{meta}</span>
-        <h3 className="font-display-lg text-primary text-xl font-bold leading-snug">
+      <div className="w-full md:w-1/2 space-y-3 md:space-y-4">
+        <span className="text-[10px] text-on-surface-variant uppercase font-mono tracking-widest block">{meta}</span>
+        <h3 className="font-display-lg text-primary text-lg md:text-xl font-bold leading-snug">
           {name}
         </h3>
-        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed line-clamp-3">
+        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed line-clamp-2 md:line-clamp-3">
           {stripHtmlTags(desc)}
         </p>
 
         {/* Interactive Variant Pills */}
         {hasVariants && (
           <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Ürün Çeşidi:</span>
-            <div className="flex flex-wrap gap-2">
+            <span className="text-[10px] md:text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Çeşit:</span>
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
               {variants.map((v, i) => {
                 const label = getVariantLabel(v);
                 const vPrice = v.price ? Number(v.price) : null;
@@ -138,7 +138,7 @@ export function ProductCard({
                     key={v.id || i}
                     type="button"
                     onClick={() => setSelectedVariant(v)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer border ${
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] md:text-xs transition-all cursor-pointer border ${
                       isSelected
                         ? "border-primary bg-primary text-white font-bold shadow-md scale-105"
                         : "border-outline-variant/30 bg-surface-container-low text-on-surface hover:border-primary/50 font-medium"
@@ -158,13 +158,13 @@ export function ProductCard({
         )}
 
         {/* Clean Luxury Price Display */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-outline-variant/15">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-outline-variant/15">
           <div className="flex items-baseline gap-2 whitespace-nowrap">
-            <span className="text-2xl md:text-3xl font-display-lg text-primary font-extrabold tracking-tight">
+            <span className="text-xl md:text-3xl font-display-lg text-primary font-extrabold tracking-tight">
               {fmt(activePrice)}
             </span>
             {activeOldPrice && activeOldPrice > activePrice && (
-              <span className="text-sm text-on-surface-variant/70 line-through font-medium">
+              <span className="text-xs md:text-sm text-on-surface-variant/70 line-through font-medium">
                 {fmt(activeOldPrice)}
               </span>
             )}
@@ -173,14 +173,14 @@ export function ProductCard({
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {onAddToCart && !isOutOfStock && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onAddToCart(selectedVariant);
                 }}
-                className="bg-primary text-white hover:bg-primary/90 px-4 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-2 shadow-sm font-label-md text-xs font-bold uppercase tracking-wider"
+                className="flex-1 sm:flex-none bg-primary text-white hover:bg-primary/90 px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-label-md text-xs font-bold uppercase tracking-wider active:scale-95"
                 aria-label={`${name} sepete ekle`}
               >
                 <span className="material-symbols-outlined text-base">shopping_cart</span>
@@ -189,7 +189,7 @@ export function ProductCard({
             )}
             <Link
               href={`/urun/${id}`}
-              className="border border-secondary hover:bg-secondary hover:text-white text-secondary font-label-sm text-xs px-5 py-2.5 rounded-lg tracking-wider uppercase transition-all font-bold"
+              className="flex-1 sm:flex-none border border-secondary hover:bg-secondary hover:text-white text-secondary font-label-sm text-xs px-4 py-2.5 rounded-xl tracking-wider uppercase transition-all font-bold text-center active:scale-95"
             >
               Detaylar
             </Link>

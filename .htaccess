@@ -1,0 +1,14 @@
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX PASSENGER CONFIGURATION
+<IfModule mod_passenger.c>
+    PassengerAppEnv production
+    PassengerAppRoot "/home/ata3a6icilikcom/pekefe.com"
+    PassengerBaseURI "/"
+    PassengerAppType node
+    PassengerStartupFile cpanel_server.js
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+</IfModule>

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# PEKEFE cPanel GitHub Automated Deployment Script
-# Usage: ./deploy_github.sh
+# PEKEFE cPanel GitHub Automated Deployment & Self-Healing Script
 
 echo "================================================="
 echo "  PEKEFE ERP & Web — GitHub Deployment Sync"
@@ -11,23 +10,30 @@ echo "================================================="
 cd ~/pekefe.com || exit 1
 
 # 2. Fetch & Pull latest changes from GitHub
-echo "[1/4] Pulling latest updates from GitHub (main)..."
+echo "[1/5] Pulling latest updates from GitHub (main)..."
 git fetch origin main
 git reset --hard origin/main
 
-# 3. Environment & Dependencies
-echo "[2/4] Syncing environment & dependencies..."
-cp ~/.env ~/pekefe.com/.env 2>/dev/null || true
+# 3. Environment Setup
+echo "[2/5] Checking environment (.env)..."
+if [ ! -f .env ]; then
+  cp .env.example .env
+  echo "Created .env from .env.example"
+fi
 
-# 4. Next.js Build
-echo "[3/4] Building Next.js production bundle..."
+# 4. Database Sync (Fixes SQLite Error Code 14)
+echo "[3/5] Verifying SQLite database (prisma/dev.db)..."
+npx prisma db push --skip-generate 2>/dev/null || true
+
+# 5. Production Build
+echo "[4/5] Building Next.js production bundle..."
 npm run build
 
-# 5. Restart Passenger Server
-echo "[4/4] Restarting Phusion Passenger Node.js server..."
+# 6. Restart Passenger Server
+echo "[5/5] Restarting Phusion Passenger Node.js server..."
 mkdir -p ~/pekefe.com/tmp
 touch ~/pekefe.com/tmp/restart.txt
 
 echo "================================================="
-echo " SUCCESS: PEKEFE site has been updated & restarted!"
+echo " SUCCESS: PEKEFE site updated and restarted!"
 echo "================================================="

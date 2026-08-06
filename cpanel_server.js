@@ -1,8 +1,8 @@
 /**
  * PEKEFE ERP & Web Application — cPanel Node.js Selector Entry Point
  * 
- * Dynamically switches working directory to .next/standalone to resolve Next.js BUILD_ID
- * and standalone server asset manifests.
+ * Preserves Phusion Passenger's dynamic socket/port in process.env.PORT
+ * so Passenger can proxy requests without 503 socket timeout errors.
  */
 
 const path = require("path");
@@ -14,15 +14,15 @@ if (fs.existsSync(envPath)) {
 }
 
 process.env.NODE_ENV = "production";
-process.env.PORT = "3001";
+
+// Preserve Phusion Passenger socket provided in process.env.PORT
+if (!process.env.PORT) {
+  process.env.PORT = "3000";
+}
 
 const standaloneDir = path.join(__dirname, ".next", "standalone");
-
 if (fs.existsSync(standaloneDir)) {
   process.chdir(standaloneDir);
-  require(path.join(standaloneDir, "server.js"));
-} else if (fs.existsSync(path.join(__dirname, "server.js"))) {
-  require(path.join(__dirname, "server.js"));
-} else {
-  console.error("Error: Could not locate Next.js standalone server.js entry point!");
 }
+
+require("./server.js");

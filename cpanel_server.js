@@ -7,6 +7,7 @@ if (fs.existsSync(envPath)) {
 }
 
 process.env.NODE_ENV = "production";
+process.env.HOSTNAME = "0.0.0.0";
 
 if (!process.env.PORT) {
   process.env.PORT = "3001";
@@ -18,13 +19,13 @@ if (fs.existsSync(standaloneDir)) {
   try {
     const srcPublic = path.join(__dirname, "public");
     const destPublic = path.join(standaloneDir, "public");
-    if (fs.existsSync(srcPublic) && !fs.existsSync(destPublic)) {
+    if (fs.existsSync(srcPublic)) {
       fs.cpSync(srcPublic, destPublic, { recursive: true });
     }
 
     const srcStatic = path.join(__dirname, ".next", "static");
     const destStatic = path.join(standaloneDir, ".next", "static");
-    if (fs.existsSync(srcStatic) && !fs.existsSync(destStatic)) {
+    if (fs.existsSync(srcStatic)) {
       fs.mkdirSync(path.dirname(destStatic), { recursive: true });
       fs.cpSync(srcStatic, destStatic, { recursive: true });
     }

@@ -1,13 +1,66 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
 
+const DEFAULT_CLIENT_POSTS = [
+  {
+    id: "blog-1",
+    title: "Geleneksel İspir Dut Pekmezi Nasıl Üretilir?",
+    slug: "geleneksel-ispir-dut-pekmezi-nasil-uretilir",
+    category: "Geleneksel Üretim",
+    image: "/ispir-dut-hasadi.png",
+    metaDesc: "İspir yaylalarında 2200m rakımda yetişen saf beyaz dutların bakır kazanlarda odun ateşinde ağır ağır pişirilme hikayesi.",
+    content: "İspir'in el değmemiş 2200 metre üzerindeki yaylalarında yetişen saf beyaz dutlar, tam olgunlaşma döneminde silkelenerek keten bezlere toplanır.",
+    readTime: "5 dk okuma",
+  },
+  {
+    id: "blog-2",
+    title: "Ham Çiçek Balı ve İşlenmiş Bal Arasındaki 5 Temel Fark",
+    slug: "ham-cicek-bali-ve-islenmis-bal-arasindaki-farklar",
+    category: "Doğal Beslenme",
+    image: "/ispir-kackar-yaylalari-manzara.webp",
+    metaDesc: "Pastörize edilmemiş, 45 derece üzerinde ısıtılmamış hakiki ham çiçek balının polen ve canlı enzim zenginliği.",
+    content: "Market raflarında gördüğünüz berrak ve akışkan ballar ile doğadan kovan çıkışı elde edilen ham bal arasında hayati besin farkları bulunur.",
+    readTime: "4 dk okuma",
+  },
+  {
+    id: "blog-3",
+    title: "Pestil ve Köme Hazırlamanın İncelikleri: İspir Gelenekleri",
+    slug: "pestil-ve-kome-hazirlamanin-incelikleri",
+    category: "Yöresel Tarifler",
+    image: "/ispir-pestil-kurutma-gercek.png",
+    metaDesc: "Keten bezlerde güneşte kurutulan doğal dut pestili ve cevizli İspir kömesinin asırlık lezzet sırları.",
+    content: "Doğu Anadolu'nun kış aylarındaki en büyük enerji kaynağı olan pestil ve köme, yaz sonu dut hasadıyla başlar.",
+    readTime: "6 dk okuma",
+  },
+  {
+    id: "blog-4",
+    title: "Dut Pekmezinin Sağlığa Faydaları ve Günlük Tüketim Önerileri",
+    slug: "dut-pekmezinin-sagliga-faydalari",
+    category: "Sağlıklı Yaşam",
+    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    metaDesc: "Demir, kalsiyum ve antioksidan deposu geleneksel dut pekmezinin vücut direncine ve enerji seviyesine etkileri.",
+    content: "Geleneksel İspir dut pekmezi, zengin mineral ve vitamin içeriğiyle doğal bir şifa kaynağıdır.",
+    readTime: "3 dk okuma",
+  },
+  {
+    id: "blog-5",
+    title: "İspir Yaylalarının 2200m Rakımlı Flora Zenginliği",
+    slug: "ispir-yaylalarinin-2200m-rakimli-flora-zenginligi",
+    category: "Doğa & Coğrafya",
+    image: "/ispir-yedi-goller-kackar-manzara.webp",
+    metaDesc: "Kaçkar dağlarının eteklerindeki endemik çiçek türleri ve PEKEFE lezzetlerinin essiz aromatik kaynağı.",
+    content: "Erzurum İspir bölgesi, yüksek rakımı, temiz su kaynakları ve sanayi kirliliğinden uzak bakir doğasıyla Türkiye'nin en değerli arıcılık ve meyvecilik merkezlerinden biridir.",
+    readTime: "5 dk okuma",
+  }
+];
+
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState(DEFAULT_CLIENT_POSTS);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
@@ -19,7 +72,9 @@ export default function Blog() {
         const res = await fetch("/api/blog");
         if (res.ok) {
           const data = await res.json();
-          setArticles(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setArticles(data);
+          }
         }
       } catch (err) {
         console.error("Blog get hatası:", err);

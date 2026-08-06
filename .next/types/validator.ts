@@ -1091,6 +1091,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/admin/seed-blog/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/seed-blog">> = Specific
+  const handler = {} as typeof import("../../src/app/api/admin/seed-blog/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/admin/seed-email-templates/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/seed-email-templates">> = Specific

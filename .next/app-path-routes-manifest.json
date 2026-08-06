@@ -137,6 +137,7 @@
   "/api/admin/route": "/api/admin",
   "/api/admin/scan/route": "/api/admin/scan",
   "/api/admin/search/route": "/api/admin/search",
+  "/api/admin/seed-blog/route": "/api/admin/seed-blog",
   "/api/admin/seed-email-templates/route": "/api/admin/seed-email-templates",
   "/api/ai-assistant/ask/route": "/api/ai-assistant/ask",
   "/api/ai-assistant/route": "/api/ai-assistant",

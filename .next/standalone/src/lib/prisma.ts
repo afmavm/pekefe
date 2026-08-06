@@ -12,9 +12,9 @@ export const tenantStorage = new AsyncLocalStorage<TenantContext>();
 const globalForPrisma = global as unknown as { prisma: any };
 
 const createPrismaClient = () => {
-  let dbUrl = process.env.DATABASE_URL || "file:./dev.db";
+  let dbUrl = process.env.DATABASE_URL || "mysql://root:root@localhost:3306/pekefe_db";
   
-  if (dbUrl.includes(".db") || dbUrl.startsWith("file:")) {
+  if (dbUrl.startsWith("file:") || dbUrl.includes(".db")) {
     if (!dbUrl.includes("busy_timeout")) {
       const separator = dbUrl.includes("?") ? "&" : "?";
       dbUrl = `${dbUrl}${separator}connection_limit=1&busy_timeout=60000`;

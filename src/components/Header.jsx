@@ -254,11 +254,23 @@ export default function Header() {
 
             {/* Mobile Menu Button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-full hover:bg-surface-container-low transition-all cursor-pointer active:scale-95 text-primary"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen((prev) => !prev);
+              }}
+              className="md:hidden p-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all cursor-pointer text-primary flex items-center justify-center w-10 h-10 border border-outline-variant/20"
               aria-label="Menü"
             >
-              <span className="material-symbols-outlined text-2xl">{mobileMenuOpen ? "close" : "menu"}</span>
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>

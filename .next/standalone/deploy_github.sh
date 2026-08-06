@@ -21,11 +21,9 @@ if [ ! -f .env ]; then
   echo "Created .env from .env.example"
 fi
 
-# 4. Sync .htaccess to public_html for Apache Passenger Routing
-echo "[3/4] Syncing .htaccess to public_html..."
-if [ -f .htaccess ]; then
-  cp .htaccess ~/public_html/.htaccess 2>/dev/null || true
-fi
+# 3. Sync .htaccess to public_html for Apache Passenger Routing
+echo "[3/4] Auto-fixing cPanel Passenger routes & .htaccess..."
+bash cpanel_fix.sh 2>/dev/null || true
 
 # 5. Instant Restart (No cPanel build overhead!)
 echo "[4/4] Restarting Phusion Passenger Node.js server..."

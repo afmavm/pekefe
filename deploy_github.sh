@@ -9,10 +9,11 @@ echo "================================================="
 # 1. Navigate to project directory
 cd ~/pekefe.com || exit 1
 
-# 2. Pull pre-built bundle from GitHub
-echo "[1/4] Pulling pre-built bundle from GitHub..."
-git fetch origin main -c pack.threads=1 2>/dev/null || true
-git reset --hard origin/main 2>/dev/null || true
+# 2. Pull pre-built bundle from GitHub (Always latest commit)
+echo "[1/4] Pulling latest build bundle from GitHub..."
+git fetch origin main
+git reset --hard origin/main
+git pull origin main --force 2>/dev/null || true
 
 # 3. Check .env
 echo "[2/4] Verifying environment configuration (.env)..."

@@ -37,3 +37,16 @@ PassengerAppEnv production
 EOT
 
 echo "[SUCCESS] PEKEFE .htaccess created strictly inside $CURRENT_DIR/.htaccess!"
+
+# Safely create symlinks inside public_html pointing to $CURRENT_DIR
+# so cPanel Addon Domain / Subdomain DocumentRoot resolves cleanly no matter the cPanel configuration
+mkdir -p ~/public_html 2>/dev/null || true
+if [ -d ~/public_html ] && [ "$CURRENT_DIR" != "$HOME/public_html" ]; then
+  ln -sfn "$CURRENT_DIR" ~/public_html/pekefe.com 2>/dev/null || true
+  ln -sfn "$CURRENT_DIR" ~/public_html/pekefe 2>/dev/null || true
+  echo "[SUCCESS] DocumentRoot symlinks created inside public_html for Pekefe!"
+fi
+
+# Ensure startup file fallbacks exist
+cp -f "$CURRENT_DIR/cpanel_server.js" "$CURRENT_DIR/app.js" 2>/dev/null || true
+cp -f "$CURRENT_DIR/cpanel_server.js" "$CURRENT_DIR/index.js" 2>/dev/null || true

@@ -22,12 +22,12 @@ if [ ! -f .env ]; then
 fi
 
 # 3. Sync .htaccess inside CURRENT_DIR and PUBLIC_TARGET
-echo "[3/4] Auto-fixing cPanel Reverse Proxy routes & .htaccess..."
+echo "[3/4] Auto-fixing Reverse Proxy routes & .htaccess..."
 if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
-# 4. Instant PM2 Restart for pekefe-app and pekefe processes
+# 4. Instant PM2 Restart for pekefe-app process on Port 4000
 echo "[4/4] Restarting PEKEFE PM2 process (pekefe-app on Port 4000)..."
 PORT=4000 pm2 restart pekefe-app --update-env 2>/dev/null || PORT=4000 pm2 restart pekefe --update-env 2>/dev/null || PORT=4000 pm2 start cpanel_server.js --name "pekefe-app" --update-env 2>/dev/null || true
 pm2 save 2>/dev/null || true

@@ -4,28 +4,28 @@ import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
-    console.log("[API SEED] Seeding full products & admin users...");
+    console.log("[API SEED] Seeding authentic Pekefe İspir products & admin users...");
     const hashedPassword = await bcrypt.hash("password123", 10);
 
     // 1. Branches
     const defaultBranch = await prisma.branch.upsert({
       where: { code: 'BR-MRKZ' },
-      update: { name: 'Merkez Şube', address: 'Manisa OSB', phone: '0236 111 22 33' },
+      update: { name: 'İspir Merkez Tesis', address: 'İspir, Erzurum', phone: '0544 149 4851' },
       create: {
         id: 'default-branch',
-        name: 'Merkez Şube',
+        name: 'İspir Merkez Tesis',
         code: 'BR-MRKZ',
-        address: 'Manisa OSB',
-        phone: '0236 111 22 33'
+        address: 'İspir, Erzurum',
+        phone: '0544 149 4851'
       }
     });
 
     const subeBranch = await prisma.branch.upsert({
       where: { code: 'BR-IST' },
-      update: { name: 'İstanbul Şubesi', address: 'Ataşehir, İstanbul', phone: '0216 111 22 33' },
+      update: { name: 'İstanbul Dağıtım Şubesi', address: 'Ataşehir, İstanbul', phone: '0216 111 22 33' },
       create: {
         id: 'sube-branch',
-        name: 'İstanbul Şubesi',
+        name: 'İstanbul Dağıtım Şubesi',
         code: 'BR-IST',
         address: 'Ataşehir, İstanbul',
         phone: '0216 111 22 33'
@@ -35,23 +35,23 @@ export async function GET() {
     // 2. Warehouses
     await prisma.warehouse.upsert({
       where: { code: 'WH-MRKZ' },
-      update: { name: 'Merkez Depo', type: 'Merkez', address: 'Erzurum OSB, 3. Cadde' },
+      update: { name: 'İspir Üretim Deposu', type: 'Merkez', address: 'İspir Tesisleri' },
       create: {
         id: '1',
-        name: 'Merkez Depo',
+        name: 'İspir Üretim Deposu',
         code: 'WH-MRKZ',
         type: 'Merkez',
-        address: 'Erzurum OSB, 3. Cadde',
+        address: 'İspir Tesisleri',
         branchId: defaultBranch.id
       }
     });
 
     await prisma.warehouse.upsert({
       where: { code: 'WH-SUBE' },
-      update: { name: 'Şube Depo', type: 'Şube', address: 'İstanbul Anadolu Yakası' },
+      update: { name: 'İstanbul Sevkiyat Deposu', type: 'Şube', address: 'İstanbul Anadolu Yakası' },
       create: {
         id: '2',
-        name: 'Şube Depo',
+        name: 'İstanbul Sevkiyat Deposu',
         code: 'WH-SUBE',
         type: 'Şube',
         address: 'İstanbul Anadolu Yakası',
@@ -59,7 +59,7 @@ export async function GET() {
       }
     });
 
-    // 3. Super Admin
+    // 3. Super Admin & Admin
     const admin = await prisma.user.upsert({
       where: { email: "admin@nexab2b.com" },
       update: { password: hashedPassword, role: "SUPER_ADMIN", isApproved: true },
@@ -96,97 +96,137 @@ export async function GET() {
       },
     });
 
-    // 4. Products & Stock
-    const productsToSeed = [
+    // 4. Authentic PEKEFE İspir Product Catalog
+    const authenticProducts = [
       {
-        sku: 'PEKEFE-KORUK-01',
-        name: 'Pekefe Pro Paslanmaz Arı Körüğü',
-        category: 'geleneksel lezzetler',
-        stock: 150,
-        criticalLimit: 20,
-        price: 850,
-        cost: 300,
-        image: "/uploads/beekeeping_bellows_premium.png",
-        desc: "Asırlık Erzurum kalitesi, patentli çift hava kanalı sayesinde hiç sönmeyen 304 paslanmaz arı körüğü.",
+        sku: 'PEKEFE-PEKMEZ-01',
+        name: 'Geleneksel İspir Dut Pekmezi (700g Cam Kavanoz)',
+        category: 'Geleneksel Lezzetler',
+        stock: 350,
+        criticalLimit: 30,
+        price: 320,
+        cost: 140,
+        image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+        desc: "İspir yaylalarında 2200m rakımda yetişen saf beyaz dutların bakır kazanlarda odun ateşinde ağır ağır pişirilmiş geleneksel lezzeti.",
         attributes: {
-          "Malzeme": "304 Paslanmaz Çelik",
-          "Hava Kanalı": "Patentli Çift Kanal",
-          unit: "adet",
-          barcode: "8680000000015"
+          "Yöre": "Erzurum / İspir",
+          "Gramaj": "700 Gram",
+          "Rakım": "2200 Metre",
+          unit: "kavanoz",
+          barcode: "8680000001012"
         },
         images: []
       },
       {
-        sku: 'PEKEFE-ELBISE-01',
-        name: 'Tam Koruma Arıcı Elbisesi',
-        category: 'geleneksel lezzetler',
-        stock: 80,
-        criticalLimit: 10,
-        price: 1200,
-        cost: 500,
-        image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800",
-        desc: "3 katmanlı, nefes alabilir, arı sokmalarına karşı %100 güvenli profesyonel elbise.",
-        attributes: { "Beden": "L/XL", "Katman Sayısı": "3 Katmanlı", unit: "adet", barcode: "8680000000022" },
-        images: []
-      },
-      {
-        sku: 'PEKEFE-SET-01',
-        name: 'Kovan Bakım Seti',
-        category: 'geleneksel lezzetler',
-        stock: 120,
-        criticalLimit: 15,
-        price: 650,
-        cost: 250,
-        image: "https://images.unsplash.com/photo-1587049016823-69ef9d5045ac?q=80&w=800",
-        desc: "8 parça paslanmaz çelik aletler ve özel taşıma çantası içeren profesyonel kovan bakım seti.",
-        attributes: { "Parça Sayısı": "8 Parça", "Çanta": "Dahil", unit: "adet", barcode: "8680000000039" },
-        images: []
-      },
-      {
-        sku: 'KORUK-GALV-01',
-        name: 'Profesyonel Galvaniz Arıcı Körüğü',
-        category: 'yöresel ürünler',
-        stock: 10,
-        criticalLimit: 5,
-        price: 350,
-        oldPrice: 455,
-        isCampaignActive: true,
-        cost: 85,
-        image: "https://images.unsplash.com/photo-1587049016823-69ef9d5045ac?q=80&w=800",
-        desc: "Korozyona dayanıklı galvaniz kaplama, dayanıklı deri körük ve optimum hava üfleme kapasitesi.",
-        attributes: { unit: 'adet' },
-        images: []
-      },
-      {
-        sku: 'RAW-SAC-01',
-        name: '304 Paslanmaz Çelik Sac (Plaka)',
-        category: 'Hammadde',
+        sku: 'PEKEFE-FASULYE-01',
+        name: 'Coğrafi İşaretli Hakiki İspir Kuru Fasulyesi (1000g)',
+        category: 'Geleneksel Lezzetler',
         stock: 500,
-        criticalLimit: 100,
-        cost: 350,
-        price: 0,
-        image: "https://placehold.co/100?text=Sac",
-        isRawMaterial: true,
-        images: [],
-        attributes: {}
+        criticalLimit: 50,
+        price: 240,
+        cost: 110,
+        image: "https://images.unsplash.com/photo-1551462147-ff29053bfc14?auto=format&fit=crop&q=80&w=800",
+        desc: "İspir'in kendine has toprak ve iklim yapısında yetişen, erken pişen ve kabuk atmayan tescilli coğrafi işaretli İspir kuru fasulyesi.",
+        attributes: {
+          "Yöre": "İspir Yaylaları",
+          "Gramaj": "1000 Gram",
+          unit: "paket",
+          barcode: "8680000001029"
+        },
+        images: []
       },
       {
-        sku: 'RAW-DERI-01',
-        name: 'Körük Derisi ve Körük Körüğü',
-        category: 'Hammadde',
-        stock: 250,
-        criticalLimit: 50,
-        cost: 150,
-        price: 0,
-        image: "https://placehold.co/100?text=Deri",
-        isRawMaterial: true,
-        images: [],
-        attributes: {}
+        sku: 'PEKEFE-BAL-01',
+        name: 'Kaçkar Ham Çiçek Balı (2200m Rakım - 850g)',
+        category: 'Yöresel Ürünler',
+        stock: 200,
+        criticalLimit: 25,
+        price: 650,
+        cost: 280,
+        image: "/ispir-kackar-yaylalari-manzara.webp",
+        desc: "Pastörize edilmemiş, 45 derece üzerinde ısıtılmamış, polen ve canlı enzim zengini %100 saf Kaçkar yayla ham çiçek balı.",
+        attributes: {
+          "Rakım": "2200+ Metre",
+          "Gramaj": "850 Gram",
+          unit: "kavanoz",
+          barcode: "8680000001036"
+        },
+        images: []
+      },
+      {
+        sku: 'PEKEFE-KOME-01',
+        name: 'Cevizli İspir Kömesi (1000g İplik Köme)',
+        category: 'Geleneksel Lezzetler',
+        stock: 180,
+        criticalLimit: 20,
+        price: 380,
+        cost: 160,
+        image: "/ispir-pestil-kurutma-gercek.png",
+        desc: "Süt, nişasta ve süzme dut şırasının bakır kazanlarda pişirilmesi ve yerli İspir cevizlerinin dizilmesiyle güneşte kurutulan geleneksel köme.",
+        attributes: {
+          "Yöre": "İspir",
+          "Gramaj": "1000 Gram",
+          unit: "paket",
+          barcode: "8680000001043"
+        },
+        images: []
+      },
+      {
+        sku: 'PEKEFE-PESTIL-01',
+        name: 'Geleneksel Yaprak Dut Pestili (500g)',
+        category: 'Geleneksel Lezzetler',
+        stock: 220,
+        criticalLimit: 25,
+        price: 220,
+        cost: 90,
+        image: "/ispir-pestil-kurutma-gercek.png",
+        desc: "Geleneksel keten bezlerde dağ havasında kurutulmuş, hiçbir katkı ve ilave şeker içermeyen incecik yaprak dut pestili.",
+        attributes: {
+          "Gramaj": "500 Gram",
+          unit: "paket",
+          barcode: "8680000001050"
+        },
+        images: []
+      },
+      {
+        sku: 'PEKEFE-PEYNIR-01',
+        name: 'Erzurum Göğermiş Civil Peyniri (1000g)',
+        category: 'Yöresel Ürünler',
+        stock: 140,
+        criticalLimit: 15,
+        price: 290,
+        cost: 130,
+        image: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&q=80&w=800",
+        desc: "Doğal penisilin deposu, geleneksel yöntemlerle olgunlaştırılmış hakiki Erzurum küflü göğermiş civil peyniri.",
+        attributes: {
+          "Yöre": "Erzurum",
+          "Gramaj": "1000 Gram",
+          unit: "paket",
+          barcode: "8680000001067"
+        },
+        images: []
+      },
+      {
+        sku: 'PEKEFE-CEVIZ-01',
+        name: 'İspir Yerli İnce Kabuk Cevizi (1000g)',
+        category: 'Yöresel Ürünler',
+        stock: 300,
+        criticalLimit: 30,
+        price: 310,
+        cost: 140,
+        image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?auto=format&fit=crop&q=80&w=800",
+        desc: "İspir vadisinde yetişen, elde kolayca kırılan, yüksek yağ oranına ve lezzete sahip yerli ince kabuk ceviz.",
+        attributes: {
+          "Gramaj": "1000 Gram",
+          unit: "kg",
+          barcode: "8680000001074"
+        },
+        images: []
       }
     ];
 
     let seededCount = 0;
-    for (const p of productsToSeed) {
+    for (const p of authenticProducts) {
       const prod = await prisma.product.upsert({
         where: { sku: p.sku },
         update: p,
@@ -213,7 +253,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: `${seededCount} adet ürün, depolar, stok bakiyeleri ve admin kullanıcıları başarıyla veritabanına yüklendi!`,
+      message: `${seededCount} adet hakiki Pekefe İspir Yöresel Ürünü, depolar ve stok bakiyeleri veritabanına başarıyla yüklendi!`,
       adminEmail: admin.email,
       defaultPassword: "password123",
     });

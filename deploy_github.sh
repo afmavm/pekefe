@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PEKEFE cPanel GitHub Automated Deployment Script (PM2 Port 4000 Mode)
+# PEKEFE cPanel GitHub Automated Deployment Script (LiteSpeed & Phusion Passenger Universal)
 
 echo "================================================="
 echo "  PEKEFE ERP & Web — GitHub Instant Deployment"
@@ -20,20 +20,20 @@ if [ ! -f .env ]; then
   cp .env.example .env 2>/dev/null || true
 fi
 
-# 3. Sync .htaccess inside CURRENT_DIR
-echo "[3/4] Auto-fixing Reverse Proxy routes & .htaccess..."
+# 3. Sync .htaccess & LiteSpeed public_html folders
+echo "[3/4] Auto-fixing LiteSpeed DocumentRoots & .htaccess..."
 if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
-# 4. Instant PM2 Server Restart on Port 4000
-echo "[4/4] Restarting PEKEFE PM2 Node.js process (Port 4000)..."
-PORT=4000 pm2 restart pekefe --update-env 2>/dev/null || PORT=4000 pm2 start cpanel_server.js --name "pekefe" --update-env 2>/dev/null || true
-pm2 save 2>/dev/null || true
-
-# Also touch restart.txt for Passenger fallback
+# 4. Instant Passenger & PM2 Server Restart
+echo "[4/4] Restarting Node.js servers..."
 mkdir -p "$CURRENT_DIR/tmp"
 touch "$CURRENT_DIR/tmp/restart.txt"
+touch "/home/ata3a6icilikcom/public_html/pekefe.com/tmp/restart.txt" 2>/dev/null || true
+
+PORT=4000 pm2 restart pekefe --update-env 2>/dev/null || PORT=4000 pm2 start cpanel_server.js --name "pekefe" --update-env 2>/dev/null || true
+pm2 save 2>/dev/null || true
 
 echo "================================================="
 echo " SUCCESS: PEKEFE site updated and restarted!"

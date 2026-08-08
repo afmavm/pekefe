@@ -27,6 +27,10 @@ if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
+# Disable Prisma telemetry & update child processes to prevent EAGAIN CloudLinux process limit errors
+export CHECKPOINT_DISABLE=1
+export PRISMA_HIDE_UPDATE_MESSAGE=1
+
 # Ensure database tables & seed are present
 npx prisma db push --skip-generate 2>/dev/null || true
 

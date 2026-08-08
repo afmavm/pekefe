@@ -31,8 +31,8 @@ fi
 export CHECKPOINT_DISABLE=1
 export PRISMA_HIDE_UPDATE_MESSAGE=1
 
-# Ensure database tables & seed are present
-npx prisma db push --skip-generate 2>/dev/null || true
+# Run lightweight seed directly in Node without CLI sub-process spawning
+node scripts/db_seed.js 2>/dev/null || true
 
 # 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000
 echo "[4/4] Performing instant PM2 process restart on Port 4000..."

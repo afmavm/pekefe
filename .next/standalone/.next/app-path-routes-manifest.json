@@ -139,6 +139,7 @@
   "/api/admin/search/route": "/api/admin/search",
   "/api/admin/seed-blog/route": "/api/admin/seed-blog",
   "/api/admin/seed-email-templates/route": "/api/admin/seed-email-templates",
+  "/api/admin/seed/route": "/api/admin/seed",
   "/api/ai-assistant/ask/route": "/api/ai-assistant/ask",
   "/api/ai-assistant/route": "/api/ai-assistant",
   "/api/applications/[id]/route": "/api/applications/[id]",

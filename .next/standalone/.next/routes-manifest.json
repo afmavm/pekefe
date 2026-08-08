@@ -1040,6 +1040,12 @@
       "namedRegex": "^/api/admin/search(?:/)?$"
     },
     {
+      "page": "/api/admin/seed",
+      "regex": "^/api/admin/seed(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/seed(?:/)?$"
+    },
+    {
       "page": "/api/admin/seed-blog",
       "regex": "^/api/admin/seed\\-blog(?:/)?$",
       "routeKeys": {},

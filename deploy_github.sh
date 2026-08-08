@@ -27,6 +27,9 @@ if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
+# Ensure database tables & seed are present
+npx prisma db push --skip-generate 2>/dev/null || true
+
 # 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000
 echo "[4/4] Performing instant PM2 process restart on Port 4000..."
 pm2 delete pekefe-app 2>/dev/null || true

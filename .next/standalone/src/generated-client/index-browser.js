@@ -115,6 +115,9 @@ Prisma.NullTypes = {
  */
 
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 });
 
@@ -1078,6 +1081,69 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.CompanyOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  taxNo: 'taxNo',
+  taxOffice: 'taxOffice',
+  domain: 'domain',
+  currency: 'currency'
+};
+
+exports.Prisma.AccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  refresh_token: 'refresh_token',
+  access_token: 'access_token',
+  token_type: 'token_type',
+  scope: 'scope',
+  id_token: 'id_token',
+  session_state: 'session_state'
+};
+
+exports.Prisma.SessionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId'
+};
+
+exports.Prisma.UserOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  image: 'image',
+  password: 'password',
+  role: 'role',
+  companyId: 'companyId',
+  branchId: 'branchId',
+  warehouseId: 'warehouseId',
+  customer_type: 'customer_type',
+  b2b_group_id: 'b2b_group_id',
+  company_name: 'company_name',
+  tax_id: 'tax_id',
+  tax_office: 'tax_office'
+};
+
+exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
+  identifier: 'identifier',
+  token: 'token'
+};
+
+exports.Prisma.AddressOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  addressTitle: 'addressTitle',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phone: 'phone',
+  city: 'city',
+  district: 'district',
+  fullAddress: 'fullAddress'
+};
+
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
@@ -1087,6 +1153,617 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.ProductOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  sku: 'sku',
+  category: 'category',
+  subCategory: 'subCategory',
+  image: 'image',
+  desc: 'desc',
+  seoTitle: 'seoTitle',
+  seoDesc: 'seoDesc',
+  seoKeywords: 'seoKeywords',
+  videoUrl: 'videoUrl',
+  companyId: 'companyId'
+};
+
+exports.Prisma.CategoryDetailOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  parentId: 'parentId'
+};
+
+exports.Prisma.ProductVariantOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  sku: 'sku',
+  barcode: 'barcode'
+};
+
+exports.Prisma.StockLocationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productVariantId: 'productVariantId',
+  warehouseId: 'warehouseId',
+  rack: 'rack'
+};
+
+exports.Prisma.WarehouseOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  type: 'type',
+  address: 'address',
+  branchId: 'branchId',
+  companyId: 'companyId'
+};
+
+exports.Prisma.BranchOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  address: 'address',
+  phone: 'phone'
+};
+
+exports.Prisma.RecipeItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  mainProductId: 'mainProductId',
+  mainProductVariantId: 'mainProductVariantId',
+  ingredientId: 'ingredientId',
+  ingredientVariantId: 'ingredientVariantId',
+  unit: 'unit'
+};
+
+exports.Prisma.ProductionOrderOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productVariantId: 'productVariantId',
+  status: 'status',
+  productionPlanId: 'productionPlanId',
+  warehouseId: 'warehouseId',
+  approvedBy: 'approvedBy',
+  completedBy: 'completedBy',
+  notes: 'notes',
+  companyId: 'companyId'
+};
+
+exports.Prisma.CurrentAccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  cariKod: 'cariKod',
+  name: 'name',
+  type: 'type',
+  cariTipi: 'cariTipi',
+  ad: 'ad',
+  soyad: 'soyad',
+  tckn: 'tckn',
+  taxNo: 'taxNo',
+  taxId: 'taxId',
+  taxOffice: 'taxOffice',
+  mersisNo: 'mersisNo',
+  yetkiliKisi: 'yetkiliKisi',
+  webSitesi: 'webSitesi',
+  phone: 'phone',
+  email: 'email',
+  address: 'address',
+  currency: 'currency',
+  b2bPaymentTerms: 'b2bPaymentTerms',
+  b2bCode: 'b2bCode',
+  dealerGroup: 'dealerGroup',
+  priceGroup: 'priceGroup',
+  priceFormula: 'priceFormula',
+  parentDealerId: 'parentDealerId',
+  kaynakPlatform: 'kaynakPlatform',
+  companyId: 'companyId'
+};
+
+exports.Prisma.SubAccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  currentAccountId: 'currentAccountId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  role: 'role'
+};
+
+exports.Prisma.TransactionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  currentAccountId: 'currentAccountId',
+  subAccountId: 'subAccountId',
+  type: 'type',
+  description: 'description',
+  paymentMethod: 'paymentMethod'
+};
+
+exports.Prisma.InvoiceOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  currentAccountId: 'currentAccountId',
+  status: 'status',
+  type: 'type',
+  externalLink: 'externalLink',
+  notes: 'notes',
+  companyId: 'companyId'
+};
+
+exports.Prisma.BankOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  accountNumber: 'accountNumber',
+  iban: 'iban',
+  currency: 'currency',
+  logo: 'logo',
+  branch: 'branch',
+  type: 'type'
+};
+
+exports.Prisma.OrderOrderByRelevanceFieldEnum = {
+  id: 'id',
+  currentAccountId: 'currentAccountId',
+  status: 'status',
+  summary: 'summary',
+  type: 'type',
+  method: 'method',
+  companyId: 'companyId'
+};
+
+exports.Prisma.CMSDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  heroTitle: 'heroTitle',
+  heroSubtitle: 'heroSubtitle',
+  buttonText: 'buttonText',
+  announcement: 'announcement',
+  announcement2: 'announcement2',
+  siteName: 'siteName',
+  primaryColor: 'primaryColor',
+  secondaryColor: 'secondaryColor',
+  siteDescription: 'siteDescription',
+  categoryTitle: 'categoryTitle',
+  categorySubtitle: 'categorySubtitle',
+  appTitle: 'appTitle',
+  appSubtitle: 'appSubtitle',
+  contactPhone: 'contactPhone',
+  contactEmail: 'contactEmail',
+  contactAddress: 'contactAddress',
+  socialInstagram: 'socialInstagram',
+  socialWhatsapp: 'socialWhatsapp',
+  socialFacebook: 'socialFacebook',
+  socialYoutube: 'socialYoutube',
+  logoFont: 'logoFont',
+  logoUrl: 'logoUrl',
+  logoWeight: 'logoWeight',
+  footerSlogan: 'footerSlogan',
+  layoutWidth: 'layoutWidth',
+  heroAlignment: 'heroAlignment',
+  topBarText1: 'topBarText1',
+  topBarText2: 'topBarText2',
+  cartDiscountType: 'cartDiscountType',
+  companyName: 'companyName',
+  bankName: 'bankName',
+  bankIban: 'bankIban',
+  efaturaPrefix: 'efaturaPrefix',
+  earsivPrefix: 'earsivPrefix',
+  companyStampUrl: 'companyStampUrl',
+  companyOwnerName: 'companyOwnerName',
+  companyOwnerSurname: 'companyOwnerSurname',
+  companyTaxNo: 'companyTaxNo',
+  companyTaxOffice: 'companyTaxOffice',
+  companyFax: 'companyFax',
+  companyGsm: 'companyGsm',
+  companyKepAddress: 'companyKepAddress',
+  companyMersisNo: 'companyMersisNo',
+  companySicilNo: 'companySicilNo',
+  companyRegion: 'companyRegion',
+  companyCountry: 'companyCountry',
+  companyCity: 'companyCity',
+  companyDistrict: 'companyDistrict',
+  companyBuildingName: 'companyBuildingName',
+  companyBuildingNo: 'companyBuildingNo',
+  companyStreet: 'companyStreet',
+  companyPostalCode: 'companyPostalCode',
+  companyWebsite: 'companyWebsite',
+  companyDefaultUnit: 'companyDefaultUnit',
+  companyDefaultLanguages: 'companyDefaultLanguages',
+  companyExcludedChars: 'companyExcludedChars',
+  companyDefaultTevkifatCode: 'companyDefaultTevkifatCode',
+  companyInvoiceFooter: 'companyInvoiceFooter',
+  footerText: 'footerText',
+  mapCoordinates: 'mapCoordinates',
+  dealProductIds: 'dealProductIds'
+};
+
+exports.Prisma.CMSPageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  status: 'status'
+};
+
+exports.Prisma.IntegrationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  status: 'status',
+  lastSync: 'lastSync',
+  logo: 'logo'
+};
+
+exports.Prisma.IntegrationLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  integrationId: 'integrationId',
+  time: 'time',
+  message: 'message',
+  status: 'status'
+};
+
+exports.Prisma.StockTransactionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productVariantId: 'productVariantId',
+  warehouseId: 'warehouseId',
+  type: 'type',
+  description: 'description',
+  userId: 'userId',
+  userEmail: 'userEmail',
+  moduleSource: 'moduleSource',
+  ipAddress: 'ipAddress',
+  referenceId: 'referenceId',
+  companyId: 'companyId'
+};
+
+exports.Prisma.StockTransferOrderByRelevanceFieldEnum = {
+  id: 'id',
+  transferNo: 'transferNo',
+  productId: 'productId',
+  fromWarehouseId: 'fromWarehouseId',
+  toWarehouseId: 'toWarehouseId',
+  status: 'status',
+  requester: 'requester',
+  approvedBy: 'approvedBy',
+  rejectionReason: 'rejectionReason',
+  notes: 'notes'
+};
+
+exports.Prisma.StockCycleCountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  warehouseId: 'warehouseId',
+  type: 'type',
+  status: 'status',
+  notes: 'notes',
+  createdBy: 'createdBy'
+};
+
+exports.Prisma.StockCycleCountItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  cycleCountId: 'cycleCountId',
+  productId: 'productId',
+  rack: 'rack',
+  notes: 'notes'
+};
+
+exports.Prisma.CouponOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  discountType: 'discountType'
+};
+
+exports.Prisma.TicketOrderByRelevanceFieldEnum = {
+  id: 'id',
+  email: 'email',
+  subject: 'subject',
+  status: 'status',
+  category: 'category',
+  orderId: 'orderId'
+};
+
+exports.Prisma.TicketMessageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  ticketId: 'ticketId',
+  sender: 'sender',
+  message: 'message'
+};
+
+exports.Prisma.CampaignOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  type: 'type',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  target: 'target',
+  description: 'description'
+};
+
+exports.Prisma.FeedbackOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  status: 'status',
+  reply: 'reply'
+};
+
+exports.Prisma.BlogPostOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  content: 'content',
+  category: 'category',
+  image: 'image',
+  metaDesc: 'metaDesc'
+};
+
+exports.Prisma.AccountingAccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  parentCode: 'parentCode'
+};
+
+exports.Prisma.JournalEntryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  number: 'number',
+  description: 'description',
+  status: 'status',
+  type: 'type',
+  createdBy: 'createdBy',
+  referenceId: 'referenceId',
+  companyId: 'companyId'
+};
+
+exports.Prisma.JournalLineOrderByRelevanceFieldEnum = {
+  id: 'id',
+  journalEntryId: 'journalEntryId',
+  debitAccountId: 'debitAccountId',
+  creditAccountId: 'creditAccountId',
+  description: 'description'
+};
+
+exports.Prisma.ExpenseOrderByRelevanceFieldEnum = {
+  id: 'id',
+  category: 'category',
+  description: 'description',
+  supplier: 'supplier',
+  receiptNo: 'receiptNo',
+  paymentMethod: 'paymentMethod',
+  bankId: 'bankId',
+  status: 'status',
+  companyId: 'companyId'
+};
+
+exports.Prisma.BudgetItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  category: 'category',
+  notes: 'notes'
+};
+
+exports.Prisma.TaxDeclarationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  period: 'period',
+  type: 'type',
+  status: 'status',
+  notes: 'notes'
+};
+
+exports.Prisma.InvoiceItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  name: 'name'
+};
+
+exports.Prisma.IncomeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  category: 'category',
+  description: 'description',
+  currentAccountId: 'currentAccountId',
+  paymentMethod: 'paymentMethod',
+  bankId: 'bankId',
+  status: 'status',
+  companyId: 'companyId'
+};
+
+exports.Prisma.AuthLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  ip: 'ip',
+  userId: 'userId',
+  route: 'route',
+  method: 'method',
+  failReason: 'failReason'
+};
+
+exports.Prisma.MediaItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  url: 'url',
+  size: 'size',
+  tag: 'tag',
+  alt: 'alt'
+};
+
+exports.Prisma.ProductUnitOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name'
+};
+
+exports.Prisma.ProductionPlanOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  status: 'status'
+};
+
+exports.Prisma.WorkstationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  unit: 'unit'
+};
+
+exports.Prisma.RouteStepOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name',
+  workstationId: 'workstationId'
+};
+
+exports.Prisma.WasteLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productVariantId: 'productVariantId',
+  productionOrderId: 'productionOrderId',
+  warehouseId: 'warehouseId',
+  reason: 'reason'
+};
+
+exports.Prisma.PurchaseRequisitionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  requisitionNo: 'requisitionNo',
+  branchId: 'branchId',
+  departmentId: 'departmentId',
+  requesterId: 'requesterId',
+  projectId: 'projectId',
+  costCenterId: 'costCenterId',
+  priority: 'priority',
+  status: 'status',
+  approvalStatus: 'approvalStatus',
+  notes: 'notes'
+};
+
+exports.Prisma.PurchaseRequisitionItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  requisitionId: 'requisitionId',
+  productId: 'productId',
+  warehouseId: 'warehouseId',
+  description: 'description'
+};
+
+exports.Prisma.PurchaseRequisitionApprovalOrderByRelevanceFieldEnum = {
+  id: 'id',
+  requisitionId: 'requisitionId',
+  approverId: 'approverId',
+  action: 'action',
+  comment: 'comment'
+};
+
+exports.Prisma.DespatchAdviceOrderByRelevanceFieldEnum = {
+  id: 'id',
+  despatchNo: 'despatchNo',
+  ettnNo: 'ettnNo',
+  customerAccountId: 'customerAccountId',
+  invoiceId: 'invoiceId',
+  orderId: 'orderId',
+  carrierId: 'carrierId',
+  driverName: 'driverName',
+  driverIdentityNo: 'driverIdentityNo',
+  licensePlate: 'licensePlate',
+  status: 'status'
+};
+
+exports.Prisma.DespatchLineOrderByRelevanceFieldEnum = {
+  id: 'id',
+  despatchId: 'despatchId',
+  productId: 'productId'
+};
+
+exports.Prisma.RoleOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
+exports.Prisma.PermissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
+exports.Prisma.RolePermissionOrderByRelevanceFieldEnum = {
+  roleId: 'roleId',
+  permissionId: 'permissionId'
+};
+
+exports.Prisma.UserRoleOrderByRelevanceFieldEnum = {
+  userId: 'userId',
+  roleId: 'roleId'
+};
+
+exports.Prisma.SystemAuditLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tableName: 'tableName',
+  recordId: 'recordId',
+  action: 'action',
+  userId: 'userId',
+  companyId: 'companyId'
+};
+
+exports.Prisma.B2BGroupOrderByRelevanceFieldEnum = {
+  id: 'id',
+  group_name: 'group_name'
+};
+
+exports.Prisma.ProductB2BPriceOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  b2bGroupId: 'b2bGroupId'
+};
+
+exports.Prisma.TieredPricingOrderByRelevanceFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  b2bGroupId: 'b2bGroupId'
+};
+
+exports.Prisma.AdminNotificationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  message: 'message',
+  type: 'type',
+  orderId: 'orderId'
+};
+
+exports.Prisma.FeatureModuleOrderByRelevanceFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  description: 'description'
+};
+
+exports.Prisma.CompanyPermissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  featureModuleId: 'featureModuleId'
+};
+
+exports.Prisma.FailedCargoRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  carrierName: 'carrierName',
+  requestPayload: 'requestPayload',
+  errorMessage: 'errorMessage',
+  status: 'status'
+};
+
+exports.Prisma.EmailTemplateOrderByRelevanceFieldEnum = {
+  id: 'id',
+  eventType: 'eventType',
+  name: 'name',
+  subject: 'subject',
+  bodyHtml: 'bodyHtml',
+  variables: 'variables',
+  status: 'status'
+};
+
+exports.Prisma.EmailLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  recipient: 'recipient',
+  subject: 'subject',
+  bodyHtml: 'bodyHtml',
+  eventType: 'eventType',
+  status: 'status',
+  errorMessage: 'errorMessage'
 };
 
 

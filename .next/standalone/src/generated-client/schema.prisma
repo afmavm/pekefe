@@ -1,13 +1,13 @@
 generator client {
   provider      = "prisma-client-js"
   output        = "../src/generated-client"
-  engineType    = "wasm"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "foreignKeys"
 }
 
 model Company {
@@ -41,12 +41,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -147,9 +147,9 @@ model Product {
   cost                Decimal               @default(0.0)
   image               String?
   images              Json
-  desc                String?
+  desc                String?               @db.Text
   seoTitle            String?
-  seoDesc             String?
+  seoDesc             String?               @db.Text
   seoKeywords         String?
   videoUrl            String?
   attributes          Json
@@ -382,7 +382,7 @@ model CurrentAccount {
   priceGroup            String           @default("Liste")
   priceFormula          String?
   parentDealerId        String?
-  kaynakPlatform        String           @default("ATAK_B2B")
+  kaynakPlatform        String           @default("PEKEFE_B2B")
   eFaturaDurumu         Boolean          @default(false)
   blokeDurumu           Boolean          @default(false)
   adresler              Json?
@@ -513,7 +513,7 @@ model CMSData {
   announcement             String
   announcement2            String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
   maintenanceMode          Boolean @default(false)
-  siteName                 String  @default("Pekefe Geleneksel & Doğal Lezzetler")
+  siteName                 String  @default("PEKEFE Geleneksel & Doğal Lezzetler")
   primaryColor             String  @default("#b45309")
   secondaryColor           String  @default("#1F2937")
   siteDescription          String  @default("")
@@ -601,7 +601,7 @@ model CMSData {
 
   // E-Fatura Ayarları
   companyInvoiceFooter String  @default("")
-  footerText           String  @default("© 2026 Pekefe Geleneksel & Doğal Lezzetler. Tüm Hakları Saklıdır.")
+  footerText           String  @default("© 2026 PEKEFE Geleneksel & Doğal Lezzetler. Tüm Hakları Saklıdır.")
   mapCoordinates       String  @default("")
   // Fırsat Ürünleri Bölümü
   dealSectionActive    Boolean @default(false)
@@ -1342,7 +1342,7 @@ model EmailTemplate {
   eventType String   @unique @map("event_type")
   name      String
   subject   String
-  bodyHtml  String   @map("body_html")
+  bodyHtml  String   @map("body_html") @db.Text
   variables String
   status    String   @default("ACTIVE")
   createdAt DateTime @default(now()) @map("created_at")
@@ -1355,10 +1355,10 @@ model EmailLog {
   id           String   @id @default(uuid())
   recipient    String
   subject      String
-  bodyHtml     String   @map("body_html")
+  bodyHtml     String   @map("body_html") @db.Text
   eventType    String?  @map("event_type")
   status       String
-  errorMessage String?  @map("error_message")
+  errorMessage String?  @map("error_message") @db.Text
   retryCount   Int      @default(0) @map("retry_count")
   createdAt    DateTime @default(now()) @map("created_at")
 

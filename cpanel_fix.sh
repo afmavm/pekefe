@@ -5,7 +5,6 @@ CURRENT_DIR="$(pwd)"
 PUBLIC_TARGET="/home/ata3a6icilikcom/public_html/pekefe.com"
 PUBLIC_ALT="/home/ata3a6icilikcom/public_html/pekefe"
 
-# Generate PM2 ProxyPass .htaccess content without any cpanel_server.js rewrite rules
 generate_htaccess() {
   cat <<EOT > "$1/.htaccess"
 # PEKEFE PM2 Reverse Proxy Routing (Port 4000)
@@ -35,11 +34,9 @@ generate_htaccess() {
 EOT
 }
 
-# Generate in current directory
 generate_htaccess "$CURRENT_DIR"
 echo "[SUCCESS] PM2 Reverse Proxy .htaccess created in $CURRENT_DIR"
 
-# Sync to public_html/pekefe.com and public_html/pekefe
 if [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
   rm -f "$PUBLIC_TARGET" "$PUBLIC_ALT" 2>/dev/null || true
   mkdir -p "$PUBLIC_TARGET" "$PUBLIC_ALT" 2>/dev/null || true
@@ -57,5 +54,5 @@ if [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
   cp -rf "$CURRENT_DIR/public" "$PUBLIC_TARGET/" 2>/dev/null || true
   cp -rf "$CURRENT_DIR/public" "$PUBLIC_ALT/" 2>/dev/null || true
 
-  echo "[SUCCESS] Reverse Proxy .htaccess & build files synced to public_html/pekefe.com!"
+  echo "[SUCCESS] Clean Reverse Proxy files synced to public_html/pekefe.com!"
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PEKEFE cPanel GitHub Automated Deployment Script (PM2 Process: pekefe-app, Port: 4000)
+# PEKEFE cPanel GitHub Automated Deployment Script (Professional PM2 Clean Deploy)
 
 echo "================================================="
 echo "  PEKEFE ERP & Web — GitHub Instant Deployment"
@@ -21,16 +21,19 @@ if [ ! -f .env ]; then
   cp .env.example .env 2>/dev/null || true
 fi
 
-# 3. Sync .htaccess inside CURRENT_DIR and PUBLIC_TARGET
+# 3. Sync Reverse Proxy .htaccess inside CURRENT_DIR and PUBLIC_TARGET
 echo "[3/4] Auto-fixing Reverse Proxy routes & .htaccess..."
 if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
-# 4. Instant PM2 Restart for pekefe-app process on Port 4000
-echo "[4/4] Restarting PEKEFE PM2 process (pekefe-app on Port 4000)..."
-PORT=4000 pm2 restart pekefe-app --update-env 2>/dev/null || PORT=4000 pm2 restart pekefe --update-env 2>/dev/null || PORT=4000 pm2 start cpanel_server.js --name "pekefe-app" --update-env 2>/dev/null || true
-pm2 save 2>/dev/null || true
+# 4. Clean PM2 state: Delete old stuck process and start fresh on Port 4000
+echo "[4/4] Performing clean PM2 process start on Port 4000..."
+pm2 delete pekefe-app 2>/dev/null || true
+pm2 delete pekefe 2>/dev/null || true
+
+PORT=4000 pm2 start cpanel_server.js --name "pekefe-app" --update-env 2>/dev/null || true
+pm2 save --force 2>/dev/null || true
 
 mkdir -p "$CURRENT_DIR/tmp"
 touch "$CURRENT_DIR/tmp/restart.txt"

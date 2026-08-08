@@ -1,27 +1,22 @@
 #!/bin/bash
-# PEKEFE Dynamic Isolated Passenger .htaccess Generator
+# PEKEFE PM2 & ProxyPass .htaccess Generator (Port 4000)
 
 CURRENT_DIR="$(pwd)"
 
-# Generate Standalone Passenger .htaccess inside CURRENT_DIR
+# Generate PM2 Reverse Proxy .htaccess inside CURRENT_DIR
 cat <<EOT > "$CURRENT_DIR/.htaccess"
-# Isolated Phusion Passenger Execution for Pekefe
-PassengerEnabled on
-PassengerAppRoot "$CURRENT_DIR"
-PassengerStartupFile cpanel_server.js
-PassengerAppType node
-PassengerAppEnv production
-
+# PEKEFE PM2 Reverse Proxy Execution (Port 4000)
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
     # Force HTTPS for mobile apps & webviews
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
-    # Route all dynamic page requests to Passenger Node.js app (Fixes 404)
+    # Proxy all dynamic page requests to PM2 Node.js process on Port 4000
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ cpanel_server.js [QSA,L]
+    RewriteRule ^(.*)$ http://127.0.0.1:4000/\$1 [P,L]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -36,17 +31,12 @@ PassengerAppEnv production
 </IfModule>
 EOT
 
-echo "[SUCCESS] PEKEFE .htaccess created strictly inside $CURRENT_DIR/.htaccess!"
+echo "[SUCCESS] PEKEFE Reverse Proxy .htaccess created inside $CURRENT_DIR/.htaccess!"
 
 # Safely create symlinks inside public_html pointing to $CURRENT_DIR
-# so cPanel Addon Domain / Subdomain DocumentRoot resolves cleanly no matter the cPanel configuration
 mkdir -p ~/public_html 2>/dev/null || true
 if [ -d ~/public_html ] && [ "$CURRENT_DIR" != "$HOME/public_html" ]; then
   ln -sfn "$CURRENT_DIR" ~/public_html/pekefe.com 2>/dev/null || true
   ln -sfn "$CURRENT_DIR" ~/public_html/pekefe 2>/dev/null || true
   echo "[SUCCESS] DocumentRoot symlinks created inside public_html for Pekefe!"
 fi
-
-# Ensure startup file fallbacks exist
-cp -f "$CURRENT_DIR/cpanel_server.js" "$CURRENT_DIR/app.js" 2>/dev/null || true
-cp -f "$CURRENT_DIR/cpanel_server.js" "$CURRENT_DIR/index.js" 2>/dev/null || true

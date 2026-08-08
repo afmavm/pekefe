@@ -8,10 +8,10 @@ echo "================================================="
 
 CURRENT_DIR="$(pwd)"
 
-# 1. Pull pre-built bundle from GitHub (Always latest commit)
-echo "[1/4] Pulling latest build bundle from GitHub..."
-git fetch origin main
-git reset --hard origin/main
+# 1. Force reset local changes to ensure clean pull from GitHub without merge errors
+echo "[1/4] Cleaning local files & pulling latest build bundle from GitHub..."
+git fetch origin main 2>/dev/null || true
+git reset --hard origin/main 2>/dev/null || true
 git pull origin main --force 2>/dev/null || true
 
 # 2. Check .env

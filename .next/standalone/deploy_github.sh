@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PEKEFE cPanel GitHub Automated Deployment Script (Professional PM2 Clean Deploy)
+# PEKEFE cPanel GitHub Automated Deployment Script (Ultra-Fast PM2 Mode)
 
 echo "================================================="
 echo "  PEKEFE ERP & Web — GitHub Instant Deployment"
@@ -27,8 +27,8 @@ if [ -f cpanel_fix.sh ]; then
   source cpanel_fix.sh 2>/dev/null || true
 fi
 
-# 4. Clean PM2 state: Delete old stuck process and start fresh on Port 4000
-echo "[4/4] Performing clean PM2 process start on Port 4000..."
+# 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000
+echo "[4/4] Performing instant PM2 process restart on Port 4000..."
 pm2 delete pekefe-app 2>/dev/null || true
 pm2 delete pekefe 2>/dev/null || true
 

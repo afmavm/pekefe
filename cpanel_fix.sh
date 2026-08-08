@@ -1,11 +1,12 @@
 #!/bin/bash
-# PEKEFE PM2 Reverse Proxy .htaccess Generator (Port 4000)
+# PEKEFE Ultra-Fast PM2 Reverse Proxy .htaccess Generator (Port 4000)
 
 CURRENT_DIR="$(pwd)"
 PUBLIC_TARGET="/home/ata3a6icilikcom/public_html/pekefe.com"
 PUBLIC_ALT="/home/ata3a6icilikcom/public_html/pekefe"
 
 generate_htaccess() {
+  mkdir -p "$1" 2>/dev/null || true
   cat <<EOT > "$1/.htaccess"
 # PEKEFE PM2 Reverse Proxy Routing (Port 4000)
 <IfModule mod_rewrite.c>
@@ -38,21 +39,7 @@ generate_htaccess "$CURRENT_DIR"
 echo "[SUCCESS] PM2 Reverse Proxy .htaccess created in $CURRENT_DIR"
 
 if [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
-  rm -f "$PUBLIC_TARGET" "$PUBLIC_ALT" 2>/dev/null || true
-  mkdir -p "$PUBLIC_TARGET" "$PUBLIC_ALT" 2>/dev/null || true
-  
   generate_htaccess "$PUBLIC_TARGET"
   generate_htaccess "$PUBLIC_ALT"
-
-  cp -f "$CURRENT_DIR/cpanel_server.js" "$PUBLIC_TARGET/" 2>/dev/null || true
-  cp -f "$CURRENT_DIR/cpanel_server.js" "$PUBLIC_ALT/" 2>/dev/null || true
-  cp -f "$CURRENT_DIR/.env" "$PUBLIC_TARGET/" 2>/dev/null || true
-  cp -f "$CURRENT_DIR/.env" "$PUBLIC_ALT/" 2>/dev/null || true
-
-  cp -rf "$CURRENT_DIR/.next" "$PUBLIC_TARGET/" 2>/dev/null || true
-  cp -rf "$CURRENT_DIR/.next" "$PUBLIC_ALT/" 2>/dev/null || true
-  cp -rf "$CURRENT_DIR/public" "$PUBLIC_TARGET/" 2>/dev/null || true
-  cp -rf "$CURRENT_DIR/public" "$PUBLIC_ALT/" 2>/dev/null || true
-
-  echo "[SUCCESS] Clean Reverse Proxy files synced to public_html/pekefe.com!"
+  echo "[SUCCESS] Instant Reverse Proxy .htaccess synced to public_html/pekefe.com!"
 fi

@@ -3,6 +3,11 @@ const path = require('path');
 
 const masterProducts = JSON.parse(fs.readFileSync(path.join(__dirname, 'formatted_dev_db_products.json'), 'utf8'));
 
+// Ensure every single product has isDeleted: false
+masterProducts.forEach(p => {
+  p.isDeleted = false;
+});
+
 const dbSeedCode = `const { PrismaClient } = require("../src/generated-client");
 const bcrypt = require("bcryptjs");
 
@@ -120,7 +125,8 @@ async function main() {
         images: p.images,
         desc: p.desc,
         isRawMaterial: p.isRawMaterial,
-        attributes: p.attributes
+        attributes: p.attributes,
+        isDeleted: false
       },
       create: {
         sku: p.sku,
@@ -135,7 +141,8 @@ async function main() {
         images: p.images,
         desc: p.desc,
         isRawMaterial: p.isRawMaterial,
-        attributes: p.attributes
+        attributes: p.attributes,
+        isDeleted: false
       }
     });
 
@@ -157,6 +164,11 @@ async function main() {
     totalSeeded++;
   }
 
+  // Ensure isDeleted is false for all products
+  await prisma.product.updateMany({
+    data: { isDeleted: false }
+  }).catch(() => {});
+
   console.log(\`[PEKEFE MASTER SEED] Success! Loaded exact \${totalSeeded} local products from dev.db & admin users.\`);
 }
 
@@ -173,7 +185,7 @@ main()
 `;
 
 fs.writeFileSync(path.join(__dirname, '..', 'scripts', 'db_seed.js'), dbSeedCode, 'utf8');
-console.log("Updated scripts/db_seed.js with exact 23 local products from dev.db!");
+console.log("Updated scripts/db_seed.js with exact 23 local products and isDeleted: false!");
 
 const apiSeedCode = `import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -267,7 +279,8 @@ export async function GET() {
           images: p.images,
           desc: p.desc,
           isRawMaterial: p.isRawMaterial,
-          attributes: p.attributes
+          attributes: p.attributes,
+          isDeleted: false
         },
         create: {
           sku: p.sku,
@@ -282,7 +295,8 @@ export async function GET() {
           images: p.images,
           desc: p.desc,
           isRawMaterial: p.isRawMaterial,
-          attributes: p.attributes
+          attributes: p.attributes,
+          isDeleted: false
         }
       });
 
@@ -304,9 +318,14 @@ export async function GET() {
       totalSeeded++;
     }
 
+    // Ensure isDeleted: false on all products
+    await prisma.product.updateMany({
+      data: { isDeleted: false }
+    }).catch(() => {});
+
     return NextResponse.json({
       success: true,
-      message: \`Yerel dev.db veritabanındaki \${totalSeeded} adet ürünün tamamı canlı MySQL veritabanına aktarıldı!\`,
+      message: \`Yerel dev.db veritabanındaki \${totalSeeded} adet ürünün tamamı (isDeleted: false) olarak canlı MySQL veritabanına aktarıldı!\`,
       adminEmail: admin.email,
       defaultPassword: "password123",
     });
@@ -321,4 +340,4 @@ export async function GET() {
 `;
 
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'app', 'api', 'admin', 'seed', 'route.ts'), apiSeedCode, 'utf8');
-console.log("Updated src/app/api/admin/seed/route.ts with exact 23 local products from dev.db!");
+console.log("Updated src/app/api/admin/seed/route.ts with exact 23 local products and isDeleted: false!");

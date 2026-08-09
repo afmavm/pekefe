@@ -26,7 +26,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnd000euel02y5vw5s6",
@@ -50,7 +51,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnf000fuel0fmmu8vdk",
@@ -74,7 +76,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnh000guel0un0ugh0s",
@@ -99,7 +102,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnj000huel0ug5c9exn",
@@ -124,7 +128,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnk000iuel00skov2dc",
@@ -149,7 +154,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnm000juel09u8b4n60",
@@ -174,7 +180,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lno000kuel0vgbyp952",
@@ -199,7 +206,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnq000luel0daoerjsj",
@@ -243,7 +251,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lns000muel0j7zdfcne",
@@ -271,7 +280,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnu000nuel0cyvbyqc7",
@@ -299,7 +309,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmro43lnv000ouel0v46dqbsa",
@@ -324,7 +335,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y5z6",
@@ -475,7 +487,8 @@ const masterProducts = [
         "Fındıklı",
         "Antep Fıstıklı"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7yzh3a000iuetcltcu35aj",
@@ -499,7 +512,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7z0es8000juetcz6mfnuc4",
@@ -523,7 +537,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cml7y76vq0005uetc6rj8y5z7",
@@ -676,7 +691,8 @@ const masterProducts = [
         "Fındıklı",
         "Antep Fıstıklı"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y5z8",
@@ -824,7 +840,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y5z9",
@@ -877,7 +894,8 @@ const masterProducts = [
       "colors": [
         "Sade"
       ]
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y6a0",
@@ -1023,7 +1041,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y6a1",
@@ -1164,7 +1183,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y6a2",
@@ -1308,7 +1328,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cms7y76vq0005uetc6rj8y6a3",
@@ -1454,7 +1475,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   },
   {
     "id": "cmsf6wr3w0000uegwn0zge19p",
@@ -1587,7 +1609,8 @@ const masterProducts = [
       "warehousePrices": {},
       "brand": "",
       "model": ""
-    }
+    },
+    "isDeleted": false
   }
 ];
 
@@ -1701,7 +1724,8 @@ async function main() {
         images: p.images,
         desc: p.desc,
         isRawMaterial: p.isRawMaterial,
-        attributes: p.attributes
+        attributes: p.attributes,
+        isDeleted: false
       },
       create: {
         sku: p.sku,
@@ -1716,7 +1740,8 @@ async function main() {
         images: p.images,
         desc: p.desc,
         isRawMaterial: p.isRawMaterial,
-        attributes: p.attributes
+        attributes: p.attributes,
+        isDeleted: false
       }
     });
 
@@ -1737,6 +1762,11 @@ async function main() {
 
     totalSeeded++;
   }
+
+  // Ensure isDeleted is false for all products
+  await prisma.product.updateMany({
+    data: { isDeleted: false }
+  }).catch(() => {});
 
   console.log(`[PEKEFE MASTER SEED] Success! Loaded exact ${totalSeeded} local products from dev.db & admin users.`);
 }

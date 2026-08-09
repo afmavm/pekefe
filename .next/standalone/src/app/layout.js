@@ -47,6 +47,9 @@ export const metadata = {
   authors: [{ name: "PEKEFE Gastronomi A.Ş." }],
   creator: "PEKEFE Gastronomi",
   publisher: "PEKEFE Gastronomi",
+  verification: {
+    google: "QTYkkg0-x4Z8s5nuv0Qg3T0ePXA35ZhKuLp0ryCXS2s",
+  },
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
@@ -147,6 +150,7 @@ export default function RootLayout({ children }) {
       className={`${playfair.variable} ${manrope.variable} h-full antialiased`}
     >
       <head>
+        <meta name="google-site-verification" content="QTYkkg0-x4Z8s5nuv0Qg3T0ePXA35ZhKuLp0ryCXS2s" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

@@ -16,9 +16,12 @@ generate_htaccess() {
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
-    # Proxy all dynamic page requests to PM2 Node.js process (pekefe-app) on Port 4000
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # Skip proxy ONLY for actual static files (images, css, js, fonts)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js|json|xml|txt|ttf|eot)$ [NC]
+    RewriteRule ^ - [L]
+    
+    # Proxy ALL page requests (including root / homepage) to PM2 Node.js process (pekefe-app) on Port 4000
     RewriteRule ^(.*)$ http://127.0.0.1:4000/\$1 [P,L]
 </IfModule>
 

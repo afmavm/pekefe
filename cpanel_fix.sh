@@ -4,7 +4,6 @@
 CURRENT_DIR="$(pwd)"
 PUBLIC_TARGET="/home/ata3a6icilikcom/public_html/pekefe.com"
 PUBLIC_ALT="/home/ata3a6icilikcom/public_html/pekefe"
-PUBLIC_ROOT="/home/ata3a6icilikcom/public_html"
 
 generate_htaccess() {
   mkdir -p "$1" 2>/dev/null || true
@@ -17,6 +16,10 @@ generate_htaccess() {
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
+    # Exclude B2B ecommerce subfolder/subdomain requests from proxying
+    RewriteCond %{REQUEST_URI} ^/b2b [NC]
+    RewriteRule ^ - [L]
+
     # Skip proxy ONLY for actual static files (images, css, js, fonts)
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js|json|xml|txt|ttf|eot)$ [NC]
@@ -40,7 +43,6 @@ EOT
 }
 
 generate_htaccess "$CURRENT_DIR"
-generate_htaccess "$PUBLIC_ROOT"
 generate_htaccess "$PUBLIC_TARGET"
 generate_htaccess "$PUBLIC_ALT"
-echo "[SUCCESS] Instant Reverse Proxy .htaccess synced across all cPanel public roots!"
+echo "[SUCCESS] PM2 Reverse Proxy .htaccess safely generated without affecting B2B!"

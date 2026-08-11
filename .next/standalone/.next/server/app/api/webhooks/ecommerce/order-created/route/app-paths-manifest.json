@@ -1,3 +1,0 @@
-{
-  "/api/webhooks/ecommerce/order-created/route": "app/api/webhooks/ecommerce/order-created/route.js"
-}

@@ -1,3 +1,0 @@
-module.exports=[576894,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Ürün Koleksiyonları",description:"İspir Dut Kömesi, Organik Dut Pekmezi, Erzurum Çiçek Balı ve tüm yöresel lezzetlerimizi keşfedin. Coğrafi işaretli, katkısız ve geleneksel üretim.",keywords:["ispir kömesi","dut pekmezi","organik bal","yöresel ürün koleksiyonu","kategoriler"],openGraph:{title:"Ürün Koleksiyonları | Pekefe",description:"İspir Dut Kömesi, Organik Dut Pekmezi, Erzurum Çiçek Balı ve tüm yöresel lezzetlerimizi keşfedin.",url:"https://www.pekefe.com/kategoriler"},alternates:{canonical:"https://www.pekefe.com/kategoriler"}}])},394752,a=>{a.n(a.i(576894))}];
-
-//# sourceMappingURL=src_app_%28shop%29_kategoriler_layout_1l32849.js.map

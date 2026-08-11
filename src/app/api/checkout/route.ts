@@ -14,7 +14,7 @@ import { generateNextOrderId } from '@/lib/b2b-helpers';
 const CheckoutSchema = z.object({
   cart: z.array(z.any()).min(1, "Sepet boş olamaz"),
   cartTotal: z.number().min(0, "Geçersiz toplam tutar"),
-  paymentMethod: z.enum(["creditCard", "bankTransfer", "openAccount"]),
+  paymentMethod: z.enum(["creditCard", "bankTransfer", "openAccount", "cashOnDelivery"]),
   couponCode: z.string().optional(),
   couponDiscount: z.number().optional(),
   cardNumber: z.string().optional(),
@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
     const serverBreakdown = calculateCartDiscounts(
       serverCartItems,
       discountSettings,
-      paymentMethod === "openAccount" ? "creditCard" : paymentMethod,
+      (paymentMethod === "openAccount" || paymentMethod === "cashOnDelivery") ? "creditCard" : paymentMethod,
       shippingFee,
       couponDiscount
     );
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
     const customOrderId = await generateNextOrderId(orderType);
 
     // 1. Ödeme işlemi (kredi kartı)
-    let transactionId = paymentMethod === "openAccount" ? "OPEN_ACCOUNT" : "BANK_TRANSFER";
+    let transactionId = paymentMethod === "openAccount" ? "OPEN_ACCOUNT" : paymentMethod === "cashOnDelivery" ? "CASH_ON_DELIVERY" : "BANK_TRANSFER";
     if (paymentMethod === "creditCard") {
       if (!cardNumber || !expDate || !cvv) {
         return NextResponse.json({ error: "Kredi kartı bilgileri eksik." }, { status: 400 });
@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
           status: paymentMethod === "bankTransfer" ? "Ödeme Bekliyor" : "Yeni",
           summary: `${selectedCarrierName ? `[${selectedCarrierName}] ` : ''}` + cart.map((item: any) => `${item.name} (${item.quantity})`).join(", "),
           type: orderType,
-          method: paymentMethod === "creditCard" ? "Kredi Kartı" : paymentMethod === "bankTransfer" ? "Banka Havalesi" : "Açık Hesap"
+          method: paymentMethod === "creditCard" ? "Kredi Kartı" : paymentMethod === "bankTransfer" ? "Banka Havalesi" : paymentMethod === "cashOnDelivery" ? "Kapıda Ödeme" : "Açık Hesap"
         }
       });
 

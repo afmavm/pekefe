@@ -9,6 +9,7 @@ import Image from "next/image";
 import { getCart, updateCartQty, removeFromCart } from "@/utils/cartStorage";
 import { useSession, signOut } from "next-auth/react";
 import GlobalSearchModal from "@/components/GlobalSearchModal";
+import { useCMS } from "@/context/CMSContext";
 
 const translateImage = (url) => {
   if (!url) return url;
@@ -22,6 +23,7 @@ const translateImage = (url) => {
 };
 
 export default function Header() {
+  const { cmsData } = useCMS();
   const pathname = usePathname();
   const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
@@ -100,8 +102,10 @@ export default function Header() {
           {/* Brand Logo */}
           <div className="flex items-center shrink-0 z-10">
             <Link href="/" className="flex items-center gap-2 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
-              <Image src="/logo.png" alt="PEKEFE Logo" width={52} height={52} priority className="h-10 md:h-13 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
-              <span className="font-bold text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">Pekefe</span>
+              <Image src={cmsData?.logoUrl || "/logo.png"} alt={cmsData?.siteName || "PEKEFE Logo"} width={52} height={52} priority className="h-10 md:h-13 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
+              <span className="font-bold text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">
+                {cmsData?.siteName ? cmsData.siteName.split(" ")[0] : "Pekefe"}
+              </span>
             </Link>
           </div>
 

@@ -188,7 +188,67 @@ export default function Odeme() {
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
   const bankDiscount = paymentMethod === "bankTransfer" ? subtotal * (bankDiscountRate / 100) : 0;
-  const grandTotal = Math.max(0, subtotal - bankDiscount + shippingCost);
+  
+  // Cash on Delivery Fee (Dynamic from Management Settings)
+  const codFee = paymentMethod === "cashOnDelivery" ? Number(siteSettings?.cashOnDeliveryFee ?? 25) : 0;
+  const grandTotal = Math.max(0, subtotal - bankDiscount + shippingCost + codFee);
+
+  // Parse dynamic payment methods from Admin / Settings
+  const activePaymentMethods = useMemo(() => {
+    let configMap = null;
+    if (siteSettings?.paymentMethodsConfig) {
+      try {
+        const parsed = typeof siteSettings.paymentMethodsConfig === "string"
+          ? JSON.parse(siteSettings.paymentMethodsConfig)
+          : siteSettings.paymentMethodsConfig;
+        if (Array.isArray(parsed)) {
+          configMap = {};
+          parsed.forEach((m) => { configMap[m.id] = m.enabled; });
+        }
+      } catch (e) {}
+    }
+
+    const allMethods = [
+      {
+        id: "creditCard",
+        label: "Kredi / Banka Kartı",
+        icon: "credit_card",
+        enabled: configMap ? configMap.creditCard !== false : true,
+      },
+      {
+        id: "bankTransfer",
+        label: "Banka Havalesi / EFT",
+        icon: "account_balance",
+        badge: (siteSettings?.bankTransferDiscountRate ?? 0) > 0 ? `%${siteSettings.bankTransferDiscountRate} İndirimli` : null,
+        enabled: configMap ? configMap.bankTransfer !== false : true,
+      },
+      {
+        id: "openAccount",
+        label: "B2B Vadeli Açık Hesap",
+        icon: "receipt_long",
+        enabled: configMap ? configMap.openAccount !== false : true,
+      },
+      {
+        id: "cashOnDelivery",
+        label: "Kapıda Ödeme",
+        icon: "local_shipping",
+        badge: (siteSettings?.cashOnDeliveryFee ?? 0) > 0 ? `+₺${siteSettings.cashOnDeliveryFee}` : null,
+        enabled: configMap ? configMap.cashOnDelivery === true : (siteSettings?.cashOnDeliveryEnabled ?? false),
+      },
+    ];
+
+    return allMethods.filter((m) => m.enabled);
+  }, [siteSettings]);
+
+  // Keep paymentMethod selection valid if settings change
+  useEffect(() => {
+    if (activePaymentMethods.length > 0) {
+      const isCurrentValid = activePaymentMethods.some((m) => m.id === paymentMethod);
+      if (!isCurrentValid) {
+        setPaymentMethod(activePaymentMethods[0].id);
+      }
+    }
+  }, [activePaymentMethods, paymentMethod]);
 
   // Card brand icon check
   const getCardBrand = () => {
@@ -625,50 +685,27 @@ export default function Odeme() {
             </div>
 
             {/* Payment Method Selector Tabs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("creditCard")}
-                className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer ${
-                  paymentMethod === "creditCard"
-                    ? "border-primary bg-primary/5 shadow-sm text-primary"
-                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
-                }`}
-              >
-                <span className="material-symbols-outlined text-2xl">credit_card</span>
-                <span className="font-bold text-xs">Kredi / Banka Kartı</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("bankTransfer")}
-                className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer relative ${
-                  paymentMethod === "bankTransfer"
-                    ? "border-primary bg-primary/5 shadow-sm text-primary"
-                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
-                }`}
-              >
-                {bankDiscountRate > 0 && (
-                  <span className="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    %{bankDiscountRate} İndirimli
-                  </span>
-                )}
-                <span className="material-symbols-outlined text-2xl">account_balance</span>
-                <span className="font-bold text-xs">Banka Havalesi / EFT</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("openAccount")}
-                className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all cursor-pointer ${
-                  paymentMethod === "openAccount"
-                    ? "border-primary bg-primary/5 shadow-sm text-primary"
-                    : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
-                }`}
-              >
-                <span className="material-symbols-outlined text-2xl">receipt_long</span>
-                <span className="font-bold text-xs">B2B Vadeli Açık Hesap</span>
-              </button>
+            <div className={`grid grid-cols-1 ${activePaymentMethods.length === 2 ? 'sm:grid-cols-2' : activePaymentMethods.length >= 4 ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3'} gap-3`}>
+              {activePaymentMethods.map((method) => (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => setPaymentMethod(method.id)}
+                  className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer relative ${
+                    paymentMethod === method.id
+                      ? "border-primary bg-primary/5 shadow-sm text-primary"
+                      : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {method.badge && (
+                    <span className="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                      {method.badge}
+                    </span>
+                  )}
+                  <span className="material-symbols-outlined text-2xl">{method.icon}</span>
+                  <span className="font-bold text-xs text-center">{method.label}</span>
+                </button>
+              ))}
             </div>
 
             {/* TAB 1: CREDIT CARD / PAYTR */}
@@ -812,6 +849,31 @@ export default function Odeme() {
                 </div>
               </div>
             )}
+
+            {/* TAB 4: CASH ON DELIVERY */}
+            {paymentMethod === "cashOnDelivery" && (
+              <div className="p-6 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-3 text-purple-900 font-bold text-sm">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+                    <span className="material-symbols-outlined text-xl">local_shipping</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-purple-900">Kapıda Ödeme (Kargo Teslimatı)</h4>
+                    <p className="text-xs text-purple-700 mt-0.5">Siparişiniz kurye tarafından teslim edilirken ödeme yapın.</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-purple-800 leading-relaxed">
+                  Kargonuz teslim edilirken nakit veya kredi kartı (POS cihazı) ile kapıda ödeme yapabilirsiniz.
+                  {codFee > 0 && ` Kapıda ödeme hizmet bedeli (+₺${codFee}) toplam tutara eklenmiştir.`}
+                </p>
+
+                <div className="p-3 bg-white rounded-xl border border-purple-200/80 flex justify-between text-xs">
+                  <span className="font-semibold text-gray-600">Ödeme Yöntemi:</span>
+                  <span className="font-bold text-purple-700">Teslimatta Nakit / Kredi Kartı POS</span>
+                </div>
+              </div>
+            )}
           </section>
         </div>
 
@@ -855,6 +917,13 @@ export default function Odeme() {
                 <div className="flex justify-between text-amber-700 font-semibold">
                   <span>Havale / EFT İndirimi (%{bankDiscountRate})</span>
                   <span>-₺{bankDiscount.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+
+              {codFee > 0 && (
+                <div className="flex justify-between text-purple-700 font-semibold">
+                  <span>Kapıda Ödeme Bedeli</span>
+                  <span>+₺{codFee.toLocaleString("tr-TR")}</span>
                 </div>
               )}
 
@@ -903,6 +972,8 @@ export default function Odeme() {
                     <span>
                       {paymentMethod === "creditCard"
                         ? "PayTR ile Güvenli Öde (3D Secure)"
+                        : paymentMethod === "cashOnDelivery"
+                        ? "Kapıda Ödemeli Siparişi Onayla"
                         : "Siparişi Onayla ve Öde"}
                     </span>
                   </>

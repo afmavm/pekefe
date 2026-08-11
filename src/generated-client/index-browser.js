@@ -527,7 +527,14 @@ exports.Prisma.CMSDataScalarFieldEnum = {
   footerText: 'footerText',
   mapCoordinates: 'mapCoordinates',
   dealSectionActive: 'dealSectionActive',
-  dealProductIds: 'dealProductIds'
+  dealProductIds: 'dealProductIds',
+  paymentMethodsConfig: 'paymentMethodsConfig',
+  paytrConfig: 'paytrConfig',
+  installmentsConfig: 'installmentsConfig',
+  cashOnDeliveryFee: 'cashOnDeliveryFee',
+  cashOnDeliveryEnabled: 'cashOnDeliveryEnabled',
+  minOrderAmountForOpenAccount: 'minOrderAmountForOpenAccount',
+  openAccountDaysLimit: 'openAccountDaysLimit'
 };
 
 exports.Prisma.CMSPageScalarFieldEnum = {
@@ -1372,7 +1379,10 @@ exports.Prisma.CMSDataOrderByRelevanceFieldEnum = {
   companyInvoiceFooter: 'companyInvoiceFooter',
   footerText: 'footerText',
   mapCoordinates: 'mapCoordinates',
-  dealProductIds: 'dealProductIds'
+  dealProductIds: 'dealProductIds',
+  paymentMethodsConfig: 'paymentMethodsConfig',
+  paytrConfig: 'paytrConfig',
+  installmentsConfig: 'installmentsConfig'
 };
 
 exports.Prisma.CMSPageOrderByRelevanceFieldEnum = {

@@ -10,6 +10,7 @@ import { Toast } from "@/components/ui/Toast";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { DealSection } from "@/components/home/DealSection";
 
 export default function Home() {
   const [activeRecipe, setActiveRecipe] = useState("tahini");
@@ -259,6 +260,9 @@ export default function Home() {
 
       {/* ─── HERO SECTION (Cinematic Image Slider) ─── */}
       <HeroSlider />
+
+      {/* Fırsat Ürünleri (Deal Products) Section */}
+      <DealSection />
 
       {/* ─── BRAND STORY SECTION (Editorial Storytelling) ─── */}
       <section id="hikaye" className="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto reveal-element scroll-mt-20">

@@ -25,6 +25,7 @@ export async function GET() {
     row.companyAutoDeductInstallments = !!row.companyAutoDeductInstallments;
     row.companyUseRowRateInPurchase = !!row.companyUseRowRateInPurchase;
     row.companyCheckCurrentVkn = !!row.companyCheckCurrentVkn;
+    row.cashOnDeliveryEnabled = !!row.cashOnDeliveryEnabled;
 
     return NextResponse.json(row);
   } catch (error) {
@@ -208,7 +209,16 @@ export async function PUT(request: Request) {
       companyCheckCurrentVkn: getVal('companyCheckCurrentVkn', 'boolean', true),
 
       companyInvoiceFooter: getVal('companyInvoiceFooter', 'string', ''),
-      companyStampUrl: getVal('companyStampUrl', 'string', '')
+      companyStampUrl: getVal('companyStampUrl', 'string', ''),
+
+      // Odeme Yontemi Ayarlari
+      paymentMethodsConfig: getVal('paymentMethodsConfig', 'string', '[]'),
+      paytrConfig: getVal('paytrConfig', 'string', '{}'),
+      installmentsConfig: getVal('installmentsConfig', 'string', '[]'),
+      cashOnDeliveryFee: getVal('cashOnDeliveryFee', 'number', 25),
+      cashOnDeliveryEnabled: getVal('cashOnDeliveryEnabled', 'boolean', false),
+      minOrderAmountForOpenAccount: getVal('minOrderAmountForOpenAccount', 'number', 500),
+      openAccountDaysLimit: getVal('openAccountDaysLimit', 'number', 30),
     };
 
     const saved = await prisma.cMSData.upsert({
@@ -233,6 +243,7 @@ export async function PUT(request: Request) {
     saved.companyAutoDeductInstallments = !!saved.companyAutoDeductInstallments;
     saved.companyUseRowRateInPurchase = !!saved.companyUseRowRateInPurchase;
     saved.companyCheckCurrentVkn = !!saved.companyCheckCurrentVkn;
+    saved.cashOnDeliveryEnabled = !!saved.cashOnDeliveryEnabled;
 
     return NextResponse.json(saved);
   } catch (error: any) {

@@ -606,6 +606,15 @@ model CMSData {
   // Fırsat Ürünleri Bölümü
   dealSectionActive    Boolean @default(false)
   dealProductIds       String  @default("[]")
+
+  // Ödeme Yöntemi Ayarları
+  paymentMethodsConfig         String  @default("[]")
+  paytrConfig                  String  @default("{}")
+  installmentsConfig           String  @default("[]")
+  cashOnDeliveryFee            Float   @default(25)
+  cashOnDeliveryEnabled        Boolean @default(false)
+  minOrderAmountForOpenAccount Float   @default(500)
+  openAccountDaysLimit         Int     @default(30)
 }
 
 model CMSPage {

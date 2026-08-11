@@ -30361,6 +30361,9 @@ export namespace Prisma {
     companyDefaultKdv: number | null
     companyDefaultReturnDays: number | null
     companyListStartDay: number | null
+    cashOnDeliveryFee: number | null
+    minOrderAmountForOpenAccount: number | null
+    openAccountDaysLimit: number | null
   }
 
   export type CMSDataSumAggregateOutputType = {
@@ -30375,6 +30378,9 @@ export namespace Prisma {
     companyDefaultKdv: number | null
     companyDefaultReturnDays: number | null
     companyListStartDay: number | null
+    cashOnDeliveryFee: number | null
+    minOrderAmountForOpenAccount: number | null
+    openAccountDaysLimit: number | null
   }
 
   export type CMSDataMinAggregateOutputType = {
@@ -30463,6 +30469,13 @@ export namespace Prisma {
     mapCoordinates: string | null
     dealSectionActive: boolean | null
     dealProductIds: string | null
+    paymentMethodsConfig: string | null
+    paytrConfig: string | null
+    installmentsConfig: string | null
+    cashOnDeliveryFee: number | null
+    cashOnDeliveryEnabled: boolean | null
+    minOrderAmountForOpenAccount: number | null
+    openAccountDaysLimit: number | null
   }
 
   export type CMSDataMaxAggregateOutputType = {
@@ -30551,6 +30564,13 @@ export namespace Prisma {
     mapCoordinates: string | null
     dealSectionActive: boolean | null
     dealProductIds: string | null
+    paymentMethodsConfig: string | null
+    paytrConfig: string | null
+    installmentsConfig: string | null
+    cashOnDeliveryFee: number | null
+    cashOnDeliveryEnabled: boolean | null
+    minOrderAmountForOpenAccount: number | null
+    openAccountDaysLimit: number | null
   }
 
   export type CMSDataCountAggregateOutputType = {
@@ -30646,6 +30666,13 @@ export namespace Prisma {
     mapCoordinates: number
     dealSectionActive: number
     dealProductIds: number
+    paymentMethodsConfig: number
+    paytrConfig: number
+    installmentsConfig: number
+    cashOnDeliveryFee: number
+    cashOnDeliveryEnabled: number
+    minOrderAmountForOpenAccount: number
+    openAccountDaysLimit: number
     _all: number
   }
 
@@ -30662,6 +30689,9 @@ export namespace Prisma {
     companyDefaultKdv?: true
     companyDefaultReturnDays?: true
     companyListStartDay?: true
+    cashOnDeliveryFee?: true
+    minOrderAmountForOpenAccount?: true
+    openAccountDaysLimit?: true
   }
 
   export type CMSDataSumAggregateInputType = {
@@ -30676,6 +30706,9 @@ export namespace Prisma {
     companyDefaultKdv?: true
     companyDefaultReturnDays?: true
     companyListStartDay?: true
+    cashOnDeliveryFee?: true
+    minOrderAmountForOpenAccount?: true
+    openAccountDaysLimit?: true
   }
 
   export type CMSDataMinAggregateInputType = {
@@ -30764,6 +30797,13 @@ export namespace Prisma {
     mapCoordinates?: true
     dealSectionActive?: true
     dealProductIds?: true
+    paymentMethodsConfig?: true
+    paytrConfig?: true
+    installmentsConfig?: true
+    cashOnDeliveryFee?: true
+    cashOnDeliveryEnabled?: true
+    minOrderAmountForOpenAccount?: true
+    openAccountDaysLimit?: true
   }
 
   export type CMSDataMaxAggregateInputType = {
@@ -30852,6 +30892,13 @@ export namespace Prisma {
     mapCoordinates?: true
     dealSectionActive?: true
     dealProductIds?: true
+    paymentMethodsConfig?: true
+    paytrConfig?: true
+    installmentsConfig?: true
+    cashOnDeliveryFee?: true
+    cashOnDeliveryEnabled?: true
+    minOrderAmountForOpenAccount?: true
+    openAccountDaysLimit?: true
   }
 
   export type CMSDataCountAggregateInputType = {
@@ -30947,6 +30994,13 @@ export namespace Prisma {
     mapCoordinates?: true
     dealSectionActive?: true
     dealProductIds?: true
+    paymentMethodsConfig?: true
+    paytrConfig?: true
+    installmentsConfig?: true
+    cashOnDeliveryFee?: true
+    cashOnDeliveryEnabled?: true
+    minOrderAmountForOpenAccount?: true
+    openAccountDaysLimit?: true
     _all?: true
   }
 
@@ -31129,6 +31183,13 @@ export namespace Prisma {
     mapCoordinates: string
     dealSectionActive: boolean
     dealProductIds: string
+    paymentMethodsConfig: string
+    paytrConfig: string
+    installmentsConfig: string
+    cashOnDeliveryFee: number
+    cashOnDeliveryEnabled: boolean
+    minOrderAmountForOpenAccount: number
+    openAccountDaysLimit: number
     _count: CMSDataCountAggregateOutputType | null
     _avg: CMSDataAvgAggregateOutputType | null
     _sum: CMSDataSumAggregateOutputType | null
@@ -31243,6 +31304,13 @@ export namespace Prisma {
     mapCoordinates?: boolean
     dealSectionActive?: boolean
     dealProductIds?: boolean
+    paymentMethodsConfig?: boolean
+    paytrConfig?: boolean
+    installmentsConfig?: boolean
+    cashOnDeliveryFee?: boolean
+    cashOnDeliveryEnabled?: boolean
+    minOrderAmountForOpenAccount?: boolean
+    openAccountDaysLimit?: boolean
   }, ExtArgs["result"]["cMSData"]>
 
 
@@ -31340,9 +31408,16 @@ export namespace Prisma {
     mapCoordinates?: boolean
     dealSectionActive?: boolean
     dealProductIds?: boolean
+    paymentMethodsConfig?: boolean
+    paytrConfig?: boolean
+    installmentsConfig?: boolean
+    cashOnDeliveryFee?: boolean
+    cashOnDeliveryEnabled?: boolean
+    minOrderAmountForOpenAccount?: boolean
+    openAccountDaysLimit?: boolean
   }
 
-  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds", ExtArgs["result"]["cMSData"]>
+  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds" | "paymentMethodsConfig" | "paytrConfig" | "installmentsConfig" | "cashOnDeliveryFee" | "cashOnDeliveryEnabled" | "minOrderAmountForOpenAccount" | "openAccountDaysLimit", ExtArgs["result"]["cMSData"]>
 
   export type $CMSDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CMSData"
@@ -31440,6 +31515,13 @@ export namespace Prisma {
       mapCoordinates: string
       dealSectionActive: boolean
       dealProductIds: string
+      paymentMethodsConfig: string
+      paytrConfig: string
+      installmentsConfig: string
+      cashOnDeliveryFee: number
+      cashOnDeliveryEnabled: boolean
+      minOrderAmountForOpenAccount: number
+      openAccountDaysLimit: number
     }, ExtArgs["result"]["cMSData"]>
     composites: {}
   }
@@ -31901,6 +31983,13 @@ export namespace Prisma {
     readonly mapCoordinates: FieldRef<"CMSData", 'String'>
     readonly dealSectionActive: FieldRef<"CMSData", 'Boolean'>
     readonly dealProductIds: FieldRef<"CMSData", 'String'>
+    readonly paymentMethodsConfig: FieldRef<"CMSData", 'String'>
+    readonly paytrConfig: FieldRef<"CMSData", 'String'>
+    readonly installmentsConfig: FieldRef<"CMSData", 'String'>
+    readonly cashOnDeliveryFee: FieldRef<"CMSData", 'Float'>
+    readonly cashOnDeliveryEnabled: FieldRef<"CMSData", 'Boolean'>
+    readonly minOrderAmountForOpenAccount: FieldRef<"CMSData", 'Float'>
+    readonly openAccountDaysLimit: FieldRef<"CMSData", 'Int'>
   }
     
 
@@ -78979,7 +79068,14 @@ export namespace Prisma {
     footerText: 'footerText',
     mapCoordinates: 'mapCoordinates',
     dealSectionActive: 'dealSectionActive',
-    dealProductIds: 'dealProductIds'
+    dealProductIds: 'dealProductIds',
+    paymentMethodsConfig: 'paymentMethodsConfig',
+    paytrConfig: 'paytrConfig',
+    installmentsConfig: 'installmentsConfig',
+    cashOnDeliveryFee: 'cashOnDeliveryFee',
+    cashOnDeliveryEnabled: 'cashOnDeliveryEnabled',
+    minOrderAmountForOpenAccount: 'minOrderAmountForOpenAccount',
+    openAccountDaysLimit: 'openAccountDaysLimit'
   };
 
   export type CMSDataScalarFieldEnum = (typeof CMSDataScalarFieldEnum)[keyof typeof CMSDataScalarFieldEnum]
@@ -80046,7 +80142,10 @@ export namespace Prisma {
     companyInvoiceFooter: 'companyInvoiceFooter',
     footerText: 'footerText',
     mapCoordinates: 'mapCoordinates',
-    dealProductIds: 'dealProductIds'
+    dealProductIds: 'dealProductIds',
+    paymentMethodsConfig: 'paymentMethodsConfig',
+    paytrConfig: 'paytrConfig',
+    installmentsConfig: 'installmentsConfig'
   };
 
   export type CMSDataOrderByRelevanceFieldEnum = (typeof CMSDataOrderByRelevanceFieldEnum)[keyof typeof CMSDataOrderByRelevanceFieldEnum]
@@ -82878,6 +82977,13 @@ export namespace Prisma {
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringFilter<"CMSData"> | string
+    paytrConfig?: StringFilter<"CMSData"> | string
+    installmentsConfig?: StringFilter<"CMSData"> | string
+    cashOnDeliveryFee?: FloatFilter<"CMSData"> | number
+    cashOnDeliveryEnabled?: BoolFilter<"CMSData"> | boolean
+    minOrderAmountForOpenAccount?: FloatFilter<"CMSData"> | number
+    openAccountDaysLimit?: IntFilter<"CMSData"> | number
   }
 
   export type CMSDataOrderByWithRelationInput = {
@@ -82973,6 +83079,13 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
+    paymentMethodsConfig?: SortOrder
+    paytrConfig?: SortOrder
+    installmentsConfig?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    cashOnDeliveryEnabled?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
     _relevance?: CMSDataOrderByRelevanceInput
   }
 
@@ -83072,6 +83185,13 @@ export namespace Prisma {
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringFilter<"CMSData"> | string
+    paytrConfig?: StringFilter<"CMSData"> | string
+    installmentsConfig?: StringFilter<"CMSData"> | string
+    cashOnDeliveryFee?: FloatFilter<"CMSData"> | number
+    cashOnDeliveryEnabled?: BoolFilter<"CMSData"> | boolean
+    minOrderAmountForOpenAccount?: FloatFilter<"CMSData"> | number
+    openAccountDaysLimit?: IntFilter<"CMSData"> | number
   }, "id">
 
   export type CMSDataOrderByWithAggregationInput = {
@@ -83167,6 +83287,13 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
+    paymentMethodsConfig?: SortOrder
+    paytrConfig?: SortOrder
+    installmentsConfig?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    cashOnDeliveryEnabled?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
     _count?: CMSDataCountOrderByAggregateInput
     _avg?: CMSDataAvgOrderByAggregateInput
     _max?: CMSDataMaxOrderByAggregateInput
@@ -83270,6 +83397,13 @@ export namespace Prisma {
     mapCoordinates?: StringWithAggregatesFilter<"CMSData"> | string
     dealSectionActive?: BoolWithAggregatesFilter<"CMSData"> | boolean
     dealProductIds?: StringWithAggregatesFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringWithAggregatesFilter<"CMSData"> | string
+    paytrConfig?: StringWithAggregatesFilter<"CMSData"> | string
+    installmentsConfig?: StringWithAggregatesFilter<"CMSData"> | string
+    cashOnDeliveryFee?: FloatWithAggregatesFilter<"CMSData"> | number
+    cashOnDeliveryEnabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
+    minOrderAmountForOpenAccount?: FloatWithAggregatesFilter<"CMSData"> | number
+    openAccountDaysLimit?: IntWithAggregatesFilter<"CMSData"> | number
   }
 
   export type CMSPageWhereInput = {
@@ -89293,6 +89427,13 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
+    paymentMethodsConfig?: string
+    paytrConfig?: string
+    installmentsConfig?: string
+    cashOnDeliveryFee?: number
+    cashOnDeliveryEnabled?: boolean
+    minOrderAmountForOpenAccount?: number
+    openAccountDaysLimit?: number
   }
 
   export type CMSDataUncheckedCreateInput = {
@@ -89388,6 +89529,13 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
+    paymentMethodsConfig?: string
+    paytrConfig?: string
+    installmentsConfig?: string
+    cashOnDeliveryFee?: number
+    cashOnDeliveryEnabled?: boolean
+    minOrderAmountForOpenAccount?: number
+    openAccountDaysLimit?: number
   }
 
   export type CMSDataUpdateInput = {
@@ -89483,6 +89631,13 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
+    paytrConfig?: StringFieldUpdateOperationsInput | string
+    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
+    cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
+    openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
   }
 
   export type CMSDataUncheckedUpdateInput = {
@@ -89578,6 +89733,13 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
+    paytrConfig?: StringFieldUpdateOperationsInput | string
+    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
+    cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
+    openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
   }
 
   export type CMSDataCreateManyInput = {
@@ -89673,6 +89835,13 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
+    paymentMethodsConfig?: string
+    paytrConfig?: string
+    installmentsConfig?: string
+    cashOnDeliveryFee?: number
+    cashOnDeliveryEnabled?: boolean
+    minOrderAmountForOpenAccount?: number
+    openAccountDaysLimit?: number
   }
 
   export type CMSDataUpdateManyMutationInput = {
@@ -89768,6 +89937,13 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
+    paytrConfig?: StringFieldUpdateOperationsInput | string
+    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
+    cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
+    openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
   }
 
   export type CMSDataUncheckedUpdateManyInput = {
@@ -89863,6 +90039,13 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
+    paytrConfig?: StringFieldUpdateOperationsInput | string
+    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
+    cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
+    openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
   }
 
   export type CMSPageCreateInput = {
@@ -95719,6 +95902,13 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
+    paymentMethodsConfig?: SortOrder
+    paytrConfig?: SortOrder
+    installmentsConfig?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    cashOnDeliveryEnabled?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
   }
 
   export type CMSDataAvgOrderByAggregateInput = {
@@ -95733,6 +95923,9 @@ export namespace Prisma {
     companyDefaultKdv?: SortOrder
     companyDefaultReturnDays?: SortOrder
     companyListStartDay?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
   }
 
   export type CMSDataMaxOrderByAggregateInput = {
@@ -95821,6 +96014,13 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
+    paymentMethodsConfig?: SortOrder
+    paytrConfig?: SortOrder
+    installmentsConfig?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    cashOnDeliveryEnabled?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
   }
 
   export type CMSDataMinOrderByAggregateInput = {
@@ -95909,6 +96109,13 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
+    paymentMethodsConfig?: SortOrder
+    paytrConfig?: SortOrder
+    installmentsConfig?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    cashOnDeliveryEnabled?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
   }
 
   export type CMSDataSumOrderByAggregateInput = {
@@ -95923,6 +96130,9 @@ export namespace Prisma {
     companyDefaultKdv?: SortOrder
     companyDefaultReturnDays?: SortOrder
     companyListStartDay?: SortOrder
+    cashOnDeliveryFee?: SortOrder
+    minOrderAmountForOpenAccount?: SortOrder
+    openAccountDaysLimit?: SortOrder
   }
 
   export type CMSPageOrderByRelevanceInput = {

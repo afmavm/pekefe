@@ -1,3 +1,0 @@
-module.exports=[306796,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Gizlilik Politikası",description:"Pekefe gizlilik politikası. Kişisel verilerinizin nasıl toplandığı, işlendiği ve korunduğu hakkında KVKK uyumlu bilgilendirme.",keywords:["pekefe gizlilik","kvkk","kişisel veri","çerez politikası","gizlilik sözleşmesi"],openGraph:{title:"Gizlilik Politikası | Pekefe",description:"KVKK uyumlu gizlilik politikamız hakkında bilgi alın.",url:"https://www.pekefe.com/gizlilik"},alternates:{canonical:"https://www.pekefe.com/gizlilik"}}])},995321,a=>{a.n(a.i(306796))}];
-
-//# sourceMappingURL=src_app_%28shop%29_gizlilik_layout_1s4vx8o.js.map

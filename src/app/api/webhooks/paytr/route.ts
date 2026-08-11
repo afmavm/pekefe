@@ -92,12 +92,20 @@ export async function POST(request: NextRequest) {
       // Send Email Notification
       if (order.currentAccount?.email) {
         try {
-          await emailNotificationService.sendOrderConfirmation({
-            id: order.id,
-            customerName: order.currentAccount.name,
-            customerEmail: order.currentAccount.email,
-            totalAmount: Number(order.total),
-            items: [{ name: order.summary || 'Sipariş İçeriği', quantity: 1, price: Number(order.total) }],
+          const orderDateStr = new Date().toLocaleDateString("tr-TR", {
+            day: "2-digit", month: "long", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          });
+          await emailNotificationService.queueEmail(order.currentAccount.email, "order_received", {
+            kullanici_adi: order.currentAccount.name,
+            siparis_no: order.id,
+            siparis_tutari: Number(order.total).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            siparis_icerik: order.summary || 'Sipariş Ürünleri',
+            odeme_yontemi: 'PayTR 3D Secure Kredi Kartı',
+            kargo_adresi: order.currentAccount.address || 'Teslimat Adresi',
+            kargo_sirketi: 'Kargo',
+            tarih: orderDateStr,
+            detay_linki: 'https://www.pekefe.com/hesap'
           });
         } catch (emailErr) {
           console.error('[PAYTR EMAIL SEND ERROR]:', emailErr);

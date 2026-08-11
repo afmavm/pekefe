@@ -1,3 +1,0 @@
-{
-  "/api/invoices/import-xml/route": "app/api/invoices/import-xml/route.js"
-}

@@ -1,3 +1,0 @@
-module.exports=[698650,a=>{"use strict";var b=a.i(794431),c=a.i(32331);async function d(a){let d=await (0,b.getServerSession)(c.authOptions);if(!d||!d.user)throw Error("Yetkisiz erişim. Oturum bulunamadı.");if(!(d.user.companyFeatures||[]).includes(a))throw Error(`Erişim engellendi. Bu şirket i\xe7in '${a}' mod\xfcl\xfc aktif değil.`)}a.i(843405),a.i(766518),a.s(["assertCompanyFeature",0,d])}];
-
-//# sourceMappingURL=src_lib_tenant-helpers_ts_13il_mn._.js.map

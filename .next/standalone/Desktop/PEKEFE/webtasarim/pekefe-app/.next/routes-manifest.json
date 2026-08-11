@@ -752,6 +752,12 @@
       "namedRegex": "^/admin/navbar(?:/)?$"
     },
     {
+      "page": "/admin/odeme-ayarlari",
+      "regex": "^/admin/odeme\\-ayarlari(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/odeme\\-ayarlari(?:/)?$"
+    },
+    {
       "page": "/admin/orders",
       "regex": "^/admin/orders(?:/)?$",
       "routeKeys": {},

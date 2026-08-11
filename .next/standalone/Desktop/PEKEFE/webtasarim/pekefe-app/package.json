@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && npx cross-env NEXT_CPU_COUNT=1 NODE_OPTIONS=\"--max-old-space-size=2048\" next build --webpack && node scripts/postbuild.js",
+    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && npx -y cross-env NEXT_CPU_COUNT=1 UV_THREADPOOL_SIZE=1 next build --webpack && node scripts/postbuild.js",
     "start": "next start",
     "lint": "eslint"
   },
@@ -53,6 +53,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "prisma": "^6.19.3",

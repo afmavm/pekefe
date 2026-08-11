@@ -115,13 +115,8 @@ export async function POST(request: NextRequest) {
       // Send WhatsApp Notification
       if (order.currentAccount?.phone) {
         try {
-          await WhatsAppNotificationService.sendOrderNotification({
-            orderId: order.id,
-            customerName: order.currentAccount.name,
-            customerPhone: order.currentAccount.phone,
-            totalAmount: Number(order.total),
-            itemCount: 1,
-          });
+          const msg = ` Sayın ${order.currentAccount.name}, #${order.id} nolu Pekefe siparişinizin PayTR ödemesi (₺${Number(order.total).toLocaleString('tr-TR')}) başarıyla alındı. Teşekkür ederiz!`;
+          await WhatsAppNotificationService.sendWhatsApp(order.currentAccount.phone, msg);
         } catch (waErr) {
           console.error('[PAYTR WHATSAPP SEND ERROR]:', waErr);
         }

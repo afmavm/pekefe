@@ -1,0 +1,282 @@
+[
+  {
+    "id": "slide-user-10",
+    "tag": "2000 Metre Rakımlı İspir Kaçkar Dağları",
+    "title": "Zamanın Yavaş Akışında,",
+    "highlightTitle": "Doğanın Saf İmzası.",
+    "subtitle": "Karlı dağ zirveleri, nemsiz yüksek dağ rüzgârları ve bol güneşli vadileriyle İspir Kaçkar yaylaları; Pekefe’nin eşsiz aromatik lezzetlerinin doğduğu kadim topraklardır.",
+    "image": "/uploads/1785710026606-l95h5vlp5.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 40,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Seçkin Mahsulleri Keşfet",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "İspir Mirasımız",
+      "href": "/hikayemiz"
+    }
+  },
+  {
+    "id": "slide-user-11",
+    "tag": "3000 Metre Rakımlı İspir Kaçkar Yedi Göller",
+    "title": "Buzul Göllerinin Serinliğinde,",
+    "highlightTitle": "Saf Dağ Havası.",
+    "subtitle": "İspir Kaçkar dağlarının zirvesinde yer alan kristal buzul gölleri ve bakir dağ rüzgârları; meyvelerimizin doğal olgunlaşmasını sağlayan en saf iklim zenginliğidir.",
+    "image": "/uploads/ispir-yedi-goller-kackar-manzara.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Doğal Coğrafyamız",
+      "href": "/hikayemiz"
+    },
+    "secondaryCta": {
+      "text": "Seçkin Mahsuller",
+      "href": "/kategoriler"
+    }
+  },
+  {
+    "id": "slide-user-1",
+    "tag": "Kuşaktan Kuşağa İspir Dut Bahçeleri Hasadı",
+    "title": "Bereketli Topraklarda,",
+    "highlightTitle": "Baba Ve Oğulun Mirası.",
+    "subtitle": "İspir’in güneşle dolup taşan kadim dut bahçelerinde, usta ellerin özenli seçimiyle dalından sepetlere toplanan %100 saf ve doğal mahsullerin lezzet dolu ilk adım bereketi.",
+    "image": "/uploads/ispir-dut-bahcesi-hasat.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Hasat Hikayemizi İncele",
+      "href": "/hikayemiz"
+    },
+    "secondaryCta": {
+      "text": "Tüm Koleksiyon",
+      "href": "/kategoriler"
+    }
+  },
+  {
+    "id": "slide-user-2",
+    "tag": "2000m Rakımda Saf Beyaz Dut Seçimi",
+    "title": "Dalından Dalına Özenle,",
+    "highlightTitle": "Saf Dutun En Doğal Hali.",
+    "subtitle": "İspir yaylalarının nemsiz temiz dağ havasında olgunlaşan bal kıvamındaki saf beyaz dutlar, ezilmeden ve zedelenmeden el örgüsü sepetlere tek tek toplanır.",
+    "image": "/uploads/ispir-saf-beyaz-dut-toplama.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
+    },
+    "secondaryCta": {
+      "text": "Doğal Üretim Süreci",
+      "href": "/tesisimiz"
+    }
+  },
+  {
+    "id": "slide-user-3",
+    "tag": "Geleneksel Meşe Odunu Ateşi & Bakır Kazanlar",
+    "title": "Odun Ateşi ve Cendere Usulü,",
+    "highlightTitle": "Asırlık Lezzet Ritüeli.",
+    "subtitle": "Ahşap pres cenderelerde sıkılan saf şıra, taş ocaklarda yanan meşe odunu ateşinde kaynayan dev bakır kazanlarda ağır ağır pişerek eşsiz aromasına kavuşur.",
+    "image": "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Geleneksel Pekmezler",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    }
+  },
+  {
+    "id": "slide-user-4",
+    "tag": "Katkısız %100 Karadut & Ekşi Sirke Şırası",
+    "title": "Ağır Ağır Demlenen,",
+    "highlightTitle": "Yoğun Gövdeli Şifa.",
+    "subtitle": "İspir dağlarının taze karadutları ve bakır bakraçlarda demlenen aromatik şıralar, hiçbir katkı maddesi olmadan geleneksel kıvamına kavuşur.",
+    "image": "/uploads/ispir-karadut-kaynatma-bakir-kazan.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Karadut Koleksiyonu",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Rekolte Kulübü",
+      "href": "/rekolte-kulubu"
+    }
+  },
+  {
+    "id": "slide-user-13",
+    "tag": "Odun Ateşi & Geleneksel Bakır Kazanlar",
+    "title": "Kuşaktan Kuşağa Aktarılan",
+    "highlightTitle": "Asırlık Usuller.",
+    "subtitle": "Hiçbir katkı maddesi, ilave şeker veya koruyucu kimyasal içermeyen %100 saf ve yoğun gövdeli geleneksel Pekefe lezzet şöleni.",
+    "image": "/geleneksel-kazan.png",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Geleneksel Pekmezler",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    }
+  },
+  {
+    "id": "slide-user-5",
+    "tag": "Güneşte Keten Bezlerde Doğal Olgunlaşma",
+    "title": "Keten Sergilerde İpeksi Doku,",
+    "highlightTitle": "Güneşle Olgunlaşan Pestil.",
+    "subtitle": "Sıcak herlenin keten bezlere milimetrik incelikte serilmesi ve İspir’in nemsiz dağ rüzgârlarında kurumaya bırakılmasıyla elde edilen coğrafi tescilli saray lezzeti.",
+    "image": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
+    },
+    "secondaryCta": {
+      "text": "Geleneksel Üretim",
+      "href": "/tesisimiz"
+    }
+  },
+  {
+    "id": "slide-user-14",
+    "tag": "Güneşte Keten Bezlerde Doğal Kurutma",
+    "title": "İpeksi Dokusuyla Güneşte",
+    "highlightTitle": "Olgunlaşan Pestil.",
+    "subtitle": "Keten sergilere milimetrik hassasiyetle dökülen dut herlesi, İspir'in nemsiz dağ rüzgârları ve bol güneşi altında eşsiz aromasına kavuşur.",
+    "image": "/ispir-pestil-kurutma-gercek.png",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sade Dut Pestili İncele",
+      "href": "/urun/pekefe-sade-dut-pestili"
+    },
+    "secondaryCta": {
+      "text": "Tüm Pestil Çeşitleri",
+      "href": "/kategoriler"
+    }
+  },
+  {
+    "id": "slide-user-6",
+    "tag": "6 Adımda Asırlık Zanaatkarlık Rehberi",
+    "title": "Duttan Sergiye Usta Dokunuşlar,",
+    "highlightTitle": "Adım Adım Lezzet Yolculuğu.",
+    "subtitle": "Hasat ➔ Cendere Pres ➔ Bakır Kazan ➔ Keten Döküm ➔ Ahşap Serim ➔ Ceviz Serpimi: Geleneksel İspir usulü katkısız saray pestili üretim serüveni.",
+    "image": "/uploads/ispir-pestil-uretim-yolculugu-6-adim.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 20,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    },
+    "secondaryCta": {
+      "text": "Hasat Hikayemiz",
+      "href": "/hikayemiz"
+    }
+  },
+  {
+    "id": "slide-user-7",
+    "tag": "Yüksek Standartlı Steril Tesis & Kalite Kontrol",
+    "title": "Zanaatkar Ruh,",
+    "highlightTitle": "Steril Standartlar.",
+    "subtitle": "Asırlık geleneksel tarifler; paslanmaz krom tanklar, hassas sıcaklık sensörleri ve el değmeden steril cam kavanozlama sistemiyle güvenle sofralarınıza ulaşır.",
+    "image": "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    },
+    "secondaryCta": {
+      "text": "Sertifikalarımız",
+      "href": "/sertifikalar"
+    }
+  },
+  {
+    "id": "slide-user-8",
+    "tag": "Usta Ellerden Özel Sarma Pestil Çeşitleri",
+    "title": "El Sarımı İncelik,",
+    "highlightTitle": "Zengin Gurme Çeşitler.",
+    "subtitle": "Hindistan Cevizli, Fındık Ezmeli ve Kadayıflı Sarma Pestil çeşitlerimiz; usta ellerin hassas sarım işçiliği ve %100 doğal malzemelerle steril tesisimizde hazırlanır.",
+    "image": "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Sarma Pestil Çeşitleri",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Üretim Tesisimiz",
+      "href": "/tesisimiz"
+    }
+  },
+  {
+    "id": "slide-user-9",
+    "tag": "Geleneksel Muska Pestil & İspir Köme Seçkisi",
+    "title": "Asırlık Saray Tarifi,",
+    "highlightTitle": "Zerafet Dolu Köme Ve Muska.",
+    "subtitle": "İspir cevizi ve fındık ezmesiyle doldurulan Muska Pestil, Cevizli Köme ve özel dolgulu gurme saray tatlılarımız; damaklarda unutulmaz bir lezzet izi bırakır.",
+    "image": "/uploads/ispir-muska-kome-saray-tatlilari.webp",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Köme & Muska Koleksiyonu",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Seçkin Mahsuller",
+      "href": "/kategoriler"
+    }
+  },
+  {
+    "id": "slide-user-15",
+    "tag": "Yerli İspir Cevizi ile Harmanlanmış",
+    "title": "Asil Tatların Zarafet Dolu",
+    "highlightTitle": "Zengin Uyumu.",
+    "subtitle": "İpe dizilmiş yerli cevizlerin kaynayan saf şıra herlesine daldırılmasıyla üretilen coğrafi tescilli saray lezzeti İspir Cevizli Dut Kömesi.",
+    "image": "/ispir-kome-gercek-hasat.jpg",
+    "active": true,
+    "objectPositionX": 50,
+    "objectPositionY": 50,
+    "imageScale": 1,
+    "primaryCta": {
+      "text": "Köme & Tatlı Koleksiyonu",
+      "href": "/kategoriler"
+    },
+    "secondaryCta": {
+      "text": "Rekolte Kulübü",
+      "href": "/rekolte-kulubu"
+    }
+  }
+]

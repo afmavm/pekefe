@@ -1,0 +1,3 @@
+module.exports=[247028,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Blog & Tarifler",description:"Anadolu gastronomisi üzerine makaleler, geleneksel tarifler, hasat günlükleri ve İspir'den hikayeler. Pekefe editöryal içerik arşivi.",keywords:["pekefe blog","anadolu gastronomisi","yöresel tarifler","ispir","pekmez tarifi","hasat"],openGraph:{title:"Blog & Tarifler | Pekefe",description:"Anadolu gastronomisi üzerine makaleler, geleneksel tarifler ve İspir'den hikayeler.",url:"https://www.pekefe.com/blog"},alternates:{canonical:"https://www.pekefe.com/blog"}}])},796320,a=>{a.n(a.i(247028))}];
+
+//# sourceMappingURL=src_app_%28shop%29_blog_layout_09m2vv7.js.map

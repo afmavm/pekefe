@@ -1,0 +1,3 @@
+{
+  "/api/admin/payments/paytr-status/route": "app/api/admin/payments/paytr-status/route.js"
+}

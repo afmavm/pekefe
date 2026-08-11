@@ -1,0 +1,3 @@
+{
+  "/api/accounting/current-accounts/[id]/b2b-user/route": "app/api/accounting/current-accounts/[id]/b2b-user/route.js"
+}

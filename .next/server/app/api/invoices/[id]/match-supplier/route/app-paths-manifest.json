@@ -1,0 +1,3 @@
+{
+  "/api/invoices/[id]/match-supplier/route": "app/api/invoices/[id]/match-supplier/route.js"
+}

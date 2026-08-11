@@ -1,0 +1,3 @@
+module.exports=[150853,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Kullanıcı Sözleşmesi",description:"Pekefe kullanıcı sözleşmesi ve mesafeli satış sözleşmesi. Alışveriş öncesinde lütfen okuyunuz.",keywords:["pekefe kullanıcı sözleşmesi","mesafeli satış","satış koşulları","kullanım şartları"],openGraph:{title:"Kullanıcı Sözleşmesi | Pekefe",description:"Pekefe kullanıcı ve mesafeli satış sözleşmesi.",url:"https://www.pekefe.com/sozlesme"},alternates:{canonical:"https://www.pekefe.com/sozlesme"}}])},712639,a=>{a.n(a.i(150853))}];
+
+//# sourceMappingURL=src_app_%28shop%29_sozlesme_layout_0-o9s67.js.map

@@ -1,0 +1,3 @@
+{
+  "/api/checkout/paytr-token/route": "app/api/checkout/paytr-token/route.js"
+}

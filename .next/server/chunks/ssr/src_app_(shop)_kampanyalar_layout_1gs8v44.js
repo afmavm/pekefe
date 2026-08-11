@@ -1,0 +1,3 @@
+module.exports=[960903,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Kampanyalar & Özel Koleksiyonlar",description:"Pekefe hasat festivali, Pekefe Dostu kulüp ayrıcalıkları ve sezonluk ürün lansmanları. İspir'den gelen en taze yöresel lezzetleri kaçırmayın.",keywords:["pekefe kampanyalar","hasat festivali","pekefe dostu","sezonluk ürünler","yöresel kampanya"],openGraph:{title:"Kampanyalar & Özel Koleksiyonlar | Pekefe",description:"Hasat festivali, Pekefe Dostu kulüp ayrıcalıkları ve sezonluk yöresel lezzetler.",url:"https://www.pekefe.com/kampanyalar"},alternates:{canonical:"https://www.pekefe.com/kampanyalar"}}])},416190,a=>{a.n(a.i(960903))}];
+
+//# sourceMappingURL=src_app_%28shop%29_kampanyalar_layout_1gs8v44.js.map

@@ -1,3 +1,0 @@
-module.exports=[778779,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"İletişim",description:"Pekefe ile iletişime geçin. Atatürk Caddesi No:42, İspir, Erzurum. Telefon: +90 (442) 511 00 00. E-posta: destek@pekefe.com",keywords:["pekefe iletişim","ispir erzurum adres","pekefe telefon","müşteri hizmetleri"],openGraph:{title:"İletişim | Pekefe",description:"Pekefe ile iletişime geçin. Atatürk Caddesi No:42, İspir, Erzurum.",url:"https://www.pekefe.com/iletisim"},alternates:{canonical:"https://www.pekefe.com/iletisim"}}])},588617,a=>{a.n(a.i(778779))}];
-
-//# sourceMappingURL=src_app_%28shop%29_iletisim_layout_1zj4j1y.js.map

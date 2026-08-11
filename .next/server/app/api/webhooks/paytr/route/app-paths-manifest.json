@@ -1,0 +1,3 @@
+{
+  "/api/webhooks/paytr/route": "app/api/webhooks/paytr/route.js"
+}

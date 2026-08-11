@@ -1,3 +1,0 @@
-module.exports=[555860,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Hikayemiz",description:"1987'den bu yana Erzurum İspir'in yüksek yaylalarında büyüyen bir ailenin ve geleneksel üretim tutkusunun hikayesi. İlhan Efe ve Pekefe'nin köklerine yolculuk.",keywords:["pekefe hikayesi","ispir","erzurum","ilhan efe","geleneksel üretim","anadolu gastronomisi"],openGraph:{title:"Hikayemiz | Pekefe",description:"1987'den bu yana Erzurum İspir'in yüksek yaylalarında büyüyen bir ailenin ve geleneksel üretim tutkusunun hikayesi.",url:"https://www.pekefe.com/hikayemiz"},alternates:{canonical:"https://www.pekefe.com/hikayemiz"}}])},303480,a=>{a.n(a.i(555860))}];
-
-//# sourceMappingURL=src_app_%28shop%29_hikayemiz_layout_1sxfgut.js.map

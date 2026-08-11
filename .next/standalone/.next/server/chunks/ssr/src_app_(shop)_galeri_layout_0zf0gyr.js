@@ -1,3 +1,0 @@
-module.exports=[120295,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"Galeri",description:"İspir yaylalarının hasatından üretim sürecine uzanan fotoğraf ve video galerimiz. TRT Belgeseli, hasat anları ve Pekefe tesisinden kareler.",keywords:["pekefe galeri","ispir hasat","dut pekmezi üretim","trt belgeseli","pekefe tesis fotoğraf"],openGraph:{title:"Galeri | Pekefe",description:"İspir yaylalarından üretim sürecine fotoğraf ve video galerimiz. TRT Belgeseli ve hasat anları.",url:"https://www.pekefe.com/galeri"},alternates:{canonical:"https://www.pekefe.com/galeri"}}])},915015,a=>{a.n(a.i(120295))}];
-
-//# sourceMappingURL=src_app_%28shop%29_galeri_layout_0zf0gyr.js.map

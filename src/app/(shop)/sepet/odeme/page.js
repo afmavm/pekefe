@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -44,6 +44,7 @@ export default function Odeme() {
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
   const [bankAccounts, setBankAccounts] = useState([]);
   const [siteSettings, setSiteSettings] = useState(null);
+  const [paytrToken, setPaytrToken] = useState(null);
 
   // Fetch Bank Accounts and CMS Settings from management backend
   useEffect(() => {
@@ -240,6 +241,80 @@ export default function Odeme() {
 
     setIsSubmitting(true);
 
+    // PayTR Credit Card Flow
+    if (paymentMethod === "creditCard") {
+      try {
+        const paytrPayload = {
+          cart: cartItems.map((item) => ({
+            id: String(item.id),
+            sku: item.sku || item.id,
+            name: item.name,
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+          })),
+          cartTotal: grandTotal,
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          district: formData.district || "",
+          shippingFee: shippingCost,
+          selectedCarrierName: selectedCarrier,
+          shippingAddress: {
+            addressTitle: "Teslimat Adresi",
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            city: formData.city,
+            district: formData.district || "",
+            fullAddress: formData.address,
+          },
+          billingAddress: {
+            addressTitle: "Fatura Adresi",
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            city: formData.city,
+            district: formData.district || "",
+            fullAddress: formData.address,
+          },
+        };
+
+        const res = await fetch("/api/checkout/paytr-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paytrPayload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.token) {
+          setIsSubmitting(false);
+          setErrorMsg(data.error || "PayTR ödeme servisi başlatılamadı. Lütfen tekrar deneyiniz.");
+          return;
+        }
+
+        setPaytrToken(data.token);
+        setIsSubmitting(false);
+
+        // Scroll to PayTR iframe container smoothly
+        setTimeout(() => {
+          const iframeEl = document.getElementById("paytr-iframe-container");
+          if (iframeEl) {
+            iframeEl.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 150);
+
+        return;
+      } catch (paytrErr) {
+        console.error("PayTR Token Error:", paytrErr);
+        setIsSubmitting(false);
+        setErrorMsg("PayTR ödeme servisine bağlanırken bir sorun oluştu.");
+        return;
+      }
+    }
+
     try {
       const payload = {
         cart: cartItems.map((item) => ({
@@ -250,10 +325,7 @@ export default function Odeme() {
           quantity: Number(item.quantity),
         })),
         cartTotal: grandTotal,
-        paymentMethod: paymentMethod, // creditCard, bankTransfer, openAccount
-        cardNumber: paymentMethod === "creditCard" ? cardNumber.replace(/\s+/g, "") : undefined,
-        expDate: paymentMethod === "creditCard" ? expiry : undefined,
-        cvv: paymentMethod === "creditCard" ? cvv : undefined,
+        paymentMethod: paymentMethod, // bankTransfer, openAccount
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         phone: formData.phone,
         address: `${formData.address}${formData.district ? `, ${formData.district}` : ""} / ${formData.city}`,
@@ -599,68 +671,65 @@ export default function Odeme() {
               </button>
             </div>
 
-            {/* TAB 1: CREDIT CARD */}
+            {/* TAB 1: CREDIT CARD / PAYTR */}
             {paymentMethod === "creditCard" && (
               <div className="space-y-4 pt-2 animate-in fade-in duration-200">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART ÜZERİNDEKİ İSİM *</label>
-                  <input
-                    value={nameOnCard}
-                    onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
-                    className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-semibold outline-none"
-                    placeholder="AHMET YILMAZ"
-                    type="text"
-                    required
-                  />
-                </div>
+                {paytrToken ? (
+                  <div id="paytr-iframe-container" className="bg-slate-50 p-4 md:p-6 rounded-2xl border-2 border-emerald-500 shadow-xl space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                      <div className="flex items-center gap-2.5">
+                        <span className="material-symbols-outlined text-emerald-600 text-2xl">verified_user</span>
+                        <div>
+                          <h3 className="font-bold text-sm text-slate-800">PayTR 3D Secure Güvenli Ödeme</h3>
+                          <p className="text-[11px] text-slate-500">Kart bilgileriniz PayTR 256-Bit SSL şifreli korumalı alanda işlenmektedir.</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPaytrToken(null)}
+                        className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition-all cursor-pointer"
+                      >
+                        ← Kapat / Yeniden Dene
+                      </button>
+                    </div>
 
-                <div className="space-y-1.5 relative">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART NUMARASI *</label>
-                  <div className="relative">
-                    <input
-                      value={cardNumber}
-                      onChange={handleCardNumberChange}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono tracking-wider outline-none"
-                      placeholder="0000 0000 0000 0000"
-                      type="text"
-                      maxLength={19}
-                      required
-                    />
-                    {getCardBrand() && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black tracking-widest px-2 py-0.5 bg-primary text-white rounded">
-                        {getCardBrand()}
-                      </span>
-                    )}
+                    <div className="w-full min-h-[600px] rounded-xl overflow-hidden bg-white shadow-inner">
+                      <iframe
+                        src={`https://www.paytr.com/odeme/guvenli/${paytrToken}`}
+                        id="paytriframe"
+                        style={{ width: '100%', minHeight: '650px', border: 'none' }}
+                        allow="payment"
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-emerald-950 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+                        <span className="material-symbols-outlined text-xl">lock</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-emerald-900">PayTR 3D Secure Kredi / Banka Kartı Ödemesi</h4>
+                        <p className="text-xs text-emerald-700 mt-0.5">256-Bit SSL Lisanslı Güvenli Mağaza Ödemesi</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs leading-relaxed text-emerald-800">
+                      Teslimat bilgilerinizi doldurup <strong>"PayTR ile Güvenli Öde"</strong> butonuna tıkladığınızda, bankanızın 3D SMS onaylı PayTR taksitli ödeme penceresi açılacaktır.
+                    </p>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">SON KULLANMA *</label>
-                    <input
-                      value={expiry}
-                      onChange={handleExpiryChange}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
-                      placeholder="AA/YY"
-                      type="text"
-                      maxLength={5}
-                      required
-                    />
+                    <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-emerald-200/60 text-[11px] font-bold text-emerald-800">
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">VISA</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">MASTERCARD</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">TROY</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">WORLD</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">BONUS</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">MAXIMUM</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">AXESS</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">CARDFINANS</span>
+                    </div>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">CVV / GÜVENLİK KODU *</label>
-                    <input
-                      value={cvv}
-                      onChange={handleCvvChange}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-surface focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm font-mono outline-none"
-                      placeholder="123"
-                      type="password"
-                      maxLength={3}
-                      required
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -817,23 +886,29 @@ export default function Odeme() {
             )}
 
             {/* Submit Order Button */}
-            <button
-              onClick={handleSubmitOrder}
-              disabled={isSubmitting || cartItems.length === 0}
-              className="w-full py-4 bg-gradient-to-r from-[#6b1d2f] to-[#8b2d3f] text-white font-bold rounded-xl shadow-lg shadow-[#6b1d2f]/20 hover:opacity-95 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                  <span>Siparişiniz İşleniyor...</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-lg">verified</span>
-                  <span>Siparişi Onayla ve Öde</span>
-                </>
-              )}
-            </button>
+            {!paytrToken && (
+              <button
+                onClick={handleSubmitOrder}
+                disabled={isSubmitting || cartItems.length === 0}
+                className="w-full py-4 bg-gradient-to-r from-[#6b1d2f] to-[#8b2d3f] text-white font-bold rounded-xl shadow-lg shadow-[#6b1d2f]/20 hover:opacity-95 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+                    <span>PayTR Bağlantısı Kuruluyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">verified</span>
+                    <span>
+                      {paymentMethod === "creditCard"
+                        ? "PayTR ile Güvenli Öde (3D Secure)"
+                        : "Siparişi Onayla ve Öde"}
+                    </span>
+                  </>
+                )}
+              </button>
+            )}
 
             {/* Security Badges */}
             <div className="pt-2 space-y-2 text-[11px] text-on-surface-variant">

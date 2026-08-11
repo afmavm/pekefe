@@ -22,13 +22,22 @@ if (fs.existsSync(standaloneDir)) {
     console.log("[POSTBUILD] Copied .next/static/ -> .next/standalone/.next/static/");
   }
 
-  // 3. Copy .env file if present
-  const srcEnv = path.join(__dirname, '../.env');
-  const destEnv = path.join(standaloneDir, '.env');
-  if (fs.existsSync(srcEnv)) {
-    fs.copyFileSync(srcEnv, destEnv);
-    console.log("[POSTBUILD] Copied .env -> .next/standalone/.env");
-  }
+  // 3. Remove any .env files from standalone build to avoid secret leakage
+  try {
+    const findAndRemoveEnv = (dir) => {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          findAndRemoveEnv(fullPath);
+        } else if (entry.name.startsWith('.env')) {
+          fs.rmSync(fullPath, { force: true });
+        }
+      }
+    };
+    findAndRemoveEnv(standaloneDir);
+  } catch (e) {}
 } else {
   console.log("[POSTBUILD] Standalone directory not found, skipping copy.");
 }

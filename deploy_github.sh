@@ -37,7 +37,7 @@ node scripts/db_seed.js 2>/dev/null || true
 # Check if production build is present, build if missing
 if [ ! -f .next/BUILD_ID ] || [ ! -d .next/standalone ]; then
   echo "[3.5/4] Building Next.js production bundle on server..."
-  npm run build 2>/dev/null || npx next build 2>/dev/null || true
+  NODE_OPTIONS="--max-old-space-size=2048" npm run build
 fi
 
 # 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000

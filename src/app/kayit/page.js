@@ -278,7 +278,6 @@ export default function Kayit() {
                 <input
                   type={showConfirm ? "text" : "password"} required
                   autoComplete="new-password"
-                  placeholder=""
                   className={`w-full pl-10 pr-11 py-3.5 rounded-xl border bg-gray-50 focus:bg-white focus:ring-2 transition-all text-sm outline-none placeholder:text-gray-400 ${
                     confirmPassword && confirmPassword !== password
                       ? "border-red-300 focus:border-red-400 focus:ring-red-100"

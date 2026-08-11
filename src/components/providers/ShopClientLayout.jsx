@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { CMSProvider } from "@/context/CMSContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import SupportWidget from "@/components/SupportWidget";
 import HomePopup from "@/components/HomePopup";
 
-export default function ShopClientLayout({ children }: { children: React.ReactNode }) {
+export default function ShopClientLayout({ children }) {
   return (
     <CMSProvider>
       <MaintenanceGuard>

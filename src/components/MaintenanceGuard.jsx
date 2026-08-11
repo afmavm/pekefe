@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useCMS } from "@/context/CMSContext";
 import { useSession } from "next-auth/react";
 import { Wrench, Phone, Mail, ShieldAlert, Sparkles } from "lucide-react";
 import Image from "next/image";
 
-export default function MaintenanceGuard({ children }: { children: React.ReactNode }) {
+export default function MaintenanceGuard({ children }) {
   const { cmsData } = useCMS();
   const { data: session } = useSession();
 

@@ -113,9 +113,15 @@ export function ProductConfigurator({
       {/* Price */}
       <div className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight border-b border-outline-variant/10 pb-6 flex items-baseline gap-3">
         <span>₺{displayPrice}</span>
-        <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
-          KDV Dahil
-        </span>
+        {selectedVariant && selectedVariant.vatRate != null ? (
+          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
+            %{selectedVariant.vatRate} KDV {selectedVariant.vatIncluded !== false ? "Dahil" : "Hariç"}
+          </span>
+        ) : (
+          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
+            KDV Dahil
+          </span>
+        )}
       </div>
 
       {/* Summary Description */}

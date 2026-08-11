@@ -26,6 +26,9 @@ interface Variant {
   color: string;
   stock: number;
   price: number;
+  b2bPrice?: number;
+  vatRate?: number;
+  vatIncluded?: boolean;
 }
 
 interface MediaItem {
@@ -1255,7 +1258,10 @@ function EnterpriseStockFormPage() {
               size: variantAttrs.size || v.size || "",
               color: variantAttrs.color || v.color || "",
               stock: v.stock || 0,
-              price: v.price || 0
+              price: v.price ? Number(v.price) : 0,
+              b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : undefined,
+              vatRate: variantAttrs.vatRate != null ? Number(variantAttrs.vatRate) : 20,
+              vatIncluded: variantAttrs.vatIncluded ?? true,
             };
           }));
         } else {
@@ -1414,19 +1420,38 @@ function EnterpriseStockFormPage() {
   const [editingColorNewValue, setEditingColorNewValue] = useState("");
 
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
-  const [variantForm, setVariantForm] = useState({
+  const [variantForm, setVariantForm] = useState<{
+    id: string;
+    size: string;
+    color: string;
+    stock: number;
+    price: number;
+    b2bPrice?: number;
+    vatRate?: number;
+    vatIncluded?: boolean;
+    sku: string;
+    barcode: string;
+    packagingMarkupPercent: number;
+    isEditing: boolean;
+    modalTab: "single" | "bulk";
+    selectedBulkSizes: string[];
+    selectedBulkColors: string[];
+  }>({
     id: "",
     size: "400g Cam Kavanoz",
     color: "Sade",
     stock: 1000,
     price: 320,
+    b2bPrice: 0,
+    vatRate: 20,
+    vatIncluded: true,
     sku: "",
     barcode: "",
     packagingMarkupPercent: 0,
     isEditing: false,
-    modalTab: "single" as "single" | "bulk",
-    selectedBulkSizes: [] as string[],
-    selectedBulkColors: [] as string[],
+    modalTab: "single",
+    selectedBulkSizes: [],
+    selectedBulkColors: [],
   });
 
   // Dynamic Warehouse Modal States
@@ -2255,6 +2280,9 @@ function EnterpriseStockFormPage() {
         color: variantToEdit.color,
         stock: variantToEdit.stock,
         price: variantToEdit.price,
+        b2bPrice: variantToEdit.b2bPrice ?? (form.salePrice || 0),
+        vatRate: variantToEdit.vatRate ?? 20,
+        vatIncluded: variantToEdit.vatIncluded ?? true,
         sku: variantToEdit.sku || "",
         barcode: variantToEdit.barcode || "",
         packagingMarkupPercent: 0,
@@ -2274,6 +2302,9 @@ function EnterpriseStockFormPage() {
         color: initialColor,
         stock: 1000,
         price: detail.finalPrice > 0 ? detail.finalPrice : (form.webPrice || 0),
+        b2bPrice: form.salePrice || 0,
+        vatRate: 20,
+        vatIncluded: true,
         sku: codes.sku,
         barcode: codes.barcode,
         packagingMarkupPercent: 0,
@@ -2320,6 +2351,9 @@ function EnterpriseStockFormPage() {
             color: c,
             stock: variantForm.stock,
             price: detail.finalPrice > 0 ? detail.finalPrice : form.webPrice,
+            b2bPrice: variantForm.b2bPrice || form.salePrice || 0,
+            vatRate: variantForm.vatRate ?? 20,
+            vatIncluded: variantForm.vatIncluded ?? true,
           });
         });
       });
@@ -2363,6 +2397,9 @@ function EnterpriseStockFormPage() {
         color: variantForm.color,
         stock: variantForm.stock,
         price: variantForm.price,
+        b2bPrice: variantForm.b2bPrice,
+        vatRate: variantForm.vatRate,
+        vatIncluded: variantForm.vatIncluded,
         sku: variantForm.sku || v.sku,
         barcode: variantForm.barcode || v.barcode,
         name: `${variantForm.size} - ${variantForm.color}`,
@@ -2379,6 +2416,9 @@ function EnterpriseStockFormPage() {
         color: variantForm.color,
         stock: variantForm.stock,
         price: variantForm.price,
+        b2bPrice: variantForm.b2bPrice,
+        vatRate: variantForm.vatRate,
+        vatIncluded: variantForm.vatIncluded,
       };
       setVariants(prev => [...prev, newVar]);
       toast.success("Yeni varyant eklendi.");
@@ -4463,7 +4503,9 @@ function EnterpriseStockFormPage() {
                             <th className="p-4">Gramaj / Ambalaj Ölçüsü</th>
                             <th className="p-4">Ürün Çeşidi / Tipi</th>
                             <th className="p-4 text-center">Stok Miktarı</th>
-                            <th className="p-4 text-right">Özel Fiyat</th>
+                            <th className="p-4 text-right">Web Fiyatı</th>
+                            <th className="p-4 text-right">B2B Bayi Fiyatı</th>
+                            <th className="p-4 text-center">KDV</th>
                             <th className="p-4 text-center">İşlem</th>
                           </tr>
                         </thead>
@@ -4475,6 +4517,12 @@ function EnterpriseStockFormPage() {
                               <td className="p-4 text-sm font-semibold text-slate-700">{v.color}</td>
                               <td className="p-4 text-sm font-black text-slate-800 text-center">{v.stock} Adet</td>
                               <td className="p-4 text-sm font-black text-orange-600 text-right">₺{v.price}</td>
+                              <td className="p-4 text-sm font-black text-indigo-600 text-right">
+                                {v.b2bPrice && v.b2bPrice > 0 ? `₺${v.b2bPrice}` : <span className="text-slate-400 font-normal text-xs">-</span>}
+                              </td>
+                              <td className="p-4 text-xs font-bold text-slate-600 text-center">
+                                %{v.vatRate ?? 20} {v.vatIncluded !== false ? "(Dahil)" : "(Hariç)"}
+                              </td>
                               <td className="p-4 text-center">
                                 <div className="flex items-center justify-center gap-1">
                                   <button 
@@ -5066,8 +5114,8 @@ function EnterpriseStockFormPage() {
 
                     </div>
 
-                    {/* Stock & Price Inputs */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Stock, Prices & VAT Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Başlangıç Stoku</label>
                         <input
@@ -5080,7 +5128,7 @@ function EnterpriseStockFormPage() {
 
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Varyant Özel Fiyatı (₺)</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Web Perakende Fiyatı (₺)</label>
                           {form.webPrice > 0 && (
                             <button
                               type="button"
@@ -5088,7 +5136,7 @@ function EnterpriseStockFormPage() {
                               className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0"
                               title="Web Perakende fiyatına göre tekrar hesapla"
                             >
-                              <Sparkles className="w-3 h-3 text-orange-500" /> Otomatik Hesapla
+                              <Sparkles className="w-3 h-3 text-orange-500" /> Oto
                             </button>
                           )}
                         </div>
@@ -5098,6 +5146,47 @@ function EnterpriseStockFormPage() {
                           onChange={e => setVariantForm({ ...variantForm, price: parseFloat(e.target.value) || 0 })}
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-orange-600"
                         />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">B2B Bayi Fiyatı (₺)</label>
+                        <input
+                          type="number"
+                          placeholder="₺0.00 (Opsiyonel)"
+                          value={variantForm.b2bPrice || ""}
+                          onChange={e => setVariantForm({ ...variantForm, b2bPrice: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-indigo-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Variant VAT Settings */}
+                    <div className="grid grid-cols-2 gap-4 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Varyant KDV Oranı</label>
+                        <select
+                          value={variantForm.vatRate ?? 20}
+                          onChange={e => setVariantForm({ ...variantForm, vatRate: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 outline-none"
+                        >
+                          <option value={0}>%0 KDV</option>
+                          <option value={1}>%1 KDV</option>
+                          <option value={10}>%10 KDV</option>
+                          <option value={20}>%20 KDV</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1 flex flex-col justify-center">
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">KDV Durumu</span>
+                        <label className="flex items-center gap-2 cursor-pointer pt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={variantForm.vatIncluded ?? true}
+                            onChange={e => setVariantForm({ ...variantForm, vatIncluded: e.target.checked })}
+                            className="w-4 h-4 text-orange-500 rounded focus:ring-orange-400"
+                          />
+                          <span className="text-xs font-semibold text-slate-700">Fiyata KDV Dahil</span>
+                        </label>
                       </div>
                     </div>
 

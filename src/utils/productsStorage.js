@@ -350,7 +350,10 @@ export function formatDbProductToStorefront(p) {
       attributes: vAttrs || { size: sizeVal, color: colorVal, name: label },
       name: label,
       size: sizeVal || label,
-      color: colorVal
+      color: colorVal,
+      b2bPrice: (vAttrs && vAttrs.b2bPrice != null) ? Number(vAttrs.b2bPrice) : (v.b2bPrice != null ? Number(v.b2bPrice) : null),
+      vatRate: (vAttrs && vAttrs.vatRate != null) ? Number(vAttrs.vatRate) : (v.vatRate != null ? Number(v.vatRate) : 20),
+      vatIncluded: (vAttrs && vAttrs.vatIncluded != null) ? vAttrs.vatIncluded : (v.vatIncluded != null ? v.vatIncluded : true),
     };
   });
 

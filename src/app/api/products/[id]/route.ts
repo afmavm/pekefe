@@ -467,7 +467,10 @@ export async function PUT(
             size: variant.size || '',
             color: variant.color || '',
             barcode: variant.barcode || '',
-            name: variant.name || `${variant.size || ''} - ${variant.color || ''}`.trim()
+            name: variant.name || `${variant.size || ''} - ${variant.color || ''}`.trim(),
+            b2bPrice: variant.b2bPrice != null ? Number(variant.b2bPrice) : null,
+            vatRate: variant.vatRate != null ? Number(variant.vatRate) : 20,
+            vatIncluded: variant.vatIncluded ?? true,
           }
         };
 

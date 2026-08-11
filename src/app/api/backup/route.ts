@@ -29,21 +29,26 @@ export async function GET(request: NextRequest) {
     const backupDir = getBackupDir();
     const files = fs.readdirSync(backupDir);
     
+    const dbProvider = getDatabaseProvider();
+    
     const backups = files
       .filter(file => file.startsWith('backup-') && (file.endsWith('.sql') || file.endsWith('.sqlite')))
       .map(file => {
         const filePath = path.join(backupDir, file);
         const stats = fs.statSync(filePath);
+        const format = file.endsWith('.sqlite') ? 'sqlite' : 'sql';
+        const isCompatible = (dbProvider === 'mysql' && format === 'sql') || (dbProvider === 'sqlite' && format === 'sqlite');
         return {
           filename: file,
           size: stats.size,
           createdAt: stats.mtime,
+          format,
+          isCompatible
         };
       })
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     const dbSize = await getDatabaseSize();
-    const dbProvider = getDatabaseProvider();
     const totalBackups = backups.length;
     const totalSize = backups.reduce((acc, curr) => acc + curr.size, 0);
     const lastBackupDate = backups.length > 0 ? backups[0].createdAt : null;

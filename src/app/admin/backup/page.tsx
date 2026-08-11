@@ -61,6 +61,8 @@ interface BackupFile {
   filename: string;
   size: number;
   createdAt: string;
+  format?: 'sql' | 'sqlite';
+  isCompatible?: boolean;
 }
 
 interface BackupStats {
@@ -844,6 +846,13 @@ export default function BackupAdminPage() {
   };
 
   const openRestoreConfirmation = (filename: string) => {
+    const targetBackup = backups.find(b => b.filename === filename);
+    if (targetBackup && targetBackup.isCompatible === false) {
+      toast.error(
+        `"${filename}" yedeği ${targetBackup.format?.toUpperCase()} formatındadır. Canlı sunucunuz ${stats?.dbProvider?.toUpperCase()} altyapısıyla çalıştığı için bu yedek geri yüklenemez. Lütfen .sql uzantılı bir MySQL yedeği seçiniz.`
+      );
+      return;
+    }
     setBackupToRestore(filename);
     setConfirmInput("");
     setConfirmModalVisible(true);
@@ -1270,6 +1279,16 @@ export default function BackupAdminPage() {
                                   title={backup.filename.includes('auto') ? 'Otomatik Yedek' : 'Manuel Yedek'}
                                 />
                                 <span className="truncate text-xs" title={backup.filename}>{backup.filename}</span>
+                                {backup.isCompatible === false && (
+                                  <span className="px-2 py-0.5 text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 rounded-md shrink-0">
+                                    Uyumsuz ({backup.format?.toUpperCase()})
+                                  </span>
+                                )}
+                                {backup.isCompatible === true && backup.format && (
+                                  <span className="px-1.5 py-0.5 text-[9px] font-bold bg-slate-100 text-slate-600 rounded shrink-0 uppercase">
+                                    {backup.format}
+                                  </span>
+                                )}
                               </div>
                             </td>
                             {/* Creation Time */}

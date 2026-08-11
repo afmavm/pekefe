@@ -258,7 +258,31 @@ export const restoreDatabase = async (filename: string): Promise<void> => {
   const srcPath = path.join(backupDir, filename);
 
   if (!fs.existsSync(srcPath)) {
-    throw new Error(`Backup file not found: ${filename}`);
+    throw new Error(`Yedek dosyası bulunamadı: ${filename}`);
+  }
+
+  // Inspect file header magic bytes & extension to detect SQLite vs MySQL format mismatch
+  let isSqliteFile = filename.endsWith('.sqlite');
+  try {
+    const fd = fs.openSync(srcPath, 'r');
+    const buffer = Buffer.alloc(16);
+    fs.readSync(fd, buffer, 0, 16, 0);
+    fs.closeSync(fd);
+    if (buffer.toString('utf8').startsWith('SQLite format 3')) {
+      isSqliteFile = true;
+    }
+  } catch (e) {}
+
+  if (provider === 'mysql' && isSqliteFile) {
+    throw new Error(
+      `Seçilen yedek (${filename}) SQLite formatındadır. Canlı sisteminiz MySQL / MariaDB kullandığından yalnızca .sql uzantılı MySQL yedekleri geri yüklenebilir.`
+    );
+  }
+
+  if (provider === 'sqlite' && !isSqliteFile) {
+    throw new Error(
+      `Seçilen yedek (${filename}) MySQL SQL formatındadır. Sisteminiz SQLite kullandığından yalnızca .sqlite uzantılı yedekler geri yüklenebilir.`
+    );
   }
 
   if (provider === 'sqlite') {

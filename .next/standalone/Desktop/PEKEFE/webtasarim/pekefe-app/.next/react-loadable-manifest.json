@@ -1,0 +1,68 @@
+{
+  "..\\node_modules\\jspdf\\dist\\jspdf.es.min.js -> canvg": {
+    "id": 3167,
+    "files": [
+      "static/chunks/bc98253f.b50765b70c666750.js",
+      "static/chunks/5902.49d2977dc0168c6d.js"
+    ]
+  },
+  "..\\node_modules\\jspdf\\dist\\jspdf.es.min.js -> dompurify": {
+    "id": 91992,
+    "files": [
+      "static/chunks/1992.6778c158fb989464.js"
+    ]
+  },
+  "..\\node_modules\\jspdf\\dist\\jspdf.es.min.js -> html2canvas": {
+    "id": 82201,
+    "files": [
+      "static/chunks/ad2866b8.6c51983a1eb56136.js"
+    ]
+  },
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 41966,
+    "files": [
+      "static/chunks/1966.b8f83f7ba376c962.js"
+    ]
+  },
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 3899,
+    "files": [
+      "static/chunks/6280.32c61eb4357f4bc5.js"
+    ]
+  },
+  "app\\admin\\AdminLayoutContent.tsx -> @/modules/cms/super-admin/superActions": {
+    "id": 11,
+    "files": [
+      "static/chunks/11.42b2db86795d5eed.js"
+    ]
+  },
+  "app\\admin\\orders\\[type]\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
+    "id": 36987,
+    "files": [
+      "static/chunks/164f4fb6-65fb7b51181b1996.js",
+      "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
+      "static/chunks/2170a4aa-a34a61dbb98d02b6.js",
+      "static/chunks/6609-cb163718e066ee48.js",
+      "static/chunks/4233-0e26f2761d4498e2.js",
+      "static/chunks/3280-4dc55331dbd8c33b.js",
+      "static/chunks/8786.52614967547c978d.js",
+      "static/chunks/4200.b3c9b60536e64353.js"
+    ]
+  },
+  "app\\giris\\page.js -> next-auth/react": {
+    "id": 37882,
+    "files": []
+  },
+  "modules\\cms\\builder\\workspace.tsx -> ./cmsBuilderActions": {
+    "id": 46358,
+    "files": [
+      "static/chunks/6358.c9cc33654002a8d6.js"
+    ]
+  },
+  "utils\\cartStorage.js -> sonner": {
+    "id": 66609,
+    "files": [
+      "static/chunks/6609-cb163718e066ee48.js"
+    ]
+  }
+}

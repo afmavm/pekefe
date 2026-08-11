@@ -4,6 +4,7 @@
 CURRENT_DIR="$(pwd)"
 PUBLIC_TARGET="/home/ata3a6icilikcom/public_html/pekefe.com"
 PUBLIC_ALT="/home/ata3a6icilikcom/public_html/pekefe"
+PUBLIC_ROOT="/home/ata3a6icilikcom/public_html"
 
 generate_htaccess() {
   mkdir -p "$1" 2>/dev/null || true
@@ -39,10 +40,7 @@ EOT
 }
 
 generate_htaccess "$CURRENT_DIR"
-echo "[SUCCESS] PM2 Reverse Proxy .htaccess created in $CURRENT_DIR"
-
-if [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
-  generate_htaccess "$PUBLIC_TARGET"
-  generate_htaccess "$PUBLIC_ALT"
-  echo "[SUCCESS] Instant Reverse Proxy .htaccess synced to public_html/pekefe.com!"
-fi
+generate_htaccess "$PUBLIC_ROOT"
+generate_htaccess "$PUBLIC_TARGET"
+generate_htaccess "$PUBLIC_ALT"
+echo "[SUCCESS] Instant Reverse Proxy .htaccess synced across all cPanel public roots!"

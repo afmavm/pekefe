@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(shop)/layout,_N_T_/(shop)/galeri/layout,_N_T_/(shop)/galeri/page,_N_T_/galeri"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHNob3Ap/galeri/__PAGE__",
+    "/!KHNob3Ap/galeri",
+    "/!KHNob3Ap",
+    "/_index",
+    "/_head"
+  ]
+}

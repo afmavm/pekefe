@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && next build --webpack && node scripts/postbuild.js",
+    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && NEXT_CPU_COUNT=1 NODE_OPTIONS=\"--max-old-space-size=2048\" next build --webpack && node scripts/postbuild.js",
     "start": "next start",
     "lint": "eslint"
   },

@@ -1768,6 +1768,23 @@ async function main() {
     data: { isDeleted: false }
   }).catch(() => {});
 
+  // Auto-migrate missing columns in MySQL table CMSData
+  const cmsAlterQueries = [
+    "ALTER TABLE CMSData ADD COLUMN paymentMethodsConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN paytrConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN installmentsConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN cashOnDeliveryFee DOUBLE NOT NULL DEFAULT 25",
+    "ALTER TABLE CMSData ADD COLUMN cashOnDeliveryEnabled TINYINT(1) NOT NULL DEFAULT 0",
+    "ALTER TABLE CMSData ADD COLUMN minOrderAmountForOpenAccount DOUBLE NOT NULL DEFAULT 500",
+    "ALTER TABLE CMSData ADD COLUMN openAccountDaysLimit INT NOT NULL DEFAULT 30",
+    "ALTER TABLE CMSData ADD COLUMN preventZeroStockSale TINYINT(1) NOT NULL DEFAULT 1",
+    "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5"
+  ];
+
+  for (const q of cmsAlterQueries) {
+    try { await prisma.$executeRawUnsafe(q); } catch (e) {}
+  }
+
   // Seed PayTR Config & Payment Methods into CMSData singleton
   const paytrConfigJson = JSON.stringify({
     merchantId: "735518",

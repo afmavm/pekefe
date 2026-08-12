@@ -4,11 +4,42 @@ import { requireAdmin } from '@/lib/auth-helpers';
 
 export const dynamic = 'force-dynamic';
 
+async function ensureCMSDataColumnsExist() {
+  const alterQueries = [
+    "ALTER TABLE CMSData ADD COLUMN paymentMethodsConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN paytrConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN installmentsConfig LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN cashOnDeliveryFee DOUBLE NOT NULL DEFAULT 25",
+    "ALTER TABLE CMSData ADD COLUMN cashOnDeliveryEnabled TINYINT(1) NOT NULL DEFAULT 0",
+    "ALTER TABLE CMSData ADD COLUMN minOrderAmountForOpenAccount DOUBLE NOT NULL DEFAULT 500",
+    "ALTER TABLE CMSData ADD COLUMN openAccountDaysLimit INT NOT NULL DEFAULT 30",
+    "ALTER TABLE CMSData ADD COLUMN preventZeroStockSale TINYINT(1) NOT NULL DEFAULT 1",
+    "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5"
+  ];
+
+  for (const q of alterQueries) {
+    try {
+      await prisma.$executeRawUnsafe(q);
+    } catch (e) {
+      // Column already exists, ignore
+    }
+  }
+}
+
 export async function GET() {
   try {
-    const row = await prisma.cMSData.findUnique({
-      where: { id: 'singleton' }
-    });
+    let row;
+    try {
+      row = await prisma.cMSData.findUnique({
+        where: { id: 'singleton' }
+      });
+    } catch (e) {
+      await ensureCMSDataColumnsExist();
+      row = await prisma.cMSData.findUnique({
+        where: { id: 'singleton' }
+      });
+    }
+
     if (!row) return NextResponse.json(null);
 
     // Convert boolean values to actual booleans
@@ -77,9 +108,17 @@ export async function PUT(request: Request) {
       }
     }
 
-    const existing = await prisma.cMSData.findUnique({
-      where: { id: 'singleton' }
-    }) || {} as any;
+    let existing;
+    try {
+      existing = await prisma.cMSData.findUnique({
+        where: { id: 'singleton' }
+      }) || {} as any;
+    } catch (e) {
+      await ensureCMSDataColumnsExist();
+      existing = await prisma.cMSData.findUnique({
+        where: { id: 'singleton' }
+      }) || {} as any;
+    }
 
     const getVal = (key: string, type: 'string' | 'number' | 'boolean' | 'json', fb: any) => {
       let val: any = undefined;
@@ -228,14 +267,27 @@ export async function PUT(request: Request) {
       defaultCriticalStockLimit: getVal('defaultCriticalStockLimit', 'number', 5),
     };
 
-    const saved = await prisma.cMSData.upsert({
-      where: { id: 'singleton' },
-      update: data,
-      create: {
-        id: 'singleton',
-        ...data
-      }
-    });
+    let saved;
+    try {
+      saved = await prisma.cMSData.upsert({
+        where: { id: 'singleton' },
+        update: data,
+        create: {
+          id: 'singleton',
+          ...data
+        }
+      });
+    } catch (e) {
+      await ensureCMSDataColumnsExist();
+      saved = await prisma.cMSData.upsert({
+        where: { id: 'singleton' },
+        update: data,
+        create: {
+          id: 'singleton',
+          ...data
+        }
+      });
+    }
 
     saved.maintenanceMode = !!saved.maintenanceMode;
     saved.announcementActive = !!saved.announcementActive;

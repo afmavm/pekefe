@@ -28,19 +28,15 @@ async function ensureCMSDataColumnsExist() {
 
 export async function GET() {
   try {
-    let row;
-    try {
-      row = await prisma.cMSData.findUnique({
-        where: { id: 'singleton' }
-      });
-    } catch (e) {
-      await ensureCMSDataColumnsExist();
-      row = await prisma.cMSData.findUnique({
-        where: { id: 'singleton' }
-      });
-    }
+    // Always ensure new columns exist in MySQL before any Prisma operation
+    await ensureCMSDataColumnsExist();
+
+    const row = await prisma.cMSData.findUnique({
+      where: { id: 'singleton' }
+    });
 
     if (!row) return NextResponse.json(null);
+
 
     // Convert boolean values to actual booleans
     row.maintenanceMode = !!row.maintenanceMode;
@@ -71,6 +67,9 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
+
+    // Always ensure new columns exist in MySQL before any Prisma operation
+    await ensureCMSDataColumnsExist();
 
     // ─── SERVER-SIDE SETTINGS VALIDATION ────────────────────────────────────
     if (body.siteName !== undefined) {
@@ -108,17 +107,9 @@ export async function PUT(request: Request) {
       }
     }
 
-    let existing;
-    try {
-      existing = await prisma.cMSData.findUnique({
-        where: { id: 'singleton' }
-      }) || {} as any;
-    } catch (e) {
-      await ensureCMSDataColumnsExist();
-      existing = await prisma.cMSData.findUnique({
-        where: { id: 'singleton' }
-      }) || {} as any;
-    }
+    const existing = await prisma.cMSData.findUnique({
+      where: { id: 'singleton' }
+    }) || {} as any;
 
     const getVal = (key: string, type: 'string' | 'number' | 'boolean' | 'json', fb: any) => {
       let val: any = undefined;
@@ -267,27 +258,14 @@ export async function PUT(request: Request) {
       defaultCriticalStockLimit: getVal('defaultCriticalStockLimit', 'number', 5),
     };
 
-    let saved;
-    try {
-      saved = await prisma.cMSData.upsert({
-        where: { id: 'singleton' },
-        update: data,
-        create: {
-          id: 'singleton',
-          ...data
-        }
-      });
-    } catch (e) {
-      await ensureCMSDataColumnsExist();
-      saved = await prisma.cMSData.upsert({
-        where: { id: 'singleton' },
-        update: data,
-        create: {
-          id: 'singleton',
-          ...data
-        }
-      });
-    }
+    const saved = await prisma.cMSData.upsert({
+      where: { id: 'singleton' },
+      update: data,
+      create: {
+        id: 'singleton',
+        ...data
+      }
+    });
 
     saved.maintenanceMode = !!saved.maintenanceMode;
     saved.announcementActive = !!saved.announcementActive;

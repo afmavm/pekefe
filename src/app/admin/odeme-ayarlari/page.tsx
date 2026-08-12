@@ -165,10 +165,10 @@ export default function OdemeAyarlariPage() {
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        toast.success("Odeme ayarlari basariyla kaydedildi!");
+        toast.success("Ödeme ayarları başarıyla kaydedildi!");
       } else {
         const err = await res.json().catch(() => ({}));
-        toast.error(err.error || "Kayit sirasinda hata olustu");
+        toast.error(err.details || err.error || "Kayıt sırasında hata oluştu");
       }
     } catch {
       toast.error("Baglanti hatasi");

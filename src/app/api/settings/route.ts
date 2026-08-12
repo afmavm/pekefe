@@ -82,14 +82,19 @@ export async function PUT(request: Request) {
     }) || {} as any;
 
     const getVal = (key: string, type: 'string' | 'number' | 'boolean' | 'json', fb: any) => {
-      let val = fb;
-      if (body[key] !== undefined) {
+      let val: any = undefined;
+      if (body[key] !== undefined && body[key] !== null) {
         val = body[key];
       } else if (existing[key] !== undefined && existing[key] !== null) {
         val = existing[key];
+      } else {
+        val = fb;
       }
 
-      if (type === 'string') return val != null ? String(val) : '';
+      if (type === 'string') {
+        const s = val != null ? String(val) : '';
+        return s.trim() !== '' ? s : fb;
+      }
       if (type === 'number') {
         const n = Number(val);
         return isNaN(n) ? (typeof fb === 'number' ? fb : 0) : n;
@@ -106,14 +111,14 @@ export async function PUT(request: Request) {
         }
         return val ?? fb;
       }
-      return val;
+      return val ?? fb;
     };
 
     const data = {
-      heroTitle: getVal('heroTitle', 'string', ''),
-      heroSubtitle: getVal('heroSubtitle', 'string', ''),
-      buttonText: getVal('buttonText', 'string', ''),
-      announcement: getVal('announcement', 'string', ''),
+      heroTitle: getVal('heroTitle', 'string', 'PEKEFE Geleneksel & Doğal Lezzetler'),
+      heroSubtitle: getVal('heroSubtitle', 'string', 'İspir Fasulyesi, Erzurum Göğermiş Peyniri ve Doğal Yöresel Lezzetler'),
+      buttonText: getVal('buttonText', 'string', 'Hemen Alışverişe Başla'),
+      announcement: getVal('announcement', 'string', '🔥 5000 TL ve Üzeri Alışverişlerde Kargo Ücretsiz!'),
       announcement2: getVal('announcement2', 'string', '🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları'),
       maintenanceMode: getVal('maintenanceMode', 'boolean', false),
       siteName: getVal('siteName', 'string', 'PEKEFE Geleneksel & Doğal Lezzetler'),

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEKEFE — Atölye Bakım Çalışması</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-cream: #FAF7F2;
+            --color-burgundy: #6B1D2F;
+            --color-burgundy-dark: #4A121F;
+            --color-gold: #C5A059;
+            --color-slate: #1A1A1A;
+            --color-muted: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--color-cream);
+            color: var(--color-slate);
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 680px;
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid rgba(107, 29, 47, 0.08);
+            border-radius: 4px;
+            padding: 56px 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+        }
+
+        .brand-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--color-gold);
+            margin-bottom: 24px;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 38px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--color-burgundy);
+            margin-bottom: 12px;
+        }
+
+        .divider {
+            width: 48px;
+            height: 1px;
+            background-color: var(--color-gold);
+            margin: 24px auto;
+            opacity: 0.6;
+        }
+
+        .headline {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--color-slate);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .description {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--color-muted);
+            margin-bottom: 36px;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-box {
+            background-color: var(--color-cream);
+            border: 1px solid rgba(197, 160, 89, 0.2);
+            padding: 20px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--color-slate);
+        }
+
+        .contact-box a {
+            color: var(--color-burgundy);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px dotted var(--color-burgundy);
+        }
+
+        .footer-note {
+            margin-top: 48px;
+            font-size: 12px;
+            color: var(--color-muted);
+            letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 40px 24px;
+            }
+            .logo-title {
+                font-size: 30px;
+            }
+            .headline {
+                font-size: 19px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <span class="brand-badge">İSPİR YÖRESEL — 1968</span>
+        <h1 class="logo-title">PEKEFE</h1>
+        <div class="divider"></div>
+        <h2 class="headline">Lezzet Atölyemizde Güncelleme Yapılmaktadır</h2>
+        
+        <p class="description">
+            Sizlere daha özel, hızlı ve kusursuz bir dijital alışveriş deneyimi sunabilmek amacıyla altyapımızda kısa süreli bir bakım çalışması yürütmekteyiz.
+        </p>
+
+        <div class="contact-box">
+            Sorularınız, bilgi talepleriniz veya acil siparişleriniz için:<br>
+            <a href="mailto:info@pekefe.com">info@pekefe.com</a>
+        </div>
+    </main>
+
+    <footer class="footer-note">
+        &copy; 2026 PEKEFE. Tüm Hakları Saklıdır.
+    </footer>
+
+</body>
+</html>

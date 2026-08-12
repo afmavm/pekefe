@@ -1,0 +1,13 @@
+# PEKEFE Maintenance Mode Yönlendirmesi
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Bakım modunda maintenance.html veya statik dosyalara gelen istekleri geç
+    RewriteCond %{REQUEST_URI} !/maintenance\.html$
+    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp|avif|ico|svg|css|js|woff|woff2)$ [NC]
+    RewriteRule ^ - [L]
+
+    # Diğer tüm istekleri maintenance.html sayfasına yönlendir (302 Geçici)
+    RewriteCond %{REQUEST_URI} !/maintenance\.html$
+    RewriteRule ^.*$ /maintenance.html [R=302,L]
+</IfModule>

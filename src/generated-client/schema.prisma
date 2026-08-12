@@ -506,78 +506,80 @@ model Order {
 }
 
 model CMSData {
-  id                       String  @id @default("singleton")
-  heroTitle                String
-  heroSubtitle             String
-  buttonText               String
-  announcement             String
-  announcement2            String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
-  maintenanceMode          Boolean @default(false)
-  siteName                 String  @default("PEKEFE Geleneksel & Doğal Lezzetler")
-  primaryColor             String  @default("#b45309")
-  secondaryColor           String  @default("#1F2937")
-  siteDescription          String  @default("")
-  categoryTitle            String  @default("")
-  categorySubtitle         String  @default("")
-  appTitle                 String  @default("")
-  appSubtitle              String  @default("")
-  contactPhone             String  @default("")
-  contactEmail             String  @default("")
-  contactAddress           String  @default("")
-  socialInstagram          String  @default("")
-  socialWhatsapp           String  @default("")
-  socialFacebook           String  @default("")
-  socialYoutube            String  @default("")
-  logoFont                 String  @default("Outfit")
-  logoUrl                  String  @default("")
-  logoSize                 Int     @default(18)
-  logoWeight               String  @default("font-black")
-  footerSlogan             String  @default("FABRİKADAN DİREKT")
-  borderRadius             Int     @default(12)
-  announcementActive       Boolean @default(true)
-  announcementSpeed        Int     @default(15)
-  layoutWidth              String  @default("max-w-4xl")
-  heroAlignment            String  @default("center")
-  pricingRules             Json
-  shippingThreshold        Float   @default(5000)
-  shippingFee              Float   @default(150)
-  shippingCarriers         Json
-  themeTemplates           Json
-  contentAnywhereRules     Json
-  savedSectionTemplates    Json
-  popupConfig              Json
-  topBarText1              String  @default("Türkiye'nin Her Yerine Güvenli Sevkiyat")
-  topBarText2              String  @default("304 Paslanmaz Çelik ve Dayanıklı Tasarım")
-  faqData                  Json
-  cartDiscountType         String  @default("none")
-  cartDiscountValue        Float   @default(0)
-  cartDiscountMinAmount    Float   @default(0)
-  bankTransferDiscountRate Float   @default(0)
-  companyName              String  @default("")
-  bankName                 String  @default("")
-  bankIban                 String  @default("")
-  efaturaPrefix            String  @default("GIB")
-  earsivPrefix             String  @default("EAR")
-  companyStampUrl          String  @default("")
+  id                    String  @id @default("singleton")
+  heroTitle             String
+  heroSubtitle          String
+  buttonText            String
+  announcement          String
+  announcement2         String  @default("🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları")
+  maintenanceMode       Boolean @default(false)
+  siteName              String  @default("PEKEFE Geleneksel & Doğal Lezzetler")
+  primaryColor          String  @default("#b45309")
+  secondaryColor        String  @default("#1F2937")
+  siteDescription       String  @default("")
+  categoryTitle         String  @default("")
+  categorySubtitle      String  @default("")
+  appTitle              String  @default("")
+  appSubtitle           String  @default("")
+  contactPhone          String  @default("")
+  contactEmail          String  @default("")
+  contactAddress        String  @default("")
+  socialInstagram       String  @default("")
+  socialWhatsapp        String  @default("")
+  socialFacebook        String  @default("")
+  socialYoutube         String  @default("")
+  logoFont              String  @default("Outfit")
+  logoUrl               String  @default("")
+  logoSize              Int     @default(18)
+  logoWeight            String  @default("font-black")
+  footerSlogan          String  @default("FABRİKADAN DİREKT")
+  borderRadius          Int     @default(12)
+  announcementActive    Boolean @default(true)
+  announcementSpeed     Int     @default(15)
+  layoutWidth           String  @default("max-w-4xl")
+  heroAlignment         String  @default("center")
+  pricingRules          Json
+  shippingThreshold     Float   @default(5000)
+  shippingFee           Float   @default(150)
+  shippingCarriers      Json
+  themeTemplates        Json
+  contentAnywhereRules  Json
+  savedSectionTemplates Json
+  popupConfig           Json
+  topBarText1           String  @default("Türkiye'nin Her Yerine Güvenli Sevkiyat")
+  topBarText2           String  @default("304 Paslanmaz Çelik ve Dayanıklı Tasarım")
+  topBarItems           String? @default("[]")
+  faqData               Json
+
+  cartDiscountType         String @default("none")
+  cartDiscountValue        Float  @default(0)
+  cartDiscountMinAmount    Float  @default(0)
+  bankTransferDiscountRate Float  @default(0)
+  companyName              String @default("")
+  bankName                 String @default("")
+  bankIban                 String @default("")
+  efaturaPrefix            String @default("GIB")
+  earsivPrefix             String @default("EAR")
+  companyStampUrl          String @default("")
   // Firma Bilgileri & Parametreleri
-  companyOwnerName         String  @default("")
-  companyOwnerSurname      String  @default("")
-  companyTaxNo             String  @default("")
-  companyTaxOffice         String  @default("")
-  companyFax               String  @default("")
-  companyGsm               String  @default("")
-  companyKepAddress        String  @default("")
-  companyMersisNo          String  @default("")
-  companySicilNo           String  @default("")
-  companyRegion            String  @default("")
-  companyCountry           String  @default("")
-  companyCity              String  @default("")
-  companyDistrict          String  @default("")
-  companyBuildingName      String  @default("")
-  companyBuildingNo        String  @default("")
-  companyStreet            String  @default("")
-  companyPostalCode        String  @default("")
-  companyWebsite           String  @default("")
+  companyOwnerName         String @default("")
+  companyOwnerSurname      String @default("")
+  companyTaxNo             String @default("")
+  companyTaxOffice         String @default("")
+  companyFax               String @default("")
+  companyGsm               String @default("")
+  companyKepAddress        String @default("")
+  companyMersisNo          String @default("")
+  companySicilNo           String @default("")
+  companyRegion            String @default("")
+  companyCountry           String @default("")
+  companyCity              String @default("")
+  companyDistrict          String @default("")
+  companyBuildingName      String @default("")
+  companyBuildingNo        String @default("")
+  companyStreet            String @default("")
+  companyPostalCode        String @default("")
+  companyWebsite           String @default("")
 
   // Firma Varsayılanları
   companyDefaultKdv          Int     @default(20)

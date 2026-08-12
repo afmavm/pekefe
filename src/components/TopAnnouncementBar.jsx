@@ -1,7 +1,25 @@
-﻿"use client";
+"use client";
 
 import { useCMS } from "@/context/CMSContext";
-import { Phone, MessageCircle, Sparkles, ShieldCheck, Truck } from "lucide-react";
+import { Phone, MessageCircle, Sparkles, ShieldCheck, Truck, Star, Package, Clock, Award, Tag, Zap } from "lucide-react";
+
+const ICON_MAP = {
+  truck: Truck,
+  shield: ShieldCheck,
+  sparkles: Sparkles,
+  star: Star,
+  package: Package,
+  clock: Clock,
+  award: Award,
+  tag: Tag,
+  zap: Zap,
+  phone: Phone,
+};
+
+const DEFAULT_ITEMS = [
+  { id: "1", text: "Türkiye'nin Her Yerine Güvenli Sevkiyat", icon: "truck", enabled: true },
+  { id: "2", text: "%100 Doğal ve Tescilli Lezzet", icon: "shield", enabled: true },
+];
 
 export default function TopAnnouncementBar() {
   const { cmsData } = useCMS();
@@ -12,25 +30,41 @@ export default function TopAnnouncementBar() {
 
   const text1 = cmsData?.announcement || "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!";
   const text2 = cmsData?.announcement2 || "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları";
-  const subText = cmsData?.topBarText1 || "Türkiye'nin Her Yerine Güvenli Sevkiyat";
   const phone = cmsData?.contactPhone || "0534 270 91 40";
   const whatsapp = cmsData?.socialWhatsapp || "905342709140";
+
+  // Parse topBarItems from cmsData
+  let topBarItems = DEFAULT_ITEMS;
+  try {
+    const raw = cmsData?.topBarItems;
+    if (raw) {
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        topBarItems = parsed;
+      }
+    }
+  } catch {}
+
+  const enabledItems = topBarItems.filter((item) => item.enabled !== false);
 
   return (
     <div className="bg-gradient-to-r from-[#6b1d2f] via-[#8b2d3f] to-[#521321] text-white text-xs py-2 px-4 shadow-sm border-b border-amber-500/20 z-50">
       <div className="max-w-container-max mx-auto flex items-center justify-between gap-4 font-semibold">
         
-        {/* Left: Shipping / Guarantee badge */}
-        <div className="hidden lg:flex items-center gap-4 text-[11px] text-amber-200/90 shrink-0">
-          <span className="flex items-center gap-1.5 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
-            <Truck className="w-3.5 h-3.5 text-amber-400" />
-            {subText}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            %100 Doğal ve Tescilli Lezzet
-          </span>
-        </div>
+        {/* Left: Dynamic top bar items */}
+        {enabledItems.length > 0 && (
+          <div className="hidden lg:flex items-center gap-4 text-[11px] text-amber-200/90 shrink-0">
+            {enabledItems.map((item, idx) => {
+              const IconComp = ICON_MAP[item.icon] || Sparkles;
+              return (
+                <span key={item.id || idx} className={`flex items-center gap-1.5 ${idx === 0 ? "bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10" : ""}`}>
+                  <IconComp className={`w-3.5 h-3.5 ${idx === 0 ? "text-amber-400" : "text-emerald-400"}`} />
+                  {item.text}
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         {/* Center: Dynamic Announcement */}
         <div className="flex-1 overflow-hidden text-center text-xs tracking-wide font-bold text-white flex items-center justify-center gap-2">

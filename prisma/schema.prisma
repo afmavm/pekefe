@@ -548,7 +548,9 @@ model CMSData {
   popupConfig              Json
   topBarText1              String  @default("Türkiye'nin Her Yerine Güvenli Sevkiyat")
   topBarText2              String  @default("304 Paslanmaz Çelik ve Dayanıklı Tasarım")
+  topBarItems              String? @default("[]")
   faqData                  Json
+
   cartDiscountType         String  @default("none")
   cartDiscountValue        Float   @default(0)
   cartDiscountMinAmount    Float   @default(0)

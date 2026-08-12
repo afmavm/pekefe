@@ -30420,6 +30420,7 @@ export namespace Prisma {
     shippingFee: number | null
     topBarText1: string | null
     topBarText2: string | null
+    topBarItems: string | null
     cartDiscountType: string | null
     cartDiscountValue: number | null
     cartDiscountMinAmount: number | null
@@ -30515,6 +30516,7 @@ export namespace Prisma {
     shippingFee: number | null
     topBarText1: string | null
     topBarText2: string | null
+    topBarItems: string | null
     cartDiscountType: string | null
     cartDiscountValue: number | null
     cartDiscountMinAmount: number | null
@@ -30616,6 +30618,7 @@ export namespace Prisma {
     popupConfig: number
     topBarText1: number
     topBarText2: number
+    topBarItems: number
     faqData: number
     cartDiscountType: number
     cartDiscountValue: number
@@ -30748,6 +30751,7 @@ export namespace Prisma {
     shippingFee?: true
     topBarText1?: true
     topBarText2?: true
+    topBarItems?: true
     cartDiscountType?: true
     cartDiscountValue?: true
     cartDiscountMinAmount?: true
@@ -30843,6 +30847,7 @@ export namespace Prisma {
     shippingFee?: true
     topBarText1?: true
     topBarText2?: true
+    topBarItems?: true
     cartDiscountType?: true
     cartDiscountValue?: true
     cartDiscountMinAmount?: true
@@ -30944,6 +30949,7 @@ export namespace Prisma {
     popupConfig?: true
     topBarText1?: true
     topBarText2?: true
+    topBarItems?: true
     faqData?: true
     cartDiscountType?: true
     cartDiscountValue?: true
@@ -31133,6 +31139,7 @@ export namespace Prisma {
     popupConfig: JsonValue
     topBarText1: string
     topBarText2: string
+    topBarItems: string | null
     faqData: JsonValue
     cartDiscountType: string
     cartDiscountValue: number
@@ -31254,6 +31261,7 @@ export namespace Prisma {
     popupConfig?: boolean
     topBarText1?: boolean
     topBarText2?: boolean
+    topBarItems?: boolean
     faqData?: boolean
     cartDiscountType?: boolean
     cartDiscountValue?: boolean
@@ -31358,6 +31366,7 @@ export namespace Prisma {
     popupConfig?: boolean
     topBarText1?: boolean
     topBarText2?: boolean
+    topBarItems?: boolean
     faqData?: boolean
     cartDiscountType?: boolean
     cartDiscountValue?: boolean
@@ -31417,7 +31426,7 @@ export namespace Prisma {
     openAccountDaysLimit?: boolean
   }
 
-  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds" | "paymentMethodsConfig" | "paytrConfig" | "installmentsConfig" | "cashOnDeliveryFee" | "cashOnDeliveryEnabled" | "minOrderAmountForOpenAccount" | "openAccountDaysLimit", ExtArgs["result"]["cMSData"]>
+  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "topBarItems" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds" | "paymentMethodsConfig" | "paytrConfig" | "installmentsConfig" | "cashOnDeliveryFee" | "cashOnDeliveryEnabled" | "minOrderAmountForOpenAccount" | "openAccountDaysLimit", ExtArgs["result"]["cMSData"]>
 
   export type $CMSDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CMSData"
@@ -31465,6 +31474,7 @@ export namespace Prisma {
       popupConfig: Prisma.JsonValue
       topBarText1: string
       topBarText2: string
+      topBarItems: string | null
       faqData: Prisma.JsonValue
       cartDiscountType: string
       cartDiscountValue: number
@@ -31933,6 +31943,7 @@ export namespace Prisma {
     readonly popupConfig: FieldRef<"CMSData", 'Json'>
     readonly topBarText1: FieldRef<"CMSData", 'String'>
     readonly topBarText2: FieldRef<"CMSData", 'String'>
+    readonly topBarItems: FieldRef<"CMSData", 'String'>
     readonly faqData: FieldRef<"CMSData", 'Json'>
     readonly cartDiscountType: FieldRef<"CMSData", 'String'>
     readonly cartDiscountValue: FieldRef<"CMSData", 'Float'>
@@ -79019,6 +79030,7 @@ export namespace Prisma {
     popupConfig: 'popupConfig',
     topBarText1: 'topBarText1',
     topBarText2: 'topBarText2',
+    topBarItems: 'topBarItems',
     faqData: 'faqData',
     cartDiscountType: 'cartDiscountType',
     cartDiscountValue: 'cartDiscountValue',
@@ -80110,6 +80122,7 @@ export namespace Prisma {
     heroAlignment: 'heroAlignment',
     topBarText1: 'topBarText1',
     topBarText2: 'topBarText2',
+    topBarItems: 'topBarItems',
     cartDiscountType: 'cartDiscountType',
     companyName: 'companyName',
     bankName: 'bankName',
@@ -82927,6 +82940,7 @@ export namespace Prisma {
     popupConfig?: JsonFilter<"CMSData">
     topBarText1?: StringFilter<"CMSData"> | string
     topBarText2?: StringFilter<"CMSData"> | string
+    topBarItems?: StringNullableFilter<"CMSData"> | string | null
     faqData?: JsonFilter<"CMSData">
     cartDiscountType?: StringFilter<"CMSData"> | string
     cartDiscountValue?: FloatFilter<"CMSData"> | number
@@ -83029,6 +83043,7 @@ export namespace Prisma {
     popupConfig?: SortOrder
     topBarText1?: SortOrder
     topBarText2?: SortOrder
+    topBarItems?: SortOrderInput | SortOrder
     faqData?: SortOrder
     cartDiscountType?: SortOrder
     cartDiscountValue?: SortOrder
@@ -83135,6 +83150,7 @@ export namespace Prisma {
     popupConfig?: JsonFilter<"CMSData">
     topBarText1?: StringFilter<"CMSData"> | string
     topBarText2?: StringFilter<"CMSData"> | string
+    topBarItems?: StringNullableFilter<"CMSData"> | string | null
     faqData?: JsonFilter<"CMSData">
     cartDiscountType?: StringFilter<"CMSData"> | string
     cartDiscountValue?: FloatFilter<"CMSData"> | number
@@ -83237,6 +83253,7 @@ export namespace Prisma {
     popupConfig?: SortOrder
     topBarText1?: SortOrder
     topBarText2?: SortOrder
+    topBarItems?: SortOrderInput | SortOrder
     faqData?: SortOrder
     cartDiscountType?: SortOrder
     cartDiscountValue?: SortOrder
@@ -83347,6 +83364,7 @@ export namespace Prisma {
     popupConfig?: JsonWithAggregatesFilter<"CMSData">
     topBarText1?: StringWithAggregatesFilter<"CMSData"> | string
     topBarText2?: StringWithAggregatesFilter<"CMSData"> | string
+    topBarItems?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
     faqData?: JsonWithAggregatesFilter<"CMSData">
     cartDiscountType?: StringWithAggregatesFilter<"CMSData"> | string
     cartDiscountValue?: FloatWithAggregatesFilter<"CMSData"> | number
@@ -89377,6 +89395,7 @@ export namespace Prisma {
     popupConfig: JsonNullValueInput | InputJsonValue
     topBarText1?: string
     topBarText2?: string
+    topBarItems?: string | null
     faqData: JsonNullValueInput | InputJsonValue
     cartDiscountType?: string
     cartDiscountValue?: number
@@ -89479,6 +89498,7 @@ export namespace Prisma {
     popupConfig: JsonNullValueInput | InputJsonValue
     topBarText1?: string
     topBarText2?: string
+    topBarItems?: string | null
     faqData: JsonNullValueInput | InputJsonValue
     cartDiscountType?: string
     cartDiscountValue?: number
@@ -89581,6 +89601,7 @@ export namespace Prisma {
     popupConfig?: JsonNullValueInput | InputJsonValue
     topBarText1?: StringFieldUpdateOperationsInput | string
     topBarText2?: StringFieldUpdateOperationsInput | string
+    topBarItems?: NullableStringFieldUpdateOperationsInput | string | null
     faqData?: JsonNullValueInput | InputJsonValue
     cartDiscountType?: StringFieldUpdateOperationsInput | string
     cartDiscountValue?: FloatFieldUpdateOperationsInput | number
@@ -89683,6 +89704,7 @@ export namespace Prisma {
     popupConfig?: JsonNullValueInput | InputJsonValue
     topBarText1?: StringFieldUpdateOperationsInput | string
     topBarText2?: StringFieldUpdateOperationsInput | string
+    topBarItems?: NullableStringFieldUpdateOperationsInput | string | null
     faqData?: JsonNullValueInput | InputJsonValue
     cartDiscountType?: StringFieldUpdateOperationsInput | string
     cartDiscountValue?: FloatFieldUpdateOperationsInput | number
@@ -89785,6 +89807,7 @@ export namespace Prisma {
     popupConfig: JsonNullValueInput | InputJsonValue
     topBarText1?: string
     topBarText2?: string
+    topBarItems?: string | null
     faqData: JsonNullValueInput | InputJsonValue
     cartDiscountType?: string
     cartDiscountValue?: number
@@ -89887,6 +89910,7 @@ export namespace Prisma {
     popupConfig?: JsonNullValueInput | InputJsonValue
     topBarText1?: StringFieldUpdateOperationsInput | string
     topBarText2?: StringFieldUpdateOperationsInput | string
+    topBarItems?: NullableStringFieldUpdateOperationsInput | string | null
     faqData?: JsonNullValueInput | InputJsonValue
     cartDiscountType?: StringFieldUpdateOperationsInput | string
     cartDiscountValue?: FloatFieldUpdateOperationsInput | number
@@ -89989,6 +90013,7 @@ export namespace Prisma {
     popupConfig?: JsonNullValueInput | InputJsonValue
     topBarText1?: StringFieldUpdateOperationsInput | string
     topBarText2?: StringFieldUpdateOperationsInput | string
+    topBarItems?: NullableStringFieldUpdateOperationsInput | string | null
     faqData?: JsonNullValueInput | InputJsonValue
     cartDiscountType?: StringFieldUpdateOperationsInput | string
     cartDiscountValue?: FloatFieldUpdateOperationsInput | number
@@ -95852,6 +95877,7 @@ export namespace Prisma {
     popupConfig?: SortOrder
     topBarText1?: SortOrder
     topBarText2?: SortOrder
+    topBarItems?: SortOrder
     faqData?: SortOrder
     cartDiscountType?: SortOrder
     cartDiscountValue?: SortOrder
@@ -95965,6 +95991,7 @@ export namespace Prisma {
     shippingFee?: SortOrder
     topBarText1?: SortOrder
     topBarText2?: SortOrder
+    topBarItems?: SortOrder
     cartDiscountType?: SortOrder
     cartDiscountValue?: SortOrder
     cartDiscountMinAmount?: SortOrder
@@ -96060,6 +96087,7 @@ export namespace Prisma {
     shippingFee?: SortOrder
     topBarText1?: SortOrder
     topBarText2?: SortOrder
+    topBarItems?: SortOrder
     cartDiscountType?: SortOrder
     cartDiscountValue?: SortOrder
     cartDiscountMinAmount?: SortOrder

@@ -14,7 +14,9 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN minOrderAmountForOpenAccount DOUBLE NOT NULL DEFAULT 500",
     "ALTER TABLE CMSData ADD COLUMN openAccountDaysLimit INT NOT NULL DEFAULT 30",
     "ALTER TABLE CMSData ADD COLUMN preventZeroStockSale TINYINT(1) NOT NULL DEFAULT 1",
-    "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5"
+    "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5",
+    "ALTER TABLE CMSData ADD COLUMN topBarItems LONGTEXT NULL"
+
   ];
 
   for (const q of alterQueries) {
@@ -186,7 +188,12 @@ export async function PUT(request: Request) {
       popupConfig: getVal('popupConfig', 'json', {}),
       topBarText1: getVal('topBarText1', 'string', "Türkiye'nin Her Yerine Güvenli Sevkiyat"),
       topBarText2: getVal('topBarText2', 'string', '304 Paslanmaz Çelik ve Dayanıklı Tasarım'),
+      topBarItems: getVal('topBarItems', 'json', [
+        { id: "1", text: "Türkiye'nin Her Yerine Güvenli Sevkiyat", icon: "truck", enabled: true },
+        { id: "2", text: "%100 Doğal ve Tescilli Lezzet", icon: "shield", enabled: true }
+      ]),
       faqData: getVal('faqData', 'json', []),
+
       cartDiscountType: getVal('cartDiscountType', 'string', 'none'),
       cartDiscountValue: getVal('cartDiscountValue', 'number', 0),
       cartDiscountMinAmount: getVal('cartDiscountMinAmount', 'number', 0),

@@ -27,6 +27,8 @@ interface CMSData {
   maintenanceMode: boolean;
   topBarText1?: string;
   topBarText2?: string;
+  topBarItems?: string | any[];
+
   siteName: string;
   primaryColor: string;
   secondaryColor?: string;

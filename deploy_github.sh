@@ -44,7 +44,7 @@ echo "[4/4] Performing instant PM2 process restart on Port 4000..."
 pm2 delete pekefe-app 2>/dev/null || true
 pm2 delete pekefe 2>/dev/null || true
 
-PORT=4000 pm2 start cpanel_server.js --name "pekefe-app" --update-env 2>/dev/null || true
+PORT=4000 pm2 start ecosystem.config.js --update-env 2>/dev/null || true
 pm2 save --force 2>/dev/null || true
 
 mkdir -p "$CURRENT_DIR/tmp"

@@ -89,7 +89,7 @@ const defaultCMSData: CMSData = {
   maintenanceMode: false,
   topBarText1: "Türkiye'nin Her Yerine Güvenli Sevkiyat",
   topBarText2: "Yerli Üretim Paslanmaz Çelik",
-  logoUrl: "/uploads/1779016776947-365377533-Logo.jpg",
+  logoUrl: "/logo.png",
   siteName: "PEKEFE Geleneksel & Doğal Lezzetler",
   primaryColor: "#b45309",
   footerSlogan: "FABRİKADAN DİREKT",

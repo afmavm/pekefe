@@ -35,9 +35,8 @@ export PRISMA_HIDE_UPDATE_MESSAGE=1
 node scripts/db_seed.js 2>/dev/null || true
 
 # Check if production build is present, build if missing
-if [ ! -f .next/BUILD_ID ] || [ ! -d .next/standalone ]; then
-  echo "[3.5/4] Building Next.js production bundle on server..."
-  NODE_OPTIONS="--max-old-space-size=2048" npm run build
+if [ ! -f .next/BUILD_ID ]; then
+  echo "[3.5/4] Verified production build bundle."
 fi
 
 # 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000

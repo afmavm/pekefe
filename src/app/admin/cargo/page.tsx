@@ -496,11 +496,11 @@ export default function CargoPage() {
 
   // Save Carriers list configuration
   const handleSaveCarriersList = async (updatedCarriers: Carrier[]) => {
-    if (!settings) return;
     setSavingCarriers(true);
     try {
+      const currentSettings = settings || { id: "singleton" };
       const updatedSettings = {
-        ...settings,
+        ...currentSettings,
         shippingCarriers: JSON.stringify(updatedCarriers)
       };
 

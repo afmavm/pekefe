@@ -513,9 +513,14 @@ function EnterpriseStockFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // SKU öncelikli — eski ?id= formatı da desteklenir (geriye dönük uyumluluk)
+  const rawQuery = typeof window !== "undefined" ? window.location.search : "";
+  const clientUrlParams = typeof window !== "undefined" ? new URLSearchParams(rawQuery) : null;
+  const clientSku = clientUrlParams?.get("sku");
+  const clientId = clientUrlParams?.get("id");
+
   const skuParam = searchParams.get("sku");
   const idParam = searchParams.get("id");
-  const productId = skuParam || idParam; // API hem id hem SKU'yu kabul ediyor
+  const productId = skuParam || idParam || clientSku || clientId;
   const isEditMode = !!productId;
   const { refreshProducts, refreshCategories } = useProduct();
 
@@ -956,7 +961,9 @@ function EnterpriseStockFormPage() {
     isInitialized.current = false;
     setIsDirty(false);
 
-    if (!productId) {
+    const hasUrlParam = typeof window !== "undefined" && (window.location.search.includes("sku=") || window.location.search.includes("id="));
+
+    if (!productId && !hasUrlParam) {
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const randBarcode = "869" + Math.floor(1000000000 + Math.random() * 9000000000);
       const randManCode = `PKF-DUT-${Math.floor(1000 + Math.random() * 9000)}`;

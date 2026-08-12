@@ -1891,6 +1891,33 @@ export function getProducts() {
   }
 }
 
+export function formatDbProductToStorefront(p) {
+  if (!p) return null;
+  let attrs = p.attributes || {};
+  if (typeof attrs === 'string') {
+    try { attrs = JSON.parse(attrs); } catch (e) { attrs = {}; }
+  }
+  let images = p.images || [];
+  if (typeof images === 'string') {
+    try { images = JSON.parse(images); } catch (e) { images = []; }
+  }
+  if (!Array.isArray(images) && p.image) {
+    images = [p.image];
+  }
+  return {
+    ...p,
+    id: p.id || p.sku,
+    name: p.name || "",
+    sku: p.sku || "",
+    price: p.sale_price ? Number(p.sale_price) : (p.price ? Number(p.price) : 0),
+    oldPrice: p.oldPrice ? Number(p.oldPrice) : (p.list_price ? Number(p.list_price) : 0),
+    stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),
+    image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
+    images: Array.isArray(images) ? images : [],
+    attributes: attrs
+  };
+}
+
 let _fetchingInProgress = false;
 
 /** Fetch live products from DB API and update localStorage cache.

@@ -528,7 +528,7 @@ function EnterpriseStockFormPage() {
 
   // Loading & Action states
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoadingProduct, setIsLoadingProduct] = useState(isEditMode);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedMediaIndex, setDraggedMediaIndex] = useState<number | null>(null);
@@ -1367,10 +1367,7 @@ function EnterpriseStockFormPage() {
   ]);
 
   // Variant list
-  const [variants, setVariants] = useState<Variant[]>([
-    { id: "1", sku: "PKF-DUT-800-CEVIZ", barcode: "8691234567891", name: "800g Cam Kavanoz - Cevizli", size: "800g Cam Kavanoz", color: "Cevizli", stock: 120, price: 340 },
-    { id: "2", sku: "PKF-DUT-800-SADE", barcode: "8691234567892", name: "800g Cam Kavanoz - Sade", size: "800g Cam Kavanoz", color: "Sade", stock: 350, price: 300 },
-  ]);
+  const [variants, setVariants] = useState<Variant[]>([]);
 
   // Track if any form values are changed by the user
   useEffect(() => {

@@ -315,7 +315,8 @@ export default function StockProductionPage() {
   };
 
   const openEditProductModal = (product: Product) => {
-    router.push(`/admin/stock/form?sku=${encodeURIComponent(product.sku)}`);
+    const targetParam = product.id ? `id=${product.id}&sku=${encodeURIComponent(product.sku)}` : `sku=${encodeURIComponent(product.sku)}`;
+    router.push(`/admin/stock/form?${targetParam}`);
   };
 
 

@@ -31,6 +31,7 @@ interface CargoOrder {
 interface Carrier {
   id: string;
   name: string;
+  logoUrl?: string;
   isActive: boolean;
   addShippingCosts: boolean;
   isFreeShipping: boolean;
@@ -530,6 +531,7 @@ export default function CargoPage() {
       {
         id: "yurtici",
         name: "Yurtiçi Kargo",
+        logoUrl: "/logos/yurtici.svg",
         isActive: true,
         addShippingCosts: true,
         isFreeShipping: false,
@@ -548,6 +550,7 @@ export default function CargoPage() {
       {
         id: "aras",
         name: "Aras Kargo",
+        logoUrl: "/logos/aras.svg",
         isActive: true,
         addShippingCosts: true,
         isFreeShipping: false,
@@ -566,6 +569,7 @@ export default function CargoPage() {
       {
         id: "mng",
         name: "MNG Kargo",
+        logoUrl: "/logos/mng.svg",
         isActive: true,
         addShippingCosts: true,
         isFreeShipping: false,
@@ -588,6 +592,7 @@ export default function CargoPage() {
   const openNewCarrierModal = () => {
     setCarrierForm({
       name: "",
+      logoUrl: "",
       isActive: true,
       addShippingCosts: true,
       isFreeShipping: false,
@@ -610,6 +615,7 @@ export default function CargoPage() {
   const openEditCarrierModal = (carrier: Carrier) => {
     setCarrierForm({
       name: carrier.name,
+      logoUrl: carrier.logoUrl || "",
       isActive: carrier.isActive,
       addShippingCosts: carrier.addShippingCosts ?? true,
       isFreeShipping: carrier.isFreeShipping ?? false,
@@ -1278,7 +1284,18 @@ export default function CargoPage() {
                     <tbody className="divide-y divide-gray-50 text-sm">
                       {carriers.map((carrier) => (
                         <tr key={carrier.id} className="hover:bg-gray-50/60 transition">
-                          <td className="px-5 py-4 font-bold text-gray-800">{carrier.name}</td>
+                          <td className="px-5 py-4 font-bold text-gray-800">
+                            <div className="flex items-center gap-3">
+                              {carrier.logoUrl ? (
+                                <img src={carrier.logoUrl} alt={carrier.name} className="h-9 w-16 object-contain rounded-lg border border-slate-200 bg-white p-1 shadow-sm shrink-0" />
+                              ) : (
+                                <div className="h-9 w-9 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 font-black text-xs shrink-0">
+                                  {carrier.name.substring(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                              <span>{carrier.name}</span>
+                            </div>
+                          </td>
                           <td className="px-5 py-4">
                             <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${carrier.billingMethod === "price" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"}`}>
                               {carrier.billingMethod === "price" ? "Sepet Tutarı" : "Desi / Ağırlık"}
@@ -1351,6 +1368,64 @@ export default function CargoPage() {
             </div>
 
             <form onSubmit={handleCarrierSubmit} className="p-6 space-y-5 overflow-y-auto flex-1 text-gray-900 bg-white">
+              {/* Logo Selection Section */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">Firma Logosu & Görseli</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-bold text-slate-500 mr-1">Hazır Marka Logoları:</span>
+                  {[
+                    { name: "Yurtiçi Kargo", logo: "/logos/yurtici.svg" },
+                    { name: "Aras Kargo", logo: "/logos/aras.svg" },
+                    { name: "MNG Kargo", logo: "/logos/mng.svg" },
+                    { name: "PTT Kargo", logo: "/logos/ptt.svg" },
+                    { name: "Sürat Kargo", logo: "/logos/surat.svg" },
+                    { name: "HepsiJET", logo: "/logos/hepsijet.svg" }
+                  ].map((brand) => (
+                    <button
+                      key={brand.name}
+                      type="button"
+                      onClick={() => setCarrierForm({ ...carrierForm, logoUrl: brand.logo, name: carrierForm.name || brand.name })}
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        carrierForm.logoUrl === brand.logo
+                          ? "border-orange-500 bg-orange-50 text-orange-700 shadow-sm"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                      }`}
+                    >
+                      <img src={brand.logo} alt={brand.name} className="h-4 object-contain" />
+                      <span>{brand.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1 items-center">
+                  <div className="sm:col-span-8">
+                    <input
+                      type="text"
+                      placeholder="Görsel URL veya hazır logo seçin (Örn: /logos/yurtici.svg)"
+                      value={carrierForm.logoUrl || ""}
+                      onChange={(e) => setCarrierForm({ ...carrierForm, logoUrl: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono text-gray-900 focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
+                  <div className="sm:col-span-4 flex items-center justify-center">
+                    {carrierForm.logoUrl ? (
+                      <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+                        <img src={carrierForm.logoUrl} alt="Logo Önizleme" className="h-7 max-w-[100px] object-contain" />
+                        <button
+                          type="button"
+                          onClick={() => setCarrierForm({ ...carrierForm, logoUrl: "" })}
+                          className="text-xs font-bold text-red-500 hover:text-red-700 ml-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-medium">Logo Seçilmedi</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Kargo Firma Adı *</label>

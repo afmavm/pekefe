@@ -167,10 +167,22 @@ export default function Odeme() {
 
   // Dynamic Shipping calculations from Management / CMS Settings per Selected Carrier
   const defaultCarriers = [
-    { id: "yurtici", name: "Yurtiçi Kargo", fallbackFee: 150, freeThreshold: 5000 },
-    { id: "aras", name: "Aras Kargo", fallbackFee: 140, freeThreshold: 5000 },
-    { id: "mng", name: "MNG Kargo", fallbackFee: 130, freeThreshold: 5000 }
+    { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", fallbackFee: 150, freeThreshold: 5000 },
+    { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", fallbackFee: 140, freeThreshold: 5000 },
+    { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", fallbackFee: 130, freeThreshold: 5000 }
   ];
+
+  const getCarrierLogo = (carrier) => {
+    if (carrier.logoUrl) return carrier.logoUrl;
+    const nameLower = (carrier.name || "").toLowerCase();
+    if (nameLower.includes("yurtiçi") || nameLower.includes("yurtici")) return "/logos/yurtici.svg";
+    if (nameLower.includes("aras")) return "/logos/aras.svg";
+    if (nameLower.includes("mng")) return "/logos/mng.svg";
+    if (nameLower.includes("ptt")) return "/logos/ptt.svg";
+    if (nameLower.includes("sürat") || nameLower.includes("surat")) return "/logos/surat.svg";
+    if (nameLower.includes("jet") || nameLower.includes("hepsi")) return "/logos/hepsijet.svg";
+    return null;
+  };
 
   const activeCarriers = (siteSettings?.shippingCarriers && Array.isArray(siteSettings.shippingCarriers) && siteSettings.shippingCarriers.length > 0)
     ? siteSettings.shippingCarriers.filter(c => c.isActive !== false)
@@ -639,26 +651,38 @@ export default function Odeme() {
                 )}
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 {activeCarriers.map((c) => {
                   const fee = getCarrierTierFee(c, totalCartDesi);
                   const isFree = subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
                   const isSelected = selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr')) || c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr'));
+                  const logo = getCarrierLogo(c);
+
                   return (
                     <button
                       key={c.id || c.name}
                       type="button"
                       onClick={() => setSelectedCarrier(c.name)}
-                      className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                      className={`p-3 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-between gap-2.5 min-h-[96px] relative ${
                         isSelected
-                          ? "border-primary bg-primary text-white shadow-md scale-[1.02]"
-                          : "border-outline-variant/30 text-gray-700 bg-surface-container-lowest hover:bg-surface-container"
+                          ? "border-primary bg-primary/5 text-primary shadow-md ring-2 ring-primary/20 scale-[1.02]"
+                          : "border-outline-variant/30 text-gray-700 bg-surface-container-lowest hover:border-gray-300 hover:bg-surface-container/50"
                       }`}
                     >
-                      <span className="text-sm">{c.name}</span>
-                      <span className={`text-[11px] font-extrabold ${isSelected ? "text-amber-300" : isFree ? "text-emerald-600" : "text-primary"}`}>
-                        {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
-                      </span>
+                      {logo ? (
+                        <div className="h-9 w-full flex items-center justify-center bg-white p-1 rounded-xl border border-slate-100 shadow-2xs">
+                          <img src={logo} alt={c.name} className="h-7 max-w-[110px] object-contain" />
+                        </div>
+                      ) : (
+                        <span className="text-sm font-extrabold text-slate-800">{c.name}</span>
+                      )}
+
+                      <div className="flex items-center justify-between w-full pt-1 border-t border-slate-100/80">
+                        <span className="text-[11px] font-bold text-slate-600 truncate max-w-[110px]">{c.name}</span>
+                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-full ${isFree ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
+                          {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}

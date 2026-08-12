@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" rx="8" fill="#003865"/>
+  <path d="M30 42L45 18H60L45 42H30Z" fill="#E30613"/>
+  <path d="M48 42L63 18H78L63 42H48Z" fill="#FFD100"/>
+  <text x="85" y="38" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#FFFFFF">Yurtiçi</text>
+  <text x="85" y="49" font-family="Arial, sans-serif" font-weight="700" font-size="10" fill="#FFD100">KARGO</text>
+</svg>

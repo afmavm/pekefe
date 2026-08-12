@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -65,7 +65,10 @@ export default function OdemeAyarlariPage() {
   });
 
   const [paytr, setPaytr] = useState<PaytrSettings>({
-    merchantId: "", merchantKey: "", merchantSalt: "", testMode: false,
+    merchantId: "735518",
+    merchantKey: "wQkmEkdf5NDCEnWg",
+    merchantSalt: "AuK7HXRb7NrbyZzw",
+    testMode: false,
   });
   const [showPaytrSecret, setShowPaytrSecret] = useState(false);
   const [testingPaytr, setTestingPaytr] = useState(false);
@@ -111,7 +114,12 @@ export default function OdemeAyarlariPage() {
         if (data.paytrConfig) {
           try {
             const cfg = JSON.parse(data.paytrConfig);
-            setPaytr(prev => ({ ...prev, merchantId: cfg.merchantId || "", testMode: cfg.testMode ?? false }));
+            setPaytr(prev => ({
+              merchantId: cfg.merchantId || prev.merchantId,
+              merchantKey: cfg.merchantKey || prev.merchantKey,
+              merchantSalt: cfg.merchantSalt || prev.merchantSalt,
+              testMode: cfg.testMode ?? prev.testMode
+            }));
           } catch {}
         }
         if (data.installmentsConfig) {

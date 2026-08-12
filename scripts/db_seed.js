@@ -1768,6 +1768,39 @@ async function main() {
     data: { isDeleted: false }
   }).catch(() => {});
 
+  // Seed PayTR Config & Payment Methods into CMSData singleton
+  const paytrConfigJson = JSON.stringify({
+    merchantId: "735518",
+    merchantKey: "wQkmEkdf5NDCEnWg",
+    merchantSalt: "AuK7HXRb7NrbyZzw",
+    testMode: false
+  });
+  const paymentMethodsConfigJson = JSON.stringify([
+    { id: "creditCard", enabled: true },
+    { id: "bankTransfer", enabled: true },
+    { id: "openAccount", enabled: true },
+    { id: "cashOnDelivery", enabled: false }
+  ]);
+
+  await prisma.cMSData.upsert({
+    where: { id: 'singleton' },
+    update: {
+      paytrConfig: paytrConfigJson,
+      paymentMethodsConfig: paymentMethodsConfigJson
+    },
+    create: {
+      id: 'singleton',
+      heroTitle: 'PEKEFE Geleneksel & Doğal Lezzetler',
+      heroSubtitle: 'İspir Fasulyesi, Erzurum Göğermiş Peyniri ve Doğal Yöresel Lezzetler',
+      buttonText: 'Hemen Alışverişe Başla',
+      announcement: '🔥 5000 TL ve Üzeri Alışverişlerde Kargo Ücretsiz!',
+      announcement2: '🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları',
+      siteName: 'PEKEFE Geleneksel & Doğal Lezzetler',
+      paytrConfig: paytrConfigJson,
+      paymentMethodsConfig: paymentMethodsConfigJson
+    }
+  }).catch((e) => console.error("[PAYTR SEED WARNING]:", e.message));
+
   console.log(`[PEKEFE MASTER SEED] Success! Loaded exact ${totalSeeded} local products from dev.db & admin users.`);
 }
 

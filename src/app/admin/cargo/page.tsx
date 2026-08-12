@@ -1163,6 +1163,10 @@ export default function CargoPage() {
                             <td className="p-4 text-slate-500 text-xs">
                               {(() => {
                                 if (!order.date) return "—";
+                                // Already formatted as DD.MM.YYYY – display as-is
+                                if (typeof order.date === "string" && /^\d{2}\.\d{2}\.\d{4}/.test(order.date)) {
+                                  return order.date;
+                                }
                                 try {
                                   const d = new Date(order.date);
                                   if (isNaN(d.getTime())) return String(order.date);

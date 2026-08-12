@@ -1644,6 +1644,10 @@ export default function OrderCommandCenter() {
                               <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
                                 {(() => {
                                   if (!order.date) return "—";
+                                  // If it looks like a Turkish formatted date (DD.MM.YYYY), display as-is
+                                  if (typeof order.date === "string" && /^\d{2}\.\d{2}\.\d{4}/.test(order.date)) {
+                                    return order.date;
+                                  }
                                   try {
                                     const d = new Date(order.date);
                                     if (isNaN(d.getTime())) return String(order.date);

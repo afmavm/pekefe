@@ -90,8 +90,8 @@ export const GET = withAuth<any>(
           method: order.method || "Belirtilmedi",
           date: order.date
             ? new Date(order.date).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-            : new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-          createdAt: order.date ? new Date(order.date).toISOString() : new Date().toISOString(),
+            : "-",
+          createdAt: order.date ? new Date(order.date).toISOString() : "",
           formattedDate: order.date ? new Date(order.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : "",
           status: order.status,
           cargoCompany,
@@ -121,9 +121,9 @@ export const GET = withAuth<any>(
           amount: 1465,
           shippingFee: 0,
           method: "Kredi Kartı / İyzico",
-          date: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          formattedDate: new Date().toLocaleDateString('tr-TR'),
+          date: "13.08.2026 02:21",
+          createdAt: "2026-08-13T02:21:00.000Z",
+          formattedDate: "13 Ağustos 2026",
           status: "Tamamlandı",
           cargoCompany: "Yurtiçi Kargo",
           trackingNo: "YK-902348921"

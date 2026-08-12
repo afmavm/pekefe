@@ -509,7 +509,11 @@ const toLocalDateTimeString = (dateInput: string | Date | null | undefined): str
   return localDate.toISOString().substring(0, 16);
 };
 
-function EnterpriseStockFormPage() {
+interface EnterpriseStockFormPageProps {
+  productId?: string;
+}
+
+function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFormPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // SKU öncelikli — eski ?id= formatı da desteklenir (geriye dönük uyumluluk)
@@ -520,7 +524,7 @@ function EnterpriseStockFormPage() {
 
   const skuParam = searchParams.get("sku");
   const idParam = searchParams.get("id");
-  const productId = skuParam || idParam || clientSku || clientId;
+  const productId = propProductId || skuParam || idParam || clientSku || clientId;
   const isEditMode = !!productId;
   const { refreshProducts, refreshCategories } = useProduct();
 
@@ -663,13 +667,7 @@ function EnterpriseStockFormPage() {
   const [printProgress, setPrintProgress] = useState(0);
 
   // Dynamic Stock movements report listing
-  const [movements, setMovements] = useState([
-    { id: "1", date: "2026-05-31 14:35", type: "Mal Kabul (Fatura #2026-0091)", warehouse: "Merkez Depo", qty: 500, user: "Ahmet Yılmaz", status: "Tamamlandı" },
-    { id: "2", date: "2026-05-31 10:12", type: "B2B Satış Siparişi (#10943)", warehouse: "Merkez Depo", qty: -12, user: "Entegrasyon", status: "Tamamlandı" },
-    { id: "3", date: "2026-05-30 16:45", type: "Şube Sevk (Sevk İrsaliyesi)", warehouse: "Merkez Depo", qty: -50, user: "Mehmet Demir", status: "Tamamlandı" },
-    { id: "4", date: "2026-05-30 16:45", type: "Şube Sevk (Giriş İrsaliyesi)", warehouse: "Şube Depo", qty: 50, user: "Mehmet Demir", status: "Tamamlandı" },
-    { id: "5", date: "2026-05-29 09:30", type: "Üretim Girişi (BOM-PKM)", warehouse: "İspir Dolum Hattı", qty: 80, user: "Otomatik Paketleme Robotu", status: "Tamamlandı" },
-  ]);
+  const [movements, setMovements] = useState<any[]>([]);
 
   // Add new movement form state
   const [newMovement, setNewMovement] = useState({
@@ -1311,18 +1309,10 @@ function EnterpriseStockFormPage() {
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
 
   // Multiple Marketplaces List
-  const [marketplaces, setMarketplaces] = useState<Marketplace[]>([
-    { id: "1", name: "Trendyol API", syncEnabled: true, apiConnected: true, apiKey: "ty-api-90234892", apiSecret: "••••••••", logoColor: "bg-orange-500" },
-    { id: "2", name: "Hepsiburada API", syncEnabled: true, apiConnected: true, apiKey: "hb-api-11029384", apiSecret: "••••••••", logoColor: "bg-red-600" },
-    { id: "3", name: "Amazon Turkey API", syncEnabled: false, apiConnected: false, logoColor: "bg-amber-500" },
-  ]);
+  const [marketplaces, setMarketplaces] = useState<Marketplace[]>([]);
 
   // Warehouses List
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([
-    { id: "1", name: "Merkez Depo", code: "WH-MRKZ", location: "Erzurum OSB, 3. Cadde", stockCount: 0 },
-    { id: "2", name: "Şube Depo", code: "WH-SUBE", location: "İstanbul Anadolu Yakası", stockCount: 0 },
-    { id: "3", name: "Üretim Bandı", code: "WH-URT", location: "Yakutiye Fabrika Alanı", stockCount: 0 },
-  ]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
 
   // Selected Warehouse detailed display info helper
   const selectedWarehouseInfo = useMemo(() => {
@@ -1330,10 +1320,7 @@ function EnterpriseStockFormPage() {
   }, [warehouses, form.warehouse]);
 
   // XML Feeds list
-  const [xmlFeeds, setXmlFeeds] = useState<XmlFeed[]>([
-    { id: "1", name: "Google Shopping XML", priceSource: "Web Perakende Fiyatı", markupPercent: 5, active: true },
-    { id: "2", name: "Bayi XML Çıktısı", priceSource: "B2B Satış Fiyatı", markupPercent: 10, active: true },
-  ]);
+  const [xmlFeeds, setXmlFeeds] = useState<XmlFeed[]>([]);
 
   // Categories list initialized empty, populated live from DB API
   const [categories, setCategories] = useState<string[]>([]);
@@ -1348,10 +1335,6 @@ function EnterpriseStockFormPage() {
           setCategoryObjects(data);
           const names = data.map((c: any) => c.name).filter(Boolean);
           setCategories(names);
-          setForm(prev => ({
-            ...prev,
-            category: prev.category && names.includes(prev.category) ? prev.category : (names[0] || "")
-          }));
         }
       }
     } catch (err) {
@@ -6689,6 +6672,20 @@ function ArchiveBoxIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+function StockFormContent() {
+  const searchParams = useSearchParams();
+  const rawQuery = typeof window !== "undefined" ? window.location.search : "";
+  const clientUrlParams = typeof window !== "undefined" ? new URLSearchParams(rawQuery) : null;
+  const clientSku = clientUrlParams?.get("sku");
+  const clientId = clientUrlParams?.get("id");
+
+  const skuParam = searchParams.get("sku");
+  const idParam = searchParams.get("id");
+  const productId = skuParam || idParam || clientSku || clientId || "new";
+
+  return <EnterpriseStockFormPage key={productId} productId={productId === "new" ? undefined : productId} />;
+}
+
 export default function StockFormWrapperPage() {
   return (
     <Suspense fallback={
@@ -6699,7 +6696,7 @@ export default function StockFormWrapperPage() {
         </div>
       </div>
     }>
-      <EnterpriseStockFormPage />
+      <StockFormContent />
     </Suspense>
   );
 }

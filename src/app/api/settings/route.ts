@@ -216,7 +216,7 @@ export async function PUT(request: Request) {
       companyInvoiceFooter: getVal('companyInvoiceFooter', 'string', ''),
       companyStampUrl: getVal('companyStampUrl', 'string', ''),
 
-      // Odeme Yontemi Ayarlari
+      // Odeme Yontemi & Stok Ayarlari
       paymentMethodsConfig: getVal('paymentMethodsConfig', 'string', '[]'),
       paytrConfig: getVal('paytrConfig', 'string', '{}'),
       installmentsConfig: getVal('installmentsConfig', 'string', '[]'),
@@ -224,6 +224,8 @@ export async function PUT(request: Request) {
       cashOnDeliveryEnabled: getVal('cashOnDeliveryEnabled', 'boolean', false),
       minOrderAmountForOpenAccount: getVal('minOrderAmountForOpenAccount', 'number', 500),
       openAccountDaysLimit: getVal('openAccountDaysLimit', 'number', 30),
+      preventZeroStockSale: getVal('preventZeroStockSale', 'boolean', true),
+      defaultCriticalStockLimit: getVal('defaultCriticalStockLimit', 'number', 5),
     };
 
     const saved = await prisma.cMSData.upsert({

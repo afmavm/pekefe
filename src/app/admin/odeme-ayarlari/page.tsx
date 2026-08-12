@@ -41,6 +41,8 @@ interface GeneralPaymentSettings {
   openAccountDaysLimit: number;
   shippingThreshold: number;
   shippingFee: number;
+  preventZeroStockSale: boolean;
+  defaultCriticalStockLimit: number;
 }
 
 const DEFAULT_INSTALLMENTS: InstallmentOption[] = [
@@ -81,6 +83,8 @@ export default function OdemeAyarlariPage() {
     openAccountDaysLimit: 30,
     shippingThreshold: 5000,
     shippingFee: 150,
+    preventZeroStockSale: true,
+    defaultCriticalStockLimit: 5,
   });
 
   useEffect(() => {
@@ -100,6 +104,8 @@ export default function OdemeAyarlariPage() {
           cashOnDeliveryEnabled: data.cashOnDeliveryEnabled ?? prev.cashOnDeliveryEnabled,
           minOrderAmountForOpenAccount: data.minOrderAmountForOpenAccount ?? prev.minOrderAmountForOpenAccount,
           openAccountDaysLimit: data.openAccountDaysLimit ?? prev.openAccountDaysLimit,
+          preventZeroStockSale: data.preventZeroStockSale ?? prev.preventZeroStockSale,
+          defaultCriticalStockLimit: data.defaultCriticalStockLimit ?? prev.defaultCriticalStockLimit,
         }));
         if (data.paymentMethodsConfig) {
           try {
@@ -146,6 +152,8 @@ export default function OdemeAyarlariPage() {
         cashOnDeliveryEnabled: general.cashOnDeliveryEnabled,
         minOrderAmountForOpenAccount: general.minOrderAmountForOpenAccount,
         openAccountDaysLimit: general.openAccountDaysLimit,
+        preventZeroStockSale: general.preventZeroStockSale,
+        defaultCriticalStockLimit: general.defaultCriticalStockLimit,
         paymentMethodsConfig: JSON.stringify(
           Object.entries(methodsEnabled).map(([id, enabled]) => ({ id, enabled }))
         ),
@@ -517,6 +525,43 @@ export default function OdemeAyarlariPage() {
                     </span>
                   </div>
                 ))}
+              </div>
+
+              {/* Stok Kontrol Kuralları */}
+              <div className="p-5 border border-slate-200 rounded-2xl bg-white space-y-4 shadow-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                      Sıfır Stoklu Ürün Satışını Engelle
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                      Aktif olduğunda stoğu 0 olan ürünlerde "Sepete Ekle" butonu otomatik olarak devre dışı kalır ve sipariş verilmesi engellenir.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGeneral(p => ({ ...p, preventZeroStockSale: !p.preventZeroStockSale }))}
+                    className={`p-1 rounded-full transition-all shrink-0 ${general.preventZeroStockSale ? "text-orange-500" : "text-slate-300"}`}
+                  >
+                    {general.preventZeroStockSale ? <ToggleRight className="w-9 h-9" /> : <ToggleLeft className="w-9 h-9" />}
+                  </button>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest">Kritik Stok Uyarı Eşiği (Adet)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={general.defaultCriticalStockLimit}
+                      onChange={e => setGeneral(p => ({ ...p, defaultCriticalStockLimit: parseInt(e.target.value) || 5 }))}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-orange-400 focus:bg-white transition"
+                    />
+                    <p className="text-[11px] text-slate-400">Bu stok adedinin altındaki ürünler kokpitte uyarı olarak gösterilir.</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}

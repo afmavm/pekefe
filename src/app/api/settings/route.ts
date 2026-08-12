@@ -58,8 +58,18 @@ export async function GET() {
 
     return NextResponse.json(row);
   } catch (error) {
-    console.error('Error fetching CMS settings:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.warn('[API SETTINGS WARNING] Veritabanı erişimi yok, varsayılan site ayarları sunuluyor:', error);
+    return NextResponse.json({
+      id: 'singleton',
+      siteName: 'PEKEFE Geleneksel & Doğal Lezzetler',
+      announcement: '🔥 5000 TL ve Üzeri Alışverişlerde Kargo Ücretsiz!',
+      announcement2: '🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları',
+      contactPhone: '+90 532 000 00 00',
+      contactEmail: 'info@pekefe.com',
+      announcementActive: true,
+      maintenanceMode: false,
+      logoUrl: '/logo.png',
+    });
   }
 }
 

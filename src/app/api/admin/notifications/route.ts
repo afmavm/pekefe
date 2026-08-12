@@ -26,8 +26,11 @@ export async function GET(request: NextRequest) {
       unreadCount
     });
   } catch (error: any) {
-    console.error("GET Admin Notifications Error:", error);
-    return NextResponse.json({ error: error.message || "Bildirimler alınamadı." }, { status: 500 });
+    console.warn("GET Admin Notifications Warning (DB unreachable, returning empty list):", error);
+    return NextResponse.json({
+      notifications: [],
+      unreadCount: 0
+    });
   }
 }
 

@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     }));
     return NextResponse.json(formattedPages);
   } catch (error) {
-    console.error('Error fetching CMS pages:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.warn('[API CMS PAGES WARNING] Veritabanı erişimi yok, varsayılan sayfa listesi sunuluyor:', error);
+    return NextResponse.json([]);
   }
 }
 

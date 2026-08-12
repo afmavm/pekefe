@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { withRateLimit } from '@/lib/rate-limit';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
-import { DEFAULT_PRODUCTS } from '@/utils/productsStorage';
+import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 
 export const dynamic = 'force-dynamic';
 
@@ -382,7 +382,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(transformedProducts);
   } catch (error) {
     console.warn('[API PRODUCTS WARNING] Veritabanı erişimi yok, varsayılan ürün kataloğu sunuluyor:', error);
-    return NextResponse.json(DEFAULT_PRODUCTS);
+    return NextResponse.json(FALLBACK_PRODUCTS);
   }
 }
 

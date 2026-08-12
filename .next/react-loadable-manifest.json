@@ -33,11 +33,11 @@
   "app\\admin\\AdminLayoutContent.tsx -> @/modules/cms/super-admin/superActions": {
     "id": 11,
     "files": [
-      "static/chunks/11.8724fb629251e61c.js"
+      "static/chunks/11.123d4a7285fac83f.js"
     ]
   },
   "app\\admin\\orders\\[type]\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
-    "id": 17578,
+    "id": 37531,
     "files": [
       "static/chunks/164f4fb6-65fb7b51181b1996.js",
       "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
@@ -46,7 +46,7 @@
       "static/chunks/4233-0e26f2761d4498e2.js",
       "static/chunks/3280-4dc55331dbd8c33b.js",
       "static/chunks/8786.52614967547c978d.js",
-      "static/chunks/1734.48f9fbfc788ba4c9.js"
+      "static/chunks/7372.ba887db0e4e1e578.js"
     ]
   },
   "app\\giris\\page.js -> next-auth/react": {
@@ -56,7 +56,7 @@
   "modules\\cms\\builder\\workspace.tsx -> ./cmsBuilderActions": {
     "id": 46358,
     "files": [
-      "static/chunks/6358.19fc48584762c1d2.js"
+      "static/chunks/6358.67071a91ca5d90ba.js"
     ]
   },
   "utils\\cartStorage.js -> sonner": {

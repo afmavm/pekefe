@@ -3,8 +3,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 import { fetchProductsFromApi } from "@/utils/productsStorage";
@@ -145,15 +143,12 @@ export default function Kategoriler() {
 
   useEffect(() => {
     loadProducts();
-
     const handleUpdated = () => loadProducts();
     window.addEventListener("pekefe_products_updated", handleUpdated);
-
     const handleVisibility = () => {
       if (document.visibilityState === "visible") loadProducts();
     };
     document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
       window.removeEventListener("pekefe_products_updated", handleUpdated);
       document.removeEventListener("visibilitychange", handleVisibility);
@@ -181,8 +176,6 @@ export default function Kategoriler() {
   const [maxPrice, setMaxPrice] = useState(5000);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recommended");
-
-  // Toast States
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
@@ -209,8 +202,6 @@ export default function Kategoriler() {
 
   const filteredProducts = useMemo(() => {
     let result = [...productsWithBust];
-
-    // Category Filter
     if (selectedCategory && selectedCategory !== "all") {
       const sel = trNormalize(selectedCategory);
       result = result.filter(p => {
@@ -219,8 +210,6 @@ export default function Kategoriler() {
         return c1.includes(sel) || sel.includes(c1) || c2.includes(sel) || sel.includes(c2);
       });
     }
-
-    // Search Tokenization Filter (Turkish Normalized)
     if (searchQuery.trim()) {
       const tokens = trNormalize(searchQuery).split(/\s+/).filter(Boolean);
       result = result.filter(p => {
@@ -230,26 +219,16 @@ export default function Kategoriler() {
         return tokens.every(token => searchableText.includes(token));
       });
     }
-
-    // Max Price Filter
     result = result.filter(p => p.numericPrice <= maxPrice);
-
-    // Sorting
     if (sortBy === "price-asc") result.sort((a, b) => a.numericPrice - b.numericPrice);
     if (sortBy === "price-desc") result.sort((a, b) => b.numericPrice - a.numericPrice);
     if (sortBy === "name-asc") result.sort((a, b) => (a.name || "").localeCompare(b.name || "", "tr"));
     if (sortBy === "name-desc") result.sort((a, b) => (b.name || "").localeCompare(a.name || "", "tr"));
-
     return result;
   }, [productsWithBust, selectedCategory, searchQuery, maxPrice, sortBy]);
 
-
-  // Scroll Reveal Animations hook
+  // Scroll Reveal
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.05,
-    };
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -257,222 +236,180 @@ export default function Kategoriler() {
           entry.target.classList.remove("opacity-0", "translate-y-8");
         }
       });
-    }, observerOptions);
-
-    const animatedCards = document.querySelectorAll(".reveal-card");
-    animatedCards.forEach((card) => {
+    }, { threshold: 0.05 });
+    const cards = document.querySelectorAll(".reveal-card");
+    cards.forEach((card) => {
       card.classList.add("transition-all", "duration-700", "opacity-0", "translate-y-8");
       observer.observe(card);
     });
-
-    return () => {
-      animatedCards.forEach((card) => observer.unobserve(card));
-    };
+    return () => { cards.forEach((card) => observer.unobserve(card)); };
   }, [filteredProducts]);
 
+  const BANNER_IMAGES = [
+    { src: "/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg", label: "1. Doğal Hasat" },
+    { src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp", label: "2. Bakır Kazan" },
+    { src: "/uploads/ispir-keten-bezde-pestil-serimi.webp", label: "3. İspir Güneşi" },
+    { src: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp", label: "4. Gurme Mahsul" },
+  ];
+
   return (
-    <div className="relative w-full min-h-screen bg-background text-on-surface overflow-hidden pb-24">
-      {/* Subtle background grain grid */}
-      <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
+    <div className="w-full min-h-screen bg-[#FAF8F5] pb-24">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 space-y-7">
 
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 space-y-12 relative z-10">
-        
-        {/* Premium Visual Category Journey Collage Banner */}
-        <header className="relative w-full min-h-[260px] md:h-[300px] rounded-3xl overflow-hidden shadow-xl flex items-center justify-center border border-outline-variant/20 group">
-          {/* 4-Stage Product Journey Collage Grid */}
-          <div className="absolute inset-0 z-0 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/15">
-            <div className="relative h-full overflow-hidden group/item">
-              <Image
-                alt="1. İspir Dut Hasadı"
-                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
-                src="/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg"
-                fill
-                sizes="25vw"
-                priority
-              />
-              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
-                1. Doğal Hasat
+        {/* ── HERO BANNER ─────────────────────── */}
+        <header className="relative w-full h-[200px] md:h-[250px] rounded-3xl overflow-hidden shadow-lg flex items-center">
+          <div className="absolute inset-0 grid grid-cols-4 z-0">
+            {BANNER_IMAGES.map((img, i) => (
+              <div key={i} className="relative overflow-hidden border-r border-white/10 last:border-0 group/panel">
+                <Image
+                  alt={img.label}
+                  src={img.src}
+                  fill
+                  sizes="25vw"
+                  className="object-cover brightness-75 transition-transform duration-700 group-hover/panel:scale-105"
+                  priority={i < 2}
+                />
+                <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-amber-200 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full opacity-0 group-hover/panel:opacity-100 transition-opacity duration-300">
+                  {img.label}
+                </div>
               </div>
-            </div>
-            <div className="relative h-full overflow-hidden group/item">
-              <Image
-                alt="2. Odun Ateşinde Bakır Kazan"
-                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
-                src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
-                fill
-                sizes="25vw"
-                priority
-              />
-              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
-                2. Meşe Ateşi
-              </div>
-            </div>
-            <div className="relative h-full overflow-hidden group/item">
-              <Image
-                alt="3. Güneşte Keten Bez Serimi"
-                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
-                src="/uploads/ispir-keten-bezde-pestil-serimi.webp"
-                fill
-                sizes="25vw"
-                priority
-              />
-              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
-                3. Doğal Kurutma
-              </div>
-            </div>
-            <div className="relative h-full overflow-hidden group/item">
-              <Image
-                alt="4. Vakumlu Gurme Lezzetler"
-                className="object-cover transition-transform duration-700 group-hover/item:scale-110 filter brightness-[0.80]"
-                src="/uploads/ispir-el-sarimi-pestil-cesitleri.webp"
-                fill
-                sizes="25vw"
-                priority
-              />
-              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-amber-200 tracking-wider uppercase opacity-0 group-hover/item:opacity-100 transition-opacity">
-                4. Gurme Mahsul
-              </div>
-            </div>
+            ))}
           </div>
-
-          {/* Cinematic Overlay & Center Copy */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/50 to-primary/70 z-10"></div>
-          
-          <div className="relative z-20 text-center px-6 py-8 max-w-2xl space-y-3">
-            <span className="inline-flex items-center gap-2 text-secondary-fixed text-[11px] font-semibold tracking-[0.25em] uppercase px-4 py-1.5 bg-white/15 backdrop-blur-md rounded-full border border-white/20 shadow-md">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              PEKEFE BUTİK MAĞAZA · MAHSULÜN SERÜVENİ
+          <div className="absolute inset-0 bg-gradient-to-r from-[#6b1d2f]/85 via-[#6b1d2f]/55 to-[#6b1d2f]/25 z-10" />
+          <div className="relative z-20 px-8 md:px-16 space-y-1.5">
+            <span className="inline-flex items-center gap-1.5 text-amber-200/90 text-[10px] font-bold tracking-[0.2em] uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+              PEKEFE · Mahsulün Serüveni
             </span>
-
-            <h1 className="font-display-lg text-[34px] md:text-[48px] text-white leading-tight font-bold drop-shadow-md">
+            <h1 className="text-white text-[28px] md:text-[38px] font-extrabold leading-tight drop-shadow-md">
               {dynamicCategories.find((c) => c.value === selectedCategory)?.name || "Tüm Ürünler"}
             </h1>
-
-            {/* Journey steps pill bar */}
-            <div className="hidden sm:flex items-center justify-center gap-2 pt-1">
-              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">1. Hasat</span>
-              <span className="text-amber-300 text-xs">→</span>
-              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">2. Bakır Kazan</span>
-              <span className="text-amber-300 text-xs">→</span>
-              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">3. İspir Güneşi</span>
-              <span className="text-amber-300 text-xs">→</span>
-              <span className="text-[10px] text-amber-100 font-mono uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-md border border-white/15">4. Sofra</span>
-            </div>
-            
-            <div className="w-16 h-[1px] bg-secondary mx-auto mt-3 rounded-full"></div>
+            <p className="text-white/65 text-sm hidden md:block">
+              {filteredProducts.length} ürün listeleniyor
+            </p>
           </div>
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-gutter items-start">
-          {/* Sidebar / Filters (Glassmorphic) */}
-          <aside className="w-full lg:w-72 flex-shrink-0 sticky lg:top-24 bg-white rounded-2xl border border-outline-variant/15 p-8 shadow-sm space-y-8">
-            
-            {/* Search Input */}
-            <div className="space-y-3">
-              <h3 className="font-label-md text-primary text-xs uppercase tracking-widest font-bold border-l-2 border-secondary pl-3">
-                Ürün Ara
-              </h3>
-              <Input
-                placeholder="Arama yapın..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        {/* ── MOBİL KATEGORİ ÇUBUĞU ────────────── */}
+        <div className="flex lg:hidden gap-2 overflow-x-auto pb-0.5 -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
+          {dynamicCategories.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => setSelectedCategory(cat.value)}
+              className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap ${
+                selectedCategory === cat.value
+                  ? "bg-[#6b1d2f] text-white border-[#6b1d2f] shadow-sm"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-[#6b1d2f]/30"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* ── ANA İÇERİK ───────────────────────── */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+          {/* ── SİDEBAR ─────────────────────── */}
+          <aside className="hidden lg:flex w-56 xl:w-60 flex-shrink-0 sticky top-24 flex-col gap-4">
+
+            {/* Arama */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2.5">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ürün Ara</p>
+              <div className="relative">
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px]">search</span>
+                <input
+                  placeholder="Ürün ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6b1d2f]/50 focus:bg-white transition"
+                />
+              </div>
             </div>
 
-            {/* Categories */}
-            <div className="space-y-3">
-              <h3 className="font-label-md text-primary text-xs uppercase tracking-widest font-bold border-l-2 border-secondary pl-3">
-                Kategoriler
-              </h3>
-              <div className="flex flex-col gap-2">
+            {/* Kategoriler */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Kategoriler</p>
+              <div className="flex flex-col gap-1">
                 {dynamicCategories.map((cat) => (
                   <button
                     key={cat.value}
                     onClick={() => setSelectedCategory(cat.value)}
-                    className={`text-left py-2 px-3 rounded-lg text-xs font-body-md transition-colors cursor-pointer flex justify-between items-center ${
+                    className={`w-full text-left flex items-center justify-between py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       selectedCategory === cat.value
-                        ? "bg-primary/5 text-primary font-bold"
-                        : "text-on-surface-variant hover:bg-surface-container-low"
+                        ? "bg-[#6b1d2f] text-white shadow-sm shadow-[#6b1d2f]/15"
+                        : "text-slate-600 hover:bg-[#6b1d2f]/5 hover:text-[#6b1d2f]"
                     }`}
                   >
                     <span>{cat.name}</span>
                     {selectedCategory === cat.value && (
-                      <span className="material-symbols-outlined text-xs text-primary font-bold">check</span>
+                      <span className="material-symbols-outlined text-[14px] text-white/80">check</span>
                     )}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Price Filter */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-label-md text-primary text-xs uppercase tracking-widest font-bold border-l-2 border-secondary pl-3">
-                  Maksimum Fiyat
-                </h3>
-                <span className="font-mono text-xs font-bold text-primary">{maxPrice} TL</span>
+            {/* Fiyat Filtresi */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Maks. Fiyat</p>
+                <span className="text-xs font-extrabold text-[#6b1d2f] font-mono">₺{maxPrice.toLocaleString("tr-TR")}</span>
               </div>
               <input
-                type="range"
-                min="0"
-                max="5000"
-                step="50"
+                type="range" min="0" max="5000" step="50"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-primary h-1 bg-surface-container rounded-lg appearance-none cursor-pointer"
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#6b1d2f] bg-slate-200"
               />
-              <div className="flex justify-between text-[10px] text-on-surface-variant font-mono">
-                <span>₺0</span>
-                <span>₺5000</span>
+              <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+                <span>₺0</span><span>₺5.000</span>
               </div>
             </div>
 
-            {/* Sorting */}
-            <div className="space-y-3">
-              <h3 className="font-label-md text-primary text-xs uppercase tracking-widest font-bold border-l-2 border-secondary pl-3">
-                Sıralama
-              </h3>
+            <p className="text-center text-[11px] text-slate-400">
+              <span className="font-extrabold text-[#6b1d2f]">{filteredProducts.length}</span> ürün bulundu
+            </p>
+          </aside>
+
+          {/* ── ÜRÜN GRID ────────────────────── */}
+          <main className="flex-grow w-full min-w-0">
+
+            {/* Üst çubuk */}
+            <div className="hidden lg:flex items-center justify-between mb-5">
+              <p className="text-sm text-slate-500">
+                <span className="font-bold text-slate-800">{filteredProducts.length}</span> ürün listeleniyor
+              </p>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white py-3 px-3 rounded-lg border border-outline-variant/30 text-xs font-body-md focus:outline-none focus:ring-1 focus:ring-primary text-on-surface outline-none cursor-pointer"
+                className="bg-white border border-slate-200 text-slate-700 py-2 px-3 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#6b1d2f]/40 transition cursor-pointer shadow-sm"
               >
                 <option value="recommended">Tavsiye Edilen</option>
-                <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
-                <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
-                <option value="name-asc">İsim: A'dan Z'ye</option>
-                <option value="name-desc">İsim: Z'den A'ya</option>
+                <option value="price-asc">Fiyat: Düşük → Yüksek</option>
+                <option value="price-desc">Fiyat: Yüksek → Düşük</option>
+                <option value="name-asc">İsim: A → Z</option>
+                <option value="name-desc">İsim: Z → A</option>
               </select>
             </div>
 
-          </aside>
-
-          {/* Product Grid List (Asymmetrical Grid) */}
-          <main className="flex-grow w-full">
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-2xl border border-outline-variant/15 shadow-sm space-y-4">
-                <span className="material-symbols-outlined text-outline text-5xl">search_off</span>
-                <h3 className="font-display-lg text-primary text-lg font-bold">Eşleşen Mahsul Bulunamadı</h3>
-                <p className="text-xs text-on-surface-variant font-light max-w-sm mx-auto">
-                  Arama kriterlerinizi genişletebilir veya diğer ürün kategorilerimizi inceleyebilirsiniz.
+              <div className="text-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <span className="material-symbols-outlined text-slate-300 text-6xl">search_off</span>
+                <h3 className="text-lg font-bold text-slate-700">Eşleşen Mahsul Bulunamadı</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  Filtrelerinizi değiştirerek veya aramayı genişleterek tekrar deneyin.
                 </p>
-                <Button
-                  onClick={() => {
-                    setSelectedCategory("all");
-                    setSearchQuery("");
-                    setMaxPrice(5000);
-                    setSortBy("recommended");
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 cursor-pointer"
+                <button
+                  onClick={() => { setSelectedCategory("all"); setSearchQuery(""); setMaxPrice(5000); setSortBy("recommended"); }}
+                  className="mt-2 px-5 py-2.5 border border-[#6b1d2f] text-[#6b1d2f] rounded-xl text-xs font-bold hover:bg-[#6b1d2f] hover:text-white transition cursor-pointer"
                 >
                   Filtreleri Temizle
-                </Button>
+                </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-12">
-                {filteredProducts.map((p, idx) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {filteredProducts.map((p) => (
                   <div key={p.id} className="reveal-card">
                     <ProductCard
                       id={p.id}
@@ -502,7 +439,6 @@ export default function Kategoriler() {
                         addToCart(itemToAdd);
                         handleAddToCart(itemToAdd.name);
                       }}
-                      className={idx % 2 === 1 ? "lg:flex-row-reverse" : ""}
                     />
                   </div>
                 ))}
@@ -512,13 +448,7 @@ export default function Kategoriler() {
         </div>
       </div>
 
-      {/* Toast Notification */}
-      <Toast
-        message={toastMsg}
-        isOpen={toastOpen}
-        onClose={() => setToastOpen(false)}
-      />
+      <Toast message={toastMsg} isOpen={toastOpen} onClose={() => setToastOpen(false)} />
     </div>
   );
 }
-

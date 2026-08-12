@@ -456,6 +456,69 @@ export default function CargoPage() {
   };
 
   // Fetch carriers from CMS Data
+  const DEFAULT_EXAMPLE_CARRIERS: Carrier[] = [
+    {
+      id: "yurtici",
+      name: "Yurtiçi Kargo",
+      logoUrl: "/logos/yurtici.svg",
+      pricingType: "tiered",
+      isActive: true,
+      addShippingCosts: true,
+      isFreeShipping: false,
+      freeThreshold: 5000,
+      taxRate: 20,
+      billingMethod: "weight",
+      fallbackFee: 150,
+      outOfRangeBehavior: "highest",
+      tiers: [
+        { minDesi: 0, maxDesi: 5, price: 90 },
+        { minDesi: 5.01, maxDesi: 15, price: 130 },
+        { minDesi: 15.01, maxDesi: 30, price: 180 },
+        { minDesi: 30.01, maxDesi: 60, price: 280 }
+      ]
+    },
+    {
+      id: "aras",
+      name: "Aras Kargo",
+      logoUrl: "/logos/aras.svg",
+      pricingType: "tiered",
+      isActive: true,
+      addShippingCosts: true,
+      isFreeShipping: false,
+      freeThreshold: 5000,
+      taxRate: 20,
+      billingMethod: "weight",
+      fallbackFee: 140,
+      outOfRangeBehavior: "highest",
+      tiers: [
+        { minDesi: 0, maxDesi: 5, price: 85 },
+        { minDesi: 5.01, maxDesi: 15, price: 120 },
+        { minDesi: 15.01, maxDesi: 30, price: 170 },
+        { minDesi: 30.01, maxDesi: 60, price: 260 }
+      ]
+    },
+    {
+      id: "mng",
+      name: "MNG Kargo",
+      logoUrl: "/logos/mng.svg",
+      pricingType: "tiered",
+      isActive: true,
+      addShippingCosts: true,
+      isFreeShipping: false,
+      freeThreshold: 4000,
+      taxRate: 20,
+      billingMethod: "weight",
+      fallbackFee: 130,
+      outOfRangeBehavior: "highest",
+      tiers: [
+        { minDesi: 0, maxDesi: 5, price: 80 },
+        { minDesi: 5.01, maxDesi: 15, price: 115 },
+        { minDesi: 15.01, maxDesi: 30, price: 160 },
+        { minDesi: 30.01, maxDesi: 60, price: 240 }
+      ]
+    }
+  ];
+
   const fetchCarriers = async () => {
     setLoadingCarriers(true);
     try {
@@ -467,9 +530,13 @@ export default function CargoPage() {
           const parsed = typeof data.shippingCarriers === "string"
             ? JSON.parse(data.shippingCarriers)
             : data.shippingCarriers;
-          setCarriers(Array.isArray(parsed) ? parsed : []);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCarriers(parsed);
+          } else {
+            handleSaveCarriersList(DEFAULT_EXAMPLE_CARRIERS);
+          }
         } else {
-          setCarriers([]);
+          handleSaveCarriersList(DEFAULT_EXAMPLE_CARRIERS);
         }
       }
     } catch (err) {
@@ -482,20 +549,7 @@ export default function CargoPage() {
 
   // Load initial settings
   useEffect(() => {
-    fetch("/api/settings")
-      .then(res => res.json())
-      .then(data => {
-        if (data && !data.error) {
-          setSettings(data);
-          if (data.shippingCarriers) {
-            const parsed = typeof data.shippingCarriers === "string"
-              ? JSON.parse(data.shippingCarriers)
-              : data.shippingCarriers;
-            setCarriers(Array.isArray(parsed) ? parsed : []);
-          }
-        }
-      })
-      .catch(err => console.error("Error loading settings:", err));
+    fetchCarriers();
   }, []);
 
   useEffect(() => {

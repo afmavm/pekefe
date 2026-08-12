@@ -56,6 +56,14 @@ export async function GET() {
     row.companyCheckCurrentVkn = !!row.companyCheckCurrentVkn;
     row.cashOnDeliveryEnabled = !!row.cashOnDeliveryEnabled;
 
+    if (row && (!row.shippingCarriers || row.shippingCarriers === "[]")) {
+      row.shippingCarriers = JSON.stringify([
+        { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 150, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 90 }, { minDesi: 5.01, maxDesi: 15, price: 130 }, { minDesi: 15.01, maxDesi: 30, price: 180 }, { minDesi: 30.01, maxDesi: 60, price: 280 }] },
+        { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 140, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 85 }, { minDesi: 5.01, maxDesi: 15, price: 120 }, { minDesi: 15.01, maxDesi: 30, price: 170 }, { minDesi: 30.01, maxDesi: 60, price: 260 }] },
+        { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 4000, taxRate: 20, billingMethod: "weight", fallbackFee: 130, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 80 }, { minDesi: 5.01, maxDesi: 15, price: 115 }, { minDesi: 15.01, maxDesi: 30, price: 160 }, { minDesi: 30.01, maxDesi: 60, price: 240 }] }
+      ]);
+    }
+
     return NextResponse.json(row);
   } catch (error) {
     console.warn('[API SETTINGS WARNING] Veritabanı erişimi yok, varsayılan site ayarları sunuluyor:', error);
@@ -69,6 +77,11 @@ export async function GET() {
       announcementActive: true,
       maintenanceMode: false,
       logoUrl: '/logo.png',
+      shippingCarriers: JSON.stringify([
+        { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 150, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 90 }, { minDesi: 5.01, maxDesi: 15, price: 130 }, { minDesi: 15.01, maxDesi: 30, price: 180 }, { minDesi: 30.01, maxDesi: 60, price: 280 }] },
+        { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 140, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 85 }, { minDesi: 5.01, maxDesi: 15, price: 120 }, { minDesi: 15.01, maxDesi: 30, price: 170 }, { minDesi: 30.01, maxDesi: 60, price: 260 }] },
+        { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 4000, taxRate: 20, billingMethod: "weight", fallbackFee: 130, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 80 }, { minDesi: 5.01, maxDesi: 15, price: 115 }, { minDesi: 15.01, maxDesi: 30, price: 160 }, { minDesi: 30.01, maxDesi: 60, price: 240 }] }
+      ])
     });
   }
 }

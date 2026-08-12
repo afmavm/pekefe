@@ -88,7 +88,9 @@ export const GET = withAuth<any>(
           amount: Number(order.total),
           shippingFee: Number(order.shippingFee || 0),
           method: order.method || "Belirtilmedi",
-          date: order.date ? new Date(order.date).toISOString() : new Date().toISOString(),
+          date: order.date
+            ? new Date(order.date).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
           createdAt: order.date ? new Date(order.date).toISOString() : new Date().toISOString(),
           formattedDate: order.date ? new Date(order.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : "",
           status: order.status,

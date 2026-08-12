@@ -1058,7 +1058,16 @@ export default function CargoPage() {
                               </div>
                             </td>
                             <td className="p-4 text-slate-500 text-xs">
-                              {order.date || "—"}
+                              {(() => {
+                                if (!order.date) return "—";
+                                try {
+                                  const d = new Date(order.date);
+                                  if (isNaN(d.getTime())) return String(order.date);
+                                  return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                                } catch {
+                                  return String(order.date);
+                                }
+                              })()}
                             </td>
                             <td className="p-4">
                               <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${st.cls}`}>

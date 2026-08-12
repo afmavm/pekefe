@@ -1641,7 +1641,18 @@ export default function OrderCommandCenter() {
                           {visibleColumns.orderNumber && (
                             <td className="p-4">
                               <p className="font-bold text-slate-900 text-sm">#{order.orderNumber}</p>
-                              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{order.date}</p>
+                              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                                {(() => {
+                                  if (!order.date) return "—";
+                                  try {
+                                    const d = new Date(order.date);
+                                    if (isNaN(d.getTime())) return String(order.date);
+                                    return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                                  } catch {
+                                    return String(order.date);
+                                  }
+                                })()}
+                              </p>
                             </td>
                           )}
                           {visibleColumns.client && (

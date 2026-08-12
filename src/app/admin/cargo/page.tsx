@@ -1485,46 +1485,61 @@ export default function CargoPage() {
 
             <form onSubmit={handleCarrierSubmit} className="p-6 space-y-5 overflow-y-auto flex-1 text-gray-900 bg-white">
               {/* Logo Selection Section */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">Firma Logosu & Görseli</label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-bold text-slate-500 mr-1">Hazır Marka Logoları:</span>
-                  {[
-                    { name: "Yurtiçi Kargo", logo: "/logos/yurtici.svg" },
-                    { name: "Aras Kargo", logo: "/logos/aras.svg" },
-                    { name: "MNG Kargo", logo: "/logos/mng.svg" },
-                    { name: "PTT Kargo", logo: "/logos/ptt.svg" },
-                    { name: "Sürat Kargo", logo: "/logos/surat.svg" },
-                    { name: "HepsiJET", logo: "/logos/hepsijet.svg" }
-                  ].map((brand) => (
-                    <button
-                      key={brand.name}
-                      type="button"
-                      onClick={() => setCarrierForm({ ...carrierForm, logoUrl: brand.logo, name: carrierForm.name || brand.name })}
-                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                        carrierForm.logoUrl === brand.logo
-                          ? "border-orange-500 bg-orange-50 text-orange-700 shadow-sm"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                      }`}
-                    >
-                      <img src={brand.logo} alt={brand.name} className="h-4 object-contain" />
-                      <span>{brand.name}</span>
-                    </button>
-                  ))}
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-orange-100 flex items-center justify-center text-orange-600 text-[10px]">🖼</span>
+                  Firma Logosu &amp; Görseli
+                </label>
+
+                {/* Preset brand logos */}
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hazır Marka Logoları</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {[
+                      { name: "Yurtiçi Kargo", logo: "/logos/yurtici.svg" },
+                      { name: "Aras Kargo", logo: "/logos/aras.svg" },
+                      { name: "MNG Kargo", logo: "/logos/mng.svg" },
+                      { name: "PTT Kargo", logo: "/logos/ptt.svg" },
+                      { name: "Sürat Kargo", logo: "/logos/surat.svg" },
+                      { name: "HepsiJET", logo: "/logos/hepsijet.svg" }
+                    ].map((brand) => (
+                      <button
+                        key={brand.name}
+                        type="button"
+                        title={brand.name}
+                        onClick={() => setCarrierForm({ ...carrierForm, logoUrl: brand.logo, name: carrierForm.name || brand.name })}
+                        className={`relative flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer group ${
+                          carrierForm.logoUrl === brand.logo
+                            ? "border-orange-500 bg-orange-50 shadow-md shadow-orange-500/10"
+                            : "border-slate-200 bg-white hover:border-orange-300 hover:shadow-sm"
+                        }`}
+                      >
+                        <div className="w-full h-8 flex items-center justify-center bg-white rounded-lg p-1">
+                          <img src={brand.logo} alt={brand.name} className="h-full max-w-full object-contain" />
+                        </div>
+                        <span className={`text-[9px] font-bold leading-tight text-center truncate w-full ${carrierForm.logoUrl === brand.logo ? "text-orange-600" : "text-slate-500"}`}>
+                          {brand.name.replace(" Kargo", "").replace("çi", "çi")}
+                        </span>
+                        {carrierForm.logoUrl === brand.logo && (
+                          <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-[8px] font-black">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1 items-center">
-                  <div className="sm:col-span-6">
+                {/* URL input + Upload button + Preview */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Özel Logo URL&apos;si veya Dosyadan Yükle</p>
+                  <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      placeholder="Görsel URL veya hazır logo seçin (Örn: /logos/yurtici.svg)"
+                      placeholder="/uploads/logo.png veya https://..."
                       value={carrierForm.logoUrl || ""}
                       onChange={(e) => setCarrierForm({ ...carrierForm, logoUrl: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono text-gray-900 focus:outline-none focus:border-orange-500"
+                      className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-gray-900 focus:outline-none focus:border-orange-400 focus:bg-white transition"
                     />
-                  </div>
-                  <div className="sm:col-span-6 flex items-center gap-2">
-                    <label className="flex-1">
+                    <label className="shrink-0">
                       <input
                         type="file"
                         accept="image/*"
@@ -1532,28 +1547,44 @@ export default function CargoPage() {
                         className="hidden"
                         disabled={uploadingLogo}
                       />
-                      <div className={`px-3 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${uploadingLogo ? "opacity-70 cursor-not-allowed" : ""}`}>
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{uploadingLogo ? "Yükleniyor..." : "Cihazdan Logo Yükle"}</span>
+                       <div className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap shadow-sm ${
+                        uploadingLogo
+                          ? "bg-orange-300 cursor-not-allowed text-white"
+                          : "bg-orange-500 hover:bg-orange-600 text-white"
+                      }`}>
+                        <Upload className="w-3.5 h-3.5 shrink-0" />
+                        <span>{uploadingLogo ? "Yükleniyor..." : "Cihazdan Yükle"}</span>
                       </div>
                     </label>
-
-                    {carrierForm.logoUrl ? (
-                      <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm shrink-0">
-                        <img src={carrierForm.logoUrl} alt="Logo Önizleme" className="h-7 max-w-[80px] object-contain" />
-                        <button
-                          type="button"
-                          onClick={() => setCarrierForm({ ...carrierForm, logoUrl: "" })}
-                          className="text-xs font-bold text-red-500 hover:text-red-700 ml-0.5 cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-slate-400 font-medium shrink-0">Logo Seçilmedi</span>
-                    )}
                   </div>
                 </div>
+
+                {/* Live Preview */}
+                {carrierForm.logoUrl ? (
+                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <div className="w-24 h-12 bg-white rounded-lg border border-slate-100 flex items-center justify-center p-2 shadow-sm shrink-0">
+                      <img src={carrierForm.logoUrl} alt="Logo Önizleme" className="max-w-full max-h-full object-contain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Canlı Önizleme</p>
+                      <p className="text-xs text-slate-700 font-mono truncate mt-0.5">{carrierForm.logoUrl}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCarrierForm({ ...carrierForm, logoUrl: "" })}
+                      className="w-7 h-7 rounded-full bg-red-50 border border-red-100 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center text-sm font-bold transition shrink-0 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-3">
+                    <div className="w-24 h-12 bg-white rounded-lg border border-slate-100 flex items-center justify-center text-slate-300">
+                      <span className="text-2xl">🖼</span>
+                    </div>
+                    <p className="text-xs text-slate-400">Yukarıdan hazır logo seçin ya da dosyanızı yükleyin</p>
+                  </div>
+                )}
               </div>
 
               {/* Fiyatlandırma Türü Seçim Kartları */}

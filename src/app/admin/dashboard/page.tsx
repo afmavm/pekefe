@@ -37,7 +37,7 @@ async function getInitialDashboardData() {
     ] = await Promise.all([
       prisma.order.count({ 
         where: { date: { gte: startOfMonth }, isDeleted: false } 
-      }),
+      }).catch(() => 0),
       prisma.order.count({ 
         where: { 
           date: { 
@@ -46,7 +46,7 @@ async function getInitialDashboardData() {
           }, 
           isDeleted: false 
         } 
-      }),
+      }).catch(() => 0),
       prisma.product.findMany({
         where: { isDeleted: false },
         select: {
@@ -60,29 +60,29 @@ async function getInitialDashboardData() {
           },
           price: true
         }
-      }),
+      }).catch(() => []),
       prisma.stockLocation.findMany({
         include: { product: true, warehouse: true }
-      }),
+      }).catch(() => []),
       prisma.warehouse.findMany({
         include: { locations: { include: { product: true } } }
-      }),
+      }).catch(() => []),
       prisma.stockTransaction.findMany({
         take: 10,
         orderBy: { date: 'desc' },
         include: { product: true, warehouse: true }
-      }),
-      prisma.invoiceItem.findMany({}),
+      }).catch(() => []),
+      prisma.invoiceItem.findMany({}).catch(() => []),
       prisma.stockTransaction.findMany({
         where: { quantity: { lt: 0 } },
         include: { product: true }
-      }),
+      }).catch(() => []),
       prisma.order.findMany({
         where: { isDeleted: false },
         take: 8,
         orderBy: { date: 'desc' },
         include: { currentAccount: true }
-      }),
+      }).catch(() => []),
       prisma.currentAccount.aggregate({
         where: {
           OR: [
@@ -93,7 +93,7 @@ async function getInitialDashboardData() {
           isDeleted: false
         },
         _sum: { balance: true }
-      }),
+      }).catch(() => ({ _sum: { balance: null } })),
       prisma.currentAccount.aggregate({
         where: {
           OR: [
@@ -104,13 +104,13 @@ async function getInitialDashboardData() {
           isDeleted: false
         },
         _sum: { balance: true }
-      }),
+      }).catch(() => ({ _sum: { balance: null } })),
       prisma.order.findMany({
         where: { date: { gte: startOfMonth }, isDeleted: false }
-      }),
+      }).catch(() => []),
       prisma.order.findMany({
         where: { date: { gte: sixMonthsAgo }, isDeleted: false }
-      })
+      }).catch(() => [])
     ]);
 
     // Financial calculations (Gold Standard 1)
@@ -362,13 +362,18 @@ export default async function AdminDashboardPage() {
   const host = headersList.get("host") || "pekefe.com";
   const domain = host.split(":")[0];
 
-  const [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([
-    prisma.product.count({ where: { isDeleted: false } }),
-    prisma.order.count({ where: { date: { gte: new Date(new Date().setHours(0,0,0,0)) }, isDeleted: false } }),
-    prisma.currentAccount.count({ where: { type: "MUSTERI", isActive: true, isDeleted: false } }),
-    prisma.cMSPage.count({ where: { status: "published" } }),
-    prisma.cMSData.findFirst({ where: { id: "singleton" } })
-  ]);
+  let productCount = 0, todayOrders = 0, dealerCount = 0, pageCount = 0, cmsData: any = null;
+  try {
+    [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([
+      prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),
+      prisma.order.count({ where: { date: { gte: new Date(new Date().setHours(0,0,0,0)) }, isDeleted: false } }).catch(() => 0),
+      prisma.currentAccount.count({ where: { type: "MUSTERI", isActive: true, isDeleted: false } }).catch(() => 0),
+      prisma.cMSPage.count({ where: { status: "published" } }).catch(() => 0),
+      prisma.cMSData.findFirst({ where: { id: "singleton" } }).catch(() => null)
+    ]);
+  } catch (e) {
+    console.error("AdminDashboardPage error:", e);
+  }
 
   const siteName = cmsData?.siteName || "Pekefe";
 

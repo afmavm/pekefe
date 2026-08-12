@@ -519,29 +519,36 @@ export default function CargoPage() {
     }
   ];
 
+  const parseCarriers = (raw: any): Carrier[] => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === "string") {
+      try {
+        const p = JSON.parse(raw);
+        return Array.isArray(p) ? p : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
   const fetchCarriers = async () => {
     setLoadingCarriers(true);
     try {
       const res = await fetch("/api/settings", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        setSettings(data);
-        if (data?.shippingCarriers) {
-          const parsed = typeof data.shippingCarriers === "string"
-            ? JSON.parse(data.shippingCarriers)
-            : data.shippingCarriers;
-          if (Array.isArray(parsed) && parsed.length > 0) {
+        if (data && !data.error) {
+          setSettings(data);
+          const parsed = parseCarriers(data.shippingCarriers);
+          if (parsed.length > 0) {
             setCarriers(parsed);
-          } else {
-            handleSaveCarriersList(DEFAULT_EXAMPLE_CARRIERS);
           }
-        } else {
-          handleSaveCarriersList(DEFAULT_EXAMPLE_CARRIERS);
         }
       }
     } catch (err) {
       console.error("Error fetching carriers settings:", err);
-      toast.error("Kargo ayarları yüklenemedi.");
     } finally {
       setLoadingCarriers(false);
     }
@@ -558,7 +565,7 @@ export default function CargoPage() {
     } else {
       fetchCarriers();
     }
-  }, [statusFilter, activeTab]);
+  }, [activeTab]);
 
   // Save single cargo assignments
   const handleSaveCargo = async (orderId: string) => {
@@ -588,9 +595,11 @@ export default function CargoPage() {
   const handleSaveCarriersList = async (updatedCarriers: Carrier[]) => {
     setSavingCarriers(true);
     try {
-      const currentSettings = settings || { id: "singleton" };
+      const currentSettings = settings || {};
       const updatedSettings = {
         ...currentSettings,
+        id: "singleton",
+        siteName: currentSettings.siteName || "PEKEFE Geleneksel & Doğal Lezzetler",
         shippingCarriers: JSON.stringify(updatedCarriers)
       };
 
@@ -601,13 +610,16 @@ export default function CargoPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         toast.success("Kargo firmaları başarıyla kaydedildi!");
         setCarriers(updatedCarriers);
-        setSettings(updatedSettings);
+        setSettings(data);
       } else {
-        throw new Error();
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData.error || "Kargo ayarları kaydedilirken hata oluştu.");
       }
-    } catch {
+    } catch (err) {
+      console.error("Save carriers list error:", err);
       toast.error("Kargo ayarları kaydedilirken hata oluştu.");
     } finally {
       setSavingCarriers(false);

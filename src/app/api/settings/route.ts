@@ -2,7 +2,36 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 
+import fs from 'fs';
+import path from 'path';
+
 export const dynamic = 'force-dynamic';
+
+const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'public', 'data', 'cms_settings_fallback.json');
+
+function readLocalSettingsFallback() {
+  try {
+    if (fs.existsSync(LOCAL_STORAGE_PATH)) {
+      const raw = fs.readFileSync(LOCAL_STORAGE_PATH, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error('Error reading local settings fallback file:', err);
+  }
+  return null;
+}
+
+function writeLocalSettingsFallback(data: any) {
+  try {
+    const dir = path.dirname(LOCAL_STORAGE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error writing local settings fallback file:', err);
+  }
+}
 
 async function ensureCMSDataColumnsExist() {
   const alterQueries = [
@@ -16,7 +45,6 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN preventZeroStockSale TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5",
     "ALTER TABLE CMSData ADD COLUMN topBarItems LONGTEXT NULL"
-
   ];
 
   for (const q of alterQueries) {
@@ -28,6 +56,8 @@ async function ensureCMSDataColumnsExist() {
   }
 }
 
+let MEMORY_SETTINGS: any = null;
+
 export async function GET() {
   try {
     // Always ensure new columns exist in MySQL before any Prisma operation
@@ -37,8 +67,11 @@ export async function GET() {
       where: { id: 'singleton' }
     });
 
-    if (!row) return NextResponse.json(null);
-
+    if (!row) {
+      const localData = readLocalSettingsFallback() || MEMORY_SETTINGS;
+      if (localData) return NextResponse.json(localData);
+      return NextResponse.json(null);
+    }
 
     // Convert boolean values to actual booleans
     row.maintenanceMode = !!row.maintenanceMode;
@@ -64,10 +97,22 @@ export async function GET() {
       ]);
     }
 
+    // If disk fallback has shippingCarriers and DB doesn't reflect the latest save (e.g. DB auth failed during last PUT),
+    // merge shippingCarriers from disk so changes are never lost
+    const diskData = readLocalSettingsFallback();
+    if (diskData?.shippingCarriers && diskData.shippingCarriers !== row.shippingCarriers) {
+      // Disk is more recent — use disk value for shippingCarriers
+      row.shippingCarriers = diskData.shippingCarriers;
+    }
+
+    MEMORY_SETTINGS = row;
     return NextResponse.json(row);
   } catch (error) {
-    console.warn('[API SETTINGS WARNING] Veritabanı erişimi yok, varsayılan site ayarları sunuluyor:', error);
-    return NextResponse.json({
+    console.warn('[API SETTINGS WARNING] Veritabanı erişimi yok, yerel disk ayarları sunuluyor:', error);
+    const localData = readLocalSettingsFallback() || MEMORY_SETTINGS;
+    if (localData) return NextResponse.json(localData);
+
+    const defaultFallback = {
       id: 'singleton',
       siteName: 'PEKEFE Geleneksel & Doğal Lezzetler',
       announcement: '🔥 5000 TL ve Üzeri Alışverişlerde Kargo Ücretsiz!',
@@ -82,7 +127,9 @@ export async function GET() {
         { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 140, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 85 }, { minDesi: 5.01, maxDesi: 15, price: 120 }, { minDesi: 15.01, maxDesi: 30, price: 170 }, { minDesi: 30.01, maxDesi: 60, price: 260 }] },
         { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 4000, taxRate: 20, billingMethod: "weight", fallbackFee: 130, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 80 }, { minDesi: 5.01, maxDesi: 15, price: 115 }, { minDesi: 15.01, maxDesi: 30, price: 160 }, { minDesi: 30.01, maxDesi: 60, price: 240 }] }
       ])
-    });
+    };
+    writeLocalSettingsFallback(defaultFallback);
+    return NextResponse.json(defaultFallback);
   }
 }
 
@@ -93,14 +140,8 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
 
-    // Always ensure new columns exist in MySQL before any Prisma operation
-    await ensureCMSDataColumnsExist();
-
-    // ─── SERVER-SIDE SETTINGS VALIDATION ────────────────────────────────────
-    if (body.siteName !== undefined) {
-      if (!body.siteName || typeof body.siteName !== "string" || !body.siteName.trim()) {
-        return NextResponse.json({ error: "Site adı boş bırakılamaz." }, { status: 400 });
-      }
+    // ─── SERVER-SIDE SETTINGS VALIDATION (SAFE FALLBACKS) ───────────────────
+    if (body.siteName !== undefined && body.siteName !== null && typeof body.siteName === "string") {
       if (body.siteName.length > 80) {
         return NextResponse.json({ error: "Site adı en fazla 80 karakter olmalıdır." }, { status: 400 });
       }
@@ -130,6 +171,22 @@ export async function PUT(request: Request) {
       if (body.contactAddress.length < 10) {
         return NextResponse.json({ error: "Adres en az 10 karakter olmalıdır." }, { status: 400 });
       }
+    }
+
+    // Always ensure new columns exist in MySQL before any Prisma operation
+    await ensureCMSDataColumnsExist();
+
+    // ─── DISK-FIRST PERSISTENCE for shippingCarriers ─────────────────────────
+    // Write carrier updates to disk immediately so they survive DB auth failures.
+    if (body.shippingCarriers !== undefined) {
+      const existing = readLocalSettingsFallback() || {};
+      writeLocalSettingsFallback({
+        ...existing,
+        id: 'singleton',
+        shippingCarriers: typeof body.shippingCarriers === 'string'
+          ? body.shippingCarriers
+          : JSON.stringify(body.shippingCarriers)
+      });
     }
 
     const existing = await prisma.cMSData.findUnique({
@@ -315,10 +372,15 @@ export async function PUT(request: Request) {
       saved.companyCheckCurrentVkn = !!saved.companyCheckCurrentVkn;
       saved.cashOnDeliveryEnabled = !!saved.cashOnDeliveryEnabled;
 
+      MEMORY_SETTINGS = { id: 'singleton', ...saved };
+      writeLocalSettingsFallback(MEMORY_SETTINGS);
       return NextResponse.json(saved);
     } catch (dbErr) {
-      console.warn('[API SETTINGS WARNING] Veritabanına yazılamadı, yerel ayar nesnesi sunuluyor:', dbErr);
-      return NextResponse.json({ id: 'singleton', ...data }, { status: 200 });
+      console.warn('[API SETTINGS WARNING] Veritabanına yazılamadı, yerel dosyaya kaydediliyor:', dbErr);
+      const fallback = { id: 'singleton', ...data };
+      MEMORY_SETTINGS = fallback;
+      writeLocalSettingsFallback(fallback);
+      return NextResponse.json(fallback, { status: 200 });
     }
   } catch (error: any) {
     console.warn('CRITICAL ERROR UPDATING CMS SETTINGS (FALLBACK RETURNED):', error);

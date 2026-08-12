@@ -11,16 +11,23 @@ function getVariantLabel(v) {
   if (typeof attrs === "string") {
     try { attrs = JSON.parse(attrs); } catch (e) {}
   }
+  let label = "";
   if (attrs && typeof attrs === "object") {
     const size  = (attrs.size  || "").trim();
     const color = (attrs.color || "").trim();
-    // If only one field exists, show it alone; if both exist combine with bullet
-    if (size && color && size !== color) return `${size} · ${color}`;
-    if (size)  return size;
-    if (color) return color;
-    return attrs.name || v.name || v.size || "";
+    if (size && color && size !== color) label = `${size} · ${color}`;
+    else if (size)  label = size;
+    else if (color) label = color;
+    else label = attrs.name || v.name || v.size || "";
+  } else {
+    label = v.size || v.name || "";
   }
-  return v.size || v.name || "";
+
+  // Clean leading dashes, currency symbols or price suffixes embedded in string
+  return String(label)
+    .replace(/^[\s\-–—]+/, "")
+    .replace(/-\s*₺\d+/gi, "")
+    .trim();
 }
 
 function stripHtmlTags(str) {
@@ -84,51 +91,62 @@ export function ProductCard({
   const isOutOfStock = stock === 0;
 
   return (
-    <div className={`flex flex-col md:flex-row gap-5 md:gap-8 items-start md:items-center bg-surface-container-lowest/80 md:bg-transparent rounded-2xl md:rounded-none p-4 md:p-0 border border-outline-variant/15 md:border-0 md:border-b border-outline-variant/10 pb-6 md:pb-12 shadow-sm md:shadow-none transition-all ${className}`}>
-      {/* Image Frame - Luxury Editorial Full-Bleed Presentation */}
-      <div className="w-full md:w-1/2 aspect-square bg-surface-container-low rounded-xl md:rounded-2xl overflow-hidden border border-outline-variant/15 relative group shadow-sm hover:shadow-md transition-all">
-        {tag && (
-          <span className="absolute top-3 left-3 md:top-4 md:left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[9px] md:text-[10px] px-3 py-0.5 md:py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
-            {tag}
-          </span>
-        )}
-        {isOutOfStock && (
-          <span className="absolute top-3 right-3 md:top-4 md:right-4 bg-slate-800/90 text-white text-[9px] md:text-[10px] px-3 py-0.5 md:py-1 rounded-full uppercase font-bold z-10 shadow-md">
-            Tükendi
-          </span>
-        )}
-        {!imgError && image ? (
-          <Image
-            src={image}
-            alt={name || "Pekefe Ürünü"}
-            fill
-            sizes="(max-width: 768px) 100vw, 35vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            unoptimized={typeof image === "string" && (image.startsWith("http://") || image.startsWith("https://"))}
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-primary/5 flex flex-col items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-4xl">eco</span>
-          </div>
-        )}
-      </div>
+    <div className={`group relative bg-white dark:bg-slate-900 border border-outline-variant/15 hover:border-[#6b1d2f]/30 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full overflow-hidden ${className}`}>
+      
+      {/* Top Part: Image & Main Info */}
+      <div className="space-y-4">
+        
+        {/* Luxury Editorial Image Frame */}
+        <div className="w-full aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 relative group/img shadow-xs">
+          {tag && (
+            <span className="absolute top-3 left-3 bg-[#6b1d2f] text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
+              {tag}
+            </span>
+          )}
+          {isOutOfStock && (
+            <span className="absolute top-3 right-3 bg-slate-800 text-white text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold z-10 shadow-md">
+              Tükendi
+            </span>
+          )}
+          {!imgError && image ? (
+            <Image
+              src={image}
+              alt={name || "Pekefe Ürünü"}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover/img:scale-105"
+              unoptimized={typeof image === "string" && (image.startsWith("http://") || image.startsWith("https://"))}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-primary/5 flex flex-col items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-4xl">eco</span>
+            </div>
+          )}
+        </div>
 
-      {/* Editorial Description Column */}
-      <div className="w-full md:w-1/2 space-y-3 md:space-y-4">
-        <span className="text-[10px] text-on-surface-variant uppercase font-mono tracking-widest block">{meta}</span>
-        <h3 className="font-display-lg text-primary text-lg md:text-xl font-bold leading-snug">
-          {name}
-        </h3>
-        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed line-clamp-2 md:line-clamp-3">
-          {stripHtmlTags(desc)}
-        </p>
+        {/* Content Section */}
+        <div className="space-y-2">
+          {meta && (
+            <span className="text-[10px] text-amber-800 dark:text-amber-400 font-mono uppercase tracking-widest block font-bold">
+              {meta}
+            </span>
+          )}
+          <h3 className="font-display-lg text-[#6b1d2f] dark:text-amber-300 text-base sm:text-lg font-bold leading-snug line-clamp-2">
+            {name}
+          </h3>
+          {desc && (
+            <p className="text-xs text-on-surface-variant leading-relaxed line-clamp-2">
+              {stripHtmlTags(desc)}
+            </p>
+          )}
+        </div>
 
         {/* Interactive Variant Pills */}
         {hasVariants && (
           <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] md:text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Gramaj / Çeşit:</span>
-            <div className="flex flex-wrap gap-1.5 md:gap-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Gramaj / Çeşit:</span>
+            <div className="flex flex-wrap gap-1.5">
               {variants.map((v, i) => {
                 const label = getVariantLabel(v);
                 const vPrice = v.price ? Number(v.price) : null;
@@ -138,15 +156,15 @@ export function ProductCard({
                     key={v.id || i}
                     type="button"
                     onClick={() => setSelectedVariant(v)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] md:text-xs transition-all cursor-pointer border ${
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] transition-all cursor-pointer border ${
                       isSelected
-                        ? "border-primary bg-primary text-white font-bold shadow-md scale-105"
-                        : "border-outline-variant/30 bg-surface-container-low text-on-surface hover:border-primary/50 font-medium"
+                        ? "border-[#6b1d2f] bg-[#6b1d2f] text-white font-bold shadow-sm"
+                        : "border-outline-variant/30 bg-surface-container-low text-on-surface hover:border-[#6b1d2f]/40 font-medium"
                     }`}
                   >
                     <span>{label}</span>
                     {vPrice ? (
-                      <span className={`font-bold ${isSelected ? "text-amber-300" : "text-secondary"}`}>
+                      <span className={`font-bold ${isSelected ? "text-amber-300" : "text-[#c5a059]"}`}>
                         ₺{vPrice.toLocaleString("tr-TR")}
                       </span>
                     ) : null}
@@ -157,45 +175,49 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Clean Luxury Price Display */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-outline-variant/15">
-          <div className="flex items-baseline gap-2 whitespace-nowrap">
-            <span className="text-xl md:text-3xl font-display-lg text-primary font-extrabold tracking-tight">
+      </div>
+
+      {/* Bottom Part: Pricing & Clean Action Buttons */}
+      <div className="pt-4 mt-4 border-t border-outline-variant/15 space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl sm:text-2xl font-display-lg text-[#6b1d2f] dark:text-amber-400 font-extrabold tracking-tight">
               {fmt(activePrice)}
             </span>
             {activeOldPrice && activeOldPrice > activePrice && (
-              <span className="text-xs md:text-sm text-on-surface-variant/70 line-through font-medium">
+              <span className="text-xs text-slate-400 line-through font-medium">
                 {fmt(activeOldPrice)}
               </span>
             )}
-            {isB2B && numericB2B && (
-              <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Bayi</span>
-            )}
           </div>
+          {isB2B && numericB2B && (
+            <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Bayi</span>
+          )}
+        </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            {onAddToCart && !isOutOfStock && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart(selectedVariant);
-                }}
-                className="flex-1 sm:flex-none bg-primary text-white hover:bg-primary/90 px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-label-md text-xs font-bold uppercase tracking-wider active:scale-95"
-                aria-label={`${name} sepete ekle`}
-              >
-                <span className="material-symbols-outlined text-base">shopping_cart</span>
-                <span>Sepete Ekle</span>
-              </button>
-            )}
-            <Link
-              href={`/urun/${id}`}
-              className="flex-1 sm:flex-none border border-secondary hover:bg-secondary hover:text-white text-secondary font-label-sm text-xs px-4 py-2.5 rounded-xl tracking-wider uppercase transition-all font-bold text-center active:scale-95"
+        <div className="flex items-center gap-2 w-full">
+          {onAddToCart && !isOutOfStock && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(selectedVariant);
+              }}
+              className="flex-1 bg-[#6b1d2f] hover:bg-[#521321] text-white px-3.5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm text-xs font-bold uppercase tracking-wider active:scale-95 shrink-0"
+              aria-label={`${name} sepete ekle`}
             >
-              Detaylar
-            </Link>
-          </div>
+              <span className="material-symbols-outlined text-base">shopping_cart</span>
+              <span>Sepete Ekle</span>
+            </button>
+          )}
+          <Link
+            href={`/urun/${id}`}
+            className="border border-[#c5a059] text-[#6b1d2f] hover:bg-[#c5a059] hover:text-white text-xs px-3.5 py-2.5 rounded-xl tracking-wider uppercase transition-all font-bold text-center active:scale-95 shrink-0"
+          >
+            Detaylar
+          </Link>
         </div>
       </div>
+
     </div>
   );
 }

@@ -491,7 +491,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 md:gap-x-12 md:gap-y-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch">
           {products.map((p, idx) => (
             <ProductCard
               key={p.id}
@@ -523,7 +523,6 @@ export default function Home() {
                 setToastMsg(`${itemToAdd.name} sepete eklendi!`);
                 setToastOpen(true);
               }}
-              className={idx % 2 === 1 ? "md:translate-y-8" : ""}
             />
           ))}
         </div>

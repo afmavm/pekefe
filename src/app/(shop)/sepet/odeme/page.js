@@ -740,30 +740,93 @@ export default function Odeme() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-emerald-950 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
-                        <span className="material-symbols-outlined text-xl">lock</span>
+                  <div className="space-y-6">
+                    {/* Visual Credit Card Preview & Form Container */}
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white shadow-xl space-y-4 relative overflow-hidden border border-slate-700">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-mono font-bold tracking-widest text-amber-400 uppercase">KREDİ / BANKA KARTINIZ</span>
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                          <span className="px-2 py-0.5 rounded bg-white/10">VISA</span>
+                          <span className="px-2 py-0.5 rounded bg-white/10">MASTER</span>
+                          <span className="px-2 py-0.5 rounded bg-white/10">TROY</span>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-emerald-900">PayTR 3D Secure Kredi / Banka Kartı Ödemesi</h4>
-                        <p className="text-xs text-emerald-700 mt-0.5">256-Bit SSL Lisanslı Güvenli Mağaza Ödemesi</p>
+
+                      {/* Live Card Number Preview */}
+                      <div className="text-xl md:text-2xl font-mono tracking-widest text-slate-100 py-2">
+                        {cardNumber || "•••• •••• •••• ••••"}
+                      </div>
+
+                      <div className="flex justify-between items-end text-xs font-mono text-slate-300">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block uppercase">KART SAHİBİ</span>
+                          <span className="font-bold uppercase tracking-wider">{nameOnCard || "AD SOYAD"}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block uppercase">SON KULLANMA</span>
+                          <span className="font-bold">{expiry || "AA/YY"}</span>
+                        </div>
                       </div>
                     </div>
-                    
-                    <p className="text-xs leading-relaxed text-emerald-800">
-                      Teslimat bilgilerinizi doldurup <strong>"PayTR ile Güvenli Öde"</strong> butonuna tıkladığınızda, bankanızın 3D SMS onaylı PayTR taksitli ödeme penceresi açılacaktır.
-                    </p>
 
-                    <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-emerald-200/60 text-[11px] font-bold text-emerald-800">
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">VISA</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">MASTERCARD</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">TROY</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">WORLD</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">BONUS</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">MAXIMUM</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">AXESS</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">CARDFINANS</span>
+                    {/* Form Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl">
+                      <div className="md:col-span-2 space-y-1.5">
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART ÜZERİNDEKİ İSİM *</label>
+                        <input
+                          type="text"
+                          value={nameOnCard}
+                          onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
+                          placeholder="AHMET YILMAZ"
+                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-medium uppercase"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2 space-y-1.5">
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART NUMARASI *</label>
+                        <input
+                          type="text"
+                          maxLength={19}
+                          value={cardNumber}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "").slice(0, 16);
+                            const formatted = val.replace(/(.{4})/g, "$1 ").trim();
+                            setCardNumber(formatted);
+                          }}
+                          placeholder="4543 0000 0000 0000"
+                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold tracking-wider"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">SON KULLANMA TARİHİ *</label>
+                        <input
+                          type="text"
+                          maxLength={5}
+                          value={expiry}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                            if (val.length >= 3) {
+                              val = `${val.slice(0, 2)}/${val.slice(2)}`;
+                            }
+                            setExpiry(val);
+                          }}
+                          placeholder="AA / YY"
+                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold text-center"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">CVV / GÜVENLİK KODU *</label>
+                        <input
+                          type="password"
+                          maxLength={4}
+                          value={cvv}
+                          onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                          placeholder="123"
+                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold text-center"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}

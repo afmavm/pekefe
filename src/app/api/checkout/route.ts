@@ -227,6 +227,18 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
+      if (product.stock <= 0) {
+        return NextResponse.json({ 
+          error: `"${product.name}" ürünü stokta tükenmiştir. Lütfen sepetinizden çıkarınız.` 
+        }, { status: 400 });
+      }
+
+      if (item.quantity > product.stock) {
+        return NextResponse.json({ 
+          error: `"${product.name}" ürünü için stok yetersizdir. Kalan stok: ${product.stock} adet.` 
+        }, { status: 400 });
+      }
+
       let basePriceVal = product.price.toNumber();
       if (isB2BUser) {
         const groupPrice = b2bPrices.find(bp => bp.productId === product.id);

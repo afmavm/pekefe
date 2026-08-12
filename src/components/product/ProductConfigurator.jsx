@@ -24,14 +24,25 @@ export function ProductConfigurator({
   handleFavoriteToggle,
   handleShareClick,
 }) {
+  const currentStock = selectedVariant ? selectedVariant.stock : (product?.stock != null ? product.stock : 0);
+  const isOutOfStock = currentStock <= 0;
+
   return (
     <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-8">
       {/* Provenance & Title */}
       <div className="space-y-4">
-        <span className="text-[10px] text-secondary uppercase font-mono tracking-[0.25em] font-bold block">
-          Rakım: {product?.altitude || product?.attributes?.altitude || "2000 Metre"} · Hasat:{" "}
-          {product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos"}
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-secondary uppercase font-mono tracking-[0.25em] font-bold block">
+            Rakım: {product?.altitude || product?.attributes?.altitude || "2000 Metre"} · Hasat:{" "}
+            {product?.harvestSeason || product?.attributes?.harvestSeason || "Temmuz - Ağustos"}
+          </span>
+          {isOutOfStock && (
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">error</span>
+              Stokta Tükenmiştir
+            </span>
+          )}
+        </div>
         <h1 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold leading-tight tracking-tight">
           {product?.name}
         </h1>
@@ -78,6 +89,7 @@ export function ProductConfigurator({
               const sizeText = (attrs?.size || v.size || "").trim();
               const colorText = (attrs?.color || v.color || "").trim();
               const hasBoth = sizeText && colorText && sizeText !== colorText;
+              const vStock = v.stock != null ? v.stock : (product?.stock || 0);
 
               return (
                 <button
@@ -87,6 +99,8 @@ export function ProductConfigurator({
                   className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-start gap-0.5 cursor-pointer ${
                     isSelected
                       ? "border-secondary bg-secondary text-white shadow-md shadow-secondary/20 scale-102"
+                      : vStock <= 0 
+                      ? "border-gray-200 bg-gray-100 text-gray-400 line-through"
                       : "border-outline-variant/30 bg-surface text-on-surface-variant hover:border-secondary/60 hover:bg-secondary/5"
                   }`}
                 >
@@ -101,7 +115,7 @@ export function ProductConfigurator({
                     <span>{label}</span>
                   )}
                   <span className={`font-mono font-extrabold mt-0.5 ${isSelected ? "text-white" : "text-secondary"}`}>
-                    ₺{v.price}
+                    ₺{v.price} {vStock <= 0 ? "(Stok Yok)" : ""}
                   </span>
                 </button>
               );
@@ -151,31 +165,40 @@ export function ProductConfigurator({
           >
             <button
               onClick={() => handleQuantityChange(-1)}
-              className="px-4 hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant"
+              className="px-4 hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant disabled:opacity-30"
               aria-label="Adet azalt"
+              disabled={isOutOfStock}
             >
               <span className="material-symbols-outlined text-sm">remove</span>
             </button>
             <input
               className="w-10 text-center border-none focus:ring-0 font-bold bg-transparent outline-none text-sm font-mono"
               type="number"
-              value={quantity}
+              value={isOutOfStock ? 0 : quantity}
               readOnly
               aria-label="Seçili adet"
               aria-live="polite"
             />
             <button
               onClick={() => handleQuantityChange(1)}
-              className="px-4 hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant"
+              className="px-4 hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant disabled:opacity-30"
               aria-label="Adet artır"
+              disabled={isOutOfStock}
             >
               <span className="material-symbols-outlined text-sm">add</span>
             </button>
           </div>
 
-          <Button onClick={handleAddToCart} size="lg" className="flex-grow shadow-md h-14">
-            Sepete Ekle
-          </Button>
+          {isOutOfStock ? (
+            <Button disabled size="lg" className="flex-grow shadow-md h-14 bg-slate-300 text-slate-600 border border-slate-300 cursor-not-allowed">
+              <span className="material-symbols-outlined text-base mr-1">block</span>
+              Stokta Tükenmiştir
+            </Button>
+          ) : (
+            <Button onClick={handleAddToCart} size="lg" className="flex-grow shadow-md h-14">
+              Sepete Ekle
+            </Button>
+          )}
         </div>
 
         <div className="flex gap-4 pt-2">

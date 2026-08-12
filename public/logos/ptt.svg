@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
-  <rect width="200" height="60" rx="8" fill="#FFCC00"/>
-  <text x="35" y="42" font-family="Arial, sans-serif" font-weight="900" font-size="30" fill="#002B49">PTT</text>
-  <text x="105" y="42" font-family="Arial, sans-serif" font-weight="800" font-size="16" fill="#E30613">Kargo</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
+  <rect width="300" height="80" rx="12" fill="#FFC700"/>
+  <!-- PTT Oval Seal -->
+  <g transform="translate(16, 12)">
+    <rect width="100" height="56" rx="28" fill="#002B49"/>
+    <text x="50" y="40" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#FFC700" text-anchor="middle">Ptt</text>
+  </g>
+  <!-- Ptt Kargo Text -->
+  <text x="130" y="53" font-family="'Arial Black', sans-serif" font-weight="900" font-size="34" fill="#002B49" letter-spacing="-0.5">KARGO</text>
+  <path d="M130 60 H275" stroke="#E30613" stroke-width="4" stroke-linecap="round"/>
 </svg>

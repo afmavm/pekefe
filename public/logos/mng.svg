@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
-  <rect width="200" height="60" rx="8" fill="#002B49"/>
-  <text x="25" y="40" font-family="Arial, sans-serif" font-weight="900" font-size="26" fill="#00A3E0">MNG</text>
-  <text x="95" y="40" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#FFFFFF">KARGO</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
+  <rect width="300" height="80" rx="12" fill="#001B36"/>
+  <!-- MNG Wave / Wings Emblem -->
+  <g transform="translate(18, 18)">
+    <path d="M0 36C12 12 30 0 48 0C30 14 20 28 16 44Z" fill="#FF6A00"/>
+    <path d="M10 36C22 16 38 6 54 6C38 18 28 30 24 44Z" fill="#00A8E8"/>
+  </g>
+  <!-- MNG Typography -->
+  <text x="80" y="52" font-family="'Arial Black', Gadget, sans-serif" font-weight="900" font-size="36" fill="#00A8E8" letter-spacing="-1">MNG</text>
+  <text x="180" y="52" font-family="'Arial Black', Gadget, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" letter-spacing="1">KARGO</text>
 </svg>

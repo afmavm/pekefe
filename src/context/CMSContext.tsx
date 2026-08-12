@@ -299,8 +299,15 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
 
 export function useCMS() {
   const context = useContext(CMSContext);
-  if (context === undefined) {
-    throw new Error("useCMS must be used within a CMSProvider");
+  if (!context) {
+    return {
+      cmsData: defaultCMSData,
+      pages: [],
+      updateCMSData: () => {},
+      toggleMaintenance: () => {},
+      fetchPages: async () => {},
+      getT: (field: string) => defaultCMSData[field],
+    };
   }
   return context;
 }

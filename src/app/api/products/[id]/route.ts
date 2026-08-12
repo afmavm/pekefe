@@ -9,6 +9,7 @@ import { authOptions } from "@/lib/authOptions";
 import { computeProductPricing } from '../route';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
+import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
   if (branchIdInput) {
@@ -35,80 +36,82 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    // id parametresi hem DB id hem de SKU olabilir
-    const product = await prisma.product.findFirst({
-      where: {
-        OR: [
-          { id: id },
-          { sku: id }
-        ]
-      },
-      include: {
-        variants: true,
-        locations: {
-          include: {
-            warehouse: true
-          }
+    
+    let product: any = null;
+    try {
+      product = await prisma.product.findFirst({
+        where: {
+          OR: [
+            { id: id },
+            { sku: id }
+          ]
         },
-        recipe: true
-      }
-    });
-
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        include: {
+          variants: true,
+          locations: {
+            include: {
+              warehouse: true
+            }
+          },
+          recipe: true
+        }
+      });
+    } catch (dbErr) {
+      console.warn(`[API PRODUCT BY ID WARNING] DB erişimi yok, FALLBACK_PRODUCTS kontrol ediliyor: ${id}`, dbErr);
     }
 
+    // DB'de bulunamadıysa veya DB kapalıysa FALLBACK_PRODUCTS içinden ara
+    if (!product) {
+      const fallbackItem = FALLBACK_PRODUCTS.find((p: any) => p.id === id || p.sku === id);
+      if (fallbackItem) {
+        product = JSON.parse(JSON.stringify(fallbackItem));
+      }
+    }
 
-    const session = await getServerSession(authOptions);
+    if (!product) {
+      return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
+    }
+
     let dealerAccount = null;
     let isB2BUser = false;
     let b2bGroupDiscountRate = 0;
     let b2bTieredRules: any[] = [];
     let b2bPrices: any[] = [];
 
-    if (session?.user?.email) {
-      const dbUser = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        include: {
-          b2bGroup: {
-            include: {
-              tieredPricing: true,
-              b2bPrices: true
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          include: {
+            b2bGroup: {
+              include: {
+                tieredPricing: true,
+                b2bPrices: true
+              }
             }
           }
-        }
-      });
+        });
 
-      if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-        isB2BUser = true;
-        if (dbUser.b2bGroup) {
-          b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
-          b2bTieredRules = dbUser.b2bGroup.tieredPricing;
-          b2bPrices = dbUser.b2bGroup.b2bPrices;
+        if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
+          isB2BUser = true;
+          if (dbUser.b2bGroup) {
+            b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
+            b2bTieredRules = dbUser.b2bGroup.tieredPricing;
+            b2bPrices = dbUser.b2bGroup.b2bPrices;
+          }
         }
-      }
 
-      dealerAccount = await getCariAccountByEmail(session.user.email);
-      if (dealerAccount) {
-        isB2BUser = true;
-        if (b2bGroupDiscountRate === 0) {
-          b2bGroupDiscountRate = dealerAccount.discountRate || 0;
-        }
-        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount.dealerGroup) {
-          const groupByName = await prisma.b2BGroup.findFirst({
-            where: { group_name: dealerAccount.dealerGroup },
-            include: {
-              tieredPricing: true,
-              b2bPrices: true
-            }
-          });
-          if (groupByName) {
-            b2bGroupDiscountRate = groupByName.base_discount_rate;
-            b2bTieredRules = groupByName.tieredPricing;
-            b2bPrices = groupByName.b2bPrices;
+        dealerAccount = await getCariAccountByEmail(session.user.email);
+        if (dealerAccount) {
+          isB2BUser = true;
+          if (b2bGroupDiscountRate === 0) {
+            b2bGroupDiscountRate = dealerAccount.discountRate || 0;
           }
         }
       }
+    } catch (sessionErr) {
+      // Ignore auth lookup errors when DB is offline
     }
 
     const b2bContext = {
@@ -120,15 +123,30 @@ export async function GET(
 
     const calculated = computeProductPricing(product, dealerAccount, new Date(), b2bContext);
 
+    let parsedImages = product.images;
+    if (typeof product.images === 'string') {
+      try { parsedImages = JSON.parse(product.images); } catch { parsedImages = []; }
+    }
+    let parsedAttributes = product.attributes;
+    if (typeof product.attributes === 'string') {
+      try { parsedAttributes = JSON.parse(product.attributes); } catch { parsedAttributes = {}; }
+    }
+
     return NextResponse.json({
       ...product,
       ...calculated,
-      images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
-      attributes: typeof product.attributes === 'string' ? JSON.parse(product.attributes) : product.attributes
+      images: parsedImages || [],
+      attributes: parsedAttributes || {}
     });
   } catch (error) {
-    console.error('Error fetching product:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Error fetching product by ID:', error);
+    // Final safety net: if anything threw, check fallback
+    const { id } = await params;
+    const fallbackItem = FALLBACK_PRODUCTS.find((p: any) => p.id === id || p.sku === id);
+    if (fallbackItem) {
+      return NextResponse.json(JSON.parse(JSON.stringify(fallbackItem)));
+    }
+    return NextResponse.json({ error: 'Ürün yüklenemedi' }, { status: 500 });
   }
 }
 

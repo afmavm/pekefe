@@ -30,8 +30,8 @@ export default function TopAnnouncementBar() {
 
   const text1 = cmsData?.announcement || "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!";
   const text2 = cmsData?.announcement2 || "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları";
-  const phone = cmsData?.contactPhone || "0534 270 91 40";
-  const whatsapp = cmsData?.socialWhatsapp || "905342709140";
+  const phone = cmsData?.contactPhone || "0544 149 48 51";
+  const whatsapp = cmsData?.socialWhatsapp || "05441494851";
 
   // Parse topBarItems from cmsData
   let topBarItems = DEFAULT_ITEMS;

@@ -5,8 +5,8 @@ import { withAuth, AuthSession } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 
 const DEFAULT_CATEGORIES = [
-  { id: "PKF-KAT-001", name: "Geleneksel Pekmezler", parentId: null, attributes: [], variants: [] },
-  { id: "PKF-KAT-002", name: "Pestil & Köme Çeşitleri", parentId: null, attributes: [], variants: [] },
+  { id: "PKF-KAT-001", name: "Pestil - Köme", parentId: null, attributes: [], variants: [] },
+  { id: "PKF-KAT-002", name: "Geleneksel Pekmezler", parentId: null, attributes: [], variants: [] },
   { id: "PKF-KAT-003", name: "Yöresel Peynirler & Bal", parentId: null, attributes: [], variants: [] },
   { id: "PKF-KAT-004", name: "Arıcılık Ekipmanları", parentId: null, attributes: [], variants: [] },
 ];

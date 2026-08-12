@@ -4,6 +4,13 @@ import { prisma } from '@/lib/prisma';
 import { withAuth, AuthSession } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 
+const DEFAULT_CATEGORIES = [
+  { id: "PKF-KAT-001", name: "Geleneksel Pekmezler", parentId: null, attributes: [], variants: [] },
+  { id: "PKF-KAT-002", name: "Pestil & Köme Çeşitleri", parentId: null, attributes: [], variants: [] },
+  { id: "PKF-KAT-003", name: "Yöresel Peynirler & Bal", parentId: null, attributes: [], variants: [] },
+  { id: "PKF-KAT-004", name: "Arıcılık Ekipmanları", parentId: null, attributes: [], variants: [] },
+];
+
 export async function GET(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, "apiLimit");
   if (rateLimitResponse) return rateLimitResponse;
@@ -16,8 +23,8 @@ export async function GET(request: NextRequest) {
       variants: c.variants as any
     })));
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.warn('[API CATEGORIES WARNING] Veritabanı erişimi yok, varsayılan kategoriler sunuluyor:', error);
+    return NextResponse.json(DEFAULT_CATEGORIES);
   }
 }
 

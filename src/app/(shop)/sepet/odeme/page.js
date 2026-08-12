@@ -147,6 +147,9 @@ export default function Odeme() {
   // Helper function to match Desi/Weight Tiers configured in Admin Panel
   const getCarrierTierFee = (carrierObj, totalDesi) => {
     if (!carrierObj) return 150;
+    if (carrierObj.pricingType === "flat") {
+      return Number(carrierObj.fallbackFee ?? 150);
+    }
     const tiers = carrierObj.tiers;
     if (Array.isArray(tiers) && tiers.length > 0) {
       const match = tiers.find(

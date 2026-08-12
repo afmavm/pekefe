@@ -188,10 +188,12 @@ export async function PUT(request: Request) {
       popupConfig: getVal('popupConfig', 'json', {}),
       topBarText1: getVal('topBarText1', 'string', "Türkiye'nin Her Yerine Güvenli Sevkiyat"),
       topBarText2: getVal('topBarText2', 'string', '304 Paslanmaz Çelik ve Dayanıklı Tasarım'),
-      topBarItems: getVal('topBarItems', 'json', [
-        { id: "1", text: "Türkiye'nin Her Yerine Güvenli Sevkiyat", icon: "truck", enabled: true },
-        { id: "2", text: "%100 Doğal ve Tescilli Lezzet", icon: "shield", enabled: true }
-      ]),
+      topBarItems: (() => {
+        const raw = getVal('topBarItems', 'string', '[]');
+        if (typeof raw === 'string') return raw;
+        try { return JSON.stringify(raw); } catch { return '[]'; }
+      })(),
+
       faqData: getVal('faqData', 'json', []),
 
       cartDiscountType: getVal('cartDiscountType', 'string', 'none'),

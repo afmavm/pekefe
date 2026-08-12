@@ -5,7 +5,7 @@ import {
   Truck, Search, RefreshCw, Loader2, Package,
   Clock, CheckCircle2, XCircle, AlertCircle,
   Plus, Trash2, Edit, Save, X, ToggleLeft, ToggleRight, ShieldCheck, DollarSign,
-  MoreHorizontal, Printer, Download, SlidersHorizontal, UserCheck, ChevronDown, ChevronRight
+  MoreHorizontal, Printer, Download, SlidersHorizontal, UserCheck, ChevronDown, ChevronRight, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -114,6 +114,38 @@ export default function CargoPage() {
     apiPassword: "",
     isTestMode: true
   });
+
+  // Logo File Upload State & Handler
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setCarrierForm((prev) => ({ ...prev, logoUrl: data.url }));
+        toast.success("Logo görseli başarıyla yüklendi.");
+      } else {
+        toast.error(data.error || "Görsel yüklenirken bir hata oluştu.");
+      }
+    } catch (err) {
+      console.error("Logo upload error:", err);
+      toast.error("Dosya yüklenemedi.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   // Tracking Modal States
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
@@ -1412,7 +1444,7 @@ export default function CargoPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1 items-center">
-                  <div className="sm:col-span-8">
+                  <div className="sm:col-span-6">
                     <input
                       type="text"
                       placeholder="Görsel URL veya hazır logo seçin (Örn: /logos/yurtici.svg)"
@@ -1421,20 +1453,34 @@ export default function CargoPage() {
                       className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono text-gray-900 focus:outline-none focus:border-orange-500"
                     />
                   </div>
-                  <div className="sm:col-span-4 flex items-center justify-center">
+                  <div className="sm:col-span-6 flex items-center gap-2">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoFileUpload}
+                        className="hidden"
+                        disabled={uploadingLogo}
+                      />
+                      <div className={`px-3 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${uploadingLogo ? "opacity-70 cursor-not-allowed" : ""}`}>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{uploadingLogo ? "Yükleniyor..." : "Cihazdan Logo Yükle"}</span>
+                      </div>
+                    </label>
+
                     {carrierForm.logoUrl ? (
-                      <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                        <img src={carrierForm.logoUrl} alt="Logo Önizleme" className="h-7 max-w-[100px] object-contain" />
+                      <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm shrink-0">
+                        <img src={carrierForm.logoUrl} alt="Logo Önizleme" className="h-7 max-w-[80px] object-contain" />
                         <button
                           type="button"
                           onClick={() => setCarrierForm({ ...carrierForm, logoUrl: "" })}
-                          className="text-xs font-bold text-red-500 hover:text-red-700 ml-1 cursor-pointer"
+                          className="text-xs font-bold text-red-500 hover:text-red-700 ml-0.5 cursor-pointer"
                         >
                           ✕
                         </button>
                       </div>
                     ) : (
-                      <span className="text-[11px] text-slate-400 font-medium">Logo Seçilmedi</span>
+                      <span className="text-[11px] text-slate-400 font-medium shrink-0">Logo Seçilmedi</span>
                     )}
                   </div>
                 </div>

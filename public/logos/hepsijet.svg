@@ -1,12 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
-  <rect width="300" height="80" rx="12" fill="#FF6000"/>
-  <!-- Jet Stream Speed Lines -->
-  <g transform="translate(16, 22)">
-    <path d="M0 12 H30" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
-    <path d="M8 24 H36" stroke="#002B49" stroke-width="4" stroke-linecap="round"/>
-    <path d="M4 36 H24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" rx="10" fill="#FF6000"/>
+  <g transform="translate(10, 16)">
+    <path d="M0 8 H22" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+    <path d="M6 16 H26" stroke="#002B49" stroke-width="3" stroke-linecap="round"/>
+    <path d="M3 24 H18" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
   </g>
-  <!-- HepsiJET Text -->
-  <text x="60" y="52" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="800" font-size="32" fill="#FFFFFF" letter-spacing="-1">hepsi</text>
-  <text x="145" y="52" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="900" font-size="34" fill="#002B49" letter-spacing="-0.5">JET</text>
+  <text x="42" y="39" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="800" font-size="24" fill="#FFFFFF" letter-spacing="-1">hepsi</text>
+  <text x="108" y="39" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="900" font-size="26" fill="#002B49" letter-spacing="-0.5">JET</text>
 </svg>

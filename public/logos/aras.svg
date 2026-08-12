@@ -1,13 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
-  <rect width="300" height="80" rx="12" fill="#E30613"/>
-  <!-- Aras Emblem Circle with Arrow -->
-  <g transform="translate(20, 16)">
-    <circle cx="24" cy="24" r="24" fill="#FFFFFF"/>
-    <!-- Red Chevron Arrow -->
-    <path d="M16 13L32 24L16 35Z" fill="#E30613"/>
-    <path d="M26 13L42 24L26 35Z" fill="#E30613" opacity="0.4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" rx="10" fill="#E30613"/>
+  <g transform="translate(12, 12)">
+    <circle cx="18" cy="18" r="18" fill="#FFFFFF"/>
+    <path d="M12 10L24 18L12 26Z" fill="#E30613"/>
+    <path d="M20 10L32 18L20 26Z" fill="#E30613" opacity="0.4"/>
   </g>
-  <!-- Aras Typography -->
-  <text x="82" y="52" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="-1">aras</text>
-  <text x="160" y="52" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="900" font-size="34" fill="#002855" letter-spacing="-0.5">kargo</text>
+  <text x="58" y="39" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="900" font-size="26" fill="#FFFFFF" letter-spacing="-1">aras</text>
+  <text x="116" y="39" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="900" font-size="26" fill="#002855" letter-spacing="-0.5">kargo</text>
 </svg>

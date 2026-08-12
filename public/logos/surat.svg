@@ -1,11 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
-  <rect width="300" height="80" rx="12" fill="#D91219"/>
-  <!-- Dynamic Speed Slashes -->
-  <g transform="translate(18, 15)">
-    <path d="M0 48L15 0H28L13 48H0Z" fill="#FFD100"/>
-    <path d="M12 48L27 0H40L25 48H12Z" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" rx="10" fill="#D91219"/>
+  <g transform="translate(12, 10)">
+    <path d="M0 38L12 0H22L10 38H0Z" fill="#FFD100"/>
+    <path d="M10 38L22 0H32L20 38H10Z" fill="#FFFFFF"/>
   </g>
-  <!-- Sürat Kargo Text -->
-  <text x="72" y="48" font-family="'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="28" fill="#FFFFFF">SÜRAT</text>
-  <text x="185" y="48" font-family="'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="22" fill="#FFD100">KARGO</text>
+  <text x="52" y="37" font-family="'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="22" fill="#FFFFFF">SÜRAT</text>
+  <text x="135" y="37" font-family="'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="16" fill="#FFD100">KARGO</text>
 </svg>

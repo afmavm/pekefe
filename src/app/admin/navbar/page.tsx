@@ -228,7 +228,8 @@ export default function NavbarAdminPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ topBarItems: JSON.stringify(topBarItems) }),
         });
-        if (!res.ok) throw new Error("Kayıt başarısız");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.details || "Kayıt başarısız");
         toast.success("Top bar öğeleri kaydedildi!");
       } else {
         // Navbar links not yet connected to API, show info
@@ -236,8 +237,8 @@ export default function NavbarAdminPage() {
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      toast.error("Kayıt sırasında hata oluştu.");
+    } catch (err: any) {
+      toast.error(err.message || "Kayıt sırasında hata oluştu.");
     } finally {
       setSaving(false);
     }

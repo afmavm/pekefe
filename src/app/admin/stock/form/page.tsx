@@ -528,6 +528,7 @@ function EnterpriseStockFormPage() {
 
   // Loading & Action states
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(isEditMode);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedMediaIndex, setDraggedMediaIndex] = useState<number | null>(null);
@@ -807,43 +808,44 @@ function EnterpriseStockFormPage() {
   };
 
   // Form Fields
+  // Form Fields
   const [form, setForm] = useState({
-    name: "Öz Hakiki İspir Dut Pekmezi (800g)",
-    sku: "PKF-DUT-800",
-    barcode: "8691167531368",
-    brand: "Pekefe",
-    model: "Geleneksel Cam Kavanoz",
-    category: "Dut Pekmezi",
-    unit: "Kavanoz",
-    manufacturerCode: "PKF-DUT-800",
+    name: "",
+    sku: "",
+    barcode: "",
+    brand: "PEKEFE",
+    model: "",
+    category: "",
+    unit: "Adet",
+    manufacturerCode: "",
     stockType: "Ticari Mal",
-    warehouse: "Erzurum İspir Merkez Depo",
-    desc: "İspir Erzurum yüksek yaylalarından toplanan organik meyvelerden kısık odun ateşinde bakır kazanlarda kaynatılarak üretilen %100 doğal, katkısız ve ilave şekersiz dut pekmezi.",
-    shortDesc: "Geleneksel odun ateşinde pişirilmiş %100 doğal İspir Dut Pekmezi",
-    recipeDetails: "%100 İspir Dut Meyvesi, Odun Ateşinde Bakır Kazan Pişirimi. Şeker ilavesiz, koruyucusuz ve katkısızdır.",
+    warehouse: "Merkez Depo",
+    desc: "",
+    shortDesc: "",
+    recipeDetails: "",
 
     // Price Matrix (Currency, VAT rate, Included switch)
-    purchasePrice: 450,
+    purchasePrice: 0,
     purchaseCurrency: "TRY",
     purchaseVat: "20",
     purchaseVatIncluded: false,
 
-    salePrice: 850,
+    salePrice: 0,
     saleCurrency: "TRY",
     saleVat: "20",
     saleVatIncluded: true,
 
-    retailPrice: 899,
+    retailPrice: 0,
     retailCurrency: "TRY",
     retailVat: "20",
     retailVatIncluded: true,
 
-    webPrice: 799,
+    webPrice: 0,
     webCurrency: "TRY",
     webVat: "20",
     webVatIncluded: true,
 
-    marketPrice: 1200,
+    marketPrice: 0,
     marketCurrency: "TRY",
     marketVat: "20",
     marketVatIncluded: true,
@@ -882,17 +884,17 @@ function EnterpriseStockFormPage() {
     badgeText2: "",
 
     // Food & Harvest Attributes
-    altitude: "2200 Metre",
-    harvestSeason: "Temmuz - Ağustos",
+    altitude: "",
+    harvestSeason: "",
     harvestStory: "",
     ingredients: "",
     ritual: "",
-    nutrients_energy: "293 kcal",
-    nutrients_carb: "70.2 g",
-    nutrients_protein: "0.8 g",
-    nutrients_calcium: "400 mg",
-    nutrients_iron: "10.2 mg",
-    hmfLevel: "< 10 mg/kg (Analiz Raporlu)",
+    nutrients_energy: "",
+    nutrients_carb: "",
+    nutrients_protein: "",
+    nutrients_calcium: "",
+    nutrients_iron: "",
+    hmfLevel: "",
   });
 
   // Always fetch branches on mount (both create and edit mode)
@@ -1030,6 +1032,7 @@ function EnterpriseStockFormPage() {
       setVariants([]);
       setStatus("Yayında");
 
+      setIsLoadingProduct(false);
       const timer = setTimeout(() => {
         isInitialized.current = true;
       }, 300);
@@ -1286,19 +1289,19 @@ function EnterpriseStockFormPage() {
       } catch (err) {
         console.error("Error loading product:", err);
         toast.error("Ürün yüklenirken bağlantı hatası oluştu.");
+      } finally {
+        setIsLoadingProduct(false);
       }
     };
 
+    setIsLoadingProduct(true);
     fetchProduct();
   }, [productId]);
 
 
 
   // Multiple Media Items List
-  const [mediaList, setMediaList] = useState<MediaItem[]>([
-    { id: "1", type: "image", url: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=300&auto=format&fit=crop", name: "Körük_Görünüm.jpg" },
-    { id: "2", type: "image", url: "https://images.unsplash.com/photo-1473081556163-2a17de81fc97?q=80&w=300&auto=format&fit=crop", name: "Deri_Detayı.jpg" },
-  ]);
+  const [mediaList, setMediaList] = useState<MediaItem[]>([]);
 
   // Multiple Marketplaces List
   const [marketplaces, setMarketplaces] = useState<Marketplace[]>([
@@ -1309,9 +1312,9 @@ function EnterpriseStockFormPage() {
 
   // Warehouses List
   const [warehouses, setWarehouses] = useState<Warehouse[]>([
-    { id: "1", name: "Merkez Depo", code: "WH-MRKZ", location: "Erzurum OSB, 3. Cadde", stockCount: 1240 },
-    { id: "2", name: "Şube Depo", code: "WH-SUBE", location: "İstanbul Anadolu Yakası", stockCount: 350 },
-    { id: "3", name: "Üretim Bandı", code: "WH-URT", location: "Yakutiye Fabrika Alanı", stockCount: 80 },
+    { id: "1", name: "Merkez Depo", code: "WH-MRKZ", location: "Erzurum OSB, 3. Cadde", stockCount: 0 },
+    { id: "2", name: "Şube Depo", code: "WH-SUBE", location: "İstanbul Anadolu Yakası", stockCount: 0 },
+    { id: "3", name: "Üretim Bandı", code: "WH-URT", location: "Yakutiye Fabrika Alanı", stockCount: 0 },
   ]);
 
   // Selected Warehouse detailed display info helper
@@ -2570,7 +2573,9 @@ function EnterpriseStockFormPage() {
             <span className="text-orange-500 font-bold">{isEditMode ? "Düzenle" : "Yeni Kayıt"}</span>
           </div>
           <div className="flex items-center gap-3 mt-1.5">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{form.name || "Yeni Stok Kartı"}</h1>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              {isEditMode && isLoadingProduct ? "Ürün Bilgileri Yükleniyor..." : (form.name || "Yeni Stok Kartı")}
+            </h1>
             {status === "Yayında" ? (
               <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-wider animate-in fade-in duration-200">
                 Yayında
@@ -2647,7 +2652,14 @@ function EnterpriseStockFormPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {isEditMode && isLoadingProduct ? (
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-16 shadow-sm flex flex-col items-center justify-center text-center my-6 min-h-[420px]">
+            <Loader2 className="w-10 h-10 animate-spin text-orange-500 mb-4" />
+            <h2 className="text-xl font-black text-slate-900 tracking-tight">Ürün Bilgileri Yükleniyor</h2>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Lütfen bekleyin, stok kartı verileri ve medya görselleri senkronize ediliyor...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* ────────────────────────────────────────────────────────
                LEFT & CENTER COLS: MAIN STACK
@@ -4925,8 +4937,8 @@ function EnterpriseStockFormPage() {
             </div>
 
           </div>
-
         </div>
+        )}
       </div>
 
       {/* ────────────────────────────────────────────────────────

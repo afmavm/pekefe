@@ -11,6 +11,23 @@ import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 
+/** Server-side SEO slug generator (mirrors client-side productsStorage.js) */
+function generateSlugServer(name: string = ''): string {
+  const trMap: Record<string, string> = {
+    ç: 'c', Ç: 'c', ğ: 'g', Ğ: 'g', ı: 'i', İ: 'i',
+    ö: 'o', Ö: 'o', ş: 's', Ş: 's', ü: 'u', Ü: 'u',
+  };
+  return name
+    .split('')
+    .map((ch) => trMap[ch] ?? ch)
+    .join('')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 export const dynamic = 'force-dynamic';
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
@@ -376,7 +393,9 @@ export async function GET(request: NextRequest) {
         images: parsedImages,
         attributes: parsedAttributes,
       };
-      return Object.assign({}, baseObj, calculated);
+      return Object.assign({}, baseObj, calculated, {
+        slug: (p as any).slug || generateSlugServer((p as any).name || '')
+      });
     });
 
     return NextResponse.json(transformedProducts);
@@ -567,6 +586,8 @@ export async function POST(request: NextRequest) {
             sku: safeSku,
             stock: Number(variant.stock ?? 0),
             price: Number(variant.price ?? 0),
+            barcode: variant.barcode || null,
+            cost: variant.cost != null ? Number(variant.cost) : 0,
             attributes: {
               size: variant.size || '',
               color: variant.color || '',
@@ -581,8 +602,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const createdProduct = await prisma.product.findUnique({
+      where: { id: product.id },
+      include: {
+        variants: true,
+        locations: { include: { warehouse: true } },
+        recipe: true
+      }
+    });
+
     revalidatePath('/', 'layout');
-    return NextResponse.json(product);
+    return NextResponse.json(createdProduct || product);
   } catch (error) {
     console.warn('Error creating product, storing in local fallback:', error);
     try {
@@ -597,7 +627,8 @@ export async function POST(request: NextRequest) {
         cost: Number(body.cost || 0),
         image: body.image || "",
         images: body.images || [],
-        attributes: body.attributes || {}
+        attributes: body.attributes || {},
+        variants: body.variants || []
       };
       FALLBACK_PRODUCTS.unshift(newFallback);
       return NextResponse.json(newFallback, { status: 200 });

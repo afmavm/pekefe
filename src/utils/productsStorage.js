@@ -1904,9 +1904,27 @@ export function formatDbProductToStorefront(p) {
   if (!Array.isArray(images) && p.image) {
     images = [p.image];
   }
+  let formattedVariants = Array.isArray(p.variants) ? p.variants.map((v) => {
+    let vAttrs = v.attributes || {};
+    if (typeof vAttrs === 'string') {
+      try { vAttrs = JSON.parse(vAttrs); } catch (e) { vAttrs = {}; }
+    }
+    return {
+      ...v,
+      size: v.size || vAttrs.size || "",
+      color: v.color || vAttrs.color || "",
+      name: v.name || vAttrs.name || "",
+      price: v.price != null ? Number(v.price) : 0,
+      stock: v.stock != null ? Number(v.stock) : 0,
+      attributes: vAttrs
+    };
+  }) : [];
+
+  const autoSlug = p.slug || generateSlug(p.name || "");
   return {
     ...p,
     id: p.id || p.sku,
+    slug: autoSlug,
     name: p.name || "",
     sku: p.sku || "",
     price: p.sale_price ? Number(p.sale_price) : (p.price ? Number(p.price) : 0),
@@ -1914,7 +1932,8 @@ export function formatDbProductToStorefront(p) {
     stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],
-    attributes: attrs
+    attributes: attrs,
+    variants: formattedVariants
   };
 }
 

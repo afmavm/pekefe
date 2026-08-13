@@ -430,8 +430,78 @@ export async function PUT(
       }
     }
 
+    // Save/Update product variants
+    if (body.variants && Array.isArray(body.variants)) {
+      try {
+        await prisma.productVariant.deleteMany({
+          where: { productId: realId }
+        });
+
+        const processedSkus = new Set<string>();
+        const productSku = (body.sku || product.sku || realId).replace(/[^a-zA-Z0-9-]/g, '').slice(0, 20);
+
+        for (let i = 0; i < body.variants.length; i++) {
+          const variant = body.variants[i];
+
+          let baseSku = (variant.sku || '').trim();
+          if (!baseSku) {
+            const sizeSlug = (variant.size || variant.name || 'VAR')
+              .replace(/[^a-zA-Z0-9]/g, '')
+              .toUpperCase()
+              .slice(0, 8);
+            baseSku = `${productSku}-${sizeSlug}-V${i + 1}`;
+          }
+
+          let safeSku = baseSku;
+          let counter = 1;
+          while (
+            processedSkus.has(safeSku) ||
+            (await prisma.productVariant.findFirst({ where: { sku: safeSku } }))
+          ) {
+            safeSku = `${baseSku}-${counter++}`;
+          }
+          processedSkus.add(safeSku);
+
+          const varAttributes = typeof variant.attributes === "object" && variant.attributes !== null
+            ? { ...variant.attributes }
+            : {};
+
+          if (variant.size) varAttributes.size = variant.size;
+          if (variant.color) varAttributes.color = variant.color;
+          if (variant.barcode) varAttributes.barcode = variant.barcode;
+          if (variant.name) varAttributes.name = variant.name;
+          if (variant.b2bPrice != null) varAttributes.b2bPrice = Number(variant.b2bPrice);
+          if (variant.vatRate != null) varAttributes.vatRate = Number(variant.vatRate);
+          if (variant.vatIncluded !== undefined) varAttributes.vatIncluded = Boolean(variant.vatIncluded);
+
+          await prisma.productVariant.create({
+            data: {
+              productId: realId,
+              sku: safeSku,
+              stock: Number(variant.stock ?? 0),
+              price: Number(variant.price ?? 0),
+              barcode: variant.barcode || null,
+              cost: variant.cost != null ? Number(variant.cost) : 0,
+              attributes: varAttributes
+            }
+          });
+        }
+      } catch (varErr) {
+        console.warn("[API PUT VARIANTS WARNING] Varyantlar güncellenemedi:", varErr);
+      }
+    }
+
+    const updatedProduct = await prisma.product.findFirst({
+      where: { id: realId },
+      include: {
+        variants: true,
+        locations: { include: { warehouse: true } },
+        recipe: true
+      }
+    });
+
     revalidatePath('/', 'layout');
-    return NextResponse.json(product);
+    return NextResponse.json(updatedProduct || product);
   } catch (error) {
     console.warn('Error updating product, falling back to local catalog:', error);
     try {
@@ -440,7 +510,26 @@ export async function PUT(
       const fallbackIdx = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === id || p.sku === id);
       if (fallbackIdx !== -1) {
         const target = FALLBACK_PRODUCTS[fallbackIdx];
-        const updatedFallback = { ...target, ...body };
+        const updatedFallback = {
+          ...target,
+          ...body,
+          variants: body.variants ? body.variants.map((v: any, i: number) => ({
+            id: v.id || `var_fb_${Date.now()}_${i}`,
+            sku: v.sku || `${target.sku || 'VAR'}-${i+1}`,
+            price: Number(v.price || target.price || 0),
+            stock: Number(v.stock || 0),
+            size: v.size || "",
+            color: v.color || "",
+            name: v.name || "",
+            attributes: {
+              size: v.size || "",
+              color: v.color || "",
+              barcode: v.barcode || "",
+              name: v.name || "",
+              b2bPrice: v.b2bPrice
+            }
+          })) : (target.variants || [])
+        };
         FALLBACK_PRODUCTS[fallbackIdx] = updatedFallback;
         return NextResponse.json(updatedFallback);
       }

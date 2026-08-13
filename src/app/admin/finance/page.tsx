@@ -122,41 +122,51 @@ export default function AdvancedAnalyticsPage() {
   // Fetch functions
   const fetchSummary = async () => {
     try {
-      const res = await fetch(`/api/accounting/summary?year=${budgetYear}`);
-      const data = await res.json();
-      if (!data.error) setSummary(data);
+      const res = await fetch(`/api/accounting/summary?year=${budgetYear}`).catch(() => null);
+      if (!res || !res.ok) return;
+      const data = await res.json().catch(() => ({}));
+      if (data && !data.error) setSummary(data);
     } catch (err) {
-      console.error("Summary load error", err);
+      console.warn("Summary load warning", err);
     }
   };
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch("/api/accounting/expenses");
-      const data = await res.json();
+      const res = await fetch("/api/accounting/expenses").catch(() => null);
+      if (!res || !res.ok) { setExpenses([]); return; }
+      const data = await res.json().catch(() => []);
       if (Array.isArray(data)) setExpenses(data);
-    } catch {
-      toast.error("Giderler yüklenemedi");
+      else setExpenses([]);
+    } catch (err) {
+      console.warn("Expenses load warning", err);
+      setExpenses([]);
     }
   };
 
   const fetchTaxes = async () => {
     try {
-      const res = await fetch("/api/accounting/tax");
-      const data = await res.json();
+      const res = await fetch("/api/accounting/tax").catch(() => null);
+      if (!res || !res.ok) { setTaxes([]); return; }
+      const data = await res.json().catch(() => []);
       if (Array.isArray(data)) setTaxes(data);
-    } catch {
-      toast.error("Vergi beyannameleri yüklenemedi");
+      else setTaxes([]);
+    } catch (err) {
+      console.warn("Taxes load warning", err);
+      setTaxes([]);
     }
   };
 
   const fetchBudget = async () => {
     try {
-      const res = await fetch(`/api/accounting/budget?year=${budgetYear}`);
-      const data = await res.json();
+      const res = await fetch(`/api/accounting/budget?year=${budgetYear}`).catch(() => null);
+      if (!res || !res.ok) { setBudgetItems([]); return; }
+      const data = await res.json().catch(() => []);
       if (Array.isArray(data)) setBudgetItems(data);
-    } catch {
-      toast.error("Bütçe verileri yüklenemedi");
+      else setBudgetItems([]);
+    } catch (err) {
+      console.warn("Budget load warning", err);
+      setBudgetItems([]);
     }
   };
 

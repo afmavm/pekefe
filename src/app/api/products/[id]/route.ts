@@ -56,13 +56,38 @@ export async function GET(
           recipe: true
         }
       });
+
+      // If not found by direct ID or SKU, match by SEO slug
+      if (!product) {
+        const allActive = await prisma.product.findMany({
+          where: { isDeleted: false },
+          include: {
+            variants: true,
+            locations: {
+              include: {
+                warehouse: true
+              }
+            },
+            recipe: true
+          }
+        });
+        const decodedId = decodeURIComponent(id);
+        product = allActive.find((p: any) => {
+          const autoSlug = p.slug || generateSlugServer(p.name || "");
+          return autoSlug === id || autoSlug === decodedId;
+        }) || null;
+      }
     } catch (dbErr) {
       console.warn(`[API PRODUCT BY ID WARNING] DB erişimi yok, FALLBACK_PRODUCTS kontrol ediliyor: ${id}`, dbErr);
     }
 
     // DB'de bulunamadıysa veya DB kapalıysa FALLBACK_PRODUCTS içinden ara
     if (!product) {
-      const fallbackItem = FALLBACK_PRODUCTS.find((p: any) => p.id === id || p.sku === id);
+      const decodedId = decodeURIComponent(id);
+      const fallbackItem = FALLBACK_PRODUCTS.find((p: any) => {
+        const autoSlug = p.slug || generateSlugServer(p.name || "");
+        return p.id === id || p.sku === id || autoSlug === id || autoSlug === decodedId;
+      });
       if (fallbackItem) {
         product = JSON.parse(JSON.stringify(fallbackItem));
       }

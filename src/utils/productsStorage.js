@@ -20,6 +20,7 @@ export function generateSlug(name = "") {
     .replace(/-+/g, "-");
 }
 
+export const STORAGE_KEY = "pekefe_products";
 export const DEFAULT_PRODUCTS = [];
 
 export function getProducts() {

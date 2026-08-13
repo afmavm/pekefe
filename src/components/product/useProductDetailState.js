@@ -62,7 +62,7 @@ export function useProductDetailState(params) {
       const found = getProductBySlug(slugOrId);
       if (found) { setProductState(found); }
       else if (Array.isArray(all)) {
-        const byId = all.find((p) => String(p.id) === String(slugOrId));
+        const byId = all.find((p) => String(p.id) === String(slugOrId) || String(p.sku) === String(slugOrId) || String(p.slug) === String(slugOrId) || generateSlug(p.name) === String(slugOrId));
         if (byId) setProductState(byId);
       }
       setIsLoading(false);

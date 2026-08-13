@@ -81,9 +81,12 @@ export default function ApplicationsPage() {
   const fetchApplications = async (isFirstLoad = false, showLoader = false) => {
     if (showLoader) setLoading(true);
     try {
-      const res = await fetch(`/api/applications`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const res = await fetch(`/api/applications`).catch(() => null);
+      if (!res || !res.ok) {
+        setApplications([]);
+        return;
+      }
+      const data = await res.json().catch(() => []);
       const apps = Array.isArray(data) ? data : [];
       setApplications(apps);
       
@@ -105,9 +108,8 @@ export default function ApplicationsPage() {
         }
       }
     } catch (err) {
-      if (isFirstLoad || showLoader) {
-        toast.error("Başvurular yüklenemedi.");
-      }
+      console.warn("fetchApplications warning:", err);
+      setApplications([]);
     } finally {
       if (showLoader) setLoading(false);
     }

@@ -632,29 +632,37 @@ export default function Odeme() {
 
           {/* Section 2: Shipping Method & Cargo Carrier */}
           <section className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-outline-variant/20">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-xl">package_2</span>
+            <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">package_2</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-on-surface">Kargo & Gönderim Seçenekleri</h2>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Teslimat hızınızı ve kargo firmanızı belirleyin.</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-on-surface">Kargo & Gönderim Seçenekleri</h2>
-                <p className="text-xs text-on-surface-variant mt-0.5">Teslimat hızınızı ve kargo firmanızı belirleyin.</p>
-              </div>
+              {totalCartDesi > 0 && (
+                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface-variant">
+                  <span className="material-symbols-outlined text-sm text-primary">scale</span>
+                  <span>Sepet Hacmi: <strong className="text-primary">{totalCartDesi} Desi/Kg</strong></span>
+                </div>
+              )}
             </div>
 
             {/* Carrier Selection */}
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex sm:hidden justify-between items-center mb-3">
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Kargo Firması Tercihi</label>
                 {totalCartDesi > 0 && (
                   <span className="text-[11px] font-semibold text-primary bg-primary/5 px-2.5 py-1 rounded-full border border-primary/10 flex items-center gap-1">
                     <span className="material-symbols-outlined text-xs">scale</span>
-                    <span>Sepet Hacmi: <strong>{totalCartDesi} Desi/Kg</strong></span>
+                    <span>{totalCartDesi} Desi</span>
                   </span>
                 )}
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {activeCarriers.map((c) => {
                   const fee = getCarrierTierFee(c, totalCartDesi);
                   const isFree = subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
@@ -666,23 +674,38 @@ export default function Odeme() {
                       key={c.id || c.name}
                       type="button"
                       onClick={() => setSelectedCarrier(c.name)}
-                      className={`p-3 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-between gap-2.5 min-h-[96px] relative ${
+                      className={`p-4 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-between gap-3 min-h-[105px] relative group overflow-hidden ${
                         isSelected
                           ? "border-primary bg-primary/5 text-primary shadow-md ring-2 ring-primary/20 scale-[1.02]"
-                          : "border-outline-variant/30 text-gray-700 bg-surface-container-lowest hover:border-gray-300 hover:bg-surface-container/50"
+                          : "border-outline-variant/30 text-gray-700 bg-white hover:border-primary/40 hover:bg-surface-container-lowest"
                       }`}
                     >
-                      {logo ? (
-                        <div className="h-9 w-full flex items-center justify-center bg-white p-1 rounded-xl border border-slate-100 shadow-2xs">
-                          <img src={logo} alt={c.name} className="h-7 max-w-[110px] object-contain" />
+                      {/* Selection Checkmark Badge */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shadow-xs">
+                          <span className="material-symbols-outlined text-xs font-bold">check</span>
                         </div>
-                      ) : (
-                        <span className="text-sm font-extrabold text-slate-800">{c.name}</span>
                       )}
 
-                      <div className="flex items-center justify-between w-full pt-1 border-t border-slate-100/80">
-                        <span className="text-[11px] font-bold text-slate-600 truncate max-w-[110px]">{c.name}</span>
-                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-full ${isFree ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
+                      {/* Logo Container */}
+                      <div className="h-10 w-full flex items-center justify-center px-2 py-1">
+                        {logo ? (
+                          <img src={logo} alt={c.name} className="max-h-8 max-w-[120px] object-contain transition-transform group-hover:scale-105" />
+                        ) : (
+                          <span className="text-sm font-extrabold text-on-surface">{c.name}</span>
+                        )}
+                      </div>
+
+                      {/* Footer Info & Fee Pill */}
+                      <div className="flex items-center justify-between w-full pt-2.5 border-t border-outline-variant/15">
+                        <span className="text-[11px] font-bold text-on-surface-variant truncate max-w-[100px]">{c.name}</span>
+                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full transition-colors ${
+                          subtotal === 0 ? "hidden" : isFree
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : isSelected
+                            ? "bg-primary text-white shadow-xs"
+                            : "bg-surface-container-high text-on-surface"
+                        }`}>
                           {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
                         </span>
                       </div>

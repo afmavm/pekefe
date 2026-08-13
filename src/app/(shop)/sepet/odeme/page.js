@@ -168,13 +168,7 @@ export default function Odeme() {
     return Number(carrierObj.fallbackFee ?? 150);
   };
 
-  // Dynamic Shipping calculations from Management / CMS Settings per Selected Carrier
-  const defaultCarriers = [
-    { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", fallbackFee: 150, freeThreshold: 5000 },
-    { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", fallbackFee: 140, freeThreshold: 5000 },
-    { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", fallbackFee: 130, freeThreshold: 5000 }
-  ];
-
+  // Live Dynamic Shipping calculations from Management / CMS Settings per Selected Carrier
   const getCarrierLogo = (carrier) => {
     if (carrier.logoUrl && typeof carrier.logoUrl === "string" && carrier.logoUrl.trim()) {
       return carrier.logoUrl.trim();
@@ -191,22 +185,22 @@ export default function Odeme() {
   };
 
   const parsedShippingCarriers = useMemo(() => {
-    if (!siteSettings?.shippingCarriers) return null;
+    if (!siteSettings?.shippingCarriers) return [];
     let list = siteSettings.shippingCarriers;
     if (typeof list === "string") {
       try {
         list = JSON.parse(list);
       } catch (e) {
-        list = null;
+        list = [];
       }
     }
     if (Array.isArray(list) && list.length > 0) {
       return list.filter((c) => c.isActive !== false);
     }
-    return null;
+    return [];
   }, [siteSettings]);
 
-  const activeCarriers = parsedShippingCarriers || defaultCarriers;
+  const activeCarriers = parsedShippingCarriers;
 
   // Auto select first active carrier if current selection is not in active list
   useEffect(() => {

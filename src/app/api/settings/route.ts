@@ -89,19 +89,9 @@ export async function GET() {
     row.companyCheckCurrentVkn = !!row.companyCheckCurrentVkn;
     row.cashOnDeliveryEnabled = !!row.cashOnDeliveryEnabled;
 
-    if (row && (!row.shippingCarriers || row.shippingCarriers === "[]")) {
-      row.shippingCarriers = JSON.stringify([
-        { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 150, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 90 }, { minDesi: 5.01, maxDesi: 15, price: 130 }, { minDesi: 15.01, maxDesi: 30, price: 180 }, { minDesi: 30.01, maxDesi: 60, price: 280 }] },
-        { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 140, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 85 }, { minDesi: 5.01, maxDesi: 15, price: 120 }, { minDesi: 15.01, maxDesi: 30, price: 170 }, { minDesi: 30.01, maxDesi: 60, price: 260 }] },
-        { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 4000, taxRate: 20, billingMethod: "weight", fallbackFee: 130, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 80 }, { minDesi: 5.01, maxDesi: 15, price: 115 }, { minDesi: 15.01, maxDesi: 30, price: 160 }, { minDesi: 30.01, maxDesi: 60, price: 240 }] }
-      ]);
-    }
-
-    // If disk fallback has shippingCarriers and DB doesn't reflect the latest save (e.g. DB auth failed during last PUT),
-    // merge shippingCarriers from disk so changes are never lost
+    // Merge disk fallback data if disk holds newer changes
     const diskData = readLocalSettingsFallback();
     if (diskData?.shippingCarriers && diskData.shippingCarriers !== row.shippingCarriers) {
-      // Disk is more recent — use disk value for shippingCarriers
       row.shippingCarriers = diskData.shippingCarriers;
     }
 
@@ -122,11 +112,7 @@ export async function GET() {
       announcementActive: true,
       maintenanceMode: false,
       logoUrl: '/logo.png',
-      shippingCarriers: JSON.stringify([
-        { id: "yurtici", name: "Yurtiçi Kargo", logoUrl: "/logos/yurtici.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 150, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 90 }, { minDesi: 5.01, maxDesi: 15, price: 130 }, { minDesi: 15.01, maxDesi: 30, price: 180 }, { minDesi: 30.01, maxDesi: 60, price: 280 }] },
-        { id: "aras", name: "Aras Kargo", logoUrl: "/logos/aras.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 5000, taxRate: 20, billingMethod: "weight", fallbackFee: 140, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 85 }, { minDesi: 5.01, maxDesi: 15, price: 120 }, { minDesi: 15.01, maxDesi: 30, price: 170 }, { minDesi: 30.01, maxDesi: 60, price: 260 }] },
-        { id: "mng", name: "MNG Kargo", logoUrl: "/logos/mng.svg", pricingType: "tiered", isActive: true, addShippingCosts: true, isFreeShipping: false, freeThreshold: 4000, taxRate: 20, billingMethod: "weight", fallbackFee: 130, outOfRangeBehavior: "highest", tiers: [{ minDesi: 0, maxDesi: 5, price: 80 }, { minDesi: 5.01, maxDesi: 15, price: 115 }, { minDesi: 15.01, maxDesi: 30, price: 160 }, { minDesi: 30.01, maxDesi: 60, price: 240 }] }
-      ])
+      shippingCarriers: '[]'
     };
     writeLocalSettingsFallback(defaultFallback);
     return NextResponse.json(defaultFallback);

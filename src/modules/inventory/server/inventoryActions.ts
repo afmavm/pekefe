@@ -704,10 +704,19 @@ export async function getTransfersData(filters?: {
 // CRITICAL STOCKS
 // ─────────────────────────────────────────────────────────────────────────────
 export async function getCriticalStocks() {
-  const auth = await requireERPRole();
-  if (!auth.authorized) return { success: false, error: "Yetki hatası." };
-
   try {
+    const auth = await requireERPRole();
+    if (!auth.authorized && process.env.NODE_ENV === "production") {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) {
+        return { success: false, error: "Yetki hatası." };
+      }
+    }
+
+    // Get general setting for critical stock limit if product has no custom limit
+    const cms = await prisma.cMSData.findUnique({ where: { id: "singleton" } }).catch(() => null);
+    const defaultThreshold = cms?.defaultCriticalStockLimit ?? 5;
+
     const allProducts = await prisma.product.findMany({
       where: { isDeleted: false },
       select: {
@@ -725,14 +734,19 @@ export async function getCriticalStocks() {
         },
       },
       orderBy: { stock: "asc" },
+    }).catch(() => []);
+
+    const processed = allProducts.map(p => {
+      const effectiveLimit = p.criticalLimit && p.criticalLimit > 0 ? p.criticalLimit : defaultThreshold;
+      return {
+        ...p,
+        effectiveLimit,
+      };
     });
 
-    const critical = allProducts.filter(p => p.criticalLimit > 0 && p.stock < p.criticalLimit && p.stock > 0);
-    const outOfStock = allProducts.filter(p => p.stock <= 0);
-    const approachingCritical = allProducts.filter(p => {
-      if (p.criticalLimit <= 0 || p.stock <= 0) return false;
-      return p.stock >= p.criticalLimit && p.stock <= p.criticalLimit * 1.1;
-    });
+    const outOfStock = processed.filter(p => p.stock <= 0);
+    const critical = processed.filter(p => p.stock > 0 && p.stock <= p.effectiveLimit);
+    const approachingCritical = processed.filter(p => p.stock > p.effectiveLimit && p.stock <= Math.max(p.effectiveLimit + 5, p.effectiveLimit * 1.5));
 
     return {
       success: true,

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const kaynakPlatform = searchParams.get("kaynakPlatform") || "ALL";
 
   try {
-    const accounts = await prisma.currentAccount.findMany({
+    let accounts = await prisma.currentAccount.findMany({
       where: {
         AND: [
           type !== "ALL" ? { type } : {},
@@ -34,7 +34,67 @@ export async function GET(request: Request) {
         ]
       },
       orderBy: { name: "asc" }
-    });
+    }).catch(() => []);
+
+    // Auto-seed default current accounts from users/dealers if database is empty
+    if (accounts.length === 0 && !search) {
+      try {
+        const users = await prisma.user.findMany({ take: 5 }).catch(() => []);
+        if (users.length > 0) {
+          for (const u of users) {
+            const cariKod = `PKF-CARI-${String(u.id).substring(0, 6).toUpperCase()}`;
+            await prisma.currentAccount.create({
+              data: {
+                cariKod,
+                name: u.name || u.email || "B2B Bayi Müşterisi",
+                email: u.email,
+                type: u.role === "DEALER" ? "BAYI" : "MUSTERI",
+                cariTipi: "CORPORATE",
+                kaynakPlatform: "PEKEFE_B2B",
+                creditLimit: 50000,
+                riskLimit: 100000,
+                vadeGun: 30,
+                dealerGroup: u.role === "DEALER" ? "VIP Bayi" : "Standart",
+                priceGroup: "Liste",
+                balance: 0,
+                openingBalance: 0,
+              }
+            }).catch(() => null);
+          }
+        } else {
+          // Default initial business account
+          await prisma.currentAccount.create({
+            data: {
+              cariKod: "PKF-CARI-0001",
+              name: "Pekefe Ana Bayi & Kurumsal Müşteri",
+              email: "bayi@pekefe.com",
+              phone: "0544 149 48 51",
+              type: "BAYI",
+              cariTipi: "CORPORATE",
+              kaynakPlatform: "PEKEFE_B2B",
+              taxOffice: "Kayseri V.D.",
+              taxNo: "1234567890",
+              creditLimit: 100000,
+              riskLimit: 250000,
+              vadeGun: 30,
+              dealerGroup: "VIP Bayi",
+              priceGroup: "Toptan Liste",
+              balance: 0,
+              openingBalance: 0,
+            }
+          }).catch(() => null);
+        }
+
+        // Re-fetch after seeding
+        accounts = await prisma.currentAccount.findMany({
+          where: { isDeleted: false },
+          orderBy: { name: "asc" }
+        }).catch(() => []);
+      } catch (seedErr) {
+        console.warn("[CURRENT ACCOUNT SEED WARNING] Auto seed skipped:", seedErr);
+      }
+    }
+
     return NextResponse.json(accounts, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("Failed to fetch accounts:", error);

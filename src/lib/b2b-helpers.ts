@@ -64,27 +64,31 @@ export async function generateNextOrderId(typeOrTx?: any, tx?: any): Promise<str
     activeTx = typeOrTx;
   }
 
-  const db = activeTx || prisma;
   const currentYear = new Date().getFullYear();
-  
-  // Count only orders of the specified type
-  const count = await db.order.count({
-    where: { type: type }
-  });
-  
-  let prefix = type === "B2B" ? "B2B" : "PKF";
-  let nextSeq = count + 1;
-  let customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
-  
-  let isIdUnique = false;
-  while (!isIdUnique) {
-    const existing = await db.order.findUnique({ where: { id: customOrderId } });
-    if (!existing) {
-      isIdUnique = true;
-    } else {
-      nextSeq++;
-      customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+  const prefix = type === "B2B" ? "B2B" : "PKF";
+
+  try {
+    const db = activeTx || prisma;
+    const count = await db.order.count({
+      where: { type: type }
+    });
+    
+    let nextSeq = count + 1;
+    let customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+    
+    let isIdUnique = false;
+    while (!isIdUnique) {
+      const existing = await db.order.findUnique({ where: { id: customOrderId } });
+      if (!existing) {
+        isIdUnique = true;
+      } else {
+        nextSeq++;
+        customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+      }
     }
+    return customOrderId;
+  } catch (err) {
+    console.warn("[GENERATE ORDER ID WARNING] DB erişilemedi, fallback sipariş kodu üretiliyor:", err);
+    return `${prefix}-${currentYear}-${Math.floor(100000 + Math.random() * 900000)}`;
   }
-  return customOrderId;
 }

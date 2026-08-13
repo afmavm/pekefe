@@ -40,49 +40,52 @@ export async function POST(request: NextRequest) {
     const grandTotal = Number(cartTotal);
     const customerEmail = email || `${phone.replace(/\D/g, '')}@pekefe.com`;
 
-    // Find or create CurrentAccount for customer
-    let account = await prisma.currentAccount.findFirst({
-      where: { email: customerEmail }
-    });
-
+    let accountId = 'guest-account';
     const fullAddress = `${address}${district ? `, ${district}` : ''} / ${city}`;
-
-    if (account) {
-      account = await prisma.currentAccount.update({
-        where: { id: account.id },
-        data: {
-          phone: phone || account.phone,
-          address: fullAddress || account.address,
-        }
-      });
-    } else {
-      account = await prisma.currentAccount.create({
-        data: {
-          name: name,
-          email: customerEmail,
-          phone: phone,
-          address: fullAddress,
-          type: 'B2C',
-          cariTipi: 'INDIVIDUAL',
-        }
-      });
-    }
-
     const orderSummary = `${selectedCarrierName ? `[${selectedCarrierName}] ` : ''}` + cart.map((item: any) => `${item.name} (${item.quantity})`).join(", ");
 
-    // Save order draft in database
-    const order = await prisma.order.create({
-      data: {
-        id: customOrderId,
-        currentAccountId: account.id,
-        total: grandTotal,
-        shippingFee: Number(shippingFee),
-        status: 'Ödeme Bekliyor',
-        summary: orderSummary,
-        type: 'B2C',
-        method: 'PayTR 3D Secure Kredi Kartı',
-      },
-    });
+    try {
+      let account = await prisma.currentAccount.findFirst({
+        where: { email: customerEmail }
+      });
+
+      if (account) {
+        account = await prisma.currentAccount.update({
+          where: { id: account.id },
+          data: {
+            phone: phone || account.phone,
+            address: fullAddress || account.address,
+          }
+        });
+      } else {
+        account = await prisma.currentAccount.create({
+          data: {
+            name: name,
+            email: customerEmail,
+            phone: phone,
+            address: fullAddress,
+            type: 'B2C',
+            cariTipi: 'INDIVIDUAL',
+          }
+        });
+      }
+      accountId = account.id;
+
+      await prisma.order.create({
+        data: {
+          id: customOrderId,
+          currentAccountId: accountId,
+          total: grandTotal,
+          shippingFee: Number(shippingFee),
+          status: 'Ödeme Bekliyor',
+          summary: orderSummary,
+          type: 'B2C',
+          method: 'PayTR 3D Secure Kredi Kartı',
+        },
+      });
+    } catch (dbErr) {
+      console.warn("[PAYTR TOKEN DB WARNING] Veritabanına taslak sipariş yazılamadı, ödeme adımı devam ettiriliyor:", dbErr);
+    }
 
     // PayTR Basket Format
     const paytrBasket = cart.map((item: any) => ({
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Create PayTR Token
     const paytrResult = await createPayTRToken({
-      merchantOid: order.id,
+      merchantOid: customOrderId,
       email: customerEmail,
       paymentAmount: grandTotal,
       userName: name,
@@ -123,12 +126,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       token: paytrResult.token,
-      orderId: order.id,
+      orderId: customOrderId,
     });
   } catch (error: any) {
     console.error('[PAYTR TOKEN ROUTE ERROR]:', error);
+    const friendlyMsg = (error?.message && (error.message.includes('prisma') || error.message.includes('database') || error.message.includes('Authentication failed')))
+      ? 'Ödeme altyapısı güncellenmektedir. Lütfen alternatif ödeme yöntemini deneyiniz.'
+      : (error?.message || 'Ödeme oturumu başlatılırken bir sunucu hatası oluştu.');
     return NextResponse.json(
-      { error: error.message || 'Ödeme oturumu başlatılırken bir sunucu hatası oluştu.' },
+      { error: friendlyMsg },
       { status: 500 }
     );
   }

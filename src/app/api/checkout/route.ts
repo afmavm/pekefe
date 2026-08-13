@@ -663,6 +663,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Checkout Error:', error);
-    return NextResponse.json({ error: error.message || 'Sipariş işlenirken bir hata oluştu.' }, { status: 500 });
+    const friendlyMsg = (error?.message && (error.message.includes('prisma') || error.message.includes('database') || error.message.includes('Authentication failed')))
+      ? 'Siparişiniz işlenirken geçici bir bağlantı aksaklığı oluştu. Lütfen tekrar deneyiniz.'
+      : (error?.message || 'Sipariş işlenirken bir hata oluştu.');
+    return NextResponse.json({ error: friendlyMsg }, { status: 500 });
   }
 }

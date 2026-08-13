@@ -1006,7 +1006,7 @@ export default function Odeme() {
               {bankDiscount > 0 && (
                 <div className="flex justify-between text-amber-700 font-semibold">
                   <span>Havale / EFT İndirimi (%{bankDiscountRate})</span>
-                  <span>-₺{bankDiscount.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
+                  <span>-₺{(bankDiscount % 1 === 0 ? bankDiscount.toLocaleString("tr-TR") : bankDiscount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</span>
                 </div>
               )}
 
@@ -1020,14 +1020,14 @@ export default function Odeme() {
               <div className="flex justify-between text-gray-600">
                 <span>Kargo Bedeli ({selectedCarrier})</span>
                 <span className="font-bold text-on-surface">
-                  {shippingCost === 0 ? <span className="text-emerald-600 font-bold">ÜCRETSİZ</span> : `₺${shippingCost}`}
+                  {shippingCost === 0 ? <span className="text-emerald-600 font-bold">ÜCRETSİZ</span> : `₺${shippingCost.toLocaleString("tr-TR")}`}
                 </span>
               </div>
 
               <div className="pt-3 border-t border-outline-variant/20 flex justify-between items-baseline">
                 <span className="text-base font-bold text-on-surface">Genel Toplam</span>
                 <span className="text-2xl font-bold text-primary">
-                  ₺{grandTotal.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                  ₺{(grandTotal % 1 === 0 ? grandTotal.toLocaleString("tr-TR") : grandTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}
                 </span>
               </div>
 

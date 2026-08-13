@@ -16,11 +16,23 @@ export async function GET(request: Request) {
   const kaynakPlatform = searchParams.get("kaynakPlatform") || "ALL";
 
   try {
+    let platformWhere: any = {};
+    if (kaynakPlatform !== "ALL") {
+      const normalized = kaynakPlatform.replace(/_/g, " ").toUpperCase();
+      if (normalized.includes("B2B")) {
+        platformWhere = {
+          kaynakPlatform: { in: ["PEKEFE_B2B", "PEKEFE B2B", "B2B"] }
+        };
+      } else {
+        platformWhere = { kaynakPlatform };
+      }
+    }
+
     let accounts = await prisma.currentAccount.findMany({
       where: {
         AND: [
           type !== "ALL" ? { type } : {},
-          kaynakPlatform !== "ALL" ? { kaynakPlatform } : {},
+          platformWhere,
           search ? {
             OR: [
               { name: { contains: search } },

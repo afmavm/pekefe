@@ -11,6 +11,14 @@ import { useSession, signOut } from "next-auth/react";
 import GlobalSearchModal from "@/components/GlobalSearchModal";
 import { useCMS } from "@/context/CMSContext";
 
+const stripHtml = (str) => {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
 const translateImage = (url) => {
   if (!url) return url;
   if (url.includes("/pekefe-dut-pekmezi-kavanoz.jpg") || url.includes("/geleneksel-pekmez.jpg") || url.includes("/geleneksel-pekmez.png")) {
@@ -362,8 +370,11 @@ export default function Header() {
                       />
                     </div>
                     <div className="flex-grow min-w-0">
-                      <h4 className="font-bold text-primary text-xs truncate">{item.name}</h4>
-                      <p className="text-[10px] text-on-surface-variant mt-0.5">{item.desc || item.meta}</p>
+                      <h4 className="font-bold text-primary text-xs truncate" title={stripHtml(item.name)}>{stripHtml(item.name)}</h4>
+                      {item.variantLabel && (
+                        <span className="text-[10px] text-[#6b1d2f] font-bold block">{stripHtml(item.variantLabel)}</span>
+                      )}
+                      <p className="text-[10px] text-on-surface-variant mt-0.5 line-clamp-1">{stripHtml(item.desc || item.meta)}</p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-outline-variant/20 rounded bg-white" role="group" aria-label={`${item.name} adedi`}>
                           <button

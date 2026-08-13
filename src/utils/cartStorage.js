@@ -23,17 +23,30 @@ function parseStoredCart(stored) {
   }
 }
 
+function stripHtml(str) {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function normalizeItems(items) {
   if (!Array.isArray(items)) return [];
   return items.map(item => {
-    const cleanName = item.name ? String(item.name).replace(/\s*\(\s*undefined\s*\)/gi, "").trim() : "";
+    const rawName = item.name ? String(item.name).replace(/\s*\(\s*undefined\s*\)/gi, "").trim() : "";
+    const cleanName = stripHtml(rawName);
+    const rawDesc = item.shortDesc || item.meta || item.desc || "";
+    const cleanDesc = stripHtml(rawDesc);
+    const shortText = cleanDesc.length > 80 ? cleanDesc.substring(0, 80) + "..." : cleanDesc;
+    
     return {
       ...item,
       id: String(item.id),
       name: cleanName,
       quantity: item.quantity || item.qty || 1,
-      variantLabel: item.variantLabel || "",
-      desc: item.desc || `${cleanName} · Premium Kavanoz`,
+      variantLabel: item.variantLabel ? stripHtml(item.variantLabel) : "",
+      desc: shortText || (cleanName ? `${cleanName} · İspir` : "Premium Mahsul"),
       badge: item.badge || "Geleneksel",
       img: item.img || item.image || "/premium-pekefe-kavanoz.png",
       image: item.image || item.img || "/premium-pekefe-kavanoz.png",
@@ -103,15 +116,20 @@ export function addToCart(product, quantity = 1) {
       else variantLabel = size || color || "";
     }
 
+    const cleanName = stripHtml(product.name || "");
+    const rawDesc = product.shortDesc || product.meta || product.desc || "";
+    const cleanDesc = stripHtml(rawDesc);
+    const shortText = cleanDesc.length > 80 ? cleanDesc.substring(0, 80) + "..." : cleanDesc;
+
     store.addItem({
       id: String(product.id),
-      name: product.name,
+      name: cleanName,
       price: price,
       quantity,
       image,
       img: image,
-      variantLabel,
-      desc: product.detail || product.meta || product.desc || "Premium Kavanoz",
+      variantLabel: stripHtml(variantLabel),
+      desc: shortText || "Premium Mahsul",
       badge: product.tag || product.badge || "Doğal"
     });
 

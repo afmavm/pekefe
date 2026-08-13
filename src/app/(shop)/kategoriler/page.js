@@ -8,89 +8,6 @@ import { Toast } from "@/components/ui/Toast";
 import { fetchProductsFromApi } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 
-const initialProducts = [
-  {
-    id: "dut-pekmezi",
-    name: "Geleneksel İspir Dut Pekmezi",
-    category: "pekmez",
-    desc: "İspir'in 2000 rakımlı yaylalarındaki yabani mulberlerden toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, katkısız saf dut pekmezi.",
-    meta: "800g · Cam Kavanoz",
-    price: 280,
-    image: "/pekefe-dut-pekmezi-kavanoz.jpg",
-    tag: "En Çok Satan",
-  },
-  {
-    id: "karadut-pekmezi",
-    name: "Yabani Karadut Pekmezi",
-    category: "pekmez",
-    desc: "Geleneksel vakumlu kaynatma tekniği ile yüksek HMF değerleri üretilmeden, vitamin ve mineralleri korunarak üretilen premium karadut özü.",
-    meta: "450g · Şişe Şeklinde Cam",
-    price: 320,
-    image: "/premium-pekefe-kavanoz.png",
-    tag: "Özel Hasat",
-  },
-  {
-    id: "sade-pestil",
-    name: "Sade Dut Pestili",
-    category: "pestil",
-    desc: "Dut şırası ve tam buğday ununun bakır kazanlarda pişirilip keten sergiler üzerinde İspir güneşi altında kurutulmasıyla üretilen incecik sade pestil.",
-    meta: "500g · Kraft Kutu",
-    price: 180,
-    image: "/ispir-pestil-kurutma-gercek.png",
-    tag: "Doğal Güneşte Kurutulmuş",
-  },
-  {
-    id: "cevizli-pestil",
-    name: "Cevizli Rulo Pestil",
-    category: "pestil",
-    desc: "İspir yöresinin yerli cevizleriyle harmanlanan, ipeksi kıvamda serilen geleneksel dut pestilinin rulo haline getirilmiş en asil şekli.",
-    meta: "500g · Premium Hediye Kutusu",
-    price: 220,
-    image: "/ispir-vakum-cevizli-pestil-beyaz.png",
-    tag: "Geleneksel Reçete",
-  },
-  {
-    id: "ispir-kome",
-    name: "İspir Dut Kömesi (Cevizli)",
-    category: "kome",
-    desc: "İpe dizilen taze İspir cevizlerinin, kaynayan dut herlesine (şıra karışımı) defalarca batırılarak güneşte kurutulmasıyla elde edilen efsanevi lezzet.",
-    meta: "1kg · Pamuk Torba",
-    price: 380,
-    image: "/ispir-kome-gercek-hasat.jpg",
-    tag: "Coğrafi İşaretli",
-  },
-  {
-    id: "ispir-tek-cekim-kome",
-    name: "İspir Tek Çekim Dut Kömesi",
-    category: "kome",
-    desc: "Dullerine sadece tek daldırma yapılarak ceviz yoğunluğu en üst seviyede tutulmuş, hafif tatlı butik seri.",
-    meta: "500g · Butik Paket",
-    price: 240,
-    image: "/ispir-kome-beyaz.png",
-    tag: "Sınırlı Hasat",
-  },
-  {
-    id: "muska-tatlisi",
-    name: "Dut Pestil Muska Tatlısı",
-    category: "tatli",
-    desc: "İncecik kesilen sade dut pestilinin içerisine yerli ceviz, bal ve pekmez karışımı muska şeklinde sarılarak elde edilen enfes saray tatlısı.",
-    meta: "350g · Özel Sunum Kabı",
-    price: 200,
-    image: "/ispir-vakum-sade-pestil-beyaz.png",
-    tag: "El Emeği",
-  },
-  {
-    id: "sarma-tatlisi",
-    name: "Dut Pestil Sarma Tatlısı",
-    category: "tatli",
-    desc: "Dut pestilinin içerisine bol miktarda dövülmüş ceviz ve antep fıstığı kreması sarılarak hazırlanan gurme lezzet dilimleri.",
-    meta: "400g · Premium Sunum Kutusu",
-    price: 210,
-    image: "/ispir-vakum-cevizli-pestil-beyaz.png",
-    tag: "Gurme Seri",
-  }
-];
-
 function trNormalize(str = "") {
   if (!str || typeof str !== "string") return "";
   const trMap = {
@@ -114,25 +31,28 @@ function parseNumericPrice(val) {
 }
 
 export default function Kategoriler() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
+    setLoading(true);
     try {
       const [prodData, catData] = await Promise.all([
         fetchProductsFromApi(),
         fetch("/api/categories", { cache: "no-store" }).then(r => r.ok ? r.json() : [])
       ]);
-      if (Array.isArray(prodData) && prodData.length > 0) {
-        const catMap = {};
-        if (Array.isArray(catData)) {
-          catData.forEach(c => { if (c?.name) catMap[trNormalize(c.name)] = c.name.trim(); });
-        }
+      const catMap = {};
+      if (Array.isArray(catData)) {
+        catData.forEach(c => { if (c?.name) catMap[trNormalize(c.name)] = c.name.trim(); });
+      }
+      if (Array.isArray(prodData)) {
         setProducts(prodData.map(p => ({
           ...p,
           price: parseNumericPrice(p.price),
           categoryDisplay: catMap[trNormalize(p.categoryDisplay || p.category)] || p.categoryDisplay || p.category
         })));
+      } else {
+        setProducts([]);
       }
     } catch (e) {
       console.error("loadProducts error:", e);
@@ -393,7 +313,19 @@ export default function Kategoriler() {
               </select>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 animate-pulse">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div key={n} className="bg-white rounded-2xl p-4 border border-slate-100 space-y-4 shadow-sm">
+                    <div className="w-full aspect-square bg-slate-100 rounded-xl" />
+                    <div className="h-4 bg-slate-100 rounded-full w-2/3" />
+                    <div className="h-3 bg-slate-100 rounded-full w-full" />
+                    <div className="h-3 bg-slate-100 rounded-full w-4/5" />
+                    <div className="h-8 bg-slate-100 rounded-xl w-full mt-4" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-24 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
                 <span className="material-symbols-outlined text-slate-300 text-6xl">search_off</span>
                 <h3 className="text-lg font-bold text-slate-700">Eşleşen Mahsul Bulunamadı</h3>

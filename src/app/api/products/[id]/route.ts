@@ -175,6 +175,23 @@ export async function GET(
   }
 }
 
+function generateSlugServer(text: string): string {
+  if (!text) return "";
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9 -]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -199,13 +216,22 @@ export async function PUT(
       return NextResponse.json({ error: "Satış fiyatı 0'dan küçük olamaz" }, { status: 400 });
     }
 
-    // Try finding product in DB
+    // Try finding product in DB by ID, SKU, or SEO Slug
     let resolvedProduct: any = null;
     try {
       resolvedProduct = await prisma.product.findFirst({
         where: { OR: [{ id }, { sku: id }] },
         select: { id: true }
       });
+
+      if (!resolvedProduct) {
+        const decodedId = decodeURIComponent(id);
+        const allProducts = await prisma.product.findMany({ select: { id: true, name: true, sku: true } });
+        resolvedProduct = allProducts.find((p: any) => {
+          const autoSlug = generateSlugServer(p.name || "");
+          return autoSlug === id || autoSlug === decodedId || p.sku === id;
+        }) || null;
+      }
     } catch (dbErr) {
       console.warn(`[API PUT PRODUCT WARNING] DB erişimi yok, FALLBACK_PRODUCTS aranıyor: ${id}`);
     }

@@ -518,6 +518,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   const searchParams = useSearchParams();
   // SKU öncelikli — eski ?id= formatı da desteklenir (geriye dönük uyumluluk)
   const rawQuery = typeof window !== "undefined" ? window.location.search : "";
+  const clientUrlParams = typeof window !== "undefined" ? new URLSearchParams(rawQuery) : null;
   const clientSlug = clientUrlParams?.get("slug");
   const clientSku = clientUrlParams?.get("sku");
   const clientId = clientUrlParams?.get("id");
@@ -1128,8 +1129,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           manufacturerCode: attrs.manufacturerCode || product.manufacturerCode || "",
           stockType: attrs.stockType || "Ticari Mal",
           warehouse: attrs.warehouse || "Merkez Depo",
-          desc: product.desc || "",
-          shortDesc: attrs.shortDesc || "",
+          desc: product.desc || attrs.shortDesc || attrs.desc || "",
+          shortDesc: product.shortDesc || attrs.shortDesc || "",
           recipeDetails: attrs.recipeDetails || "",
           
           purchasePrice: product.cost || 0,

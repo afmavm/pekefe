@@ -2,7 +2,25 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+function generateSlug(text: string): string {
+  if (!text) return "";
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9 -]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
 import { 
   PackageSearch, Settings2, Hammer, Search, AlertCircle, 
   CheckCircle2, Box, ArrowRight, Loader2, PlaySquare, Layers, Clock,
@@ -831,7 +849,13 @@ export default function StockProductionPage() {
                                 )}
                               </td>
                               <td className="px-6 py-4">
-                                <p className="font-bold text-slate-900 text-sm">{p.name}</p>
+                                <Link
+                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${p.sku}`}
+                                  className="font-bold text-slate-900 text-sm hover:text-orange-600 transition-colors block"
+                                  title="Gelişmiş Stok Kartını Düzenle (SEO Uyumlu)"
+                                >
+                                  {p.name}
+                                </Link>
                                 <p className="text-[10px] font-semibold text-slate-400">SKU: {p.sku}</p>
                               </td>
                               <td className="px-6 py-4">
@@ -880,12 +904,13 @@ export default function StockProductionPage() {
                                 )}
                               </td>
                               <td className="px-6 py-4 text-right space-x-1.5">
-                                <button
-                                  onClick={() => openEditProductModal(p)}
-                                  className="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"
+                                <Link
+                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${p.sku}`}
+                                  className="p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-orange-600 hover:text-orange-900 transition-all inline-flex items-center justify-center cursor-pointer shadow-xs"
+                                  title="Gelişmiş Stok Kartını Aç"
                                 >
                                   <Edit className="w-3.5 h-3.5" />
-                                </button>
+                                </Link>
                                 <button
                                   onClick={() => handleDeleteProduct(p.id)}
                                   className="p-1.5 bg-slate-50 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-lg text-slate-400 hover:text-red-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"

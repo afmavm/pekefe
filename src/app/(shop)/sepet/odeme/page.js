@@ -178,21 +178,50 @@ export default function Odeme() {
   const getCarrierLogo = (carrier) => {
     if (carrier.logoUrl) return carrier.logoUrl;
     const nameLower = (carrier.name || "").toLowerCase();
-    if (nameLower.includes("yurtiçi") || nameLower.includes("yurtici")) return "/logos/yurtici.svg";
+    if (nameLower.includes("yurtiçi") || nameLower.includes("yurtici") || nameLower.includes("yurt i̇çi")) return "/logos/yurtici.svg";
     if (nameLower.includes("aras")) return "/logos/aras.svg";
     if (nameLower.includes("mng")) return "/logos/mng.svg";
+    if (nameLower.includes("dhl")) return "/logos/dhl.svg";
     if (nameLower.includes("ptt")) return "/logos/ptt.svg";
     if (nameLower.includes("sürat") || nameLower.includes("surat")) return "/logos/surat.svg";
     if (nameLower.includes("jet") || nameLower.includes("hepsi")) return "/logos/hepsijet.svg";
     return null;
   };
 
-  const activeCarriers = (siteSettings?.shippingCarriers && Array.isArray(siteSettings.shippingCarriers) && siteSettings.shippingCarriers.length > 0)
-    ? siteSettings.shippingCarriers.filter(c => c.isActive !== false)
-    : defaultCarriers;
+  const parsedShippingCarriers = useMemo(() => {
+    if (!siteSettings?.shippingCarriers) return null;
+    let list = siteSettings.shippingCarriers;
+    if (typeof list === "string") {
+      try {
+        list = JSON.parse(list);
+      } catch (e) {
+        list = null;
+      }
+    }
+    if (Array.isArray(list) && list.length > 0) {
+      return list.filter((c) => c.isActive !== false);
+    }
+    return null;
+  }, [siteSettings]);
+
+  const activeCarriers = parsedShippingCarriers || defaultCarriers;
+
+  // Auto select first active carrier if current selection is not in active list
+  useEffect(() => {
+    if (activeCarriers.length > 0) {
+      const exists = activeCarriers.some(
+        c => c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr')) ||
+             selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
+      );
+      if (!exists) {
+        setSelectedCarrier(activeCarriers[0].name);
+      }
+    }
+  }, [activeCarriers, selectedCarrier]);
 
   const currentCarrierObj = activeCarriers.find(
-    c => c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr')) || selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
+    c => c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr')) ||
+         selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
   ) || activeCarriers[0];
 
   const carrierFreeThreshold = Number(currentCarrierObj?.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);

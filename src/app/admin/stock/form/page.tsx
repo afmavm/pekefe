@@ -1261,27 +1261,37 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         }
 
         // Set variants if exist
-        if (product.variants && product.variants.length > 0) {
+        if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
           setVariants(product.variants.map((v: any) => {
             const variantAttrs = typeof v.attributes === "string"
               ? JSON.parse(v.attributes)
               : (v.attributes || {});
             return {
               id: v.id,
-              sku: v.sku,
+              sku: v.sku || "",
               barcode: variantAttrs.barcode || v.barcode || "",
               name: variantAttrs.name || v.name || "",
               size: variantAttrs.size || v.size || "",
               color: variantAttrs.color || v.color || "",
-              stock: v.stock || 0,
+              stock: v.stock !== undefined ? Number(v.stock) : 0,
               price: v.price ? Number(v.price) : 0,
-              b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : undefined,
+              purchasePrice: v.cost ? Number(v.cost) : (variantAttrs.cost ? Number(variantAttrs.cost) : 0),
+              b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : (v.price ? Number(v.price) : 0),
               vatRate: variantAttrs.vatRate != null ? Number(variantAttrs.vatRate) : 20,
               vatIncluded: variantAttrs.vatIncluded ?? true,
             };
           }));
         } else {
           setVariants([]);
+        }
+
+        // Sync browser address bar with SEO-friendly slug
+        if (typeof window !== "undefined" && product.name) {
+          const seoSlug = product.slug || generateSlug(product.name);
+          const expectedQuery = `?slug=${seoSlug}&id=${product.id}&sku=${product.sku}`;
+          if (window.location.search !== expectedQuery) {
+            window.history.replaceState(null, "", `/admin/stock/form${expectedQuery}`);
+          }
         }
 
         // Set marketplaces integration configurations

@@ -258,67 +258,86 @@ export default function RecipesClient({ initialData }: RecipesClientProps) {
 
         {/* Recipes BOM Tree */}
         <div className="xl:col-span-2 space-y-6">
-          {finishedGoods.map(goods => {
-            const hasRecipe = goods.recipe && goods.recipe.length > 0;
-            return (
-              <div key={goods.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-slate-400" />
-                    <div>
-                      <span className="font-bold text-sm text-slate-800">{goods.name}</span>
-                      <span className="text-[10px] text-slate-400 ml-2">SKU: {goods.sku}</span>
+          {finishedGoods.length === 0 ? (
+            <div className="bg-white border border-dashed border-slate-200 rounded-2xl shadow-sm p-12 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center">
+                <Layers3 className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-slate-800">Henüz Tanımlı Mamul Ürün Bulunmuyor</h3>
+              <p className="text-xs text-slate-400 max-w-md">
+                Reçete (BOM) tanımlayabilmek için önce Ürün Yönetimi alanından imal edilecek mamul ürünlerinizi ekleyin veya mevcut ürünlerinizi Mamul (Satışlık Ürün) olarak işaretleyin.
+              </p>
+              <a
+                href="/admin/stock/form"
+                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-semibold shadow-sm transition"
+              >
+                <Plus className="w-4 h-4" />
+                Yeni Mamul Ürün Ekle
+              </a>
+            </div>
+          ) : (
+            finishedGoods.map(goods => {
+              const hasRecipe = goods.recipe && goods.recipe.length > 0;
+              return (
+                <div key={goods.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-5 h-5 text-slate-400" />
+                      <div>
+                        <span className="font-bold text-sm text-slate-800">{goods.name}</span>
+                        <span className="text-[10px] text-slate-400 ml-2">SKU: {goods.sku}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-0">
-                  {!hasRecipe ? (
-                    <div className="p-6 text-center text-xs text-slate-400">
-                      Bu ürüne ait reçete (BOM) bulunmamaktadır. Sol taraftan malzeme ekleyebilirsiniz.
-                    </div>
-                  ) : (
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                          <th className="p-3 pl-4">Hammadde (Bileşen)</th>
-                          <th className="p-3">Gerekli Miktar</th>
-                          <th className="p-3 text-right pr-4">İşlem</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50 text-xs text-slate-700">
-                        {goods.recipe.map((item: any) => (
-                          <tr key={item.id} className="hover:bg-slate-50/50 transition">
-                            <td className="p-3 pl-4 font-semibold">
-                              {item.ingredient?.name} 
-                              {item.ingredientVariant && (
-                                <span className="text-slate-400 font-medium text-[10px] ml-1.5">
-                                  ({Object.values(item.ingredientVariant.attributes as Record<string, string>).join(", ")})
-                                </span>
-                              )}
-                              <div className="text-[9px] text-slate-400">SKU: {item.ingredient?.sku}</div>
-                            </td>
-                            <td className="p-3 font-bold text-slate-900">
-                              {item.quantity} {item.unit}
-                            </td>
-                            <td className="p-3 text-right pr-4">
-                              <button
-                                onClick={() => handleDeleteItem(item.id, goods.id)}
-                                className="p-1 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg border border-red-100 transition"
-                                title="Bileşeni Çıkar"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </td>
+                  <div className="p-0">
+                    {!hasRecipe ? (
+                      <div className="p-6 text-center text-xs text-slate-400">
+                        Bu ürüne ait reçete (BOM) bulunmamaktadır. Sol taraftan malzeme ekleyebilirsiniz.
+                      </div>
+                    ) : (
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                            <th className="p-3 pl-4">Hammadde (Bileşen)</th>
+                            <th className="p-3">Gerekli Miktar</th>
+                            <th className="p-3 text-right pr-4">İşlem</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
+                        </thead>
+                        <tbody className="divide-y divide-slate-50 text-xs text-slate-700">
+                          {goods.recipe.map((item: any) => (
+                            <tr key={item.id} className="hover:bg-slate-50/50 transition">
+                              <td className="p-3 pl-4 font-semibold">
+                                {item.ingredient?.name} 
+                                {item.ingredientVariant && (
+                                  <span className="text-slate-400 font-medium text-[10px] ml-1.5">
+                                    ({Object.values(item.ingredientVariant.attributes as Record<string, string>).join(", ")})
+                                  </span>
+                                )}
+                                <div className="text-[9px] text-slate-400">SKU: {item.ingredient?.sku}</div>
+                              </td>
+                              <td className="p-3 font-bold text-slate-900">
+                                {item.quantity} {item.unit}
+                              </td>
+                              <td className="p-3 text-right pr-4">
+                                <button
+                                  onClick={() => handleDeleteItem(item.id, goods.id)}
+                                  className="p-1 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg border border-red-100 transition"
+                                  title="Bileşeni Çıkar"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

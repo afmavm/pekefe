@@ -220,9 +220,17 @@ export default function Odeme() {
          selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
   ) || activeCarriers[0];
 
+  const isCurrentCarrierAlwaysFree = Boolean(
+    currentCarrierObj?.isFreeShipping === true ||
+    currentCarrierObj?.isFreeShipping === "true" ||
+    currentCarrierObj?.isFree === true ||
+    currentCarrierObj?.alwaysFree === true ||
+    currentCarrierObj?.pricingType === "free"
+  );
+
   const carrierFreeThreshold = Number(currentCarrierObj?.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
   const carrierFee = getCarrierTierFee(currentCarrierObj, totalCartDesi);
-  const isShippingFree = subtotal >= carrierFreeThreshold;
+  const isShippingFree = isCurrentCarrierAlwaysFree || (subtotal >= carrierFreeThreshold);
   const shippingCost = subtotal === 0 ? 0 : (isShippingFree ? 0 : carrierFee);
 
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
@@ -690,7 +698,14 @@ export default function Odeme() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {activeCarriers.map((c) => {
                   const fee = getCarrierTierFee(c, totalCartDesi);
-                  const isFree = subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
+                  const isCarrierAlwaysFree = Boolean(
+                    c.isFreeShipping === true ||
+                    c.isFreeShipping === "true" ||
+                    c.isFree === true ||
+                    c.alwaysFree === true ||
+                    c.pricingType === "free"
+                  );
+                  const isFree = isCarrierAlwaysFree || (subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000));
                   const isSelected = selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr')) || c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr'));
                   const logo = getCarrierLogo(c);
 

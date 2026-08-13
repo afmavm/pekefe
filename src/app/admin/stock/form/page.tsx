@@ -1048,7 +1048,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/products/${productId}`);
+        const res = await fetch(`/api/products/${productId}?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
+        });
         if (!res.ok) {
           toast.error("Ürün yüklenirken hata oluştu.");
           return;

@@ -251,7 +251,13 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch('/api/products', { cache: 'no-store' });
+      const res = await fetch(`/api/products?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setProducts(data);
@@ -262,7 +268,13 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/categories', { cache: 'no-store' });
+      const res = await fetch(`/api/categories?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setCategoryDetails(data);

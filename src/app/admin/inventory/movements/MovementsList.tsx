@@ -717,13 +717,13 @@ export default function MovementsList({
       </form>
 
       {/* Print Layout Header */}
-      <div className="only-print bg-slate-900 text-white p-6 rounded-2xl mb-6">
+      <div className="hidden print:block bg-slate-900 text-white p-6 rounded-2xl mb-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Pekefe ERP Raporlama Servisi</h1>
             <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">Stok Hareketleri Audit Log Raporu</p>
           </div>
-          <div className="text-right text-xs text-slate-350">
+          <div className="text-right text-xs text-slate-300">
             <p>Tarih: {new Date().toLocaleDateString("tr-TR")}</p>
             <p>Saat: {new Date().toLocaleTimeString("tr-TR")}</p>
           </div>

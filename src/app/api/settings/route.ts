@@ -44,7 +44,9 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN openAccountDaysLimit INT NOT NULL DEFAULT 30",
     "ALTER TABLE CMSData ADD COLUMN preventZeroStockSale TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN defaultCriticalStockLimit INT NOT NULL DEFAULT 5",
-    "ALTER TABLE CMSData ADD COLUMN topBarItems LONGTEXT NULL"
+    "ALTER TABLE CMSData ADD COLUMN topBarItems LONGTEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN dealSectionActive TINYINT(1) NOT NULL DEFAULT 0",
+    "ALTER TABLE CMSData ADD COLUMN dealProductIds LONGTEXT NULL"
   ];
 
   for (const q of alterQueries) {

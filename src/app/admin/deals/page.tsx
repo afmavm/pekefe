@@ -121,6 +121,17 @@ export default function AdminDealsPage() {
     });
   };
 
+  const selectAllFiltered = () => {
+    const idsToAdd = filteredProducts.map((p) => String(p.id));
+    setSelectedIds((prev) => Array.from(new Set([...prev, ...idsToAdd])));
+    setIsDirty(true);
+  };
+
+  const clearAllSelected = () => {
+    setSelectedIds([]);
+    setIsDirty(true);
+  };
+
   const toggleSection = () => {
     setDealSectionActive((v) => !v);
     setIsDirty(true);
@@ -134,9 +145,13 @@ export default function AdminDealsPage() {
         dealProductIds: JSON.stringify(selectedIds),
       });
       setIsDirty(false);
-      toast.success("Fırsat bölümü başarıyla kaydedildi!");
-    } catch {
-      toast.error("Kayıt sırasında bir hata oluştu.");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("pekefe_cms_changed"));
+        window.dispatchEvent(new CustomEvent("pekefe_products_updated"));
+      }
+      toast.success("Fırsat ürünleri ve bölüm ayarları başarıyla kaydedildi!");
+    } catch (e: any) {
+      toast.error(e?.message || "Kayıt sırasında bir hata oluştu.");
     } finally {
       setSaving(false);
     }
@@ -239,9 +254,29 @@ export default function AdminDealsPage() {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                 Ürün Seçimi
               </p>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                Aşağıdaki listeden fırsat ürünlerini işaretleyin ({selectedIds.length} seçili)
-              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-xs text-slate-500 font-medium">
+                  Aşağıdaki listeden fırsat ürünlerini işaretleyin ({selectedIds.length} seçili)
+                </p>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={selectAllFiltered}
+                    className="text-[11px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors border border-amber-200/60 cursor-pointer"
+                  >
+                    Hepsini Seç
+                  </button>
+                  {selectedIds.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllSelected}
+                      className="text-[11px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-2.5 py-1 rounded-lg transition-colors border border-slate-200 cursor-pointer"
+                    >
+                      Seçimi Temizle
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

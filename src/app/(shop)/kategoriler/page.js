@@ -347,6 +347,7 @@ export default function Kategoriler() {
                       id={p.id}
                       name={p.name}
                       desc={p.desc}
+                      shortDesc={p.shortDesc}
                       meta={p.meta}
                       price={p.price}
                       priceMin={p.priceMin}

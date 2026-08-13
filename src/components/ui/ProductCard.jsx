@@ -42,6 +42,7 @@ export function ProductCard({
   id,
   name,
   desc,
+  shortDesc,
   meta,
   price,
   priceMin,
@@ -57,6 +58,8 @@ export function ProductCard({
 }) {
   const [imgError, setImgError] = useState(false);
   const { data: session } = useSession();
+
+  const cardDesc = shortDesc || desc || "";
 
   const isB2B = session?.user?.role === "dealer" || session?.user?.customer_type === "B2B";
 
@@ -135,9 +138,9 @@ export function ProductCard({
           <h3 className="font-display-lg text-[#6b1d2f] dark:text-amber-300 text-base sm:text-lg font-bold leading-snug line-clamp-2">
             {name}
           </h3>
-          {desc && (
+          {cardDesc && (
             <p className="text-xs text-on-surface-variant leading-relaxed line-clamp-2">
-              {stripHtmlTags(desc)}
+              {stripHtmlTags(cardDesc)}
             </p>
           )}
         </div>

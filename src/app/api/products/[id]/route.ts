@@ -307,7 +307,8 @@ export async function PUT(
     if (body.image !== undefined) data.image = body.image;
     if (body.images !== undefined) data.images = body.images || [];
     if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl;
-    if (body.desc !== undefined) data.desc = body.desc;
+    if (body.desc !== undefined) data.desc = body.desc || body.shortDesc;
+    if (body.shortDesc !== undefined) data.shortDesc = body.shortDesc;
     if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
     if (body.seoDesc !== undefined) data.seoDesc = body.seoDesc;
     if (body.seoKeywords !== undefined) data.seoKeywords = body.seoKeywords;
@@ -315,6 +316,7 @@ export async function PUT(
 
     if (
       body.attributes !== undefined ||
+      body.shortDesc !== undefined ||
       body.barcode !== undefined ||
       body.unit !== undefined ||
       body.manufacturerCode !== undefined ||
@@ -334,6 +336,7 @@ export async function PUT(
       data.attributes = {
         ...currentAttrs,
         ...(body.attributes || {}),
+        ...(body.shortDesc !== undefined ? { shortDesc: body.shortDesc } : {}),
         ...(body.barcode !== undefined ? { barcode: body.barcode } : {}),
         ...(body.unit !== undefined ? { unit: body.unit } : {}),
         ...(body.manufacturerCode !== undefined ? { manufacturerCode: body.manufacturerCode } : {}),

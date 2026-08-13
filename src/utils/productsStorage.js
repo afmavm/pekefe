@@ -78,12 +78,16 @@ export function formatDbProductToStorefront(p) {
   }) : [];
 
   const autoSlug = p.slug || generateSlug(p.name || "");
+  const resolvedShortDesc = p.shortDesc || attrs.shortDesc || "";
+  const resolvedDesc = p.desc || resolvedShortDesc || attrs.desc || "";
   return {
     ...p,
     id: p.id || p.sku,
     slug: autoSlug,
     name: p.name || "",
     sku: p.sku || "",
+    desc: resolvedDesc,
+    shortDesc: resolvedShortDesc,
     price: p.sale_price ? Number(p.sale_price) : (p.price ? Number(p.price) : 0),
     oldPrice: p.oldPrice ? Number(p.oldPrice) : (p.list_price ? Number(p.list_price) : 0),
     stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),

@@ -518,13 +518,14 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   const searchParams = useSearchParams();
   // SKU öncelikli — eski ?id= formatı da desteklenir (geriye dönük uyumluluk)
   const rawQuery = typeof window !== "undefined" ? window.location.search : "";
-  const clientUrlParams = typeof window !== "undefined" ? new URLSearchParams(rawQuery) : null;
+  const clientSlug = clientUrlParams?.get("slug");
   const clientSku = clientUrlParams?.get("sku");
   const clientId = clientUrlParams?.get("id");
 
+  const slugParam = searchParams.get("slug");
   const skuParam = searchParams.get("sku");
   const idParam = searchParams.get("id");
-  const productId = propProductId || skuParam || idParam || clientSku || clientId;
+  const productId = propProductId || slugParam || skuParam || idParam || clientSlug || clientSku || clientId;
   const isEditMode = !!productId;
   const { refreshProducts, refreshCategories } = useProduct();
 
@@ -1735,7 +1736,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         cost: form.purchasePrice,
         image: mediaList[0]?.url || "",
         images: mediaList.map(m => m.url),
-        desc: form.desc,
+        desc: form.desc || form.shortDesc,
+        shortDesc: form.shortDesc,
         isCampaignActive: form.isCampaignActive,
         discount_start_date: form.discount_start_date ? new Date(form.discount_start_date).toISOString() : null,
         discount_end_date: form.discount_end_date ? new Date(form.discount_end_date).toISOString() : null,
@@ -1751,6 +1753,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         seoDesc: form.seoDesc,
         seoKeywords: form.seoKeywords,
         attributes: {
+          shortDesc: form.shortDesc,
           sizes: sizes,
           colors: colors,
           barcode: form.barcode,

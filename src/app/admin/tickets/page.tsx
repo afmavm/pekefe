@@ -94,38 +94,7 @@ const PRIORITY_MAP: Record<string, { label: string; cls: string }> = {
   KRITIK:  { label: "Kritik",  cls: "text-red-600"   },
 };
 
-const INITIAL_CRM_TASKS: CRMTask[] = [
-  {
-    id: "crm-1",
-    cariName: "Zeta Dağıtım A.Ş.",
-    type: "TELEFON",
-    personnel: "Ahmet Şahin",
-    content: "Ödeme gecikmesi hakkında mutabakat sağlandı. Cuma gününe kadar ödeme geçecekler.",
-    reminderDate: "2026-06-05T14:00",
-    alarm: true,
-    status: "PROGRESS"
-  },
-  {
-    id: "crm-2",
-    cariName: "Beta Lojistik Ltd.",
-    type: "YUZYUZE",
-    personnel: "Elif Korkmaz",
-    content: "Yeni lojistik fiyat teklif matrisi sunuldu, revizyon bekleniyor.",
-    reminderDate: "2026-06-08T10:00",
-    alarm: false,
-    status: "TODO"
-  },
-  {
-    id: "crm-3",
-    cariName: "Ahmet Yılmaz (B2C)",
-    type: "EPOSTA",
-    personnel: "Mehmet Çelik",
-    content: "Bireysel bayilik başvuru formu iletildi. Belgelerin tamamlanması bekleniyor.",
-    reminderDate: "2026-06-04T17:30",
-    alarm: true,
-    status: "DONE"
-  }
-];
+const INITIAL_CRM_TASKS: CRMTask[] = [];
 
 const QUICK_REPLIES = [
   { label: "Talep Alındı", text: "Merhaba, talebiniz alınmıştır. En kısa sürede inceleyip size geri dönüş sağlayacağız." },
@@ -175,24 +144,23 @@ export default function TicketsAndCRMPage() {
     alarm: true
   });
 
-  // Load CRM tasks from local storage or set initial values
+  // Load CRM tasks from local storage or set empty array
   useEffect(() => {
-    const saved = localStorage.getItem("pekefe_crm_tasks");
+    const saved = localStorage.getItem("pekefe_crm_tasks_v2");
     if (saved) {
       try {
         setCrmTasks(JSON.parse(saved));
       } catch {
-        setCrmTasks(INITIAL_CRM_TASKS);
+        setCrmTasks([]);
       }
     } else {
-      setCrmTasks(INITIAL_CRM_TASKS);
-      localStorage.setItem("pekefe_crm_tasks", JSON.stringify(INITIAL_CRM_TASKS));
+      setCrmTasks([]);
     }
   }, []);
 
   const saveCrmTasks = (newTasks: CRMTask[]) => {
     setCrmTasks(newTasks);
-    localStorage.setItem("pekefe_crm_tasks", JSON.stringify(newTasks));
+    localStorage.setItem("pekefe_crm_tasks_v2", JSON.stringify(newTasks));
   };
 
   const fetchTickets = async () => {

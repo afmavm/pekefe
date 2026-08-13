@@ -176,6 +176,9 @@ export default function Odeme() {
   ];
 
   const getCarrierLogo = (carrier) => {
+    if (carrier.logoUrl && typeof carrier.logoUrl === "string" && carrier.logoUrl.trim()) {
+      return carrier.logoUrl.trim();
+    }
     const nameLower = (carrier.name || "").toLowerCase();
     if (nameLower.includes("yurtiçi") || nameLower.includes("yurtici") || nameLower.includes("yurt i̇çi") || nameLower.includes("yurt ici")) return "/logos/yurtici.svg";
     if (nameLower.includes("aras")) return "/logos/aras.svg";
@@ -184,7 +187,6 @@ export default function Odeme() {
     if (nameLower.includes("ptt")) return "/logos/ptt.svg";
     if (nameLower.includes("sürat") || nameLower.includes("surat")) return "/logos/surat.svg";
     if (nameLower.includes("jet") || nameLower.includes("hepsi")) return "/logos/hepsijet.svg";
-    if (carrier.logoUrl) return carrier.logoUrl;
     return null;
   };
 
@@ -717,9 +719,9 @@ export default function Odeme() {
                       )}
 
                       {/* Logo Container */}
-                      <div className="h-14 w-full flex items-center justify-center px-3 py-1 bg-slate-50/70 rounded-xl border border-slate-100/80">
+                      <div className="h-14 w-full flex items-center justify-center px-2 py-1 bg-white rounded-xl border border-slate-100 shadow-2xs overflow-hidden">
                         {logo ? (
-                          <img src={logo} alt={c.name} className="h-10 md:h-11 w-auto max-w-[140px] md:max-w-[165px] object-contain transition-transform group-hover:scale-105" />
+                          <img src={logo} alt={c.name} className="max-h-12 w-auto max-w-[150px] md:max-w-[170px] object-contain transition-transform group-hover:scale-105" />
                         ) : (
                           <span className="text-base font-black text-on-surface">{c.name}</span>
                         )}

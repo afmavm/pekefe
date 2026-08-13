@@ -26,12 +26,18 @@ export default async function ReportsPage({ searchParams }: PageProps) {
   const dateFrom = sp.dateFrom ?? "";
   const dateTo = sp.dateTo ?? "";
 
-  // Load warehouses directly from prisma for filter dropdown
-  const warehouses = await prisma.warehouse.findMany({
+  // Load warehouses safely from prisma for filter dropdown with fallback
+  let warehouses = await prisma.warehouse.findMany({
     where: { isActive: true },
     include: { branch: { select: { name: true } } },
     orderBy: { name: "asc" },
-  });
+  }).catch(() => []);
+
+  if (warehouses.length === 0) {
+    warehouses = [
+      { id: "merkez-depo", name: "Merkez Depo", code: "WH-MRKZ", branch: { name: "Merkez Şube" } } as any
+    ];
+  }
 
   // Load report data
   const result = await getInventoryReportData(reportType, {

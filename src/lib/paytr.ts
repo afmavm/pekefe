@@ -85,6 +85,9 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
       failUrl = 'https://www.pekefe.com/sepet/odeme?error=paytr',
     } = params;
 
+    // PayTR requires merchant_oid to be strictly alphanumeric (A-Z, a-z, 0-9)
+    const cleanMerchantOid = (merchantOid || '').replace(/[^a-zA-Z0-9]/g, '');
+
     // Convert payment amount to Kuruş (e.g. 100.50 TL -> 10050)
     const totalKurus = Math.round(paymentAmount * 100);
 
@@ -104,7 +107,7 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
 
     // Official PayTR iFrame Hash String Calculation:
     // merchant_id + user_ip + merchant_oid + email + payment_amount + user_basket + no_installment + max_installment + currency + test_mode
-    const hashString = `${merchantId}${userIp}${merchantOid}${email}${totalKurus}${userBasketStr}${noInstallment}${maxInstallment}${currency}${testMode}`;
+    const hashString = `${merchantId}${userIp}${cleanMerchantOid}${email}${totalKurus}${userBasketStr}${noInstallment}${maxInstallment}${currency}${testMode}`;
     const paytrToken = crypto
       .createHmac('sha256', merchantKey)
       .update(hashString + merchantSalt)
@@ -113,7 +116,7 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
     const bodyParams = new URLSearchParams({
       merchant_id: merchantId,
       user_ip: userIp || '127.0.0.1',
-      merchant_oid: merchantOid,
+      merchant_oid: cleanMerchantOid,
       email: email || 'musteri@pekefe.com',
       payment_amount: String(totalKurus),
       paytr_token: paytrToken,

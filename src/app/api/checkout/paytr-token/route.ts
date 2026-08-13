@@ -35,8 +35,9 @@ export async function POST(request: NextRequest) {
     const forwardedFor = request.headers.get('x-forwarded-for');
     const userIp = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
 
-    // Generate Unique Order ID (e.g. PKF-2026-0001)
-    const customOrderId = await generateNextOrderId();
+    // Generate Unique Order ID (e.g. PKF-2026-0001 -> PKF20260001)
+    const rawOrderId = await generateNextOrderId();
+    const customOrderId = rawOrderId.replace(/[^a-zA-Z0-9]/g, '');
     const grandTotal = Number(cartTotal);
     const customerEmail = email || `${phone.replace(/\D/g, '')}@pekefe.com`;
 

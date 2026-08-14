@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { 
   MessageSquare, Star, Trash2, CheckCircle2, XCircle, 
   Send, Reply, Loader2, Search, Filter, AlertCircle, Sparkles,
-  Inbox, TrendingUp, ThumbsUp
+  Inbox, TrendingUp, ThumbsUp, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ export default function AdminFeedbackPage() {
   const [submittingReply, setSubmittingReply] = useState(false);
 
   const fetchFeedbacks = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/feedback");
       if (res.ok) {
@@ -62,8 +63,7 @@ export default function AdminFeedbackPage() {
       });
 
       if (res.ok) {
-        toast.success(newStatus === "APPROVED" ? "Yorum başarıyla onaylandı." : "Yorum reddedildi.");
-        // Update state locally
+        toast.success(newStatus === "APPROVED" ? "Yorum onaylandı ve yayına alındı." : "Yorum reddedildi.");
         setFeedbacks(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
       } else {
         toast.error("İşlem başarısız oldu.");
@@ -83,11 +83,11 @@ export default function AdminFeedbackPage() {
       const res = await fetch(`/api/feedback/${replyingTo.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reply: replyText, status: "APPROVED" }) // Automatically approve on reply
+        body: JSON.stringify({ reply: replyText, status: "APPROVED" })
       });
 
       if (res.ok) {
-        toast.success("Yanıtınız başarıyla eklendi ve yorum onaylandı.");
+        toast.success("Yanıtınız eklendi ve yorum onaylandı.");
         setFeedbacks(prev => prev.map(item => 
           item.id === replyingTo.id ? { ...item, reply: replyText, status: "APPROVED" } : item
         ));
@@ -105,7 +105,7 @@ export default function AdminFeedbackPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bu geri bildirimi kalıcı olarak silmek istediğinize emin misiniz?")) return;
+    if (!confirm("Bu geri bildirimi silmek istediğinize emin misiniz?")) return;
 
     try {
       const res = await fetch(`/api/feedback/${id}`, {
@@ -113,7 +113,7 @@ export default function AdminFeedbackPage() {
       });
 
       if (res.ok) {
-        toast.success("Geri bildirim başarıyla silindi.");
+        toast.success("Geri bildirim silindi.");
         setFeedbacks(prev => prev.filter(item => item.id !== id));
       } else {
         toast.error("Silme işlemi başarısız.");
@@ -148,7 +148,6 @@ export default function AdminFeedbackPage() {
         f.message.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesTab = activeTab === "ALL" || f.status === activeTab;
-      
       const matchesRating = ratingFilter === "ALL" || f.rating === ratingFilter;
 
       return matchesSearch && matchesTab && matchesRating;
@@ -156,116 +155,113 @@ export default function AdminFeedbackPage() {
   }, [feedbacks, searchTerm, activeTab, ratingFilter]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header Deck */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div>
-          <h1 className="text-3xl font-extrabold uppercase tracking-widest text-slate-900 flex items-center gap-3">
-            <MessageSquare className="w-8 h-8 text-orange-500" /> Geri Bildirim & CRM Merkezi
+          <h1 className="text-xl font-black text-slate-900 flex items-center gap-2.5">
+            <MessageSquare className="w-6 h-6 text-[#b45309]" /> Müşteri Yorumları & Geri Bildirim Merkezi
           </h1>
-          <p className="text-slate-500 mt-2 text-sm font-medium">
-            B2C ve B2B müşterilerden gelen değerlendirmeleri, puanları inceleyin. Yanıt yazarak kurumsal prestijinizi artırın.
+          <p className="text-xs text-slate-500 mt-1">
+            Ziyaretçi ve müşterilerden gelen ürün değerlendirmelerini inceleyin, yanıtlayın ve yayınlayın.
           </p>
         </div>
+        <button
+          onClick={fetchFeedbacks}
+          className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+          title="Yenile"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* Telemetry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Metric 1 */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-orange-500 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-125 transition-transform"></div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Toplam Yorum</p>
-          <div className="flex items-baseline gap-2 mt-4">
-            <span className="text-4xl font-black text-slate-900">{metrics.total}</span>
-            <span className="text-xs font-bold text-slate-400">Adet</span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Toplam Yorum</p>
+          <div className="flex items-baseline gap-2 mt-3">
+            <span className="text-3xl font-black text-slate-900">{metrics.total}</span>
+            <span className="text-xs font-semibold text-slate-400">Adet</span>
           </div>
-          <div className="flex items-center gap-2 mt-4 text-[11px] font-bold text-slate-500">
+          <div className="flex items-center gap-1.5 mt-3 text-xs font-semibold text-slate-500">
             <Inbox className="w-4 h-4 text-slate-400" />
             <span>Gelen kutusu hacmi</span>
           </div>
         </div>
 
         {/* Metric 2 */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-amber-500 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-125 transition-transform"></div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bekleyen Yorumlar</p>
-          <div className="flex items-baseline gap-2 mt-4">
-            <span className="text-4xl font-black text-amber-600 flex items-center gap-2">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Onay Bekleyenler</p>
+          <div className="flex items-baseline gap-2 mt-3">
+            <span className="text-3xl font-black text-amber-700 flex items-center gap-2">
               {metrics.pending}
-              {metrics.pending > 0 && (
-                <span className="flex h-3.5 w-3.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-orange-500"></span>
-                </span>
-              )}
             </span>
-            <span className="text-xs font-bold text-slate-400">Onay Bekleyen</span>
+            <span className="text-xs font-semibold text-slate-400">Beklemede</span>
           </div>
-          <div className="flex items-center gap-2 mt-4 text-[11px] font-bold text-slate-500">
-            <AlertCircle className="w-4 h-4 text-amber-500" />
-            <span>Maksimum 24 saat yanıt süresi</span>
+          <div className="flex items-center gap-1.5 mt-3 text-xs font-semibold text-slate-500">
+            <AlertCircle className="w-4 h-4 text-amber-600" />
+            <span>İnceleme gerektirenler</span>
           </div>
         </div>
 
         {/* Metric 3 */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-emerald-500 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:scale-125 transition-transform"></div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ortalama Puan</p>
-          <div className="flex items-baseline gap-2 mt-4">
-            <span className="text-4xl font-black text-emerald-600 flex items-center gap-1.5">
-              {metrics.avgRating} <Star className="w-6 h-6 fill-current" />
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Ortalama Puan</p>
+          <div className="flex items-baseline gap-2 mt-3">
+            <span className="text-3xl font-black text-emerald-700 flex items-center gap-1.5">
+              {metrics.avgRating} <Star className="w-5 h-5 fill-emerald-500 text-emerald-500" />
             </span>
-            <span className="text-xs font-bold text-slate-400">/ 5.0 Puan</span>
+            <span className="text-xs font-semibold text-slate-400">/ 5.0</span>
           </div>
-          <div className="flex items-center gap-2 mt-4 text-[11px] font-bold text-slate-500">
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span>Genel müşteri memnuniyeti</span>
+          <div className="flex items-center gap-1.5 mt-3 text-xs font-semibold text-slate-500">
+            <TrendingUp className="w-4 h-4 text-emerald-600" />
+            <span>Müşteri memnuniyeti</span>
           </div>
         </div>
 
         {/* Metric 4 */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:scale-125 transition-transform"></div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Yanıtlanma Oranı</p>
-          <div className="flex items-baseline gap-2 mt-4">
-            <span className="text-4xl font-black text-blue-600">%{metrics.replyRate}</span>
-            <span className="text-xs font-bold text-slate-400">Cevaplandı</span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Yanıtlanma Oranı</p>
+          <div className="flex items-baseline gap-2 mt-3">
+            <span className="text-3xl font-black text-blue-600">%{metrics.replyRate}</span>
+            <span className="text-xs font-semibold text-slate-400">Cevaplandı</span>
           </div>
-          <div className="flex items-center gap-2 mt-4 text-[11px] font-bold text-slate-500">
+          <div className="flex items-center gap-1.5 mt-3 text-xs font-semibold text-slate-500">
             <ThumbsUp className="w-4 h-4 text-blue-500" />
-            <span>Marka etkileşim başarısı</span>
+            <span>Marka etkileşimi</span>
           </div>
         </div>
 
       </div>
 
       {/* Main Workspace Panel */}
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
         
         {/* Controls Header */}
-        <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col lg:flex-row justify-between gap-4">
+        <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col lg:flex-row justify-between items-center gap-4">
           
           {/* Tab buttons */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 w-full lg:w-auto">
             {[
-              { id: "ALL", label: "TÜMÜ", count: metrics.total, color: "bg-slate-100 text-slate-800" },
-              { id: "PENDING", label: "BEKLEYENLER", count: metrics.pending, color: "bg-amber-100 text-orange-600" },
-              { id: "APPROVED", label: "ONAYLANANLAR", count: metrics.approved, color: "bg-emerald-100 text-emerald-700" },
-              { id: "REJECTED", label: "REDDEDİLENLER", count: feedbacks.filter(f => f.status === "REJECTED").length, color: "bg-red-100 text-red-700" }
+              { id: "ALL", label: "TÜMÜ", count: metrics.total },
+              { id: "PENDING", label: "BEKLEYENLER", count: metrics.pending },
+              { id: "APPROVED", label: "ONAYLI", count: metrics.approved },
+              { id: "REJECTED", label: "REDDEDİLENLER", count: feedbacks.filter(f => f.status === "REJECTED").length }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-5 py-2.5 rounded-2xl text-[11px] font-black tracking-widest uppercase transition-all flex items-center gap-2 border ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === tab.id 
-                    ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10 scale-[1.02]" 
-                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-[#b45309] text-white shadow-xs" 
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
                 }`}
               >
                 {tab.label}
-                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${activeTab === tab.id ? 'bg-white/20 text-white' : tab.color}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                   {tab.count}
                 </span>
               </button>
@@ -273,26 +269,26 @@ export default function AdminFeedbackPage() {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             {/* Search Input */}
-            <div className="relative group">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-orange-500 transition-colors" />
+            <div className="relative flex-1 sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="İsim, email veya mesaj..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:w-[240px] pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500 transition-all"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#b45309]"
               />
             </div>
 
             {/* Rating Dropdown */}
-            <div className="relative flex items-center border border-slate-200 rounded-2xl bg-white px-3.5 py-2.5">
+            <div className="relative flex items-center border border-slate-200 rounded-xl bg-white px-3 py-2">
               <Filter className="w-3.5 h-3.5 text-slate-400 mr-2" />
               <select
                 value={ratingFilter}
                 onChange={(e) => setRatingFilter(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
-                className="bg-transparent text-xs font-black text-slate-700 focus:outline-none pr-2 cursor-pointer"
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value="ALL">TÜM PUANLAR</option>
                 <option value="5">5 YILDIZ</option>
@@ -308,51 +304,51 @@ export default function AdminFeedbackPage() {
 
         {/* List Content */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Geri bildirimler çekiliyor...</p>
+          <div className="flex flex-col items-center justify-center py-24 space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin text-[#b45309]" />
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Geri bildirimler çekiliyor...</p>
           </div>
         ) : (
-          <div className="p-6">
+          <div className="p-5">
             {filteredFeedbacks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 space-y-4 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400">
-                  <Inbox className="w-8 h-8" />
+              <div className="flex flex-col items-center justify-center py-16 space-y-3 text-center">
+                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400">
+                  <Inbox className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Kayıt Bulunamadı</h3>
+                  <h3 className="text-sm font-bold text-slate-800">Geri Bildirim Bulunamadı</h3>
                   <p className="text-xs text-slate-400 mt-1 max-w-[280px] mx-auto font-medium">
-                    Filtrelere veya arama sorgunuza uygun herhangi bir geri bildirim bulunmamaktadır.
+                    Filtrelere veya arama kriterinize uygun herhangi bir yorum bulunmamaktadır.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-4">
                 {filteredFeedbacks.map(item => (
                   <div 
                     key={item.id} 
-                    className={`bg-slate-50 border rounded-3xl p-6 transition-all duration-300 relative group flex flex-col md:flex-row md:items-start justify-between gap-6 hover:shadow-md hover:bg-white ${
-                      item.status === 'PENDING' ? 'border-amber-200 bg-orange-50/10' :
-                      item.status === 'REJECTED' ? 'border-orange-100' : 'border-slate-200'
+                    className={`bg-white border rounded-2xl p-5 transition-all flex flex-col md:flex-row md:items-start justify-between gap-5 hover:border-amber-300 shadow-xs ${
+                      item.status === 'PENDING' ? 'border-amber-200 bg-amber-50/20' :
+                      item.status === 'REJECTED' ? 'border-slate-200 bg-slate-50/50' : 'border-slate-200'
                     }`}
                   >
                     
                     {/* Main Content Info */}
-                    <div className="space-y-3 max-w-3xl flex-1">
+                    <div className="space-y-2.5 max-w-3xl flex-1">
                       
                       {/* Top row metadata */}
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2.5">
                         <span className="font-extrabold text-sm text-slate-900">{item.name}</span>
-                        <span className="text-[11px] font-bold text-slate-400">{item.email}</span>
-                        <span className="text-[10px] text-slate-400 font-semibold">• {new Date(item.createdAt).toLocaleDateString("tr-TR", { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-xs font-semibold text-slate-400">{item.email}</span>
+                        <span className="text-xs text-slate-400 font-medium">• {new Date(item.createdAt).toLocaleDateString("tr-TR", { hour: '2-digit', minute: '2-digit' })}</span>
                         
                         {/* Status badge */}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                          item.status === 'PENDING' ? 'bg-amber-100 text-orange-600' :
-                          item.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          item.status === 'PENDING' ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                          item.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
                         }`}>
-                          {item.status === 'PENDING' ? 'BEKLEMEDE' :
-                           item.status === 'APPROVED' ? 'ONAYLANDI' : 'REDDEDİLDİ'}
+                          {item.status === 'PENDING' ? 'Beklemede' :
+                           item.status === 'APPROVED' ? 'Yayında (Onaylı)' : 'Reddedildi'}
                         </span>
                       </div>
 
@@ -361,7 +357,7 @@ export default function AdminFeedbackPage() {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-4 h-4 ${
+                            className={`w-3.5 h-3.5 ${
                               i < item.rating ? "text-amber-400 fill-amber-400" : "text-slate-200"
                             }`} 
                           />
@@ -375,18 +371,18 @@ export default function AdminFeedbackPage() {
 
                       {/* Admin Response Block */}
                       {item.reply ? (
-                        <div className="mt-4 p-4 bg-slate-100 border border-slate-200 rounded-2xl space-y-1.5 animate-in slide-in-from-top-2">
-                          <div className="flex items-center gap-2 text-orange-500 text-[10px] font-black uppercase tracking-widest">
-                            <Sparkles className="w-3.5 h-3.5" /> Nexa Yönetici Yanıtı
+                        <div className="mt-3 p-3 bg-amber-50/50 border border-amber-200 rounded-xl space-y-1">
+                          <div className="flex items-center gap-1.5 text-[#b45309] text-[10px] font-bold">
+                            <Sparkles className="w-3.5 h-3.5" /> Pekefe Yönetici Yanıtı
                           </div>
-                          <p className="text-slate-600 text-xs italic font-semibold">
+                          <p className="text-slate-700 text-xs italic font-medium">
                             "{item.reply}"
                           </p>
                         </div>
                       ) : (
                         item.status === "PENDING" && (
-                          <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1.5 mt-2 animate-pulse">
-                            <AlertCircle className="w-3.5 h-3.5" /> Bu yoruma henüz yanıt verilmedi. Yanıt yazarak anında onaylayın!
+                          <p className="text-[11px] text-amber-800 font-bold flex items-center gap-1 mt-1">
+                            <AlertCircle className="w-3.5 h-3.5" /> Bu yoruma henüz yanıt verilmedi. Yanıt yazarak anında onaylayabilirsiniz.
                           </p>
                         )
                       )}
@@ -394,24 +390,24 @@ export default function AdminFeedbackPage() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex flex-row md:flex-col items-center justify-end gap-2.5 md:self-center border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
+                    <div className="flex flex-row md:flex-col items-center justify-end gap-2 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                       
                       {/* Approve / Reject buttons */}
                       {item.status === 'PENDING' && (
                         <>
                           <button
                             onClick={() => handleStatusUpdate(item.id, "APPROVED")}
-                            className="flex items-center gap-1 px-4 py-2 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                            className="flex items-center gap-1 px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 rounded-xl text-xs font-bold transition cursor-pointer"
                             title="Yorumu Onayla"
                           >
-                            <CheckCircle2 className="w-4 h-4" /> Onayla
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Onayla
                           </button>
                           <button
                             onClick={() => handleStatusUpdate(item.id, "REJECTED")}
-                            className="flex items-center gap-1 px-4 py-2 bg-orange-50 hover:bg-amber-600 text-red-700 hover:text-white border border-amber-200 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                            className="flex items-center gap-1 px-3.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition cursor-pointer"
                             title="Yorumu Reddet"
                           >
-                            <XCircle className="w-4 h-4" /> Reddet
+                            <XCircle className="w-3.5 h-3.5" /> Reddet
                           </button>
                         </>
                       )}
@@ -420,10 +416,10 @@ export default function AdminFeedbackPage() {
                       {item.status === 'APPROVED' && (
                         <button
                           onClick={() => handleStatusUpdate(item.id, "REJECTED")}
-                          className="flex items-center gap-1 px-4 py-2 bg-slate-100 hover:bg-amber-600 text-slate-500 hover:text-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                          className="flex items-center gap-1 px-3.5 py-1.5 bg-slate-100 hover:bg-red-600 text-slate-600 hover:text-white border border-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
                           title="Reddetme Listesine Taşı"
                         >
-                          <XCircle className="w-4 h-4" /> Reddet
+                          <XCircle className="w-3.5 h-3.5" /> Reddet
                         </button>
                       )}
 
@@ -431,10 +427,10 @@ export default function AdminFeedbackPage() {
                       {item.status === 'REJECTED' && (
                         <button
                           onClick={() => handleStatusUpdate(item.id, "APPROVED")}
-                          className="flex items-center gap-1 px-4 py-2 bg-slate-100 hover:bg-emerald-600 text-slate-500 hover:text-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                          className="flex items-center gap-1 px-3.5 py-1.5 bg-slate-100 hover:bg-emerald-600 text-slate-600 hover:text-white border border-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
                           title="Onaylı Listesine Geri Al"
                         >
-                          <CheckCircle2 className="w-4 h-4" /> Onayla
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Onayla
                         </button>
                       )}
 
@@ -444,19 +440,19 @@ export default function AdminFeedbackPage() {
                           setReplyingTo(item);
                           setReplyText(item.reply || "");
                         }}
-                        className="flex items-center gap-1 px-4 py-2 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                        className="flex items-center gap-1 px-3.5 py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 rounded-xl text-xs font-bold transition cursor-pointer"
                         title="Yanıt Ekle / Düzenle"
                       >
-                        <Reply className="w-4 h-4" /> Yanıtla
+                        <Reply className="w-3.5 h-3.5" /> Yanıtla
                       </button>
 
                       {/* Delete button */}
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-orange-50 border border-transparent hover:border-amber-200 rounded-xl transition-all"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer"
                         title="Geri Bildirimi Kalıcı Olarak Sil"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
 
                     </div>
@@ -473,42 +469,42 @@ export default function AdminFeedbackPage() {
       {/* Reply Modal / Overlay Drawer */}
       {replyingTo && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[500px] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-[500px] bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
             
             {/* Header */}
-            <div className="p-8 pb-6 text-center bg-slate-900 text-white relative">
+            <div className="p-6 text-center bg-slate-900 text-white relative">
               <div className="relative z-10 flex flex-col items-center">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center mb-4">
-                  <Reply className="w-6 h-6 text-orange-500" />
+                <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mb-3">
+                  <Reply className="w-5 h-5 text-amber-400" />
                 </div>
-                <h3 className="text-xl font-extrabold uppercase tracking-widest">Cevap Yazın</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                  YAZAN: {replyingTo.name.toUpperCase()}
+                <h3 className="text-base font-extrabold uppercase tracking-wider">Müşteriye Yanıt Yazın</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                  ALICI: {replyingTo.name.toUpperCase()}
                 </p>
               </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleReplySubmit} className="p-8 space-y-6">
+            <form onSubmit={handleReplySubmit} className="p-6 space-y-4">
               
               {/* Original Review Card Preview */}
-              <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl space-y-1">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Müşteri Yorumu</p>
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Müşteri Yorumu</p>
                 <p className="text-slate-600 text-xs italic font-medium leading-relaxed">
                   "{replyingTo.message}"
                 </p>
               </div>
 
               {/* Text Input */}
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Yanıt Mesajınız</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase">Kurumsal Yanıtınız</label>
                 <textarea
                   required
                   rows={4}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Müşteriye iletilecek profesyonel cevabınızı yazın..."
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs text-slate-800 transition-all focus:bg-white focus:border-orange-500"
+                  placeholder="Müşteriye iletilecek nazik ve profesyonel yanıtınızı yazın..."
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-semibold text-xs text-slate-800 transition focus:bg-white focus:border-[#b45309]"
                 />
               </div>
 
@@ -517,19 +513,19 @@ export default function AdminFeedbackPage() {
                 <button
                   type="button"
                   onClick={() => setReplyingTo(null)}
-                  className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-black uppercase tracking-widest transition-all"
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
-                  Kapat
+                  İptal
                 </button>
                 <button
                   type="submit"
                   disabled={submittingReply}
-                  className="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  className="flex-1 py-3 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-md disabled:opacity-50"
                 >
                   {submittingReply ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <>Gönder & Onayla <Send className="w-4.5 h-4.5" /></>
+                    <>Gönder & Onayla <Send className="w-4 h-4" /></>
                   )}
                 </button>
               </div>
@@ -543,4 +539,3 @@ export default function AdminFeedbackPage() {
     </div>
   );
 }
-

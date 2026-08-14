@@ -66,9 +66,12 @@ export default function GelirGiderPage() {
   const load = useCallback(() => {
     setLoading(true);
     fetch("/api/accounting/income-expense")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((data) => setTransactions(Array.isArray(data) ? data : []))
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err);
+        setTransactions([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
+import { fetchProductsFromApi } from "@/utils/productsStorage";
 import { isVideoUrl } from "@/lib/utils";
 
 function generateSlug(text: string): string {
@@ -1302,10 +1303,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           setVariants([]);
         }
 
-        // Sync browser address bar with SEO-friendly slug
-        if (typeof window !== "undefined" && product.name) {
-          const seoSlug = product.slug || generateSlug(product.name);
-          const expectedQuery = `?slug=${seoSlug}&id=${product.id}&sku=${product.sku}`;
+        // Sync browser address bar with clean & professional ID URL parameter
+        if (typeof window !== "undefined" && product.id) {
+          const expectedQuery = `?id=${product.id}`;
           if (window.location.search !== expectedQuery) {
             window.history.replaceState(null, "", `/admin/stock/form${expectedQuery}`);
           }
@@ -1878,7 +1878,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         setIsDirty(false); // Bypass warning popup on save redirect
         toast.success(isEditMode ? "Stok kartı başarıyla güncellendi." : "Stok kartı başarıyla oluşturuldu.");
         
-        // Refresh products context to ensure client side is updated instantly
+        // Refresh products context and localStorage cache to ensure client side is updated instantly
+        await fetchProductsFromApi();
         await refreshProducts();
         await refreshCategories();
 

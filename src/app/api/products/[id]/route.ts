@@ -554,8 +554,32 @@ export async function PUT(
       }
     });
 
+    let parsedImages = updatedProduct?.images;
+    if (typeof parsedImages === 'string') {
+      try { parsedImages = JSON.parse(parsedImages); } catch { parsedImages = []; }
+    }
+    let parsedAttributes = updatedProduct?.attributes;
+    if (typeof parsedAttributes === 'string') {
+      try { parsedAttributes = JSON.parse(parsedAttributes); } catch { parsedAttributes = {}; }
+    }
+
+    const formattedResponse = {
+      ...(updatedProduct || product),
+      images: parsedImages || [],
+      attributes: parsedAttributes || {}
+    };
+
+    // Keep FALLBACK_PRODUCTS synced in memory
+    const fallbackIdx = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === realId || p.sku === realId);
+    if (fallbackIdx !== -1) {
+      FALLBACK_PRODUCTS[fallbackIdx] = {
+        ...FALLBACK_PRODUCTS[fallbackIdx],
+        ...formattedResponse
+      };
+    }
+
     revalidatePath('/', 'layout');
-    return NextResponse.json(updatedProduct || product);
+    return NextResponse.json(formattedResponse);
   } catch (error) {
     console.warn('Error updating product, falling back to local catalog:', error);
     try {

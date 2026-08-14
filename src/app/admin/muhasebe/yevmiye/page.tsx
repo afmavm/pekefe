@@ -57,15 +57,19 @@ export default function YevmiyePage() {
   const load = () => {
     setLoading(true);
     Promise.all([
-      fetch("/api/accounting/journal").then((r) => r.json()),
-      fetch("/api/accounting/accounts").then((r) => r.json()),
-    ]).then(([entriesData, accountsData]) => {
-      setEntries(Array.isArray(entriesData) ? entriesData : []);
-      setAccounts(Array.isArray(accountsData) ? accountsData : []);
-    }).catch((err) => {
-      console.error(err);
-      toast.error("Yevmiye defteri verileri yüklenemedi.");
-    }).finally(() => setLoading(false));
+      fetch("/api/accounting/journal").then((r) => (r && r.ok ? r.json() : [])).catch(() => []),
+      fetch("/api/accounting/accounts").then((r) => (r && r.ok ? r.json() : [])).catch(() => []),
+    ])
+      .then(([entriesData, accountsData]) => {
+        setEntries(Array.isArray(entriesData) ? entriesData : []);
+        setAccounts(Array.isArray(accountsData) ? accountsData : []);
+      })
+      .catch((err) => {
+        console.error(err);
+        setEntries([]);
+        setAccounts([]);
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);

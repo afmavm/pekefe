@@ -304,7 +304,23 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     fetchCategories();
     fetchProductionOrders();
     fetchStockTransfers();
-  }, []);
+
+    const handleProductsChange = () => {
+      fetchProducts();
+    };
+
+    window.addEventListener("pekefe_products_changed", handleProductsChange);
+    window.addEventListener("pekefe_products_updated", handleProductsChange);
+    window.addEventListener("pekefe_search_index_updated", handleProductsChange);
+    window.addEventListener("storage", handleProductsChange);
+
+    return () => {
+      window.removeEventListener("pekefe_products_changed", handleProductsChange);
+      window.removeEventListener("pekefe_products_updated", handleProductsChange);
+      window.removeEventListener("pekefe_search_index_updated", handleProductsChange);
+      window.removeEventListener("storage", handleProductsChange);
+    };
+  }, [fetchProducts, fetchCategories]);
 
   const addProduct = async (product: Product) => {
     try {
@@ -313,7 +329,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
       });
-      if (res.ok) fetchProducts();
+      if (res.ok) {
+        await fetchProducts();
+        window.dispatchEvent(new Event("pekefe_products_changed"));
+      }
     } catch (err) { console.error(err); }
   };
 
@@ -324,7 +343,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
       });
-      if (res.ok) fetchProducts();
+      if (res.ok) {
+        await fetchProducts();
+        window.dispatchEvent(new Event("pekefe_products_changed"));
+      }
     } catch (err) { console.error(err); }
   };
 
@@ -336,7 +358,8 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(updatedProducts)
       });
       if (res.ok) {
-        fetchProducts();
+        await fetchProducts();
+        window.dispatchEvent(new Event("pekefe_products_changed"));
         toast.success("Tüm ürünler başarıyla güncellendi.");
         return true;
       } else {
@@ -354,7 +377,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   const deleteProduct = async (id: string | number) => {
     try {
       const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-      if (res.ok) fetchProducts();
+      if (res.ok) {
+        await fetchProducts();
+        window.dispatchEvent(new Event("pekefe_products_changed"));
+      }
     } catch (err) { console.error(err); }
   };
 

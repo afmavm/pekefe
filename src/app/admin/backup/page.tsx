@@ -949,7 +949,7 @@ export default function BackupAdminPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Database className="w-5 h-5 text-orange-500" />
+              <Database className="w-5 h-5 text-[#b45309]" />
               Sistem Yönetimi ve Operasyonlar
             </h1>
             <p className="text-xs text-slate-500 mt-0.5 font-medium">
@@ -960,7 +960,7 @@ export default function BackupAdminPage() {
             {activeTab === 'backup' ? (
               <button
                 onClick={triggerBackup}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm cursor-pointer"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-amber-800 text-white font-bold text-xs transition shadow-sm cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 Şimdi Yedek Al
@@ -977,7 +977,7 @@ export default function BackupAdminPage() {
             ) : activeTab === 'settings' ? (
               <button
                 onClick={openAddBank}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm cursor-pointer"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-amber-800 text-white font-bold text-xs transition shadow-sm cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Banka Hesabı Ekle
@@ -986,7 +986,7 @@ export default function BackupAdminPage() {
               <button
                 onClick={handleSaveRules}
                 disabled={rulesSaving}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm cursor-pointer disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-amber-800 text-white font-bold text-xs transition shadow-sm cursor-pointer disabled:opacity-50"
               >
                 {rulesSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 Bilgileri Güncelle
@@ -996,12 +996,12 @@ export default function BackupAdminPage() {
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-t border-slate-100 pt-3 gap-2">
+        <div className="flex border-t border-slate-100 pt-3 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('backup')}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
               activeTab === 'backup'
-                ? 'bg-orange-50 text-orange-600'
+                ? 'bg-amber-50 text-[#b45309]'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             }`}
           >
@@ -1014,7 +1014,7 @@ export default function BackupAdminPage() {
             }}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 ${
               activeTab === 'deployment'
-                ? 'bg-orange-50 text-orange-600'
+                ? 'bg-amber-50 text-[#b45309]'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             }`}
           >
@@ -1029,7 +1029,7 @@ export default function BackupAdminPage() {
             }}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 ${
               activeTab === 'settings'
-                ? 'bg-orange-50 text-orange-600'
+                ? 'bg-amber-50 text-[#b45309]'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             }`}
           >
@@ -1043,7 +1043,7 @@ export default function BackupAdminPage() {
             }}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 ${
               activeTab === 'company'
-                ? 'bg-orange-50 text-orange-600'
+                ? 'bg-amber-50 text-[#b45309]'
                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
             }`}
           >

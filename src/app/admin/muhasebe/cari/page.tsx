@@ -332,14 +332,6 @@ export default function CariPage() {
   const [showDevirMenu, setShowDevirMenu] = useState(false);
   const [actionForm, setActionForm] = useState({ amount: "", description: "", paymentMethod: "Banka Havalesi", bankId: "BNK-01" });
 
-  const handleAntigravityCompleteInModal = (data: any) => {
-    setActionForm(prev => ({
-      ...prev,
-      amount: String(data.allocatedAmount),
-      description: `Antigravity Akıllı Dağıtım ile kapatıldı. (Kur Farkı Kazancı: +${data.exchangeGainLoss.toLocaleString()} TRY)`
-    }));
-  };
-
   // ── Ekstre (Hesap Hareketi) State ─────────────────────────────
   const [ekstreData, setEkstreData] = useState<any>(null);
   const [ekstreLoading, setEkstreLoading] = useState(false);

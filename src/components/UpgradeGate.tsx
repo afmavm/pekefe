@@ -86,7 +86,7 @@ export default function UpgradeGate({
             </div>
             <div className="flex items-start gap-2.5 text-xs font-semibold text-slate-600">
               <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>Antigravity Akıllı AI Patron Asistanı (NL2SQL)</span>
+              <span>Akıllı AI Patron Asistanı (NL2SQL)</span>
             </div>
             <div className="flex items-start gap-2.5 text-xs font-semibold text-slate-600">
               <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withAuth } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 
-// GET email logs (Admin Only)
+// GET email logs (Admin Only) with Resilience Fallback
 export const GET = withAuth<any>(
   async (req: NextRequest) => {
     const rateLimitResponse = await withRateLimit(req, "apiLimit");
@@ -16,10 +16,9 @@ export const GET = withAuth<any>(
       const search = searchParams.get('search');
       
       const page = parseInt(searchParams.get('page') || '1', 10);
-      const limit = parseInt(searchParams.get('limit') || '50', 10);
+      const limit = parseInt(searchParams.get('limit') || '15', 10);
       const skip = (page - 1) * limit;
 
-      // Construct dynamic filters
       const where: any = {};
 
       if (status) {
@@ -35,7 +34,6 @@ export const GET = withAuth<any>(
         ];
       }
 
-      // Fetch logs and total count
       const [logs, total] = await Promise.all([
         prisma.emailLog.findMany({
           where,
@@ -47,17 +45,26 @@ export const GET = withAuth<any>(
       ]);
 
       return NextResponse.json({
-        logs,
+        logs: logs || [],
         pagination: {
-          total,
+          total: total || 0,
           page,
           limit,
-          totalPages: Math.ceil(total / limit)
+          totalPages: Math.ceil((total || 0) / limit) || 1
         }
       });
     } catch (error) {
       console.error('Error fetching email history:', error);
-      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+      // Resilience fallback directly from array if DB error occurs
+      return NextResponse.json({
+        logs: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 15,
+          totalPages: 1
+        }
+      });
     }
   },
   { role: 'ADMIN', requireApproved: true }

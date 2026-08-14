@@ -25,7 +25,7 @@ export default function TopAnnouncementBar() {
   const { cmsData } = useCMS();
 
   const isBarActive = cmsData?.announcementActive;
-  if (isBarActive === false || isBarActive === "false" || isBarActive === 0 || isBarActive === "0") {
+  if (!isBarActive || isBarActive === "false" || isBarActive === 0 || isBarActive === "0") {
     return null;
   }
 

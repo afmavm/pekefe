@@ -86,6 +86,7 @@ const defaultCMSData: CMSData = {
   buttonText: "Ürünleri Keşfet",
   announcement: "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!",
   announcement2: "🔥 %100 Yerli İmalat & 304 Paslanmaz Çelik Garantisi",
+  announcementActive: false,
   maintenanceMode: false,
   topBarText1: "Türkiye'nin Her Yerine Güvenli Sevkiyat",
   topBarText2: "Yerli Üretim Paslanmaz Çelik",
@@ -222,6 +223,17 @@ function parseCMSData(data: any): any {
 
 export function CMSProvider({ children, initialCMSData, initialPages }: CMSProviderProps) {
   const [cmsData, setCmsData] = useState<CMSData>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("pekefe_cms_cached_data");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === "object") {
+            return parseCMSData(parsed);
+          }
+        }
+      } catch (e) {}
+    }
     const raw = initialCMSData || defaultCMSData;
     return parseCMSData(raw);
   });
@@ -233,7 +245,11 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
       const res = await fetch(`/api/settings?t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       if (data && typeof data === 'object' && !data.error) {
-        setCmsData(parseCMSData(data));
+        const parsed = parseCMSData(data);
+        setCmsData(parsed);
+        if (typeof window !== "undefined") {
+          try { localStorage.setItem("pekefe_cms_cached_data", JSON.stringify(parsed)); } catch (e) {}
+        }
       }
     } catch (err) { console.error(err); }
   };

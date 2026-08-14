@@ -27,7 +27,7 @@ const defaultBlogPosts = [
   <li><strong>Doğal Gün Güneşi Kıvamı:</strong> Kaynatılan şıra, güneşte dinlendirilerek ideal kıvama ulaşır ve el değmeden steril cam kavanozlara doldurulur.</li>
 </ul>
 
-<div style="background-color: #fffbeb; border: 2px dashed border-amber-300; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+<div style="background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
   <h3 style="color: #78350f; margin-top: 0;">🔥 Rekolteye Özel Şifa Kaynağı!</h3>
   <p style="color: #92400e; font-size: 14px;">Geleneksel yöntemlerle sınırlı sayıda üretilen %100 katkısız <strong>İspir Dut Pekmezini</strong> hemen keşfedin. Sepette geçerli <strong>PEKEFE15</strong> koduyla %15 indirim avantajını kaçırmayın!</p>
   <a href="/products/ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezini Sipariş Ver →</a>
@@ -37,8 +37,8 @@ const defaultBlogPosts = [
 <p>Yüksek oranda organik demir, kalsiyum, magnezyum ve potasyum içeren İspir Dut Pekmezi; sabahları aç karnına tüketildiğinde kan yapımını destekler, vücut direncini artırır ve gün boyu doğal bir zindelik sağlar.</p>`,
     isFeatured: true,
     isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-15T01:00:00.000Z",
+    updatedAt: "2026-08-15T01:00:00.000Z",
   },
   {
     id: "blog-2",
@@ -66,8 +66,8 @@ const defaultBlogPosts = [
 </div>`,
     isFeatured: true,
     isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-15T00:50:00.000Z",
+    updatedAt: "2026-08-15T00:50:00.000Z",
   },
   {
     id: "blog-3",
@@ -88,13 +88,13 @@ const defaultBlogPosts = [
 
 <div style="background-color: #fff7ed; border: 2px solid #ffedd5; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
   <h3 style="color: #9a3412; margin-top: 0;">🎁 Taze Üretim Cevizli Köme & Pestil Çeşitleri</h3>
-  <p style="color: #c2410c; font-size: 14px;">Geleneksel usta ellerden çıkan taze cevizli köme ve yaprak dut pestili çeşitlerimizi özel vakumlu korumalı ambalajıyla hemen sipariş edin.</p>
+  <p style="color: #c2410c; font-size: 14px;">Geleneksel usta handsinden çıkan taze cevizli köme ve yaprak dut pestili çeşitlerimizi özel vakumlu korumalı ambalajıyla hemen sipariş edin.</p>
   <a href="/kategoriler" style="display: inline-block; background-color: #c2410c; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">📦 Yöresel Köme ve Pestilleri İncele →</a>
 </div>`,
     isFeatured: false,
     isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-15T00:40:00.000Z",
+    updatedAt: "2026-08-15T00:40:00.000Z",
   },
   {
     id: "blog-4",
@@ -117,15 +117,15 @@ const defaultBlogPosts = [
   <li><strong>Karaciğer Detoksu:</strong> Vücuttaki toksinlerin atılmasına yardımcı olur.</li>
 </ol>
 
-<div style="background-color: #fffbeb; border: 2px dashed border-amber-300; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+<div style="background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
   <h3 style="color: #78350f; margin-top: 0;">☀️ Günlük Şifa Kürünüzü Hazırlayın</h3>
   <p style="color: #92400e; font-size: 14px;">Katkısız, koruyucusuz ve şekersiz %100 Erzurum İspir Dut Pekmezi ile ailenizin sağlığını güvenceye alın.</p>
   <a href="/products/ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezi Satın Al →</a>
 </div>`,
     isFeatured: false,
     isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-15T00:30:00.000Z",
+    updatedAt: "2026-08-15T00:30:00.000Z",
   },
   {
     id: "blog-5",
@@ -147,8 +147,138 @@ const defaultBlogPosts = [
 </div>`,
     isFeatured: false,
     isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-15T00:20:00.000Z",
+    updatedAt: "2026-08-15T00:20:00.000Z",
+  },
+  {
+    id: "blog-6",
+    title: "İspir Kuru Fasulyesi Neden Dünyanın En Lezzetli Fasulyesidir? Püf Noktaları & Güveç Tarifi",
+    slug: "ispir-kuru-fasulyesi-neden-dunyanin-en-lezzetli-fasulyesidir",
+    category: "Tarifler",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+    metaDesc: "Coğrafi işaretli İspir Kuru Fasulyesinin çabuk pişme, kabuk atmama sırları ve toprak güveçte lokum kıvamında pişirme tarifi. Hemen sipariş edin!",
+    content: `<h2>Coğrafi Tescilli Lezzet: Gerçek İspir Kuru Fasulyesi</h2>
+<p>Türkiye'nin gurme mutfağında taht kuran <strong>İspir Kuru Fasulyesi</strong>, Çoruh Vadisi’nin mikro-klima ikliminde, 1200 ile 1800 metre arasındaki özel topraklarda yetiştirilir. Tanelerinin ufak ve tombul oluşu, pişerken asla kabuk atmaması ve erken yumuşaması en büyük özelliğidir.</p>
+
+<h3>İspir Fasulyesini Özel Kılan 4 Nedeni:</h3>
+<ul>
+  <li><strong>İnce Kabuklu ve Erken Pişen Yapı:</strong> Islatılma süresi kısa olup tencerede kabuk ayrılması yaşanmaz.</li>
+  <li><strong>Doğal Tatlımsı Aroma:</strong> Toprağın zengin mineral dengesi sayesinde piştiğinde kendi doğal sosunu oluşturur.</li>
+  <li><strong>Mideye Dokunmaz:</strong> Gaz yapma oranı diğer fasulye türlerine göre son derece düşüktür.</li>
+</ul>
+
+<h3>Ustasından Toprak Güveçte İspir Fasulyesi Tarifi:</h3>
+<p>Bir gece önceden ılık suda bekletilen İspir fasulyeleri, PEKEFE Geleneksel Yayla Tereyağı ve kuşbaşı dana etiyle güveçte kısık ateşte ağır ağır pişirilir. Salçasını ve baharatlarını son aşamada ekleyerek lokum kıvamını yakalayabilirsiniz.</p>
+
+<div style="background-color: #fefce8; border: 2px dashed #ca8a04; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+  <h3 style="color: #854d0e; margin-top: 0;">🥘 Taze Hasat Coğrafi İşaretli İspir Fasulyesi</h3>
+  <p style="color: #a16207; font-size: 14px;">Çoruh Vadisinden yeni mahsül hakiki İspir Kuru Fasulyesini hemen deneyin. Mutfağınızda lokum kıvamında lezzet garantisi!</p>
+  <a href="/products" style="display: inline-block; background-color: #ca8a04; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 Hakiki İspir Fasulyesini Satın Al →</a>
+</div>`,
+    isFeatured: true,
+    isActive: true,
+    createdAt: "2026-08-15T00:15:00.000Z",
+    updatedAt: "2026-08-15T00:15:00.000Z",
+  },
+  {
+    id: "blog-7",
+    title: "Hakiki İspir Karakovan Balı Nedir? Mumu Doğal Yenebilir Mi?",
+    slug: "ispir-karakovan-bali-nedir-mumu-yenir-mi",
+    category: "Sağlık",
+    image: "https://images.unsplash.com/photo-1471943311424-646960669fbc?w=800&q=80",
+    metaDesc: "Ihlamur kütüklerinde insan eli değmeden arının kendi ördüğü saf organik karakovan balı şifası ve doğal petek mumunun hazmı. Sipariş verin!",
+    content: `<h2>Karanlık Kovanların Saf Mucizesi: Karakovan Balı</h2>
+<p>Karakovan balı; temel petek çıtası konulmaksızın, tamamen arının kendi vücut salgısıyla ördüğü <strong>%100 doğal petekli baldır.</strong> Eski geleneksel yöntemlerle içi oyulmuş ıhlamur veya meşe kütüklerinde, zifiri karanlıkta üretildiği için 'Karakovan' adını almıştır.</p>
+
+<h3>Karakovan Balının Petek Mumu Yenebilir mi?</h3>
+<p>Evet! Endüstriyel ballardaki suni mumların aksine, PEKEFE İspir Karakovan Balının mumu tamamen arının kendi ördüğü organik bal mumudur. Ağızda erir, mideyi yormaz ve boğaz antiseptiği olarak üst solunum yollarına büyük fayda sağlar.</p>
+
+<div style="background-color: #fffbeb; border: 2px solid #fde68a; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+  <h3 style="color: #92400e; margin-top: 0;">🍯 Sınırlı Rekolte İspir Karakovan Balı</h3>
+  <p style="color: #b45309; font-size: 14px;">Hiçbir müdahale olmadan arıların binbir çiçek nektarıyla doldurduğu hakiki karakovan balını özel ahşap kutusunda sipariş edin.</p>
+  <a href="/products" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🐝 Karakovan Balını İncele & Al →</a>
+</div>`,
+    isFeatured: false,
+    isActive: true,
+    createdAt: "2026-08-15T00:10:00.000Z",
+    updatedAt: "2026-08-15T00:10:00.000Z",
+  },
+  {
+    id: "blog-8",
+    title: "Çam Kozalağı Şurubunun Akciğer ve Solunum Yollarına Şaşırtıcı Faydaları",
+    slug: "cam-kozalagi-surubunun-akciger-ve-solunum-yollarina-faydalari",
+    category: "Sağlık",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80",
+    metaDesc: "İlkbaharda toplanan genç yeşil çam kozalaklarının öksürük, bronşit ve akciğer detoksuna mucizevi etkileri. Kozalak kozalağı şurubu sipariş edin!",
+    content: `<h2>Doğal Akciğer Detoksu: Yeşil Çam Kozalağı Şurubu</h2>
+<p>Mayıs ve Haziran aylarında İspir dağlarındaki yüksek oksijenli çam ormanlarından toplanan taze yeşil çam kozalakları, solunum yolu rahatsızlıkları ve akciğer temizliği için yüzyıllardır kullanılan en kıymetli şifa reçetelerinden biridir.</p>
+
+<h3>Çam Kozalağı Şurubunun Öne Çıkan Faydaları:</h3>
+<ul>
+  <li><strong>İnatçı Öksürüğü Dindirir:</strong> Boğazdaki tahrişi ve balgamı kısa sürede söker.</li>
+  <li><strong>Astım ve Bronşit Rahatlaması:</strong> Nefes darlığı çekenlerde solunum yollarını rahatlatır.</li>
+  <li><strong>Sigara Kullananlar İçin Detoks:</strong> Akciğerde biriken katran ve toksinlerin atılmasına destek verir.</li>
+</ul>
+
+<div style="background-color: #ecfdf5; border: 2px solid #a7f3d0; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+  <h3 style="color: #065f46; margin-top: 0;">🌲 Saf & Katkısız Çam Kozalağı Şurubu</h3>
+  <p style="color: #047857; font-size: 14px;">Meşe odun ateşinde koruyucusuz pişirilen şifalı çam kozalağı şurubumuzu hemen sipariş vererek ailenizin nefesini tazeleyin.</p>
+  <a href="/products" style="display: inline-block; background-color: #047857; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🌲 Çam Kozalağı Şurubu Satın Al →</a>
+</div>`,
+    isFeatured: false,
+    isActive: true,
+    createdAt: "2026-08-15T00:08:00.000Z",
+    updatedAt: "2026-08-15T00:08:00.000Z",
+  },
+  {
+    id: "blog-9",
+    title: "Erzurum Göğermiş Peyniri (Yeşil Peynir) ve Doğal Köy Tereyağı Rehberi",
+    slug: "erzurum-gogermis-peyniri-ve-dogal-koy-tereyagi-rehberi",
+    category: "Geleneksel Üretim",
+    image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800&q=80",
+    metaDesc: "Doğal penisilin deposu küflü Erzurum göğermiş peyniri ve yayla sütünden yapılan sarı köy tereyağının lezzet özellikleri. Şimdi sipariş edin!",
+    content: `<h2>Doğal Penisilin Deposu: Erzurum Göğermiş Peyniri</h2>
+<p>Erzurum ve İspir coğrafyasına özgü <strong>Göğermiş (Yeşil Küflü) Peynir</strong>, çeçil peynirinin özel deri ve mahzenlerde doğal olarak küflendirilmesiyle elde edilen dünyaca ünlü bir gurme lezzettir. İçerdiği zararsız doğal küf mantarları sayesinde vücut için adeta bir antioksidan ve antibiyotik deposudur.</p>
+
+<h3>PEKEFE Yayla Tereyağı İle Kahvaltı Şöleni</h3>
+<p>2200 metre rakımlı yaylalarda serbest otlayan ineklerin taze sütünden yayıklanarak elde edilen sarı köy tereyağımız, katkısız kokusu ve eşsiz lezzetiyle kahvaltılarınıza ve yemeklerinize unutulmaz bir lezzet katacaktır.</p>
+
+<div style="background-color: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+  <h3 style="color: #1e293b; margin-top: 0;">🧀 Yöresel Erzurum Peynir & Tereyağı Çeşitleri</h3>
+  <p style="color: #475569; font-size: 14px;">Soğuk zincir korumalı özel ambalajlarıyla Erzurum Göğermiş Peyniri ve Geleneksel Yayla Tereyağını hemen sepetinize ekleyin.</p>
+  <a href="/products" style="display: inline-block; background-color: #0f172a; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🧀 Yöresel Şarküteri Ürünlerini İncele →</a>
+</div>`,
+    isFeatured: false,
+    isActive: true,
+    createdAt: "2026-08-15T00:05:00.000Z",
+    updatedAt: "2026-08-15T00:05:00.000Z",
+  },
+  {
+    id: "blog-10",
+    title: "PEKEFE İle Doğrudan Üreticiden Sofranıza Güvenli Şeffaf Kargo Süreci",
+    slug: "pekefe-ile-dogrudan-ureticiden-sofraniza-guvenli-kargo",
+    category: "Haberler",
+    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&q=80",
+    metaDesc: "Erzurum İspir'deki üretim tesislerimizden kırılma korumalı strafor ambalaj ve soğuk zincir kargo ile kapınıza gelen lezzet garantisi.",
+    content: `<h2>Aracı Yok, Bekleme Yok: Doğrudan İspir Üreticisinden Kapınıza!</h2>
+<p>PEKEFE olarak tüm bal, pekmez, pestil, köme ve yöresel lezzetlerimizi Erzurum İspir’deki merkez depomuzdan ve imalathanemizden doğrudan siz değerli lezzet tutkunlarına ulaştırıyoruz.</p>
+
+<h3>Sipariş ve Kargo Güvencelerimiz:</h3>
+<ul>
+  <li><strong>Kırılmaya Karşı %100 Garanti:</strong> Cam kavanozlarımız yüksek yoğunluklu darbe emici strafor korumalarla paketlenir.</li>
+  <li><strong>Soğuk Zincir Ambalaj:</strong> Peynir ve tereyağı gibi hassas şarküteri ürünleri buz aküleriyle sevk edilir.</li>
+  <li><strong>Aynı Gün Kargo:</strong> Saat 14:00'e kadar verilen tüm siparişler aynı gün kargoya teslim edilir.</li>
+</ul>
+
+<div style="background-color: #fdf2f8; border: 2px solid #fbcfe8; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
+  <h3 style="color: #9d174d; margin-top: 0;">🎉 İlk Siparişinize Özel %15 İndirim!</h3>
+  <p style="color: #be185d; font-size: 14px;">Doğal ve yöresel lezzetleri hemen keşfedin. Ödeme adımında <strong>PEKEFE15</strong> kupon kodunu kullanarak %15 açılış indirimini kullanın!</p>
+  <a href="/products" style="display: inline-block; background-color: #be185d; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛍️ Alışverişe Başla & İndirimi Kullan →</a>
+</div>`,
+    isFeatured: false,
+    isActive: true,
+    createdAt: "2026-08-15T00:01:00.000Z",
+    updatedAt: "2026-08-15T00:01:00.000Z",
   }
 ];
 
@@ -245,7 +375,7 @@ export async function POST(request: Request) {
       slug,
       content: body.content,
       category: body.category || 'Genel',
-      image: body.image || FALLBACK_IMAGE,
+      image: body.image || "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=800&q=80",
       metaDesc: body.metaDesc || null,
       isFeatured: body.isFeatured ?? false,
       isActive: body.isActive ?? true,

@@ -17,6 +17,23 @@ import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
 import { isVideoUrl } from "@/lib/utils";
 
+function generateSlug(text: string): string {
+  if (!text) return "";
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9 -]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 interface Variant {
   id: string;
   sku: string;
@@ -1801,10 +1818,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           marketVat: form.marketVat,
           marketVatIncluded: form.marketVatIncluded,
 
-           b2bActive: form.b2bActive,
+          b2bActive: form.b2bActive,
           b2bPreOrderable: form.b2bPreOrderable,
           marketplaces: marketplaces,
-          shortDesc: form.shortDesc,
           recipeDetails: form.recipeDetails,
           altitude: form.altitude,
           harvestSeason: form.harvestSeason,

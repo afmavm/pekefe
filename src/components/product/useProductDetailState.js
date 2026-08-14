@@ -83,9 +83,13 @@ export function useProductDetailState(params) {
     };
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("pekefe_products_updated", handleUpdated);
+    window.addEventListener("pekefe_products_changed", handleUpdated);
+    window.addEventListener("storage", handleUpdated);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("pekefe_products_updated", handleUpdated);
+      window.removeEventListener("pekefe_products_changed", handleUpdated);
+      window.removeEventListener("storage", handleUpdated);
     };
   }, [slugOrId]);
 

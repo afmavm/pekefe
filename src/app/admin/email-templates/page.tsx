@@ -421,7 +421,7 @@ export default function EmailTemplatesPage() {
                 <h2 className="text-base font-extrabold text-slate-900">
                   {editingTemplate ? "E-posta Şablonunu Düzenle" : "Yeni E-posta Şablonu Tanımla"}
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">Süslü parantez `{{degisken}}` formatı dinamik veriler ile değiştirilir.</p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">Süslü parantez &#123;&#123;degisken&#125;&#125; formatı dinamik veriler ile değiştirilir.</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}

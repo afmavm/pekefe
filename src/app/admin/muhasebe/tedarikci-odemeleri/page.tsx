@@ -94,20 +94,23 @@ export default function TedarikciOdemeleriPage() {
     setMetadataLoading(true);
     try {
       // 1. Fetch suppliers
-      const supRes = await fetch("/api/invoices/incoming?lists=true");
-      const supData = await supRes.json();
-      if (supData.suppliers) {
-        setSuppliers(supData.suppliers);
+      const supRes = await fetch("/api/invoices/incoming?lists=true").catch(() => null);
+      if (supRes && supRes.ok) {
+        const supData = await supRes.json().catch(() => ({}));
+        if (supData.suppliers) {
+          setSuppliers(supData.suppliers);
+        }
       }
 
       // 2. Fetch banks
-      const bankRes = await fetch("/api/accounting/banks");
-      const bankData = await bankRes.json();
-      const banksList = Array.isArray(bankData) ? bankData : (bankData?.data || []);
-      setBanks(banksList);
+      const bankRes = await fetch("/api/accounting/banks").catch(() => null);
+      if (bankRes && bankRes.ok) {
+        const bankData = await bankRes.json().catch(() => ({}));
+        const banksList = Array.isArray(bankData) ? bankData : (bankData?.data || []);
+        setBanks(banksList);
+      }
     } catch (error) {
       console.error("Metadata fetch error:", error);
-      toast.error("Tedarikçi ve banka bilgileri yüklenemedi.");
     } finally {
       setMetadataLoading(false);
     }
@@ -131,19 +134,24 @@ export default function TedarikciOdemeleriPage() {
     setInvoicesLoading(true);
     setSettlementAmounts({});
     try {
-      const res = await fetch(`/api/suppliers/${supplierId}/open-invoices`);
-      const data = await res.json();
-      if (data.error) {
-        toast.error(data.error);
+      const res = await fetch(`/api/suppliers/${supplierId}/open-invoices`).catch(() => null);
+      if (!res || !res.ok) {
         setSupplierDetails(null);
         setOpenInvoices([]);
-      } else {
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data && !data.error) {
         setSupplierDetails(data.supplier);
         setOpenInvoices(data.invoices || []);
+      } else {
+        setSupplierDetails(null);
+        setOpenInvoices([]);
       }
     } catch (error) {
       console.error("Supplier invoices fetch error:", error);
-      toast.error("Açık faturalar yüklenirken bir hata oluştu.");
+      setSupplierDetails(null);
+      setOpenInvoices([]);
     } finally {
       setInvoicesLoading(false);
     }

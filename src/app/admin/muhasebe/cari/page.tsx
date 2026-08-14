@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
-import { AntigravityEngine } from "@/components/AntigravityEngine";
 import { turkeyLocations } from "@/data/turkey-locations";
 import { useSearchParams } from "next/navigation";
 
@@ -4956,10 +4955,6 @@ export default function CariPage() {
                 <FileText className="w-4 h-4 shrink-0" />
                 <span>Belge Türü: <strong>{actionModal.belgeTipi || actionModal.devirTipi}</strong></span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-700   border border-purple-200/40 uppercase tracking-widest flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5" />
-                Antigravity Aktif
-              </span>
             </div>
           )}
 
@@ -5045,23 +5040,11 @@ export default function CariPage() {
             </div>
           )}
 
-          {/* Alış/Satış için kısa ürün/hizmet açıklaması */}
           {(actionModal.type === "alis" || actionModal.type === "satis" || actionModal.type === "isAlma") && (
             <div className="space-y-1">
               <label className="font-extrabold text-slate-700  block">Ürün / Hizmet Açıklaması</label>
               <input type="text" placeholder="Ürün veya hizmet adı..." name="urunAciklama"
                 className="w-full px-3.5 py-2.5 bg-white  border border-slate-200  rounded-xl outline-none font-bold text-slate-800  focus:border-indigo-500 transition-all shadow-sm"
-              />
-            </div>
-          )}
-
-          {/* Antigravity Engine Integration for Alis / Satis */}
-          {(actionModal.type === "alis" || actionModal.type === "satis") && (
-            <div className="pt-2 border-t border-slate-100 ">
-              <AntigravityEngine
-                defaultAmount={parseTurkishCurrency(actionForm.amount) || 120000}
-                currency={activeAccount?.currency || "TRY"}
-                onDistributionComplete={handleAntigravityCompleteInModal}
               />
             </div>
           )}

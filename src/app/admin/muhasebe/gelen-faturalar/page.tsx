@@ -272,9 +272,6 @@ export default function GelenFaturalarPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
             <Receipt className="w-6 h-6 text-orange-500 shrink-0" /> Gelen E-Faturalar
-            <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200/50 font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 uppercase tracking-wider ml-1">
-              <Sparkles className="w-3 h-3 text-blue-500 animate-pulse" /> Antigravity Engine
-            </span>
           </h1>
           <p className="text-xs text-slate-500 mt-0.5 font-medium">
             GİB sisteminden gelen e-Faturaları uyuşmazlık denetimleri ve akıllı eşleştirmelerle onaylayıp stoklara işleyin.

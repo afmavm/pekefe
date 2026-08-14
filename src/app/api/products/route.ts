@@ -290,9 +290,11 @@ export function computeProductPricing(
 }
 
 export async function GET(request: NextRequest) {
-  const rateLimitResponse = await withRateLimit(request, "apiLimit");
-  if (rateLimitResponse) return rateLimitResponse;
   try {
+    const rateLimitResponse = await withRateLimit(request, "apiLimit");
+    if (rateLimitResponse && process.env.NODE_ENV === "production") {
+      return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
+    }
     const session = await getServerSession(authOptions);
     const products = await prisma.product.findMany({
       where: { isDeleted: false },

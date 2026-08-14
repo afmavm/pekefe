@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
+import { getProducts } from "@/utils/productsStorage";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -127,30 +128,36 @@ export default function StockProductionPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch(`/api/products?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setProducts(data || []);
+        if (Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+        } else {
+          setProducts(getProducts() || []);
+        }
       } else {
-        toast.error("Ürün verileri yüklenemedi.");
+        setProducts(getProducts() || []);
       }
 
-      const catRes = await fetch("/api/categories");
+      const catRes = await fetch(`/api/categories?t=${Date.now()}`);
       if (catRes.ok) {
         const catData = await catRes.json();
         setCategories(catData || []);
         
         // Auto expand parent categories initially
         const initialExpanded: Record<string, boolean> = {};
-        catData.forEach((c: any) => {
-          if (!c.parentId) {
-            initialExpanded[c.id] = true;
-          }
-        });
+        if (Array.isArray(catData)) {
+          catData.forEach((c: any) => {
+            if (!c.parentId) {
+              initialExpanded[c.id] = true;
+            }
+          });
+        }
         setExpandedCategories(initialExpanded);
       }
     } catch (err) {
-      toast.error("Bağlantı hatası.");
+      setProducts(getProducts() || []);
     } finally {
       setLoading(false);
     }

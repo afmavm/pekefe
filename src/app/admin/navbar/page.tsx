@@ -372,13 +372,22 @@ export default function NavbarAdminPage() {
                 )}
 
                 {/* Right Contact */}
-                  {socialWhatsapp && (
-                    <span className="flex items-center gap-1 bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">
-                      <MessageCircle className="w-3 h-3" />
-                      <span>WhatsApp</span>
-                    </span>
-                  )}
-                </div>
+                {(contactPhoneEnabled || socialWhatsappEnabled) && (
+                  <div className="flex items-center gap-3 shrink-0 text-[11px]">
+                    {contactPhoneEnabled && contactPhone && (
+                      <span className="flex items-center gap-1 text-white/90">
+                        <Phone className="w-3 h-3 text-amber-400" />
+                        <span>{contactPhone}</span>
+                      </span>
+                    )}
+                    {socialWhatsappEnabled && socialWhatsapp && (
+                      <span className="flex items-center gap-1 bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">
+                        <MessageCircle className="w-3 h-3" />
+                        <span>WhatsApp</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="bg-gray-100 border border-gray-200 rounded-xl p-4 text-center text-sm text-gray-500 font-medium">

@@ -42,7 +42,7 @@ export default function PagesAdminPage() {
 
   useEffect(() => {
     fetch("/api/cms/pages", { cache: "no-store" })
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         if (Array.isArray(data)) setPages(data);
       })

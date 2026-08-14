@@ -181,7 +181,7 @@ export default function NavbarAdminPage() {
   // Load all settings from API
   useEffect(() => {
     fetch("/api/settings")
-      .then((r) => r.json())
+      .then((r) => (r && r.ok ? r.json() : null))
       .then((data) => {
         if (data && typeof data === "object") {
           if (typeof data.announcementActive === "boolean") setAnnouncementActive(data.announcementActive);
@@ -198,7 +198,7 @@ export default function NavbarAdminPage() {
           }
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error("Settings load error:", err));
   }, []);
 
   // ── NavLink handlers ──

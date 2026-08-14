@@ -29,10 +29,15 @@ export default function TopAnnouncementBar() {
     return null;
   }
 
-  const text1 = cmsData?.announcement !== undefined ? cmsData.announcement : "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!";
-  const text2 = cmsData?.announcement2 !== undefined ? cmsData.announcement2 : "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları";
-  const phone = cmsData?.contactPhone || "0544 149 48 51";
-  const whatsapp = cmsData?.socialWhatsapp || "05441494851";
+  const showAnn1 = cmsData?.announcement1Enabled !== false && cmsData?.announcement1Enabled !== "false" && cmsData?.announcement1Enabled !== 0;
+  const showAnn2 = cmsData?.announcement2Enabled !== false && cmsData?.announcement2Enabled !== "false" && cmsData?.announcement2Enabled !== 0;
+  const showPhone = cmsData?.contactPhoneEnabled !== false && cmsData?.contactPhoneEnabled !== "false" && cmsData?.contactPhoneEnabled !== 0;
+  const showWhatsapp = cmsData?.socialWhatsappEnabled !== false && cmsData?.socialWhatsappEnabled !== "false" && cmsData?.socialWhatsappEnabled !== 0;
+
+  const text1 = showAnn1 ? (cmsData?.announcement !== undefined ? cmsData.announcement : "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!") : "";
+  const text2 = showAnn2 ? (cmsData?.announcement2 !== undefined ? cmsData.announcement2 : "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları") : "";
+  const phone = showPhone ? (cmsData?.contactPhone || "0544 149 48 51") : "";
+  const whatsapp = showWhatsapp ? (cmsData?.socialWhatsapp || "05441494851") : "";
 
   // Parse topBarItems from cmsData
   let topBarItems = DEFAULT_ITEMS;
@@ -68,31 +73,40 @@ export default function TopAnnouncementBar() {
         )}
 
         {/* Center: Dynamic Announcement */}
-        <div className="flex-1 overflow-hidden text-center text-xs tracking-wide font-bold text-white flex items-center justify-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
-          <span className="truncate">{text1}</span>
-          {text2 && (
-            <span className="hidden md:inline-block text-amber-200/80 font-normal">
-              • {text2}
-            </span>
-          )}
-        </div>
+        {(text1 || text2) && (
+          <div className="flex-1 overflow-hidden text-center text-xs tracking-wide font-bold text-white flex items-center justify-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
+            {text1 && <span className="truncate">{text1}</span>}
+            {text2 && (
+              <span className="hidden md:inline-block text-amber-200/80 font-normal">
+                {text1 ? `• ${text2}` : text2}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Right: Contact & WhatsApp */}
-        <div className="hidden sm:flex items-center gap-3 shrink-0 text-[11px]">
-          {phone && (
-            <a href={`tel:${phone}`} className="flex items-center gap-1 text-white/90 hover:text-amber-300 transition">
-              <Phone className="w-3 h-3 text-amber-400" />
-              <span>{phone}</span>
-            </a>
-          )}
-          {whatsapp && (
-            <a
-              href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold transition shadow-sm"
-            >
+        {(phone || whatsapp) && (
+          <div className="hidden sm:flex items-center gap-3 shrink-0 text-[11px]">
+            {phone && (
+              <a href={`tel:${phone}`} className="flex items-center gap-1 text-white/90 hover:text-amber-300 transition">
+                <Phone className="w-3 h-3 text-amber-400" />
+                <span>{phone}</span>
+              </a>
+            )}
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold transition shadow-sm"
+              >
+                <MessageCircle className="w-3 h-3" />
+                <span>WhatsApp</span>
+              </a>
+            )}
+          </div>
+        )}
               <MessageCircle className="w-3 h-3" />
               <span>WhatsApp</span>
             </a>

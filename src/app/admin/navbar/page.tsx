@@ -253,6 +253,10 @@ export default function NavbarAdminPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             announcementActive,
+            announcement1Enabled,
+            announcement2Enabled,
+            contactPhoneEnabled,
+            socialWhatsappEnabled,
             announcement,
             announcement2,
             contactPhone,

@@ -82,19 +82,24 @@ export function PurchaseRequisitionsClient() {
       if (selectedStatus) queryParams.append("status", selectedStatus);
       if (selectedApproval) queryParams.append("approvalStatus", selectedApproval);
 
-      const res = await fetch(`/api/purchase-requisitions?${queryParams.toString()}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setRequisitions(data);
-
-      // Extract unique departments for filtering
-      const depts = new Set<string>();
-      data.forEach((r: Requisition) => {
-        if (r.departmentId) depts.add(r.departmentId);
-      });
-      setDepartments(Array.from(depts));
-    } catch (error: any) {
-      toast.error(error.message || "Talepler yüklenirken bir hata oluştu.");
+      const res = await fetch(`/api/purchase-requisitions?${queryParams.toString()}`).catch(() => null);
+      if (!res || !res.ok) {
+        setRequisitions([]);
+        return;
+      }
+      const data = await res.json().catch(() => []);
+      if (Array.isArray(data)) {
+        setRequisitions(data);
+        const depts = new Set<string>();
+        data.forEach((r: Requisition) => {
+          if (r.departmentId) depts.add(r.departmentId);
+        });
+        setDepartments(Array.from(depts));
+      } else {
+        setRequisitions([]);
+      }
+    } catch {
+      setRequisitions([]);
     } finally {
       setLoading(false);
     }

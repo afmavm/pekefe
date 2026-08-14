@@ -75,27 +75,19 @@ export async function GET() {
       return NextResponse.json(null);
     }
 
-    // Convert boolean values to actual booleans
-    row.maintenanceMode = !!row.maintenanceMode;
-    row.announcementActive = !!row.announcementActive;
-    row.dealSectionActive = !!row.dealSectionActive;
-
-    row.companySalesKdvIncluded = !!row.companySalesKdvIncluded;
-    row.companyPurchaseKdvIncluded = !!row.companyPurchaseKdvIncluded;
-    row.companyAutoSendEarsivMail = !!row.companyAutoSendEarsivMail;
-    row.companyUsePaymentPlan = !!row.companyUsePaymentPlan;
-    row.companyAutoUpdatePriceByMargin = !!row.companyAutoUpdatePriceByMargin;
-    row.companyUseCurrencyInPurchase = !!row.companyUseCurrencyInPurchase;
-    row.companyAutoDeductInstallments = !!row.companyAutoDeductInstallments;
-    row.companyUseRowRateInPurchase = !!row.companyUseRowRateInPurchase;
-    row.companyCheckCurrentVkn = !!row.companyCheckCurrentVkn;
-    row.cashOnDeliveryEnabled = !!row.cashOnDeliveryEnabled;
-
-    // Merge disk fallback data if disk holds newer changes
     const diskData = readLocalSettingsFallback();
-    if (diskData?.shippingCarriers && diskData.shippingCarriers !== row.shippingCarriers) {
-      row.shippingCarriers = diskData.shippingCarriers;
+    if (diskData) {
+      for (const k of Object.keys(diskData)) {
+        if (diskData[k] !== undefined && diskData[k] !== null) {
+          (row as any)[k] = diskData[k];
+        }
+      }
     }
+
+    // Convert boolean values to actual booleans
+    row.maintenanceMode = row.maintenanceMode === true || row.maintenanceMode === "true" || row.maintenanceMode === 1;
+    row.announcementActive = row.announcementActive === true || row.announcementActive === "true" || row.announcementActive === 1;
+    row.dealSectionActive = row.dealSectionActive === true || row.dealSectionActive === "true" || row.dealSectionActive === 1;
 
     MEMORY_SETTINGS = row;
     return NextResponse.json(row);
@@ -358,16 +350,17 @@ export async function PUT(request: Request) {
       saved.companyCheckCurrentVkn = !!saved.companyCheckCurrentVkn;
       saved.cashOnDeliveryEnabled = !!saved.cashOnDeliveryEnabled;
 
-      MEMORY_SETTINGS = { id: 'singleton', ...saved };
-      writeLocalSettingsFallback(MEMORY_SETTINGS);
+      const mergedRes = { id: 'singleton', ...existing, ...data, ...saved };
+      MEMORY_SETTINGS = mergedRes;
+      writeLocalSettingsFallback(mergedRes);
       try {
         const { revalidatePath } = await import('next/cache');
         revalidatePath('/', 'layout');
       } catch {}
-      return NextResponse.json(saved);
+      return NextResponse.json(mergedRes);
     } catch (dbErr) {
       console.warn('[API SETTINGS WARNING] Veritabanına yazılamadı, yerel dosyaya kaydediliyor:', dbErr);
-      const fallback = { id: 'singleton', ...data };
+      const fallback = { id: 'singleton', ...existing, ...data };
       MEMORY_SETTINGS = fallback;
       writeLocalSettingsFallback(fallback);
       try {

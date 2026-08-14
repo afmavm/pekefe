@@ -120,13 +120,16 @@ export default function DespatchAdminPage() {
   const fetchDespatches = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/despatch/list");
-      if (res.ok) {
-        const data = await res.json();
+      const res = await fetch("/api/despatch/list").catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json().catch(() => ({}));
         setDespatches(data.despatches || []);
+      } else {
+        setDespatches([]);
       }
     } catch (e) {
       console.error("Despatch listesi alınamadı:", e);
+      setDespatches([]);
     } finally {
       setLoading(false);
     }

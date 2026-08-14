@@ -10,7 +10,7 @@ export async function GET(
     const auth = await requireAdmin();
     if (!auth.authorized && process.env.NODE_ENV === "production") {
       const { getServerSession } = await import("next-auth");
-      const { authOptions } = await import("@/lib/auth");
+      const { authOptions } = await import("@/lib/authOptions");
       const session = await getServerSession(authOptions);
       if (!session?.user) {
         return auth.response;

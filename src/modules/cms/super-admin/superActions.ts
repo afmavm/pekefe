@@ -106,7 +106,7 @@ export async function getFeatureModulesAction() {
   try {
     let features = await prisma.featureModule.findMany({
       orderBy: {
-        key: "asc font"
+        key: "asc"
       }
     });
 

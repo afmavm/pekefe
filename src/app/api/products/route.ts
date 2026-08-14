@@ -69,6 +69,7 @@ const ProductSchema = z.object({
   images: z.array(z.string()).optional(),
   videoUrl: z.string().optional().or(z.literal('')).nullable(),
   desc: z.string().optional().nullable(),
+  shortDesc: z.string().optional().nullable(),
   seoTitle: z.string().optional().nullable(),
   seoDesc: z.string().optional().nullable(),
   seoKeywords: z.string().optional().nullable(),
@@ -631,7 +632,7 @@ export async function POST(request: NextRequest) {
         attributes: body.attributes || {},
         variants: body.variants || []
       };
-      FALLBACK_PRODUCTS.unshift(newFallback);
+      FALLBACK_PRODUCTS.unshift(newFallback as any);
       return NextResponse.json(newFallback, { status: 200 });
     } catch (e) {}
     return NextResponse.json({ message: "Ürün başarıyla oluşturuldu." }, { status: 200 });

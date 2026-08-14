@@ -14,7 +14,7 @@ const defaultBlogPosts = [
     title: "Geleneksel İspir Dut Pekmezi Nasıl Üretilir? Sırları ve Şifası",
     slug: "geleneksel-ispir-dut-pekmezi-nasil-uretilir",
     category: "Üretim",
-    image: "/ispir-dut-hasadi.png",
+    image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=800&q=80",
     metaDesc: "İspir'in 2200m rakımlı el değmemiş yaylalarında yetişen saf beyaz dutların bakır kazanlarda ve meşe odun ateşinde karamelize edilmeden pişirilme hikayesi. Hemen tadın!",
     content: `<h2>Doğanın En Saf Tatlısı: 2200 Metrede İspir Beyaz Dut Hasadı</h2>
 <p>Doğu Anadolu’nun incisi Erzurum İspir coğrafyası, yüksek oksijen oranı, sanayi kirliliğinden uzak bakır doğası ve mikro-klima iklimiyle dünyanın en kaliteli beyaz dutlarının yetiştiği nadide bir vadidir. Her yıl Temmuz ve Ağustos aylarında 2200 metre üzerindeki rakımda olgunlaşan dutlarımız, dalları zedelenmeden özel keten bezlere silkelenerek toplanır.</p>
@@ -45,14 +45,14 @@ const defaultBlogPosts = [
     title: "Ham Çiçek Balı ve İşlenmiş Bal Arasındaki 5 Hayati Fark",
     slug: "ham-cicek-bali-ve-islenmis-bal-arasindaki-farklar",
     category: "Sağlık",
-    image: "/ispir-kackar-yaylalari-manzara.webp",
+    image: "https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=800&q=80",
     metaDesc: "Pastörize edilmemiş, 45°C üzerinde ısıtılmamış hakiki ham çiçek balının polen zenginliği ve laboratuvar analiz gerçekleri. Hakiki bal satın alın!",
     content: `<h2>Ham Bal Nedir? Market Ballarından Nasıl Ayrılır?</h2>
 <p>Market raflarında berrak, sıvı ve berrak görünümüyle aylarca duran ballar ile arının kovandan çıkardığı <strong>Ham Çiçek Balı (Raw Honey)</strong> arasında çok büyük biyolojik ve besleyici farklar vardır. Ham bal; kovandan süzüldüğü haliyle, hiçbir yüksek ısıl işleme tabi tutulmadan ve mikron düzeyde polen filtrelemesi yapılmadan kavanozlanan şifadır.</p>
 
 <h3>İşte Hakiki Ham Balı Ayrıştıran 5 Temel Faktör:</h3>
 <ol>
-  <li><strong>Yüksek Isıl İşlem (Pastörizasyon) Görmez:</strong> Endüstriyel ballar kristalleşmeyi geciktirmek için 65-70°C sıcaklığa maruz bırakılır. Bu sıcaklık balın içinde bulunan diastaz enzimlerini ve canlı vitaminleri yok eder. PEKEFE ham balı asla 45°C üzerine çıkarılmaz.</li>
+  <li><strong>Yüksek Isıl İşlem (Pastörizasyon) Görmez:</strong> Endüstriyel ballar kristalleşmeyi geciktirmek için 65-70°C sıcaklığa maruz bırakılır. Bu işlem balın içindeki duyarlı enzimleri ve canlı vitaminleri yok eder. PEKEFE ham balı asla 45°C üzerine çıkarılmaz.</li>
   <li><strong>Polen Zenginliği Korunur:</strong> Balın kimliğini, kaynağını ve şifasını taşıyan çiçek polenleri ham balda tamamen korunur.</li>
   <li><strong>Doğal Kristalleşme (Donma):</strong> Hakiki ham bal soğuk ortamda zamanla kremsi bir kıvam alarak kristalleşir. Bu durum balın saf ve hilesiz olduğunun en somut kanıtıdır.</li>
   <li><strong>Kaçkar Florası Aroması:</strong> 2200m rakımlı İspir Kaçkar yaylalarının binbir çeşit endemik çiçeğinin keskin aroması sadece ham balda hissedilir.</li>
@@ -74,7 +74,7 @@ const defaultBlogPosts = [
     title: "Erzurum İspir Pestil ve Köme Hazırlamanın Asırlık Sırları",
     slug: "pestil-ve-kome-hazirlamanin-incelikleri",
     category: "Tarifler",
-    image: "/ispir-pestil-kurutma-gercek.png",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80",
     metaDesc: "Keten bezlerde dağ güneşiyle kurutulan cevizli İspir kömesi ve doğal dut pestilinin asırlık üretim gelenekleri. Taze köme siparişi verin!",
     content: `<h2>Geleneksel Lezzet Mirası: İspir Cevizli Köme ve Dut Pestili</h2>
 <p>Doğu Anadolu’nun çetin kış şartlarında enerji kaynağı olarak yüzyıllardır hazırlanan pestil ve köme, yaz sonu İspir beyaz dutlarının bereketiyle başlar. Tamamen doğal malzemelerle hazırlanan bu atıştırmalıklar, çocuklarınıza gönül rahatlığıyla yedirebileceğiniz en sağlıklı lezzet deposudur.</p>
@@ -101,7 +101,7 @@ const defaultBlogPosts = [
     title: "Dut Pekmezinin Kanıtlanmış 7 Sağlık Faydası ve Günlük Şifa Kürü",
     slug: "dut-pekmezinin-sagliga-faydalari",
     category: "Sağlık",
-    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=800&q=80",
     metaDesc: "Organik demir ve kalsiyum deposu geleneksel dut pekmezinin kan yapımına, bağışıklık sistemine ve enerji seviyesine etkileri.",
     content: `<h2>Şifa Deposu: Neden Her Gün 1 Kaşık İspir Dut Pekmezi Tüketmelisiniz?</h2>
 <p>Geleneksel yöntemlerle pişirilen saf İspir Dut Pekmezi, içerdiği yoğun mineraller ve doğal şeker bileşenleri sayesinde vücudun günlük mikro besin ihtiyacını karşılayan en güçlü doğal takviyelerden biridir.</p>
@@ -132,7 +132,7 @@ const defaultBlogPosts = [
     title: "2200m Rakımlı Kaçkar Yaylalarının Endemik Çiçek Florası ve Ham Bal Mucizesi",
     slug: "ispir-yaylalarinin-2200m-rakimli-flora-zenginligi",
     category: "Genel",
-    image: "/ispir-yedi-goller-kackar-manzara.webp",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
     metaDesc: "Kaçkar dağlarının el değmemiş 2200m+ yaylalarındaki endemik flora çeşitliliği ve PEKEFE ballarının eşsiz aromatik kaynağı.",
     content: `<h2>Kaçkar Dağlarının Zirvesinden Gelen Doğal Lezzet Mucizesi</h2>
 <p>Erzurum İspir bölgesi, Kaçkar dağlarının güney yamaçlarında yer alan yüksek rakımı, temiz su kaynakları ve sanayi kirliliğinden tamamen arındırılmış bakır doğasıyla Türkiye’nin en kıymetli arıcılık merkezidir.</p>
@@ -245,7 +245,7 @@ export async function POST(request: Request) {
       slug,
       content: body.content,
       category: body.category || 'Genel',
-      image: body.image || null,
+      image: body.image || FALLBACK_IMAGE,
       metaDesc: body.metaDesc || null,
       isFeatured: body.isFeatured ?? false,
       isActive: body.isActive ?? true,

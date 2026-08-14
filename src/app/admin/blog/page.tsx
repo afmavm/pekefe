@@ -434,14 +434,12 @@ export default function AdminBlogPage() {
                   
                   {/* Interactive Cover Image Container */}
                   <div className="group relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200 shadow-sm cursor-pointer">
-                    <Image 
+                    <img 
                       src={post.image || FALLBACK_IMAGE} 
                       alt={post.title} 
-                      fill 
-                      sizes="80px" 
-                      className="object-cover transition duration-300 group-hover:scale-110"
+                      className="w-full h-full object-cover transition duration-300 group-hover:scale-110"
                       onError={(e: any) => {
-                        e.target.srcset = FALLBACK_IMAGE;
+                        e.target.onerror = null;
                         e.target.src = FALLBACK_IMAGE;
                       }}
                     />

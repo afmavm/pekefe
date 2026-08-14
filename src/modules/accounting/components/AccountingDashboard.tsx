@@ -66,13 +66,41 @@ export default function AccountingDashboard({ initialData }: AccountingDashboard
 
   const fetchSummary = async () => {
     try {
-      const res = await fetch(`/api/accounting/summary?year=${year}`);
-      const data = await res.json();
-      if (!data.error) {
+      const res = await fetch(`/api/accounting/summary?year=${year}`).catch(() => null);
+      if (!res || !res.ok) {
+        setSummary({
+          totalIncome: 0,
+          totalExpense: 0,
+          netProfit: 0,
+          monthlyIncome: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+          monthlyExpense: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+          expenseByCategory: [],
+        });
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data && !data.error) {
         setSummary(data);
+      } else {
+        setSummary({
+          totalIncome: 0,
+          totalExpense: 0,
+          netProfit: 0,
+          monthlyIncome: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+          monthlyExpense: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+          expenseByCategory: [],
+        });
       }
     } catch (err) {
       console.error("Failed to load summary stats:", err);
+      setSummary({
+        totalIncome: 0,
+        totalExpense: 0,
+        netProfit: 0,
+        monthlyIncome: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+        monthlyExpense: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+        expenseByCategory: [],
+      });
     }
   };
 

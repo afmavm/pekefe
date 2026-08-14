@@ -575,7 +575,7 @@ export async function PUT(
       FALLBACK_PRODUCTS[fallbackIdx] = {
         ...FALLBACK_PRODUCTS[fallbackIdx],
         ...formattedResponse
-      };
+      } as any;
     }
 
     revalidatePath('/', 'layout');

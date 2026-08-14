@@ -2367,13 +2367,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           });
         });
       });
-      setVariants(prev => {
-        const existingNames = new Set(prev.map(v => v.name));
-        const filtered = newCreated.filter(v => !existingNames.has(v.name));
-        return [...prev, ...filtered];
-      });
+      const existingNames = new Set(variants.map(v => v.name));
+      const filtered = newCreated.filter(v => !existingNames.has(v.name));
+      const allUpdated = [...variants, ...filtered];
+      setVariants(allUpdated);
       setIsVariantModalOpen(false);
       toast.success(`${newCreated.length} adet varyant matrisi üretildi.`);
+
+      if (isEditMode && productId) {
+        fetch(`/api/products/${productId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ variants: allUpdated })
+        }).then(res => {
+          if (res.ok) {
+            refreshProducts();
+            toast.success("Varyantlar veritabanına ve diske kalıcı olarak kaydedildi.");
+          }
+        }).catch(err => {
+          console.error("Varyant kaydetme sync hatası:", err);
+        });
+      }
       return;
     }
 
@@ -2400,8 +2414,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       });
     }
 
+    let updatedVariants: Variant[] = [];
     if (variantForm.isEditing && variantForm.id) {
-      setVariants(prev => prev.map(v => v.id === variantForm.id ? {
+      updatedVariants = variants.map(v => v.id === variantForm.id ? {
         ...v,
         size: variantForm.size,
         color: variantForm.color,
@@ -2413,7 +2428,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         sku: variantForm.sku || v.sku,
         barcode: variantForm.barcode || v.barcode,
         name: `${variantForm.size} - ${variantForm.color}`,
-      } : v));
+      } : v);
+      setVariants(updatedVariants);
       toast.success("Varyant başarıyla güncellendi.");
     } else {
       const codes = generateSkuAndBarcode(variantForm.size, variantForm.color);
@@ -2430,10 +2446,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         vatRate: variantForm.vatRate,
         vatIncluded: variantForm.vatIncluded,
       };
-      setVariants(prev => [...prev, newVar]);
+      updatedVariants = [...variants, newVar];
+      setVariants(updatedVariants);
       toast.success("Yeni varyant eklendi.");
     }
     setIsVariantModalOpen(false);
+
+    // Eğer düzenleme modundaysa varyantları veritabanına ve diske anında yaz
+    if (isEditMode && productId) {
+      fetch(`/api/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variants: updatedVariants })
+      }).then(res => {
+        if (res.ok) {
+          refreshProducts();
+          toast.success("Varyantlar veritabanına ve diske kalıcı olarak kaydedildi.");
+        }
+      }).catch(err => {
+        console.error("Varyant kaydetme sync hatası:", err);
+      });
+    }
   };
 
   const autoCalculateAllVariantPrices = () => {
@@ -2456,8 +2489,24 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   };
 
   const deleteVariant = (id: string) => {
-    setVariants(prev => prev.filter(v => v.id !== id));
+    const updatedVariants = variants.filter(v => v.id !== id);
+    setVariants(updatedVariants);
     toast.error("Varyant karttan kaldırıldı.");
+
+    if (isEditMode && productId) {
+      fetch(`/api/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variants: updatedVariants })
+      }).then(res => {
+        if (res.ok) {
+          refreshProducts();
+          toast.info("Varyant silme veritabanına işlendi.");
+        }
+      }).catch(err => {
+        console.error("Varyant silme sync hatası:", err);
+      });
+    }
   };
 
   // Add/Remove Warehouses

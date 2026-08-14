@@ -618,7 +618,7 @@ export default function StockProductionPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-3">
-            <PackageSearch className="w-6 h-6 text-orange-500" /> Ürün Kataloğu & Kategori Yönetimi
+            <PackageSearch className="w-6 h-6 text-[#b45309]" /> Ürün Kataloğu & Kategori Yönetimi
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
             Tüm imalat mamullerini ve hammadde envanterlerini tanımlayın, ürün hiyerarşisini ve kategorileri yönetin.
@@ -640,7 +640,7 @@ export default function StockProductionPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer ${
                   activeTab === tab.id 
-                    ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/10" 
+                    ? "bg-[#b45309] text-white border-[#b45309] shadow-md shadow-[#b45309]/10" 
                     : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                 }`}
               >
@@ -752,7 +752,7 @@ export default function StockProductionPage() {
         {/* Content */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
+            <Loader2 className="w-12 h-12 animate-spin text-[#b45309]" />
             <p className="text-sm text-slate-400 font-semibold">Katalog Verileri Yükleniyor...</p>
           </div>
         ) : (
@@ -768,7 +768,7 @@ export default function StockProductionPage() {
                   </div>
                   <button
                     onClick={openAddProductModal}
-                    className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow shadow-orange-500/10"
+                    className="px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow shadow-[#b45309]/10"
                   >
                     <Plus className="w-4 h-4" /> YENİ ÜRÜN EKLE
                   </button>

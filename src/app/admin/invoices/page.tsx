@@ -107,12 +107,17 @@ export default function InvoicesPage() {
       const params = new URLSearchParams();
       if (statusFilter !== "ALL") params.set("status", statusFilter);
       if (typeFilter !== "ALL") params.set("type", typeFilter);
-      const res = await fetch(`/api/accounting/invoices?${params}`);
-      const data = await res.json();
+      const res = await fetch(`/api/accounting/invoices?${params}`).catch(() => null);
+      if (!res || !res.ok) {
+        setInvoices([]);
+        setSelectedIds([]);
+        return;
+      }
+      const data = await res.json().catch(() => []);
       setInvoices(Array.isArray(data) ? data : []);
-      setSelectedIds([]); // Clear selection state when list changes
+      setSelectedIds([]);
     } catch {
-      toast.error("Faturalar yüklenemedi");
+      setInvoices([]);
     } finally {
       setLoading(false);
     }

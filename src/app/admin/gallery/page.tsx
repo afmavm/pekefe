@@ -22,6 +22,8 @@ import {
   FileVideo,
   FileImage,
   Star,
+  Search,
+  Link as LinkIcon
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,18 +48,26 @@ const CATEGORY_OPTIONS = [
   { id: "hasat", label: "Hasat & Doğal Yaşam" },
   { id: "uretim", label: "Geleneksel Üretim" },
   { id: "dolum", label: "Hijyen & Dolum" },
+  { id: "aricilik", label: "Arıcılık & Kovanlar" },
+  { id: "b2b", label: "B2B & Ekipmanlar" },
 ];
 
 export default function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingThumb, setUploadingThumb] = useState(false);
+
+  // Media Library Picker Modal
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaItems, setMediaItems] = useState<any[]>([]);
+  const [pickerTarget, setPickerTarget] = useState<"src" | "thumb">("src");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -92,8 +102,22 @@ export default function AdminGalleryPage() {
     }
   };
 
+  // Fetch Media Library Assets for Picker
+  const fetchMedia = async () => {
+    try {
+      const res = await fetch("/api/cms/media", { cache: "no-store" });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setMediaItems(data);
+      }
+    } catch {
+      console.error("Error fetching media items for picker");
+    }
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchMedia();
   }, []);
 
   // Open modal for NEW item
@@ -130,6 +154,26 @@ export default function AdminGalleryPage() {
       active: Boolean(item.active),
     });
     setIsModalOpen(true);
+  };
+
+  // Open Media Picker
+  const openMediaPicker = (target: "src" | "thumb") => {
+    setPickerTarget(target);
+    setIsMediaPickerOpen(true);
+  };
+
+  const selectImageFromPicker = (url: string) => {
+    if (pickerTarget === "src") {
+      setFormData((prev) => ({
+        ...prev,
+        src: url,
+        thumb: prev.thumb || url
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, thumb: url }));
+    }
+    setIsMediaPickerOpen(false);
+    toast.success("Görsel seçildi.");
   };
 
   // Handle direct file upload for Main Media (Src)
@@ -276,6 +320,26 @@ export default function AdminGalleryPage() {
     }
   };
 
+  // Toggle Featured
+  const handleToggleFeatured = async (item: GalleryItem) => {
+    const updatedFeatured = !item.isFeatured;
+    try {
+      const res = await fetch("/api/gallery", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id, isFeatured: updatedFeatured }),
+      });
+      if (res.ok) {
+        toast.success(updatedFeatured ? "Öge öne çıkarılan olarak işaretlendi." : "Öne çıkarma kaldırıldı.");
+        setItems((prev) =>
+          prev.map((i) => (i.id === item.id ? { ...i, isFeatured: updatedFeatured } : i))
+        );
+      }
+    } catch {
+      toast.error("Öne çıkarma durumu değiştirilemedi.");
+    }
+  };
+
   // Delete Item
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`"${title}" ögesini galeriden silmek istediğinizden emin misiniz?`)) {
@@ -296,9 +360,12 @@ export default function AdminGalleryPage() {
     }
   };
 
-  const filteredItems = activeCategory === "all"
-    ? items
-    : items.filter((i) => i.category === activeCategory);
+  const filteredItems = items.filter((item) => {
+    const matchesCategory = activeCategory === "all" ? true : item.category === activeCategory;
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.desc && item.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   const videoCount = items.filter((i) => i.type === "video").length;
   const imageCount = items.filter((i) => i.type === "image").length;
@@ -315,7 +382,7 @@ export default function AdminGalleryPage() {
               <ImageIcon className="w-6 h-6" />
             </span>
             <h1 className="text-2xl md:text-3xl font-bold font-display-lg text-amber-950">
-              Galeri Yönetimi
+              Galeri & Albüm Yönetimi
             </h1>
           </div>
           <p className="text-sm text-stone-500 mt-1 font-body">
@@ -385,15 +452,29 @@ export default function AdminGalleryPage() {
         </div>
       </div>
 
-      {/* ─── CATEGORY FILTER BAR ─── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-stone-400 uppercase tracking-wider mr-2 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Filtrele:
+      {/* ─── SEARCH & CATEGORY FILTER BAR ─── */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+        
+        {/* Search Bar */}
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Başlık veya açıklamaya göre ara..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white text-stone-900"
+          />
+        </div>
+
+        {/* Categories */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto overflow-x-auto">
+          <span className="text-xs font-bold text-stone-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+            <Filter className="w-3.5 h-3.5" /> Kategori:
           </span>
           <button
             onClick={() => setActiveCategory("all")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               activeCategory === "all"
                 ? "bg-[#4A0E17] text-white shadow-sm"
                 : "bg-stone-100 text-stone-600 hover:bg-stone-200"
@@ -407,315 +488,346 @@ export default function AdminGalleryPage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeCategory === cat.id
                     ? "bg-[#4A0E17] text-white shadow-sm"
                     : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                 }`}
               >
-                {cat.label} ({count})
+                <span>{cat.label}</span>
+                <span className="text-[10px] opacity-70">({count})</span>
               </button>
             );
           })}
         </div>
-
-        <div className="text-xs text-stone-500 font-mono">
-          Gösterilen: {filteredItems.length} / {items.length}
-        </div>
       </div>
 
-      {/* ─── MEDIA GRID ─── */}
+      {/* ─── GALLERY ITEMS GRID ─── */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-stone-200 space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#4A0E17]" />
-          <p className="text-sm text-stone-500">Galeri verileri yükleniyor...</p>
+        <div className="flex flex-col items-center justify-center py-24 gap-3 bg-white rounded-2xl border border-stone-200">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-700" />
+          <span className="text-sm text-stone-500 font-bold">Galeri İçeriği Yükleniyor...</span>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-stone-200 space-y-3 p-8">
-          <ImageIcon className="w-12 h-12 mx-auto text-stone-300" />
-          <h3 className="text-lg font-bold text-stone-700">Henüz Medya Bulunmuyor</h3>
-          <p className="text-sm text-stone-500 max-w-md mx-auto">
-            Bu kategoride kayıtlı görsel veya video bulunmuyor. Yeni Medya Ekle butonunu kullanarak hemen içerik yükleyebilirsiniz.
-          </p>
-          <button
-            onClick={handleOpenNewModal}
-            className="inline-flex items-center gap-2 bg-[#4A0E17] text-white px-4 py-2 rounded-xl text-xs font-bold mt-2"
-          >
-            <Plus className="w-4 h-4" /> Medya Ekle
-          </button>
+        <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center space-y-4">
+          <ImageIcon className="w-16 h-16 text-stone-300 mx-auto" />
+          <div>
+            <h3 className="text-lg font-bold text-stone-800">Hiç Medya Bulunamadı</h3>
+            <p className="text-sm text-stone-500 mt-1 max-w-md mx-auto">
+              {activeCategory !== "all" || searchQuery
+                ? "Arama veya kategori filtrenize uygun görsel bulunamadı."
+                : "Galeri henüz boş. Sağ üstteki 'Yeni Medya Ekle' butonundan ilk görselinizi yükleyebilirsiniz."}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden shadow-sm flex flex-col justify-between group ${
-                !item.active ? "opacity-60 border-dashed border-stone-300" : "border-stone-200 hover:shadow-md"
-              }`}
-            >
-              <div className="relative aspect-[16/10] bg-stone-900 overflow-hidden">
-                <Image
-                  src={item.thumb || item.src}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredItems.map((item) => {
+            const displayThumb = item.thumb || item.src;
 
-                {/* Top Badges */}
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20">
-                  <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 border border-white/20">
-                    {item.type === "video" ? (
-                      <>
-                        <Video className="w-3 h-3 text-blue-400" /> Video
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-3 h-3 text-emerald-400" /> Fotoğraf
-                      </>
+            return (
+              <div
+                key={item.id}
+                className={`bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group ${
+                  !item.active ? "opacity-60 bg-stone-50" : ""
+                }`}
+              >
+                {/* Media Image / Video Container */}
+                <div className="relative aspect-video bg-stone-900 overflow-hidden">
+                  {displayThumb ? (
+                    <Image
+                      src={displayThumb}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-500">
+                      <ImageIcon className="w-10 h-10" />
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+
+                  {/* Type Badge (Video / Image) */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                    <span
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow ${
+                        item.type === "video" ? "bg-red-600" : "bg-emerald-600"
+                      }`}
+                    >
+                      {item.type === "video" ? <Play className="w-3 h-3 fill-current" /> : <ImageIcon className="w-3 h-3" />}
+                      {item.type === "video" ? "Video" : "Görsel"}
+                    </span>
+                    {item.badge && (
+                      <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-500 text-stone-950 uppercase tracking-wider shadow">
+                        {item.badge}
+                      </span>
                     )}
-                  </span>
+                  </div>
 
-                  <span
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                      item.active ? "bg-emerald-500 text-white" : "bg-stone-700 text-stone-300"
-                    }`}
-                  >
-                    {item.active ? "Yayında" : "Pasif"}
-                  </span>
-                </div>
-
-                {/* Bottom Overlay Title */}
-                <div className="absolute bottom-3 left-3 right-3 text-white z-20">
-                  <span className="text-[10px] font-mono text-amber-200 uppercase font-bold block">
-                    {item.badge || item.categoryLabel}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-amber-800 bg-amber-50 font-bold px-2 py-0.5 rounded uppercase">
-                    {item.categoryLabel}
-                  </span>
-                  <h3 className="font-bold text-stone-900 text-base leading-snug line-clamp-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-stone-500 font-body leading-relaxed line-clamp-2">
-                    {item.desc || "Açıklama belirtilmedi."}
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                  {/* Featured Star Toggle */}
                   <button
-                    onClick={() => handleToggleActive(item)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors ${
-                      item.active
-                        ? "bg-amber-50 text-amber-900 hover:bg-amber-100"
-                        : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                    type="button"
+                    onClick={() => handleToggleFeatured(item)}
+                    className={`absolute top-3 right-3 p-1.5 rounded-full backdrop-blur-md transition z-10 ${
+                      item.isFeatured ? "bg-amber-500 text-white shadow-lg" : "bg-black/40 text-white/70 hover:text-white"
                     }`}
+                    title={item.isFeatured ? "Öne Çıkarılan" : "Öne Çıkar"}
                   >
-                    {item.active ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {item.active ? "Yayından Kaldır" : "Yayına Al"}
+                    <Star className="w-4 h-4 fill-current" />
                   </button>
 
-                  <div className="flex items-center gap-1">
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-3 left-3 right-3 z-10">
+                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">
+                      {item.categoryLabel || item.category}
+                    </span>
+                    <h3 className="text-sm font-bold text-white truncate" title={item.title}>
+                      {item.title}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Content Details */}
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                  <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed font-body">
+                    {item.desc || "Açıklama girilmedi."}
+                  </p>
+
+                  <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+                    {/* Active Status Badge */}
                     <button
-                      onClick={() => handleOpenEditModal(item)}
-                      className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-colors"
-                      title="Düzenle"
+                      type="button"
+                      onClick={() => handleToggleActive(item)}
+                      className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition flex items-center gap-1 ${
+                        item.active
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          : "bg-stone-100 text-stone-500 border-stone-200 hover:bg-stone-200"
+                      }`}
                     >
-                      <Edit3 className="w-4 h-4 text-blue-600" />
+                      {item.active ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                      <span>{item.active ? "Yayında" : "Pasif"}</span>
                     </button>
-                    <button
-                      onClick={() => handleDelete(item.id, item.title)}
-                      className="p-2 rounded-lg text-stone-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                      title="Sil"
-                    >
-                      <Trash2 className="w-4 h-4 text-rose-500" />
-                    </button>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditModal(item)}
+                        className="p-1.5 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-100 transition"
+                        title="Düzenle"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id, item.title)}
+                        className="p-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
+                        title="Sil"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* ─── MODAL: CREATE / EDIT MEDIA ─── */}
+      {/* ─── ADD / EDIT MODAL ─── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8">
-            
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-stone-950/60 backdrop-blur-xs animate-in fade-in"
+            onClick={() => setIsModalOpen(false)}
+          />
+
+          <div className="relative bg-white rounded-3xl border border-stone-200 shadow-2xl w-full max-w-2xl overflow-hidden z-10 animate-in zoom-in-95 max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 bg-[#4A0E17] text-white">
+            <div className="p-6 border-b border-stone-100 flex items-center justify-between bg-stone-50 shrink-0">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-300" />
-                <h3 className="font-bold font-display-lg text-lg">
-                  {editingItem ? "Galeri Ögesini Düzenle" : "Yeni Galeri İçeriği Ekle"}
-                </h3>
+                <span className="p-2 rounded-xl bg-amber-100 text-amber-900 font-bold">
+                  {editingItem ? <Edit3 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-stone-900">
+                    {editingItem ? "Galeri Ögesini Düzenle" : "Yeni Galeri Ögesi Ekle"}
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    Görsel veya video detaylarını aşağıdan ayarlayın.
+                  </p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-stone-300 hover:text-white p-1 rounded-lg transition-colors"
+                className="p-2 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-200 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
               
-              {/* Type and Category Selectors */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-                    Medya Türü
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: "image" })}
-                      className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                        formData.type === "image"
-                          ? "bg-[#4A0E17] text-white border-[#4A0E17]"
-                          : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
-                      }`}
-                    >
-                      <ImageIcon className="w-4 h-4" /> Fotoğraf
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: "video" })}
-                      className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                        formData.type === "video"
-                          ? "bg-[#4A0E17] text-white border-[#4A0E17]"
-                          : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
-                      }`}
-                    >
-                      <Video className="w-4 h-4" /> Video
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-                    Galeri Kategorisi
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => {
-                      const selectedCat = CATEGORY_OPTIONS.find((c) => c.id === e.target.value);
-                      setFormData({
-                        ...formData,
-                        category: e.target.value,
-                        categoryLabel: selectedCat?.label || "Galeri Özel",
-                      });
-                    }}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs font-bold text-stone-800 focus:outline-none focus:border-[#4A0E17]"
-                  >
-                    {CATEGORY_OPTIONS.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Type Switcher */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, type: "image" }))}
+                  className={`p-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition ${
+                    formData.type === "image"
+                      ? "bg-amber-900 text-white border-amber-900 shadow-sm"
+                      : "bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100"
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span>Fotoğraf / Görsel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, type: "video" }))}
+                  className={`p-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition ${
+                    formData.type === "video"
+                      ? "bg-red-700 text-white border-red-700 shadow-sm"
+                      : "bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100"
+                  }`}
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Video İçi Link / MP4</span>
+                </button>
               </div>
 
               {/* Title & Badge */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-                    İçerik Başlığı *
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
+                    Başlık *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Örn: İspirin bereketli topraklarında Dut Hasadı"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="Örn: 2026 Erzurum Hasat Belgeseli"
+                    className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
                     Etiket / Rozet
                   </label>
                   <input
                     type="text"
-                    placeholder="Örn: TRT Haber Özel"
                     value={formData.badge}
-                    onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, badge: e.target.value }))}
+                    placeholder="Örn: Galeri Özel"
+                    className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white"
                   />
                 </div>
               </div>
 
-              {/* Description */}
+              {/* Category */}
               <div>
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-                  İçerik Açıklaması
+                <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
+                  Kategori *
                 </label>
-                <textarea
-                  rows={3}
-                  placeholder="İçeriğin detaylı açıklamasını ve hikayesini yazın..."
-                  value={formData.desc}
-                  onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"
-                />
+                <select
+                  value={formData.category}
+                  onChange={(e) => {
+                    const sel = CATEGORY_OPTIONS.find((c) => c.id === e.target.value);
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                      categoryLabel: sel ? sel.label : e.target.value,
+                    }));
+                  }}
+                  className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white font-medium"
+                >
+                  {CATEGORY_OPTIONS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Media File Upload / URL Input */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
-                  Medya Dosyası (Görsel veya Video) *
+              {/* Main Media File / URL */}
+              <div>
+                <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
+                  {formData.type === "video" ? "Video URL / Dosyası *" : "Görsel URL / Dosyası *"}
                 </label>
-
                 <div className="flex gap-2">
                   <input
                     type="text"
                     required
-                    placeholder="Resim veya Video URL adresi veya sunucu yolu (/uploads/...)"
                     value={formData.src}
-                    onChange={(e) => setFormData({ ...formData, src: e.target.value })}
-                    className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, src: e.target.value }))}
+                    placeholder={
+                      formData.type === "video"
+                        ? "https://youtube.com/embed/... veya video.mp4"
+                        : "https://... veya dosya seçin"
+                    }
+                    className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white font-mono"
                   />
+                  
+                  <button
+                    type="button"
+                    onClick={() => openMediaPicker("src")}
+                    className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-700 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1"
+                    title="Medya Kütüphanesinden Seç"
+                  >
+                    <ImageIcon className="w-4 h-4 text-amber-700" />
+                    <span className="hidden sm:inline">Kütüphaneden Seç</span>
+                  </button>
+
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileUpload}
-                    accept="image/*,video/*"
+                    accept={formData.type === "video" ? "video/*" : "image/*"}
                     className="hidden"
                   />
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="bg-amber-100 hover:bg-amber-200 text-amber-900 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 transition"
                   >
-                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    <span>Dosya Yükle</span>
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 text-amber-400" />}
+                    <span>Yükle</span>
                   </button>
                 </div>
               </div>
 
-              {/* Optional Custom Thumbnail */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
-                  Kapak Görseli / Küçük Resim (Opsiyonel)
+              {/* Thumbnail Image */}
+              <div>
+                <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
+                  Kapak / Önizleme Görseli (Opsiyonel)
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Video kapak resmi URL'si (Boş bırakılırsa dosyanın kendisi kullanılır)"
                     value={formData.thumb}
-                    onChange={(e) => setFormData({ ...formData, thumb: e.target.value })}
-                    className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-stone-900 focus:outline-none focus:border-[#4A0E17]"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, thumb: e.target.value }))}
+                    placeholder="Boş bırakılırsa dosyanın kendisi kapak olur"
+                    className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white font-mono"
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => openMediaPicker("thumb")}
+                    className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-700 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1"
+                  >
+                    <ImageIcon className="w-4 h-4 text-amber-700" />
+                    <span className="hidden sm:inline">Kütüphane</span>
+                  </button>
+
                   <input
                     type="file"
                     ref={thumbInputRef}
@@ -727,61 +839,122 @@ export default function AdminGalleryPage() {
                     type="button"
                     onClick={() => thumbInputRef.current?.click()}
                     disabled={uploadingThumb}
-                    className="bg-stone-100 hover:bg-stone-200 text-stone-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 transition"
                   >
                     {uploadingThumb ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    <span>Kapak Seç</span>
+                    <span>Yükle</span>
                   </button>
                 </div>
               </div>
 
-              {/* Switches: Active & Featured */}
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
+                  Açıklama Metni
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.desc}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, desc: e.target.value }))}
+                  placeholder="Görsel veya video ile ilgili detaylı açıklama..."
+                  className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white resize-none"
+                />
+              </div>
+
+              {/* Toggles */}
               <div className="flex items-center gap-6 pt-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.active}
-                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                    className="w-4 h-4 text-[#4A0E17] rounded focus:ring-0"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, active: e.target.checked }))}
+                    className="w-4 h-4 rounded text-amber-900 focus:ring-amber-500"
                   />
-                  <span className="text-xs font-bold text-stone-700">Sitede Yayına Al (Aktif)</span>
+                  <span className="text-xs font-bold text-stone-800">Sitede Yayında (Aktif)</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.isFeatured}
-                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                    className="w-4 h-4 text-[#4A0E17] rounded focus:ring-0"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, isFeatured: e.target.checked }))}
+                    className="w-4 h-4 rounded text-amber-900 focus:ring-amber-500"
                   />
-                  <span className="text-xs font-bold text-stone-700 flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> Öne Çıkar (Manşet)
-                  </span>
+                  <span className="text-xs font-bold text-stone-800">Öne Çıkarılan Medya</span>
                 </label>
               </div>
 
-              {/* Modal Footer */}
+              {/* Modal Actions */}
               <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs hover:bg-stone-50 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs hover:bg-stone-100 transition"
                 >
-                  İptal
+                  Vazgeç
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#4A0E17] hover:bg-[#360a10] text-white px-6 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md active:scale-95 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-[#4A0E17] hover:bg-[#360a10] text-white font-bold text-xs transition shadow-md"
                 >
-                  {editingItem ? "Güncellemeleri Kaydet" : "Galeriye Ekle"}
+                  {editingItem ? "Güncelle" : "Galeriye Ekle"}
                 </button>
               </div>
-
             </form>
           </div>
         </div>
       )}
 
+      {/* ─── MEDIA PICKER MODAL ─── */}
+      {isMediaPickerOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-sm" onClick={() => setIsMediaPickerOpen(false)} />
+          
+          <div className="bg-white relative z-10 rounded-3xl w-full max-w-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95">
+            <div className="p-5 border-b border-stone-100 flex items-center justify-between bg-stone-50">
+              <h3 className="font-bold text-base text-stone-900 flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-amber-700" />
+                Medya Kütüphanesinden Görsel Seç
+              </h3>
+              <button onClick={() => setIsMediaPickerOpen(false)} className="p-1 rounded-full text-stone-400 hover:text-stone-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              {mediaItems.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {mediaItems.map((item) => (
+                    <div
+                      key={item.id || item.url}
+                      onClick={() => selectImageFromPicker(item.url)}
+                      className="group cursor-pointer bg-stone-50 rounded-2xl overflow-hidden border border-stone-200 hover:border-amber-700 transition flex flex-col h-40 shadow-xs hover:shadow-md"
+                    >
+                      <div className="relative flex-grow bg-stone-100 overflow-hidden">
+                        <Image src={item.url} alt={item.name || "Media"} fill sizes="200px" className="object-cover group-hover:scale-105 transition duration-300" />
+                      </div>
+                      <div className="p-2 bg-white border-t border-stone-100">
+                        <p className="text-[10px] font-bold text-stone-800 truncate">{item.name || "Görsel"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-stone-400">
+                  <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p className="text-xs font-bold">Kütüphanede görsel bulunamadı.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-stone-100 bg-stone-50 flex justify-end">
+              <button onClick={() => setIsMediaPickerOpen(false)} className="px-4 py-2 bg-stone-200 text-stone-700 font-bold rounded-xl text-xs">
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

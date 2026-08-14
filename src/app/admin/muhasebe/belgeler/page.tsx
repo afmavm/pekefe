@@ -263,13 +263,13 @@ export default function BelgelerPage() {
   const loadBelgeler = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/accounting/invoices?status=ALL");
-      if (!res.ok) return;
-      const data = await res.json();
+      const res = await fetch("/api/accounting/invoices?status=ALL").catch(() => null);
+      if (!res || !res.ok) { setBelgeler([]); return; }
+      const data = await res.json().catch(() => []);
       const list: Belge[] = (Array.isArray(data) ? data : []).map((inv: any) => {
-        const rawTutar   = Number(inv.totalAmount) - Number(inv.taxAmount);
-        const rawKdv     = Number(inv.taxAmount);
-        const rawTotal   = Number(inv.totalAmount);
+        const rawTutar   = Number(inv.totalAmount || 0) - Number(inv.taxAmount || 0);
+        const rawKdv     = Number(inv.taxAmount || 0);
+        const rawTotal   = Number(inv.totalAmount || 0);
         const dir: "SATIS"|"ALIS" = (inv.type === "ALIS" || inv.type === "ALIS_FATURA") ? "ALIS" : "SATIS";
         return {
           id: inv.id,
@@ -300,20 +300,22 @@ export default function BelgelerPage() {
         .slice(0, 8)
         .map(b => ({ faturaNo: b.belgeNo, tarih: b.belgeTarih, kalanTutar: b.genelToplam }));
       setOpenInvoices(openFifo);
+    } catch {
+      setBelgeler([]);
     } finally { setLoading(false); }
   }, []);
 
   const loadAccounts = useCallback(async () => {
     try {
-      const res = await fetch("/api/accounting/current-accounts");
-      if (res.ok) { const d = await res.json(); setAccounts(Array.isArray(d) ? d : []); }
+      const res = await fetch("/api/accounting/current-accounts").catch(() => null);
+      if (res && res.ok) { const d = await res.json().catch(() => []); setAccounts(Array.isArray(d) ? d : []); }
     } catch {}
   }, []);
 
   const loadProducts = useCallback(async () => {
     try {
-      const res = await fetch("/api/products");
-      if (res.ok) { const d = await res.json(); setProducts(Array.isArray(d) ? d : []); }
+      const res = await fetch("/api/products").catch(() => null);
+      if (res && res.ok) { const d = await res.json().catch(() => []); setProducts(Array.isArray(d) ? d : []); }
     } catch {}
   }, []);
 

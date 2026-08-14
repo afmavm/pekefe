@@ -62,13 +62,14 @@ export default function BankaPage() {
   const load = () => {
     setLoading(true);
     fetch("/api/accounting/banks", { cache: "no-store" })
-      .then((r) => r.json())
+      .then((r) => (r && r.ok ? r.json() : null))
       .then((res) => {
-        // API { success: true, data: [...] } formatında dönebilir
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
         setBanks(list);
       })
-      .catch(() => { setBanks([]); toast.error("Banka hesapları yüklenemedi."); })
+      .catch(() => {
+        setBanks([]);
+      })
       .finally(() => setLoading(false));
   };
 

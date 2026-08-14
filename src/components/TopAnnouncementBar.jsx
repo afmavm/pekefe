@@ -24,12 +24,13 @@ const DEFAULT_ITEMS = [
 export default function TopAnnouncementBar() {
   const { cmsData } = useCMS();
 
-  if (cmsData?.announcementActive === false) {
+  const isBarActive = cmsData?.announcementActive;
+  if (isBarActive === false || isBarActive === "false" || isBarActive === 0 || isBarActive === "0") {
     return null;
   }
 
-  const text1 = cmsData?.announcement || "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!";
-  const text2 = cmsData?.announcement2 || "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları";
+  const text1 = cmsData?.announcement !== undefined ? cmsData.announcement : "Tüm Türkiye'ye Aynı Gün Kargo ve Fabrika Fiyatları!";
+  const text2 = cmsData?.announcement2 !== undefined ? cmsData.announcement2 : "🔥 %100 Yerli İmalat Paslanmaz Arı Körükleri ve Ekipmanları";
   const phone = cmsData?.contactPhone || "0544 149 48 51";
   const whatsapp = cmsData?.socialWhatsapp || "05441494851";
 

@@ -192,26 +192,24 @@ export async function PUT(request: Request) {
       }
 
       if (type === 'string') {
-        const s = val != null ? String(val) : '';
-        return s.trim() !== '' ? s : fb;
+        return val != null ? String(val) : '';
       }
       if (type === 'number') {
         const n = Number(val);
         return isNaN(n) ? (typeof fb === 'number' ? fb : 0) : n;
       }
-      if (type === 'boolean') return typeof val === 'boolean' ? val : !!val;
+      if (type === 'boolean') {
+        if (typeof val === 'boolean') return val;
+        if (val === 'true' || val === 1 || val === '1') return true;
+        if (val === 'false' || val === 0 || val === '0') return false;
+        return !!val;
+      }
       if (type === 'json') {
         if (val === null || val === undefined) return fb;
-        if (typeof val === 'string') {
-          try {
-            return JSON.parse(val);
-          } catch {
-            return fb;
-          }
-        }
-        return val ?? fb;
+        if (typeof val === 'string') return val;
+        return JSON.stringify(val);
       }
-      return val ?? fb;
+      return val;
     };
 
     const data = {

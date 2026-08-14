@@ -354,19 +354,19 @@ export default function MarketplaceDashboard({
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div>
-          <h1 className="text-xl font-black text-slate-900 flex items-center gap-3">
-            <Network className="w-6 h-6 text-orange-500" /> Entegrasyon Kontrol Paneli
+          <h1 className="text-xl font-black text-slate-900 flex items-center gap-2.5">
+            <Network className="w-6 h-6 text-[#b45309]" /> Entegrasyon & API Servisleri Merkezi
           </h1>
-          <p className="text-slate-500 mt-1 text-sm">
-            Trendyol, Hepsiburada, N11 pazaryerleri ve harici tedarikçi kanallarını yönetin.
+          <p className="text-slate-500 mt-1 text-xs font-medium">
+            Trendyol, Hepsiburada, N11 pazaryerleri ve harici tedarikçi kanallarının canlı senkronizasyonunu yönetin.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAddModal}
-          className="py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition shadow-md shadow-orange-100"
+          className="py-2.5 px-4 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition shadow-md cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Yeni Entegrasyon Ekle
         </button>
@@ -386,8 +386,8 @@ export default function MarketplaceDashboard({
           <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">Hata Kuyruğu</p>
           <p className="text-3xl font-black text-blue-600">{errorCount}</p>
         </div>
-        <div className="bg-orange-500 rounded-2xl p-5 shadow-sm text-white">
-          <p className="text-[10px] font-semibold text-orange-100 uppercase tracking-wider mb-1">Pasif Kanallar</p>
+        <div className="bg-[#b45309] rounded-2xl p-5 shadow-sm text-white">
+          <p className="text-[10px] font-semibold text-amber-100 uppercase tracking-wider mb-1">Pasif Kanallar</p>
           <p className="text-3xl font-black">{integrations.length - activeCount}</p>
         </div>
       </div>

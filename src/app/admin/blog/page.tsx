@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { 
   Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, X, Save, Search, 
-  Calendar, Tag, Upload, Star, Clock, Filter, ImageIcon, Check, Loader2 
+  Calendar, Tag, Upload, Star, Clock, Filter, ImageIcon, Check, Loader2, RefreshCw 
 } from "lucide-react";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
@@ -25,6 +25,8 @@ interface BlogPost {
 
 const CATEGORIES = ["Genel", "Haberler", "Tarifler", "Sağlık", "Üretim", "Kampanya"];
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=800&q=80";
+
 const emptyPost = {
   title: "",
   slug: "",
@@ -40,6 +42,7 @@ export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const directChangeInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -51,9 +54,13 @@ export default function AdminBlogPage() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
+  // Direct Cover Image Change State
+  const [activeTargetPostId, setActiveTargetPostId] = useState<string | null>(null);
+
   // Media Library Picker Modal
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
+  const [pickerTarget, setPickerTarget] = useState<"form" | "direct">("form");
 
   const fetchPosts = () => {
     setLoading(true);
@@ -100,6 +107,7 @@ export default function AdminBlogPage() {
     return minutes > 0 ? `${minutes} dk okuma` : "1 dk okuma";
   };
 
+  // Upload image for FORM
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -128,10 +136,80 @@ export default function AdminBlogPage() {
     }
   };
 
+  // Direct Cover Image Change for a specific blog post
+  const handleDirectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeTargetPostId) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadToast = toast.loading("Yeni kapak fotoğrafı güncelleniyor...");
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      toast.dismiss(uploadToast);
+
+      if (res.ok && data.url) {
+        await updatePostImage(activeTargetPostId, data.url);
+      } else {
+        toast.error(data.error || "Kapak resmi yüklenemedi.");
+      }
+    } catch {
+      toast.dismiss(uploadToast);
+      toast.error("Görsel güncellenirken hata oluştu.");
+    } finally {
+      setActiveTargetPostId(null);
+      if (e.target.value) e.target.value = "";
+    }
+  };
+
+  // Helper to update image via API
+  const updatePostImage = async (postId: string, newImageUrl: string) => {
+    const targetPost = posts.find((p) => p.id === postId);
+    if (!targetPost) return;
+
+    // Optimistic UI Update
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, image: newImageUrl } : p))
+    );
+    toast.success("Kapak fotoğrafı başarıyla güncellendi!");
+
+    try {
+      await fetch(`/api/blog/${postId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...targetPost, image: newImageUrl }),
+      });
+    } catch {
+      toast.error("Güncelleme veritabanına iletilemedi.");
+      fetchPosts();
+    }
+  };
+
+  const openMediaPickerForDirect = (postId: string) => {
+    setActiveTargetPostId(postId);
+    setPickerTarget("direct");
+    setIsMediaPickerOpen(true);
+  };
+
+  const openMediaPickerForForm = () => {
+    setPickerTarget("form");
+    setIsMediaPickerOpen(true);
+  };
+
   const selectImageFromPicker = (url: string) => {
-    setForm((prev) => ({ ...prev, image: url }));
+    if (pickerTarget === "direct" && activeTargetPostId) {
+      updatePostImage(activeTargetPostId, url);
+      setActiveTargetPostId(null);
+    } else {
+      setForm((prev) => ({ ...prev, image: url }));
+      toast.success("Görsel seçildi.");
+    }
     setIsMediaPickerOpen(false);
-    toast.success("Görsel medya deposundan seçildi.");
   };
 
   const openCreate = () => {
@@ -185,7 +263,6 @@ export default function AdminBlogPage() {
   };
 
   const handleDelete = async (id: string) => {
-    // Optimistic UI update
     setPosts((prev) => prev.filter((p) => p.id !== id));
     setDeleteConfirm(null);
     try {
@@ -204,7 +281,6 @@ export default function AdminBlogPage() {
 
   const handleToggleActive = async (post: BlogPost) => {
     const nextState = !post.isActive;
-    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => (p.id === post.id ? { ...p, isActive: nextState } : p))
     );
@@ -225,7 +301,6 @@ export default function AdminBlogPage() {
 
   const handleToggleFeatured = async (post: BlogPost) => {
     const nextFeatured = !post.isFeatured;
-    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => (p.id === post.id ? { ...p, isFeatured: nextFeatured } : p))
     );
@@ -255,6 +330,15 @@ export default function AdminBlogPage() {
 
   return (
     <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+      {/* Hidden File Input for Direct Change */}
+      <input
+        type="file"
+        ref={directChangeInputRef}
+        onChange={handleDirectImageUpload}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* Header Deck */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div>
@@ -265,12 +349,21 @@ export default function AdminBlogPage() {
             Toplam {posts.length} yazı · {posts.filter(p => p.isActive).length} yayında · {posts.filter(p => p.isFeatured).length} öne çıkarılan
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="px-5 py-3 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md shadow-amber-900/10"
-        >
-          <Plus className="w-4 h-4" /> Yeni Yazı Oluştur
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchPosts}
+            className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+            title="Listeyi Yenile"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+          <button
+            onClick={openCreate}
+            className="px-5 py-3 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-md shadow-amber-900/10"
+          >
+            <Plus className="w-4 h-4" /> Yeni Yazı Oluştur
+          </button>
+        </div>
       </div>
 
       {/* Toolbar & Filters */}
@@ -338,15 +431,31 @@ export default function AdminBlogPage() {
             <div key={post.id} className="bg-white rounded-2xl border border-slate-200 hover:border-amber-300 transition p-5 shadow-sm space-y-4">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  {post.image ? (
-                    <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200 relative">
-                      <Image src={post.image} alt={post.title} fill sizes="80px" className="object-cover" />
+                  
+                  {/* Interactive Cover Image Container */}
+                  <div className="group relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200 shadow-sm cursor-pointer">
+                    <Image 
+                      src={post.image || FALLBACK_IMAGE} 
+                      alt={post.title} 
+                      fill 
+                      sizes="80px" 
+                      className="object-cover transition duration-300 group-hover:scale-110"
+                      onError={(e: any) => {
+                        e.target.srcset = FALLBACK_IMAGE;
+                        e.target.src = FALLBACK_IMAGE;
+                      }}
+                    />
+
+                    {/* Hover Change Button Overlay */}
+                    <div 
+                      onClick={() => openMediaPickerForDirect(post.id)}
+                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[9px] font-bold p-1 text-center"
+                      title="Kapak Fotoğrafını Değiştir"
+                    >
+                      <Upload className="w-4 h-4 mb-0.5 text-amber-400" />
+                      <span>Değiştir</span>
                     </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl shrink-0 bg-slate-100 border border-slate-200 flex flex-col items-center justify-center text-slate-400">
-                      <ImageIcon className="w-6 h-6" />
-                    </div>
-                  )}
+                  </div>
 
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -385,6 +494,14 @@ export default function AdminBlogPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => openMediaPickerForDirect(post.id)}
+                    title="Kapak Fotoğrafını Değiştir"
+                    className="w-9 h-9 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center hover:bg-amber-100 transition text-amber-800 cursor-pointer"
+                  >
+                    <ImageIcon className="w-4 h-4 text-amber-700" />
+                  </button>
+
                   <button
                     onClick={() => handleToggleFeatured(post)}
                     title={post.isFeatured ? "Öne Çıkarmayı Kaldır" : "Öne Çıkar"}
@@ -514,7 +631,7 @@ export default function AdminBlogPage() {
 
                     <button
                       type="button"
-                      onClick={() => setIsMediaPickerOpen(true)}
+                      onClick={openMediaPickerForForm}
                       className="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition shrink-0 flex items-center gap-1"
                       title="Medya Kütüphanesinden Seç"
                     >
@@ -630,16 +747,37 @@ export default function AdminBlogPage() {
           
           <div className="bg-white relative z-10 rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-[#b45309]" />
-                Medya Kütüphanesinden Kapak Görseli Seç
-              </h3>
+              <div>
+                <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-[#b45309]" />
+                  Medya Kütüphanesinden Kapak Görseli Seç
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Seçtiğiniz görsel doğrudan bu yazının kapak fotoğrafı olarak atanacaktır.</p>
+              </div>
               <button onClick={() => setIsMediaPickerOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 overflow-y-auto flex-1">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-bold text-slate-500">Mevcut Görseller ({mediaItems.length})</span>
+                <label 
+                  onClick={() => {
+                    setIsMediaPickerOpen(false);
+                    if (pickerTarget === "direct" && directChangeInputRef.current) {
+                      directChangeInputRef.current.click();
+                    } else if (imageFileInputRef.current) {
+                      imageFileInputRef.current.click();
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1"
+                >
+                  <Upload className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Bilgisayardan Yükle</span>
+                </label>
+              </div>
+
               {mediaItems.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {mediaItems.map((item) => (
@@ -650,6 +788,9 @@ export default function AdminBlogPage() {
                     >
                       <div className="relative flex-grow bg-slate-100 overflow-hidden">
                         <Image src={item.url} alt={item.name || "Media"} fill sizes="200px" className="object-cover group-hover:scale-105 transition duration-300" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="px-3 py-1 bg-white text-slate-900 font-bold text-xs rounded-xl shadow">Seç</span>
+                        </div>
                       </div>
                       <div className="p-2 bg-white border-t border-slate-100">
                         <p className="text-[10px] font-bold text-slate-800 truncate">{item.name || "Görsel"}</p>

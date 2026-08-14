@@ -354,9 +354,9 @@ export default function CariPage() {
     if (from) params.append("from", from);
     if (to)   params.append("to", to);
     fetch(`/api/accounting/current-accounts/${id}/ekstre?${params}`, { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => { if (!d.error) setEkstreData(d); })
-      .catch(() => toast.error("Ekstre y\u00fcklenemedi."))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && !d.error) setEkstreData(d); })
+      .catch(() => {})
       .finally(() => setEkstreLoading(false));
   };
 
@@ -919,7 +919,7 @@ export default function CariPage() {
     if (platformFilter !== "ALL") params.append("kaynakPlatform", platformFilter);
 
     fetch("/api/accounting/current-accounts?" + params.toString(), { cache: "no-store" })
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => {
         const list = Array.isArray(data) ? data : [];
         setAccounts(list);
@@ -929,14 +929,14 @@ export default function CariPage() {
       })
       .catch(err => {
         console.error(err);
-        toast.error("Cari kartlar listesi yüklenemedi.");
+        setAccounts([]);
       })
       .finally(() => setLoading(false));
   };
 
   const fetchActiveDetails = (id: string) => {
     fetch(`/api/accounting/current-accounts/${id}`, { cache: "no-store" })
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && !data.error) {
           setActiveAccount(data);

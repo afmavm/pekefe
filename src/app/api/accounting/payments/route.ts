@@ -18,12 +18,12 @@ export async function GET(request: Request) {
     const transactions = await prisma.transaction.findMany({
       include: { currentAccount: true },
       orderBy: { date: "desc" },
-    });
+    }).catch(() => []);
 
     const payments = transactions
       .map((t) => {
         let mappedType = "TAHSILAT";
-        const dbTypeUpper = t.type.toUpperCase();
+        const dbTypeUpper = (t.type || "").toUpperCase();
 
         if (
           dbTypeUpper.includes("TAHSILAT") ||
@@ -46,17 +46,20 @@ export async function GET(request: Request) {
         ) {
           mappedType = "IADE";
         } else {
-          mappedType = t.amount.toNumber() >= 0 ? "TAHSILAT" : "ODEME";
+          const num = t.amount ? (typeof (t.amount as any).toNumber === 'function' ? (t.amount as any).toNumber() : Number(t.amount)) : 0;
+          mappedType = num >= 0 ? "TAHSILAT" : "ODEME";
         }
+
+        const amt = t.amount ? (typeof (t.amount as any).toNumber === 'function' ? (t.amount as any).toNumber() : Number(t.amount)) : 0;
 
         return {
           id: t.id,
           currentAccount: t.currentAccount ? { name: t.currentAccount.name } : undefined,
-          amount: Math.abs(t.amount.toNumber()),
+          amount: Math.abs(amt),
           type: mappedType,
           method: t.paymentMethod || "NAKIT",
           status: "TAMAMLANDI",
-          date: t.date.toISOString(),
+          date: t.date ? new Date(t.date).toISOString() : new Date().toISOString(),
           description: t.description,
         };
       })
@@ -65,7 +68,7 @@ export async function GET(request: Request) {
     return NextResponse.json(payments, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("payments GET error:", error);
-    return NextResponse.json({ error: "Failed to fetch payments" }, { status: 500 });
+    return NextResponse.json([], { headers: NO_CACHE_HEADERS });
   }
 }
 

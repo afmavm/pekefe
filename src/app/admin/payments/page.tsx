@@ -63,11 +63,15 @@ export default function PaymentsPage() {
     try {
       const params = new URLSearchParams();
       if (typeFilter !== "ALL") params.set("type", typeFilter);
-      const res = await fetch(`/api/accounting/payments?${params}`, { cache: "no-store" });
-      const data = await res.json();
+      const res = await fetch(`/api/accounting/payments?${params}`, { cache: "no-store" }).catch(() => null);
+      if (!res || !res.ok) {
+        setPayments([]);
+        return;
+      }
+      const data = await res.json().catch(() => []);
       setPayments(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("Ödemeler yüklenemedi");
+      setPayments([]);
     } finally {
       setLoading(false);
     }

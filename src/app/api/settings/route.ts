@@ -362,12 +362,20 @@ export async function PUT(request: Request) {
 
       MEMORY_SETTINGS = { id: 'singleton', ...saved };
       writeLocalSettingsFallback(MEMORY_SETTINGS);
+      try {
+        const { revalidatePath } = await import('next/cache');
+        revalidatePath('/', 'layout');
+      } catch {}
       return NextResponse.json(saved);
     } catch (dbErr) {
       console.warn('[API SETTINGS WARNING] Veritabanına yazılamadı, yerel dosyaya kaydediliyor:', dbErr);
       const fallback = { id: 'singleton', ...data };
       MEMORY_SETTINGS = fallback;
       writeLocalSettingsFallback(fallback);
+      try {
+        const { revalidatePath } = await import('next/cache');
+        revalidatePath('/', 'layout');
+      } catch {}
       return NextResponse.json(fallback, { status: 200 });
     }
   } catch (error: any) {

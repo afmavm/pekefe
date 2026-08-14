@@ -252,6 +252,12 @@ export default function NavbarAdminPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || data.details || "Kayıt başarısız");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("settings-updated"));
+          try {
+            localStorage.setItem("pekefe_settings_updated", String(Date.now()));
+          } catch {}
+        }
         toast.success("Üst duyuru bandı ayarları başarıyla kaydedildi!");
       } else {
         toast.info("Navbar link yönetimi kaydedildi.");

@@ -260,10 +260,22 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
     }
   }, [initialPages]);
 
-  // Always fetch fresh data from API on mount to catch any admin updates
+  // Always fetch fresh data from API on mount and listen for instant updates
   useEffect(() => {
     fetchCMSData();
     fetchPages();
+
+    const handleSettingsUpdated = () => {
+      fetchCMSData();
+      fetchPages();
+    };
+
+    window.addEventListener("settings-updated", handleSettingsUpdated);
+    window.addEventListener("storage", handleSettingsUpdated);
+    return () => {
+      window.removeEventListener("settings-updated", handleSettingsUpdated);
+      window.removeEventListener("storage", handleSettingsUpdated);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -279,6 +291,12 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
       throw new Error(errData.error || `HTTP ${res.status}`);
     }
     await fetchCMSData();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("settings-updated"));
+      try {
+        localStorage.setItem("pekefe_settings_updated", String(Date.now()));
+      } catch {}
+    }
   };
 
 

@@ -1,71 +1,105 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'public', 'data', 'blog_posts_fallback.json');
 
 const defaultBlogPosts = [
   {
     id: "blog-1",
     title: "Geleneksel İspir Dut Pekmezi Nasıl Üretilir?",
     slug: "geleneksel-ispir-dut-pekmezi-nasil-uretilir",
-    category: "Geleneksel Üretim",
+    category: "Üretim",
     image: "/ispir-dut-hasadi.png",
     metaDesc: "İspir yaylalarında 2200m rakımda yetişen saf beyaz dutların bakır kazanlarda odun ateşinde ağır ağır pişirilme hikayesi.",
     content: `İspir'in el değmemiş 2200 metre üzerindeki yaylalarında yetişen saf beyaz dutlar, tam olgunlaşma döneminde silkelenerek keten bezlere toplanır.\n\nToplanan dutlar, hiçbir kimyasal katkı maddesi veya ilave şeker eklenmeksizin preslenir ve doğal şırası elde edilir. Geleneksel bakır kazanlarda, meşe odunu ateşinde saatlerce köpüğü alınarak kaynatılır. \n\nBakır kazanların yüksek ve eşit ısı iletimi, pekmezin karamelize olmadan doğal şeker dengesini ve besin değerini korumasını sağlar. Güneşte kıvam alan PEKEFE İspir Dut Pekmezi, cam kavanozlara doldurularak el değmeden mühürlenir.`,
-    readTime: "5 dk okuma",
+    isFeatured: true,
     isActive: true,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "blog-2",
     title: "Ham Çiçek Balı ve İşlenmiş Bal Arasındaki 5 Temel Fark",
     slug: "ham-cicek-bali-ve-islenmis-bal-arasindaki-farklar",
-    category: "Doğal Beslenme",
+    category: "Sağlık",
     image: "/ispir-kackar-yaylalari-manzara.webp",
     metaDesc: "Pastörize edilmemiş, 45 derece üzerinde ısıtılmamış hakiki ham çiçek balının polen ve canlı enzim zenginliği.",
     content: `Market raflarında gördüğünüz berrak ve akışkan ballar ile doğadan kovan çıkışı elde edilen ham bal arasında hayati besin farkları bulunur.\n\n1. Pastörizasyon: Endüstriyel ballar kristalleşmeyi önlemek için yüksek ısıda (65-70°C) ısıtılır. Bu işlem balın içindeki duyarlı enzimleri ve vitaminleri yok eder. PEKEFE ham balı ise asla 45°C üzerine çıkarılmaz.\n2. Polen Filtreleme: Endüstriyel filtreleme balın kaynağını gösteren çiçek polenlerini süzer. Ham balda polenler doğal haliyle muhafaza edilir.\n3. Kristalleşme (Donma): Hakiki ham bal soğuk ortamda zamanla kristalleşir. Bu durum balın saflığının en büyük kanıtıdır.\n4. Aroma ve Tat Zenginliği: 2200m rakımlı Kaçkar yaylalarının binbir çeşit endemik çiçeğinin kokusu sadece ham balda hissedilir.\n5. Antioksidan Değeri: Isıl işlem görmemiş ham bal yüksek antibakteriyel etkiye sahiptir.`,
-    readTime: "4 dk okuma",
+    isFeatured: true,
     isActive: true,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "blog-3",
     title: "Pestil ve Köme Hazırlamanın İncelikleri: İspir Gelenekleri",
     slug: "pestil-ve-kome-hazirlamanin-incelikleri",
-    category: "Yöresel Tarifler",
+    category: "Tarifler",
     image: "/ispir-pestil-kurutma-gercek.png",
     metaDesc: "Keten bezlerde güneşte kurutulan doğal dut pestili ve cevizli İspir kömesinin asırlık lezzet sırları.",
     content: `Doğu Anadolu'nun kış aylarındaki en büyük enerji kaynağı olan pestil ve köme, yaz sonu dut hasadıyla başlar.\n\nSüt, nişasta ve süzme dut şırasının bakır kazanlarda herlenmesiyle (pişirilmesiyle) elde edilen kıvamlı tatlı harç, incecik bezlere serilir. Yerli İspir cevizleri ipe dizilerek bu harca birkaç kez batırılır.\n\nTemiz dağ havasında ve doğrudan güneş ışığında kurutulan köme ve pestiller, hiçbir koruyucu madde içermeksizin lezzetini aylarca korur. PEKEFE geleneksel usta elleriyle hazırlanan kömeler, çocuklarınıza ve sevdiklerinize sunabileceğiniz en sağlıklı atıştırmalıktır.`,
-    readTime: "6 dk okuma",
+    isFeatured: false,
     isActive: true,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "blog-4",
     title: "Dut Pekmezinin Sağlığa Faydaları ve Günlük Tüketim Önerileri",
     slug: "dut-pekmezinin-sagliga-faydalari",
-    category: "Sağlıklı Yaşam",
+    category: "Sağlık",
     image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
     metaDesc: "Demir, kalsiyum ve antioksidan deposu geleneksel dut pekmezinin vücut direncine ve enerji seviyesine etkileri.",
     content: `Geleneksel İspir dut pekmezi, zengin mineral ve vitamin içeriğiyle doğal bir şifa kaynağıdır.\n\n- Kansızlık ve Demir Eksikliği: İçerdiği yüksek oranda organik demir sayesinde kan yapımını destekler.\n- Sporcu ve Çocuk Enerjisi: Doğal glukoz ve fruktoz içeriğiyle gün boyu zindelik sağlar.\n- Mide ve Sindirim Rahatlığı: Sabahları aç karnına alınan bir tatlı kaşığı dut pekmezi mide asidini dengelemeye yardımcı olur.\n- Kemik Gelişimi: Kalsiyum ve magnezyum deposudur.\n\nKullanım Önerisi: Her sabah kahvaltıdan önce 1-2 tatlı kaşığı tüketebilir veya ılık suya karıştırarak doğal bir detoks içeceği hazırlayabilirsiniz.`,
-    readTime: "3 dk okuma",
+    isFeatured: false,
     isActive: true,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "blog-5",
     title: "İspir Yaylalarının 2200m Rakımlı Flora Zenginliği",
     slug: "ispir-yaylalarinin-2200m-rakimli-flora-zenginligi",
-    category: "Doğa & Coğrafya",
+    category: "Genel",
     image: "/ispir-yedi-goller-kackar-manzara.webp",
     metaDesc: "Kaçkar dağlarının eteklerindeki endemik çiçek türleri ve PEKEFE lezzetlerinin essiz aromatik kaynağı.",
     content: `Erzurum İspir bölgesi, yüksek rakımı, temiz su kaynakları ve sanayi kirliliğinden uzak bakir doğasıyla Türkiye'nin en değerli arıcılık ve meyvecilik merkezlerinden biridir.\n\n2200 metrenin üzerindeki yaylalarda yetişen binlerce endemik çiçek türü, nektar zenginliği açısından eşsizdir. Kimyasal tarım ilaçlarının ulaşamadığı bu yüksek coğrafya, PEKEFE bal ve pekmezlerinin %100 katkısız ve saf olmasının arkasındaki ana sırdır.`,
-    readTime: "5 dk okuma",
+    isFeatured: false,
     isActive: true,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 ];
+
+export function readLocalBlogPostsFallback(): any[] {
+  try {
+    if (fs.existsSync(LOCAL_STORAGE_PATH)) {
+      const raw = fs.readFileSync(LOCAL_STORAGE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (err) {
+    console.error('Error reading local blog fallback file:', err);
+  }
+  return defaultBlogPosts;
+}
+
+export function writeLocalBlogPostsFallback(data: any[]) {
+  try {
+    const dir = path.dirname(LOCAL_STORAGE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error writing local blog fallback file:', err);
+  }
+}
 
 // GET /api/blog — Aktif blog yazılarını listele
 export async function GET(request: Request) {
@@ -73,42 +107,37 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const adminMode = searchParams.get('admin') === 'true';
     
-    let posts = [];
+    let dbPosts: any[] = [];
     try {
-      posts = await prisma.blogPost.findMany({
+      dbPosts = await prisma.blogPost.findMany({
         where: adminMode ? {} : { isActive: true },
         orderBy: { createdAt: 'desc' },
       });
     } catch (dbError) {
-      console.warn("Database connection issue, returning fallback blog posts:", dbError);
-      return NextResponse.json(defaultBlogPosts);
+      console.warn("Database connection issue for blog GET, returning disk fallback:", dbError);
     }
 
-    // Veritabanı boşsa veya sonuç yoksa otomatik varsayılan blog yazılarını ekle ve dön
-    if (!posts || posts.length === 0) {
-      try {
-        for (const post of defaultBlogPosts) {
-          const { id, createdAt, ...postData } = post;
-          await prisma.blogPost.upsert({
-            where: { slug: post.slug },
-            update: postData,
-            create: postData,
-          });
-        }
+    const fallbackPosts = readLocalBlogPostsFallback();
 
-        posts = await prisma.blogPost.findMany({
-          where: adminMode ? {} : { isActive: true },
-          orderBy: { createdAt: 'desc' },
-        });
-      } catch (upsertError) {
-        return NextResponse.json(defaultBlogPosts);
-      }
+    if (!dbPosts || dbPosts.length === 0) {
+      return NextResponse.json(adminMode ? fallbackPosts : fallbackPosts.filter(p => p.isActive));
     }
 
-    return NextResponse.json(posts.length > 0 ? posts : defaultBlogPosts);
+    // Merge DB and disk fallback
+    const mergedMap = new Map();
+    fallbackPosts.forEach(p => mergedMap.set(p.id, p));
+    dbPosts.forEach(p => mergedMap.set(p.id, { ...mergedMap.get(p.id), ...p }));
+
+    let result = Array.from(mergedMap.values());
+    if (!adminMode) {
+      result = result.filter(p => p.isActive);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Blog GET error:', error);
-    return NextResponse.json(defaultBlogPosts);
+    const fallback = readLocalBlogPostsFallback();
+    return NextResponse.json(fallback);
   }
 }
 
@@ -133,24 +162,44 @@ export async function POST(request: Request) {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
-    const existing = await prisma.blogPost.findUnique({ where: { slug } });
-    if (existing) {
-      slug = `${slug}-${Date.now()}`;
+    const newPost = {
+      id: `blog-${Date.now()}`,
+      title: body.title,
+      slug,
+      content: body.content,
+      category: body.category || 'Genel',
+      image: body.image || null,
+      metaDesc: body.metaDesc || null,
+      isFeatured: body.isFeatured ?? false,
+      isActive: body.isActive ?? true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Save to disk first
+    const diskPosts = readLocalBlogPostsFallback();
+    const updatedDisk = [newPost, ...diskPosts];
+    writeLocalBlogPostsFallback(updatedDisk);
+
+    // Try DB insert safely
+    try {
+      await prisma.blogPost.create({
+        data: {
+          id: newPost.id,
+          title: newPost.title,
+          slug: newPost.slug,
+          content: newPost.content,
+          category: newPost.category,
+          image: newPost.image,
+          metaDesc: newPost.metaDesc,
+          isActive: newPost.isActive,
+        }
+      });
+    } catch (dbErr) {
+      console.warn("DB create blog failed, but disk fallback succeeded:", dbErr);
     }
 
-    const post = await prisma.blogPost.create({
-      data: {
-        title: body.title,
-        slug,
-        content: body.content,
-        category: body.category || 'Genel',
-        image: body.image || null,
-        metaDesc: body.metaDesc || null,
-        isActive: body.isActive ?? true,
-      }
-    });
-
-    return NextResponse.json(post);
+    return NextResponse.json(newPost);
   } catch (error: any) {
     console.error('Blog POST error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });

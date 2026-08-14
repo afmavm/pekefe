@@ -35,6 +35,7 @@ function writeLocalSettingsFallback(data: any) {
 
 async function ensureCMSDataColumnsExist() {
   const alterQueries = [
+    "ALTER TABLE CMSData ADD COLUMN announcementActive TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN paymentMethodsConfig LONGTEXT NULL",
     "ALTER TABLE CMSData ADD COLUMN paytrConfig LONGTEXT NULL",
     "ALTER TABLE CMSData ADD COLUMN installmentsConfig LONGTEXT NULL",
@@ -101,11 +102,35 @@ export async function GET() {
 
     const merged = { ...dbRow, ...diskData };
 
-    merged.announcementActive = merged.announcementActive === true || merged.announcementActive === "true" || merged.announcementActive === 1;
-    merged.announcement1Enabled = merged.announcement1Enabled !== false && merged.announcement1Enabled !== "false" && merged.announcement1Enabled !== 0;
-    merged.announcement2Enabled = merged.announcement2Enabled !== false && merged.announcement2Enabled !== "false" && merged.announcement2Enabled !== 0;
-    merged.contactPhoneEnabled = merged.contactPhoneEnabled !== false && merged.contactPhoneEnabled !== "false" && merged.contactPhoneEnabled !== 0;
-    merged.socialWhatsappEnabled = merged.socialWhatsappEnabled !== false && merged.socialWhatsappEnabled !== "false" && merged.socialWhatsappEnabled !== 0;
+    if (diskData && diskData.announcementActive !== undefined) {
+      merged.announcementActive = diskData.announcementActive === true || diskData.announcementActive === "true" || diskData.announcementActive === 1;
+    } else {
+      merged.announcementActive = merged.announcementActive === true || merged.announcementActive === "true" || merged.announcementActive === 1;
+    }
+
+    if (diskData && diskData.announcement1Enabled !== undefined) {
+      merged.announcement1Enabled = diskData.announcement1Enabled === true || diskData.announcement1Enabled === "true" || diskData.announcement1Enabled === 1;
+    } else {
+      merged.announcement1Enabled = merged.announcement1Enabled !== false && merged.announcement1Enabled !== "false" && merged.announcement1Enabled !== 0;
+    }
+
+    if (diskData && diskData.announcement2Enabled !== undefined) {
+      merged.announcement2Enabled = diskData.announcement2Enabled === true || diskData.announcement2Enabled === "true" || diskData.announcement2Enabled === 1;
+    } else {
+      merged.announcement2Enabled = merged.announcement2Enabled !== false && merged.announcement2Enabled !== "false" && merged.announcement2Enabled !== 0;
+    }
+
+    if (diskData && diskData.contactPhoneEnabled !== undefined) {
+      merged.contactPhoneEnabled = diskData.contactPhoneEnabled === true || diskData.contactPhoneEnabled === "true" || diskData.contactPhoneEnabled === 1;
+    } else {
+      merged.contactPhoneEnabled = merged.contactPhoneEnabled !== false && merged.contactPhoneEnabled !== "false" && merged.contactPhoneEnabled !== 0;
+    }
+
+    if (diskData && diskData.socialWhatsappEnabled !== undefined) {
+      merged.socialWhatsappEnabled = diskData.socialWhatsappEnabled === true || diskData.socialWhatsappEnabled === "true" || diskData.socialWhatsappEnabled === 1;
+    } else {
+      merged.socialWhatsappEnabled = merged.socialWhatsappEnabled !== false && merged.socialWhatsappEnabled !== "false" && merged.socialWhatsappEnabled !== 0;
+    }
 
     MEMORY_SETTINGS = merged;
     return NextResponse.json(merged);

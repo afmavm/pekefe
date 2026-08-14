@@ -185,49 +185,62 @@ export default function AdminBlogPage() {
   };
 
   const handleDelete = async (id: string) => {
+    // Optimistic UI update
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    setDeleteConfirm(null);
     try {
       const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Yazı silindi.");
-        setDeleteConfirm(null);
-        fetchPosts();
+        toast.success("Yazı başarıyla silindi.");
       } else {
         toast.error("Silme işlemi başarısız.");
+        fetchPosts();
       }
     } catch {
       toast.error("Bağlantı hatası.");
+      fetchPosts();
     }
   };
 
   const handleToggleActive = async (post: BlogPost) => {
+    const nextState = !post.isActive;
+    // Optimistic UI update
+    setPosts((prev) =>
+      prev.map((p) => (p.id === post.id ? { ...p, isActive: nextState } : p))
+    );
+    toast.success(nextState ? "Yazı yayınlandı." : "Yazı gizlendi (taslak yapıldı).");
+
     try {
       const res = await fetch(`/api/blog/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...post, isActive: !post.isActive })
+        body: JSON.stringify({ ...post, isActive: nextState })
       });
-      if (res.ok) {
-        toast.success(post.isActive ? "Yazı gizlendi." : "Yazı yayınlandı.");
-        fetchPosts();
-      }
+      if (!res.ok) fetchPosts();
     } catch {
       toast.error("Hata oluştu.");
+      fetchPosts();
     }
   };
 
   const handleToggleFeatured = async (post: BlogPost) => {
+    const nextFeatured = !post.isFeatured;
+    // Optimistic UI update
+    setPosts((prev) =>
+      prev.map((p) => (p.id === post.id ? { ...p, isFeatured: nextFeatured } : p))
+    );
+    toast.success(nextFeatured ? "Yazı öne çıkarıldı." : "Öne çıkarma kaldırıldı.");
+
     try {
       const res = await fetch(`/api/blog/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...post, isFeatured: !post.isFeatured })
+        body: JSON.stringify({ ...post, isFeatured: nextFeatured })
       });
-      if (res.ok) {
-        toast.success(post.isFeatured ? "Öne çıkarma kaldırıldı." : "Yazı öne çıkarıldı.");
-        fetchPosts();
-      }
+      if (!res.ok) fetchPosts();
     } catch {
       toast.error("Hata oluştu.");
+      fetchPosts();
     }
   };
 

@@ -107,11 +107,6 @@ export default function TopAnnouncementBar() {
             )}
           </div>
         )}
-              <MessageCircle className="w-3 h-3" />
-              <span>WhatsApp</span>
-            </a>
-          )}
-        </div>
 
       </div>
     </div>

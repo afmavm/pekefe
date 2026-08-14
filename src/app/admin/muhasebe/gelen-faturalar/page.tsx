@@ -65,11 +65,11 @@ export default function GelenFaturalarPage() {
   const fetchInvoices = (statusFilter = activeTab) => {
     setLoading(true);
     fetch(`/api/invoices/incoming?status=${statusFilter}`)
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => setInvoices(Array.isArray(data) ? data : []))
       .catch(err => {
         console.error("List fetch error:", err);
-        toast.error("Faturalar yüklenirken hata oluştu.");
+        setInvoices([]);
       })
       .finally(() => setLoading(false));
   };

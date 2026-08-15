@@ -88,7 +88,7 @@ export default function CargoPage() {
 
   // Tab 2: Carriers States
   const [settings, setSettings] = useState<any>(null);
-  const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const [carriers, setCarriers] = useState<Carrier[]>(DEFAULT_EXAMPLE_CARRIERS);
   const [loadingCarriers, setLoadingCarriers] = useState(false);
   const [savingCarriers, setSavingCarriers] = useState(false);
   const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
@@ -534,7 +534,6 @@ export default function CargoPage() {
   };
 
   const fetchCarriers = async () => {
-    setLoadingCarriers(true);
     try {
       const res = await fetch(`/api/settings?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {

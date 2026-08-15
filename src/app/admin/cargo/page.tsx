@@ -536,7 +536,7 @@ export default function CargoPage() {
   const fetchCarriers = async () => {
     setLoadingCarriers(true);
     try {
-      const res = await fetch("/api/settings", { cache: "no-store" });
+      const res = await fetch(`/api/settings?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data && !data.error) {
@@ -544,11 +544,18 @@ export default function CargoPage() {
           const parsed = parseCarriers(data.shippingCarriers);
           if (parsed.length > 0) {
             setCarriers(parsed);
+          } else {
+            setCarriers(DEFAULT_EXAMPLE_CARRIERS);
           }
+        } else {
+          setCarriers(DEFAULT_EXAMPLE_CARRIERS);
         }
+      } else {
+        setCarriers(DEFAULT_EXAMPLE_CARRIERS);
       }
     } catch (err) {
       console.error("Error fetching carriers settings:", err);
+      setCarriers(DEFAULT_EXAMPLE_CARRIERS);
     } finally {
       setLoadingCarriers(false);
     }

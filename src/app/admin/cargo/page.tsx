@@ -59,6 +59,69 @@ const STATUS_MAP: Record<string, { label: string; cls: string; icon: React.Eleme
 
 const CARGO_COMPANIES_AUTOCOMPLETE = ["Yurtiçi Kargo", "Aras Kargo", "MNG Kargo", "PTT Kargo", "Sürat Kargo"];
 
+const DEFAULT_EXAMPLE_CARRIERS: Carrier[] = [
+  {
+    id: "yurtici",
+    name: "Yurtiçi Kargo",
+    logoUrl: "/logos/yurtici.svg",
+    pricingType: "tiered",
+    isActive: true,
+    addShippingCosts: true,
+    isFreeShipping: false,
+    freeThreshold: 5000,
+    taxRate: 20,
+    billingMethod: "weight",
+    fallbackFee: 150,
+    outOfRangeBehavior: "highest",
+    tiers: [
+      { minDesi: 0, maxDesi: 5, price: 90 },
+      { minDesi: 5.01, maxDesi: 15, price: 130 },
+      { minDesi: 15.01, maxDesi: 30, price: 180 },
+      { minDesi: 30.01, maxDesi: 60, price: 280 }
+    ]
+  },
+  {
+    id: "aras",
+    name: "Aras Kargo",
+    logoUrl: "/logos/aras.svg",
+    pricingType: "tiered",
+    isActive: true,
+    addShippingCosts: true,
+    isFreeShipping: false,
+    freeThreshold: 5000,
+    taxRate: 20,
+    billingMethod: "weight",
+    fallbackFee: 140,
+    outOfRangeBehavior: "highest",
+    tiers: [
+      { minDesi: 0, maxDesi: 5, price: 85 },
+      { minDesi: 5.01, maxDesi: 15, price: 120 },
+      { minDesi: 15.01, maxDesi: 30, price: 170 },
+      { minDesi: 30.01, maxDesi: 60, price: 260 }
+    ]
+  },
+  {
+    id: "mng",
+    name: "MNG Kargo",
+    logoUrl: "/logos/mng.svg",
+    pricingType: "tiered",
+    isActive: true,
+    addShippingCosts: true,
+    isFreeShipping: false,
+    freeThreshold: 4000,
+    taxRate: 20,
+    billingMethod: "weight",
+    fallbackFee: 130,
+    outOfRangeBehavior: "highest",
+    tiers: [
+      { minDesi: 0, maxDesi: 5, price: 80 },
+      { minDesi: 5.01, maxDesi: 15, price: 115 },
+      { minDesi: 15.01, maxDesi: 30, price: 160 },
+      { minDesi: 30.01, maxDesi: 60, price: 240 }
+    ]
+  }
+];
+
 export default function CargoPage() {
   const [activeTab, setActiveTab] = useState<"orders" | "carriers">("orders");
 
@@ -456,69 +519,6 @@ export default function CargoPage() {
   };
 
   // Fetch carriers from CMS Data
-  const DEFAULT_EXAMPLE_CARRIERS: Carrier[] = [
-    {
-      id: "yurtici",
-      name: "Yurtiçi Kargo",
-      logoUrl: "/logos/yurtici.svg",
-      pricingType: "tiered",
-      isActive: true,
-      addShippingCosts: true,
-      isFreeShipping: false,
-      freeThreshold: 5000,
-      taxRate: 20,
-      billingMethod: "weight",
-      fallbackFee: 150,
-      outOfRangeBehavior: "highest",
-      tiers: [
-        { minDesi: 0, maxDesi: 5, price: 90 },
-        { minDesi: 5.01, maxDesi: 15, price: 130 },
-        { minDesi: 15.01, maxDesi: 30, price: 180 },
-        { minDesi: 30.01, maxDesi: 60, price: 280 }
-      ]
-    },
-    {
-      id: "aras",
-      name: "Aras Kargo",
-      logoUrl: "/logos/aras.svg",
-      pricingType: "tiered",
-      isActive: true,
-      addShippingCosts: true,
-      isFreeShipping: false,
-      freeThreshold: 5000,
-      taxRate: 20,
-      billingMethod: "weight",
-      fallbackFee: 140,
-      outOfRangeBehavior: "highest",
-      tiers: [
-        { minDesi: 0, maxDesi: 5, price: 85 },
-        { minDesi: 5.01, maxDesi: 15, price: 120 },
-        { minDesi: 15.01, maxDesi: 30, price: 170 },
-        { minDesi: 30.01, maxDesi: 60, price: 260 }
-      ]
-    },
-    {
-      id: "mng",
-      name: "MNG Kargo",
-      logoUrl: "/logos/mng.svg",
-      pricingType: "tiered",
-      isActive: true,
-      addShippingCosts: true,
-      isFreeShipping: false,
-      freeThreshold: 4000,
-      taxRate: 20,
-      billingMethod: "weight",
-      fallbackFee: 130,
-      outOfRangeBehavior: "highest",
-      tiers: [
-        { minDesi: 0, maxDesi: 5, price: 80 },
-        { minDesi: 5.01, maxDesi: 15, price: 115 },
-        { minDesi: 15.01, maxDesi: 30, price: 160 },
-        { minDesi: 30.01, maxDesi: 60, price: 240 }
-      ]
-    }
-  ];
-
   const parseCarriers = (raw: any): Carrier[] => {
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;

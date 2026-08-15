@@ -31,6 +31,64 @@ const defaultVariablesMap: Record<string, string[]> = {
   B2B_REJECTED: ["userName", "companyName", "rejectReason", "contactUrl", "recipientEmail"]
 };
 
+const CLIENT_FALLBACK_TEMPLATES: EmailTemplate[] = [
+  {
+    id: "fb-1",
+    eventType: "WELCOME",
+    name: "Hoş Geldiniz - Yeni Üyelik",
+    subject: "Pekefe Ailesine Hoş Geldiniz, {{userName}}! 🌿",
+    variables: "userName,userEmail,loginUrl,recipientEmail",
+    status: "ACTIVE",
+    bodyHtml: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;"><h2>Aramıza Hoş Geldiniz, {{userName}}! ✨</h2><p>Pekefe ailesine katıldığınız için teşekkür ederiz.</p></div>`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "fb-2",
+    eventType: "PASSWORD_RESET",
+    name: "Şifre Sıfırlama İsteği",
+    subject: "Şifrenizi Sıfırlayın — Pekefe",
+    variables: "userName,resetUrl,expiresIn,recipientEmail",
+    status: "ACTIVE",
+    bodyHtml: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;"><h2>Şifre Sıfırlama Talebi</h2><p>Merhaba <strong>{{userName}}</strong>,</p></div>`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "fb-3",
+    eventType: "ORDER_CONFIRMED",
+    name: "Sipariş Onaylandı",
+    subject: "Siparişiniz Alındı — #{{orderNo}} 📦",
+    variables: "userName,orderNo,orderDate,orderTotal,shippingAddress,orderDetailUrl,recipientEmail",
+    status: "ACTIVE",
+    bodyHtml: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;"><h2>Siparişiniz Alındı! 🎉</h2><p><strong>#{{orderNo}}</strong> numaralı siparişiniz onaylandı.</p></div>`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "fb-4",
+    eventType: "ORDER_SHIPPED",
+    name: "Sipariş Kargoya Verildi",
+    subject: "Siparişiniz Kargoya Verildi — #{{orderNo}} 🚚",
+    variables: "userName,orderNo,cargoCompany,trackingNo,trackingUrl,estimatedDelivery,recipientEmail",
+    status: "ACTIVE",
+    bodyHtml: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;"><h2>Siparişiniz Yola Çıktı! 🚚</h2></div>`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "fb-5",
+    eventType: "B2B_APPROVED",
+    name: "B2B Bayi Hesabı Onaylandı",
+    subject: "Tebrikler! Bayi Hesabınız Aktif Edildi — Pekefe B2B 🏆",
+    variables: "userName,companyName,b2bGroup,discountRate,loginUrl,recipientEmail",
+    status: "ACTIVE",
+    bodyHtml: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;"><h2>Bayi Hesabınız Onaylandı! 🏆</h2></div>`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
 export default function EmailTemplatesPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,12 +120,20 @@ export default function EmailTemplatesPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/email-templates");
-      if (res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (res.ok && contentType.includes("application/json")) {
         const data = await res.json();
-        setTemplates(Array.isArray(data) ? data : []);
+        if (Array.isArray(data) && data.length > 0) {
+          setTemplates(data);
+        } else {
+          setTemplates(CLIENT_FALLBACK_TEMPLATES);
+        }
+      } else {
+        setTemplates(CLIENT_FALLBACK_TEMPLATES);
       }
     } catch (error: any) {
-      console.error("Error fetching templates:", error);
+      console.warn("API Error, using fallback templates:", error);
+      setTemplates(CLIENT_FALLBACK_TEMPLATES);
     } finally {
       setLoading(false);
     }

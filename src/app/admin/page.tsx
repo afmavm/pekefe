@@ -1,6 +1,3 @@
-import { redirect } from "next/navigation";
+import AdminDashboardPage from "./dashboard/page";
 
-// Root /admin → redirect directly to /admin/dashboard
-export default function AdminRootPage() {
-  redirect("/admin/dashboard");
-}
+export default AdminDashboardPage;

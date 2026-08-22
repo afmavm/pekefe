@@ -4887,7 +4887,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                 <button
                   type="button"
-                  onClick={openAddMarketplaceModal}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAddMarketplaceModal();
+                  }}
                   className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border-none shadow-xs shrink-0 self-start sm:self-auto"
                 >
                   <Plus className="w-3.5 h-3.5 text-orange-400" /> Kanal Ekle
@@ -4928,7 +4932,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       {/* Edit Marketplace */}
                       <button
                         type="button"
-                        onClick={() => openEditMarketplaceModal(mp)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openEditMarketplaceModal(mp);
+                        }}
                         className="p-1.5 bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 rounded-lg transition cursor-pointer"
                         title="Kanalı Düzenle"
                       >
@@ -6185,7 +6193,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK PAZARYERİ KANALI MODAL (MARKETPLACE CREATOR & EDITOR)
          ──────────────────────────────────────────────────────── */}
       {isMarketplaceModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
           <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Header */}

@@ -4838,51 +4838,52 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             </div>
 
             {/* 2. DYNAMIC MARKETPLACE SENKRONIZASYON PANEL (Entegre Marketplaces) */}
-            <div className="bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-orange-500/10 rounded-2xl p-5 shadow-sm space-y-4">
-              <div className="flex justify-between items-center pb-1">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center">
-                    <AlertCircle className="w-5 h-5 text-orange-500 animate-pulse" />
+                  <div className="w-9 h-9 bg-orange-50 text-orange-500 border border-orange-200/60 rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                    <Radio className="w-4.5 h-4.5 text-orange-500 animate-pulse" />
                   </div>
                   <div>
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">Entegrasyon & Pazaryerleri</h3>
-                    <p className="text-[10px] text-slate-500 font-semibold">Aktif pazaryeri mağaza bağlantıları</p>
+                    <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Aktif pazaryeri mağaza bağlantıları ve stok senkronizasyonu</p>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setIsMarketplaceModalOpen(true)}
-                  className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] font-bold transition flex items-center gap-1 cursor-pointer border-none shadow-sm"
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border-none shadow-xs shrink-0 self-start sm:self-auto"
                 >
-                  <Plus className="w-3 h-3 text-orange-500" /> Kanal Ekle
+                  <Plus className="w-3.5 h-3.5 text-orange-400" /> Kanal Ekle
                 </button>
               </div>
 
               {/* Dynamic Marketplaces List */}
-              <div className="border-t border-slate-100/60 pt-3.5 space-y-3.5">
+              <div className="space-y-2.5">
                 {marketplaces.map((mp) => (
-                  <div key={mp.id} className="flex items-center justify-between bg-white/40 border border-slate-200/50 p-3 rounded-xl hover:bg-white/80 transition shadow-sm">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-extrabold text-[10px] tracking-tight uppercase ${mp.logoColor}`}>
+                  <div key={mp.id} className="flex items-center justify-between bg-slate-50/60 border border-slate-200/70 p-3 rounded-xl hover:border-orange-300 hover:bg-white transition shadow-2xs">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-tight uppercase shadow-xs ${mp.logoColor}`}>
                         {mp.name.substring(0,2)}
                       </div>
                       <div>
                         <span className="block text-xs font-bold text-slate-800">{mp.name}</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${mp.apiConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-400"}`}></span>
-                          <span className="text-[9px] text-slate-400 font-semibold">{mp.apiConnected ? "API Bağlantısı Aktif" : "API Anahtarı Eksik"}</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${mp.apiConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}></span>
+                          <span className="text-[9px] text-slate-500 font-semibold">{mp.apiConnected ? "API Bağlantısı Aktif" : "API Anahtarı Bekleniyor"}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={() => {
                           setConfiguringMarketplace(mp);
                           setApiCredentials({ apiKey: mp.apiKey || "", apiSecret: "" });
                         }}
-                        className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-orange-500 border border-slate-200 rounded-lg transition"
+                        className="p-1.5 bg-white hover:bg-slate-100 text-slate-500 hover:text-orange-600 border border-slate-200 rounded-lg transition cursor-pointer"
                         title="API Entegrasyon Ayarları"
                       >
                         <Key className="w-3.5 h-3.5" />
@@ -4907,8 +4908,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 ))}
               </div>
 
-              <div className="bg-white/40 border border-slate-200/50 rounded-xl p-3 text-[10px] text-slate-500 font-semibold leading-relaxed flex gap-2">
-                <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+              <div className="bg-amber-50/50 border-l-3 border-amber-500 p-3 rounded-xl text-[10px] text-slate-600 font-semibold leading-relaxed flex gap-2.5">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>
                   Ürüne ait B2B veya Perakende fiyat matrisleri güncellendiğinde senkronizasyonu açık (yeşil mağaza) kanalların tamamı anında tetiklenir.
                 </span>

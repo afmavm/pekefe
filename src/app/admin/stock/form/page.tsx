@@ -2794,8 +2794,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             <div className="bg-white border border-slate-200/80 rounded-2xl p-1.5 shadow-sm flex flex-wrap gap-1.5">
               {[
                 { id: "genel", label: "Genel Bilgiler & Hikaye", icon: Package },
+                { id: "varyantlar", label: "Varyant & Fiyatlandırma", icon: Layers },
                 { id: "b2b_lojistik", label: "B2B & Şube Lojistiği", icon: Database },
-                { id: "diger", label: "Teknik & Diğer", icon: Info },
+                { id: "diger", label: "Teknik & SEO", icon: Info },
               ].map(tab => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id || (activeTab === ("hikaye_analiz" as any) && tab.id === "genel") || ((activeTab === ("b2b" as any) || activeTab === ("sube" as any)) && tab.id === "b2b_lojistik");
@@ -4261,9 +4262,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             </div>
 
             {/* ────────────────────────────────────────────────────────
-                 BOTTOM SUB-PANEL: VARIANTS, XML PRICES (Uyumluluklar Removed)
+                 BOTTOM SUB-PANEL: VARIANTS & XML PRICES (ONLY RENDERED IN VARYANTLAR TAB)
                ──────────────────────────────────────────────────────── */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6.5 shadow-sm space-y-6">
+            {activeTab === "varyantlar" && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6.5 shadow-sm space-y-6">
               
               {/* Secondary Sub-Tabs */}
               <div className="flex justify-between items-end border-b border-slate-200">
@@ -4477,9 +4479,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     </div>
                   )}
                 </div>
-              )}
-
-            </div>
+              </div>
+            )}
 
           </div>
 

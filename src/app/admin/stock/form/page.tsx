@@ -3388,7 +3388,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={form.isCampaignActive}
+                            checked={Boolean(form.isCampaignActive)}
                             onChange={e => setForm({ ...form, isCampaignActive: e.target.checked })}
                             className="sr-only peer"
                           />
@@ -3397,7 +3397,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     </div>
 
-                    {form.isCampaignActive && (
+                    {(Boolean(form.isCampaignActive) || form.isCampaignActive === "true" || form.isCampaignActive === 1) && (
                       <div className="space-y-4 pt-1.5 animate-fadeIn">
                         {/* İNDİRİM HESAPLAMA VE TİPİ SEÇİCİ */}
                         <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-3.5 shadow-xs">

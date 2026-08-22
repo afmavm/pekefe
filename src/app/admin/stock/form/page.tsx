@@ -6182,48 +6182,54 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       )}
 
       {/* ────────────────────────────────────────────────────────
-           DİNAMİK PAZARYERİ KANALI MODAL (MARKETPLACE CREATOR)
+           DİNAMİK PAZARYERİ KANALI MODAL (MARKETPLACE CREATOR & EDITOR)
          ──────────────────────────────────────────────────────── */}
       {isMarketplaceModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="p-5 bg-white border-b border-slate-100 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Globe className="w-5 h-5 text-orange-500" />
+                <div className="w-10 h-10 bg-orange-50 text-orange-500 border border-orange-200/50 rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                  <Globe className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">
-                  {editingMarketplaceId ? "Pazaryeri Kanalını Düzenle" : "Yeni Entegrasyon Kanalı Ekle"}
-                </h3>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
+                    {editingMarketplaceId ? "Pazaryeri Kanalını Düzenle" : "Yeni Entegrasyon Kanalı Ekle"}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Mağaza adı, logo rengi ve senkronizasyon ayarları</p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsMarketplaceModalOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
+            {/* Body */}
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Kanal / Mağaza Adı *</label>
+                <label className="block text-xs font-bold text-slate-700">Kanal / Mağaza Adı *</label>
                 <input
                   type="text"
                   placeholder="Örn: Çiçeksepeti API veya WooCommerce"
                   value={newMarketplace.name}
                   onChange={e => setNewMarketplace({ ...newMarketplace, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 outline-none transition"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest font-sans">Kanal Marka Rengi</label>
+                  <label className="block text-xs font-bold text-slate-700">Kanal Marka Rengi</label>
                   <select
                     value={newMarketplace.logoColor}
                     onChange={e => setNewMarketplace({ ...newMarketplace, logoColor: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white cursor-pointer outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 cursor-pointer outline-none transition"
                   >
                     <option value="bg-orange-500">Turuncu (Trendyol / Hepsiburada)</option>
                     <option value="bg-violet-600">Mor (N11)</option>
@@ -6235,29 +6241,32 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Stok Senkronu</label>
+                  <label className="block text-xs font-bold text-slate-700">Stok Senkronu</label>
                   <select
                     value={newMarketplace.syncEnabled ? "true" : "false"}
                     onChange={e => setNewMarketplace({ ...newMarketplace, syncEnabled: e.target.value === "true" })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white cursor-pointer outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 cursor-pointer outline-none transition"
                   >
-                    <option value="true">Aktif</option>
-                    <option value="false">Durdurulmuş</option>
+                    <option value="true">Aktif (Senkronize)</option>
+                    <option value="false">Durdurulmuş (Pasif)</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex gap-3">
+            {/* Footer */}
+            <div className="p-4 bg-slate-50/70 border-t border-slate-100 flex gap-3 justify-end">
               <button
+                type="button"
                 onClick={() => setIsMarketplaceModalOpen(false)}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 İptal
               </button>
               <button
+                type="button"
                 onClick={saveMarketplace}
-                className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer border-none"
+                className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-orange-500/20 cursor-pointer border-none"
               >
                 {editingMarketplaceId ? (
                   <>

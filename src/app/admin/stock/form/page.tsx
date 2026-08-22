@@ -1067,29 +1067,43 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const fetchProduct = async () => {
       try {
         let product: any = null;
-        try {
-          const res = await fetch(`/api/products/${productId}?t=${Date.now()}`, {
-            cache: "no-store",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              "Pragma": "no-cache"
-            }
-          });
-          if (res.ok) {
-            product = await res.json();
-          }
-        } catch (e) {
-          console.warn("API product fetch error, attempting fallback", e);
+
+        // 1. Instant local storage/memory lookup (0ms Load Time)
+        const localProducts = getProducts();
+        const cachedProduct = localProducts.find((p: any) => 
+          String(p.id) === String(productId) || 
+          String(p.sku) === String(productId) || 
+          String(p.slug) === String(productId)
+        );
+
+        if (cachedProduct) {
+          product = cachedProduct;
         }
 
-        if (!product || !product.id) {
-          const localProducts = getProducts();
-          product = localProducts.find((p: any) => 
-            String(p.id) === String(productId) || 
-            String(p.sku) === String(productId) || 
-            String(p.slug) === String(productId)
-          );
-        }
+        // Silent background fetch from DB to refresh if needed
+        fetch(`/api/products/${productId}?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
+        }).then(r => r.ok ? r.json() : null).then(apiProduct => {
+          if (apiProduct && apiProduct.id) {
+            // Apply live API product updates silently
+            const attrs = typeof apiProduct.attributes === "string" 
+              ? JSON.parse(apiProduct.attributes) 
+              : (apiProduct.attributes || {});
+            
+            setForm(prev => ({
+              ...prev,
+              name: apiProduct.name || prev.name,
+              sku: apiProduct.sku || prev.sku,
+              salePrice: apiProduct.sale_price ? Number(apiProduct.sale_price) : (apiProduct.price || prev.salePrice),
+              marketPrice: apiProduct.oldPrice ? Number(apiProduct.oldPrice) : prev.marketPrice,
+              isCampaignActive: apiProduct.isCampaignActive ?? prev.isCampaignActive
+            }));
+          }
+        }).catch(() => {});
 
         if (!product) {
           toast.error("İstenen ürün kaydı bulunamadı.");
@@ -1896,6 +1910,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         setIsDirty(false); // Bypass warning popup on save redirect
         toast.success(isEditMode ? "Stok kartı başarıyla güncellendi." : "Stok kartı başarıyla oluşturuldu.");
         
+        // Instantly write changes to persistent local storage cache (0ms persistence guarantee)
+        const updatedLocalObject = {
+          ...payload,
+          id: isEditMode ? productId : (data.id || payload.sku),
+          price: payload.sale_price,
+          oldPrice: payload.list_price,
+          isCampaignActive: payload.isCampaignActive
+        };
+        updateProductInStorage(updatedLocalObject);
+
         // Refresh products context and localStorage cache to ensure client side is updated instantly
         await fetchProductsFromApi();
         await refreshProducts();

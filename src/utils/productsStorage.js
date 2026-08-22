@@ -208,3 +208,37 @@ export function getProductBySlug(slug) {
   if (!found) found = products.find(p => generateSlug(p.name) === String(slug));
   return found || null;
 }
+
+export function updateProductInStorage(updatedProduct) {
+  if (typeof window === "undefined" || !updatedProduct) return;
+  try {
+    const products = getProducts();
+    const targetId = updatedProduct.id || updatedProduct.sku;
+    const idx = products.findIndex(p => 
+      String(p.id) === String(targetId) || 
+      String(p.sku) === String(targetId) ||
+      (p.slug && updatedProduct.slug && String(p.slug) === String(updatedProduct.slug))
+    );
+    
+    let newList = [];
+    if (idx !== -1) {
+      newList = [...products];
+      newList[idx] = formatDbProductToStorefront({
+        ...newList[idx],
+        ...updatedProduct,
+        attributes: {
+          ...(typeof newList[idx].attributes === 'object' ? newList[idx].attributes : {}),
+          ...(typeof updatedProduct.attributes === 'object' ? updatedProduct.attributes : {})
+        }
+      });
+    } else {
+      newList = [formatDbProductToStorefront(updatedProduct), ...products];
+    }
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+    window.dispatchEvent(new Event("pekefe_products_changed"));
+    window.dispatchEvent(new CustomEvent("pekefe_products_updated", { detail: newList }));
+  } catch (err) {
+    console.error("updateProductInStorage error:", err);
+  }
+}

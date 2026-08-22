@@ -2740,18 +2740,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
              ──────────────────────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Odoo / Shopify Dynamic upper tabs */}
+            {/* Consolidated Dynamic Upper Tabs */}
             <div className="bg-white border border-slate-200/80 rounded-2xl p-1.5 shadow-sm flex flex-wrap gap-1.5">
               {[
-                { id: "genel", label: "Genel Bilgiler", icon: Package },
-                { id: "hikaye_analiz", label: "Mahsul Hikayesi & Analiz", icon: BookOpen },
-                { id: "b2b", label: "B2B Ayarları", icon: Database },
-                { id: "birimler", label: "Birimler", icon: Tag },
-                { id: "sube", label: "Şubeler", icon: Globe },
-                { id: "diger", label: "Diğer", icon: Info },
+                { id: "genel", label: "Genel Bilgiler & Hikaye", icon: Package },
+                { id: "b2b_lojistik", label: "B2B & Şube Lojistiği", icon: Database },
+                { id: "birimler", label: "Birimler & Katsayılar", icon: Tag },
+                { id: "diger", label: "Teknik & Diğer", icon: Info },
               ].map(tab => {
                 const Icon = tab.icon;
-                const active = activeTab === tab.id;
+                const active = activeTab === tab.id || (activeTab === ("hikaye_analiz" as any) && tab.id === "genel") || ((activeTab === ("b2b" as any) || activeTab === ("sube" as any)) && tab.id === "b2b_lojistik");
                 return (
                   <button
                     key={tab.id}
@@ -3580,276 +3578,172 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
               )}
 
-              {/* ======================= TAB: MAHSUL HİKAYESİ & ANALİZ ======================= */}
-              {activeTab === "hikaye_analiz" && (
+              {/* ======================= TAB: B2B & ŞUBE LOJİSTİĞİ ======================= */}
+              {(activeTab === "b2b_lojistik" || (activeTab as any) === "b2b" || (activeTab as any) === "sube") && (
                 <div className="space-y-8 animate-in fade-in duration-200">
-                  
-                  {/* Tab Header Banner */}
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-200/60">
-                        <BookOpen className="w-5 h-5 text-amber-600" />
+                  {/* B2B PORTAL AYARLARI KARTI */}
+                  <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60">
+                      <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                        <Database className="w-5 h-5 text-orange-500" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">Ürün Detay Kartı İçerik & Analiz Yönetimi</h3>
-                        <p className="text-xs text-slate-500">Müşteri ürün detay sayfasında yer alan "MAHSUL HİKAYESİ & DETAYLAR" ve "ANALİZ & BESİN DEĞERLERİ" başlıkları altındaki tüm metin ve değerleri buradan güncelleyebilirsiniz.</p>
+                        <h3 className="text-sm font-bold text-slate-800">1. B2B Bayi Portalı Ayarları</h3>
+                        <p className="text-xs text-slate-500">Ürünün B2B bayilerine gösterimi ve sipariş verme koşulları</p>
                       </div>
-                    </div>
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200/80 shadow-xs">
-                      Canlı Ürün Detay Kartı Entegrasyonlu
-                    </span>
-                  </div>
-
-                  {/* BÖLÜM 1: MAHSUL HİKAYESİ & ZANAATKARLIK */}
-                  <div className="bg-slate-50/70 p-5.5 rounded-2xl border border-slate-200/80 space-y-4 text-left shadow-xs">
-                    <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-                      <Sparkles className="w-4 h-4 text-amber-600" />
-                      <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">1. Mahsul Hikayesi & Detaylar (Asırlık Zanaatkarlık Sekmesi)</h4>
-                    </div>
-
-                    <div className="space-y-4">
-                      {/* Mahsul Hikayesi Metni */}
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Asırlık Zanaatkarlık ve Mahsul Hikayesi Metni</label>
-                        <textarea
-                          rows={6}
-                          value={form.harvestStory || ""}
-                          onChange={e => setForm({ ...form, harvestStory: e.target.value })}
-                          placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık yabani dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
-                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 focus:ring-4 focus:ring-amber-50 outline-none resize-none leading-relaxed text-slate-800"
-                        />
-                        <p className="text-[10px] text-slate-400 font-medium">Bu metin ürün detay sayfasındaki "MAHSUL HİKAYESİ & DETAYLAR" sekmesinde ana açıklama paragrafı olarak gösterilir.</p>
-                      </div>
-
-                      {/* İçindekiler Metni & Hasat Bilgileri */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1.5 md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-700">Hasat Rakımı / Yüksekliği</label>
-                          <input
-                            type="text"
-                            value={form.altitude || ""}
-                            onChange={e => setForm({ ...form, altitude: e.target.value })}
-                            placeholder="Örnek: 2200 Metre"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5 md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-700">Hasat Sezonu / Dönemi</label>
-                          <input
-                            type="text"
-                            value={form.harvestSeason || ""}
-                            onChange={e => setForm({ ...form, harvestSeason: e.target.value })}
-                            placeholder="Örnek: Temmuz - Ağustos"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5 md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-700">İçindekiler Temizlik Metni</label>
-                          <input
-                            type="text"
-                            value={form.ingredients || ""}
-                            onChange={e => setForm({ ...form, ingredients: e.target.value })}
-                            placeholder="Örnek: %100 Saf İspir Beyaz Dut Şırası"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* BÖLÜM 2: ANALİZ & BESİN DEĞERLERİ */}
-                  <div className="bg-slate-50/70 p-5.5 rounded-2xl border border-slate-200/80 space-y-4 text-left shadow-xs">
-                    <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-                      <FileCheck className="w-4 h-4 text-amber-600" />
-                      <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">2. Analiz & Besin Değerleri Sekmesi (100g Değerleri)</h4>
-                    </div>
-
-                    <div className="space-y-4">
-                      {/* 100g Besin Değerleri Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-                        <div className="space-y-1">
-                          <label className="block text-[11px] font-bold text-slate-600">Enerji (kcal)</label>
-                          <input
-                            type="text"
-                            value={form.nutrients_energy || ""}
-                            onChange={e => setForm({ ...form, nutrients_energy: e.target.value })}
-                            placeholder="293 kcal"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-[11px] font-bold text-slate-600">Karbonhidrat (g)</label>
-                          <input
-                            type="text"
-                            value={form.nutrients_carb || ""}
-                            onChange={e => setForm({ ...form, nutrients_carb: e.target.value })}
-                            placeholder="70.2 g"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-[11px] font-bold text-slate-600">Protein (g)</label>
-                          <input
-                            type="text"
-                            value={form.nutrients_protein || ""}
-                            onChange={e => setForm({ ...form, nutrients_protein: e.target.value })}
-                            placeholder="0.8 g"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-[11px] font-bold text-slate-600">Kalsiyum (mg)</label>
-                          <input
-                            type="text"
-                            value={form.nutrients_calcium || ""}
-                            onChange={e => setForm({ ...form, nutrients_calcium: e.target.value })}
-                            placeholder="400 mg"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-[11px] font-bold text-slate-600">Demir (mg)</label>
-                          <input
-                            type="text"
-                            value={form.nutrients_iron || ""}
-                            onChange={e => setForm({ ...form, nutrients_iron: e.target.value })}
-                            placeholder="10.2 mg"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500"
-                          />
-                        </div>
-                      </div>
-
-                      {/* HMF & Ritüel Metinleri */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">HMF Seviyesi & Laboratuvar Analiz Sonucu</label>
-                          <input
-                            type="text"
-                            value={form.hmfLevel || ""}
-                            onChange={e => setForm({ ...form, hmfLevel: e.target.value })}
-                            placeholder="Örnek: < 10 mg/kg (Analiz Raporlu)"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Tüketim & Servis Ritüeli Önerisi</label>
-                          <input
-                            type="text"
-                            value={form.ritual || ""}
-                            onChange={e => setForm({ ...form, ritual: e.target.value })}
-                            placeholder="Örnek: Oda sıcaklığında (18°C - 22°C), taş değirmen tahini ile %40'a %60 oranında karıştırılarak..."
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* BÖLÜM 3: TEKNİK SPESİFİKASYON TABLOSU */}
-                  <div className="bg-slate-50/70 p-5.5 rounded-2xl border border-slate-200/80 space-y-4 text-left shadow-xs">
-                    <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-                      <SlidersHorizontal className="w-4 h-4 text-amber-600" />
-                      <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">3. Teknik Spesifikasyon Tablosu (Ürün Detayı Sağ Sütun)</h4>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Menşei</label>
+                      <label className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-orange-50/50 transition-all select-none shadow-xs">
                         <input
-                          type="text"
-                          value={form.specsMaterial || ""}
-                          onChange={e => setForm({ ...form, specsMaterial: e.target.value })}
-                          placeholder="Örnek: Erzurum / İspir"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
+                          type="checkbox"
+                          checked={form.b2bActive}
+                          onChange={e => setForm({ ...form, b2bActive: e.target.checked })}
+                          className="w-5 h-5 text-orange-500 border-slate-300 rounded focus:ring-orange-400 cursor-pointer"
                         />
-                      </div>
+                        <div>
+                          <span className="block text-xs font-bold text-slate-700">Satışa Aç</span>
+                          <span className="block text-[10px] text-slate-400 mt-0.5">Ürünün B2B portalı üzerinden bayiler tarafından satın alınabilmesini sağlar.</span>
+                        </div>
+                      </label>
 
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Pişirme / Kurutma Yöntemi</label>
+                      <label className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-orange-50/50 transition-all select-none shadow-xs">
                         <input
-                          type="text"
-                          value={form.specsBellows || ""}
-                          onChange={e => setForm({ ...form, specsBellows: e.target.value })}
-                          placeholder="Örnek: Odun Ateşinde Bakır Kazanlar"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
+                          type="checkbox"
+                          checked={form.b2bPreOrderable}
+                          onChange={e => setForm({ ...form, b2bPreOrderable: e.target.checked })}
+                          className="w-5 h-5 text-orange-500 border-slate-300 rounded focus:ring-orange-400 cursor-pointer"
                         />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Şeker & Glikoz Oranı</label>
-                        <input
-                          type="text"
-                          value={form.specsWeight || ""}
-                          onChange={e => setForm({ ...form, specsWeight: e.target.value })}
-                          placeholder="Örnek: 0.0% (Sadece Doğal Meyve Şekeri)"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Ambalaj Özelliği / Kalınlık</label>
-                        <input
-                          type="text"
-                          value={form.specsDimensions || ""}
-                          onChange={e => setForm({ ...form, specsDimensions: e.target.value })}
-                          placeholder="Örnek: Gıdaya Uygun Cam Kavanoz & Vakumlu Kapak"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-amber-500 outline-none"
-                        />
-                      </div>
+                        <div>
+                          <span className="block text-xs font-bold text-slate-700">Ön Sipariş Verilebilir</span>
+                          <span className="block text-[10px] text-slate-400 mt-0.5">Stokta bulunmasa dahi bayilerin bu ürün için sipariş oluşturmasına izin verir.</span>
+                        </div>
+                      </label>
                     </div>
                   </div>
 
-                </div>
-              )}
-
-              {/* ======================= TAB: B2B AYARLARI ======================= */}
-              {activeTab === "b2b" && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                    <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-                      <Database className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-800">B2B Bayi Portalı Ayarları</h3>
-                      <p className="text-xs text-slate-500">Ürünün B2B bayilerine gösterimi ve sipariş verme koşulları</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-all select-none">
-                      <input
-                        type="checkbox"
-                        checked={form.b2bActive}
-                        onChange={e => setForm({ ...form, b2bActive: e.target.checked })}
-                        className="w-5 h-5 text-orange-500 border-slate-300 rounded focus:ring-orange-400 cursor-pointer"
-                      />
-                      <div>
-                        <span className="block text-xs font-bold text-slate-700">Satışa Aç</span>
-                        <span className="block text-[10px] text-slate-400 mt-0.5">Ürünün B2B portalı üzerinden bayiler tarafından satın alınabilmesini sağlar.</span>
+                  {/* ŞUBE VE DEPO STOK DAĞILIMI KARTI */}
+                  <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-200/60">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-orange-500" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-800">2. Şube ve Depo Stok Dağılımı</h3>
+                          <p className="text-xs text-slate-500">Ürünün farklı şube ve depolardaki güncel stok kırılımlarını yönetin</p>
+                        </div>
                       </div>
-                    </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsWarehouseManagerOpen(true)}
+                        className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border-none shadow-sm"
+                      >
+                        <Settings2 className="w-3.5 h-3.5 text-orange-500" /> Depoları Yönet
+                      </button>
+                    </div>
 
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-all select-none">
-                      <input
-                        type="checkbox"
-                        checked={form.b2bPreOrderable}
-                        onChange={e => setForm({ ...form, b2bPreOrderable: e.target.checked })}
-                        className="w-5 h-5 text-orange-500 border-slate-300 rounded focus:ring-orange-400 cursor-pointer"
-                      />
-                      <div>
-                        <span className="block text-xs font-bold text-slate-700">Ön Sipariş Verilebilir</span>
-                        <span className="block text-[10px] text-slate-400 mt-0.5">Stokta bulunmasa dahi bayilerin bu ürün için sipariş oluşturmasına izin verir.</span>
-                      </div>
-                    </label>
+                    <div className="space-y-6">
+                      {branches.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
+                          <div className="w-10 h-10 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
+                          <p className="text-xs font-semibold">Şube bilgileri yükleniyor...</p>
+                        </div>
+                      ) : branches.map(branch => {
+                        const branchWarehouses = warehouses.filter(w => w.branchId === branch.id);
+                        return (
+                          <div key={branch.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                            {/* Branch Header and Price */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-3 border-b border-slate-100">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500 font-bold shrink-0">
+                                  <Store className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-bold text-slate-800">{branch.name}</h4>
+                                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">{branch.code}</span>
+                                </div>
+                              </div>
+                              <div className="space-y-1 w-full sm:w-auto">
+                                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Şube Satış Fiyatı (₺)</label>
+                                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg focus-within:bg-white focus-within:border-orange-500 transition-all overflow-hidden px-3 py-1.5 shadow-inner">
+                                  <input
+                                    type="number"
+                                    value={branchPrices[branch.id] !== undefined ? branchPrices[branch.id] : ""}
+                                    placeholder={form.salePrice ? `${form.salePrice}` : "0"}
+                                    min={0}
+                                    step="any"
+                                    onChange={e => {
+                                      const val = e.target.value === "" ? undefined : Math.max(0, parseFloat(e.target.value) || 0);
+                                      setBranchPrices(prev => ({
+                                        ...prev,
+                                        [branch.id]: val !== undefined ? val : 0
+                                      }));
+                                      setWarehouses(prev => prev.map(w => w.branchId === branch.id ? { ...w, price: val } : w));
+                                    }}
+                                    className="w-full bg-transparent text-xs font-bold outline-none text-right text-slate-800"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-400 ml-1">₺</span>
+                                </div>
+                              </div>
+                            </div>
 
+                            {/* Warehouses */}
+                            <div className="space-y-3.5">
+                              {branchWarehouses.length === 0 ? (
+                                <p className="text-xs text-slate-400 italic">Bu şubeye bağlı depo bulunmamaktadır.</p>
+                              ) : (
+                                branchWarehouses.map(wh => (
+                                  <div key={wh.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm">
+                                    <div className="flex justify-between items-start gap-2">
+                                      <div className="flex items-center gap-2">
+                                        <Package className="w-4 h-4 text-orange-500 shrink-0" />
+                                        <div>
+                                          <span className="block text-xs font-bold text-slate-800">{wh.name}</span>
+                                          <span className="block text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">{wh.code}</span>
+                                        </div>
+                                      </div>
+                                      <span className="px-2 py-0.5 bg-slate-200/50 text-slate-500 rounded text-[9px] font-black uppercase tracking-wider max-w-[120px] truncate" title={wh.location}>
+                                        {wh.location}
+                                      </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mt-1">
+                                      <div className="space-y-1">
+                                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest">Mevcut Stok</label>
+                                        <input
+                                          type="number"
+                                          value={wh.stockCount}
+                                          min={0}
+                                          onChange={e => {
+                                            const val = Math.max(0, parseInt(e.target.value) || 0);
+                                            setWarehouses(prev => prev.map(w => w.id === wh.id ? { ...w, stockCount: val } : w));
+                                          }}
+                                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 text-center outline-none focus:border-orange-500 shadow-sm"
+                                        />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest">Rezerve</label>
+                                        <input
+                                          type="number"
+                                          value={wh.reserved !== undefined ? wh.reserved : 0}
+                                          min={0}
+                                          onChange={e => {
+                                            const val = Math.max(0, parseInt(e.target.value) || 0);
+                                            setWarehouses(prev => prev.map(w => w.id === wh.id ? { ...w, reserved: val } : w));
+                                          }}
+                                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 text-center outline-none focus:border-orange-500 shadow-sm"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}

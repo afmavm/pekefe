@@ -2686,19 +2686,31 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   };
 
   // Add/Edit/Remove Marketplaces
-  const openAddMarketplaceModal = () => {
+  const openAddMarketplaceModal = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setEditingMarketplaceId(null);
     setNewMarketplace({ name: "", syncEnabled: true, logoColor: "bg-orange-500" });
     setIsMarketplaceModalOpen(true);
   };
 
-  const openEditMarketplaceModal = (mp: Marketplace) => {
+  const openEditMarketplaceModal = (mp: Marketplace, e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setEditingMarketplaceId(mp.id);
     setNewMarketplace({ name: mp.name, syncEnabled: mp.syncEnabled, logoColor: mp.logoColor || "bg-orange-500" });
     setIsMarketplaceModalOpen(true);
   };
 
-  const saveMarketplace = () => {
+  const saveMarketplace = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!newMarketplace.name.trim()) {
       toast.error("Lütfen kanal adını girin.");
       return;

@@ -2795,7 +2795,6 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               {[
                 { id: "genel", label: "Genel Bilgiler & Hikaye", icon: Package },
                 { id: "b2b_lojistik", label: "B2B & Şube Lojistiği", icon: Database },
-                { id: "birimler", label: "Birimler & Katsayılar", icon: Tag },
                 { id: "diger", label: "Teknik & Diğer", icon: Info },
               ].map(tab => {
                 const Icon = tab.icon;
@@ -3931,7 +3930,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               )}
 
               {/* ======================= TAB: BIRIMLER ======================= */}
-              {activeTab === "birimler" && (
+              {activeTab === "diger" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
                   <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                     <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">

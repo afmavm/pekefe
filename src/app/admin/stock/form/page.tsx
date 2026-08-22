@@ -11,7 +11,7 @@ import {
   UploadCloud, Sparkles, Coins, FileText, Database, RefreshCw, Lock, Unlock, 
   ShoppingBag, Globe, Percent, Calendar, ArrowUpRight, BarChart3, 
   AlertTriangle, Eye, Printer, Layers3, CheckSquare, Square, Tag, ExternalLink, 
-  HelpCircle, Video, Key, PlusCircle, Trash, Store, SlidersHorizontal, BookOpen
+  HelpCircle, Video, Key, PlusCircle, Trash, Store, SlidersHorizontal, BookOpen, Radio
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";

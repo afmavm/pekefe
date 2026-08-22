@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
-import { getProducts } from "@/utils/productsStorage";
+import { getProducts, resolveProductPrice } from "@/utils/productsStorage";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -872,9 +872,13 @@ export default function StockProductionPage() {
                               </td>
                               <td className="px-6 py-4">
                                 <div className="text-xs font-semibold text-slate-600 flex flex-col gap-0.5">
-                                  <p><b>Maliyet:</b> {p.cost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
+                                  <p><b>Maliyet:</b> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
                                   <p className="text-slate-900 font-extrabold">
-                                    <b>Satış:</b> {p.isRawMaterial ? <span className="text-slate-400 font-normal">—</span> : `${(p.sale_price !== null && p.sale_price !== undefined ? Number(p.sale_price) : p.price).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`}
+                                    <b>Satış:</b> {p.isRawMaterial ? (
+                                      <span className="text-slate-400 font-normal">—</span>
+                                    ) : (
+                                      `${resolveProductPrice(p).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
+                                    )}
                                   </p>
                                 </div>
                               </td>

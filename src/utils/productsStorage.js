@@ -48,6 +48,35 @@ export function getProducts() {
   }
 }
 
+export function resolveProductPrice(p) {
+  if (!p) return 0;
+  // 1. Check explicit webPrice / sale_price if positive
+  if (p.webPrice && Number(p.webPrice) > 0) return Number(p.webPrice);
+  if (p.sale_price && Number(p.sale_price) > 0) return Number(p.sale_price);
+  if (p.price && Number(p.price) > 0) return Number(p.price);
+  if (p.list_price && Number(p.list_price) > 0) return Number(p.list_price);
+  if (p.retail_list_price && Number(p.retail_list_price) > 0) return Number(p.retail_list_price);
+  
+  // 2. Check attributes object
+  let attrs = p.attributes;
+  if (typeof attrs === "string") {
+    try { attrs = JSON.parse(attrs); } catch {}
+  }
+  if (attrs && typeof attrs === "object") {
+    if (attrs.webPrice && Number(attrs.webPrice) > 0) return Number(attrs.webPrice);
+    if (attrs.salePrice && Number(attrs.salePrice) > 0) return Number(attrs.salePrice);
+    if (attrs.price && Number(attrs.price) > 0) return Number(attrs.price);
+  }
+
+  // 3. Fallback to first variant with a positive price
+  if (Array.isArray(p.variants) && p.variants.length > 0) {
+    const validVar = p.variants.find(v => v.price && Number(v.price) > 0);
+    if (validVar) return Number(validVar.price);
+  }
+
+  return 0;
+}
+
 export function formatDbProductToStorefront(p) {
   if (!p) return null;
   let attrs = p.attributes || {};
@@ -80,6 +109,10 @@ export function formatDbProductToStorefront(p) {
   const autoSlug = p.slug || generateSlug(p.name || "");
   const resolvedShortDesc = p.shortDesc || attrs.shortDesc || "";
   const resolvedDesc = p.desc || resolvedShortDesc || attrs.desc || "";
+  const finalPrice = resolveProductPrice(p);
+  const rawOldPrice = p.oldPrice || p.marketPrice || p.list_price || p.retail_list_price || attrs.marketPrice || attrs.list_price || 0;
+  const finalOldPrice = Number(rawOldPrice) > finalPrice ? Number(rawOldPrice) : 0;
+
   return {
     ...p,
     id: p.id || p.sku,
@@ -88,8 +121,8 @@ export function formatDbProductToStorefront(p) {
     sku: p.sku || "",
     desc: resolvedDesc,
     shortDesc: resolvedShortDesc,
-    price: p.sale_price ? Number(p.sale_price) : (p.price ? Number(p.price) : 0),
-    oldPrice: p.oldPrice ? Number(p.oldPrice) : (p.list_price ? Number(p.list_price) : 0),
+    price: finalPrice,
+    oldPrice: finalOldPrice,
     stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],

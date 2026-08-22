@@ -110,8 +110,20 @@ export function formatDbProductToStorefront(p) {
   const resolvedShortDesc = p.shortDesc || attrs.shortDesc || "";
   const resolvedDesc = p.desc || resolvedShortDesc || attrs.desc || "";
   const finalPrice = resolveProductPrice(p);
-  const rawOldPrice = p.oldPrice || p.marketPrice || p.list_price || p.retail_list_price || attrs.marketPrice || attrs.list_price || 0;
-  const finalOldPrice = Number(rawOldPrice) > finalPrice ? Number(rawOldPrice) : 0;
+
+  const isCampaignActive = !!(
+    p.isCampaignActive || 
+    p.is_campaign_active || 
+    p.is_discounted || 
+    attrs.isCampaignActive || 
+    attrs.is_discounted
+  );
+
+  const rawOldPrice = isCampaignActive 
+    ? (p.oldPrice || p.marketPrice || p.list_price || p.retail_list_price || attrs.marketPrice || attrs.list_price || 0)
+    : 0;
+    
+  const finalOldPrice = (isCampaignActive && Number(rawOldPrice) > finalPrice) ? Number(rawOldPrice) : 0;
 
   return {
     ...p,
@@ -123,6 +135,7 @@ export function formatDbProductToStorefront(p) {
     shortDesc: resolvedShortDesc,
     price: finalPrice,
     oldPrice: finalOldPrice,
+    isCampaignActive: isCampaignActive,
     stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],

@@ -90,6 +90,9 @@ export function ProductCard({
   oldPrice,
   b2b_price,
   discount_end_date,
+  isCampaignActive,
+  is_campaign_active,
+  is_discounted,
   variants = [],
   image,
   tag,
@@ -107,10 +110,13 @@ export function ProductCard({
   const hasVariants = Array.isArray(variants) && variants.length > 0;
   const [selectedVariant, setSelectedVariant] = useState(hasVariants ? variants[0] : null);
 
+  // Active campaign status check
+  const activeCampaign = !!(isCampaignActive || is_campaign_active || is_discounted);
+
   // Numeric computations
   const numericB2B = b2b_price ? Number(b2b_price) : null;
   const numericPrice = typeof price === "number" ? price : parseFloat(String(price || "0").replace(/[₺TL\s,]/gi, "")) || 0;
-  const numericOld = oldPrice ? Number(oldPrice) : null;
+  const numericOld = (activeCampaign && oldPrice) ? Number(oldPrice) : null;
 
   // Active Price Resolution
   let activePrice = numericPrice;
@@ -146,7 +152,7 @@ export function ProductCard({
             <span className="absolute top-3 left-3 bg-[#6b1d2f] text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
               {tag}
             </span>
-          ) : activeOldPrice && activeOldPrice > activePrice ? (
+          ) : (activeCampaign && activeOldPrice && activeOldPrice > activePrice) ? (
             <span className="absolute top-3 left-3 bg-red-600 text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10 animate-pulse">
               %{Math.round(((activeOldPrice - activePrice) / activeOldPrice) * 100)} İNDİRİM
             </span>
@@ -229,7 +235,7 @@ export function ProductCard({
       <div className="pt-4 mt-4 border-t border-outline-variant/15 space-y-3">
         
         {/* Live Campaign Countdown Timer for Discounted Items */}
-        {activeOldPrice && activeOldPrice > activePrice && (
+        {activeCampaign && activeOldPrice && activeOldPrice > activePrice && (
           <CardCountdownTimer endDate={discount_end_date} />
         )}
 

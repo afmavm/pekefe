@@ -376,6 +376,21 @@ export async function PUT(
       data: data
     });
 
+    // Synchronize stock in StockLocation table if stock changed and no explicit warehouses payload
+    if ((body.stock !== undefined || body.stock_quantity !== undefined) && (!body.warehouses || !Array.isArray(body.warehouses))) {
+      try {
+        const primaryLoc = await prisma.stockLocation.findFirst({
+          where: { productId: realId }
+        });
+        if (primaryLoc) {
+          await prisma.stockLocation.update({
+            where: { id: primaryLoc.id },
+            data: { quantity: Number(data.stock) }
+          });
+        }
+      } catch (locErr) {}
+    }
+
     // Save warehouse specific stock levels (locations)
     if (body.warehouses && Array.isArray(body.warehouses)) {
       try {

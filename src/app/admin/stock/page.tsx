@@ -203,7 +203,16 @@ export default function StockProductionPage() {
 
       if (res.ok) {
         toast.success("Stok miktarı başarıyla güncellendi.");
+        
+        // Instantly write new stock quantity to persistent local storage cache
+        updateProductInStorage({
+          ...quickStockProduct,
+          stock: quickStockQty,
+          stock_quantity: quickStockQty
+        });
+
         setQuickStockProduct(null);
+        await fetchProductsFromApi();
         await refreshProducts();
         router.refresh();
         await loadData();

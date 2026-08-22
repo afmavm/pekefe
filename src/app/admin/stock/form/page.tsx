@@ -4232,18 +4232,6 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   </div>
 
                   <div className="space-y-4">
-                    
-                    {/* Short Description */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">Ürün Kısa Açıklaması</label>
-                      <input
-                        type="text"
-                        value={form.shortDesc}
-                        onChange={e => setForm({ ...form, shortDesc: e.target.value })}
-                        placeholder="Örn: 304 kalite paslanmaz çelikten üretilen premium arı körüğü..."
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                      />
-                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       
@@ -4365,143 +4353,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     </div>
 
-                    {/* Ürün Detay Sayfası Ek Bilgileri (Premium Tablar) */}
+                    {/* Ürün Tüketim & Saklama Koşulları Rehberi */}
                     <div className="pt-4 border-t border-slate-100 space-y-4">
-                      <h4 className="text-xs font-bold uppercase text-orange-500 tracking-wider">Ürün Detay Sayfası Ek Bilgileri</h4>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Gövde Malzemesi */}
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">İçerik & Malzeme (Teknik Özellik)</label>
-                          <input
-                            type="text"
-                            value={form.specsMaterial}
-                            onChange={e => setForm({ ...form, specsMaterial: e.target.value })}
-                            placeholder="Örnek: %100 Organik İspir Dut Meyvesi & Odun Ateşi"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                          />
-                        </div>
-
-                        {/* Ağırlık */}
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Ağırlık & Gramaj (Teknik Özellik)</label>
-                          <input
-                            type="text"
-                            value={form.specsWeight}
-                            onChange={e => setForm({ ...form, specsWeight: e.target.value })}
-                            placeholder="Örnek: 800 Gram Net (Cam Kavanoz)"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                          />
-                        </div>
-
-                        {/* Boyutlar */}
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Ambalaj Ölçüleri (Teknik Özellik)</label>
-                          <input
-                            type="text"
-                            value={form.specsDimensions}
-                            onChange={e => setForm({ ...form, specsDimensions: e.target.value })}
-                            placeholder="Örnek: 14 cm Yükseklik x 8.5 cm Çap"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                          />
-                        </div>
-
-                        {/* Ambalaj Koruması */}
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Ambalaj & Koruması (Teknik Özellik)</label>
-                          <input
-                            type="text"
-                            value={form.specsBellows}
-                            onChange={e => setForm({ ...form, specsBellows: e.target.value })}
-                            placeholder="Örnek: Gıdaya Uygun Cam Kavanoz & Vakumlu Emniyet Bandı"
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Hızlı Ürün Özeti Maddeleri */}
-                      <div className="space-y-4 pt-2">
-                        <div className="border-b border-slate-100 pb-2">
-                          <label className="block text-xs font-bold text-slate-700">Hızlı Ürün Özeti Maddeleri (Satın Alma Yanında Çıkan Maddeler)</label>
-                          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Ürün detaylarında listelenecek 3 adet kısa özellik. HTML kodu yazmanız gerekmez; başlık kısımları otomatik olarak kalın yazılacaktır.</p>
-                        </div>
-                        
-                        <div className="space-y-3.5">
-                          {/* Madde 1 */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
-                            <div className="space-y-1.5 md:col-span-1">
-                              <label className="block text-[11px] font-bold text-slate-600">Maddenin Başlığı (Kalın Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview1_title}
-                                onChange={e => setForm({ ...form, quickOverview1_title: e.target.value })}
-                                placeholder="Örnek: Odun Ateşinde Bakır Kazan"
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                            <div className="space-y-1.5 md:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600">Açıklama Metni (Normal Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview1_desc}
-                                onChange={e => setForm({ ...form, quickOverview1_desc: e.target.value })}
-                                placeholder="Örnek: Geleneksel yöntemlerle kısık odun ateşinde ağır ağır kaynatılmıştır."
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Madde 2 */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
-                            <div className="space-y-1.5 md:col-span-1">
-                              <label className="block text-[11px] font-bold text-slate-600">Maddenin Başlığı (Kalın Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview2_title}
-                                onChange={e => setForm({ ...form, quickOverview2_title: e.target.value })}
-                                placeholder="Örnek: İlave Şeker Ve Katkı İçermez"
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                            <div className="space-y-1.5 md:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600">Açıklama Metni (Normal Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview2_desc}
-                                onChange={e => setForm({ ...form, quickOverview2_desc: e.target.value })}
-                                placeholder="Örnek: %100 meyve şekerinden oluşan besleyici ve doğal içeriğe sahiptir."
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Madde 3 */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
-                            <div className="space-y-1.5 md:col-span-1">
-                              <label className="block text-[11px] font-bold text-slate-600">Maddenin Başlığı (Kalın Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview3_title}
-                                onChange={e => setForm({ ...form, quickOverview3_title: e.target.value })}
-                                placeholder="Örnek: %100 Yerli İspir Hasadı"
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                            <div className="space-y-1.5 md:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600">Açıklama Metni (Normal Bölüm)</label>
-                              <input
-                                type="text"
-                                value={form.quickOverview3_desc}
-                                onChange={e => setForm({ ...form, quickOverview3_desc: e.target.value })}
-                                placeholder="Örnek: Erzurum İspir yöresinin yüksek rakımlı temiz bahçelerinden toplanmıştır."
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Ürün Detay Sayfası Ekstra Açıklama Paragrafı */}
+                      {/* Ürün Açıklaması Ekstra Paragrafı */}
                       <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-slate-700">Ürün Açıklaması Ekstra Paragrafı (Alt Alan)</label>
                         <textarea
@@ -4513,10 +4367,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         />
                       </div>
 
-                      {/* Kullanım Kılavuzu */}
+                      {/* Kullanım & Tüketim Kılavuzu */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="block text-xs font-bold text-slate-700">Kullanım Kılavuzu (Kılavuz Tabı)</label>
+                          <label className="block text-xs font-bold text-slate-700">Kullanım & Tüketim Rehberi (Kılavuz Tabı)</label>
                           <span className="text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100 rounded-full px-2.5 py-0.5">HTML Editör</span>
                         </div>
                         <RichTextEditor
@@ -4524,44 +4378,6 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           onChange={val => setForm(prev => ({ ...prev, usageGuide: val }))}
                         />
                       </div>
-
-                      {/* Garanti ve Destek */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="block text-xs font-bold text-slate-700">Garanti &amp; Destek Ko&#351;ullar&#305; (Garanti Tab&#305;)</label>
-                          <span className="text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100 rounded-full px-2.5 py-0.5">HTML Edit&#246;r</span>
-                        </div>
-                        <RichTextEditor
-                          value={form.warrantyInfo || ""}
-                          onChange={val => setForm(prev => ({ ...prev, warrantyInfo: val }))}
-                        />
-                      </div>
-
-                      {/* Garanti Kartı Bilgileri */}
-                      <div className="space-y-3 border border-slate-200 rounded-xl p-4 bg-slate-50">
-                        <p className="text-xs font-black text-slate-700 uppercase tracking-wide">Garanti Kartı (Sol Panel)</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="block text-xs font-bold text-slate-600">Güvence Etiketi</label>
-                            <input
-                              type="text"
-                              value={form.warrantyBadgeLabel}
-                              onChange={e => setForm({ ...form, warrantyBadgeLabel: e.target.value })}
-                              placeholder="PROFESYONEL GÜVENCE"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="block text-xs font-bold text-slate-600">Garanti Yılı</label>
-                            <input
-                              type="text"
-                              value={form.warrantyYears}
-                              onChange={e => setForm({ ...form, warrantyYears: e.target.value })}
-                              placeholder="2"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                            />
-                          </div>
-                        </div>
                         <div className="space-y-1">
                           <label className="block text-xs font-bold text-slate-600">Kart Açıklaması</label>
                           <input

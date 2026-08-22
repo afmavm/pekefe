@@ -65,13 +65,30 @@ export default function Kategoriler() {
     loadProducts();
     const handleUpdated = () => loadProducts();
     window.addEventListener("pekefe_products_updated", handleUpdated);
+    window.addEventListener("pekefe_products_changed", handleUpdated);
+    window.addEventListener("storage", handleUpdated);
+
     const handleVisibility = () => {
       if (document.visibilityState === "visible") loadProducts();
     };
     document.addEventListener("visibilitychange", handleVisibility);
+
+    let bc;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        bc = new BroadcastChannel("pekefe_product_sync");
+        bc.onmessage = () => loadProducts();
+      } catch (e) {}
+    }
+
     return () => {
       window.removeEventListener("pekefe_products_updated", handleUpdated);
+      window.removeEventListener("pekefe_products_changed", handleUpdated);
+      window.removeEventListener("storage", handleUpdated);
       document.removeEventListener("visibilitychange", handleVisibility);
+      if (bc) {
+        try { bc.close(); } catch (e) {}
+      }
     };
   }, [loadProducts]);
 
@@ -354,6 +371,8 @@ export default function Kategoriler() {
                       priceMax={p.priceMax}
                       oldPrice={p.oldPrice}
                       b2b_price={p.b2b_price}
+                      isCampaignActive={p.isCampaignActive}
+                      discount_end_date={p.discount_end_date || p.attributes?.discount_end_date}
                       variants={p.variants || []}
                       image={p.image}
                       tag={p.tag}

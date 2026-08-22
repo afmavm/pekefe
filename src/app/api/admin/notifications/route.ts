@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, withTimeout } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 
@@ -10,21 +10,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const notifications = await prisma.$queryRawUnsafe(
-      `SELECT * FROM admin_notifications ORDER BY createdAt DESC LIMIT 50`
-    );
+    const fetchPromise = (async () => {
+      const notifications = await prisma.$queryRawUnsafe(
+        `SELECT * FROM admin_notifications ORDER BY createdAt DESC LIMIT 50`
+      );
 
-    const unreadCountResult: any = await prisma.$queryRawUnsafe(
-      `SELECT COUNT(*) as count FROM admin_notifications WHERE isRead = 0`
-    );
+      const unreadCountResult: any = await prisma.$queryRawUnsafe(
+        `SELECT COUNT(*) as count FROM admin_notifications WHERE isRead = 0`
+      );
 
-    // SQLite count is returned as BigInt or object containing count
-    const unreadCount = Number(unreadCountResult[0]?.count || 0);
+      const unreadCount = Number(unreadCountResult[0]?.count || 0);
+      return { notifications, unreadCount };
+    })();
 
-    return NextResponse.json({
-      notifications,
-      unreadCount
-    });
+    const result = await withTimeout(fetchPromise, 400, { notifications: [], unreadCount: 0 });
+
+    return NextResponse.json(result);
   } catch (error: any) {
     console.warn("GET Admin Notifications Warning (DB unreachable, returning empty list):", error);
     return NextResponse.json({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
@@ -296,19 +296,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
     }
     const session = await getServerSession(authOptions);
-    const products = await prisma.product.findMany({
-      where: { isDeleted: false },
-      include: {
-        variants: true,
-        locations: {
-          include: {
-            warehouse: true
-          }
+    const fetchProductsPromise = (async () => {
+      return await prisma.product.findMany({
+        where: { isDeleted: false },
+        include: {
+          variants: true,
+          locations: {
+            include: {
+              warehouse: true
+            }
+          },
+          recipe: true
         },
-        recipe: true
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+        orderBy: { createdAt: 'desc' }
+      });
+    })();
+
+    const products = await withTimeout(fetchProductsPromise, 400, null as any);
+
+    if (!products) {
+      return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
+    }
 
     let dealerAccount = null;
     let isB2BUser = false;

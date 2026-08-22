@@ -19,10 +19,15 @@ const createPrismaClient = () => {
       const separator = dbUrl.includes("?") ? "&" : "?";
       dbUrl = `${dbUrl}${separator}connection_limit=1&busy_timeout=60000`;
     }
+  } else if (dbUrl.startsWith("mysql:")) {
+    if (!dbUrl.includes("connect_timeout")) {
+      const separator = dbUrl.includes("?") ? "&" : "?";
+      dbUrl = `${dbUrl}${separator}connect_timeout=1&pool_timeout=1`;
+    }
   }
 
   const basePrisma = new PrismaClient({
-    log: ["query"],
+    log: [],
     datasources: {
       db: {
         url: dbUrl,
@@ -152,4 +157,11 @@ if (typeof window === 'undefined' && !isBuildPhase) {
   }).catch(err => {
     console.error('Failed to initialize backup cron:', err);
   });
+}
+
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 800, fallbackValue: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallbackValue), timeoutMs))
+  ]);
 }

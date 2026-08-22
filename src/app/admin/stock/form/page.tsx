@@ -3374,39 +3374,167 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     </div>
 
                     {form.isCampaignActive && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5 pt-1.5 animate-fadeIn">
-                        {/* Başlangıç Tarihi */}
-                        <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-2 shadow-xs hover:border-orange-200 transition focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-50/50">
-                          <div className="flex items-center gap-2 text-slate-500">
-                            <Calendar className="w-4 h-4 text-orange-500" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Kampanya Başlangıç Tarihi</span>
+                      <div className="space-y-4 pt-1.5 animate-fadeIn">
+                        {/* İNDİRİM HESAPLAMA VE TİPİ SEÇİCİ */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-3.5 shadow-xs">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2.5 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                              <Percent className="w-4 h-4 text-orange-500" /> İndirim Tipi ve Hesaplama Metodu
+                            </span>
+                            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const base = form.marketPrice || form.webPrice || 0;
+                                  const curSale = form.salePrice || base;
+                                  const pct = base > 0 && curSale < base ? Math.round(((base - curSale) / base) * 100) : 10;
+                                  const newSale = Math.round(base * (1 - pct / 100));
+                                  setForm({ ...form, discountType: "percent", discountValue: pct, salePrice: newSale });
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                                  (form.discountType || "percent") === "percent"
+                                    ? "bg-orange-500 text-white shadow-sm"
+                                    : "text-slate-600 hover:text-slate-900"
+                                }`}
+                              >
+                                % Yüzde İndirimi
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const base = form.marketPrice || form.webPrice || 0;
+                                  const curSale = form.salePrice || base;
+                                  const diff = base > curSale ? base - curSale : 50;
+                                  const newSale = Math.max(0, base - diff);
+                                  setForm({ ...form, discountType: "amount", discountValue: diff, salePrice: newSale });
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                                  form.discountType === "amount"
+                                    ? "bg-orange-500 text-white shadow-sm"
+                                    : "text-slate-600 hover:text-slate-900"
+                                }`}
+                              >
+                                ₺ Tutar İndirimi
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setForm({ ...form, discountType: "price" });
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                                  form.discountType === "price"
+                                    ? "bg-orange-500 text-white shadow-sm"
+                                    : "text-slate-600 hover:text-slate-900"
+                                }`}
+                              >
+                                ₺ Doğrudan Fiyat
+                              </button>
+                            </div>
                           </div>
-                          <div className="relative">
-                            <input
-                              type="datetime-local"
-                              value={form.discount_start_date}
-                              onChange={e => setForm({ ...form, discount_start_date: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
-                            />
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                            {(form.discountType || "percent") === "percent" && (
+                              <div className="space-y-1.5">
+                                <label className="block text-xs font-bold text-slate-700">Uygulanacak İndirim Oranı (%)</label>
+                                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:bg-white focus-within:border-orange-500 px-3.5 py-2 transition">
+                                  <span className="text-sm font-black text-orange-500 mr-2">%</span>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={99}
+                                    value={form.discountValue !== undefined ? form.discountValue : ""}
+                                    placeholder="Örn: 15"
+                                    onChange={e => {
+                                      const pct = Math.min(99, Math.max(0, parseFloat(e.target.value) || 0));
+                                      const base = form.marketPrice || form.webPrice || 0;
+                                      const calcSale = base > 0 ? Math.round(base * (1 - pct / 100)) : form.salePrice;
+                                      setForm({ ...form, discountValue: pct, salePrice: calcSale });
+                                    }}
+                                    className="w-full bg-transparent text-sm font-bold outline-none text-slate-800"
+                                  />
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-medium">Liste fiyatı üzerinden %{form.discountValue || 0} indirim yapılarak net fiyat hesaplanır.</p>
+                              </div>
+                            )}
+
+                            {form.discountType === "amount" && (
+                              <div className="space-y-1.5">
+                                <label className="block text-xs font-bold text-slate-700">Düşülecek İndirim Tutarı (₺)</label>
+                                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:bg-white focus-within:border-orange-500 px-3.5 py-2 transition">
+                                  <span className="text-sm font-black text-orange-500 mr-2">₺</span>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={form.discountValue !== undefined ? form.discountValue : ""}
+                                    placeholder="Örn: 50"
+                                    onChange={e => {
+                                      const amt = Math.max(0, parseFloat(e.target.value) || 0);
+                                      const base = form.marketPrice || form.webPrice || 0;
+                                      const calcSale = base > 0 ? Math.max(0, base - amt) : form.salePrice;
+                                      setForm({ ...form, discountValue: amt, salePrice: calcSale });
+                                    }}
+                                    className="w-full bg-transparent text-sm font-bold outline-none text-slate-800"
+                                  />
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-medium">Liste fiyatından net ₺{form.discountValue || 0} düşülerek satış fiyatı güncellenir.</p>
+                              </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                              <label className="block text-xs font-bold text-slate-700">Kampanyalı Perakende Satış Fiyatı (₺)</label>
+                              <div className="flex items-center bg-emerald-50/50 border border-emerald-200 rounded-xl px-3.5 py-2 shadow-inner">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step="any"
+                                  value={form.salePrice || ""}
+                                  onChange={e => {
+                                    const val = Math.max(0, parseFloat(e.target.value) || 0);
+                                    setForm({ ...form, salePrice: val });
+                                  }}
+                                  className="w-full bg-transparent text-sm font-black text-emerald-700 outline-none"
+                                />
+                                <span className="text-xs font-bold text-emerald-600 ml-1">₺</span>
+                              </div>
+                              <p className="text-[10px] text-emerald-600 font-medium">Müşterinin e-ticaret sitesinde ödeyeceği nihai kampanyalı fiyat.</p>
+                            </div>
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın otomatik olarak başlayacağı gün ve saat (Boş bırakılırsa hemen başlar).</p>
                         </div>
 
-                        {/* Bitiş Tarihi */}
-                        <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-2 shadow-xs hover:border-orange-200 transition focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-50/50">
-                          <div className="flex items-center gap-2 text-slate-500">
-                            <Clock className="w-4 h-4 text-orange-500" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Kampanya Bitiş Tarihi</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
+                          {/* Başlangıç Tarihi */}
+                          <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-2 shadow-xs hover:border-orange-200 transition focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-50/50">
+                            <div className="flex items-center gap-2 text-slate-500">
+                              <Calendar className="w-4 h-4 text-orange-500" />
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Kampanya Başlangıç Tarihi</span>
+                            </div>
+                            <div className="relative">
+                              <input
+                                type="datetime-local"
+                                value={form.discount_start_date}
+                                onChange={e => setForm({ ...form, discount_start_date: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-medium">Kampanyanın otomatik olarak başlayacağı gün ve saat (Boş bırakılırsa hemen başlar).</p>
                           </div>
-                          <div className="relative">
-                            <input
-                              type="datetime-local"
-                              value={form.discount_end_date}
-                              onChange={e => setForm({ ...form, discount_end_date: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
-                            />
+
+                          {/* Bitiş Tarihi */}
+                          <div className="bg-white border border-slate-200 rounded-xl p-4.5 space-y-2 shadow-xs hover:border-orange-200 transition focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-50/50">
+                            <div className="flex items-center gap-2 text-slate-500">
+                              <Clock className="w-4 h-4 text-orange-500" />
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Kampanya Bitiş Tarihi</span>
+                            </div>
+                            <div className="relative">
+                              <input
+                                type="datetime-local"
+                                value={form.discount_end_date}
+                                onChange={e => setForm({ ...form, discount_end_date: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-medium">Kampanyanın sona ereceği gün ve saat (Sitede canlı geri sayım sayacı görünür).</p>
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın sona ereceği gün ve saat (Sitede canlı geri sayım sayacı görünür).</p>
                         </div>
 
                         {/* Kampanya Fiyat & İndirim Özeti */}

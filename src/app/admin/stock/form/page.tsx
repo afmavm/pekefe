@@ -1066,18 +1066,36 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/products/${productId}?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache"
+        let product: any = null;
+        try {
+          const res = await fetch(`/api/products/${productId}?t=${Date.now()}`, {
+            cache: "no-store",
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache"
+            }
+          });
+          if (res.ok) {
+            product = await res.json();
           }
-        });
-        if (!res.ok) {
-          toast.error("Ürün yüklenirken hata oluştu.");
+        } catch (e) {
+          console.warn("API product fetch error, attempting fallback", e);
+        }
+
+        if (!product || !product.id) {
+          const localProducts = getProducts();
+          product = localProducts.find((p: any) => 
+            String(p.id) === String(productId) || 
+            String(p.sku) === String(productId) || 
+            String(p.slug) === String(productId)
+          );
+        }
+
+        if (!product) {
+          toast.error("İstenen ürün kaydı bulunamadı.");
+          setIsLoadingProduct(false);
           return;
         }
-        const product = await res.json();
         
         // Parse attributes if string
         const attrs = typeof product.attributes === "string" 

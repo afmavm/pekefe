@@ -4378,18 +4378,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           onChange={val => setForm(prev => ({ ...prev, usageGuide: val }))}
                         />
                       </div>
-                        <div className="space-y-1">
-                          <label className="block text-xs font-bold text-slate-600">Kart Açıklaması</label>
-                          <input
-                            type="text"
-                            value={form.warrantyBadgeDesc}
-                            onChange={e => setForm({ ...form, warrantyBadgeDesc: e.target.value })}
-                            placeholder="Tüm metal gövde ve yapı parçaları imalat hatalarına karşı güvence altındadır."
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-medium">Boş bırakırsanız placeholder'daki varsayılan değerler kullanılır.</p>
-                      </div>
+
                     </div>
 
                   </div>

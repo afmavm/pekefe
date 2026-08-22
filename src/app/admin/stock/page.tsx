@@ -1421,7 +1421,7 @@ export default function StockProductionPage() {
 
       {/* Quick Stock Update Modal Overlay */}
       {quickStockProduct && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div key={`quick-stock-modal-${quickStockProduct.id || quickStockProduct.sku}-${Date.now()}`} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">

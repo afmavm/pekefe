@@ -3335,8 +3335,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border border-slate-100 p-4 rounded-xl shadow-xs gap-3">
                       <div className="space-y-0.5">
                         <span className="block text-sm font-bold text-slate-700">Kampanya İndirimi Aktif</span>
-                        <span className="block text-xs text-slate-400 font-semibold leading-normal">
-                          Aktif edildiğinde, başlangıç ve bitiş tarihlerine göre indirimli fiyat (B2B Satış Fiyatı) geçerli olur.
+                        <span className="block text-xs text-slate-500 font-medium leading-normal">
+                          Aktif edildiğinde, tanımlanan tarihler arasında e-ticaret sitesinde Kampanyalı İndirimli Perakende Fiyatı geçerli olur.
                         </span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -3371,7 +3371,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
                             />
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın otomatik olarak başlayacağı gün ve saat.</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın otomatik olarak başlayacağı gün ve saat (Boş bırakılırsa hemen başlar).</p>
                         </div>
 
                         {/* Bitiş Tarihi */}
@@ -3388,7 +3388,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:border-orange-400 transition"
                             />
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın sona ereceği ve normal fiyatın geçerli olacağı gün ve saat.</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Kampanyanın sona ereceği gün ve saat (Sitede canlı geri sayım sayacı görünür).</p>
                         </div>
 
                         {/* Kampanya Fiyat & İndirim Özeti */}
@@ -3399,20 +3399,24 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             </div>
                             <div className="text-left">
                               <span className="block text-xs font-bold text-slate-700">Canlı Kampanya Fiyat Önizlemesi</span>
-                              <span className="block text-xs text-slate-500 font-semibold mt-0.5 leading-normal">
-                                Fiyat matrisinde girilen Piyasa Fiyatı ({form.marketPrice} ₺) üzerinden B2B Satış Fiyatına ({form.salePrice} ₺) indirim uygulanır.
+                              <span className="block text-xs text-slate-600 font-medium mt-0.5 leading-normal">
+                                {form.marketPrice > form.salePrice
+                                  ? `Piyasa Liste Fiyatı (₺${form.marketPrice}) üzerinden Kampanyalı Perakende Satış Fiyatına (₺${form.salePrice}) indirim uygulanır.`
+                                  : form.webPrice > form.salePrice
+                                  ? `Web Perakende Fiyatı (₺${form.webPrice}) üzerinden Kampanyalı Satış Fiyatına (₺${form.salePrice}) indirim uygulanır.`
+                                  : `İndirimli Kampanya Fiyatı: ₺${form.salePrice || form.webPrice}`}
                               </span>
                             </div>
                           </div>
                           <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
-                            {form.marketPrice > form.salePrice ? (
+                            {(form.marketPrice > form.salePrice || form.webPrice > form.salePrice) ? (
                               <div className="text-right">
                                 <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">İndirim Oranı</span>
                                 <span className="text-lg font-black text-orange-600">
-                                  %{Math.round(((form.marketPrice - form.salePrice) / form.marketPrice) * 100)} İndirim
+                                  %{Math.round((((form.marketPrice || form.webPrice) - form.salePrice) / (form.marketPrice || form.webPrice)) * 100)} İndirim
                                 </span>
                                 <span className="block text-[10px] text-emerald-600 font-bold mt-0.5">
-                                  Tasarruf: {Math.round(form.marketPrice - form.salePrice)} ₺
+                                  Tasarruf: {Math.round((form.marketPrice || form.webPrice) - form.salePrice)} ₺
                                 </span>
                               </div>
                             ) : (

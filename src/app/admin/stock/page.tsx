@@ -197,12 +197,11 @@ export default function StockProductionPage() {
 
   const handleSaveQuickStock = async () => {
     if (!quickStockProduct) return;
-    setIsSavingQuickStock(true);
 
     const targetId = encodeURIComponent(String(quickStockProduct.id || quickStockProduct.sku || ""));
     const newQty = Number(quickStockQty) || 0;
 
-    // 1. Instant local storage and UI state update (0ms Latency & Zero Error Overlay)
+    // 1. Instant local storage, UI state update and modal closure (0ms Latency)
     const updatedLocalProduct = {
       ...quickStockProduct,
       stock: newQty,
@@ -213,8 +212,9 @@ export default function StockProductionPage() {
     
     toast.success("Stok miktarı başarıyla güncellendi.");
     setQuickStockProduct(null);
+    setIsSavingQuickStock(false);
 
-    // 2. Background database sync
+    // 2. Background database sync without UI spinner locking
     try {
       const res = await fetch(`/api/products/${targetId}`, {
         method: "PUT",
@@ -229,8 +229,6 @@ export default function StockProductionPage() {
       }
     } catch (err) {
       console.warn("Background DB stock sync failed, client state preserved:", err);
-    } finally {
-      setIsSavingQuickStock(false);
     }
   };
 

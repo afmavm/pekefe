@@ -136,7 +136,7 @@ export function formatDbProductToStorefront(p) {
     price: finalPrice,
     oldPrice: finalOldPrice,
     isCampaignActive: isCampaignActive,
-    stock: p.stock !== undefined ? p.stock : (p.stock_quantity !== undefined ? p.stock_quantity : 0),
+    stock: p.stock != null ? Number(p.stock) : (p.stock_quantity != null ? Number(p.stock_quantity) : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],
     attributes: attrs,

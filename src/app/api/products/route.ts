@@ -312,7 +312,7 @@ export async function GET(request: NextRequest) {
       });
     })();
 
-    const products = await withTimeout(fetchProductsPromise, 400, null as any);
+    const products = await withTimeout(fetchProductsPromise, 5000, null as any);
 
     if (!products) {
       return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });

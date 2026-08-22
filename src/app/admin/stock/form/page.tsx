@@ -4092,118 +4092,121 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
               )}
 
-              {/* ======================= TAB: DIĞER ======================= */}
+              {/* ======================= TAB: TEKNİK & SEO ======================= */}
               {activeTab === "diger" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                    <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-                      <Info className="w-5 h-5 text-orange-500" />
+                  
+                  {/* 🔍 KART 1: ARAMA MOTORU OPTİMİZASYONU (SEO) & TANITIM VİDEOSU */}
+                  <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/70">
+                      <div className="w-9 h-9 bg-orange-500 text-white rounded-xl flex items-center justify-center shadow-sm shadow-orange-200">
+                        <Search className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">1. Arama Motoru (SEO) & Tanıtım Videosu</h3>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Google arama sonuçları optimizasyonu ve video tanıtım bağlantıları</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-800">Gelişmiş & Arama Motoru (SEO) Ayarları</h3>
-                      <p className="text-xs text-slate-500">Açıklamalar, video tanıtım linki ve arama motoru optimizasyonu metadataları</p>
+
+                    <div className="space-y-4 pt-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* Video URL */}
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700 flex justify-between items-center">
+                            <span>Tanıtım Videosu URL'si</span>
+                            <span className="text-[10px] text-slate-400 font-semibold">Cihazdan veya Harici Link</span>
+                          </label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={form.videoUrl || ""}
+                              onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                              placeholder="Örn: https://youtube.com/watch?v= veya yüklenen video..."
+                              className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => videoFileInputRef.current?.click()}
+                              disabled={isUploadingVideo}
+                              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition cursor-pointer border-none flex items-center gap-1.5 shrink-0"
+                            >
+                              {isUploadingVideo ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Yükleniyor...
+                                </>
+                              ) : (
+                                <>
+                                  <UploadCloud className="w-3.5 h-3.5" /> Video Yükle
+                                </>
+                              )}
+                            </button>
+                          </div>
+                          <input
+                            type="file"
+                            ref={videoFileInputRef}
+                            onChange={handleVideoUpload}
+                            accept="video/*"
+                            className="hidden"
+                          />
+                        </div>
+
+                        {/* SEO Keywords */}
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700">SEO Anahtar Kelimeler</label>
+                          <input
+                            type="text"
+                            value={form.seoKeywords}
+                            onChange={e => setForm({ ...form, seoKeywords: e.target.value })}
+                            placeholder="arı körüğü, paslanmaz körük, Geleneksel & Doğal Lezzetler"
+                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
+                          />
+                        </div>
+
+                      </div>
+
+                      {/* SEO Title & Description Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        <div className="space-y-1.5 md:col-span-1">
+                          <label className="block text-xs font-bold text-slate-700">SEO Başlığı</label>
+                          <input
+                            type="text"
+                            value={form.seoTitle}
+                            onChange={e => setForm({ ...form, seoTitle: e.target.value })}
+                            placeholder="Geleneksel İspir Dut Pekmezi (800g) - Pekefe"
+                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700">SEO Açıklaması</label>
+                          <input
+                            type="text"
+                            value={form.seoDesc}
+                            onChange={e => setForm({ ...form, seoDesc: e.target.value })}
+                            placeholder="Pekefe İspir Erzurum yöresi doğal lezzetlerini en uygun fiyatlarla satın alın."
+                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
+                          />
+                        </div>
+
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      
-                      {/* Video URL */}
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700 flex justify-between items-center">
-                          <span>Tanıtım Videosu URL'si</span>
-                          <span className="text-[10px] text-slate-400 font-semibold">Cihazdan veya Harici Link</span>
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={form.videoUrl || ""}
-                            onChange={e => setForm({ ...form, videoUrl: e.target.value })}
-                            placeholder="Örn: https://youtube.com/watch?v= veya yüklenen video..."
-                            className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none animate-in fade-in"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => videoFileInputRef.current?.click()}
-                            disabled={isUploadingVideo}
-                            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition cursor-pointer border-none flex items-center gap-1.5 shrink-0"
-                          >
-                            {isUploadingVideo ? (
-                              <>
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Yükleniyor...
-                              </>
-                            ) : (
-                              <>
-                                <UploadCloud className="w-3.5 h-3.5" /> Video Yükle
-                              </>
-                            )}
-                          </button>
-                        </div>
-                        <input
-                          type="file"
-                          ref={videoFileInputRef}
-                          onChange={handleVideoUpload}
-                          accept="video/*"
-                          className="hidden"
-                        />
+                  {/* 🏷️ KART 2: VİTRİN GÖRSEL ROZETLERİ */}
+                  <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/70">
+                      <div className="w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center shadow-sm shadow-amber-200">
+                        <Sparkles className="w-4.5 h-4.5" />
                       </div>
-
-                      {/* SEO Keywords */}
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">SEO Anahtar Kelimeler</label>
-                        <input
-                          type="text"
-                          value={form.seoKeywords}
-                          onChange={e => setForm({ ...form, seoKeywords: e.target.value })}
-                          placeholder="arı körüğü, paslanmaz körük, Geleneksel & Doğal Lezzetler"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                        />
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">2. Vitrin Ürün Görsel Rozetleri</h3>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">E-ticaret vitrinindeki fotoğrafların üzerinde görünecek vurgu etiketleri</p>
                       </div>
-
                     </div>
 
-                    {/* SEO Title & Description Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      
-                      <div className="space-y-1.5 md:col-span-1">
-                        <label className="block text-xs font-bold text-slate-700">SEO Başlığı</label>
-                        <input
-                          type="text"
-                          value={form.seoTitle}
-                          onChange={e => setForm({ ...form, seoTitle: e.target.value })}
-                          placeholder="Geleneksel İspir Dut Pekmezi (800g) - Pekefe"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-700">SEO Açıklaması</label>
-                        <input
-                          type="text"
-                          value={form.seoDesc}
-                          onChange={e => setForm({ ...form, seoDesc: e.target.value })}
-                          placeholder="Pekefe İspir Erzurum yöresi doğal lezzetlerini en uygun fiyatlarla satın alın."
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
-                        />
-                      </div>
-
-                    </div>
-
-                    {/* Recipe details */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">Ürün Reçete Açıklamaları / Notlar</label>
-                      <textarea
-                        rows={3}
-                        value={form.recipeDetails}
-                        onChange={e => setForm({ ...form, recipeDetails: e.target.value })}
-                        placeholder="İmalatta kullanılacak hammaddeler, meyve oranı ve geleneksel kaynatma notları..."
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none resize-none"
-                      />
-                    </div>
-
-                    {/* Görsel Üzerindeki Rozetler */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                       <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-slate-700">Ürün Görsel Rozeti 1 (Amber Renkli)</label>
                         <input
@@ -4211,7 +4214,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           value={form.badgeText1 || ""}
                           onChange={e => setForm({ ...form, badgeText1: e.target.value })}
                           placeholder="Örnek: %100 Doğal"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
                         />
                       </div>
 
@@ -4222,13 +4225,49 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           value={form.badgeText2 || ""}
                           onChange={e => setForm({ ...form, badgeText2: e.target.value })}
                           placeholder="Örnek: İspir Hasadı (Boş bırakılırsa kategori gösterilir)"
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none transition"
                         />
                       </div>
                     </div>
+                  </div>
 
-                    {/* Ürün Tüketim & Saklama Koşulları Rehberi */}
-                    <div className="pt-4 border-t border-slate-100 space-y-4">
+                  {/* 📜 KART 3: İMALAT REÇETESİ & ÜRETİM NOTLARI */}
+                  <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/70">
+                      <div className="w-9 h-9 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <FileText className="w-4.5 h-4.5 text-orange-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">3. İmalat Reçetesi & Üretim Notları</h3>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Ürünün imalat reçetesi, hammadde oranları ve geleneksel kaynatma detayları</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <label className="block text-xs font-bold text-slate-700">Ürün Reçete Açıklamaları / Notlar</label>
+                      <textarea
+                        rows={3}
+                        value={form.recipeDetails}
+                        onChange={e => setForm({ ...form, recipeDetails: e.target.value })}
+                        placeholder="İmalatta kullanılacak hammaddeler, meyve oranı ve geleneksel kaynatma notları..."
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none resize-none transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 📖 KART 4: DETAYLI ÜRÜN TANITIMI & TÜKETİM REHBERİ */}
+                  <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/70">
+                      <div className="w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center shadow-sm shadow-emerald-200">
+                        <BookOpen className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">4. Detaylı Tanıtım Metni & Tüketim Rehberi</h3>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">E-ticaret detay sayfasında gösterilecek alt paragraf metni ve saklama rehberi</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-1">
                       {/* Ürün Açıklaması Ekstra Paragrafı */}
                       <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-slate-700">Ürün Açıklaması Ekstra Paragrafı (Alt Alan)</label>
@@ -4237,7 +4276,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           value={form.longDescExtra}
                           onChange={e => setForm({ ...form, longDescExtra: e.target.value })}
                           placeholder="Ürün açıklamasının altında yer alacak detaylı marka/seri tanıtım metni..."
-                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none resize-y"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 outline-none resize-y transition"
                         />
                       </div>
 
@@ -4245,17 +4284,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="block text-xs font-bold text-slate-700">Kullanım & Tüketim Rehberi (Kılavuz Tabı)</label>
-                          <span className="text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100 rounded-full px-2.5 py-0.5">HTML Editör</span>
+                          <span className="text-[10px] text-slate-400 font-semibold bg-white border border-slate-200 rounded-full px-2.5 py-0.5">HTML Editör</span>
                         </div>
                         <RichTextEditor
                           value={form.usageGuide || ""}
                           onChange={val => setForm(prev => ({ ...prev, usageGuide: val }))}
                         />
                       </div>
-
                     </div>
-
                   </div>
+
                 </div>
               )}
 

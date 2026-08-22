@@ -2685,20 +2685,55 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     toast.success("Kurumsal depo kaydı kaldırıldı.");
   };
 
-  // Add/Remove Marketplaces
-  const addMarketplace = () => {
-    if (!newMarketplace.name.trim()) return;
-    const nMp: Marketplace = {
-      id: Math.random().toString(),
-      name: newMarketplace.name.trim(),
-      syncEnabled: newMarketplace.syncEnabled,
-      apiConnected: false,
-      logoColor: newMarketplace.logoColor,
-    };
-    setMarketplaces(prev => [...prev, nMp]);
+  // Add/Edit/Remove Marketplaces
+  const openAddMarketplaceModal = () => {
+    setEditingMarketplaceId(null);
+    setNewMarketplace({ name: "", syncEnabled: true, logoColor: "bg-orange-500" });
+    setIsMarketplaceModalOpen(true);
+  };
+
+  const openEditMarketplaceModal = (mp: Marketplace) => {
+    setEditingMarketplaceId(mp.id);
+    setNewMarketplace({ name: mp.name, syncEnabled: mp.syncEnabled, logoColor: mp.logoColor || "bg-orange-500" });
+    setIsMarketplaceModalOpen(true);
+  };
+
+  const saveMarketplace = () => {
+    if (!newMarketplace.name.trim()) {
+      toast.error("Lütfen kanal adını girin.");
+      return;
+    }
+
+    if (editingMarketplaceId) {
+      // Edit Mode
+      setMarketplaces(prev => prev.map(m => m.id === editingMarketplaceId ? {
+        ...m,
+        name: newMarketplace.name.trim(),
+        syncEnabled: newMarketplace.syncEnabled,
+        logoColor: newMarketplace.logoColor
+      } : m));
+      toast.success("Pazaryeri entegrasyon kanalı güncellendi.");
+      setEditingMarketplaceId(null);
+    } else {
+      // Add Mode
+      const nMp: Marketplace = {
+        id: Math.random().toString(),
+        name: newMarketplace.name.trim(),
+        syncEnabled: newMarketplace.syncEnabled,
+        apiConnected: false,
+        logoColor: newMarketplace.logoColor,
+      };
+      setMarketplaces(prev => [...prev, nMp]);
+      toast.success("Yeni pazaryeri kanalı oluşturuldu.");
+    }
     setIsMarketplaceModalOpen(false);
-    setNewMarketplace({ name: "", syncEnabled: true, logoColor: "bg-slate-500" });
-    toast.success("Yeni pazaryeri kanalı oluşturuldu.");
+    setNewMarketplace({ name: "", syncEnabled: true, logoColor: "bg-orange-500" });
+  };
+
+  const removeMarketplace = (id: string) => {
+    const mp = marketplaces.find(m => m.id === id);
+    setMarketplaces(prev => prev.filter(m => m.id !== id));
+    toast.error(`${mp?.name || "Pazaryeri"} entegrasyon kanalı silindi.`);
   };
 
   const testApiConnection = () => {
@@ -4852,7 +4887,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                 <button
                   type="button"
-                  onClick={() => setIsMarketplaceModalOpen(true)}
+                  onClick={openAddMarketplaceModal}
                   className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border-none shadow-xs shrink-0 self-start sm:self-auto"
                 >
                   <Plus className="w-3.5 h-3.5 text-orange-400" /> Kanal Ekle
@@ -4864,7 +4899,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 {marketplaces.map((mp) => (
                   <div key={mp.id} className="flex items-center justify-between bg-slate-50/60 border border-slate-200/70 p-3 rounded-xl hover:border-orange-300 hover:bg-white transition shadow-2xs">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-tight uppercase shadow-xs ${mp.logoColor}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-tight uppercase shadow-xs ${mp.logoColor || "bg-slate-700"}`}>
                         {mp.name.substring(0,2)}
                       </div>
                       <div>
@@ -4876,7 +4911,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      {/* API Credentials Config */}
                       <button
                         type="button"
                         onClick={() => {
@@ -4889,7 +4925,28 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <Key className="w-3.5 h-3.5" />
                       </button>
 
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      {/* Edit Marketplace */}
+                      <button
+                        type="button"
+                        onClick={() => openEditMarketplaceModal(mp)}
+                        className="p-1.5 bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 rounded-lg transition cursor-pointer"
+                        title="Kanalı Düzenle"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Delete Marketplace */}
+                      <button
+                        type="button"
+                        onClick={() => removeMarketplace(mp.id)}
+                        className="p-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition cursor-pointer"
+                        title="Kanalı Sil"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Sync Toggle */}
+                      <label className="relative inline-flex items-center cursor-pointer ml-1">
                         <input
                           type="checkbox"
                           checked={mp.syncEnabled}
@@ -6136,7 +6193,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
                   <Globe className="w-5 h-5 text-orange-500" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Yeni Entegrasyon Kanalı Ekle</h3>
+                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">
+                  {editingMarketplaceId ? "Pazaryeri Kanalını Düzenle" : "Yeni Entegrasyon Kanalı Ekle"}
+                </h3>
               </div>
               <button
                 onClick={() => setIsMarketplaceModalOpen(false)}
@@ -6166,6 +6225,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     onChange={e => setNewMarketplace({ ...newMarketplace, logoColor: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white cursor-pointer outline-none"
                   >
+                    <option value="bg-orange-500">Turuncu (Trendyol / Hepsiburada)</option>
                     <option value="bg-violet-600">Mor (N11)</option>
                     <option value="bg-emerald-600">Yeşil (Çiçeksepeti)</option>
                     <option value="bg-blue-600">Mavi (WooCommerce)</option>
@@ -6196,10 +6256,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 İptal
               </button>
               <button
-                onClick={addMarketplace}
+                onClick={saveMarketplace}
                 className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer border-none"
               >
-                <Plus className="w-4 h-4" /> Entegrasyonu Oluştur
+                {editingMarketplaceId ? (
+                  <>
+                    <Save className="w-4 h-4" /> Değişiklikleri Kaydet
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" /> Entegrasyonu Oluştur
+                  </>
+                )}
               </button>
             </div>
 

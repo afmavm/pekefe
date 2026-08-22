@@ -25,7 +25,22 @@ function trNormalize(str = "") {
 function parseNumericPrice(val) {
   if (typeof val === "number" && !isNaN(val)) return val;
   if (!val) return 0;
-  const cleaned = String(val).replace(/[^\d.]/g, "");
+
+  let str = String(val).trim();
+  
+  // Handle Turkish thousand separators (e.g. "1.000,00" or "1.000")
+  if (str.includes(".") && str.includes(",")) {
+    str = str.replace(/\./g, "").replace(",", ".");
+  } else if (str.includes(".")) {
+    const parts = str.split(".");
+    if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+      str = str.replace(/\./g, "");
+    }
+  } else if (str.includes(",")) {
+    str = str.replace(",", ".");
+  }
+
+  const cleaned = str.replace(/[^\d.]/g, "");
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }

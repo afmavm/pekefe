@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { parseNumericPrice } from "@/utils/productsStorage";
 
 function CardCountdownTimer({ endDate }) {
   const [timeLeft, setTimeLeft] = useState(null);
@@ -114,9 +115,9 @@ export function ProductCard({
   const activeCampaign = !!(isCampaignActive || is_campaign_active || is_discounted);
 
   // Numeric computations
-  const numericB2B = b2b_price ? Number(b2b_price) : null;
-  const numericPrice = typeof price === "number" ? price : parseFloat(String(price || "0").replace(/[₺TL\s,]/gi, "")) || 0;
-  const numericOld = (activeCampaign && oldPrice) ? Number(oldPrice) : null;
+  const numericB2B = b2b_price ? parseNumericPrice(b2b_price) : null;
+  const numericPrice = parseNumericPrice(price);
+  const numericOld = (activeCampaign && oldPrice) ? parseNumericPrice(oldPrice) : null;
 
   // Active Price Resolution
   let activePrice = numericPrice;

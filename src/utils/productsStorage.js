@@ -48,30 +48,67 @@ export function getProducts() {
   }
 }
 
+export function parseNumericPrice(val) {
+  if (typeof val === "number" && !isNaN(val)) return val;
+  if (!val) return 0;
+  
+  let str = String(val).trim();
+  
+  // Handle Turkish thousand separators (e.g. "1.000,00" or "1.000")
+  if (str.includes(".") && str.includes(",")) {
+    str = str.replace(/\./g, "").replace(",", ".");
+  } else if (str.includes(".")) {
+    const parts = str.split(".");
+    if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+      str = str.replace(/\./g, "");
+    }
+  } else if (str.includes(",")) {
+    str = str.replace(",", ".");
+  }
+  
+  const cleaned = str.replace(/[^\d.]/g, "");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
 export function resolveProductPrice(p) {
   if (!p) return 0;
-  // 1. Check explicit webPrice / sale_price if positive
-  if (p.webPrice && Number(p.webPrice) > 0) return Number(p.webPrice);
-  if (p.sale_price && Number(p.sale_price) > 0) return Number(p.sale_price);
-  if (p.price && Number(p.price) > 0) return Number(p.price);
-  if (p.list_price && Number(p.list_price) > 0) return Number(p.list_price);
-  if (p.retail_list_price && Number(p.retail_list_price) > 0) return Number(p.retail_list_price);
   
-  // 2. Check attributes object
+  const webP = parseNumericPrice(p.webPrice);
+  if (webP > 0) return webP;
+
+  const saleP = parseNumericPrice(p.sale_price);
+  if (saleP > 0) return saleP;
+
+  const pr = parseNumericPrice(p.price);
+  if (pr > 0) return pr;
+
+  const listP = parseNumericPrice(p.list_price);
+  if (listP > 0) return listP;
+
+  const retailP = parseNumericPrice(p.retail_list_price);
+  if (retailP > 0) return retailP;
+  
+  // Check attributes object
   let attrs = p.attributes;
   if (typeof attrs === "string") {
     try { attrs = JSON.parse(attrs); } catch {}
   }
   if (attrs && typeof attrs === "object") {
-    if (attrs.webPrice && Number(attrs.webPrice) > 0) return Number(attrs.webPrice);
-    if (attrs.salePrice && Number(attrs.salePrice) > 0) return Number(attrs.salePrice);
-    if (attrs.price && Number(attrs.price) > 0) return Number(attrs.price);
+    const aWebP = parseNumericPrice(attrs.webPrice);
+    if (aWebP > 0) return aWebP;
+    
+    const aSaleP = parseNumericPrice(attrs.salePrice);
+    if (aSaleP > 0) return aSaleP;
+    
+    const aPr = parseNumericPrice(attrs.price);
+    if (aPr > 0) return aPr;
   }
 
-  // 3. Fallback to first variant with a positive price
+  // Fallback to first variant with a positive price
   if (Array.isArray(p.variants) && p.variants.length > 0) {
-    const validVar = p.variants.find(v => v.price && Number(v.price) > 0);
-    if (validVar) return Number(validVar.price);
+    const validVar = p.variants.find(v => parseNumericPrice(v.price) > 0);
+    if (validVar) return parseNumericPrice(validVar.price);
   }
 
   return 0;

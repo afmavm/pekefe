@@ -4406,8 +4406,6 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   )}
                 </div>
               )}
-
-              {/* 2. SUB-TAB: XML OZEL FIYATLARI */}
               {activeSubTab === "xml" && (
                 <div className="space-y-4">
                   {xmlFeeds.length > 0 ? (
@@ -4479,8 +4477,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
           </div>
 

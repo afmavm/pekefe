@@ -261,7 +261,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       if (Array.isArray(data)) {
         setProducts(data);
-        fetchLiveProducts();
       }
     } catch (err) { console.error(err); }
   }, []);

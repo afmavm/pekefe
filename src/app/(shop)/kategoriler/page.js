@@ -34,8 +34,10 @@ export default function Kategoriler() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
+  const loadProducts = useCallback(async (isSilent = false) => {
+    if (!isSilent && products.length === 0) {
+      setLoading(true);
+    }
     try {
       const [prodData, catData] = await Promise.all([
         fetchProductsFromApi(),
@@ -59,17 +61,17 @@ export default function Kategoriler() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [products.length]);
 
   useEffect(() => {
     loadProducts();
-    const handleUpdated = () => loadProducts();
+    const handleUpdated = () => loadProducts(true);
     window.addEventListener("pekefe_products_updated", handleUpdated);
     window.addEventListener("pekefe_products_changed", handleUpdated);
     window.addEventListener("storage", handleUpdated);
 
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") loadProducts();
+      if (document.visibilityState === "visible") loadProducts(true);
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
@@ -77,7 +79,7 @@ export default function Kategoriler() {
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         bc = new BroadcastChannel("pekefe_product_sync");
-        bc.onmessage = () => loadProducts();
+        bc.onmessage = () => loadProducts(true);
       } catch (e) {}
     }
 

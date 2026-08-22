@@ -81,18 +81,6 @@ export async function GET(
       console.warn(`[API PRODUCT BY ID WARNING] DB erişimi yok, FALLBACK_PRODUCTS kontrol ediliyor: ${id}`, dbErr);
     }
 
-    // DB'de bulunamadıysa veya DB kapalıysa FALLBACK_PRODUCTS içinden ara
-    if (!product) {
-      const decodedId = decodeURIComponent(id);
-      const fallbackItem = FALLBACK_PRODUCTS.find((p: any) => {
-        const autoSlug = p.slug || generateSlugServer(p.name || "");
-        return p.id === id || p.sku === id || autoSlug === id || autoSlug === decodedId;
-      });
-      if (fallbackItem) {
-        product = JSON.parse(JSON.stringify(fallbackItem));
-      }
-    }
-
     if (!product) {
       return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
     }

@@ -315,7 +315,7 @@ export async function GET(request: NextRequest) {
     const products = await withTimeout(fetchProductsPromise, 5000, null as any);
 
     if (!products) {
-      return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
+      return NextResponse.json([], { status: 200 });
     }
 
     let dealerAccount = null;
@@ -411,8 +411,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transformedProducts);
   } catch (error) {
-    console.warn('[API PRODUCTS WARNING] Veritabanı erişimi yok, varsayılan ürün kataloğu sunuluyor:', error);
-    return NextResponse.json(FALLBACK_PRODUCTS);
+    console.warn('[API PRODUCTS WARNING] Veritabanı hatası:', error);
+    return NextResponse.json([]);
   }
 }
 

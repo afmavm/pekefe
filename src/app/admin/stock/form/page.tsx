@@ -9,7 +9,7 @@ import {
   CheckCircle2, Box, ArrowRight, Loader2, PlaySquare, Layers, Clock,
   Package, Plus, Edit, Trash2, Save, X, ChevronRight, ChevronDown, Copy, Check, Info,
   UploadCloud, Sparkles, Coins, FileText, Database, RefreshCw, Lock, Unlock, 
-  ShoppingBag, Globe, Percent, Calendar, FileCheck, ArrowUpRight, BarChart3, 
+  ShoppingBag, Globe, Percent, Calendar, ArrowUpRight, BarChart3, 
   AlertTriangle, Eye, Printer, Layers3, CheckSquare, Square, Tag, ExternalLink, 
   HelpCircle, Video, Key, PlusCircle, Trash, Store, SlidersHorizontal, BookOpen
 } from "lucide-react";

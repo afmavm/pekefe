@@ -133,6 +133,11 @@ export default function StockProductionPage() {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setProducts(data);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("pekefe_products", JSON.stringify(data));
+            } catch (e) {}
+          }
         } else {
           setProducts(getProducts() || []);
         }

@@ -101,11 +101,15 @@ export function ProductCard({
         
         {/* Luxury Editorial Image Frame */}
         <div className="w-full aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 relative group/img shadow-xs">
-          {tag && (
+          {tag ? (
             <span className="absolute top-3 left-3 bg-[#6b1d2f] text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
               {tag}
             </span>
-          )}
+          ) : activeOldPrice && activeOldPrice > activePrice ? (
+            <span className="absolute top-3 left-3 bg-red-600 text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10 animate-pulse">
+              %{Math.round(((activeOldPrice - activePrice) / activeOldPrice) * 100)} İNDİRİM
+            </span>
+          ) : null}
           {isOutOfStock && (
             <span className="absolute top-3 right-3 bg-slate-800 text-white text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold z-10 shadow-md">
               Tükendi

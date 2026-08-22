@@ -1,6 +1,65 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
+
+function CampaignCountdownTimer({ endDate }) {
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  useEffect(() => {
+    if (!endDate) return;
+    const calculateTime = () => {
+      const difference = new Date(endDate).getTime() - new Date().getTime();
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-2xl p-4 space-y-2 shadow-md animate-pulse">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm">schedule</span> Sınırlı Süreli Kampanya Fırsatı
+        </span>
+        <span className="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full uppercase">Canlı İndirim</span>
+      </div>
+      <div className="flex items-center gap-2 font-mono font-black text-lg justify-center sm:justify-start">
+        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
+          <span className="text-xl leading-none">{String(timeLeft.days).padStart(2, '0')}</span>
+          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Gün</span>
+        </div>
+        <span>:</span>
+        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
+          <span className="text-xl leading-none">{String(timeLeft.hours).padStart(2, '0')}</span>
+          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Saat</span>
+        </div>
+        <span>:</span>
+        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
+          <span className="text-xl leading-none">{String(timeLeft.minutes).padStart(2, '0')}</span>
+          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Dakika</span>
+        </div>
+        <span>:</span>
+        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
+          <span className="text-xl leading-none text-amber-300">{String(timeLeft.seconds).padStart(2, '0')}</span>
+          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Saniye</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * ProductConfigurator
@@ -124,15 +183,32 @@ export function ProductConfigurator({
         </div>
       )}
 
+      {/* Campaign Countdown Timer */}
+      {(product?.discount_end_date || product?.attributes?.discount_end_date) && (
+        <CampaignCountdownTimer endDate={product?.discount_end_date || product?.attributes?.discount_end_date} />
+      )}
+
       {/* Price */}
-      <div className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight border-b border-outline-variant/10 pb-6 flex items-baseline gap-3">
-        <span>₺{displayPrice}</span>
+      <div className="border-b border-outline-variant/10 pb-6 space-y-2">
+        <div className="flex items-baseline gap-3">
+          <span className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight">₺{displayPrice}</span>
+          {product?.oldPrice && Number(product.oldPrice) > Number(displayPrice) && (
+            <span className="text-sm font-semibold text-slate-400 line-through font-mono">
+              ₺{product.oldPrice}
+            </span>
+          )}
+          {product?.oldPrice && Number(product.oldPrice) > Number(displayPrice) && (
+            <span className="text-xs font-black text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full animate-pulse">
+              %{Math.round(((Number(product.oldPrice) - Number(displayPrice)) / Number(product.oldPrice)) * 100)} İNDİRİM
+            </span>
+          )}
+        </div>
         {selectedVariant && selectedVariant.vatRate != null ? (
-          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
+          <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 font-mono inline-block">
             %{selectedVariant.vatRate} KDV {selectedVariant.vatIncluded !== false ? "Dahil" : "Hariç"}
           </span>
         ) : (
-          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 font-mono">
+          <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 font-mono inline-block">
             KDV Dahil
           </span>
         )}

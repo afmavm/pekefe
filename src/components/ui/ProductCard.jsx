@@ -1,9 +1,49 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+
+function CardCountdownTimer({ endDate }) {
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  useEffect(() => {
+    // Target endDate if available, or default to a 24h flash deal
+    const targetTime = endDate 
+      ? new Date(endDate).getTime() 
+      : (Date.now() + 24 * 60 * 60 * 1000);
+
+    const calculateTime = () => {
+      const difference = targetTime - Date.now();
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+      setTimeLeft({ hours, minutes, seconds });
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="bg-orange-50 border border-orange-200/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[10px] font-bold text-orange-700 shadow-2xs">
+      <span className="flex items-center gap-1 font-mono">
+        <span className="material-symbols-outlined text-xs text-orange-500">schedule</span> Fırsat Bitiş:
+      </span>
+      <span className="font-mono font-black text-orange-800 tracking-wider">
+        {String(timeLeft.hours).padStart(2, "0")}s {String(timeLeft.minutes).padStart(2, "0")}d {String(timeLeft.seconds).padStart(2, "0")}s
+      </span>
+    </div>
+  );
+}
 
 function getVariantLabel(v) {
   if (!v) return "";
@@ -49,6 +89,7 @@ export function ProductCard({
   priceMax,
   oldPrice,
   b2b_price,
+  discount_end_date,
   variants = [],
   image,
   tag,
@@ -186,6 +227,12 @@ export function ProductCard({
 
       {/* Bottom Part: Pricing & Clean Action Buttons */}
       <div className="pt-4 mt-4 border-t border-outline-variant/15 space-y-3">
+        
+        {/* Live Campaign Countdown Timer for Discounted Items */}
+        {activeOldPrice && activeOldPrice > activePrice && (
+          <CardCountdownTimer endDate={discount_end_date} />
+        )}
+
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div className="flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-display-lg text-[#6b1d2f] dark:text-amber-400 font-extrabold tracking-tight">

@@ -1888,6 +1888,14 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           window.dispatchEvent(new Event("pekefe_products_changed"));
           window.dispatchEvent(new CustomEvent("pekefe_search_index_updated"));
           window.dispatchEvent(new CustomEvent("pekefe_products_updated"));
+
+          if ("BroadcastChannel" in window) {
+            try {
+              const bc = new BroadcastChannel("pekefe_product_sync");
+              bc.postMessage({ type: "PRODUCT_UPDATED", id: productId, slug: form.slug });
+              bc.close();
+            } catch (e) {}
+          }
         }
         
         // Refresh server components router cache to update server-rendered pages (like /tr)

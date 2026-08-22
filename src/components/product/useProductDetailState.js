@@ -77,19 +77,45 @@ export function useProductDetailState(params) {
         });
       }
     };
-    const handleUpdated = () => {
+    const handleUpdated = async () => {
+      try {
+        const res = await fetch(`/api/products/${slugOrId}?t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const raw = await res.json();
+          if (raw?.id) { setProductState(formatDbProductToStorefront(raw)); setIsLoading(false); return; }
+        }
+      } catch {}
+      await fetchProductsFromApi();
       const fresh = getProductBySlug(slugOrId);
       if (fresh) setProductState(fresh);
     };
+
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("pekefe_products_updated", handleUpdated);
     window.addEventListener("pekefe_products_changed", handleUpdated);
     window.addEventListener("storage", handleUpdated);
+
+    // Modern BroadcastChannel for cross-tab instant 0ms synchronization
+    let bc;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        bc = new BroadcastChannel("pekefe_product_sync");
+        bc.onmessage = (event) => {
+          if (event.data?.type === "PRODUCT_UPDATED" || event.data?.type === "PRODUCTS_CHANGED") {
+            handleUpdated();
+          }
+        };
+      } catch (e) {}
+    }
+
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("pekefe_products_updated", handleUpdated);
       window.removeEventListener("pekefe_products_changed", handleUpdated);
       window.removeEventListener("storage", handleUpdated);
+      if (bc) {
+        try { bc.close(); } catch (e) {}
+      }
     };
   }, [slugOrId]);
 

@@ -1548,6 +1548,63 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   });
 
   // Media link inputs
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [generatingField, setGeneratingField] = useState<string | null>(null);
+
+  const handleGenerateAiSeo = async (targetField: string = "all") => {
+    if (!form.name || !form.name.trim()) {
+      toast.error("Lütfen önce ürün adını girin.");
+      return;
+    }
+
+    if (targetField === "all") setIsGeneratingAi(true);
+    else setGeneratingField(targetField);
+
+    try {
+      const res = await fetch("/api/ai/generate-seo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productName: form.name,
+          category: form.category,
+          description: form.shortDesc || form.description,
+          targetField,
+        })
+      });
+
+      const json = await res.json();
+
+      if (res.ok && json.success && json.data) {
+        const d = json.data;
+        setForm(prev => {
+          const next = { ...prev };
+          if (targetField === "all" || targetField === "seoTitle") next.seoTitle = d.seoTitle;
+          if (targetField === "all" || targetField === "seoDesc") next.seoDesc = d.seoDesc;
+          if (targetField === "all" || targetField === "seoKeywords") next.seoKeywords = d.seoKeywords;
+          if (targetField === "all" || targetField === "badgeText1") next.badgeText1 = d.badgeText1;
+          if (targetField === "all" || targetField === "badgeText2") next.badgeText2 = d.badgeText2;
+          if (targetField === "all" || targetField === "recipeDetails") next.recipeDetails = d.recipeDetails;
+          if (targetField === "all" || targetField === "longDescExtra") next.longDescExtra = d.longDescExtra;
+          if (targetField === "all" || targetField === "usageGuide") next.usageGuide = d.usageGuide;
+          return next;
+        });
+
+        if (targetField === "all") {
+          toast.success("✨ Yapay Zeka SEO ve tüm detay içeriklerini başarıyla oluşturdu!");
+        } else {
+          toast.success("✨ İlgili alan Yapay Zeka ile yeniden oluşturuldu!");
+        }
+      } else {
+        toast.error(json.error || "Yapay zeka içeriği oluşturulurken bir hata meydana geldi.");
+      }
+    } catch (err) {
+      console.error("AI Generation error:", err);
+      toast.error("Yapay zeka servisine erişilemedi.");
+    } finally {
+      setIsGeneratingAi(false);
+      setGeneratingField(null);
+    }
+  };
   const [mediaUrlInput, setMediaUrlInput] = useState("");
   const [mediaTypeInput, setMediaTypeInput] = useState<"image" | "video">("image");
 
@@ -4096,6 +4153,40 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               {activeTab === "diger" && (
                 <div className="space-y-8 animate-in fade-in duration-200">
                   
+                  {/* ✨ YAPAY ZEKA (AI) OTOMATİK İÇERİK MİMARİSİ BANNER */}
+                  <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-2xl p-4.5 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-purple-500/30">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                        <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                          PEKEFE AI • Yapay Zeka SEO & İçerik Motoru
+                        </h4>
+                        <p className="text-[11px] text-slate-300 font-medium mt-0.5 max-w-xl">
+                          Ürün adından ve açıklamasından semantik olarak SEO başlığı, açıklama, rozetler, imalat reçetesi ve tüketim rehberini otomatik üretir.
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleGenerateAiSeo("all")}
+                      disabled={isGeneratingAi}
+                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition cursor-pointer border-none flex items-center gap-2 shrink-0 shadow-lg shadow-orange-500/20 uppercase tracking-wider"
+                    >
+                      {isGeneratingAi ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-slate-950" /> Yapay Zeka Analiz Ediyor...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 text-slate-950" /> Yapay Zeka ile Tümünü Otomatik Doldur
+                        </>
+                      )}
+                    </button>
+                  </div>
+
                   {/* 🔍 BÖLÜM 1: ARAMA MOTORU OPTİMİZASYONU (SEO) & TANITIM VİDEOSU */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 pb-2.5 border-b border-slate-200/80">
@@ -4152,7 +4243,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                       {/* SEO Keywords */}
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">SEO Anahtar Kelimeler</label>
+                        <div className="flex justify-between items-center">
+                          <label className="block text-xs font-bold text-slate-700">SEO Anahtar Kelimeler</label>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateAiSeo("seoKeywords")}
+                            disabled={generatingField === "seoKeywords"}
+                            className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                          >
+                            {generatingField === "seoKeywords" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                            AI Üret
+                          </button>
+                        </div>
                         <input
                           type="text"
                           value={form.seoKeywords}
@@ -4166,7 +4268,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         
                         <div className="space-y-1.5 md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-700">SEO Başlığı</label>
+                          <div className="flex justify-between items-center">
+                            <label className="block text-xs font-bold text-slate-700">SEO Başlığı</label>
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateAiSeo("seoTitle")}
+                              disabled={generatingField === "seoTitle"}
+                              className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                            >
+                              {generatingField === "seoTitle" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                              AI Üret
+                            </button>
+                          </div>
                           <input
                             type="text"
                             value={form.seoTitle}
@@ -4177,7 +4290,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         </div>
 
                         <div className="space-y-1.5 md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-700">SEO Açıklaması</label>
+                          <div className="flex justify-between items-center">
+                            <label className="block text-xs font-bold text-slate-700">SEO Açıklaması</label>
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateAiSeo("seoDesc")}
+                              disabled={generatingField === "seoDesc"}
+                              className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                            >
+                              {generatingField === "seoDesc" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                              AI Üret
+                            </button>
+                          </div>
                           <input
                             type="text"
                             value={form.seoDesc}
@@ -4206,7 +4330,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Ürün Görsel Rozeti 1 (Amber Renkli)</label>
+                        <div className="flex justify-between items-center">
+                          <label className="block text-xs font-bold text-slate-700">Ürün Görsel Rozeti 1 (Amber Renkli)</label>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateAiSeo("badgeText1")}
+                            disabled={generatingField === "badgeText1"}
+                            className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                          >
+                            {generatingField === "badgeText1" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                            AI Üret
+                          </button>
+                        </div>
                         <input
                           type="text"
                           value={form.badgeText1 || ""}
@@ -4217,7 +4352,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Ürün Görsel Rozeti 2 (Koyu Renkli)</label>
+                        <div className="flex justify-between items-center">
+                          <label className="block text-xs font-bold text-slate-700">Ürün Görsel Rozeti 2 (Koyu Renkli)</label>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateAiSeo("badgeText2")}
+                            disabled={generatingField === "badgeText2"}
+                            className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                          >
+                            {generatingField === "badgeText2" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                            AI Üret
+                          </button>
+                        </div>
                         <input
                           type="text"
                           value={form.badgeText2 || ""}
@@ -4242,7 +4388,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     </div>
 
                     <div className="space-y-1.5 pt-1">
-                      <label className="block text-xs font-bold text-slate-700">Ürün Reçete Açıklamaları / Notlar</label>
+                      <div className="flex justify-between items-center">
+                        <label className="block text-xs font-bold text-slate-700">Ürün Reçete Açıklamaları / Notlar</label>
+                        <button
+                          type="button"
+                          onClick={() => handleGenerateAiSeo("recipeDetails")}
+                          disabled={generatingField === "recipeDetails"}
+                          className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                        >
+                          {generatingField === "recipeDetails" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                          AI ile Reçete Oluştur
+                        </button>
+                      </div>
                       <textarea
                         rows={3}
                         value={form.recipeDetails}
@@ -4268,7 +4425,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     <div className="space-y-4 pt-1">
                       {/* Ürün Açıklaması Ekstra Paragrafı */}
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Ürün Açıklaması Ekstra Paragrafı (Alt Alan)</label>
+                        <div className="flex justify-between items-center">
+                          <label className="block text-xs font-bold text-slate-700">Ürün Açıklaması Ekstra Paragrafı (Alt Alan)</label>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateAiSeo("longDescExtra")}
+                            disabled={generatingField === "longDescExtra"}
+                            className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                          >
+                            {generatingField === "longDescExtra" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                            AI Paragraf Oluştur
+                          </button>
+                        </div>
                         <textarea
                           rows={3}
                           value={form.longDescExtra}
@@ -4281,7 +4449,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       {/* Kullanım & Tüketim Kılavuzu */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="block text-xs font-bold text-slate-700">Kullanım & Tüketim Rehberi (Kılavuz Tabı)</label>
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs font-bold text-slate-700">Kullanım & Tüketim Rehberi (Kılavuz Tabı)</label>
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateAiSeo("usageGuide")}
+                              disabled={generatingField === "usageGuide"}
+                              className="text-[10px] text-purple-600 hover:text-purple-700 font-extrabold flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60 transition cursor-pointer"
+                            >
+                              {generatingField === "usageGuide" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-500" />}
+                              AI Rehber Oluştur
+                            </button>
+                          </div>
                           <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 border border-slate-200/60 rounded-full px-2.5 py-0.5">HTML Editör</span>
                         </div>
                         <RichTextEditor

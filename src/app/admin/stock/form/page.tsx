@@ -4479,6 +4479,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     </div>
                   )}
                 </div>
+              </div>
             )}
 
           </div>

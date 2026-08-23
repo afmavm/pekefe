@@ -929,7 +929,8 @@ export default function StockProductionPage() {
                               </td>
                               <td className="px-6 py-4">
                                 <Link
-                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${p.sku}`}
+                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${encodeURIComponent(p.sku)}`}
+                                  prefetch={false}
                                   className="font-bold text-slate-900 text-sm hover:text-orange-600 transition-colors block"
                                   title="Gelişmiş Stok Kartını Düzenle (SEO Uyumlu)"
                                 >
@@ -988,7 +989,8 @@ export default function StockProductionPage() {
                               </td>
                               <td className="px-6 py-4 text-right space-x-1.5">
                                 <Link
-                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${p.sku}`}
+                                  href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${encodeURIComponent(p.sku)}`}
+                                  prefetch={false}
                                   className="p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-orange-600 hover:text-orange-900 transition-all inline-flex items-center justify-center cursor-pointer shadow-xs"
                                   title="Gelişmiş Stok Kartını Aç"
                                 >

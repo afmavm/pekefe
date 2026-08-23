@@ -979,10 +979,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     isInitialized.current = false;
     setIsDirty(false);
 
+    let isSubscribed = true;
+
     const getTargetParams = () => {
-      let id = idParam || "";
-      let sku = skuParam || "";
-      let slug = slugParam || "";
+      let id = idParam || searchParams.get("id") || "";
+      let sku = skuParam || searchParams.get("sku") || "";
+      let slug = slugParam || searchParams.get("slug") || "";
 
       if (typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1001,6 +1003,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const isEdit = Boolean(target.id || target.sku || target.slug);
 
     if (!isEdit) {
+      // If truly new product, initialize default empty form
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const randBarcode = "869" + Math.floor(1000000000 + Math.random() * 9000000000);
       const randManCode = `PKF-DUT-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1079,9 +1082,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
       setIsLoadingProduct(false);
       const timer = setTimeout(() => {
-        isInitialized.current = true;
+        if (isSubscribed) isInitialized.current = true;
       }, 300);
-      return () => clearTimeout(timer);
+      return () => {
+        isSubscribed = false;
+        clearTimeout(timer);
+      };
     }
 
     const fetchProduct = async () => {

@@ -134,7 +134,7 @@ export default async function StockStatusPage({
             <div className="mt-3 sm:mt-0 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm">
               <Package className="h-4 w-4 text-orange-500" />
               <span className="text-slate-500">Toplam kayıt:</span>
-              <span className="font-semibold text-slate-800">{total.toLocaleString("tr-TR")}</span>
+              <span className="font-semibold text-slate-800">{(total ?? 0).toLocaleString("tr-TR")}</span>
             </div>
           )}
         </div>
@@ -384,15 +384,15 @@ export default async function StockStatusPage({
                         {/* Physical Stock */}
                         <td className="px-4 py-3 text-right">
                           <span className="font-semibold text-slate-800">
-                            {loc.stock.toLocaleString("tr-TR")}
+                            {(loc.stock ?? 0).toLocaleString("tr-TR")}
                           </span>
                         </td>
 
                         {/* Reserved */}
                         <td className="px-4 py-3 text-right">
-                          {loc.reserved > 0 ? (
+                          {(loc.reserved ?? 0) > 0 ? (
                             <span className="font-medium text-amber-600">
-                              {loc.reserved.toLocaleString("tr-TR")}
+                              {(loc.reserved ?? 0).toLocaleString("tr-TR")}
                             </span>
                           ) : (
                             <span className="text-slate-400">0</span>
@@ -410,14 +410,14 @@ export default async function StockStatusPage({
                         {/* Min Stock */}
                         <td className="px-4 py-3 text-right">
                           <span className="text-slate-600">
-                            {loc.minStock.toLocaleString("tr-TR")}
+                            {(loc.minStock ?? 0).toLocaleString("tr-TR")}
                           </span>
                         </td>
 
                         {/* Critical Limit */}
                         <td className="px-4 py-3 text-right">
                           <span className="text-slate-600">
-                            {effectiveCritical.toLocaleString("tr-TR")}
+                            {(effectiveCritical ?? 0).toLocaleString("tr-TR")}
                           </span>
                         </td>
 
@@ -443,11 +443,11 @@ export default async function StockStatusPage({
               <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-5 py-3">
                 <p className="text-sm text-slate-500">
                   <span className="font-medium text-slate-700">
-                    {((currentPage - 1) * pageSize + 1).toLocaleString("tr-TR")}
+                    {(((currentPage - 1) * pageSize + 1) || 1).toLocaleString("tr-TR")}
                     {" – "}
-                    {Math.min(currentPage * pageSize, total).toLocaleString("tr-TR")}
+                    {(Math.min(currentPage * pageSize, total || 0) || 0).toLocaleString("tr-TR")}
                   </span>{" "}
-                  / {total.toLocaleString("tr-TR")} kayıt
+                  / {(total ?? 0).toLocaleString("tr-TR")} kayıt
                 </p>
 
                 <div className="flex items-center gap-1">

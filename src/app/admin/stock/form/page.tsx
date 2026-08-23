@@ -590,8 +590,26 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   const [colors, setColors] = useState<string[]>(["Sade", "Cevizli", "Fındıklı", "Antep Fıstıklı"]);
   const [isSizeManagerOpen, setIsSizeManagerOpen] = useState(false);
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
+  const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
+  const [isColorDropdownOpen, setIsColorDropdownOpen] = useState(false);
+  const sizeDropdownRef = useRef<HTMLDivElement>(null);
+  const colorDropdownRef = useRef<HTMLDivElement>(null);
   const [newSizeName, setNewSizeName] = useState("");
   const [newColorName, setNewColorName] = useState("");
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sizeDropdownRef.current && !sizeDropdownRef.current.contains(e.target as Node)) {
+        setIsSizeDropdownOpen(false);
+      }
+      if (colorDropdownRef.current && !colorDropdownRef.current.contains(e.target as Node)) {
+        setIsColorDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Load initial sizes & colors from localStorage AND API/database catalog
   useEffect(() => {
@@ -5347,7 +5365,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       
                       {/* 1. Gramaj / Ambalaj Ölçüsü */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5" ref={sizeDropdownRef}>
                         <div className="flex justify-between items-center">
                           <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                             Gramaj / Ambalaj Ölçüsü *
@@ -5361,34 +5379,86 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           </button>
                         </div>
                         <div className="relative">
-                          <input
-                            type="text"
-                            list="variant-sizes-datalist"
-                            value={variantForm.size}
-                            onChange={e => handleVariantSizeChange(e.target.value)}
-                            onBlur={e => {
-                              const val = e.target.value.trim();
-                              if (val && !sizes.includes(val)) {
-                                setSizes(prev => {
-                                  const next = Array.from(new Set([...prev, val]));
-                                  try { localStorage.setItem("pekefe_stock_sizes", JSON.stringify(next)); } catch (err) {}
-                                  return next;
-                                });
-                              }
-                            }}
-                            placeholder="Örn: 800g Cam Kavanoz, 1 Kg..."
-                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none transition-all"
-                          />
-                          <datalist id="variant-sizes-datalist">
-                            {sizes.map(size => (
-                              <option key={size} value={size} />
-                            ))}
-                          </datalist>
+                          <div 
+                            className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:bg-white focus-within:border-orange-500 transition-all cursor-pointer"
+                            onClick={() => setIsSizeDropdownOpen(prev => !prev)}
+                          >
+                            <input
+                              type="text"
+                              value={variantForm.size}
+                              onChange={e => {
+                                handleVariantSizeChange(e.target.value);
+                                setIsSizeDropdownOpen(true);
+                              }}
+                              onFocus={() => setIsSizeDropdownOpen(true)}
+                              placeholder="Gramaj seçin veya yazın (Örn: 400g Cam Kavanoz)..."
+                              className="w-full px-3.5 py-2.5 bg-transparent border-none text-xs font-bold text-slate-800 outline-none cursor-text"
+                            />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsSizeDropdownOpen(prev => !prev);
+                              }}
+                              className="px-3 text-slate-400 hover:text-orange-500 transition cursor-pointer border-none bg-transparent"
+                            >
+                              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isSizeDropdownOpen ? "rotate-180 text-orange-500" : ""}`} />
+                            </button>
+                          </div>
+
+                          {/* Interactive Size Dropdown Menu */}
+                          {isSizeDropdownOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto">
+                              <div className="p-1.5 space-y-0.5">
+                                {sizes.length === 0 ? (
+                                  <div className="p-3 text-center text-xs text-slate-400 font-semibold">
+                                    Kayıtlı gramaj seçeneği bulunamadı.
+                                  </div>
+                                ) : (
+                                  sizes.map(sizeOption => {
+                                    const isSelected = variantForm.size === sizeOption;
+                                    return (
+                                      <button
+                                        key={sizeOption}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleVariantSizeChange(sizeOption);
+                                          setIsSizeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border-none ${
+                                          isSelected 
+                                            ? "bg-orange-50 text-orange-600 font-black" 
+                                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                                        }`}
+                                      >
+                                        <span>{sizeOption}</span>
+                                        {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
+                                      </button>
+                                    );
+                                  })
+                                )}
+                              </div>
+                              <div className="p-2 border-t border-slate-100 bg-slate-50/70">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsSizeDropdownOpen(false);
+                                    setIsSizeManagerOpen(true);
+                                  }}
+                                  className="w-full py-1.5 px-2.5 rounded-lg text-[11px] font-bold text-orange-600 hover:bg-orange-100/50 flex items-center justify-center gap-1.5 transition border-none cursor-pointer"
+                                >
+                                  <PlusCircle className="w-3.5 h-3.5" /> Yeni Gramaj Ekle / Yönet
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       {/* 2. Ürün Çeşidi / Tipi */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5" ref={colorDropdownRef}>
                         <div className="flex justify-between items-center">
                           <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                             Ürün Çeşidi / Tipi *
@@ -5402,38 +5472,94 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           </button>
                         </div>
                         <div className="relative">
-                          <input
-                            type="text"
-                            list="variant-colors-datalist"
-                            value={variantForm.color}
-                            onChange={e => {
-                              const newColor = e.target.value;
-                              const codes = generateSkuAndBarcode(variantForm.size, newColor);
-                              setVariantForm(prev => ({
-                                ...prev,
-                                color: newColor,
-                                sku: prev.isEditing ? prev.sku : codes.sku,
-                                barcode: prev.isEditing ? prev.barcode : codes.barcode,
-                              }));
-                            }}
-                            onBlur={e => {
-                              const val = e.target.value.trim();
-                              if (val && !colors.includes(val)) {
-                                setColors(prev => {
-                                  const next = Array.from(new Set([...prev, val]));
-                                  try { localStorage.setItem("pekefe_stock_colors", JSON.stringify(next)); } catch (err) {}
-                                  return next;
-                                });
-                              }
-                            }}
-                            placeholder="Örn: Sade, Cevizli, Fındıklı..."
-                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none transition-all"
-                          />
-                          <datalist id="variant-colors-datalist">
-                            {colors.map(color => (
-                              <option key={color} value={color} />
-                            ))}
-                          </datalist>
+                          <div 
+                            className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:bg-white focus-within:border-orange-500 transition-all cursor-pointer"
+                            onClick={() => setIsColorDropdownOpen(prev => !prev)}
+                          >
+                            <input
+                              type="text"
+                              value={variantForm.color}
+                              onChange={e => {
+                                const newColor = e.target.value;
+                                const codes = generateSkuAndBarcode(variantForm.size, newColor);
+                                setVariantForm(prev => ({
+                                  ...prev,
+                                  color: newColor,
+                                  sku: prev.isEditing ? prev.sku : codes.sku,
+                                  barcode: prev.isEditing ? prev.barcode : codes.barcode,
+                                }));
+                                setIsColorDropdownOpen(true);
+                              }}
+                              onFocus={() => setIsColorDropdownOpen(true)}
+                              placeholder="Çeşit seçin veya yazın (Örn: Sade, Cevizli)..."
+                              className="w-full px-3.5 py-2.5 bg-transparent border-none text-xs font-bold text-slate-800 outline-none cursor-text"
+                            />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsColorDropdownOpen(prev => !prev);
+                              }}
+                              className="px-3 text-slate-400 hover:text-orange-500 transition cursor-pointer border-none bg-transparent"
+                            >
+                              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isColorDropdownOpen ? "rotate-180 text-orange-500" : ""}`} />
+                            </button>
+                          </div>
+
+                          {/* Interactive Color Dropdown Menu */}
+                          {isColorDropdownOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto">
+                              <div className="p-1.5 space-y-0.5">
+                                {colors.length === 0 ? (
+                                  <div className="p-3 text-center text-xs text-slate-400 font-semibold">
+                                    Kayıtlı ürün çeşidi bulunamadı.
+                                  </div>
+                                ) : (
+                                  colors.map(colorOption => {
+                                    const isSelected = variantForm.color === colorOption;
+                                    return (
+                                      <button
+                                        key={colorOption}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const codes = generateSkuAndBarcode(variantForm.size, colorOption);
+                                          setVariantForm(prev => ({
+                                            ...prev,
+                                            color: colorOption,
+                                            sku: prev.isEditing ? prev.sku : codes.sku,
+                                            barcode: prev.isEditing ? prev.barcode : codes.barcode,
+                                          }));
+                                          setIsColorDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border-none ${
+                                          isSelected 
+                                            ? "bg-orange-50 text-orange-600 font-black" 
+                                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                                        }`}
+                                      >
+                                        <span>{colorOption}</span>
+                                        {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
+                                      </button>
+                                    );
+                                  })
+                                )}
+                              </div>
+                              <div className="p-2 border-t border-slate-100 bg-slate-50/70">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsColorDropdownOpen(false);
+                                    setIsColorManagerOpen(true);
+                                  }}
+                                  className="w-full py-1.5 px-2.5 rounded-lg text-[11px] font-bold text-orange-600 hover:bg-orange-100/50 flex items-center justify-center gap-1.5 transition border-none cursor-pointer"
+                                >
+                                  <PlusCircle className="w-3.5 h-3.5" /> Yeni Ürün Çeşidi Ekle / Yönet
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 

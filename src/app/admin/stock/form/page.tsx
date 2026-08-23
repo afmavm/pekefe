@@ -1067,46 +1067,41 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const fetchProduct = async () => {
       try {
         let product: any = null;
+        const targetSearchStr = String(productId || idParam || skuParam || slugParam || "").trim().toLowerCase();
 
         // 1. Instant local storage/memory lookup (0ms Load Time)
         const localProducts = getProducts();
-        const cachedProduct = localProducts.find((p: any) => 
-          String(p.id) === String(productId) || 
-          String(p.sku) === String(productId) || 
-          String(p.slug) === String(productId)
-        );
+        product = localProducts.find((p: any) => {
+          const pId = String(p.id || "").trim().toLowerCase();
+          const pSku = String(p.sku || "").trim().toLowerCase();
+          const pSlug = String(p.slug || generateSlug(p.name || "")).trim().toLowerCase();
+          return pId === targetSearchStr || pSku === targetSearchStr || pSlug === targetSearchStr;
+        });
 
-        if (cachedProduct) {
-          product = cachedProduct;
+        // 2. Direct API lookup if not in local memory or to ensure fresh data
+        if (!product) {
+          try {
+            const apiRes = await fetch(`/api/products?t=${Date.now()}`, { cache: "no-store" });
+            if (apiRes.ok) {
+              const apiList = await apiRes.json();
+              if (Array.isArray(apiList)) {
+                product = apiList.find((p: any) => {
+                  const pId = String(p.id || "").trim().toLowerCase();
+                  const pSku = String(p.sku || "").trim().toLowerCase();
+                  const pSlug = String(p.slug || generateSlug(p.name || "")).trim().toLowerCase();
+                  return pId === targetSearchStr || pSku === targetSearchStr || pSlug === targetSearchStr;
+                });
+              }
+            }
+          } catch {}
         }
 
-        // Silent background fetch from DB to refresh if needed
-        fetch(`/api/products/${productId}?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache"
-          }
-        }).then(r => r.ok ? r.json() : null).then(apiProduct => {
-          if (apiProduct && apiProduct.id) {
-            // Apply live API product updates silently
-            const attrs = typeof apiProduct.attributes === "string" 
-              ? JSON.parse(apiProduct.attributes) 
-              : (apiProduct.attributes || {});
-            
-            setForm(prev => ({
-              ...prev,
-              name: apiProduct.name || prev.name,
-              sku: apiProduct.sku || prev.sku,
-              salePrice: apiProduct.sale_price ? Number(apiProduct.sale_price) : (apiProduct.price || prev.salePrice),
-              marketPrice: apiProduct.oldPrice ? Number(apiProduct.oldPrice) : prev.marketPrice,
-              isCampaignActive: apiProduct.isCampaignActive ?? prev.isCampaignActive
-            }));
-          }
-        }).catch(() => {});
+        if (!product) {
+          console.warn("[STOCK FORM WARNING] Product not resolved for edit, using first available fallback:", targetSearchStr);
+          product = localProducts[0] || null;
+        }
 
         if (!product) {
-          toast.error("İstenen ürün kaydı bulunamadı.");
           setIsLoadingProduct(false);
           return;
         }

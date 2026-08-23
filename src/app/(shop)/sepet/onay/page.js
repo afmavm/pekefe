@@ -9,23 +9,27 @@ export default function SepetOnay() {
   const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
-    clearCart();
     try {
-      const stored = localStorage.getItem("pekefe_completed_order");
-      if (stored) {
-        setCompletedOrder(JSON.parse(stored));
+      let storedData = localStorage.getItem("pekefe_completed_order") || sessionStorage.getItem("pekefe_completed_order");
+      if (!storedData && typeof document !== "undefined") {
+        const match = document.cookie.match(new RegExp('(?:^|; )pekefe_completed_order=([^;]*)'));
+        if (match && match[1]) storedData = decodeURIComponent(match[1]);
+      }
+      if (storedData) {
+        setCompletedOrder(JSON.parse(storedData));
       }
     } catch (e) {
       console.error("Error reading completed order", e);
     }
+    clearCart();
   }, []);
 
-  const orderNum = completedOrder?.orderId || "PKF-782934";
+  const orderNum = completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);
   const orderDate = completedOrder?.date || new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
   const items = completedOrder?.items || [];
-  const subtotal = completedOrder?.subtotal ?? items.reduce((a, b) => a + b.price * b.quantity, 0);
+  const subtotal = completedOrder?.subtotal ?? items.reduce((a, b) => a + Number(b.price || 0) * Number(b.quantity || 1), 0);
   const shippingCost = completedOrder?.shippingCost ?? 0;
-  const total = completedOrder?.total ?? subtotal + shippingCost;
+  const total = completedOrder?.total ?? (subtotal + shippingCost);
   const shippingAddress = completedOrder?.shippingAddress;
 
   return (

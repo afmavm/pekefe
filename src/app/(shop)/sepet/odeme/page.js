@@ -349,6 +349,36 @@ export default function Odeme() {
 
     setIsSubmitting(true);
 
+    const instantOrderObj = {
+      orderId: `PKF-${Math.floor(100000 + Math.random() * 900000)}`,
+      date: new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
+      items: cartItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        desc: item.desc || item.shortDesc || `${item.quantity} Adet`,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        img: item.img || item.image || "/premium-pekefe-kavanoz.png"
+      })),
+      subtotal: subtotal,
+      shippingCost: shippingCost,
+      total: grandTotal,
+      paymentMethod: paymentMethod,
+      shippingAddress: {
+        name: `${formData.firstName} ${formData.lastName}`,
+        address: formData.address,
+        city: `${formData.district ? `${formData.district} / ` : ""}${formData.city}`,
+        phone: formData.phone,
+      }
+    };
+
+    try {
+      const jsonStr = JSON.stringify(instantOrderObj);
+      localStorage.setItem("pekefe_completed_order", jsonStr);
+      sessionStorage.setItem("pekefe_completed_order", jsonStr);
+      document.cookie = `pekefe_completed_order=${encodeURIComponent(jsonStr)}; path=/; max-age=3600`;
+    } catch (e) {}
+
     // PayTR Credit Card Flow
     if (paymentMethod === "creditCard") {
       try {

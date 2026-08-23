@@ -303,22 +303,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     fetchCategories();
     fetchProductionOrders();
     fetchStockTransfers();
-
-    const handleProductsChange = () => {
-      fetchProducts();
-    };
-
-    window.addEventListener("pekefe_products_changed", handleProductsChange);
-    window.addEventListener("pekefe_products_updated", handleProductsChange);
-    window.addEventListener("pekefe_search_index_updated", handleProductsChange);
-    window.addEventListener("storage", handleProductsChange);
-
-    return () => {
-      window.removeEventListener("pekefe_products_changed", handleProductsChange);
-      window.removeEventListener("pekefe_products_updated", handleProductsChange);
-      window.removeEventListener("pekefe_search_index_updated", handleProductsChange);
-      window.removeEventListener("storage", handleProductsChange);
-    };
   }, [fetchProducts, fetchCategories]);
 
   const addProduct = async (product: Product) => {
@@ -330,7 +314,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.ok) {
         await fetchProducts();
-        window.dispatchEvent(new Event("pekefe_products_changed"));
       }
     } catch (err) { console.error(err); }
   };
@@ -344,7 +327,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.ok) {
         await fetchProducts();
-        window.dispatchEvent(new Event("pekefe_products_changed"));
       }
     } catch (err) { console.error(err); }
   };
@@ -358,7 +340,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.ok) {
         await fetchProducts();
-        window.dispatchEvent(new Event("pekefe_products_changed"));
         toast.success("Tüm ürünler başarıyla güncellendi.");
         return true;
       } else {

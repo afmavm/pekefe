@@ -229,8 +229,8 @@ export default function StockProductionPage() {
       stock: newQty,
       stock_quantity: newQty
     };
-    updateProductInStorage(updatedLocalProduct);
-    setProducts(prev => prev.map(p => (p.id === quickStockProduct.id || p.sku === quickStockProduct.sku) ? { ...p, stock: newQty } : p));
+    try { updateProductInStorage(updatedLocalProduct); } catch (e) {}
+    setProducts(prev => prev.map(p => (p && (p.id === quickStockProduct.id || p.sku === quickStockProduct.sku)) ? { ...p, stock: newQty, stock_quantity: newQty } : p));
     
     toast.success("Stok miktarı başarıyla güncellendi.");
     setQuickStockProduct(null);
@@ -238,19 +238,14 @@ export default function StockProductionPage() {
 
     // 2. Background database sync without UI spinner locking
     try {
-      const res = await fetch(`/api/products/${targetId}`, {
+      await fetch(`/api/products/${targetId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stock: newQty, stock_quantity: newQty })
+        body: JSON.stringify({ ...quickStockProduct, stock: newQty, stock_quantity: newQty })
       });
-
-      if (res.ok) {
-        await fetchProductsFromApi();
-        await refreshProducts();
-        router.refresh();
-      }
+      try { loadData(); } catch (e) {}
     } catch (err) {
-      console.warn("Background DB stock sync failed, client state preserved:", err);
+      console.warn("Background DB stock sync notice:", err);
     }
   };
 

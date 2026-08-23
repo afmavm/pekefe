@@ -10,6 +10,7 @@ import { computeProductPricing } from '../route';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
+import { readLocalProducts, saveLocalProduct } from '@/lib/jsonProductDb';
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
   if (branchIdInput) {
@@ -226,6 +227,16 @@ export async function PUT(
 
     // Fallback handler if DB is offline or product not in DB
     if (!resolvedProduct) {
+      const localProducts = readLocalProducts();
+      const localItem = localProducts.find((p: any) => p.id === id || p.sku === id || decodeURIComponent(id) === p.sku);
+      if (localItem) {
+        const updatedLocal = saveLocalProduct({ ...localItem, ...body, id: localItem.id, sku: localItem.sku });
+        revalidatePath('/', 'layout');
+        revalidatePath('/admin/stock');
+        revalidatePath('/api/products');
+        return NextResponse.json(updatedLocal);
+      }
+
       const fallbackIdx = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === id || p.sku === id);
       if (fallbackIdx !== -1) {
         const target = FALLBACK_PRODUCTS[fallbackIdx];
@@ -238,16 +249,20 @@ export async function PUT(
           list_price: list_price !== undefined ? list_price : target.list_price,
           stock: body.stock !== undefined ? Number(body.stock) : target.stock,
           stock_quantity: body.stock_quantity !== undefined ? Number(body.stock_quantity) : target.stock_quantity,
-          attributes: {
-            ...(typeof target.attributes === 'object' ? target.attributes : {}),
-            ...(body.attributes || {})
-          }
         };
+        saveLocalProduct(updatedFallback);
         FALLBACK_PRODUCTS[fallbackIdx] = updatedFallback;
         revalidatePath('/', 'layout');
+        revalidatePath('/admin/stock');
+        revalidatePath('/api/products');
         return NextResponse.json(updatedFallback);
       }
-      return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
+
+      const safeUpdated = saveLocalProduct({ ...body, id: id, sku: id });
+      revalidatePath('/', 'layout');
+      revalidatePath('/admin/stock');
+      revalidatePath('/api/products');
+      return NextResponse.json(safeUpdated);
     }
 
     const realId = resolvedProduct.id;

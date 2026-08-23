@@ -20,53 +20,37 @@ export function generateSlug(name = "") {
     .replace(/-+/g, "-");
 }
 
-export const STORAGE_KEY = "pekefe_products_v3";
+export const STORAGE_KEY = "pekefe_products_v4";
 export const DEFAULT_PRODUCTS = [
   {
     id: "PKF-1787481354097",
-    name: "Geleneksel İspir Dut Pestili",
+    name: "Test Ürünü Pestil",
     sku: "PKF-714690",
     category: "Pestil - Köme",
-    stock: 50,
-    price: 350,
-    oldPrice: 420,
-    sale_price: 350,
-    cost: 150,
-    image: "/uploads/beekeeping_bellows_premium.png",
+    stock: 5,
+    price: 1,
+    oldPrice: 1,
+    sale_price: 1,
+    cost: 1,
+    image: "",
     meta: "Pestil · İspir",
-    desc: "İspir yaylalarının doğal dut şırasından harmanlanmış geleneksel lezzet.",
+    desc: "",
     variants: [],
     createdAt: new Date().toISOString()
   },
   {
     id: "PKF-1787481146376",
-    name: "Cevizli İspir Kömesi",
+    name: "Test Ürün Adli Tip",
     sku: "PKF-TEST-999",
     category: "Pestil - Köme",
-    stock: 40,
-    price: 380,
-    oldPrice: 450,
-    sale_price: 380,
-    cost: 160,
-    image: "/uploads/beekeeping_bellows_premium.png",
-    meta: "Köme · İspir",
-    desc: "İnce serilmiş dut pestili içerisinde taze Erzurum ceviz içi dolgusu.",
-    variants: [],
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "PKF-1003",
-    name: "Geleneksel Bal & Tahin Karışımı",
-    sku: "PKF-BAL-TAHIN",
-    category: "Geleneksel Lezzetler",
-    stock: 30,
-    price: 290,
-    oldPrice: 340,
-    sale_price: 290,
-    cost: 120,
-    image: "/uploads/beekeeping_bellows_premium.png",
-    meta: "Doğal Bal · İspir",
-    desc: "Halis İspir balı ve çifte kavrulmuş yerli susam tahini harmanı.",
+    stock: 10,
+    price: 100,
+    oldPrice: 100,
+    sale_price: 100,
+    cost: 50,
+    image: "",
+    meta: "Pestil · İspir",
+    desc: "Test aciklama",
     variants: [],
     createdAt: new Date().toISOString()
   }

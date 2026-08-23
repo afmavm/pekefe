@@ -220,6 +220,8 @@ export function saveProducts(newProducts) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newProducts));
     window.dispatchEvent(new Event("pekefe_products_changed"));
+    window.dispatchEvent(new CustomEvent("pekefe_products_updated", { detail: newProducts }));
+    import("@/lib/liveSync").then(({ notifyLiveSync }) => notifyLiveSync("products")).catch(() => {});
   } catch (err) {
     console.error("Error saving products to localStorage", err);
   }
@@ -275,6 +277,7 @@ export function updateProductInStorage(updatedProduct) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
     window.dispatchEvent(new Event("pekefe_products_changed"));
     window.dispatchEvent(new CustomEvent("pekefe_products_updated", { detail: newList }));
+    import("@/lib/liveSync").then(({ notifyLiveSync }) => notifyLiveSync("products")).catch(() => {});
   } catch (err) {
     console.error("updateProductInStorage error:", err);
   }

@@ -84,28 +84,26 @@ export default function Kategoriler() {
     window.addEventListener("pekefe_products_updated", handleUpdated);
     window.addEventListener("pekefe_products_changed", handleUpdated);
     window.addEventListener("storage", handleUpdated);
+    window.addEventListener("focus", handleUpdated);
+
+    let channel = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      channel = new BroadcastChannel("pekefe_live_sync_channel");
+      channel.onmessage = () => loadProducts(true);
+    }
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") loadProducts(true);
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
-    let bc;
-    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-      try {
-        bc = new BroadcastChannel("pekefe_product_sync");
-        bc.onmessage = () => loadProducts(true);
-      } catch (e) {}
-    }
-
     return () => {
       window.removeEventListener("pekefe_products_updated", handleUpdated);
       window.removeEventListener("pekefe_products_changed", handleUpdated);
       window.removeEventListener("storage", handleUpdated);
+      window.removeEventListener("focus", handleUpdated);
       document.removeEventListener("visibilitychange", handleVisibility);
-      if (bc) {
-        try { bc.close(); } catch (e) {}
-      }
+      if (channel) channel.close();
     };
   }, [loadProducts]);
 

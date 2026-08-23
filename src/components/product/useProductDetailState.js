@@ -94,17 +94,14 @@ export function useProductDetailState(params) {
     window.addEventListener("pekefe_products_updated", handleUpdated);
     window.addEventListener("pekefe_products_changed", handleUpdated);
     window.addEventListener("storage", handleUpdated);
+    window.addEventListener("focus", handleUpdated);
 
     // Modern BroadcastChannel for cross-tab instant 0ms synchronization
     let bc;
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
-        bc = new BroadcastChannel("pekefe_product_sync");
-        bc.onmessage = (event) => {
-          if (event.data?.type === "PRODUCT_UPDATED" || event.data?.type === "PRODUCTS_CHANGED") {
-            handleUpdated();
-          }
-        };
+        bc = new BroadcastChannel("pekefe_live_sync_channel");
+        bc.onmessage = () => handleUpdated();
       } catch (e) {}
     }
 
@@ -113,6 +110,7 @@ export function useProductDetailState(params) {
       window.removeEventListener("pekefe_products_updated", handleUpdated);
       window.removeEventListener("pekefe_products_changed", handleUpdated);
       window.removeEventListener("storage", handleUpdated);
+      window.removeEventListener("focus", handleUpdated);
       if (bc) {
         try { bc.close(); } catch (e) {}
       }

@@ -80,16 +80,30 @@ export default function Home() {
   const [productsState, setProductsState] = useState(() => getProducts());
 
   useEffect(() => {
-    fetchLiveProducts().then((live) => {
-      if (live && live.length > 0) setProductsState(live);
-    });
-
-    const handleProductsChange = () => {
-      setProductsState(getProducts());
+    const refresh = () => {
+      fetchLiveProducts().then((live) => {
+        if (live && Array.isArray(live)) setProductsState(live);
+      });
     };
+
+    refresh();
+
+    const handleProductsChange = () => refresh();
     window.addEventListener("pekefe_products_changed", handleProductsChange);
+    window.addEventListener("pekefe_products_updated", handleProductsChange);
+    window.addEventListener("focus", handleProductsChange);
+
+    let channel = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      channel = new BroadcastChannel("pekefe_live_sync_channel");
+      channel.onmessage = () => refresh();
+    }
+
     return () => {
       window.removeEventListener("pekefe_products_changed", handleProductsChange);
+      window.removeEventListener("pekefe_products_updated", handleProductsChange);
+      window.removeEventListener("focus", handleProductsChange);
+      if (channel) channel.close();
     };
   }, []);
 

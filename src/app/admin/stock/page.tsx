@@ -22,14 +22,14 @@ function generateSlug(text: string): string {
     .replace(/-+/g, "-");
 }
 import { 
-  PackageSearch, Settings2, Hammer, Search, AlertCircle, 
+  PackageSearch, Settings2, Hammer, Search, AlertTriangle, 
   CheckCircle2, Box, ArrowRight, Loader2, PlaySquare, Layers, Clock,
   Package, Plus, Edit, Trash2, Save, X, ChevronRight, ChevronDown, Copy, Check, Info,
   UploadCloud, Sparkles, Coins, FileText, Database, RefreshCw, FileDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
-import { getProducts, resolveProductPrice } from "@/utils/productsStorage";
+import { getProducts, resolveProductPrice, STORAGE_KEY, saveProducts } from "@/utils/productsStorage";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -140,12 +140,8 @@ export default function StockProductionPage() {
         const finalProducts = [...dbProducts, ...unsyncedLocals];
 
         setProducts(finalProducts);
-        if (typeof window !== "undefined") {
-          try {
-            const { STORAGE_KEY } = require("@/utils/productsStorage");
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(finalProducts));
-          } catch (e) {}
-        }
+        // Sync localStorage with proper key and dispatch change event for all listeners
+        saveProducts(finalProducts);
       } else {
         setProducts(getProducts() || []);
       }
@@ -468,21 +464,15 @@ export default function StockProductionPage() {
       if (res.ok) {
         toast.success("Ürün başarıyla silindi.");
         
-        // Instant 0ms Client State Purge
+        // Instant 0ms Client State Purge + Sync all listeners
         setProducts(prev => {
           const updated = prev.filter(p => String(p.id) !== String(id) && String(p.sku) !== String(id));
-          if (typeof window !== "undefined") {
-            try {
-              const { STORAGE_KEY } = require("@/utils/productsStorage");
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            } catch (e) {}
-          }
+          saveProducts(updated); // dispatches pekefe_products_changed + pekefe_products_updated
           return updated;
         });
 
         await refreshProducts();
         await refreshCategories();
-        router.refresh();
         await loadData();
       } else {
         const data = await res.json();

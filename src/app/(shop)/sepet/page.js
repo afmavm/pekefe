@@ -72,12 +72,27 @@ export default function Sepet() {
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("pekefe_applied_coupon");
-      if (stored) {
-        setAppliedCoupon(JSON.parse(stored));
+    const loadCoupon = () => {
+      try {
+        const stored = localStorage.getItem("pekefe_applied_coupon");
+        if (stored) {
+          setAppliedCoupon(JSON.parse(stored));
+        } else {
+          setAppliedCoupon(null);
+        }
+      } catch (e) {
+        setAppliedCoupon(null);
       }
-    } catch (e) {}
+    };
+
+    loadCoupon();
+    window.addEventListener("pekefe_coupon_changed", loadCoupon);
+    window.addEventListener("storage", loadCoupon);
+
+    return () => {
+      window.removeEventListener("pekefe_coupon_changed", loadCoupon);
+      window.removeEventListener("storage", loadCoupon);
+    };
   }, []);
 
   const updateQuantity = (id, delta) => {

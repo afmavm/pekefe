@@ -1,0 +1,25 @@
+[
+  {
+    "id": "PKF-1787481146376",
+    "name": "Test Ürün Adli Tıp",
+    "sku": "PKF-TEST-999",
+    "brand": "PEKEFE",
+    "model": "",
+    "category": "Pestil - Köme",
+    "stock": 10,
+    "stock_quantity": 10,
+    "price": 100,
+    "oldPrice": 100,
+    "list_price": 100,
+    "sale_price": 100,
+    "cost": 50,
+    "image": "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    "images": ["/pekefe-dut-pekmezi-kavanoz-tr.jpg"],
+    "desc": "Doğal İspir Pestil ve Köme lezzetleri.",
+    "shortDesc": "Doğal yöresel lezzet.",
+    "variants": [],
+    "locations": [],
+    "createdAt": "2026-08-23T10:32:26.377Z",
+    "isDeleted": false
+  }
+]

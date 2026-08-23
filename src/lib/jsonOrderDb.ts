@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const LOCAL_ORDERS_PATH = path.join(process.cwd(), 'public', 'data', 'orders_db.json');
+const LOCAL_ORDERS_PATH = path.join(process.cwd(), 'data', 'orders_db.json');
 
 export interface LocalOrder {
   id: string;

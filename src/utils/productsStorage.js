@@ -20,27 +20,11 @@ export function generateSlug(name = "") {
     .replace(/-+/g, "-");
 }
 
-export const STORAGE_KEY = "pekefe_products_v4";
+export const STORAGE_KEY = "pekefe_products_v5";
 export const DEFAULT_PRODUCTS = [
   {
-    id: "PKF-1787481354097",
-    name: "Test Ürünü Pestil",
-    sku: "PKF-714690",
-    category: "Pestil - Köme",
-    stock: 5,
-    price: 1,
-    oldPrice: 1,
-    sale_price: 1,
-    cost: 1,
-    image: "",
-    meta: "Pestil · İspir",
-    desc: "",
-    variants: [],
-    createdAt: new Date().toISOString()
-  },
-  {
     id: "PKF-1787481146376",
-    name: "Test Ürün Adli Tip",
+    name: "Test Ürün Adli Tıp",
     sku: "PKF-TEST-999",
     category: "Pestil - Köme",
     stock: 10,
@@ -48,9 +32,11 @@ export const DEFAULT_PRODUCTS = [
     oldPrice: 100,
     sale_price: 100,
     cost: 50,
-    image: "",
+    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    images: ["/pekefe-dut-pekmezi-kavanoz-tr.jpg"],
     meta: "Pestil · İspir",
-    desc: "Test aciklama",
+    desc: "Doğal İspir Pestil ve Köme lezzetleri.",
+    shortDesc: "Doğal yöresel lezzet.",
     variants: [],
     createdAt: new Date().toISOString()
   }

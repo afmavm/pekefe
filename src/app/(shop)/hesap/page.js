@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -45,16 +45,25 @@ export default function Hesap() {
     setToast({ isOpen: true, message, type });
   };
 
+  const getFavoritesKey = () => {
+    return session?.user?.email ? `pekefe_favorites_${session.user.email}` : "pekefe_favorites";
+  };
+
   const loadFavorites = () => {
     if (typeof window !== "undefined") {
-      const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
-      const favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+      const favoritesKey = getFavoritesKey();
+      // Try modern key first, fallback to legacy keys if exists
+      let raw = localStorage.getItem(favoritesKey);
+      if (!raw && session?.user?.email) {
+        raw = localStorage.getItem(`favorites_${session.user.email}`) || localStorage.getItem("favorites");
+      }
+      const favs = JSON.parse(raw || "[]");
       setFavoritesList(favs);
     }
   };
 
   const removeFavoriteItem = (id) => {
-    const favoritesKey = session?.user?.email ? `favorites_${session.user.email}` : "favorites";
+    const favoritesKey = getFavoritesKey();
     let favs = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
     favs = favs.filter(item => String(item.id) !== String(id) && String(item.sku) !== String(id));
     localStorage.setItem(favoritesKey, JSON.stringify(favs));
@@ -246,6 +255,24 @@ export default function Hesap() {
   };
 
   const loyaltyTier = loyaltyPoints >= 2000 ? "PEKEFE USTASI" : loyaltyPoints >= 500 ? "PEKEFE GURMESİ" : "PEKEFE DOSTU";
+
+  if (status === "loading") {
+    return (
+      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 flex flex-col items-center justify-center min-h-[400px]">
+        <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-4" />
+        <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Hesap Bilgileri Yükleniyor...</p>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 flex flex-col items-center justify-center min-h-[400px]">
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-600 rounded-full animate-spin mb-4" />
+        <p className="text-sm font-semibold text-slate-500 tracking-wide">Giriş sayfasına yönlendiriliyorsunuz...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-16">

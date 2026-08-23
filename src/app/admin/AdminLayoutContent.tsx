@@ -3,21 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-const useSession = () => ({
-  data: {
-    user: {
-      name: "Pekefe Yönetici",
-      email: "admin@pekefe.com",
-      role: "SUPER_ADMIN"
-    }
-  },
-  status: "authenticated" as "authenticated" | "loading" | "unauthenticated"
-});
-const signOut = (options?: any) => {
-  if (typeof window !== "undefined") {
-    window.location.href = "/";
-  }
-};
+import { useSession, signOut } from "next-auth/react";
 import { useCMS, CMSProvider } from "@/context/CMSContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { OrderProvider } from "@/context/OrderContext";

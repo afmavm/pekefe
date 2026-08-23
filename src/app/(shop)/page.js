@@ -81,14 +81,31 @@ export default function Home() {
 
   useEffect(() => {
     let isMounted = true;
-    fetchProductsFromApi().then((live) => {
-      if (isMounted && Array.isArray(live) && live.length > 0) {
-        setProductsState(live);
+
+    const refreshLive = () => {
+      fetchProductsFromApi().then((live) => {
+        if (isMounted && Array.isArray(live)) {
+          setProductsState(live);
+        }
+      });
+    };
+
+    refreshLive();
+
+    const handleProductsChanged = () => {
+      if (isMounted) {
+        setProductsState(getProducts());
+        refreshLive();
       }
-    });
+    };
+
+    window.addEventListener("pekefe_products_changed", handleProductsChanged);
+    window.addEventListener("pekefe_products_updated", handleProductsChanged);
 
     return () => {
       isMounted = false;
+      window.removeEventListener("pekefe_products_changed", handleProductsChanged);
+      window.removeEventListener("pekefe_products_updated", handleProductsChanged);
     };
   }, []);
 

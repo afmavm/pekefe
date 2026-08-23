@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { readUsersAndRoles } from "@/lib/jsonUserDb";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as any) as any,
@@ -22,6 +23,34 @@ export const authOptions: NextAuthOptions = {
         const inputEmail = credentials.email.trim().toLowerCase();
         const inputPassword = credentials.password;
 
+        // ── 1. Alt Kullanıcı & Rol Veritabanında (users_roles_db.json) Doğrulama ──
+        try {
+          const localData = readUsersAndRoles();
+          const localUser = localData.users.find(u => u.email.toLowerCase() === inputEmail);
+          if (localUser && localUser.passwordHash) {
+            const isMatch = await bcrypt.compare(inputPassword, localUser.passwordHash);
+            if (isMatch) {
+              if (localUser.status === "passive") {
+                throw new Error("Hesabınız yönetici tarafından pasife alınmıştır.");
+              }
+              return {
+                id: localUser.id,
+                name: localUser.name || "Yönetici",
+                email: localUser.email,
+                role: (localUser.role || "SUPER_ADMIN") as any,
+                isApproved: true,
+                customer_type: "b2b",
+                permissions: localUser.customPermissions || [],
+              } as any;
+            }
+          }
+        } catch (localErr: any) {
+          if (localErr.message?.includes("pasife")) {
+            throw localErr;
+          }
+          console.warn("[AUTH LOCAL USER WARNING]:", localErr);
+        }
+
         let user: any = null;
         try {
           user = await prisma.user.findUnique({
@@ -31,7 +60,7 @@ export const authOptions: NextAuthOptions = {
           console.warn("[AUTH WARNING] Veritabanı bağlantısı kurulamadı, yerel güvenli giriş deneniyor:", dbErr);
         }
 
-        // ── 1. Veritabanında Kullanıcı Bulunduysa Normal Doğrulama ──
+        // ── 2. Veritabanında Kullanıcı Bulunduysa Normal Doğrulama ──
         if (user && user.password) {
           const isPasswordCorrect = await bcrypt.compare(
             inputPassword,

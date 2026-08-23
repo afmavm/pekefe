@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withTimeout } from '@/lib/prisma';
 import { withAuth, AuthSession } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
@@ -76,13 +76,13 @@ export const POST = withAuth<any>(
               update: {
                 name: newUser.name,
                 role: newUser.role,
-                password_hash: hash
+                password: hash
               },
               create: {
                 name: newUser.name,
                 email: cleanEmail,
                 role: newUser.role,
-                password_hash: hash
+                password: hash
               }
             }),
             2500,
@@ -148,7 +148,7 @@ export const PUT = withAuth<any>(
           await withTimeout(
             prisma.user.update({
               where: { email: updatedUser.email },
-              data: { password_hash: hash, role: updatedUser.role, name: updatedUser.name }
+              data: { password: hash, role: updatedUser.role, name: updatedUser.name }
             }),
             2500,
             null

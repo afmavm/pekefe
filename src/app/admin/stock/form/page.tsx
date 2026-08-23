@@ -1854,31 +1854,29 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   };
 
   const handleSave = async () => {
-    if (!form.name || !form.sku || !form.category) {
-      toast.error("Lütfen gerekli alanları (Ürün Adı, SKU ve Kategori) doldurun.");
+    if (!form.name?.trim() || !form.sku?.trim()) {
+      toast.error("Lütfen Ürün Adı ve SKU alanlarını doldurun.");
       return;
     }
 
-    if (form.marketPrice < form.salePrice) {
-      toast.error("Liste fiyatı (Piyasa Fiyatı) satış fiyatından küçük olamaz!");
-      return;
-    }
+    const finalSalePrice = Number(form.salePrice || form.retailPrice || form.webPrice || 0);
+    const rawMarketPrice = Number(form.marketPrice || 0);
+    const finalMarketPrice = rawMarketPrice > 0 ? (rawMarketPrice < finalSalePrice ? finalSalePrice : rawMarketPrice) : finalSalePrice;
+    const resolvedCategory = form.category?.trim() || "Genel";
 
     setIsSaving(true);
     try {
       const url = isEditMode ? `/api/products/${productId}` : "/api/products";
+      const method = isEditMode ? "PUT" : "POST";
       const warehouseStockSum = warehouses.reduce((sum, w) => sum + (Number(w.stockCount) || 0), 0);
       const totalStock = warehouseStockSum > 0 ? warehouseStockSum : (Number(form.stock) || Number(form.stockCount) || Number(form.stock_quantity) || 0);
 
-      const finalSalePrice = Number(form.salePrice || form.retailPrice || form.webPrice || 0);
-      const finalMarketPrice = Number(form.marketPrice) > 0 ? Number(form.marketPrice) : finalSalePrice;
-
       const payload = {
-        name: form.name,
-        sku: form.sku,
-        brand: form.brand,
-        model: form.model,
-        category: form.category,
+        name: form.name.trim(),
+        sku: form.sku.trim(),
+        brand: form.brand || "PEKEFE",
+        model: form.model || "",
+        category: resolvedCategory,
         stock: totalStock,
         warehouses: warehouses,
         variants: variants,

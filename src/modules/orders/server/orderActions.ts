@@ -1,9 +1,10 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma, withTimeout } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { emailNotificationService } from "@/lib/email-notification-service";
+import { readLocalOrders, saveLocalOrder } from "@/lib/jsonOrderDb";
 
 /**
  * Asserts that the current session belongs to a verified ADMIN or DEALER profile.
@@ -287,30 +288,57 @@ export async function getFulfillmentDetailsAction(orderId: string) {
   try {
     await assertAuth();
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        despatchAdvices: {
-          include: { lines: { include: { product: true } } }
-        },
-        invoices: {
-          include: { invoiceItems: true }
-        }
+    let order: any = null;
+    try {
+      order = await withTimeout(
+        prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            despatchAdvices: {
+              include: { lines: { include: { product: true } } }
+            },
+            invoices: {
+              include: { invoiceItems: true }
+            }
+          }
+        }),
+        2500,
+        null
+      );
+    } catch (e) {
+      console.warn("[FULFILLMENT WARNING] Prisma query timed out or failed:", e);
+    }
+
+    if (!order) {
+      const localOrders = readLocalOrders();
+      const localMatch = localOrders.find((o: any) => o.id === orderId || o.orderNumber === orderId);
+      if (localMatch) {
+        order = {
+          id: localMatch.id,
+          status: localMatch.status || "Yeni",
+          date: new Date(localMatch.date || Date.now()),
+          total: { toNumber: () => Number(localMatch.amount || localMatch.total || 0) },
+          summary: localMatch.summary || "",
+          type: localMatch.type || "B2C",
+          despatchAdvices: [],
+          invoices: []
+        };
       }
-    });
+    }
 
     if (!order) {
       return { success: false, error: "Sipariş bulunamadı." };
     }
 
-    const parsed = await parseOrderSummaryBackend(order.summary || "", order.total.toNumber());
+    const totalNum = typeof order.total?.toNumber === "function" ? order.total.toNumber() : Number(order.total || 0);
+    const parsed = await parseOrderSummaryBackend(order.summary || "", totalNum);
 
     const items = parsed.map(item => {
       let shippedQty = 0;
-      order.despatchAdvices.forEach(da => {
+      (order.despatchAdvices || []).forEach((da: any) => {
         if (da.status !== "Cancelled") {
-          da.lines.forEach(l => {
-            if (l.product.name.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(l.product.name.toLowerCase())) {
+          (da.lines || []).forEach((l: any) => {
+            if (l.product?.name?.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(l.product?.name?.toLowerCase())) {
               shippedQty += l.quantity;
             }
           });
@@ -318,10 +346,10 @@ export async function getFulfillmentDetailsAction(orderId: string) {
       });
 
       let invoicedQty = 0;
-      order.invoices.forEach(inv => {
+      (order.invoices || []).forEach((inv: any) => {
         if (inv.status !== "Cancelled") {
-          inv.invoiceItems.forEach(ii => {
-            if (ii.name.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(ii.name.toLowerCase())) {
+          (inv.invoiceItems || []).forEach((ii: any) => {
+            if (ii.name?.toLowerCase().includes(item.name.toLowerCase()) || item.name.toLowerCase().includes(ii.name?.toLowerCase())) {
               invoicedQty += ii.quantity;
             }
           });
@@ -337,19 +365,21 @@ export async function getFulfillmentDetailsAction(orderId: string) {
       };
     });
 
+    const orderDate = order.date instanceof Date ? order.date.toISOString() : new Date(order.date || Date.now()).toISOString();
+
     return { 
       success: true, 
       order: {
         id: order.id,
         status: order.status,
-        date: order.date.toISOString(),
-        total: order.total.toNumber(),
+        date: orderDate,
+        total: totalNum,
         summary: order.summary,
         type: order.type
       }, 
       items,
-      waybills: order.despatchAdvices.map(da => ({ id: da.id, despatchNo: da.despatchNo, status: da.status, date: da.createdAt.toISOString() })),
-      invoices: order.invoices.map(inv => ({ id: inv.id, totalAmount: inv.totalAmount.toNumber(), status: inv.status, type: inv.type, date: inv.date.toISOString() }))
+      waybills: (order.despatchAdvices || []).map((da: any) => ({ id: da.id, despatchNo: da.despatchNo, status: da.status, date: da.createdAt?.toISOString?.() || new Date().toISOString() })),
+      invoices: (order.invoices || []).map((inv: any) => ({ id: inv.id, totalAmount: typeof inv.totalAmount?.toNumber === 'function' ? inv.totalAmount.toNumber() : Number(inv.totalAmount || 0), status: inv.status, type: inv.type, date: inv.date?.toISOString?.() || new Date().toISOString() }))
     };
   } catch (error: any) {
     console.error("Error in getFulfillmentDetailsAction:", error);
@@ -368,9 +398,23 @@ export async function createInvoiceAndWaybillAction(
   try {
     await assertAuth();
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId }
-    });
+    let order: any = null;
+    try {
+      order = await withTimeout(
+        prisma.order.findUnique({
+          where: { id: orderId }
+        }),
+        2500,
+        null
+      );
+    } catch (e) {
+      console.warn("[INVOICE/WAYBILL WARNING] Prisma error:", e);
+    }
+
+    if (!order) {
+      const localOrders = readLocalOrders();
+      order = localOrders.find((o: any) => o.id === orderId || o.orderNumber === orderId);
+    }
 
     if (!order) {
       return { success: false, error: "Sipariş bulunamadı." };

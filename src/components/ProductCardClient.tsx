@@ -104,8 +104,16 @@ export default function ProductCardClient({
     e.stopPropagation();
     if (isOutOfStock) return;
 
-    const basePrice = product.is_b2b_user && product.b2b_price ? product.b2b_price : product.price;
-    const effectivePrice = selectedVariant && selectedVariant.price ? Number(selectedVariant.price) : basePrice;
+    const basePrice = Number(
+      product.price ?? 
+      product.sale_price ?? 
+      product.list_price ?? 
+      product.oldPrice ?? 
+      (product.is_b2b_user && product.b2b_price ? product.b2b_price : 0)
+    );
+    const effectivePrice = selectedVariant && Number(selectedVariant.price) > 0 
+      ? Number(selectedVariant.price) 
+      : basePrice;
 
     if (!effectivePrice || Number(effectivePrice) <= 0) {
       toast.error("Fiyatı 0 TL olan ürünler sepete eklenemez.", {

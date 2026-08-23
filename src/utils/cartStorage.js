@@ -87,7 +87,7 @@ export function saveCart(cart) {
 
 export function addToCart(product, quantity = 1) {
   try {
-    const price = Number(product.price) || 0;
+    const price = Number(product.price ?? product.sale_price ?? product.list_price ?? product.oldPrice ?? 0);
     if (price <= 0) {
       if (typeof window !== "undefined") {
         import("sonner").then(({ toast }) => {

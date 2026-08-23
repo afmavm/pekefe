@@ -141,15 +141,16 @@ export function HeroSlider({ customSlides }) {
 
   // Dynamic Infinite Autoplay Timer for ANY number of slides (N >= 1)
   useEffect(() => {
-    if (isPaused || !slides || slides.length <= 1) return;
+    const slideCount = Array.isArray(slides) ? slides.length : 0;
+    if (isPaused || slideCount <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slideCount);
       setProgressKey((prevKey) => prevKey + 1);
     }, SLIDE_DURATION);
 
     return () => clearInterval(timer);
-  }, [isPaused, slides]);
+  }, [isPaused, slides?.length]);
 
   // Touch Swipe Handlers for Mobile
   const handleTouchStart = (e) => {

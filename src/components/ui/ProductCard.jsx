@@ -10,10 +10,13 @@ function CardCountdownTimer({ endDate }) {
   const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
-    // Target endDate if available, or default to a 24h flash deal
-    const targetTime = endDate 
-      ? new Date(endDate).getTime() 
-      : (Date.now() + 24 * 60 * 60 * 1000);
+    if (!endDate) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const targetTime = new Date(endDate).getTime();
+    if (isNaN(targetTime)) return;
 
     const calculateTime = () => {
       const difference = targetTime - Date.now();

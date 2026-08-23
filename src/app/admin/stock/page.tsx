@@ -131,15 +131,19 @@ export default function StockProductionPage() {
       const res = await fetch(`/api/products?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
+        const localProds = getProducts() || [];
         if (Array.isArray(data) && data.length > 0) {
-          setProducts(data);
+          const serverIds = new Set(data.map((p: any) => String(p.id || p.sku)));
+          const unsyncedLocals = localProds.filter((p: any) => p && !serverIds.has(String(p.id)) && !serverIds.has(String(p.sku)));
+          const merged = [...unsyncedLocals, ...data];
+          setProducts(merged);
           if (typeof window !== "undefined") {
             try {
-              localStorage.setItem("pekefe_products", JSON.stringify(data));
+              localStorage.setItem("pekefe_products", JSON.stringify(merged));
             } catch (e) {}
           }
         } else {
-          setProducts(getProducts() || []);
+          setProducts(localProds);
         }
       } else {
         setProducts(getProducts() || []);
@@ -170,6 +174,24 @@ export default function StockProductionPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleProductChange = () => {
+      loadData();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("pekefe_products_changed", handleProductChange);
+      window.addEventListener("pekefe_products_updated", handleProductChange);
+      window.addEventListener("pekefe_search_index_updated", handleProductChange);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("pekefe_products_changed", handleProductChange);
+        window.removeEventListener("pekefe_products_updated", handleProductChange);
+        window.removeEventListener("pekefe_search_index_updated", handleProductChange);
+      }
+    };
   }, []);
 
   useEffect(() => {

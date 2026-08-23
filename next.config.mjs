@@ -45,6 +45,40 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin/products",
+        destination: "/admin/stock",
+        permanent: true,
+      },
+      {
+        source: "/admin/products/new",
+        destination: "/admin/stock/form",
+        permanent: true,
+      },
+      {
+        source: "/admin/products/create",
+        destination: "/admin/stock/form",
+        permanent: true,
+      },
+      {
+        source: "/admin/stock/new",
+        destination: "/admin/stock/form",
+        permanent: true,
+      },
+      {
+        source: "/admin/stock/create",
+        destination: "/admin/stock/form",
+        permanent: true,
+      },
+      {
+        source: "/admin/products/form",
+        destination: "/admin/stock/form",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

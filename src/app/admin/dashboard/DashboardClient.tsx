@@ -766,7 +766,7 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
               <Star className="w-4 h-4 text-amber-500" />
               En Çok Satan Ürünler
             </h3>
-            <Link href="/admin/products" className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1">
+            <Link href="/admin/stock" className="text-[10px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1">
               Tümü <ArrowRight className="w-3 h-3" />
             </Link>
           </div>

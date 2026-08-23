@@ -544,7 +544,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   const slugParam = searchParams.get("slug");
   const skuParam = searchParams.get("sku");
   const idParam = searchParams.get("id");
-  const productId = propProductId || slugParam || skuParam || idParam || clientSlug || clientSku || clientId;
+  const productId = propProductId || idParam || skuParam || clientId || clientSku || slugParam || clientSlug;
   const isEditMode = !!productId;
   const { refreshProducts, refreshCategories } = useProduct();
 
@@ -1069,24 +1069,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const fetchProduct = async () => {
       try {
         let product: any = null;
-        let targetSearchStr = String(productId || idParam || skuParam || slugParam || "").trim().toLowerCase();
+        const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+        const targetIdVal = (idParam || urlParams?.get("id") || "").trim().toLowerCase();
+        const targetSkuVal = (skuParam || urlParams?.get("sku") || "").trim().toLowerCase();
+        const targetSlugVal = (slugParam || urlParams?.get("slug") || "").trim().toLowerCase();
 
-        if (typeof window !== "undefined") {
-          const urlParams = new URLSearchParams(window.location.search);
-          const rawId = urlParams.get("id") || urlParams.get("sku") || urlParams.get("slug") || "";
-          if (rawId) {
-            targetSearchStr = rawId.trim().toLowerCase();
-          }
-        }
-
-        // 1. Instant local storage/memory lookup (0ms Load Time)
-        const localProducts = getProducts();
-        product = localProducts.find((p: any) => {
+        const isMatch = (p: any) => {
           const pId = String(p.id || "").trim().toLowerCase();
           const pSku = String(p.sku || "").trim().toLowerCase();
           const pSlug = String(p.slug || generateSlug(p.name || "")).trim().toLowerCase();
-          return pId === targetSearchStr || pSku === targetSearchStr || pSlug === targetSearchStr;
-        });
+          const pNameClean = String(p.name || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+          
+          if (targetIdVal && pId === targetIdVal) return true;
+          if (targetSkuVal && pSku === targetSkuVal) return true;
+          if (targetSlugVal && (pSlug === targetSlugVal || pSlug.includes(targetSlugVal) || targetSlugVal.includes(pSlug))) return true;
+          if (targetSlugVal && pNameClean.includes(targetSlugVal.replace(/-/g, ""))) return true;
+          return false;
+        };
+
+        // 1. Instant local storage/memory lookup (0ms Load Time)
+        const localProducts = getProducts();
+        product = localProducts.find(isMatch);
 
         // 2. Direct API lookup if not in local memory or to ensure fresh data
         if (!product) {
@@ -1095,19 +1098,14 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             if (apiRes.ok) {
               const apiList = await apiRes.json();
               if (Array.isArray(apiList)) {
-                product = apiList.find((p: any) => {
-                  const pId = String(p.id || "").trim().toLowerCase();
-                  const pSku = String(p.sku || "").trim().toLowerCase();
-                  const pSlug = String(p.slug || generateSlug(p.name || "")).trim().toLowerCase();
-                  return pId === targetSearchStr || pSku === targetSearchStr || pSlug === targetSearchStr;
-                });
+                product = apiList.find(isMatch);
               }
             }
           } catch {}
         }
 
         if (!product) {
-          console.warn("[STOCK FORM WARNING] Product not resolved for edit, using first available fallback:", targetSearchStr);
+          console.warn("[STOCK FORM WARNING] Product not resolved for edit, using first available fallback:", targetIdVal || targetSkuVal || targetSlugVal);
           product = localProducts[0] || null;
         }
 

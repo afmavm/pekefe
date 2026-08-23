@@ -81,8 +81,9 @@ const ProductSchema = z.object({
   brand: z.string().optional().nullable(),
   model: z.string().optional().nullable(),
 }).refine((data) => {
-  const list = data.list_price ?? data.oldPrice ?? data.price ?? 0;
   const sale = data.sale_price ?? data.price ?? 0;
+  let list = data.list_price ?? data.oldPrice ?? 0;
+  if (!list || list <= 0) list = sale;
   return list >= sale;
 }, {
   message: "Liste fiyatı satış fiyatından küçük olamaz",

@@ -1855,6 +1855,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
       const totalStock = warehouses.reduce((sum, w) => sum + w.stockCount, 0);
 
+      const finalSalePrice = Number(form.salePrice || form.retailPrice || form.webPrice || 0);
+      const finalMarketPrice = Number(form.marketPrice) > 0 ? Number(form.marketPrice) : finalSalePrice;
+
       const payload = {
         name: form.name,
         sku: form.sku,
@@ -1865,9 +1868,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         warehouses: warehouses,
         variants: variants,
         criticalLimit: 5,
-        price: form.salePrice,
-        oldPrice: form.marketPrice,
-        cost: form.purchasePrice,
+        price: finalSalePrice,
+        oldPrice: finalMarketPrice,
+        cost: Number(form.purchasePrice || 0),
         image: mediaList[0]?.url || "",
         images: mediaList.map(m => m.url),
         desc: form.desc || form.shortDesc,
@@ -1875,8 +1878,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         isCampaignActive: form.isCampaignActive,
         discount_start_date: parseSafeIsoDate(form.discount_start_date),
         discount_end_date: parseSafeIsoDate(form.discount_end_date),
-        list_price: form.marketPrice,
-        sale_price: form.salePrice,
+        list_price: finalMarketPrice,
+        sale_price: finalSalePrice,
         stock_quantity: totalStock,
         isRawMaterial: form.stockType === "Hammadde",
         barcode: form.barcode,

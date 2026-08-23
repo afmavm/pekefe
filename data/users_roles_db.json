@@ -1,0 +1,118 @@
+{
+  "roles": [
+    {
+      "id": "role-super-admin",
+      "name": "SUPER_ADMIN",
+      "label": "Süper Yönetici",
+      "description": "Tüm sistem modüllerine, ayarlara ve kullanıcı yönetimine sınırsız tam yetki.",
+      "color": "bg-red-500 text-white",
+      "permissions": [
+        "*"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-stock-manager",
+      "name": "STOCK_MANAGER",
+      "label": "Stok & Depo Sorumlusu",
+      "description": "Ürünler, stok hareketleri, depolar, varyantlar ve envanter yönetimi.",
+      "color": "bg-amber-500 text-white",
+      "permissions": [
+        "view_dashboard",
+        "manage_stock",
+        "manage_inventory",
+        "manage_warehouses"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-order-manager",
+      "name": "ORDER_MANAGER",
+      "label": "Sipariş & Lojistik Sorumlusu",
+      "description": "B2B/B2C siparişler, kargo takip, paketleme ve teslimat yönetimi.",
+      "color": "bg-blue-500 text-white",
+      "permissions": [
+        "view_dashboard",
+        "manage_orders",
+        "manage_cargo",
+        "manage_despatch"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-accountant",
+      "name": "ACCOUNTANT",
+      "label": "Muhasebe & Finans Uzmanı",
+      "description": "Faturalar, cari hesaplar, kasa/banka, ödemeler ve finansal raporlar.",
+      "color": "bg-emerald-600 text-white",
+      "permissions": [
+        "view_dashboard",
+        "manage_accounting",
+        "manage_invoices",
+        "manage_finance",
+        "view_reports"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-production-manager",
+      "name": "PRODUCTION_MANAGER",
+      "label": "Üretim & MRP Müdürü",
+      "description": "Üretim emirleri, reçeteler (BOM), operasyonlar ve hammadde takibi.",
+      "color": "bg-purple-600 text-white",
+      "permissions": [
+        "view_dashboard",
+        "manage_production",
+        "manage_stock"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-content-editor",
+      "name": "CONTENT_EDITOR",
+      "label": "Pazarlama & CMS Editörü",
+      "description": "Slider, blog, sayfalar, popuplar, bannerlar ve kampanya yönetimi.",
+      "color": "bg-pink-500 text-white",
+      "permissions": [
+        "manage_cms",
+        "manage_blog",
+        "manage_campaigns",
+        "manage_media"
+      ],
+      "isSystem": true
+    },
+    {
+      "id": "role-support",
+      "name": "SUPPORT_AGENT",
+      "label": "Müşteri Temsilcisi",
+      "description": "Destek talepleri, müşteri geri bildirimleri ve sipariş durum izleme.",
+      "color": "bg-cyan-600 text-white",
+      "permissions": [
+        "view_dashboard",
+        "view_orders",
+        "manage_tickets",
+        "manage_feedback"
+      ],
+      "isSystem": true
+    }
+  ],
+  "users": [
+    {
+      "id": "user-super-admin-01",
+      "name": "Muhammed AKÇELİK",
+      "email": "afmavm@gmail.com",
+      "phone": "05441494851",
+      "role": "SUPER_ADMIN",
+      "roleLabel": "Süper Yönetici",
+      "department": "Yönetim",
+      "status": "active",
+      "createdAt": "2026-08-23T19:58:36.089Z",
+      "updatedAt": "2026-08-23T20:02:12.004Z",
+      "customPermissions": [
+        "*"
+      ],
+      "warehouseId": "",
+      "passwordHash": "$2b$10$gUo4mhoqGdPXhhstDpzTRutdoxZZipEX.s3cPZ.GB/lUxt2QL6Gw2"
+    }
+  ]
+}

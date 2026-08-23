@@ -6932,14 +6932,18 @@ function StockFormContent() {
   const searchParams = useSearchParams();
   const rawQuery = typeof window !== "undefined" ? window.location.search : "";
   const clientUrlParams = typeof window !== "undefined" ? new URLSearchParams(rawQuery) : null;
+
+  const clientSlug = clientUrlParams?.get("slug");
   const clientSku = clientUrlParams?.get("sku");
   const clientId = clientUrlParams?.get("id");
 
-  const skuParam = searchParams.get("sku");
-  const idParam = searchParams.get("id");
-  const productId = skuParam || idParam || clientSku || clientId || "new";
+  const slugParam = searchParams?.get("slug");
+  const skuParam = searchParams?.get("sku");
+  const idParam = searchParams?.get("id");
 
-  return <EnterpriseStockFormPage key={productId} productId={productId === "new" ? undefined : productId} />;
+  const resolvedId = idParam || skuParam || slugParam || clientId || clientSku || clientSlug || "new";
+
+  return <EnterpriseStockFormPage key={resolvedId} productId={resolvedId === "new" ? undefined : resolvedId} />;
 }
 
 export default function StockFormWrapperPage() {

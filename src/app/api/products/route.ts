@@ -646,7 +646,7 @@ export async function POST(request: NextRequest) {
     });
 
     const returnedProd = createdProduct || product;
-    saveLocalProduct(returnedProd as any);
+    saveLocalProduct(returnedProd as any, false);
     revalidatePath('/', 'layout');
     revalidatePath('/admin/stock');
     revalidatePath('/api/products');
@@ -654,7 +654,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('CRITICAL DB PRODUCT CREATE NOTICE:', error?.message || error);
     try {
-      const saved = saveLocalProduct(bodyPayload || {});
+      const saved = saveLocalProduct(bodyPayload || {}, false);
       FALLBACK_PRODUCTS.unshift(saved as any);
       return NextResponse.json(saved, { status: 200 });
     } catch (e) {}

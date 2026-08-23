@@ -142,7 +142,8 @@ export default function StockProductionPage() {
         setProducts(finalProducts);
         if (typeof window !== "undefined") {
           try {
-            localStorage.setItem("pekefe_products", JSON.stringify(finalProducts));
+            const { STORAGE_KEY } = require("@/utils/productsStorage");
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(finalProducts));
           } catch (e) {}
         }
       } else {

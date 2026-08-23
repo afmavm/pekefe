@@ -617,7 +617,9 @@ export async function PUT(
       attributes: parsedAttributes || {}
     };
 
-    // Keep FALLBACK_PRODUCTS synced in memory
+    // Keep local JSON DB & FALLBACK_PRODUCTS synced in memory & disk
+    saveLocalProduct(formattedResponse, true);
+
     const fallbackIdx = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === realId || p.sku === realId);
     if (fallbackIdx !== -1) {
       FALLBACK_PRODUCTS[fallbackIdx] = {

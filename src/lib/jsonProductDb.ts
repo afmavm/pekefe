@@ -45,23 +45,26 @@ export function readLocalProducts(): LocalProduct[] {
   }
 }
 
-export function saveLocalProduct(product: Partial<LocalProduct>): LocalProduct {
+export function saveLocalProduct(product: Partial<LocalProduct>, isEditMode: boolean = false): LocalProduct {
   const current = readLocalProducts();
+  const timestamp = Date.now();
+  const generatedId = isEditMode ? (product.id || `PKF-${timestamp}`) : `PKF-${timestamp}`;
+
   const newProduct: LocalProduct = {
-    id: product.id || `PKF-${Date.now()}`,
+    id: generatedId,
     name: product.name || 'Yeni Ürün',
-    sku: product.sku || `SKU-${Date.now()}`,
+    sku: product.sku || `PKF-${Math.floor(100000 + Math.random() * 900000)}`,
     brand: product.brand || '',
     model: product.model || '',
-    category: product.category || 'Genel',
-    stock: Number(product.stock || product.stock_quantity || 0),
-    stock_quantity: Number(product.stock || product.stock_quantity || 0),
-    price: Number(product.price || product.sale_price || 0),
-    oldPrice: product.oldPrice != null ? Number(product.oldPrice) : Number(product.price || product.sale_price || 0),
-    list_price: product.list_price != null ? Number(product.list_price) : Number(product.price || product.sale_price || 0),
-    sale_price: Number(product.sale_price || product.price || 0),
-    cost: Number(product.cost || 0),
-    image: product.image || '',
+    category: product.category || 'Pestil - Köme',
+    stock: Number(product.stock ?? product.stock_quantity ?? 10),
+    stock_quantity: Number(product.stock ?? product.stock_quantity ?? 10),
+    price: Number(product.price ?? product.sale_price ?? 100),
+    oldPrice: product.oldPrice != null ? Number(product.oldPrice) : Number(product.price ?? product.sale_price ?? 100),
+    list_price: product.list_price != null ? Number(product.list_price) : Number(product.price ?? product.sale_price ?? 100),
+    sale_price: Number(product.sale_price ?? product.price ?? 100),
+    cost: Number(product.cost ?? 50),
+    image: product.image || '/logo.png',
     images: product.images || [],
     desc: product.desc || '',
     shortDesc: product.shortDesc || '',
@@ -71,10 +74,15 @@ export function saveLocalProduct(product: Partial<LocalProduct>): LocalProduct {
     isDeleted: false
   };
 
-  const existingIndex = current.findIndex(p => p.id === newProduct.id || p.sku === newProduct.sku);
-  if (existingIndex !== -1) {
-    current[existingIndex] = { ...current[existingIndex], ...newProduct };
+  if (isEditMode) {
+    const existingIndex = current.findIndex(p => p.id === newProduct.id || p.sku === newProduct.sku);
+    if (existingIndex !== -1) {
+      current[existingIndex] = { ...current[existingIndex], ...newProduct };
+    } else {
+      current.unshift(newProduct);
+    }
   } else {
+    // ALWAYS ADD AS A NEW PRODUCT IN CREATE MODE — NEVER OVERWRITE
     current.unshift(newProduct);
   }
 

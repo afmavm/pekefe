@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
-import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { getProducts, fetchProductsFromApi } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { DealSection } from "@/components/home/DealSection";
@@ -80,18 +80,20 @@ export default function Home() {
   const [productsState, setProductsState] = useState(() => getProducts());
 
   useEffect(() => {
+    let timer = null;
     const refresh = () => {
-      fetchLiveProducts().then((live) => {
-        if (live && Array.isArray(live)) setProductsState(live);
-      });
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        fetchProductsFromApi().then((live) => {
+          if (live && Array.isArray(live)) setProductsState(live);
+        });
+      }, 300);
     };
 
     refresh();
 
-    const handleProductsChange = () => refresh();
+    const handleProductsChange = () => setProductsState(getProducts());
     window.addEventListener("pekefe_products_changed", handleProductsChange);
-    window.addEventListener("pekefe_products_updated", handleProductsChange);
-    window.addEventListener("focus", handleProductsChange);
 
     let channel = null;
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
@@ -100,9 +102,8 @@ export default function Home() {
     }
 
     return () => {
+      if (timer) clearTimeout(timer);
       window.removeEventListener("pekefe_products_changed", handleProductsChange);
-      window.removeEventListener("pekefe_products_updated", handleProductsChange);
-      window.removeEventListener("focus", handleProductsChange);
       if (channel) channel.close();
     };
   }, []);

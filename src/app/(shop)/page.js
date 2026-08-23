@@ -80,31 +80,15 @@ export default function Home() {
   const [productsState, setProductsState] = useState(() => getProducts());
 
   useEffect(() => {
-    let timer = null;
-    const refresh = () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        fetchProductsFromApi().then((live) => {
-          if (live && Array.isArray(live)) setProductsState(live);
-        });
-      }, 300);
-    };
-
-    refresh();
-
-    const handleProductsChange = () => setProductsState(getProducts());
-    window.addEventListener("pekefe_products_changed", handleProductsChange);
-
-    let channel = null;
-    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-      channel = new BroadcastChannel("pekefe_live_sync_channel");
-      channel.onmessage = () => refresh();
-    }
+    let isMounted = true;
+    fetchProductsFromApi().then((live) => {
+      if (isMounted && Array.isArray(live) && live.length > 0) {
+        setProductsState(live);
+      }
+    });
 
     return () => {
-      if (timer) clearTimeout(timer);
-      window.removeEventListener("pekefe_products_changed", handleProductsChange);
-      if (channel) channel.close();
+      isMounted = false;
     };
   }, []);
 

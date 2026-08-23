@@ -89,22 +89,52 @@ export function saveLocalProduct(product: Partial<LocalProduct>): LocalProduct {
   return newProduct;
 }
 
-export function deductLocalProductStock(productId: string | number, quantity: number) {
+export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
   try {
     const products = readLocalProducts();
-    const targetIdStr = String(productId);
-    const rawProductId = targetIdStr.split('_')[0]; // Handle variant IDs like 'PKF-123_var'
+    const targetIdStr = String(typeof itemInfo === 'object' ? (itemInfo.id || itemInfo.productId || itemInfo.sku || '') : itemInfo).trim();
+    const rawProductId = targetIdStr.split('_')[0].trim();
+    const rawSku = typeof itemInfo === 'object' ? String(itemInfo.sku || '').trim() : '';
 
-    const idx = products.findIndex(p => String(p.id) === targetIdStr || String(p.id) === rawProductId || p.sku === targetIdStr);
+    const cleanItemName = typeof itemInfo === 'object' 
+      ? String(itemInfo.name || '').toLowerCase().replace(/\s*\([^)]*\)/g, '').replace(/[^a-z0-9çğıöşü]/gi, '').trim()
+      : '';
+
+    let idx = products.findIndex(p => {
+      const pId = String(p.id || '').trim();
+      const pSku = String(p.sku || '').trim();
+      return (
+        pId === targetIdStr || 
+        pSku === targetIdStr || 
+        (rawProductId && pId === rawProductId) || 
+        (rawProductId && pSku === rawProductId) ||
+        (rawSku && (pId === rawSku || pSku === rawSku))
+      );
+    });
+
+    // If not found by ID/SKU, try exact or sanitized name match
+    if (idx === -1 && cleanItemName) {
+      idx = products.findIndex(p => {
+        const pCleanName = String(p.name || '').toLowerCase().replace(/[^a-z0-9çğıöşü]/gi, '').trim();
+        return pCleanName === cleanItemName || pCleanName.includes(cleanItemName) || cleanItemName.includes(pCleanName);
+      });
+    }
+
     if (idx >= 0) {
       const currentStock = Number(products[idx].stock ?? products[idx].stock_quantity ?? 0);
-      const newStock = Math.max(0, currentStock - Number(quantity || 1));
+      const deductQty = Number(quantity || 1);
+      const newStock = Math.max(0, currentStock - deductQty);
       products[idx].stock = newStock;
       products[idx].stock_quantity = newStock;
       saveLocalProduct(products[idx]);
-      console.log(`[JSON DB STOCK] Deducted ${quantity} from product ${products[idx].name}. New Stock: ${newStock}`);
+      console.log(`[JSON DB STOCK SUCCESS] Deducted ${deductQty} from "${products[idx].name}". Old Stock: ${currentStock} -> New Stock: ${newStock}`);
+      return true;
+    } else {
+      console.warn(`[JSON DB STOCK WARNING] Product not resolved for stock deduction:`, itemInfo);
+      return false;
     }
   } catch (err) {
     console.error('Error deducting local product stock:', err);
+    return false;
   }
 }

@@ -740,7 +740,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"
   ];
   const isDevMode = process.env.NODE_ENV === "development" || typeof window !== "undefined";
-  const userRole = session?.user?.role || "";
   const hasAccess = isDevMode || (!!session?.user && (ERP_ROLES.includes(userRole) || userRole.startsWith("role-")));
 
   if (!hasAccess) {

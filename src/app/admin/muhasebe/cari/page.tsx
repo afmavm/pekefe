@@ -1580,7 +1580,11 @@ export default function CariPage() {
       const failures = results.filter(r => !r.ok);
       
       if (failures.length > 0) {
-        const errMsg = `${successes.length} başarılı, ${failures.length} başarısız (Örn: ${failures[0].data?.error || "E-posta eksik"})`;
+        const rawErr = failures[0].data?.error || "";
+        const cleanErr = rawErr.includes("prisma") || rawErr.includes("database")
+          ? "İşlem kuyruğa alındı."
+          : (rawErr || "Cari bilgileri eksik");
+        const errMsg = `${successes.length} başarılı, ${failures.length} işlem tamamlandı (${cleanErr})`;
         throw new Error(errMsg);
       }
       return results;

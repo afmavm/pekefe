@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 
 import fs from 'fs';
@@ -8,6 +8,27 @@ import path from 'path';
 export const dynamic = 'force-dynamic';
 
 const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'public', 'data', 'cms_settings_fallback.json');
+
+function cleanMockCarriers(rawCarriers: any): string {
+  if (!rawCarriers) return "[]";
+  let list: any[] = [];
+  try {
+    list = typeof rawCarriers === "string" ? JSON.parse(rawCarriers) : (Array.isArray(rawCarriers) ? rawCarriers : []);
+  } catch {
+    list = [];
+  }
+  if (!Array.isArray(list)) return "[]";
+
+  const filtered = list.filter((c: any) => {
+    if (!c) return false;
+    if (c.id === "yurtici" && c.fallbackFee === 150 && c.freeThreshold === 5000) return false;
+    if (c.id === "aras" && c.fallbackFee === 140 && c.freeThreshold === 5000) return false;
+    if (c.id === "mng" && c.fallbackFee === 130 && c.freeThreshold === 4000) return false;
+    return true;
+  });
+
+  return JSON.stringify(filtered);
+}
 
 function readLocalSettingsFallback() {
   try {
@@ -54,13 +75,14 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN socialWhatsappEnabled TINYINT(1) NOT NULL DEFAULT 1"
   ];
 
-  for (const q of alterQueries) {
-    try {
-      await prisma.$executeRawUnsafe(q);
-    } catch (e) {
-      // Column already exists, ignore
-    }
-  }
+  try {
+    const alterPromise = (async () => {
+      for (const q of alterQueries) {
+        try { await prisma.$executeRawUnsafe(q); } catch (e) {}
+      }
+    })();
+    await withTimeout(alterPromise, 1500, null as any);
+  } catch (e) {}
 }
 
 let MEMORY_SETTINGS: any = null;
@@ -71,7 +93,8 @@ export async function GET() {
 
     let dbRow: any = null;
     try {
-      const rows: any[] = await prisma.$queryRawUnsafe(`SELECT * FROM CMSData WHERE id = 'singleton' LIMIT 1`);
+      const selectPromise = prisma.$queryRawUnsafe(`SELECT * FROM CMSData WHERE id = 'singleton' LIMIT 1`);
+      const rows: any[] = await withTimeout(selectPromise, 1500, null as any);
       if (rows && rows.length > 0) {
         dbRow = rows[0];
       }
@@ -131,6 +154,8 @@ export async function GET() {
     } else {
       merged.socialWhatsappEnabled = merged.socialWhatsappEnabled !== false && merged.socialWhatsappEnabled !== "false" && merged.socialWhatsappEnabled !== 0;
     }
+
+    merged.shippingCarriers = cleanMockCarriers(merged.shippingCarriers);
 
     MEMORY_SETTINGS = merged;
     return NextResponse.json(merged);

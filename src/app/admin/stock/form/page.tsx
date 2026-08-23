@@ -3969,192 +3969,231 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
               {/* ======================= TAB: MAHSUL HİKAYESİ & BESİN ANALİZİ ======================= */}
               {activeTab === "hikaye_analiz" && (
-                <div className="space-y-8 animate-in fade-in duration-200">
+                <div className="space-y-6 animate-in fade-in duration-200">
                   
-                  {/* BÖLÜM 1: MAHSUL HİKAYESİ & DETAYLAR (VİTRİN TAB 2) */}
-                  <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-6">
-                    <div className="flex items-center gap-3 pb-4 border-b border-slate-200/60">
-                      <div className="w-10 h-10 bg-orange-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-orange-500/20">
+                  {/* ÜST BİLGİ BANNERI */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white border border-slate-200/80 rounded-2xl shadow-sm">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-200 text-amber-600 shrink-0">
                         <BookOpen className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-900">1. Mahsul Hikayesi & Teknik Detaylar (Vitrin Tab 2)</h3>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Müşteriye ürün sayfasında gösterilen zanaatkarlık hikayesi, içindekiler ve teknik spesifikasyonlar.
+                        <h3 className="text-sm font-black text-slate-900">Ürün Detay Kartı İçerik &amp; Analiz Yönetimi</h3>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          Müşteri ürün detay sayfasında yer alan "MAHSUL HİKAYESİ &amp; DETAYLAR" ve "ANALİZ &amp; BESİN DEĞERLERİ" başlıkları altındaki tüm metin ve değerleri buradan güncelleyebilirsiniz.
                         </p>
                       </div>
                     </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-700 whitespace-nowrap shrink-0">
+                      <Sparkles className="w-3.5 h-3.5" /> Canlı Ürün Detay Kartı Entegrasyonlu
+                    </div>
+                  </div>
 
-                    {/* ZANAATKARLIK & MAHSUL HİKAYESİ */}
-                    <div className="space-y-2">
+                  {/* 1. MAHSUL HİKAYESİ & DETAYLAR (ASIRLIK ZANAATKARLIK SEKMESİ) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                      <Sparkles className="w-4 h-4 text-orange-500" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        1. MAHSUL HİKAYESİ &amp; DETAYLAR (ASIRLIK ZANAATKARLIK SEKMESİ)
+                      </h3>
+                    </div>
+
+                    <div className="space-y-1.5">
                       <label className="block text-xs font-bold text-slate-700">
-                        Mahsul &amp; Zanaatkarlık Hikayesi (Detaylı Anlatım)
+                        Asırlık Zanaatkarlık ve Mahsul Hikayesi Metni
                       </label>
-                      <RichTextEditor
+                      <textarea
+                        rows={4}
                         value={form.harvestStory || ""}
-                        onChange={val => setForm(prev => ({ ...prev, harvestStory: val }))}
+                        onChange={e => setForm({ ...form, harvestStory: e.target.value })}
+                        placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık yabani dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
+                        className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none leading-relaxed transition-all resize-none"
                       />
-                      <p className="text-[11px] text-slate-400">
-                        Ürün detay sayfasındaki "Mahsul Hikayesi &amp; Detaylar" sekmesinde zengin metin olarak görüntülenir.
+                      <p className="text-[11px] text-slate-400 font-medium">
+                        Bu metin ürün detay sayfasındaki "MAHSUL HİKAYESİ &amp; DETAYLAR" sekmesinde ana açıklama paragrafı olarak gösterilir.
                       </p>
                     </div>
 
-                    {/* İÇİNDEKİLER TEMİZLİĞİ */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">İçindekiler Temizliği / İçerik Bilgisi *</label>
-                      <input
-                        type="text"
-                        value={form.ingredients || ""}
-                        onChange={e => setForm({ ...form, ingredients: e.target.value })}
-                        placeholder="Örn: %100 Saf Katkısız Ve İlave Şekersiz İspir Dut Meyvesi"
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                      />
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Hasat Rakımı / Yüksekliği</label>
+                        <input
+                          type="text"
+                          value={form.altitude || ""}
+                          onChange={e => setForm({ ...form, altitude: e.target.value })}
+                          placeholder="2200 Metre"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
 
-                    {/* TEKNİK SPESİFİKASYONLAR (TAB 2 SAĞ SÜTUN) */}
-                    <div className="pt-3 border-t border-slate-200/60">
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">Teknik Spesifikasyonlar Tablosu</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Menşei / Hasat Yeri</label>
-                          <input
-                            type="text"
-                            value={form.specsMaterial || ""}
-                            onChange={e => setForm({ ...form, specsMaterial: e.target.value })}
-                            placeholder="Örn: Erzurum / İspir"
-                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                          />
-                        </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Hasat Sezonu / Dönemi</label>
+                        <input
+                          type="text"
+                          value={form.harvestSeason || ""}
+                          onChange={e => setForm({ ...form, harvestSeason: e.target.value })}
+                          placeholder="Temmuz - Ağustos"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
 
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Kurutma &amp; Üretim Yöntemi</label>
-                          <input
-                            type="text"
-                            value={form.specsBellows || ""}
-                            onChange={e => setForm({ ...form, specsBellows: e.target.value })}
-                            placeholder="Örn: Keten Bezlerde Doğal Kurutma"
-                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Kalınlık / Doku / Kıvam</label>
-                          <input
-                            type="text"
-                            value={form.specsDimensions || ""}
-                            onChange={e => setForm({ ...form, specsDimensions: e.target.value })}
-                            placeholder="Örn: < 1.5 mm (İpeksi Dokulu)"
-                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-bold text-slate-700">Şeker / Glikoz Oranı</label>
-                          <input
-                            type="text"
-                            value={form.specsWeight || ""}
-                            onChange={e => setForm({ ...form, specsWeight: e.target.value })}
-                            placeholder="Örn: 0.0% (Sadece Doğal Meyve Şekeri)"
-                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                          />
-                        </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">İçindekiler Temizlik Metni</label>
+                        <input
+                          type="text"
+                          value={form.ingredients || ""}
+                          onChange={e => setForm({ ...form, ingredients: e.target.value })}
+                          placeholder="Doğal Dut Şırası, Erzurum Ceviz"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
                       </div>
                     </div>
                   </div>
 
-                  {/* BÖLÜM 2: LABORATUVAR & BESİN DEĞERLERİ (VİTRİN TAB 3) */}
-                  <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-6">
-                    <div className="flex items-center gap-3 pb-4 border-b border-slate-200/60">
-                      <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center shadow-md shadow-purple-600/20">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-extrabold text-slate-900">2. Analiz &amp; 100g Besin Değerleri (Vitrin Tab 3)</h3>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Akredite laboratuvar analiz değerleri, HMF seviyesi ve tüketim ritüeli.
-                        </p>
-                      </div>
+                  {/* 2. ANALİZ & BESİN DEĞERLERİ SEKMESİ (100G DEĞERLERİ) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                      <FileText className="w-4 h-4 text-amber-500" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        2. ANALİZ &amp; BESİN DEĞERLERİ SEKMESİ (100G DEĞERLERİ)
+                      </h3>
                     </div>
 
-                    {/* 100G BESİN DEĞERLERİ GRİD */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">Enerji (Energy)</label>
+                        <label className="block text-[11px] font-bold text-slate-700">Enerji (kcal)</label>
                         <input
                           type="text"
                           value={form.nutrients_energy || ""}
                           onChange={e => setForm({ ...form, nutrients_energy: e.target.value })}
-                          placeholder="310 kcal"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-orange-600 focus:border-orange-500 outline-none font-mono"
+                          placeholder="293 kcal"
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none font-mono"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">Karbonhidrat</label>
+                        <label className="block text-[11px] font-bold text-slate-700">Karbonhidrat (g)</label>
                         <input
                           type="text"
                           value={form.nutrients_carb || ""}
                           onChange={e => setForm({ ...form, nutrients_carb: e.target.value })}
-                          placeholder="71.5 g"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-orange-500 outline-none font-mono"
+                          placeholder="70.2 g"
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none font-mono"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">Protein</label>
+                        <label className="block text-[11px] font-bold text-slate-700">Protein (g)</label>
                         <input
                           type="text"
                           value={form.nutrients_protein || ""}
                           onChange={e => setForm({ ...form, nutrients_protein: e.target.value })}
-                          placeholder="1.2 g"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-orange-500 outline-none font-mono"
+                          placeholder="0.8 g"
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none font-mono"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">Kalsiyum</label>
+                        <label className="block text-[11px] font-bold text-slate-700">Kalsiyum (mg)</label>
                         <input
                           type="text"
                           value={form.nutrients_calcium || ""}
                           onChange={e => setForm({ ...form, nutrients_calcium: e.target.value })}
-                          placeholder="180 mg"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-orange-500 outline-none font-mono"
+                          placeholder="400 mg"
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none font-mono"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">Demir</label>
+                        <label className="block text-[11px] font-bold text-slate-700">Demir (mg)</label>
                         <input
                           type="text"
                           value={form.nutrients_iron || ""}
                           onChange={e => setForm({ ...form, nutrients_iron: e.target.value })}
-                          placeholder="8.5 mg"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:border-orange-500 outline-none font-mono"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700">HMF Değeri</label>
-                        <input
-                          type="text"
-                          value={form.hmfLevel || ""}
-                          onChange={e => setForm({ ...form, hmfLevel: e.target.value })}
-                          placeholder="< 10 mg/kg"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-purple-600 focus:border-purple-500 outline-none font-mono"
+                          placeholder="10.2 mg"
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none font-mono"
                         />
                       </div>
                     </div>
 
-                    {/* TÜKETİM & SERVİS RİTÜELİ */}
-                    <div className="space-y-1.5 pt-3 border-t border-slate-200/60">
-                      <label className="block text-xs font-bold text-slate-700">Tüketim &amp; Servis Ritüeli Tavsiyesi</label>
-                      <textarea
-                        rows={3}
-                        value={form.ritual || ""}
-                        onChange={e => setForm({ ...form, ritual: e.target.value })}
-                        placeholder="Örn: Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir."
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none resize-none leading-relaxed"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">HMF Seviyesi &amp; Laboratuvar Analiz Sonucu</label>
+                        <input
+                          type="text"
+                          value={form.hmfLevel || ""}
+                          onChange={e => setForm({ ...form, hmfLevel: e.target.value })}
+                          placeholder="< 10 mg/kg (Analiz Raporlu)"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Tüketim &amp; Servis Ritüeli Önerisi</label>
+                        <input
+                          type="text"
+                          value={form.ritual || ""}
+                          onChange={e => setForm({ ...form, ritual: e.target.value })}
+                          placeholder="Örnek: Oda sıcaklığında (18°C - 22°C), taş değirmen..."
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. TEKNİK SPESİFİKASYON TABLOSU (ÜRÜN DETAYI SAĞ SÜTUN) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                      <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        3. TEKNİK SPESİFİKASYON TABLOSU (ÜRÜN DETAYI SAĞ SÜTUN)
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Menşei</label>
+                        <input
+                          type="text"
+                          value={form.specsMaterial || ""}
+                          onChange={e => setForm({ ...form, specsMaterial: e.target.value })}
+                          placeholder="Örnek: Erzurum / İspir"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Pişirme / Kurutma Yöntemi</label>
+                        <input
+                          type="text"
+                          value={form.specsBellows || ""}
+                          onChange={e => setForm({ ...form, specsBellows: e.target.value })}
+                          placeholder="Örnek: Odun Ateşinde Bakır Kazanlar"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Şeker &amp; Glikoz Oranı</label>
+                        <input
+                          type="text"
+                          value={form.specsWeight || ""}
+                          onChange={e => setForm({ ...form, specsWeight: e.target.value })}
+                          placeholder="Örnek: 0.0% (Sadece Doğal Meyve Şekeri)"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Ambalaj Özelliği / Kalınlık</label>
+                        <input
+                          type="text"
+                          value={form.specsDimensions || ""}
+                          onChange={e => setForm({ ...form, specsDimensions: e.target.value })}
+                          placeholder="Örnek: Gıdaya Uygun Cam Kavanoz &amp; Vakumlu Kapak"
+                          className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
 

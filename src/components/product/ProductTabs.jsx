@@ -134,8 +134,9 @@ export function ProductTabs({
                     ["Kategori", product?.categoryDisplay || product?.category || "Geleneksel"],
                     ["Stok Kodu (SKU)", product?.sku || "PRD-PKF-001"],
                     ...(product?.barcode ? [["Barkod", product.barcode]] : []),
-                    ["Hasat Yeri", "Erzurum / İspir"],
-                    ["Yayla Yüksekliği", product?.attributes?.altitude || product?.altitude || "2200 Metre"],
+                    ["Hasat Yeri / Menşei", product?.attributes?.specsMaterial || product?.specsMaterial || "Erzurum / İspir"],
+                    ["Yayla Yüksekliği / Rakım", product?.attributes?.altitude || product?.altitude || "2200 Metre"],
+                    ["Hasat Sezonu", product?.attributes?.harvestSeason || product?.harvestSeason || "Temmuz - Ağustos"],
                   ].map(([key, val]) => (
                     <div key={key} className="flex justify-between items-center border-b border-outline-variant/10 pb-2.5">
                       <span className="text-xs text-on-surface-variant font-semibold">{key}</span>

@@ -345,24 +345,35 @@ export function useProductDetailState(params) {
     if (!product) return "";
     const attrs = product.attributes || {};
     const c = attrs.harvestStory || product.harvestStory || attrs.details || product.details || product.desc || attrs.desc || product.description;
-    return c?.trim() || "İspir'in 2000 rakımlı yüksek yaylalarından toplanan mahsullerimiz geleneksel yöntemlerle kısık odun ateşinde bakır kazanlarda kaynatılarak üretilmektedir.";
+    return c?.trim() || "İspir'in 2000 rakımlı yaylalarındaki asırlık yabani dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet...";
   }, [product]);
 
-  const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "%100 Saf Katkısız Ve İlave Şekersiz İspir Hasadı";
+  const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "Doğal Dut Şırası, Erzurum Ceviz";
   const ritualText      = product?.attributes?.ritual || product?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
-  const nutrientsData   = product?.attributes?.nutrients || product?.nutrients || { energy: "310 kcal", carb: "71.5 g", protein: "1.2 g", calcium: "180 mg", iron: "8.5 mg" };
-  const hmfLevelText    = product?.attributes?.hmfLevel || "< 10 mg/kg (Analiz Raporlu)";
+  
+  const nutrientsData = useMemo(() => {
+    const raw = product?.attributes?.nutrients || product?.nutrients || {};
+    return {
+      energy: raw.energy || raw.nutrients_energy || "293 kcal",
+      carb: raw.carb || raw.nutrients_carb || "70.2 g",
+      protein: raw.protein || raw.nutrients_protein || "0.8 g",
+      calcium: raw.calcium || raw.nutrients_calcium || "400 mg",
+      iron: raw.iron || raw.nutrients_iron || "10.2 mg",
+    };
+  }, [product]);
+
+  const hmfLevelText = product?.attributes?.hmfLevel || product?.hmfLevel || "< 10 mg/kg (Analiz Raporlu)";
 
   const specificationsList = useMemo(() => {
     const attrs = product?.attributes || {};
     if (attrs.specifications?.length > 0)  return attrs.specifications;
     if (product?.specifications?.length > 0) return product.specifications;
     return [
-      { key: "Menşei",          value: attrs.specsMaterial  || "Erzurum / İspir" },
-      { key: "Kurutma Yöntemi", value: attrs.specsBellows   || "Keten Bezlerde Güneşte Doğal Kurutma" },
-      { key: "Kalınlık",        value: attrs.specsDimensions|| "< 1.5 mm (İpeksi Dokulu)" },
-      { key: "Şeker / Glikoz",  value: attrs.specsWeight    || "0.0% (Sadece Doğal Meyve Şekeri)" },
-      { key: "HMF Seviyesi",    value: hmfLevelText },
+      { key: "Menşei",                      value: attrs.specsMaterial   || product?.specsMaterial   || "Erzurum / İspir" },
+      { key: "Pişirme / Kurutma Yöntemi",   value: attrs.specsBellows    || product?.specsBellows    || "Odun Ateşinde Bakır Kazanlar" },
+      { key: "Şeker & Glikoz Oranı",        value: attrs.specsWeight     || product?.specsWeight     || "0.0% (Sadece Doğal Meyve Şekeri)" },
+      { key: "Ambalaj Özelliği / Kalınlık", value: attrs.specsDimensions || product?.specsDimensions || "Gıdaya Uygun Cam Kavanoz & Vakumlu Kapak" },
+      { key: "HMF Seviyesi",                value: hmfLevelText },
     ];
   }, [product, hmfLevelText]);
 

@@ -281,6 +281,7 @@ const navGroups: NavGroup[] = [
 
 const PAGE_TITLES: Record<string, string> = {
   "/admin": "Dashboard & Genel Bakış",
+  "/admin/profile": "Yönetici Profilim & Güvenlik",
   "/admin/users": "Kullanıcılar & Rol Yönetimi (RBAC)",
   "/admin/ai-assistant": "AI Patron Asistanı (NL2SQL)",
   "/admin/orders": "Sipariş Listesi & Havuz",
@@ -1152,12 +1153,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </p>
                   </div>
                   <Link
-                    href="/admin/theme"
+                    href="/admin/profile"
                     prefetch={false}
                     className="flex items-center gap-2 px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 hover:text-orange-600 transition"
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    <Sliders className="w-3.5 h-3.5" />
+                    <User className="w-3.5 h-3.5" />
                     Sistem Profilim
                   </Link>
                   <a

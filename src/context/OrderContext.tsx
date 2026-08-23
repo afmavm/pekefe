@@ -36,7 +36,13 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const res = await fetch('/api/orders');
+      const res = await fetch(`/api/orders?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      });
       if (!res.ok) return; // Auth failure, silently skip
       const data = await res.json();
       if (Array.isArray(data)) setOrders(data);
@@ -45,6 +51,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchOrders();
+
+    const handleCartOrOrderChange = () => fetchOrders();
+    window.addEventListener("pekefe_orders_updated", handleCartOrOrderChange);
+    window.addEventListener("pekefe_cart_changed", handleCartOrOrderChange);
+    window.addEventListener("focus", handleCartOrOrderChange);
+
+    return () => {
+      window.removeEventListener("pekefe_orders_updated", handleCartOrOrderChange);
+      window.removeEventListener("pekefe_cart_changed", handleCartOrOrderChange);
+      window.removeEventListener("focus", handleCartOrOrderChange);
+    };
   }, [fetchOrders]);
 
   const addOrder = async (order: Order) => {

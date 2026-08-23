@@ -5,7 +5,10 @@ import { requireAdmin } from '@/lib/auth-helpers';
 import fs from 'fs';
 import path from 'path';
 
+import { jsonNoCache } from '@/lib/noCacheResponse';
+
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'public', 'data', 'cms_settings_fallback.json');
 
@@ -158,10 +161,10 @@ export async function GET() {
     merged.shippingCarriers = cleanMockCarriers(merged.shippingCarriers);
 
     MEMORY_SETTINGS = merged;
-    return NextResponse.json(merged);
+    return jsonNoCache(merged);
   } catch (error) {
     const localData = readLocalSettingsFallback() || MEMORY_SETTINGS;
-    return NextResponse.json(localData || {});
+    return jsonNoCache(localData || {});
   }
 }
 

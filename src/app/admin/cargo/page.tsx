@@ -444,7 +444,8 @@ export default function CargoPage() {
     try {
       const params = new URLSearchParams();
       if (statusFilter !== "ALL") params.set("status", statusFilter);
-      const res = await fetch(`/api/orders?${params}`);
+      params.set("t", String(Date.now()));
+      const res = await fetch(`/api/orders?${params}`, { cache: "no-store", headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" } });
       const data = await res.json();
       const cargoRelevant = (Array.isArray(data) ? data : data?.orders ?? []).filter(
         (o: CargoOrder) => !["İptal"].includes(o.status)

@@ -11,6 +11,10 @@ import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 import { readLocalProducts, saveLocalProduct } from '@/lib/jsonProductDb';
+import { jsonNoCache } from '@/lib/noCacheResponse';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /** Server-side SEO slug generator (mirrors client-side productsStorage.js) */
 function generateSlugServer(name: string = ''): string {

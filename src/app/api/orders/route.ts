@@ -6,6 +6,10 @@ import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { emailNotificationService } from '@/lib/email-notification-service';
 import { WhatsAppNotificationService } from '@/lib/whatsapp-service';
 import { readLocalOrders } from '@/lib/jsonOrderDb';
+import { jsonNoCache } from '@/lib/noCacheResponse';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Oturum açmış kullanıcılar kendi siparişlerini, admin ise tüm siparişleri görebilir
 export const GET = withAuth<any>(

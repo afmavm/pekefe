@@ -467,6 +467,19 @@ export default function StockProductionPage() {
 
       if (res.ok) {
         toast.success("Ürün başarıyla silindi.");
+        
+        // Instant 0ms Client State Purge
+        setProducts(prev => {
+          const updated = prev.filter(p => String(p.id) !== String(id) && String(p.sku) !== String(id));
+          if (typeof window !== "undefined") {
+            try {
+              const { STORAGE_KEY } = require("@/utils/productsStorage");
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            } catch (e) {}
+          }
+          return updated;
+        });
+
         await refreshProducts();
         await refreshCategories();
         router.refresh();

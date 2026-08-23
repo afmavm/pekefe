@@ -100,6 +100,22 @@ export function addToCart(product, quantity = 1) {
     }
 
     const store = useCartStore.getState();
+    const targetId = String(product.id);
+    const existingItem = (store.items || []).find(item => String(item.id) === targetId);
+    const currentQty = existingItem ? Number(existingItem.quantity || 1) : 0;
+    const maxStock = product.stock != null ? Number(product.stock) : product.stock_quantity != null ? Number(product.stock_quantity) : (existingItem?.stock ?? 999);
+
+    if (currentQty + quantity > maxStock) {
+      if (typeof window !== "undefined") {
+        import("sonner").then(({ toast }) => {
+          toast.error("Stok Sınırı Aşıldı!", {
+            description: `Üzgünüz, stokta bu üründen sadece ${maxStock} adet bulunmaktadır.`
+          });
+        });
+      }
+      return false;
+    }
+
     const image = product.images && product.images[0]
       ? product.images[0]
       : (product.image || product.img || "/premium-pekefe-kavanoz.png");
@@ -122,10 +138,12 @@ export function addToCart(product, quantity = 1) {
     const shortText = cleanDesc.length > 80 ? cleanDesc.substring(0, 80) + "..." : cleanDesc;
 
     store.addItem({
-      id: String(product.id),
+      id: targetId,
       name: cleanName,
       price: price,
       quantity,
+      stock: maxStock,
+      stock_quantity: maxStock,
       image,
       img: image,
       variantLabel: stripHtml(variantLabel),
@@ -149,6 +167,19 @@ export function updateCartQty(id, delta) {
     const existing = items.find(item => String(item.id) === targetId);
     if (existing) {
       const nextQty = (existing.quantity || 1) + delta;
+      const maxStock = existing.stock != null ? Number(existing.stock) : existing.stock_quantity != null ? Number(existing.stock_quantity) : 999;
+
+      if (delta > 0 && nextQty > maxStock) {
+        if (typeof window !== "undefined") {
+          import("sonner").then(({ toast }) => {
+            toast.error("Stok Sınırı Aşıldı!", {
+              description: `Mevcut stok sınırı nedeniyle en fazla ${maxStock} adet alabilirsiniz.`
+            });
+          });
+        }
+        return false;
+      }
+
       if (nextQty <= 0) {
         store.removeItem(targetId);
       } else {

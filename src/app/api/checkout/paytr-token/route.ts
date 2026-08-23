@@ -4,7 +4,7 @@ import { createPayTRToken } from '@/lib/paytr';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 import { saveLocalOrder } from '@/lib/jsonOrderDb';
-import { deductLocalProductStock } from '@/lib/jsonProductDb';
+import { readLocalProducts, deductLocalProductStock } from '@/lib/jsonProductDb';
 import { emailNotificationService } from '@/lib/email-notification-service';
 
 export async function POST(request: NextRequest) {
@@ -32,6 +32,30 @@ export async function POST(request: NextRequest) {
 
     if (!name || !phone || !address || !city) {
       return NextResponse.json({ error: 'Lütfen teslimat adresi bilgilerini eksiksiz doldurunuz.' }, { status: 400 });
+    }
+
+    // 🛡️ SERVER-SIDE REAL-TIME STOCK VALIDATION LAYER
+    try {
+      const dbProducts = readLocalProducts();
+      for (const item of cart) {
+        const targetIdStr = String(item.id || item.productId);
+        const rawProductId = targetIdStr.split('_')[0];
+        const dbProduct = dbProducts.find(p => String(p.id) === targetIdStr || String(p.id) === rawProductId || p.sku === targetIdStr);
+        
+        if (dbProduct) {
+          const availableStock = Number(dbProduct.stock ?? dbProduct.stock_quantity ?? 0);
+          const requestedQty = Number(item.quantity || 1);
+          
+          if (requestedQty > availableStock) {
+            console.warn(`[STOCK REJECTION] Product "${dbProduct.name}" requested: ${requestedQty}, Available: ${availableStock}`);
+            return NextResponse.json({
+              error: `Stok Yetersiz: "${dbProduct.name}" ürünü için stokta sadece ${availableStock} adet bulunmaktadır. Lütfen sepetinizdeki adedi düşürün.`
+            }, { status: 400 });
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.error("[STOCK CHECK WARNING] Live stock check error:", stockErr);
     }
 
     // Extract customer IP

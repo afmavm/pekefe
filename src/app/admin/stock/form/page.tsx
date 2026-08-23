@@ -5372,10 +5372,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           </label>
                           <button 
                             type="button" 
-                            onClick={() => setIsSizeManagerOpen(true)} 
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsSizeDropdownOpen(false);
+                              setIsSizeManagerOpen(true);
+                            }}
                             className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[11px]"
                           >
-                            <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
+                            <Settings2 className="w-3.5 h-3.5 text-orange-500" /> Yönet
                           </button>
                         </div>
                         <div className="relative">
@@ -5408,8 +5414,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                           {/* Interactive Size Dropdown Menu */}
                           {isSizeDropdownOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto">
-                              <div className="p-1.5 space-y-0.5">
+                            <div 
+                              onMouseDown={(e) => e.stopPropagation()}
+                              className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+                            >
+                              <div className="p-1.5 space-y-0.5 max-h-48 overflow-y-auto">
                                 {sizes.length === 0 ? (
                                   <div className="p-3 text-center text-xs text-slate-400 font-semibold">
                                     Kayıtlı gramaj seçeneği bulunamadı.
@@ -5418,38 +5427,82 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                   sizes.map(sizeOption => {
                                     const isSelected = variantForm.size === sizeOption;
                                     return (
-                                      <button
+                                      <div
                                         key={sizeOption}
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
+                                        onClick={() => {
                                           handleVariantSizeChange(sizeOption);
                                           setIsSizeDropdownOpen(false);
                                         }}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border-none ${
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
                                           isSelected 
                                             ? "bg-orange-50 text-orange-600 font-black" 
                                             : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                                         }`}
                                       >
                                         <span>{sizeOption}</span>
-                                        {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
-                                      </button>
+                                        <div className="flex items-center gap-1">
+                                          {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeSizeOption(sizeOption);
+                                            }}
+                                            className="p-1 text-slate-300 hover:text-red-500 rounded-md hover:bg-red-50 transition border-none bg-transparent cursor-pointer"
+                                            title="Listeden Kaldır"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      </div>
                                     );
                                   })
                                 )}
                               </div>
-                              <div className="p-2 border-t border-slate-100 bg-slate-50/70">
+                              
+                              {/* Inline Quick Add Input */}
+                              <div className="p-2 border-t border-slate-100 bg-slate-50/80 space-y-1.5">
+                                <div className="flex gap-1.5">
+                                  <input
+                                    type="text"
+                                    placeholder="Yeni gramaj (Örn: 250 Gr)..."
+                                    value={newSizeName}
+                                    onChange={e => setNewSizeName(e.target.value)}
+                                    onKeyDown={e => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        if (newSizeName.trim()) {
+                                          addSizeOption();
+                                          handleVariantSizeChange(newSizeName.trim());
+                                        }
+                                      }
+                                    }}
+                                    className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (newSizeName.trim()) {
+                                        addSizeOption();
+                                        handleVariantSizeChange(newSizeName.trim());
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg text-xs transition border-none cursor-pointer"
+                                  >
+                                    Ekle
+                                  </button>
+                                </div>
                                 <button
                                   type="button"
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     setIsSizeDropdownOpen(false);
                                     setIsSizeManagerOpen(true);
                                   }}
-                                  className="w-full py-1.5 px-2.5 rounded-lg text-[11px] font-bold text-orange-600 hover:bg-orange-100/50 flex items-center justify-center gap-1.5 transition border-none cursor-pointer"
+                                  className="w-full py-1 text-center text-[10px] font-bold text-slate-500 hover:text-orange-600 transition border-none bg-transparent cursor-pointer"
                                 >
-                                  <PlusCircle className="w-3.5 h-3.5" /> Yeni Gramaj Ekle / Yönet
+                                  ⚙️ Gelişmiş Gramaj Yönetim Penceresi
                                 </button>
                               </div>
                             </div>
@@ -5465,10 +5518,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           </label>
                           <button 
                             type="button" 
-                            onClick={() => setIsColorManagerOpen(true)} 
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsColorDropdownOpen(false);
+                              setIsColorManagerOpen(true);
+                            }}
                             className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[11px]"
                           >
-                            <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
+                            <Settings2 className="w-3.5 h-3.5 text-orange-500" /> Yönet
                           </button>
                         </div>
                         <div className="relative">
@@ -5508,8 +5567,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                           {/* Interactive Color Dropdown Menu */}
                           {isColorDropdownOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-56 overflow-y-auto">
-                              <div className="p-1.5 space-y-0.5">
+                            <div 
+                              onMouseDown={(e) => e.stopPropagation()}
+                              className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+                            >
+                              <div className="p-1.5 space-y-0.5 max-h-48 overflow-y-auto">
                                 {colors.length === 0 ? (
                                   <div className="p-3 text-center text-xs text-slate-400 font-semibold">
                                     Kayıtlı ürün çeşidi bulunamadı.
@@ -5518,11 +5580,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                   colors.map(colorOption => {
                                     const isSelected = variantForm.color === colorOption;
                                     return (
-                                      <button
+                                      <div
                                         key={colorOption}
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
+                                        onClick={() => {
                                           const codes = generateSkuAndBarcode(variantForm.size, colorOption);
                                           setVariantForm(prev => ({
                                             ...prev,
@@ -5532,30 +5592,88 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                           }));
                                           setIsColorDropdownOpen(false);
                                         }}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border-none ${
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
                                           isSelected 
                                             ? "bg-orange-50 text-orange-600 font-black" 
                                             : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                                         }`}
                                       >
                                         <span>{colorOption}</span>
-                                        {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
-                                      </button>
+                                        <div className="flex items-center gap-1">
+                                          {isSelected && <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />}
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeColorOption(colorOption);
+                                            }}
+                                            className="p-1 text-slate-300 hover:text-red-500 rounded-md hover:bg-red-50 transition border-none bg-transparent cursor-pointer"
+                                            title="Listeden Kaldır"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      </div>
                                     );
                                   })
                                 )}
                               </div>
-                              <div className="p-2 border-t border-slate-100 bg-slate-50/70">
+
+                              {/* Inline Quick Add Input */}
+                              <div className="p-2 border-t border-slate-100 bg-slate-50/80 space-y-1.5">
+                                <div className="flex gap-1.5">
+                                  <input
+                                    type="text"
+                                    placeholder="Yeni çeşit (Örn: Süzme, Fıstıklı)..."
+                                    value={newColorName}
+                                    onChange={e => setNewColorName(e.target.value)}
+                                    onKeyDown={e => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        if (newColorName.trim()) {
+                                          addColorOption();
+                                          const codes = generateSkuAndBarcode(variantForm.size, newColorName.trim());
+                                          setVariantForm(prev => ({
+                                            ...prev,
+                                            color: newColorName.trim(),
+                                            sku: prev.isEditing ? prev.sku : codes.sku,
+                                            barcode: prev.isEditing ? prev.barcode : codes.barcode,
+                                          }));
+                                        }
+                                      }
+                                    }}
+                                    className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (newColorName.trim()) {
+                                        addColorOption();
+                                        const codes = generateSkuAndBarcode(variantForm.size, newColorName.trim());
+                                        setVariantForm(prev => ({
+                                          ...prev,
+                                          color: newColorName.trim(),
+                                          sku: prev.isEditing ? prev.sku : codes.sku,
+                                          barcode: prev.isEditing ? prev.barcode : codes.barcode,
+                                        }));
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg text-xs transition border-none cursor-pointer"
+                                  >
+                                    Ekle
+                                  </button>
+                                </div>
                                 <button
                                   type="button"
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     setIsColorDropdownOpen(false);
                                     setIsColorManagerOpen(true);
                                   }}
-                                  className="w-full py-1.5 px-2.5 rounded-lg text-[11px] font-bold text-orange-600 hover:bg-orange-100/50 flex items-center justify-center gap-1.5 transition border-none cursor-pointer"
+                                  className="w-full py-1 text-center text-[10px] font-bold text-slate-500 hover:text-orange-600 transition border-none bg-transparent cursor-pointer"
                                 >
-                                  <PlusCircle className="w-3.5 h-3.5" /> Yeni Ürün Çeşidi Ekle / Yönet
+                                  ⚙️ Gelişmiş Ürün Çeşitleri Yönetim Penceresi
                                 </button>
                               </div>
                             </div>

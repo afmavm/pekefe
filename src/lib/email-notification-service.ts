@@ -1,4 +1,4 @@
-import { prisma } from "./prisma";
+import { prisma, withTimeout } from "./prisma";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 import { getLiveEnv } from "./env-helper";
@@ -518,7 +518,20 @@ export class EmailNotificationService {
   }
 
   /**
-   * Adds an email with dynamic placeholders to the database queue.
+   * Replace template variables
+   */
+  private compileTemplate(templateStr: string, placeholders: Record<string, any>): string {
+    let result = templateStr || "";
+    Object.entries(placeholders || {}).forEach(([key, val]) => {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
+      result = result.replace(regex, val !== undefined && val !== null ? String(val) : "");
+    });
+    result = result.replace(/{{\s*\w+\s*}}/g, "");
+    return result;
+  }
+
+  /**
+   * Adds an email with dynamic placeholders to the queue AND sends directly/instantly.
    */
   public async queueEmail(
     recipient: string,
@@ -527,59 +540,93 @@ export class EmailNotificationService {
     maxRetries = 3
   ): Promise<string> {
     const cleanEventType = eventType.toLowerCase().trim();
+    if (!recipient || !recipient.includes("@")) {
+      console.warn(`[EmailNotificationService] Invalid recipient email address: ${recipient}`);
+      return "invalid_email";
+    }
 
-    // Önce veritabanındaki şablona bak
-    let template = await prisma.emailTemplate.findUnique({
-      where: { eventType: cleanEventType },
-    });
+    let subject = "";
+    let bodyHtml = "";
 
-    // Şablon DB'de yoksa (veya INACTIVE ise) seed et — mevcut özelleştirmeleri ASLA ezme
-    if (!template) {
+    // 1. Try resolving template from DB with timeout
+    try {
+      const templatePromise = prisma.emailTemplate.findUnique({
+        where: { eventType: cleanEventType },
+      });
+      const dbTemplate = await withTimeout(templatePromise, 1500, null as any);
+      if (dbTemplate && dbTemplate.status === "ACTIVE") {
+        subject = dbTemplate.subject;
+        bodyHtml = dbTemplate.bodyHtml;
+      }
+    } catch {}
+
+    // 2. Fallback to in-memory default template
+    if (!subject || !bodyHtml) {
       try {
-        template = await this.seedDefaultTemplate(cleanEventType);
-      } catch (seedErr: any) {
-        console.error(`[EmailNotificationService] Failed to seed template for ${eventType}:`, seedErr);
+        const seeded = await this.seedDefaultTemplate(cleanEventType);
+        if (seeded) {
+          subject = seeded.subject;
+          bodyHtml = seeded.bodyHtml;
+        }
+      } catch {}
+    }
+
+    if (!subject || !bodyHtml) {
+      subject = `Pekefe Bilgilendirme - ${cleanEventType.toUpperCase()}`;
+      bodyHtml = `<p>Merhaba {{kullanici_adi}}, işleminiz başarıyla tamamlanmıştır.</p>`;
+    }
+
+    const compiledSubject = this.compileTemplate(subject, placeholders);
+    const compiledBody = this.compileTemplate(bodyHtml, placeholders);
+
+    // 3. DIRECT INSTANT SEND (No DB dependency blockage)
+    try {
+      const transporter = this.getTransporter();
+      const fromEmail = getLiveEnv("SMTP_USER", "info@pekefe.com");
+      const fromName = getLiveEnv("SMTP_FROM_NAME", "PEKEFE İSPİR YÖRESEL");
+
+      const info = await transporter.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to: recipient,
+        subject: compiledSubject,
+        html: compiledBody,
+      });
+
+      console.log(`[EmailNotificationService] ✅ EMAIL DIRECTLY SENT to ${recipient} (MessageID: ${info.messageId})`);
+
+      // Async non-blocking log
+      prisma.emailLog.create({
+        data: {
+          recipient,
+          subject: compiledSubject,
+          bodyHtml: compiledBody,
+          eventType: cleanEventType,
+          status: "SENT",
+          retryCount: 0,
+        },
+      }).catch(() => {});
+
+      return info.messageId || "sent_ok";
+    } catch (sendErr: any) {
+      console.error(`[EmailNotificationService] ❌ Direct email send failed to ${recipient}:`, sendErr);
+
+      try {
+        const log = await prisma.emailLog.create({
+          data: {
+            recipient,
+            subject: compiledSubject,
+            bodyHtml: compiledBody,
+            eventType: cleanEventType,
+            status: "PENDING",
+            retryCount: 0,
+            errorMessage: sendErr?.message || "Direct send error"
+          },
+        });
+        return log.id;
+      } catch {
+        return "error_logged";
       }
     }
-
-    if (!template) {
-      throw new Error(`Email template for event ${eventType} could not be resolved.`);
-    }
-
-    if (template.status !== "ACTIVE") {
-      throw new Error(`Email template for event ${eventType} is currently inactive.`);
-    }
-
-    const compiledSubject = this.compileTemplate(template.subject, placeholders);
-    const compiledBody = this.compileTemplate(template.bodyHtml, placeholders);
-
-    const log = await prisma.emailLog.create({
-      data: {
-        recipient,
-        subject: compiledSubject,
-        bodyHtml: compiledBody,
-        eventType: cleanEventType,
-        status: "PENDING",
-        retryCount: 0,
-      },
-    });
-
-    await this.processQueue();
-
-    return log.id;
-  }
-
-  /**
-   * Replace template variables
-   */
-  private compileTemplate(templateStr: string, placeholders: Record<string, any>): string {
-    let result = templateStr;
-    Object.entries(placeholders).forEach(([key, val]) => {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
-      result = result.replace(regex, val !== undefined && val !== null ? String(val) : "");
-    });
-    result = result.replace(/{{\s*\w+\s*}}/g, "");
-    return result;
   }
 
   /**

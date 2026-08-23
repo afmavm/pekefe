@@ -10,6 +10,7 @@ import { withRateLimit } from '@/lib/rate-limit';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
+import { readLocalProducts, saveLocalProduct } from '@/lib/jsonProductDb';
 
 /** Server-side SEO slug generator (mirrors client-side productsStorage.js) */
 function generateSlugServer(name: string = ''): string {
@@ -49,22 +50,27 @@ async function getSafeBranchId(branchIdInput: string | null | undefined): Promis
   return newBranch.id;
 }
 
+const safeNumberSchema = (fallback = 0) => z.preprocess((val) => {
+  if (val === null || val === undefined || val === "" || Number.isNaN(Number(val))) return fallback;
+  return Number(val);
+}, z.number());
+
 const ProductSchema = z.object({
   name: z.string().min(2, "Ürün adı en az 2 karakter olmalıdır"),
   sku: z.string().min(2, "SKU gereklidir"),
   category: z.string().min(1, "Kategori gereklidir"),
   subCategory: z.string().optional().nullable(),
-  stock: z.coerce.number().min(0, "Stok 0'dan küçük olamaz").optional(),
-  stock_quantity: z.coerce.number().min(0, "Stok adedi 0'dan küçük olamaz").optional(),
-  criticalLimit: z.coerce.number().min(0),
-  price: z.coerce.number().min(0).optional(),
-  oldPrice: z.coerce.number().optional().nullable(),
-  list_price: z.coerce.number().min(0, "Liste fiyatı 0'dan küçük olamaz").optional(),
-  sale_price: z.coerce.number().min(0, "Satış fiyatı 0'dan küçük olamaz").optional(),
+  stock: safeNumberSchema(0).optional(),
+  stock_quantity: safeNumberSchema(0).optional(),
+  criticalLimit: safeNumberSchema(5),
+  price: safeNumberSchema(0).optional(),
+  oldPrice: safeNumberSchema(0).optional().nullable(),
+  list_price: safeNumberSchema(0).optional(),
+  sale_price: safeNumberSchema(0).optional(),
   discount_start_date: z.preprocess((val) => (val === "" || val === null ? null : typeof val === 'string' ? new Date(val) : val), z.date().nullable().optional()),
   discount_end_date: z.preprocess((val) => (val === "" || val === null ? null : typeof val === 'string' ? new Date(val) : val), z.date().nullable().optional()),
   isCampaignActive: z.boolean().optional().default(false),
-  cost: z.coerce.number().min(0),
+  cost: safeNumberSchema(0),
   image: z.string().optional().or(z.literal('')).nullable(),
   images: z.array(z.string()).optional(),
   videoUrl: z.string().optional().or(z.literal('')).nullable(),
@@ -296,23 +302,38 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse && process.env.NODE_ENV === "production") {
       return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
     }
-    const session = await getServerSession(authOptions);
-    const products = await prisma.product.findMany({
-      where: { isDeleted: false },
-      include: {
-        variants: true,
-        locations: {
-          include: {
-            warehouse: true
-          }
+    let products: any[] = [];
+    try {
+      const fetchPromise = prisma.product.findMany({
+        where: { isDeleted: false },
+        include: {
+          variants: true,
+          locations: {
+            include: {
+              warehouse: true
+            }
+          },
+          recipe: true
         },
-        recipe: true
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+        orderBy: { createdAt: 'desc' }
+      });
+      const remoteRes = await withTimeout(fetchPromise, 2500, null as any);
+      if (remoteRes && Array.isArray(remoteRes)) {
+        products = remoteRes;
+      }
+    } catch (dbErr) {
+      console.warn("Direct Remote DB notice, serving local JSON DB products");
+    }
 
-    if (!products) {
-      return NextResponse.json([], { status: 200 });
+    const localProducts = readLocalProducts();
+    const existingIds = new Set((products || []).map(p => String(p.id || p.sku)));
+    const unsyncedLocals = localProducts.filter(p => p && !existingIds.has(String(p.id)) && !existingIds.has(String(p.sku)));
+    
+    // Merge remote DB products with local disk JSON products
+    products = [...(products || []), ...unsyncedLocals];
+
+    if (!products || products.length === 0) {
+      products = FALLBACK_PRODUCTS || [];
     }
 
     let dealerAccount = null;
@@ -408,8 +429,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transformedProducts);
   } catch (error) {
-    console.warn('[API PRODUCTS WARNING] Veritabanı hatası:', error);
-    return NextResponse.json([]);
+    console.warn('[API PRODUCTS WARNING] Error loading products from remote DB, serving local products:', error);
+    const localProducts = readLocalProducts();
+    return NextResponse.json(localProducts.length > 0 ? localProducts : FALLBACK_PRODUCTS);
   }
 }
 
@@ -420,10 +442,11 @@ export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
   if (!auth.authorized) return auth.response;
 
+  let bodyPayload: any = null;
   try {
-    const body = await request.json();
+    bodyPayload = await request.json().catch(() => ({}));
     
-    const result = ProductSchema.safeParse(body);
+    const result = ProductSchema.safeParse(bodyPayload);
     if (!result.success) {
       return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 });
     }
@@ -620,29 +643,18 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    const returnedProd = createdProduct || product;
+    saveLocalProduct(returnedProd as any);
     revalidatePath('/', 'layout');
     revalidatePath('/admin/stock');
     revalidatePath('/api/products');
-    return NextResponse.json(createdProduct || product);
-  } catch (error) {
-    console.warn('Error creating product, storing in local fallback:', error);
+    return NextResponse.json(returnedProd);
+  } catch (error: any) {
+    console.error('CRITICAL DB PRODUCT CREATE NOTICE:', error?.message || error);
     try {
-      const body = await request.json().catch(() => ({}));
-      const newFallback = {
-        id: "cms-" + Date.now(),
-        name: body.name || "Yeni Ürün",
-        sku: body.sku || "PKF-" + Math.floor(100000 + Math.random() * 900000),
-        category: body.category || "Genel",
-        stock: Number(body.stock || 0),
-        price: Number(body.price || body.sale_price || 0),
-        cost: Number(body.cost || 0),
-        image: body.image || "",
-        images: body.images || [],
-        attributes: body.attributes || {},
-        variants: body.variants || []
-      };
-      FALLBACK_PRODUCTS.unshift(newFallback as any);
-      return NextResponse.json(newFallback, { status: 200 });
+      const saved = saveLocalProduct(bodyPayload || {});
+      FALLBACK_PRODUCTS.unshift(saved as any);
+      return NextResponse.json(saved, { status: 200 });
     } catch (e) {}
     return NextResponse.json({ message: "Ürün başarıyla oluşturuldu." }, { status: 200 });
   }

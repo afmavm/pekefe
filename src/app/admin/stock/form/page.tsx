@@ -2620,20 +2620,42 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     }
 
     let updatedVariants: Variant[] = [];
-    if (variantForm.isEditing && variantForm.id) {
-      updatedVariants = variants.map(v => v.id === variantForm.id ? {
-        ...v,
-        size: variantForm.size,
-        color: variantForm.color,
-        stock: variantForm.stock,
-        price: variantForm.price,
-        b2bPrice: variantForm.b2bPrice,
-        vatRate: variantForm.vatRate,
-        vatIncluded: variantForm.vatIncluded,
-        sku: variantForm.sku || v.sku,
-        barcode: variantForm.barcode || v.barcode,
-        name: `${variantForm.size} - ${variantForm.color}`,
-      } : v);
+    if (variantForm.isEditing) {
+      let found = false;
+      updatedVariants = variants.map(v => {
+        if ((variantForm.id && v.id === variantForm.id) || (variantForm.sku && v.sku === variantForm.sku)) {
+          found = true;
+          return {
+            ...v,
+            size: variantForm.size,
+            color: variantForm.color,
+            stock: Number(variantForm.stock) || 0,
+            price: Number(variantForm.price) || 0,
+            b2bPrice: Number(variantForm.b2bPrice) || 0,
+            vatRate: Number(variantForm.vatRate ?? 20),
+            vatIncluded: Boolean(variantForm.vatIncluded ?? true),
+            sku: variantForm.sku || v.sku,
+            barcode: variantForm.barcode || v.barcode,
+            name: `${variantForm.size} - ${variantForm.color}`,
+          };
+        }
+        return v;
+      });
+      if (!found) {
+        updatedVariants.push({
+          id: variantForm.id || Math.random().toString(),
+          sku: variantForm.sku,
+          barcode: variantForm.barcode,
+          name: `${variantForm.size} - ${variantForm.color}`,
+          size: variantForm.size,
+          color: variantForm.color,
+          stock: Number(variantForm.stock) || 0,
+          price: Number(variantForm.price) || 0,
+          b2bPrice: Number(variantForm.b2bPrice) || 0,
+          vatRate: Number(variantForm.vatRate ?? 20),
+          vatIncluded: Boolean(variantForm.vatIncluded ?? true),
+        });
+      }
       setVariants(updatedVariants);
       toast.success("Varyant başarıyla güncellendi.");
     } else {
@@ -2645,11 +2667,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         name: `${variantForm.size} - ${variantForm.color}`,
         size: variantForm.size,
         color: variantForm.color,
-        stock: variantForm.stock,
-        price: variantForm.price,
-        b2bPrice: variantForm.b2bPrice,
-        vatRate: variantForm.vatRate,
-        vatIncluded: variantForm.vatIncluded,
+        stock: Number(variantForm.stock) || 0,
+        price: Number(variantForm.price) || 0,
+        b2bPrice: Number(variantForm.b2bPrice) || 0,
+        vatRate: Number(variantForm.vatRate ?? 20),
+        vatIncluded: Boolean(variantForm.vatIncluded ?? true),
       };
       updatedVariants = [...variants, newVar];
       setVariants(updatedVariants);
@@ -5146,8 +5168,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
          ──────────────────────────────────────────────────────── */}
       {isVariantModalOpen && (() => {
         return (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="w-full max-w-[560px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+            <div className="w-full max-w-xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
               
               {/* Modern Header Bar */}
               <div className="p-5 bg-white border-b border-slate-100 flex justify-between items-center">
@@ -5571,8 +5593,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK EBAT/BOYUT YÖNETİCİSİ MODAL (SIZE MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isSizeManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[10000] animate-in fade-in duration-200">
+          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
               <div className="flex items-center gap-3">
@@ -5691,8 +5713,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK DERİ TİPİ/RENK YÖNETİCİSİ MODAL (COLOR MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isColorManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[10000] animate-in fade-in duration-200">
+          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
               <div className="flex items-center gap-3">

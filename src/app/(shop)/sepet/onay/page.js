@@ -16,7 +16,17 @@ export default function SepetOnay() {
         if (match && match[1]) storedData = decodeURIComponent(match[1]);
       }
       if (storedData) {
-        setCompletedOrder(JSON.parse(storedData));
+        const parsed = JSON.parse(storedData);
+        setCompletedOrder(parsed);
+
+        // Auto-promote order status to 'Hazırlanıyor' upon reaching order confirmation page
+        if (parsed?.orderId) {
+          fetch('/api/orders', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: parsed.orderId, status: 'Hazırlanıyor' })
+          }).catch(err => console.error("Auto promote order status error:", err));
+        }
       }
     } catch (e) {
       console.error("Error reading completed order", e);

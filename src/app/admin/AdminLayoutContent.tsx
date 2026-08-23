@@ -734,9 +734,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  const ERP_ROLES = ["SUPER_ADMIN", "ADMIN", "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"];
+  const ERP_ROLES = [
+    "SUPER_ADMIN", "ADMIN", "STOCK_MANAGER", "ORDER_MANAGER", 
+    "ACCOUNTANT", "PRODUCTION_MANAGER", "CONTENT_EDITOR", "SUPPORT_AGENT",
+    "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"
+  ];
   const isDevMode = process.env.NODE_ENV === "development" || typeof window !== "undefined";
-  const hasAccess = isDevMode || (session && ERP_ROLES.includes(session.user?.role));
+  const userRole = session?.user?.role || "";
+  const hasAccess = isDevMode || (!!session?.user && (ERP_ROLES.includes(userRole) || userRole.startsWith("role-")));
 
   if (!hasAccess) {
     return (
@@ -1129,7 +1134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {userInitials}
                 </div>
                 <span className="hidden md:block text-xs font-semibold text-slate-700 max-w-[90px] truncate">
-                  {session.user?.name || "Admin"}
+                  {session?.user?.name || "Admin"}
                 </span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
@@ -1141,10 +1146,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 >
                   <div className="px-4 py-2.5 border-b border-slate-100 mb-1">
                     <p className="text-sm font-bold text-slate-800 truncate">
-                      {session.user?.name || "Admin"}
+                      {session?.user?.name || "Admin"}
                     </p>
                     <p className="text-xs text-slate-400 truncate mt-0.5">
-                      {session.user?.email}
+                      {session?.user?.email}
                     </p>
                   </div>
                   <Link

@@ -344,6 +344,8 @@ export async function GET(request: NextRequest) {
     let b2bTieredRules: any[] = [];
     let b2bPrices: any[] = [];
 
+    const session = await getServerSession(authOptions).catch(() => null);
+
     if (session?.user?.email) {
       const dbUser = await prisma.user.findUnique({
         where: { email: session.user.email },

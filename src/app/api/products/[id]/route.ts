@@ -215,12 +215,13 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let body: any = {};
   try {
+    try { body = await request.json(); } catch (e) {}
     const auth = await requireAdmin(request);
     if (auth && 'authorized' in auth && !auth.authorized) {
       return auth.response;
     }
-    const body = await request.json();
     const { id } = await params;
 
     const list_price = body.list_price !== undefined && body.list_price !== null ? Number(body.list_price) : (body.oldPrice !== undefined && body.oldPrice !== null ? Number(body.oldPrice) : undefined);

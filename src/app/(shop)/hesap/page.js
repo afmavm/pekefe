@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Toast } from "@/components/ui/Toast";
 
@@ -15,6 +15,15 @@ export default function Hesap() {
   const [activeTab, setActiveTab] = useState("orders"); // orders, addresses, info, favorites
   const [showPassword, setShowPassword] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+
+  // Auth Form State for Unauthenticated View
+  const [authMode, setAuthMode] = useState("login"); // login, register
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
 
   // Live State
   const [infoForm, setInfoForm] = useState({
@@ -73,13 +82,6 @@ export default function Hesap() {
     }
     showNotification("Ürün favorilerinizden çıkarıldı.", "info");
   };
-
-  // Auth Guard – redirect unauthenticated users to /giris
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/giris?callbackUrl=%2Fhesap");
-    }
-  }, [status, router]);
 
   // Fetch Live Data on Load
   useEffect(() => {
@@ -265,11 +267,267 @@ export default function Hesap() {
     );
   }
 
-  if (status === "unauthenticated") {
+  // Handle In-page Login
+  const handleInPageLogin = async (e) => {
+    e.preventDefault();
+    if (!authEmail || !authPassword) {
+      showNotification("Lütfen e-posta ve şifrenizi giriniz.", "warning");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        email: authEmail,
+        password: authPassword,
+        redirect: false,
+      });
+      setAuthLoading(false);
+      if (res?.error) {
+        showNotification("E-posta veya şifre hatalı. Lütfen tekrar deneyin.", "error");
+      } else {
+        showNotification("Giriş başarılı! Hesabınız yükleniyor...", "success");
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
+      }
+    } catch {
+      setAuthLoading(false);
+      showNotification("Giriş yapılırken bir hata oluştu.", "error");
+    }
+  };
+
+  // Handle In-page Register
+  const handleInPageRegister = async (e) => {
+    e.preventDefault();
+    if (!authName || !authEmail || !authPassword) {
+      showNotification("Lütfen tüm zorunlu alanları doldurunuz.", "warning");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const regRes = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: authName,
+          email: authEmail,
+          password: authPassword,
+          phone: authPhone,
+        }),
+      });
+      const regData = await regRes.json();
+      if (!regRes.ok) {
+        setAuthLoading(false);
+        showNotification(regData.error || "Kayıt işlemi başarısız.", "error");
+        return;
+      }
+      showNotification("Kayıt başarılı! Oturum açılıyor...", "success");
+      const res = await signIn("credentials", {
+        email: authEmail,
+        password: authPassword,
+        redirect: false,
+      });
+      setAuthLoading(false);
+      if (res?.error) {
+        router.push("/giris");
+      } else {
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
+      }
+    } catch {
+      setAuthLoading(false);
+      showNotification("Kayıt sırasında bağlantı hatası oluştu.", "error");
+    }
+  };
+
+  if (status === "loading") {
     return (
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20 flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-600 rounded-full animate-spin mb-4" />
-        <p className="text-sm font-semibold text-slate-500 tracking-wide">Giriş sayfasına yönlendiriliyorsunuz...</p>
+        <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-4" />
+        <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Hesap Bilgileri Yükleniyor...</p>
+      </div>
+    );
+  }
+
+  // Unauthenticated In-Page Auth Portal
+  if (status === "unauthenticated" || !session?.user) {
+    return (
+      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-20 flex justify-center">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/80 p-8 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto border border-amber-200 shadow-sm">
+              <span className="material-symbols-outlined text-3xl">account_circle</span>
+            </div>
+            <h1 className="text-2xl font-black text-slate-900">Hesabınıza Giriş Yapın</h1>
+            <p className="text-xs font-semibold text-slate-500">
+              Siparişlerinizi takip etmek, teslimat adreslerinizi ve hesap detaylarınızı yönetmek için giriş yapınız.
+            </p>
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setAuthMode("login")}
+              className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer border-none ${
+                authMode === "login" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900 bg-transparent"
+              }`}
+            >
+              Giriş Yap
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode("register")}
+              className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer border-none ${
+                authMode === "register" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900 bg-transparent"
+              }`}
+            >
+              Yeni Üyelik Oluştur
+            </button>
+          </div>
+
+          {authMode === "login" ? (
+            <form onSubmit={handleInPageLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">E-Posta Adresi</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="ornek@alanadi.com"
+                  value={authEmail}
+                  onChange={e => setAuthEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-slate-700">Şifre</label>
+                  <Link href="/giris" className="text-[11px] font-bold text-amber-600 hover:underline">
+                    Şifremi Unuttum?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showAuthPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    value={authPassword}
+                    onChange={e => setAuthPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition pr-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthPassword(!showAuthPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 border-none bg-transparent cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showAuthPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl text-sm font-black shadow-lg shadow-amber-600/25 transition flex items-center justify-center gap-2 cursor-pointer border-none"
+              >
+                {authLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">login</span>
+                    Giriş Yap
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleInPageRegister} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Ad Soyad</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Adınız Soyadınız"
+                  value={authName}
+                  onChange={e => setAuthName(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">E-Posta Adresi</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="ornek@alanadi.com"
+                  value={authEmail}
+                  onChange={e => setAuthEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Telefon Numarası</label>
+                <input
+                  type="tel"
+                  placeholder="05XX XXX XX XX"
+                  value={authPhone}
+                  onChange={e => setAuthPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Şifre</label>
+                <div className="relative">
+                  <input
+                    type={showAuthPassword ? "text" : "password"}
+                    required
+                    placeholder="En az 6 karakter"
+                    value={authPassword}
+                    onChange={e => setAuthPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-amber-600 outline-none transition pr-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthPassword(!showAuthPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 border-none bg-transparent cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showAuthPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl text-sm font-black shadow-lg shadow-amber-600/25 transition flex items-center justify-center gap-2 cursor-pointer border-none mt-2"
+              >
+                {authLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">person_add</span>
+                    Üyeliği Tamamla
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          <div className="pt-2 border-t border-slate-100 text-center">
+            <Link href="/b2b" className="text-xs font-bold text-amber-700 hover:underline flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined text-sm">business</span>
+              Kurumsal / B2B Bayi Girişi veya Başvurusu için Tıklayın
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

@@ -32,7 +32,7 @@ interface Carrier {
   id: string;
   name: string;
   logoUrl?: string;
-  pricingType?: "flat" | "tiered";
+  pricingType?: "flat" | "tiered" | "receiver_pay";
   isActive: boolean;
   addShippingCosts: boolean;
   isFreeShipping: boolean;
@@ -1433,43 +1433,6 @@ export default function CargoPage() {
                   Firma Logosu &amp; Görseli
                 </label>
 
-                {/* Preset brand logos */}
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hazır Marka Logoları</p>
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                    {[
-                      { name: "Yurtiçi Kargo", logo: "/logos/yurtici.svg" },
-                      { name: "Aras Kargo", logo: "/logos/aras.svg" },
-                      { name: "MNG Kargo", logo: "/logos/mng.svg" },
-                      { name: "PTT Kargo", logo: "/logos/ptt.svg" },
-                      { name: "Sürat Kargo", logo: "/logos/surat.svg" },
-                      { name: "HepsiJET", logo: "/logos/hepsijet.svg" }
-                    ].map((brand) => (
-                      <button
-                        key={brand.name}
-                        type="button"
-                        title={brand.name}
-                        onClick={() => setCarrierForm({ ...carrierForm, logoUrl: brand.logo, name: carrierForm.name || brand.name })}
-                        className={`relative flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer group ${
-                          carrierForm.logoUrl === brand.logo
-                            ? "border-orange-500 bg-orange-50 shadow-md shadow-orange-500/10"
-                            : "border-slate-200 bg-white hover:border-orange-300 hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="w-full h-8 flex items-center justify-center bg-white rounded-lg p-1">
-                          <img src={brand.logo} alt={brand.name} className="h-full max-w-full object-contain" />
-                        </div>
-                        <span className={`text-[9px] font-bold leading-tight text-center truncate w-full ${carrierForm.logoUrl === brand.logo ? "text-orange-600" : "text-slate-500"}`}>
-                          {brand.name.replace(" Kargo", "").replace("çi", "çi")}
-                        </span>
-                        {carrierForm.logoUrl === brand.logo && (
-                          <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-[8px] font-black">✓</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* URL input + Upload button + Preview */}
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Özel Logo URL&apos;si veya Dosyadan Yükle</p>
@@ -1524,7 +1487,7 @@ export default function CargoPage() {
                     <div className="w-24 h-12 bg-white rounded-lg border border-slate-100 flex items-center justify-center text-slate-300">
                       <span className="text-2xl">🖼</span>
                     </div>
-                    <p className="text-xs text-slate-400">Yukarıdan hazır logo seçin ya da dosyanızı yükleyin</p>
+                    <p className="text-xs text-slate-400">Logo URL&apos;si girin ya da cihazınızdan görsel yükleyin</p>
                   </div>
                 )}
               </div>
@@ -1536,11 +1499,15 @@ export default function CargoPage() {
                     Fiyatlandırma Türü Seçimi *
                   </label>
                   <span className="text-[10px] font-bold text-slate-600 bg-white px-2.5 py-1 rounded-full border border-slate-200">
-                    {carrierForm.pricingType === "flat" ? "📌 Sabit Ücret Aktif" : "📊 Desi Kademeli Fiyat Aktif"}
+                    {carrierForm.pricingType === "flat"
+                      ? "📌 Sabit Ücret Aktif"
+                      : carrierForm.pricingType === "tiered"
+                      ? "📊 Desi Kademeli Fiyat Aktif"
+                      : "📦 Alıcı Ödemeli Aktif"}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={() => setCarrierForm({ ...carrierForm, pricingType: "flat" })}
@@ -1558,7 +1525,7 @@ export default function CargoPage() {
                     <div>
                       <span className="font-extrabold text-xs text-slate-900 block">📌 Sabit Kargo Ücreti</span>
                       <span className="text-[11px] text-slate-500 font-medium block mt-0.5 leading-snug">
-                        Sepet desisinden bağımsız tek sabit fiyat uygulanır. Desi kademeleri devredışı kalır.
+                        Sepet desisinden bağımsız tek sabit fiyat uygulanır.
                       </span>
                     </div>
                   </button>
@@ -1578,9 +1545,31 @@ export default function CargoPage() {
                       {carrierForm.pricingType === "tiered" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                     </div>
                     <div>
-                      <span className="font-extrabold text-xs text-slate-900 block">📊 Desi / Kg Kademeli Fiyat</span>
+                      <span className="font-extrabold text-xs text-slate-900 block">📊 Desi / Kg Kademeli</span>
                       <span className="text-[11px] text-slate-500 font-medium block mt-0.5 leading-snug">
-                        Siparişin desi ağırlığına göre kademeli ücret hesaplanır. Sabit ücret pasif olur.
+                        Siparişin desi ağırlığına göre kademeli ücret hesaplanır.
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCarrierForm({ ...carrierForm, pricingType: "receiver_pay", fallbackFee: 0 })}
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex items-start gap-3 ${
+                      carrierForm.pricingType === "receiver_pay"
+                        ? "border-orange-500 bg-white shadow-sm ring-2 ring-orange-500/10"
+                        : "border-slate-200 bg-white/60 text-slate-600 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
+                      carrierForm.pricingType === "receiver_pay" ? "border-orange-500 bg-orange-500" : "border-slate-300"
+                    }`}>
+                      {carrierForm.pricingType === "receiver_pay" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs text-slate-900 block">📦 Ücret Alıcı Ödemeli</span>
+                      <span className="text-[11px] text-slate-500 font-medium block mt-0.5 leading-snug">
+                        Kargo ücreti siparişe 0 TL olarak yansır, kurye kapıda alıcıdan tahsil eder.
                       </span>
                     </div>
                   </button>
@@ -1614,21 +1603,22 @@ export default function CargoPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className={carrierForm.pricingType === "tiered" ? "opacity-50" : ""}>
+                <div className={carrierForm.pricingType !== "flat" ? "opacity-50" : ""}>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                     Sabit Kargo Ücreti (₺)
                     {carrierForm.pricingType === "tiered" && <span className="text-[10px] text-amber-600 ml-1 font-semibold">(Pasif)</span>}
+                    {carrierForm.pricingType === "receiver_pay" && <span className="text-[10px] text-emerald-600 ml-1 font-semibold">(Alıcı Ödemeli - 0 ₺)</span>}
                   </label>
                   <input
                     required={carrierForm.pricingType === "flat"}
-                    disabled={carrierForm.pricingType === "tiered"}
+                    disabled={carrierForm.pricingType !== "flat"}
                     type="number"
                     min={0}
-                    placeholder={carrierForm.pricingType === "tiered" ? "Kademeli Fiyat Aktif" : "150"}
-                    value={carrierForm.fallbackFee}
+                    placeholder={carrierForm.pricingType === "receiver_pay" ? "0 ₺ (Alıcı Ödemeli)" : carrierForm.pricingType === "tiered" ? "Kademeli Fiyat Aktif" : "150"}
+                    value={carrierForm.pricingType === "receiver_pay" ? 0 : carrierForm.fallbackFee}
                     onChange={(e) => setCarrierForm({ ...carrierForm, fallbackFee: Number(e.target.value) })}
                     className={`w-full px-4 py-3 border rounded-xl text-sm font-semibold transition-colors ${
-                      carrierForm.pricingType === "tiered"
+                      carrierForm.pricingType !== "flat"
                         ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                         : "bg-white border-slate-300 text-gray-900 focus:outline-none focus:border-orange-500"
                     }`}

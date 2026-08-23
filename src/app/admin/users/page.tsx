@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { 
   Users, UserPlus, Shield, ShieldCheck, Key, Edit, Trash2, 
   Search, Check, X, Lock, Unlock, Mail, Phone, Building2, 
-  CheckCircle2, AlertCircle, RefreshCw, Layers, Sparkles, Filter
+  CheckCircle2, AlertCircle, RefreshCw, Layers, Sparkles, Filter,
+  Eye, EyeOff
 } from "lucide-react";
 import { toast } from "sonner";
 import { RoleDefinition, SubUser } from "@/lib/jsonUserDb";
@@ -17,6 +18,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Modals
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -71,6 +73,7 @@ export default function AdminUsersPage() {
 
   const openNewUserModal = () => {
     setEditingUser(null);
+    setShowPassword(false);
     const defaultRoleObj = roles.find(r => r.name === "STOCK_MANAGER") || roles[0];
     setUserForm({
       name: "",
@@ -88,6 +91,7 @@ export default function AdminUsersPage() {
 
   const openEditUserModal = (user: SubUser) => {
     setEditingUser(user);
+    setShowPassword(false);
     const userRoleObj = roles.find(r => r.name === user.role);
     setUserForm({
       name: user.name,
@@ -605,14 +609,24 @@ export default function AdminUsersPage() {
                   <label className="block text-xs font-bold text-slate-700">
                     {editingUser ? "Yeni Şifre (Boş bırakılırsa değişmez)" : "Giriş Şifresi *"}
                   </label>
-                  <input
-                    type="password"
-                    required={!editingUser}
-                    value={userForm.password}
-                    onChange={e => setUserForm({ ...userForm, password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required={!editingUser}
+                      value={userForm.password}
+                      onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 transition cursor-pointer border-none bg-transparent flex items-center justify-center p-0.5"
+                      title={showPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5">

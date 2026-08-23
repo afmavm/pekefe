@@ -192,6 +192,8 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: "/giris",
+    signOut: "/giris",
+    error: "/giris",
   },
 
   session: {

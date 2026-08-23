@@ -256,6 +256,7 @@ const navGroups: NavGroup[] = [
         icon: Settings,
         description: "Sistem, Tema & Yetkilendirmeler",
         subItems: [
+          { name: "Kullanıcılar & Roller", href: "/admin/users", icon: Users },
           { name: "Tema Ayarları", href: "/admin/theme", icon: Palette },
           { name: "Kampanya Ayarları", href: "/admin/campaigns", icon: SlidersHorizontal },
           { name: "Sistem Raporları", href: "/admin/reports", icon: BarChart3 },
@@ -280,6 +281,7 @@ const navGroups: NavGroup[] = [
 
 const PAGE_TITLES: Record<string, string> = {
   "/admin": "Dashboard & Genel Bakış",
+  "/admin/users": "Kullanıcılar & Rol Yönetimi (RBAC)",
   "/admin/ai-assistant": "AI Patron Asistanı (NL2SQL)",
   "/admin/orders": "Sipariş Listesi & Havuz",
   "/admin/cargo": "Kargo Takip Entegrasyonu",

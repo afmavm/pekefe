@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { withAuth, AuthSession, isAdminRole } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { emailNotificationService } from '@/lib/email-notification-service';
 import { WhatsAppNotificationService } from '@/lib/whatsapp-service';
+import { readLocalOrders } from '@/lib/jsonOrderDb';
 
 // Oturum açmış kullanıcılar kendi siparişlerini, admin ise tüm siparişleri görebilir
 export const GET = withAuth<any>(
@@ -16,36 +17,76 @@ export const GET = withAuth<any>(
     const isPersonal = searchParams.get('personal') === 'true';
 
     try {
-      let orders;
-      if (isAdminRole(session.user.role) && !isPersonal) {
-        orders = await prisma.order.findMany({
-          include: {
-            currentAccount: true
-          },
-          orderBy: { date: 'desc' }
-        });
-      } else {
-        const account = await prisma.currentAccount.findFirst({
-          where: { email: session.user.email || "" }
-        });
+      let orders: any[] = [];
+      try {
+        if (isAdminRole(session?.user?.role) && !isPersonal) {
+          const remotePromise = prisma.order.findMany({
+            include: {
+              currentAccount: true
+            },
+            orderBy: { date: 'desc' }
+          });
+          orders = await withTimeout(remotePromise, 2500, []);
+        } else {
+          const accountPromise = prisma.currentAccount.findFirst({
+            where: { email: session?.user?.email || "" }
+          });
+          const account = await withTimeout(accountPromise, 2500, null);
 
-        if (!account) {
-          return NextResponse.json([]);
+          if (account) {
+            const remotePromise = prisma.order.findMany({
+              where: { currentAccountId: account.id },
+              include: {
+                currentAccount: true
+              },
+              orderBy: { date: 'desc' }
+            });
+            orders = await withTimeout(remotePromise, 2500, []);
+          }
         }
-
-        orders = await prisma.order.findMany({
-          where: { currentAccountId: account.id },
-          include: {
-            currentAccount: true
-          },
-          orderBy: { date: 'desc' }
-        });
+      } catch (dbErr) {
+        console.warn("[ORDERS API WARNING] Remote DB error, fallback to local disk DB:", dbErr);
       }
 
-      // Sort orders by date ascending to assign sequential numbers
-      const sortedOrders = [...orders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Merge local orders from JSON disk DB
+      const localOrders = readLocalOrders();
+      const map = new Map<string, any>();
 
-      const formattedOrders = orders.map(order => {
+      (orders || []).forEach(o => {
+        const idKey = o.id || o.orderNumber;
+        if (idKey) map.set(idKey, o);
+      });
+
+      localOrders.forEach(lo => {
+        const idKey = lo.id || lo.orderNumber;
+        if (idKey) {
+          const existing = map.get(idKey);
+          map.set(idKey, {
+            id: lo.id,
+            total: lo.amount ?? lo.total ?? 0,
+            shippingFee: lo.shippingFee ?? 0,
+            status: lo.status || 'Yeni',
+            summary: lo.summary || '',
+            type: lo.type || 'B2C',
+            method: lo.method || 'Belirtilmedi',
+            date: lo.date || new Date().toISOString(),
+            currentAccount: {
+              name: lo.client || lo.customerName || 'Müşteri',
+              address: lo.address || '',
+              phone: lo.phone || '',
+              email: lo.email || '',
+            },
+            ...existing
+          });
+        }
+      });
+
+      const mergedOrders = Array.from(map.values());
+
+      // Sort orders by date ascending to assign sequential numbers
+      const sortedOrders = [...mergedOrders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      const formattedOrders = mergedOrders.map(order => {
         let orderNumber = order.id;
         if (/^(PKF|B2B|B2C|ORD)-/i.test(order.id)) {
           orderNumber = order.id.toUpperCase();

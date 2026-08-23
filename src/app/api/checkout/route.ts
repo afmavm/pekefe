@@ -10,6 +10,7 @@ import { PriceCalculator } from '@/modules/catalog/server/price-calculator';
 import { calculateCartDiscounts } from '@/modules/orders/server/discount-calculator';
 import { withRateLimit } from '@/lib/rate-limit';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
+import { saveLocalOrder } from '@/lib/jsonOrderDb';
 
 const CheckoutSchema = z.object({
   cart: z.array(z.any()).min(1, "Sepet boş olamaz"),
@@ -426,6 +427,30 @@ export async function POST(request: NextRequest) {
           method: paymentMethod === "creditCard" ? "Kredi Kartı" : paymentMethod === "bankTransfer" ? "Banka Havalesi" : paymentMethod === "cashOnDelivery" ? "Kapıda Ödeme" : "Açık Hesap"
         }
       });
+
+      try {
+        saveLocalOrder({
+          id: customOrderId,
+          orderNumber: customOrderId,
+          client: account.name || name,
+          customerName: name,
+          email: customerEmail,
+          phone: phone,
+          address: address,
+          date: new Date().toISOString(),
+          status: paymentMethod === "bankTransfer" ? "Ödeme Bekliyor" : "Yeni",
+          amount: verifiedTotal,
+          total: verifiedTotal,
+          shippingFee: Number(shippingFee || 0),
+          type: orderType,
+          method: paymentMethod === "creditCard" ? "Kredi Kartı" : paymentMethod === "bankTransfer" ? "Banka Havalesi" : paymentMethod === "cashOnDelivery" ? "Kapıda Ödeme" : "Açık Hesap",
+          summary: order.summary,
+          cargoCompany: selectedCarrierName,
+          items: cart
+        });
+      } catch (localErr) {
+        console.error("Local order save error:", localErr);
+      }
 
       // Sadakat Puanı Kazanımı (Pekefe Lezzet Puanı: Her 1 TL Harcama = 1 PTS Puan)
       const earnedLoyaltyPoints = Math.floor(verifiedTotal);

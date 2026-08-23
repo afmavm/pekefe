@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createPayTRToken } from '@/lib/paytr';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
+import { saveLocalOrder } from '@/lib/jsonOrderDb';
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, 'apiLimit');
@@ -85,7 +86,32 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (dbErr) {
-      console.warn("[PAYTR TOKEN DB WARNING] Veritabanına taslak sipariş yazılamadı, ödeme adımı devam ettiriliyor:", dbErr);
+      console.warn("[PAYTR TOKEN DB WARNING] Veritabanına taslak sipariş yazılamadı, yerel depolama devreye giriyor:", dbErr);
+    }
+
+    // Always save order to local disk DB as fail-safe guarantee
+    try {
+      saveLocalOrder({
+        id: customOrderId,
+        orderNumber: customOrderId,
+        client: name,
+        customerName: name,
+        email: customerEmail,
+        phone: phone,
+        address: fullAddress,
+        date: new Date().toISOString(),
+        status: 'Ödeme Bekliyor',
+        amount: grandTotal,
+        total: grandTotal,
+        shippingFee: Number(shippingFee),
+        type: 'B2C',
+        method: 'PayTR 3D Secure Kredi Kartı',
+        summary: orderSummary,
+        cargoCompany: selectedCarrierName,
+        items: cart
+      });
+    } catch (localErr) {
+      console.error("Local order save failed:", localErr);
     }
 
     // PayTR Basket Format

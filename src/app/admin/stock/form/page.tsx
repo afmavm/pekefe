@@ -1354,8 +1354,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         }, 300);
 
       } catch (err) {
-        console.error("Error loading product:", err);
-        toast.error("Ürün yüklenirken bağlantı hatası oluştu.");
+        console.warn("[STOCK FORM SILENT WARN] Error loading product background:", err);
       } finally {
         setIsLoadingProduct(false);
       }

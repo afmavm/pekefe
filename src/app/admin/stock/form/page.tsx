@@ -3003,11 +3003,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               })}
             </div>
 
-            {/* TAB CONTENTS PANEL (Enhanced High-Contrast Layout) */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6.5 shadow-sm min-h-[400px]">
-              
-              {/* ======================= TAB: GENEL ======================= */}
-              {activeTab === "genel" && (
+            {/* TAB CONTENTS PANEL (Enhanced High-Contrast Layout) - Rendered for non-variant tabs */}
+            {activeTab !== "varyantlar" && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6.5 shadow-sm min-h-[400px]">
+                
+                {/* ======================= TAB: GENEL ======================= */}
+                {activeTab === "genel" && (
                 <div className="space-y-6">
                   
                   {/* Grid fields */}
@@ -4603,7 +4604,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
               )}
 
-            </div>
+              </div>
+            )}
 
             {/* ────────────────────────────────────────────────────────
                  BOTTOM SUB-PANEL: VARIANTS & XML PRICES (ONLY RENDERED IN VARYANTLAR TAB)

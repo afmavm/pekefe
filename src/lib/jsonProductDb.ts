@@ -146,3 +146,23 @@ export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
     return false;
   }
 }
+
+export function deleteLocalProduct(targetId: string): boolean {
+  try {
+    const products = readLocalProducts();
+    const cleanTarget = String(targetId || "").trim().toLowerCase();
+    const filtered = products.filter(p => {
+      const pId = String(p.id || "").trim().toLowerCase();
+      const pSku = String(p.sku || "").trim().toLowerCase();
+      return pId !== cleanTarget && pSku !== cleanTarget;
+    });
+
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(filtered, null, 2), 'utf8');
+    return true;
+  } catch (e) {
+    console.error('Error deleting local JSON product:', e);
+    return false;
+  }
+}

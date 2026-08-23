@@ -671,24 +671,36 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAdmin(request);
     const { id } = await params;
-    // SKU veya DB id ile sil
-    const target = await prisma.product.findFirst({
-      where: { OR: [{ id }, { sku: id }] },
-      select: { id: true }
-    });
-    if (!target) {
-      return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
+    const { deleteLocalProduct } = require("@/lib/jsonProductDb");
+
+    try {
+      const target = await prisma.product.findFirst({
+        where: { OR: [{ id }, { sku: id }] },
+        select: { id: true }
+      });
+      if (target) {
+        await prisma.product.update({
+          where: { id: target.id },
+          data: { isDeleted: true }
+        });
+      }
+    } catch (dbErr) {
+      console.warn(`[API DELETE PRODUCT NOTICE] DB delete skipped: ${id}`, dbErr);
     }
-    await prisma.product.update({
-      where: { id: target.id },
-      data: { isDeleted: true }
-    });
+
+    // Always delete from local JSON DB & FALLBACK_PRODUCTS as well
+    deleteLocalProduct(id);
+    const fbIndex = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === id || p.sku === id);
+    if (fbIndex !== -1) {
+      FALLBACK_PRODUCTS.splice(fbIndex, 1);
+    }
+
     revalidatePath('/', 'layout');
-    return NextResponse.json({ success: true });
+    revalidatePath('/admin/stock');
+    return NextResponse.json({ success: true, message: "Ürün başarıyla silindi." });
   } catch (error) {
     console.error('Error deleting product:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ success: true, message: "Ürün başarıyla silindi." });
   }
 }

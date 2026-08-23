@@ -979,12 +979,28 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     isInitialized.current = false;
     setIsDirty(false);
 
-    const searchStr = typeof window !== "undefined" ? window.location.search : "";
-    const urlParams = typeof window !== "undefined" ? new URLSearchParams(searchStr) : null;
-    const activeEditId = productId || urlParams?.get("id") || urlParams?.get("sku") || urlParams?.get("slug");
-    const hasUrlParam = Boolean(activeEditId || searchStr.includes("sku=") || searchStr.includes("id=") || searchStr.includes("slug="));
+    const getTargetParams = () => {
+      let id = idParam || "";
+      let sku = skuParam || "";
+      let slug = slugParam || "";
 
-    if (!activeEditId && !hasUrlParam) {
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!id) id = urlParams.get("id") || "";
+        if (!sku) sku = urlParams.get("sku") || "";
+        if (!slug) slug = urlParams.get("slug") || "";
+      }
+      return {
+        id: id.trim().toLowerCase(),
+        sku: sku.trim().toLowerCase(),
+        slug: slug.trim().toLowerCase()
+      };
+    };
+
+    const target = getTargetParams();
+    const isEdit = Boolean(target.id || target.sku || target.slug);
+
+    if (!isEdit) {
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const randBarcode = "869" + Math.floor(1000000000 + Math.random() * 9000000000);
       const randManCode = `PKF-DUT-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -992,8 +1008,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         name: "",
         sku: `PKF-${randNum}`,
         barcode: randBarcode,
+        brand: "PEKEFE",
+        model: "",
         category: "",
-        unit: "Kavanoz",
+        unit: "Adet",
         manufacturerCode: randManCode,
         stockType: "Ticari Mal",
         warehouse: "Erzurum İspir Merkez Depo",
@@ -1069,12 +1087,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const fetchProduct = async () => {
       try {
         let product: any = null;
-        const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-        const targetIdVal = (idParam || urlParams?.get("id") || "").trim().toLowerCase();
-        const targetSkuVal = (skuParam || urlParams?.get("sku") || "").trim().toLowerCase();
-        const targetSlugVal = (slugParam || urlParams?.get("slug") || "").trim().toLowerCase();
+        const { id: targetIdVal, sku: targetSkuVal, slug: targetSlugVal } = getTargetParams();
 
         const isMatch = (p: any) => {
+          if (!p) return false;
           const pId = String(p.id || "").trim().toLowerCase();
           const pSku = String(p.sku || "").trim().toLowerCase();
           const pSlug = String(p.slug || generateSlug(p.name || "")).trim().toLowerCase();
@@ -1087,29 +1103,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           return false;
         };
 
-        // 1. Instant local storage/memory lookup (0ms Load Time)
-        const localProducts = getProducts();
-        product = localProducts.find(isMatch);
-
-        // 2. Direct API lookup if not in local memory or to ensure fresh data
-        if (!product) {
-          try {
-            const apiRes = await fetch(`/api/products?t=${Date.now()}`, { cache: "no-store" });
-            if (apiRes.ok) {
-              const apiList = await apiRes.json();
-              if (Array.isArray(apiList)) {
-                product = apiList.find(isMatch);
-              }
+        // 1. Direct API lookup to always fetch latest DB product
+        try {
+          const apiRes = await fetch(`/api/products?t=${Date.now()}`, { cache: "no-store" });
+          if (apiRes.ok) {
+            const apiList = await apiRes.json();
+            if (Array.isArray(apiList)) {
+              product = apiList.find(isMatch);
             }
-          } catch {}
+          }
+        } catch (e) {
+          console.error("API products fetch failed in form:", e);
+        }
+
+        // 2. Fallback to local storage if API didn't return
+        if (!product) {
+          const localProducts = getProducts();
+          product = localProducts.find(isMatch);
         }
 
         if (!product) {
-          console.warn("[STOCK FORM WARNING] Product not resolved for edit, using first available fallback:", targetIdVal || targetSkuVal || targetSlugVal);
-          product = localProducts[0] || null;
-        }
-
-        if (!product) {
+          console.warn("[STOCK FORM WARNING] Product not resolved for edit:", targetIdVal, targetSkuVal, targetSlugVal);
           setIsLoadingProduct(false);
           return;
         }
@@ -1364,7 +1378,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
     setIsLoadingProduct(true);
     fetchProduct();
-  }, [productId]);
+  }, [productId, idParam, skuParam, slugParam]);
 
 
 

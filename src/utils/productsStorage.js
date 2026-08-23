@@ -21,17 +21,69 @@ export function generateSlug(name = "") {
 }
 
 export const STORAGE_KEY = "pekefe_products";
-export const DEFAULT_PRODUCTS = [];
+export const DEFAULT_PRODUCTS = [
+  {
+    id: "PKF-1787481354097",
+    name: "Geleneksel İspir Dut Pestili",
+    sku: "PKF-714690",
+    category: "Pestil - Köme",
+    stock: 50,
+    price: 350,
+    oldPrice: 420,
+    sale_price: 350,
+    cost: 150,
+    image: "/uploads/beekeeping_bellows_premium.png",
+    meta: "Pestil · İspir",
+    desc: "İspir yaylalarının doğal dut şırasından harmanlanmış geleneksel lezzet.",
+    variants: [],
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "PKF-1787481146376",
+    name: "Cevizli İspir Kömesi",
+    sku: "PKF-TEST-999",
+    category: "Pestil - Köme",
+    stock: 40,
+    price: 380,
+    oldPrice: 450,
+    sale_price: 380,
+    cost: 160,
+    image: "/uploads/beekeeping_bellows_premium.png",
+    meta: "Köme · İspir",
+    desc: "İnce serilmiş dut pestili içerisinde taze Erzurum ceviz içi dolgusu.",
+    variants: [],
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "PKF-1003",
+    name: "Geleneksel Bal & Tahin Karışımı",
+    sku: "PKF-BAL-TAHIN",
+    category: "Geleneksel Lezzetler",
+    stock: 30,
+    price: 290,
+    oldPrice: 340,
+    sale_price: 290,
+    cost: 120,
+    image: "/uploads/beekeeping_bellows_premium.png",
+    meta: "Doğal Bal · İspir",
+    desc: "Halis İspir balı ve çifte kavrulmuş yerli susam tahini harmanı.",
+    variants: [],
+    createdAt: new Date().toISOString()
+  }
+];
 
 export function getProducts() {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return DEFAULT_PRODUCTS;
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-      return [];
+      return DEFAULT_PRODUCTS;
     }
     const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return DEFAULT_PRODUCTS;
+    }
     // Sanitize stale "X Adet Stokta" meta values from localStorage
     const sanitized = parsed.map(p => {
       if (p.meta && /^\d+ adet stokta$/i.test(String(p.meta).trim())) {
@@ -44,7 +96,7 @@ export function getProducts() {
     });
     return sanitized;
   } catch (err) {
-    return [];
+    return DEFAULT_PRODUCTS;
   }
 }
 

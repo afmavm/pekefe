@@ -631,37 +631,27 @@ export async function PUT(
     revalidatePath('/', 'layout');
     return NextResponse.json(formattedResponse);
   } catch (error) {
-    console.warn('Error updating product, falling back to local catalog:', error);
+    console.warn('Error updating product in DB, saving directly to local catalog:', error);
     try {
-      const body = await request.json().catch(() => ({}));
       const { id } = await params;
-      const fallbackIdx = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === id || p.sku === id);
-      if (fallbackIdx !== -1) {
-        const target = FALLBACK_PRODUCTS[fallbackIdx];
-        const updatedFallback = {
-          ...target,
-          ...body,
-          variants: body.variants ? body.variants.map((v: any, i: number) => ({
-            id: v.id || `var_fb_${Date.now()}_${i}`,
-            sku: v.sku || `${target.sku || 'VAR'}-${i+1}`,
-            price: Number(v.price || target.price || 0),
-            stock: Number(v.stock || 0),
-            size: v.size || "",
-            color: v.color || "",
-            name: v.name || "",
-            attributes: {
-              size: v.size || "",
-              color: v.color || "",
-              barcode: v.barcode || "",
-              name: v.name || "",
-              b2bPrice: v.b2bPrice
-            }
-          })) : (target.variants || [])
-        };
-        FALLBACK_PRODUCTS[fallbackIdx] = updatedFallback;
-        return NextResponse.json(updatedFallback);
-      }
-    } catch (e) {}
+      const localProducts = readLocalProducts();
+      const localItem = localProducts.find((p: any) => p.id === id || p.sku === id || decodeURIComponent(id) === p.sku);
+      
+      const payloadToSave = {
+        ...(localItem || {}),
+        ...body,
+        id: localItem?.id || id,
+        sku: body.sku || localItem?.sku || id
+      };
+
+      const updatedLocal = saveLocalProduct(payloadToSave, true);
+      revalidatePath('/', 'layout');
+      revalidatePath('/admin/stock');
+      revalidatePath('/api/products');
+      return NextResponse.json(updatedLocal, { status: 200 });
+    } catch (e) {
+      console.error('Local JSON save error in catch block:', e);
+    }
     return NextResponse.json({ message: "Ürün bilgileri kaydedildi" }, { status: 200 });
   }
 }

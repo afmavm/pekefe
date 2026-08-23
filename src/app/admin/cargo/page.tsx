@@ -59,8 +59,6 @@ const STATUS_MAP: Record<string, { label: string; cls: string; icon: React.Eleme
 
 const CARGO_COMPANIES_AUTOCOMPLETE = ["Yurtiçi Kargo", "Aras Kargo", "MNG Kargo", "PTT Kargo", "Sürat Kargo"];
 
-const DEFAULT_EXAMPLE_CARRIERS: Carrier[] = [];
-
 export default function CargoPage() {
   const [activeTab, setActiveTab] = useState<"orders" | "carriers">("orders");
 
@@ -90,7 +88,7 @@ export default function CargoPage() {
 
   // Tab 2: Carriers States
   const [settings, setSettings] = useState<any>(null);
-  const [carriers, setCarriers] = useState<Carrier[]>(DEFAULT_EXAMPLE_CARRIERS);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [loadingCarriers, setLoadingCarriers] = useState(false);
   const [savingCarriers, setSavingCarriers] = useState(false);
   const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);

@@ -122,7 +122,7 @@ export default function StockProductionPage() {
 
   // Quick Stock Update Modal States
   const [quickStockProduct, setQuickStockProduct] = useState<Product | null>(null);
-  const [quickStockQty, setQuickStockQty] = useState<number>(0);
+  const [quickStockQty, setQuickStockQty] = useState<string | number>(0);
   const [isSavingQuickStock, setIsSavingQuickStock] = useState(false);
 
   const loadData = async () => {
@@ -1481,7 +1481,7 @@ export default function StockProductionPage() {
 
       {/* Quick Stock Update Modal Overlay */}
       {quickStockProduct && (
-        <div key={`quick-stock-modal-${quickStockProduct.id || quickStockProduct.sku}-${Date.now()}`} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div key={`quick-stock-modal-${quickStockProduct.id || quickStockProduct.sku}`} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
@@ -1510,7 +1510,7 @@ export default function StockProductionPage() {
                 <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:border-orange-400 focus-within:bg-white transition-all overflow-hidden shadow-inner">
                   <button
                     type="button"
-                    onClick={() => setQuickStockQty(prev => Math.max(0, prev - 1))}
+                    onClick={() => setQuickStockQty(prev => Math.max(0, (Number(prev) || 0) - 1))}
                     className="px-4 py-3 text-slate-500 hover:text-orange-500 hover:bg-slate-100 border-r border-slate-200 transition font-black text-lg select-none shrink-0"
                   >
                     -
@@ -1518,13 +1518,22 @@ export default function StockProductionPage() {
                   <input
                     type="number"
                     min="0"
+                    autoFocus
                     value={quickStockQty}
-                    onChange={(e) => setQuickStockQty(Math.max(0, parseInt(e.target.value) || 0))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") {
+                        setQuickStockQty("");
+                      } else {
+                        const parsed = parseInt(val, 10);
+                        setQuickStockQty(isNaN(parsed) ? 0 : Math.max(0, parsed));
+                      }
+                    }}
                     className="flex-1 bg-transparent py-3 text-lg font-bold text-slate-900 outline-none border-none text-center"
                   />
                   <button
                     type="button"
-                    onClick={() => setQuickStockQty(prev => prev + 1)}
+                    onClick={() => setQuickStockQty(prev => (Number(prev) || 0) + 1)}
                     className="px-4 py-3 text-slate-500 hover:text-orange-500 hover:bg-slate-100 border-l border-slate-200 transition font-black text-lg select-none shrink-0"
                   >
                     +

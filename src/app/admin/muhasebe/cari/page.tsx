@@ -914,8 +914,9 @@ export default function CariPage() {
       .then(data => {
         const list = Array.isArray(data) ? data : [];
         setAccounts(list);
-        if (list.length > 0 && !activeAccount) {
-          fetchActiveDetails(list[0].id);
+        if (list.length > 0) {
+          setActiveAccount(list[0]);
+          fetchActiveDetails(list[0].id, list[0]);
         }
       })
       .catch(err => {
@@ -925,14 +926,15 @@ export default function CariPage() {
       .finally(() => setLoading(false));
   };
 
-  const fetchActiveDetails = (id: string) => {
+  const fetchActiveDetails = (id: string, fallbackAcc?: any) => {
+    if (fallbackAcc) {
+      setActiveAccount(fallbackAcc);
+    }
     fetch(`/api/accounting/current-accounts/${id}`, { cache: "no-store" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && !data.error) {
           setActiveAccount(data);
-          // Muhasebe modunda (view yok) Hareketler sekmesi varsayılanı
-          // — detay yüklenince ekstreyi de çek
           if (!searchParams?.get("view")) {
             fetchEkstre(id);
           }
@@ -954,9 +956,12 @@ export default function CariPage() {
   }, [activeTab, activeAccount?.id]);
 
 
-  // Kart gövdesine tıklayınca sadece detayı aç
-  const handleOpenAccount = (id: string) => {
-    fetchActiveDetails(id);
+  // Kart gövdesine tıklayınca anında detayı aç
+  const handleOpenAccount = (id: string, acc?: any) => {
+    if (acc) {
+      setActiveAccount(acc);
+    }
+    fetchActiveDetails(id, acc);
   };
 
   // Kutucuğa tıklayınca sadece seçim yap/kaldır
@@ -1920,7 +1925,7 @@ export default function CariPage() {
                     {/* ── İÇERİK ALANI: sadece detay açar, seçim yapmaz ── */}
                     <div 
                       className="flex-1 min-w-0 p-4 cursor-pointer"
-                      onClick={() => handleOpenAccount(acc.id)}
+                      onClick={() => handleOpenAccount(acc.id, acc)}
                     >
                       <div className="flex justify-between items-start">
                         <h4 className="font-extrabold text-sm text-slate-800 truncate pr-2">{acc.name}</h4>

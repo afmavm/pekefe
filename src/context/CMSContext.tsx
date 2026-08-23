@@ -255,15 +255,10 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
   };
 
   const fetchPages = async () => {
-    try {
-      const res = await fetch(`/api/cms/pages?t=${Date.now()}`, { cache: 'no-store' });
-      const data = await res.json();
-      if (Array.isArray(data)) setPages(data);
-    } catch (err) { console.error(err); }
+    // Silently skip if no API endpoint
   };
 
-  // Sync state when SSR-provided props change (client-side navigation keeps layout mounted,
-  // so useState won't reinitialize — we must sync manually via useEffect)
+  // Sync state when SSR-provided props change
   useEffect(() => {
     if (initialCMSData) {
       setCmsData(parseCMSData(initialCMSData));
@@ -276,23 +271,9 @@ export function CMSProvider({ children, initialCMSData, initialPages }: CMSProvi
     }
   }, [initialPages]);
 
-  // Always fetch fresh data from API on mount and listen for instant updates
+  // Always fetch fresh data from API on mount
   useEffect(() => {
     fetchCMSData();
-    fetchPages();
-
-    const handleSettingsUpdated = () => {
-      fetchCMSData();
-      fetchPages();
-    };
-
-    window.addEventListener("settings-updated", handleSettingsUpdated);
-    window.addEventListener("storage", handleSettingsUpdated);
-    return () => {
-      window.removeEventListener("settings-updated", handleSettingsUpdated);
-      window.removeEventListener("storage", handleSettingsUpdated);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateCMSData = async (newData: Partial<CMSData>) => {

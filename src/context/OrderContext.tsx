@@ -51,17 +51,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchOrders();
-
-    const handleCartOrOrderChange = () => fetchOrders();
-    window.addEventListener("pekefe_orders_updated", handleCartOrOrderChange);
-    window.addEventListener("pekefe_cart_changed", handleCartOrOrderChange);
-    window.addEventListener("focus", handleCartOrOrderChange);
-
-    return () => {
-      window.removeEventListener("pekefe_orders_updated", handleCartOrOrderChange);
-      window.removeEventListener("pekefe_cart_changed", handleCartOrOrderChange);
-      window.removeEventListener("focus", handleCartOrOrderChange);
-    };
   }, [fetchOrders]);
 
   const addOrder = async (order: Order) => {

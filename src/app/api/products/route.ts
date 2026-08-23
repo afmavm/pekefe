@@ -297,26 +297,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
     }
     const session = await getServerSession(authOptions);
-    const fetchProductsPromise = (async () => {
-      return await prisma.product.findMany({
-        where: { isDeleted: false },
-        include: {
-          variants: true,
-          locations: {
-            include: {
-              warehouse: true
-            }
-          },
-          recipe: true
+    const products = await prisma.product.findMany({
+      where: { isDeleted: false },
+      include: {
+        variants: true,
+        locations: {
+          include: {
+            warehouse: true
+          }
         },
-        orderBy: { createdAt: 'desc' }
-      });
-    })();
+        recipe: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-    const products = await withTimeout(fetchProductsPromise, 5000, null as any);
-
-    if (!products || products.length === 0) {
-      return NextResponse.json(FALLBACK_PRODUCTS || [], { status: 200 });
+    if (!products) {
+      return NextResponse.json([], { status: 200 });
     }
 
     let dealerAccount = null;
@@ -625,6 +621,8 @@ export async function POST(request: NextRequest) {
     });
 
     revalidatePath('/', 'layout');
+    revalidatePath('/admin/stock');
+    revalidatePath('/api/products');
     return NextResponse.json(createdProduct || product);
   } catch (error) {
     console.warn('Error creating product, storing in local fallback:', error);

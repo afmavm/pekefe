@@ -128,22 +128,22 @@ export default function StockProductionPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/products?t=${Date.now()}`);
+      const res = await fetch(`/api/products?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
+        const dbProducts = Array.isArray(data) ? data : [];
         const localProds = getProducts() || [];
-        if (Array.isArray(data) && data.length > 0) {
-          const serverIds = new Set(data.map((p: any) => String(p.id || p.sku)));
-          const unsyncedLocals = localProds.filter((p: any) => p && !serverIds.has(String(p.id)) && !serverIds.has(String(p.sku)));
-          const merged = [...unsyncedLocals, ...data];
-          setProducts(merged);
-          if (typeof window !== "undefined") {
-            try {
-              localStorage.setItem("pekefe_products", JSON.stringify(merged));
-            } catch (e) {}
-          }
-        } else {
-          setProducts(localProds);
+
+        // Real-time Database Products + Unsynced Local Products
+        const dbIds = new Set(dbProducts.map((p: any) => String(p.id || p.sku)));
+        const unsyncedLocals = localProds.filter((p: any) => p && !dbIds.has(String(p.id)) && !dbIds.has(String(p.sku)));
+        const finalProducts = [...dbProducts, ...unsyncedLocals];
+
+        setProducts(finalProducts);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("pekefe_products", JSON.stringify(finalProducts));
+          } catch (e) {}
         }
       } else {
         setProducts(getProducts() || []);

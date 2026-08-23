@@ -261,7 +261,7 @@ export function ProductCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onAddToCart(selectedVariant);
+                onAddToCart(selectedVariant ? { ...selectedVariant, price: activePrice } : { price: activePrice, id: id });
               }}
               className="flex-1 bg-[#6b1d2f] hover:bg-[#521321] text-white px-3.5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm text-xs font-bold uppercase tracking-wider active:scale-95 shrink-0"
               aria-label={`${name} sepete ekle`}

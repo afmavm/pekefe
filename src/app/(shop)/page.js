@@ -509,12 +509,20 @@ export default function Home() {
               tag={p.tag}
               stock={p.stock}
               onAddToCart={(selectedVar) => {
+                const effectivePrice = Number(
+                  selectedVar?.price ?? 
+                  p.price ?? 
+                  p.sale_price ?? 
+                  p.list_price ?? 
+                  p.oldPrice ?? 
+                  0
+                );
                 const varLabel = selectedVar?.attributes?.size || selectedVar?.attributes?.name || selectedVar?.name || selectedVar?.size || "";
                 const itemToAdd = {
-                  id: selectedVar?.id || `${p.id}_var`,
+                  id: selectedVar?.id ? `${p.id}_${selectedVar.id}` : p.id,
                   productId: p.id,
-                  name: varLabel ? `${p.name} (${varLabel})` : p.name,
-                  price: selectedVar?.price ? Number(selectedVar.price) : p.price,
+                  name: (varLabel && varLabel !== p.name) ? `${p.name} (${varLabel})` : p.name,
+                  price: effectivePrice,
                   sku: selectedVar?.sku || p.sku || p.id,
                   image: p.image,
                   quantity: 1

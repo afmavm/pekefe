@@ -20,8 +20,26 @@ export function generateSlug(name = "") {
     .replace(/-+/g, "-");
 }
 
-export const STORAGE_KEY = "pekefe_products_v5";
+export const STORAGE_KEY = "pekefe_products_v6";
 export const DEFAULT_PRODUCTS = [
+  {
+    id: "PKF-1787504925641",
+    name: "Deneme Pestil",
+    sku: "PKF-812100",
+    category: "Pestil - Köme",
+    stock: 6,
+    price: 1,
+    oldPrice: 1,
+    sale_price: 1,
+    cost: 1,
+    image: "/logo.png",
+    images: ["/logo.png"],
+    meta: "Pestil · İspir",
+    desc: "",
+    shortDesc: "",
+    variants: [],
+    createdAt: new Date().toISOString()
+  },
   {
     id: "PKF-1787481146376",
     name: "Test Ürün Adli Tıp",

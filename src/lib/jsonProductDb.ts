@@ -78,15 +78,25 @@ export function saveLocalProduct(product: Partial<LocalProduct>, isEditMode: boo
     isDeleted: false
   };
 
-  if (isEditMode) {
-    const existingIndex = current.findIndex(p => p.id === newProduct.id || p.sku === newProduct.sku);
-    if (existingIndex !== -1) {
-      current[existingIndex] = { ...current[existingIndex], ...newProduct };
-    } else {
-      current.unshift(newProduct);
-    }
+  const cleanSku = String(product.sku || '').trim().toLowerCase();
+  const cleanId = String(product.id || '').trim().toLowerCase();
+
+  const existingIndex = current.findIndex(p => {
+    const pId = String(p.id || '').trim().toLowerCase();
+    const pSku = String(p.sku || '').trim().toLowerCase();
+    return (cleanId && pId === cleanId) || (cleanSku && pSku === cleanSku);
+  });
+
+  if (existingIndex !== -1) {
+    // Update existing product cleanly (preserves same ID and avoids duplicate rows)
+    current[existingIndex] = {
+      ...current[existingIndex],
+      ...newProduct,
+      id: current[existingIndex].id || newProduct.id,
+      sku: product.sku || current[existingIndex].sku
+    };
   } else {
-    // ALWAYS ADD AS A NEW PRODUCT IN CREATE MODE — NEVER OVERWRITE
+    // Truly new product with unique SKU & ID
     current.unshift(newProduct);
   }
 

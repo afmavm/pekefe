@@ -134,14 +134,41 @@ export default function StockProductionPage() {
         const dbProducts = Array.isArray(data) ? data : [];
         const localProds = getProducts() || [];
 
-        // Real-time Database Products + Unsynced Local Products
-        const dbIds = new Set(dbProducts.map((p: any) => String(p.id || p.sku)));
-        const unsyncedLocals = localProds.filter((p: any) => p && !dbIds.has(String(p.id)) && !dbIds.has(String(p.sku)));
-        const finalProducts = [...dbProducts, ...unsyncedLocals];
+        // Strict Deduplication: Match by both ID and SKU case-insensitively
+        const seenIds = new Set<string>();
+        const seenSkus = new Set<string>();
+        const finalProducts: Product[] = [];
+
+        // DB products have highest priority
+        for (const p of dbProducts) {
+          if (!p) continue;
+          const cleanId = String(p.id || "").trim().toLowerCase();
+          const cleanSku = String(p.sku || "").trim().toLowerCase();
+          if (cleanId) seenIds.add(cleanId);
+          if (cleanSku) seenSkus.add(cleanSku);
+          finalProducts.push(p);
+        }
+
+        // Add unsynced local products only if completely unique
+        for (const p of localProds) {
+          if (!p) continue;
+          const cleanId = String(p.id || "").trim().toLowerCase();
+          const cleanSku = String(p.sku || "").trim().toLowerCase();
+          const isDuplicate = (cleanId && seenIds.has(cleanId)) || (cleanSku && seenSkus.has(cleanSku));
+          if (!isDuplicate) {
+            if (cleanId) seenIds.add(cleanId);
+            if (cleanSku) seenSkus.add(cleanSku);
+            finalProducts.push(p);
+          }
+        }
 
         setProducts(finalProducts);
-        // Sync localStorage with proper key and dispatch change event for all listeners
-        saveProducts(finalProducts);
+        // Silent localStorage update WITHOUT dispatching events to prevent infinite loop
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(finalProducts));
+          } catch (e) {}
+        }
       } else {
         setProducts(getProducts() || []);
       }
@@ -172,8 +199,12 @@ export default function StockProductionPage() {
   useEffect(() => {
     loadData();
 
+    let debounceTimer: any = null;
     const handleProductChange = () => {
-      loadData();
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        loadData();
+      }, 500);
     };
 
     if (typeof window !== "undefined") {
@@ -183,6 +214,7 @@ export default function StockProductionPage() {
     }
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       if (typeof window !== "undefined") {
         window.removeEventListener("pekefe_products_changed", handleProductChange);
         window.removeEventListener("pekefe_products_updated", handleProductChange);

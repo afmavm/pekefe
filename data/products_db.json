@@ -6,8 +6,8 @@
     "brand": "PEKEFE",
     "model": "",
     "category": "Pestil - Köme",
-    "stock": 6,
-    "stock_quantity": 6,
+    "stock": 11,
+    "stock_quantity": 11,
     "price": 1,
     "oldPrice": 1,
     "list_price": 1,
@@ -19,7 +19,7 @@
     "shortDesc": "",
     "variants": [],
     "locations": [],
-    "createdAt": "2026-08-23T17:08:45.641Z",
+    "createdAt": "2026-08-23T17:23:27.357Z",
     "isDeleted": false
   },
   {

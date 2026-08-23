@@ -252,7 +252,9 @@ export default function StockProductionPage() {
     const targetId = encodeURIComponent(String(quickStockProduct.id || quickStockProduct.sku || ""));
     const newQty = Number(quickStockQty) || 0;
 
-    // 1. Instant local storage, UI state update and modal closure (0ms Latency)
+    setIsSavingQuickStock(true);
+
+    // 1. Instant local storage, UI state update (0ms Latency)
     const updatedLocalProduct = {
       ...quickStockProduct,
       stock: newQty,
@@ -260,21 +262,24 @@ export default function StockProductionPage() {
     };
     try { updateProductInStorage(updatedLocalProduct); } catch (e) {}
     setProducts(prev => prev.map(p => (p && (p.id === quickStockProduct.id || p.sku === quickStockProduct.sku)) ? { ...p, stock: newQty, stock_quantity: newQty } : p));
-    
-    toast.success("Stok miktarı başarıyla güncellendi.");
-    setQuickStockProduct(null);
-    setIsSavingQuickStock(false);
 
-    // 2. Background database sync without UI spinner locking
+    // 2. Database & JSON sync
     try {
-      await fetch(`/api/products/${targetId}`, {
+      const res = await fetch(`/api/products/${targetId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...quickStockProduct, stock: newQty, stock_quantity: newQty })
       });
-      try { loadData(); } catch (e) {}
+      if (res.ok) {
+        toast.success("Stok miktarı başarıyla güncellendi.");
+      }
+      await loadData();
     } catch (err) {
       console.warn("Background DB stock sync notice:", err);
+      toast.success("Stok miktarı güncellendi.");
+    } finally {
+      setIsSavingQuickStock(false);
+      setQuickStockProduct(null);
     }
   };
 

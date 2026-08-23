@@ -1847,9 +1847,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     setIsSaving(true);
     try {
       const url = isEditMode ? `/api/products/${productId}` : "/api/products";
-      const method = isEditMode ? "PUT" : "POST";
-
-      const totalStock = warehouses.reduce((sum, w) => sum + w.stockCount, 0);
+      const warehouseStockSum = warehouses.reduce((sum, w) => sum + (Number(w.stockCount) || 0), 0);
+      const totalStock = warehouseStockSum > 0 ? warehouseStockSum : (Number(form.stock) || Number(form.stockCount) || Number(form.stock_quantity) || 0);
 
       const finalSalePrice = Number(form.salePrice || form.retailPrice || form.webPrice || 0);
       const finalMarketPrice = Number(form.marketPrice) > 0 ? Number(form.marketPrice) : finalSalePrice;

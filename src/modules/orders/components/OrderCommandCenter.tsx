@@ -1892,9 +1892,23 @@ export default function OrderCommandCenter() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Sipariş Özeti</p>
                     <p className="text-xs text-slate-700 font-semibold leading-relaxed">{selectedOrder.summary}</p>
                     <div className="h-px bg-slate-200/50" />
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-semibold text-slate-500">Tutar</span>
-                      <span className="font-extrabold text-slate-900 text-sm">₺{selectedOrder.amount.toLocaleString("tr-TR")}</span>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between items-center text-slate-600">
+                        <span>Ödeme Şekli</span>
+                        <span className="font-bold text-slate-900 bg-white px-2.5 py-1 border border-slate-200 rounded-lg shadow-2xs">
+                          {selectedOrder.method || "Kredi Kartı"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-slate-600">
+                        <span>Kargo Gönderimi</span>
+                        <span className="font-semibold text-slate-800">
+                          {selectedOrder.cargoCompany || "Yurtiçi Kargo"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-slate-200/60">
+                        <span className="font-bold text-slate-600">Toplam Tutar</span>
+                        <span className="font-extrabold text-orange-600 text-base">₺{selectedOrder.amount.toLocaleString("tr-TR")}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -2063,7 +2077,7 @@ export default function OrderCommandCenter() {
                     {/* Step 2 */}
                     <div className="relative">
                       <div className="absolute -left-[27px] top-0.5 w-4 h-4 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-white"><Check className="w-2.5 h-2.5" /></div>
-                      <p className="text-xs font-bold text-slate-850">Ödeme Doğrulandı (Banka Havalesi)</p>
+                      <p className="text-xs font-bold text-slate-800">Ödeme Doğrulandı ({selectedOrder.method || "Kredi Kartı / Havale"})</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">{selectedOrder.date} 09:50</p>
                     </div>
                     {/* Step 1 */}

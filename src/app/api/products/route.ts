@@ -31,6 +31,7 @@ function generateSlugServer(name: string = ''): string {
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
   if (branchIdInput) {

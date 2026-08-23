@@ -979,7 +979,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     isInitialized.current = false;
     setIsDirty(false);
 
-    const hasUrlParam = typeof window !== "undefined" && (window.location.search.includes("sku=") || window.location.search.includes("id="));
+    const searchStr = typeof window !== "undefined" ? window.location.search : "";
+    const hasUrlParam = searchStr.includes("sku=") || searchStr.includes("id=") || searchStr.includes("slug=");
 
     if (!productId && !hasUrlParam) {
       const randNum = Math.floor(100000 + Math.random() * 900000);
@@ -1067,7 +1068,15 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     const fetchProduct = async () => {
       try {
         let product: any = null;
-        const targetSearchStr = String(productId || idParam || skuParam || slugParam || "").trim().toLowerCase();
+        let targetSearchStr = String(productId || idParam || skuParam || slugParam || "").trim().toLowerCase();
+
+        if (typeof window !== "undefined") {
+          const urlParams = new URLSearchParams(window.location.search);
+          const rawId = urlParams.get("id") || urlParams.get("sku") || urlParams.get("slug") || "";
+          if (rawId) {
+            targetSearchStr = rawId.trim().toLowerCase();
+          }
+        }
 
         // 1. Instant local storage/memory lookup (0ms Load Time)
         const localProducts = getProducts();

@@ -103,6 +103,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const isLocalhost = request.headers.get('host')?.includes('localhost');
+    const targetOkUrl = isLocalhost 
+      ? `http://${request.headers.get('host')}/sepet/onay` 
+      : 'https://www.pekefe.com/sepet/onay';
+    
+    const targetFailUrl = isLocalhost 
+      ? `http://${request.headers.get('host')}/sepet/odeme?error=paytr` 
+      : 'https://www.pekefe.com/sepet/odeme?error=paytr';
+
     // Create PayTR Token
     const paytrResult = await createPayTRToken({
       merchantOid: customOrderId,
@@ -113,8 +122,8 @@ export async function POST(request: NextRequest) {
       userPhone: phone,
       userIp: userIp,
       basket: paytrBasket,
-      okUrl: 'https://www.pekefe.com/sepet/onay',
-      failUrl: 'https://www.pekefe.com/sepet/odeme?error=paytr',
+      okUrl: targetOkUrl,
+      failUrl: targetFailUrl,
     });
 
     if (!paytrResult.success || !paytrResult.token) {

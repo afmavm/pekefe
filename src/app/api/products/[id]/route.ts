@@ -383,7 +383,7 @@ export async function PUT(
       body.brand !== undefined ||
       body.model !== undefined
     ) {
-      let currentAttrs = {};
+      let currentAttrs: any = {};
       try {
         const existingProduct = await prisma.product.findUnique({ where: { id: realId } });
         currentAttrs = existingProduct?.attributes
@@ -401,7 +401,40 @@ export async function PUT(
         ...(body.unit !== undefined ? { unit: body.unit } : {}),
         ...(body.manufacturerCode !== undefined ? { manufacturerCode: body.manufacturerCode } : {}),
         ...(body.brand !== undefined ? { brand: body.brand } : {}),
-        ...(body.model !== undefined ? { model: body.model } : {})
+        ...(body.model !== undefined ? { model: body.model } : {}),
+        ...(body.stockType !== undefined ? { stockType: body.stockType } : {}),
+        ...(body.warehouse !== undefined ? { warehouse: body.warehouse } : {}),
+        ...(body.recipeDetails !== undefined ? { recipeDetails: body.recipeDetails } : {}),
+        ...(body.harvestStory !== undefined ? { harvestStory: body.harvestStory } : {}),
+        ...(body.ingredients !== undefined ? { ingredients: body.ingredients } : {}),
+        ...(body.ritual !== undefined ? { ritual: body.ritual } : {}),
+        ...(body.nutrients !== undefined ? { nutrients: body.nutrients } : {}),
+        ...(body.hmfLevel !== undefined ? { hmfLevel: body.hmfLevel } : {}),
+        ...(body.specsMaterial !== undefined ? { specsMaterial: body.specsMaterial } : {}),
+        ...(body.specsWeight !== undefined ? { specsWeight: body.specsWeight } : {}),
+        ...(body.specsDimensions !== undefined ? { specsDimensions: body.specsDimensions } : {}),
+        ...(body.specsBellows !== undefined ? { specsBellows: body.specsBellows } : {}),
+        ...(body.unitCoefficients !== undefined ? { unitCoefficients: body.unitCoefficients } : {}),
+        ...(body.branchPrices !== undefined ? { branchPrices: body.branchPrices } : {}),
+        ...(body.marketplaces !== undefined ? { marketplaces: body.marketplaces } : {}),
+        ...(body.b2bActive !== undefined ? { b2bActive: body.b2bActive } : {}),
+        ...(body.b2bPreOrderable !== undefined ? { b2bPreOrderable: body.b2bPreOrderable } : {}),
+        ...(body.altitude !== undefined ? { altitude: body.altitude } : {}),
+        ...(body.harvestSeason !== undefined ? { harvestSeason: body.harvestSeason } : {}),
+        ...(body.usageGuide !== undefined ? { usageGuide: body.usageGuide } : {}),
+        ...(body.warrantyInfo !== undefined ? { warrantyInfo: body.warrantyInfo } : {}),
+        ...(body.warrantyBadgeLabel !== undefined ? { warrantyBadgeLabel: body.warrantyBadgeLabel } : {}),
+        ...(body.warrantyYears !== undefined ? { warrantyYears: body.warrantyYears } : {}),
+        ...(body.warrantyBadgeDesc !== undefined ? { warrantyBadgeDesc: body.warrantyBadgeDesc } : {}),
+        ...(body.quickOverview1_title !== undefined ? { quickOverview1_title: body.quickOverview1_title } : {}),
+        ...(body.quickOverview1_desc !== undefined ? { quickOverview1_desc: body.quickOverview1_desc } : {}),
+        ...(body.quickOverview2_title !== undefined ? { quickOverview2_title: body.quickOverview2_title } : {}),
+        ...(body.quickOverview2_desc !== undefined ? { quickOverview2_desc: body.quickOverview2_desc } : {}),
+        ...(body.quickOverview3_title !== undefined ? { quickOverview3_title: body.quickOverview3_title } : {}),
+        ...(body.quickOverview3_desc !== undefined ? { quickOverview3_desc: body.quickOverview3_desc } : {}),
+        ...(body.longDescExtra !== undefined ? { longDescExtra: body.longDescExtra } : {}),
+        ...(body.badgeText1 !== undefined ? { badgeText1: body.badgeText1 } : {}),
+        ...(body.badgeText2 !== undefined ? { badgeText2: body.badgeText2 } : {}),
       };
     }
 

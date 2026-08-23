@@ -25,6 +25,14 @@ export interface LocalProduct {
   images?: string[];
   desc?: string | null;
   shortDesc?: string | null;
+  seoTitle?: string | null;
+  seoDesc?: string | null;
+  seoKeywords?: string | null;
+  videoUrl?: string | null;
+  isCampaignActive?: boolean;
+  discount_start_date?: string | null;
+  discount_end_date?: string | null;
+  attributes?: any;
   variants?: any[];
   warehouses?: any[];
   locations?: any[];
@@ -49,10 +57,14 @@ export function readLocalProducts(): LocalProduct[] {
   }
 }
 
-export function saveLocalProduct(product: Partial<LocalProduct>, isEditMode: boolean = false): LocalProduct {
+export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string]: any }, isEditMode: boolean = false): LocalProduct {
   const current = readLocalProducts();
   const timestamp = Date.now();
   const generatedId = isEditMode ? (product.id || `PKF-${timestamp}`) : `PKF-${timestamp}`;
+
+  const incomingAttrs = typeof product.attributes === 'object' && product.attributes !== null
+    ? { ...product.attributes }
+    : {};
 
   const newProduct: LocalProduct = {
     id: generatedId,
@@ -72,7 +84,32 @@ export function saveLocalProduct(product: Partial<LocalProduct>, isEditMode: boo
     images: product.images || [],
     desc: product.desc || '',
     shortDesc: product.shortDesc || '',
+    seoTitle: product.seoTitle || '',
+    seoDesc: product.seoDesc || '',
+    seoKeywords: product.seoKeywords || '',
+    videoUrl: product.videoUrl || '',
+    isCampaignActive: Boolean(product.isCampaignActive),
+    discount_start_date: product.discount_start_date ? String(product.discount_start_date) : null,
+    discount_end_date: product.discount_end_date ? String(product.discount_end_date) : null,
+    attributes: {
+      ...incomingAttrs,
+      ...(product.harvestStory ? { harvestStory: product.harvestStory } : {}),
+      ...(product.ingredients ? { ingredients: product.ingredients } : {}),
+      ...(product.ritual ? { ritual: product.ritual } : {}),
+      ...(product.nutrients ? { nutrients: product.nutrients } : {}),
+      ...(product.hmfLevel ? { hmfLevel: product.hmfLevel } : {}),
+      ...(product.specsMaterial ? { specsMaterial: product.specsMaterial } : {}),
+      ...(product.specsWeight ? { specsWeight: product.specsWeight } : {}),
+      ...(product.specsDimensions ? { specsDimensions: product.specsDimensions } : {}),
+      ...(product.specsBellows ? { specsBellows: product.specsBellows } : {}),
+      ...(product.usageGuide ? { usageGuide: product.usageGuide } : {}),
+      ...(product.warrantyInfo ? { warrantyInfo: product.warrantyInfo } : {}),
+      ...(product.unitCoefficients ? { unitCoefficients: product.unitCoefficients } : {}),
+      ...(product.branchPrices ? { branchPrices: product.branchPrices } : {}),
+      ...(product.marketplaces ? { marketplaces: product.marketplaces } : {}),
+    },
     variants: product.variants || [],
+    warehouses: product.warehouses || [],
     locations: product.locations || [],
     createdAt: new Date().toISOString(),
     isDeleted: false

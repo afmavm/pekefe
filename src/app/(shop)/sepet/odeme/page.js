@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Toast } from "@/components/ui/Toast";
-import { getCart, clearCart } from "@/utils/cartStorage";
+import { getCart, clearCart, addToCart } from "@/utils/cartStorage";
+import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { turkeyLocations } from "@/data/turkey-locations";
 
 export default function Odeme() {
@@ -63,6 +64,23 @@ export default function Odeme() {
       })
       .catch((e) => console.error("Error loading bank accounts:", e));
   }, []);
+
+  const [allProducts, setAllProducts] = useState([]);
+  useEffect(() => {
+    setAllProducts(getProducts());
+    fetchLiveProducts().then((live) => {
+      if (live && live.length > 0) {
+        setAllProducts(live);
+      }
+    });
+  }, []);
+
+  const recommendations = useMemo(() => {
+    if (!Array.isArray(allProducts) || allProducts.length === 0) return [];
+    const cartIds = new Set((cartItems || []).map((item) => String(item.productId || item.id)));
+    const available = allProducts.filter((p) => !cartIds.has(String(p.id)));
+    return (available.length > 0 ? available : allProducts).slice(0, 4);
+  }, [allProducts, cartItems]);
 
   // Enforce mandatory user authentication for checkout
   useEffect(() => {
@@ -235,10 +253,16 @@ export default function Odeme() {
     currentCarrierObj?.pricingType === "free"
   );
 
+  const isCurrentCarrierReceiverPay = Boolean(
+    currentCarrierObj?.pricingType === "receiver_pay" ||
+    currentCarrierObj?.pricingType === "buyer_pays" ||
+    currentCarrierObj?.isReceiverPay === true
+  );
+
   const carrierFreeThreshold = Number(currentCarrierObj?.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
   const carrierFee = getCarrierTierFee(currentCarrierObj, totalCartDesi);
   const isShippingFree = isCurrentCarrierAlwaysFree || (subtotal >= carrierFreeThreshold);
-  const shippingCost = subtotal === 0 ? 0 : (isShippingFree ? 0 : carrierFee);
+  const shippingCost = subtotal === 0 ? 0 : (isCurrentCarrierReceiverPay ? 0 : (isShippingFree ? 0 : carrierFee));
 
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
@@ -763,7 +787,12 @@ export default function Odeme() {
                     c.alwaysFree === true ||
                     c.pricingType === "free"
                   );
-                  const isFree = isCarrierAlwaysFree || (subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000));
+                  const isReceiverPay = Boolean(
+                    c.pricingType === "receiver_pay" ||
+                    c.pricingType === "buyer_pays" ||
+                    c.isReceiverPay === true
+                  );
+                  const isFree = !isReceiverPay && (isCarrierAlwaysFree || (subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000)));
                   const isSelected = selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr')) || c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr'));
                   const logo = getCarrierLogo(c);
 
@@ -798,13 +827,15 @@ export default function Odeme() {
                       <div className="flex items-center justify-between w-full pt-2.5 border-t border-outline-variant/15">
                         <span className="text-[11px] font-bold text-on-surface-variant truncate max-w-[100px]">{c.name}</span>
                         <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full transition-colors ${
-                          subtotal === 0 ? "hidden" : isFree
+                          subtotal === 0 ? "hidden" : isReceiverPay
+                            ? "bg-amber-500 text-white shadow-xs"
+                            : isFree
                             ? "bg-emerald-600 text-white shadow-xs"
                             : isSelected
                             ? "bg-primary text-white shadow-xs"
                             : "bg-surface-container-high text-on-surface"
                         }`}>
-                          {subtotal === 0 ? "" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
+                          {subtotal === 0 ? "" : isReceiverPay ? "Kapıda Alıcı Öder" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
                         </span>
                       </div>
                     </button>
@@ -1138,11 +1169,27 @@ export default function Odeme() {
                 </div>
               )}
 
-              <div className="flex justify-between text-gray-600">
-                <span>Kargo Bedeli ({selectedCarrier})</span>
-                <span className="font-bold text-on-surface">
-                  {shippingCost === 0 ? <span className="text-emerald-600 font-bold">ÜCRETSİZ</span> : `₺${shippingCost.toLocaleString("tr-TR")}`}
-                </span>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>Kargo Bedeli ({selectedCarrier})</span>
+                  <span className="font-bold text-on-surface">
+                    {isCurrentCarrierReceiverPay ? (
+                      <span className="text-amber-700 font-bold px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md text-xs">
+                        Kapıda Alıcı Öder
+                      </span>
+                    ) : shippingCost === 0 ? (
+                      <span className="text-emerald-600 font-bold">ÜCRETSİZ</span>
+                    ) : (
+                      `₺${shippingCost.toLocaleString("tr-TR")}`
+                    )}
+                  </span>
+                </div>
+                {isCurrentCarrierReceiverPay && (
+                  <div className="p-2.5 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
+                    <span className="material-symbols-outlined text-sm text-amber-600 shrink-0">info</span>
+                    <span>Kargo bedeli sipariş teslimatında doğrudan kargo firmasına ödenecektir.</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-3 border-t border-outline-variant/20 flex justify-between items-baseline">
@@ -1206,6 +1253,71 @@ export default function Odeme() {
           </div>
         </aside>
       </div>
+
+      {/* Dynamic Cross-Sell Recommendations Section ("Bu Ürünleri Alanlar Bunları da Tercih Etti") */}
+      {recommendations.length > 0 && (
+        <section className="mt-12 pt-8 border-t border-outline-variant/20">
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <span className="text-secondary font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                Müşterilerin Tercihi
+              </span>
+              <h2 className="text-xl md:text-2xl font-bold text-primary mt-1">
+                Bu Ürünleri Alanlar Bunları da Tercih Etti
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {recommendations.map((p) => {
+              const formattedPrice = `₺${Number(p.price || p.sale_price || 0).toLocaleString("tr-TR")}`;
+              const tagLabel = p.tag || p.category || "Yöresel Lezzet";
+              return (
+                <div
+                  key={p.id}
+                  className="bg-white p-4 rounded-2xl border border-outline-variant/20 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative aspect-square rounded-xl overflow-hidden mb-3 bg-surface-container-low flex items-center justify-center border border-slate-100">
+                      <Image
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        alt={p.name}
+                        src={p.image || "/premium-pekefe-kavanoz.png"}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                      />
+                      <div className="absolute top-2 left-2 bg-secondary/90 text-white text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold z-10 shadow-xs">
+                        {tagLabel}
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-sm text-on-surface mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                      {p.name}
+                    </h3>
+                    <p className="text-xs text-on-surface-variant line-clamp-1 mb-2">
+                      {p.shortDesc || p.desc || "Geleneksel İspir Lezzeti"}
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-outline-variant/10 flex items-center justify-between">
+                    <span className="font-bold text-sm text-primary">{formattedPrice}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addToCart(p, 1);
+                        setToast({ isOpen: true, message: `${p.name} sepete eklendi!`, type: "success" });
+                      }}
+                      className="px-3 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-xs">add_shopping_cart</span>
+                      <span>Ekle</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <Toast
         isOpen={toast.isOpen}

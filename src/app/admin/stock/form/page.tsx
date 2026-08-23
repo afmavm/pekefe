@@ -1338,13 +1338,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           setVariants([]);
         }
 
-        // Sync browser address bar with clean & professional ID URL parameter
-        if (typeof window !== "undefined" && product.id) {
-          const expectedQuery = `?id=${product.id}`;
-          if (window.location.search !== expectedQuery) {
-            window.history.replaceState(null, "", `/admin/stock/form${expectedQuery}`);
-          }
-        }
+        // Form successfully populated without URL mutation trigger
 
         // Set marketplaces integration configurations
         if (attrs.marketplaces && Array.isArray(attrs.marketplaces)) {

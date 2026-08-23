@@ -5147,35 +5147,29 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK PROFESYONEL VARYANT OLUŞTURUCU & MATRİS MODALI
          ──────────────────────────────────────────────────────── */}
       {isVariantModalOpen && (() => {
-        const detail = getVariantCalculationDetail(
-          variantForm.size,
-          form.webPrice,
-          form.unit,
-          variantForm.packagingMarkupPercent
-        );
-
         return (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="w-full max-w-[540px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="w-full max-w-[560px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
               
-              {/* Header Bar */}
-              <div className="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/20 rounded-2xl flex items-center justify-center border border-orange-500/30">
-                    <Layers className="w-5 h-5 text-orange-400" />
+              {/* Modern Header Bar */}
+              <div className="p-5 bg-white border-b border-slate-100 flex justify-between items-center">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 bg-orange-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-orange-500/20">
+                    <Layers className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-extrabold uppercase tracking-wider text-left text-white">
+                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
                       {variantForm.isEditing ? "Varyant Kartını Düzenle" : "Yeni Varyant Tanımla"}
                     </h3>
-                    <p className="text-[10px] text-slate-400 font-medium text-left">
+                    <p className="text-xs text-slate-500 font-medium">
                       Web Perakende fiyatı (₺{form.webPrice || 0}) baz alınarak otomatik oranlanır
                     </p>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setIsVariantModalOpen(false)}
-                  className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                  className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-all cursor-pointer border-none"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -5183,50 +5177,59 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
               {/* Mode Tabs (Tekli vs Toplu Matris) - Only show if not editing */}
               {!variantForm.isEditing && (
-                <div className="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "single" }))}
-                    className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
-                      variantForm.modalTab === "single"
-                        ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
-                        : "text-slate-500 hover:text-slate-800 bg-transparent"
-                    }`}
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500" /> Tekli Varyant Formu
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "bulk" }))}
-                    className={`flex-1 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
-                      variantForm.modalTab === "bulk"
-                        ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
-                        : "text-slate-500 hover:text-slate-800 bg-transparent"
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-orange-500" /> Toplu Matris Üretici
-                  </button>
+                <div className="px-6 pt-4 pb-2 bg-slate-50/60 border-b border-slate-100">
+                  <div className="flex bg-slate-200/70 p-1 rounded-xl gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "single" }))}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+                        variantForm.modalTab === "single"
+                          ? "bg-white text-slate-900 shadow-sm font-extrabold"
+                          : "text-slate-600 hover:text-slate-900 bg-transparent"
+                      }`}
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500" /> Tekli Varyant Formu
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVariantForm(prev => ({ ...prev, modalTab: "bulk" }))}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+                        variantForm.modalTab === "bulk"
+                          ? "bg-white text-slate-900 shadow-sm font-extrabold"
+                          : "text-slate-600 hover:text-slate-900 bg-transparent"
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-orange-500" /> Toplu Matris Üretici
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* Modal Body */}
-              <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+              <div className="p-6 space-y-4 overflow-y-auto flex-1">
                 {variantForm.modalTab === "single" ? (
                   <>
-                    {/* Gramaj/Ölçü & Ürün Çeşidi Pickers with Direct Input */}
+                    {/* Gramaj/Ölçü & Ürün Çeşidi Clean Combobox Inputs */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       
                       {/* 1. Gramaj / Ambalaj Ölçüsü */}
                       <div className="space-y-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          <span>Gramaj / Ambalaj Ölçüsü</span>
-                          <button type="button" onClick={() => setIsSizeManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                            Gramaj / Ambalaj Ölçüsü *
+                          </label>
+                          <button 
+                            type="button" 
+                            onClick={() => setIsSizeManagerOpen(true)} 
+                            className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[11px]"
+                          >
                             <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
                           </button>
-                        </label>
-                        <div className="space-y-2">
+                        </div>
+                        <div className="relative">
                           <input
                             type="text"
+                            list="variant-sizes-datalist"
                             value={variantForm.size}
                             onChange={e => handleVariantSizeChange(e.target.value)}
                             onBlur={e => {
@@ -5239,40 +5242,35 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                 });
                               }
                             }}
-                            placeholder="✏️ Elle miktar/ölçü yazın (Örn: 1 Kg, 500 Gr)..."
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
+                            placeholder="Örn: 800g Cam Kavanoz, 1 Kg..."
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none transition-all"
                           />
-                          <div className="relative">
-                            <select
-                              value={sizes.includes(variantForm.size) ? variantForm.size : "custom"}
-                              onChange={e => {
-                                if (e.target.value !== "custom") {
-                                  handleVariantSizeChange(e.target.value);
-                                }
-                              }}
-                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 outline-none cursor-pointer appearance-none pr-8"
-                            >
-                              <option value="custom">⚡ Hazır Ölçü Seçin veya Yukarıya Yazın...</option>
-                              {sizes.map(size => (
-                                <option key={size} value={size}>{size}</option>
-                              ))}
-                            </select>
-                            <ChevronDown className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                          </div>
+                          <datalist id="variant-sizes-datalist">
+                            {sizes.map(size => (
+                              <option key={size} value={size} />
+                            ))}
+                          </datalist>
                         </div>
                       </div>
 
                       {/* 2. Ürün Çeşidi / Tipi */}
                       <div className="space-y-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                          <span>Ürün Çeşidi / Tipi</span>
-                          <button type="button" onClick={() => setIsColorManagerOpen(true)} className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[10px]">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                            Ürün Çeşidi / Tipi *
+                          </label>
+                          <button 
+                            type="button" 
+                            onClick={() => setIsColorManagerOpen(true)} 
+                            className="text-orange-500 hover:text-orange-600 font-bold flex items-center gap-0.5 tracking-normal cursor-pointer border-none bg-transparent p-0 text-[11px]"
+                          >
                             <Settings2 className="w-3 h-3 text-orange-500" /> Yönet
                           </button>
-                        </label>
-                        <div className="space-y-2">
+                        </div>
+                        <div className="relative">
                           <input
                             type="text"
+                            list="variant-colors-datalist"
                             value={variantForm.color}
                             onChange={e => {
                               const newColor = e.target.value;
@@ -5280,7 +5278,6 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               setVariantForm(prev => ({
                                 ...prev,
                                 color: newColor,
-                                // Only regenerate SKU for new variants (not editing existing ones)
                                 sku: prev.isEditing ? prev.sku : codes.sku,
                                 barcode: prev.isEditing ? prev.barcode : codes.barcode,
                               }));
@@ -5295,54 +5292,34 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                 });
                               }
                             }}
-                            placeholder="✏️ Elle ürün çeşidi/tipi yazın (Örn: Sade, Cevizli)..."
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-slate-800"
+                            placeholder="Örn: Sade, Cevizli, Fındıklı..."
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none transition-all"
                           />
-                          <div className="relative">
-                            <select
-                              value={colors.includes(variantForm.color) ? variantForm.color : "custom"}
-                              onChange={e => {
-                                if (e.target.value !== "custom") {
-                                  const newColor = e.target.value;
-                                  const codes = generateSkuAndBarcode(variantForm.size, newColor);
-                                  setVariantForm(prev => ({
-                                    ...prev,
-                                    color: newColor,
-                                    // Only regenerate SKU for new variants (not editing existing ones)
-                                    sku: prev.isEditing ? prev.sku : codes.sku,
-                                    barcode: prev.isEditing ? prev.barcode : codes.barcode,
-                                  }));
-                                }
-                              }}
-                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 outline-none cursor-pointer appearance-none pr-8"
-                            >
-                              <option value="custom">⚡ Hazır Çeşit Seçin veya Yukarıya Yazın...</option>
-                              {colors.map(color => (
-                                <option key={color} value={color}>{color}</option>
-                              ))}
-                            </select>
-                            <ChevronDown className="absolute right-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                          </div>
+                          <datalist id="variant-colors-datalist">
+                            {colors.map(color => (
+                              <option key={color} value={color} />
+                            ))}
+                          </datalist>
                         </div>
                       </div>
 
                     </div>
 
                     {/* Stock, Prices & VAT Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                       <div className="space-y-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Başlangıç Stoku</label>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Başlangıç Stoku</label>
                         <input
                           type="number"
                           value={variantForm.stock}
                           onChange={e => setVariantForm({ ...variantForm, stock: parseInt(e.target.value) || 0 })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none text-center text-slate-900"
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Web Perakende Fiyatı (₺)</label>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">Web Fiyatı (₺)</label>
                           {form.webPrice > 0 && (
                             <button
                               type="button"
@@ -5358,30 +5335,30 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           type="number"
                           value={variantForm.price}
                           onChange={e => setVariantForm({ ...variantForm, price: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-orange-600"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-extrabold focus:bg-white focus:border-orange-500 outline-none text-center text-orange-600"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">B2B Bayi Fiyatı (₺)</label>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">B2B Bayi Fiyatı (₺)</label>
                         <input
                           type="number"
-                          placeholder="₺0.00 (Opsiyonel)"
+                          placeholder="₺0.00"
                           value={variantForm.b2bPrice || ""}
                           onChange={e => setVariantForm({ ...variantForm, b2bPrice: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none text-center font-black text-indigo-600"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-extrabold focus:bg-white focus:border-orange-500 outline-none text-center text-indigo-600"
                         />
                       </div>
                     </div>
 
                     {/* Variant VAT Settings */}
-                    <div className="grid grid-cols-2 gap-4 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+                    <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
                       <div className="space-y-1">
                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Varyant KDV Oranı</label>
                         <select
                           value={variantForm.vatRate ?? 20}
                           onChange={e => setVariantForm({ ...variantForm, vatRate: parseInt(e.target.value) || 0 })}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 outline-none"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 outline-none cursor-pointer"
                         >
                           <option value={0}>%0 KDV</option>
                           <option value={1}>%1 KDV</option>
@@ -5397,120 +5374,72 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             type="checkbox"
                             checked={variantForm.vatIncluded ?? true}
                             onChange={e => setVariantForm({ ...variantForm, vatIncluded: e.target.checked })}
-                            className="w-4 h-4 text-orange-500 rounded focus:ring-orange-400"
+                            className="w-4 h-4 text-orange-500 rounded focus:ring-orange-400 accent-orange-500"
                           />
-                          <span className="text-xs font-semibold text-slate-700">Fiyata KDV Dahil</span>
+                          <span className="text-xs font-bold text-slate-700">Fiyata KDV Dahil</span>
                         </label>
                       </div>
                     </div>
 
-                    {/* FORMULA TRANSPARENCY CARD (MATEMATİKSEL OTO-HESAPLAMA MATRİSİ) */}
-                    {form.webPrice > 0 && (
-                      <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                            <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                            <span>Web Fiyat Hesaplama Matrisi</span>
-                          </div>
-                          <span className="text-[10px] font-extrabold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200/60">
-                            ₺{form.webPrice} Baz Fiyat
-                          </span>
-                        </div>
-
-                        <div className="text-[11px] text-slate-600 space-y-1.5 bg-white p-2.5 rounded-lg border border-slate-100 font-mono">
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Algılanan Ölçü:</span>
-                            <span className="font-bold text-slate-800">{detail.extractedUnitText}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Birim Oranı:</span>
-                            <span className="font-bold text-slate-800">{detail.multiplier}x</span>
-                          </div>
-                          <div className="flex justify-between border-t border-slate-100 pt-1">
-                            <span className="text-slate-500 font-sans font-semibold">Oransal Taban Fiyat:</span>
-                            <span className="font-bold text-slate-900">₺{form.webPrice} × {detail.multiplier} = ₺{detail.calculatedPrice}</span>
-                          </div>
-                          {detail.packagingMarkupPercent > 0 && (
-                            <div className="flex justify-between text-orange-600 font-sans font-bold text-[10.5px]">
-                              <span>Ambalaj & İşçilik Farkı (+%{detail.packagingMarkupPercent}):</span>
-                              <span>+₺{detail.markupAmount}</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between border-t border-slate-200 pt-1.5 font-sans font-black text-xs text-orange-700">
-                            <span>Hesaplanan Net Satış Fiyatı:</span>
-                            <span className="text-sm font-extrabold text-orange-600">₺{detail.finalPrice}</span>
-                          </div>
-                        </div>
-
-                        {/* Ambalaj / İşçilik Farkı Selector */}
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-[10px] font-bold text-slate-500">Ambalaj & İşçilik Farkı:</span>
-                          <div className="flex gap-1">
-                            {[0, 5, 10, 15].map(pct => (
-                              <button
-                                key={pct}
-                                type="button"
-                                onClick={() => handleVariantSizeChange(variantForm.size, pct)}
-                                className={`px-2.5 py-1 rounded text-[10px] font-extrabold border transition cursor-pointer ${
-                                  variantForm.packagingMarkupPercent === pct
-                                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                                }`}
-                              >
-                                {pct === 0 ? "Standart" : `+${pct}%`}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SKU & Barcode Row */}
-                    <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                    {/* SKU & Barcode Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Stok Kodu (SKU)</label>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Stok Kodu (SKU)</label>
                         <input
                           type="text"
                           value={variantForm.sku}
                           onChange={e => setVariantForm({ ...variantForm, sku: e.target.value })}
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:bg-white outline-none"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 outline-none focus:bg-white focus:border-orange-500"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Barkod</label>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Barkod</label>
                         <input
                           type="text"
                           value={variantForm.barcode}
                           onChange={e => setVariantForm({ ...variantForm, barcode: e.target.value })}
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:bg-white outline-none"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 outline-none focus:bg-white focus:border-orange-500"
                         />
                       </div>
                     </div>
                   </>
                 ) : (
-                  /* BULK MATRIX GENERATOR MODE */
-                  <div className="space-y-5">
-                    <div className="bg-orange-50/70 border border-orange-200/60 rounded-xl p-3 text-xs text-orange-900 font-medium flex gap-2">
-                      <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                      <span>
-                        Seçeceğiniz tüm ebat ve renk kombinasyonları için Web Perakende fiyatı (₺{form.webPrice}) üzerinden otomatik orantılı varyant kartları topluca üretilecektir.
-                      </span>
+                  /* 2. BULK MATRIX GENERATOR */
+                  <div className="space-y-4">
+                    <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-xs text-amber-900 font-medium">
+                      Seçeceğiniz tüm ebat ve renk kombinasyonları için Web Perakende fiyatı (₺{form.webPrice || 0}) orantılanarak toplu varyant kartları otomatik üretilecektir.
                     </div>
 
-                    {/* Size Checkboxes */}
+                    {/* Bulk Sizes Selection */}
                     <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Üretilecek Gramaj & Ambalaj Ölçüleri ({variantForm.selectedBulkSizes.length} Seçili)
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          Dahil Edilecek Gramajlar / Ölçüler ({variantForm.selectedBulkSizes.length})
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (variantForm.selectedBulkSizes.length === sizes.length) {
+                              setVariantForm(prev => ({ ...prev, selectedBulkSizes: [] }));
+                            } else {
+                              setVariantForm(prev => ({ ...prev, selectedBulkSizes: [...sizes] }));
+                            }
+                          }}
+                          className="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-transparent border-none cursor-pointer p-0"
+                        >
+                          {variantForm.selectedBulkSizes.length === sizes.length ? "Seçimi Kaldır" : "Tümünü Seç"}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1">
                         {sizes.map(s => {
                           const checked = variantForm.selectedBulkSizes.includes(s);
                           return (
                             <label
                               key={s}
-                              className={`p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition flex items-center justify-between ${
-                                checked
-                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                              className={`flex items-center justify-between p-2 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                                checked 
+                                  ? "bg-orange-50 text-orange-900 border-orange-300 font-bold" 
                                   : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                               }`}
                             >
@@ -5525,7 +5454,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                     setVariantForm(prev => ({ ...prev, selectedBulkSizes: prev.selectedBulkSizes.filter(x => x !== s) }));
                                   }
                                 }}
-                                className="accent-orange-500 w-4 h-4"
+                                className="accent-orange-500 w-3.5 h-3.5"
                               />
                             </label>
                           );
@@ -5533,20 +5462,36 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     </div>
 
-                    {/* Color Checkboxes */}
+                    {/* Bulk Colors/Variations Selection */}
                     <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Üretilecek Ürün Çeşitleri / Tipleri ({variantForm.selectedBulkColors.length} Seçili)
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          Dahil Edilecek Çeşitler / Tipler ({variantForm.selectedBulkColors.length})
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (variantForm.selectedBulkColors.length === colors.length) {
+                              setVariantForm(prev => ({ ...prev, selectedBulkColors: [] }));
+                            } else {
+                              setVariantForm(prev => ({ ...prev, selectedBulkColors: [...colors] }));
+                            }
+                          }}
+                          className="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-transparent border-none cursor-pointer p-0"
+                        >
+                          {variantForm.selectedBulkColors.length === colors.length ? "Seçimi Kaldır" : "Tümünü Seç"}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1">
                         {colors.map(c => {
                           const checked = variantForm.selectedBulkColors.includes(c);
                           return (
                             <label
                               key={c}
-                              className={`p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition flex items-center justify-between ${
-                                checked
-                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                              className={`flex items-center justify-between p-2 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                                checked 
+                                  ? "bg-orange-50 text-orange-900 border-orange-300 font-bold" 
                                   : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                               }`}
                             >
@@ -5561,34 +5506,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                                     setVariantForm(prev => ({ ...prev, selectedBulkColors: prev.selectedBulkColors.filter(x => x !== c) }));
                                   }
                                 }}
-                                className="accent-orange-500 w-4 h-4"
+                                className="accent-orange-500 w-3.5 h-3.5"
                               />
                             </label>
                           );
                         })}
-                      </div>
-                    </div>
-
-                    {/* Packaging Markup Selector for Bulk */}
-                    <div className="space-y-1.5 bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Toplu Üretimde Ambalaj & İşçilik Farkı:</span>
-                        <div className="flex gap-1">
-                          {[0, 5, 10, 15].map(pct => (
-                            <button
-                              key={pct}
-                              type="button"
-                              onClick={() => setVariantForm(prev => ({ ...prev, packagingMarkupPercent: pct }))}
-                              className={`px-2.5 py-1 rounded text-[10px] font-extrabold border transition cursor-pointer ${
-                                variantForm.packagingMarkupPercent === pct
-                                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                              }`}
-                            >
-                              {pct === 0 ? "Standart" : `+${pct}%`}
-                            </button>
-                          ))}
-                        </div>
                       </div>
                     </div>
 

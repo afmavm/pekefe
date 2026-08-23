@@ -88,3 +88,23 @@ export function saveLocalProduct(product: Partial<LocalProduct>): LocalProduct {
 
   return newProduct;
 }
+
+export function deductLocalProductStock(productId: string | number, quantity: number) {
+  try {
+    const products = readLocalProducts();
+    const targetIdStr = String(productId);
+    const rawProductId = targetIdStr.split('_')[0]; // Handle variant IDs like 'PKF-123_var'
+
+    const idx = products.findIndex(p => String(p.id) === targetIdStr || String(p.id) === rawProductId || p.sku === targetIdStr);
+    if (idx >= 0) {
+      const currentStock = Number(products[idx].stock ?? products[idx].stock_quantity ?? 0);
+      const newStock = Math.max(0, currentStock - Number(quantity || 1));
+      products[idx].stock = newStock;
+      products[idx].stock_quantity = newStock;
+      saveLocalProduct(products[idx]);
+      console.log(`[JSON DB STOCK] Deducted ${quantity} from product ${products[idx].name}. New Stock: ${newStock}`);
+    }
+  } catch (err) {
+    console.error('Error deducting local product stock:', err);
+  }
+}

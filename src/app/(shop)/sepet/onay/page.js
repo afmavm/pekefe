@@ -103,17 +103,15 @@ export default function SepetOnay() {
                 <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
                   TESLİMAT ADRESİ
                 </span>
-                <p className="font-body-md text-on-surface-variant whitespace-pre-line">
+                <p className="font-body-md text-on-surface-variant whitespace-pre-line leading-relaxed text-sm">
                   {shippingAddress ? (
                     <>
-                      <strong>{shippingAddress.name}</strong>
-                      <br />
-                      {shippingAddress.address}
-                      <br />
-                      {shippingAddress.city} {shippingAddress.phone ? `· Tel: ${shippingAddress.phone}` : ""}
+                      {shippingAddress.name && <strong className="block text-primary font-bold">{shippingAddress.name}</strong>}
+                      {shippingAddress.address || shippingAddress.fullAddress || shippingAddress.street || "Adres Bilgisi Kaydedildi"}
+                      {shippingAddress.phone && <span className="block text-xs font-mono text-slate-500 mt-1">Tel: {shippingAddress.phone}</span>}
                     </>
                   ) : (
-                    "Adres Bilgisi Kaydedildi"
+                    completedOrder?.address || "Adres Bilgisi Kaydedildi"
                   )}
                 </p>
               </div>

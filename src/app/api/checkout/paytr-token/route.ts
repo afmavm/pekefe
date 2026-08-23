@@ -4,6 +4,8 @@ import { createPayTRToken } from '@/lib/paytr';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
 import { saveLocalOrder } from '@/lib/jsonOrderDb';
+import { deductLocalProductStock } from '@/lib/jsonProductDb';
+import { emailNotificationService } from '@/lib/email-notification-service';
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, 'apiLimit');
@@ -110,6 +112,33 @@ export async function POST(request: NextRequest) {
         cargoCompany: selectedCarrierName,
         items: cart
       });
+
+      // Deduct stock for each cart item
+      cart.forEach((item: any) => {
+        deductLocalProductStock(item.id || item.productId, item.quantity || 1);
+      });
+
+      // Trigger instant email notifications
+      emailNotificationService.queueEmail(customerEmail, "order_received", {
+        kullanici_adi: name,
+        siparis_no: customOrderId,
+        siparis_tutari: grandTotal.toLocaleString('tr-TR'),
+        odeme_yontemi: 'PayTR 3D Secure Kredi Kartı',
+        siparis_icerik: orderSummary,
+        kargo_adresi: fullAddress,
+        detay_linki: `https://www.pekefe.com/sepet/onay`,
+        tarih: new Date().toLocaleDateString('tr-TR')
+      }).catch(err => console.error("[PAYTR EMAIL ERROR]:", err));
+
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "info@pekefe.com";
+      emailNotificationService.queueEmail(adminEmail, "admin_new_order", {
+        kullanici_adi: name,
+        siparis_no: customOrderId,
+        siparis_tutari: grandTotal.toLocaleString('tr-TR'),
+        odeme_yontemi: 'PayTR 3D Secure Kredi Kartı',
+        tarih: new Date().toLocaleDateString('tr-TR')
+      }).catch(err => console.error("[ADMIN EMAIL ERROR]:", err));
+
     } catch (localErr) {
       console.error("Local order save failed:", localErr);
     }

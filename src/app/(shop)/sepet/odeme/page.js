@@ -64,6 +64,13 @@ export default function Odeme() {
       .catch((e) => console.error("Error loading bank accounts:", e));
   }, []);
 
+  // Enforce mandatory user authentication for checkout
+  useEffect(() => {
+    if (sessionResult.status === "unauthenticated") {
+      router.push("/giris?redirect=/sepet/odeme");
+    }
+  }, [sessionResult.status, router]);
+
   // Pre-fill user data if logged in
   useEffect(() => {
     if (session?.user) {

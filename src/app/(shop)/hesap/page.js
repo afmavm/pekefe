@@ -363,7 +363,11 @@ export default function Hesap() {
               </div>
               <div className="mb-6">
                 <p className="font-label-sm text-xs opacity-70 mb-1">Pekefe Lezzet Puanı</p>
-                <p className="text-2xl font-bold tracking-tight text-amber-300 font-mono">{Number(loyaltyPoints).toLocaleString("tr-TR")} PTS</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-bold tracking-tight text-amber-300 font-mono">{Number(loyaltyPoints).toLocaleString("tr-TR")} PTS</p>
+                  <span className="text-xs text-amber-200/80 font-bold font-mono">≈ ₺{(Number(loyaltyPoints) * 0.01).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <p className="text-[10px] text-amber-200/60 mt-0.5">100 PTS = 1 ₺ (%1 Değerinde)</p>
               </div>
               <div className="flex justify-between items-end">
                 <p className="font-label-sm text-xs font-semibold">{infoForm.firstName} {infoForm.lastName}</p>

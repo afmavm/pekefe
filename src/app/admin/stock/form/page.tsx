@@ -5833,7 +5833,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK EBAT/BOYUT YÖNETİCİSİ MODAL (SIZE MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isSizeManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[10000] animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
           <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
@@ -5953,7 +5953,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK DERİ TİPİ/RENK YÖNETİCİSİ MODAL (COLOR MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isColorManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[10000] animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
           <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
             
             <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">

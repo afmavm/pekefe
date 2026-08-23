@@ -980,14 +980,15 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     setIsDirty(false);
 
     const searchStr = typeof window !== "undefined" ? window.location.search : "";
-    const hasUrlParam = searchStr.includes("sku=") || searchStr.includes("id=") || searchStr.includes("slug=");
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(searchStr) : null;
+    const activeEditId = productId || urlParams?.get("id") || urlParams?.get("sku") || urlParams?.get("slug");
+    const hasUrlParam = Boolean(activeEditId || searchStr.includes("sku=") || searchStr.includes("id=") || searchStr.includes("slug="));
 
-    if (!productId && !hasUrlParam) {
+    if (!activeEditId && !hasUrlParam) {
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const randBarcode = "869" + Math.floor(1000000000 + Math.random() * 9000000000);
       const randManCode = `PKF-DUT-${Math.floor(1000 + Math.random() * 9000)}`;
       setForm({
-        ...form,
         name: "",
         sku: `PKF-${randNum}`,
         barcode: randBarcode,

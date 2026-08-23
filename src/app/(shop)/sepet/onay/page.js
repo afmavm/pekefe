@@ -22,16 +22,7 @@ export default function SepetOnay() {
 
   const orderNum = completedOrder?.orderId || "PKF-782934";
   const orderDate = completedOrder?.date || new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
-  const items = completedOrder?.items || [
-    {
-      id: "1",
-      name: "Geleneksel İspir Dut Pekmezi",
-      desc: "800g · Kavanoz",
-      price: 280,
-      quantity: 1,
-      img: "/pekefe-dut-pekmezi-kavanoz.jpg"
-    }
-  ];
+  const items = completedOrder?.items || [];
   const subtotal = completedOrder?.subtotal ?? items.reduce((a, b) => a + b.price * b.quantity, 0);
   const shippingCost = completedOrder?.shippingCost ?? 0;
   const total = completedOrder?.total ?? subtotal + shippingCost;

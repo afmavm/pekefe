@@ -397,11 +397,32 @@ export default function Odeme() {
 
         const data = await res.json();
 
-        if (!res.ok || !data.token) {
-          setIsSubmitting(false);
-          setErrorMsg(data.error || "PayTR ödeme servisi başlatılamadı. Lütfen tekrar deneyiniz.");
-          return;
-        }
+        const completedOrderObject = {
+          orderId: data.orderId || `PKF-${Date.now()}`,
+          date: new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
+          items: cartItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            desc: item.desc || item.shortDesc || `${item.quantity} Adet`,
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            img: item.img || item.image || "/pekefe-dut-pekmezi-kavanoz.jpg"
+          })),
+          subtotal: subtotal,
+          shippingCost: shippingCost,
+          total: grandTotal,
+          shippingAddress: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            city: formData.city,
+            district: formData.district || "",
+            fullAddress: formData.address
+          }
+        };
+        try {
+          localStorage.setItem("pekefe_completed_order", JSON.stringify(completedOrderObject));
+        } catch (e) {}
 
         setPaytrToken(data.token);
         setIsSubmitting(false);

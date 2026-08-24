@@ -107,25 +107,25 @@ export default function Kampanyalar() {
     <div className="w-full bg-[#fcfaf7] dark:bg-slate-950 text-slate-900 dark:text-white antialiased min-h-screen">
       
       {/* 1. HERO SECTION */}
-      <section className="relative h-[48vh] min-h-[400px] max-h-[520px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[52vh] min-h-[440px] max-h-[580px] flex items-center justify-center overflow-hidden">
         <Image
-          src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
-          alt="İspir Vadisi Manzarası"
+          src="/uploads/kampanya_hero_banner.jpg"
+          alt="PEKEFE Gurme Kampanyalar ve Özel Seçkiler"
           fill
           priority
           sizes="100vw"
-          className="object-cover filter brightness-[0.4] contrast-110"
+          className="object-cover filter brightness-[0.48] contrast-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#3d121c]/90 via-[#3d121c]/50 to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#20070c] via-[#20070c]/40 to-black/30 z-10"></div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-4">
-          <span className="inline-flex items-center gap-1.5 text-amber-300 text-xs font-black tracking-[0.25em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-            <span className="material-symbols-outlined text-sm">local_activity</span> CANLI KAMPANYA & AYRICALIKLAR
+          <span className="inline-flex items-center gap-2 text-amber-300 text-xs font-black tracking-[0.25em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-amber-400/30 shadow-lg">
+            <span className="material-symbols-outlined text-sm text-amber-400">verified</span> CANLI KAMPANYA & AYRICALIKLAR
           </span>
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl text-white font-black leading-tight tracking-tight">
+          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl text-white font-black leading-tight tracking-tight drop-shadow-md">
             Özel Fırsatlar & Kupon Kodları
           </h1>
-          <p className="font-light text-amber-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="font-light text-amber-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
             İspir'in hakiki lezzetlerinde geçerli indirim kuponları, sezonluk fırsat paketleri ve ücretsiz kargo ayrıcalıklarını hemen kullanın.
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function Kampanyalar() {
       <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-200/80 dark:border-slate-800">
           <div>
-            <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1">
+            <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1 font-mono">
               HEDİYE & İNDİRİM BİLETLERİ
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
@@ -214,7 +214,7 @@ export default function Kampanyalar() {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1">
+              <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1 font-mono">
                 FIRSAT MAHSULLERİ
               </span>
               <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
@@ -258,38 +258,38 @@ export default function Kampanyalar() {
       {/* 4. ÖDEME & KARGO AYRICALIKLARI (BANNER) */}
       <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <div
-          style={{ backgroundColor: "#3d121c", color: "#ffffff" }}
-          className="rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-amber-500/20"
+          style={{ backgroundColor: "#360e17", color: "#ffffff" }}
+          className="rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-amber-500/25"
         >
           {/* Subtle Ambient Glow */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -top-20 -right-20 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             
-            <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-4 max-w-2xl">
               <span className="text-amber-400 font-black text-xs uppercase tracking-widest block font-mono">
                 ÖZEL SEPET AVANTAJLARI
               </span>
               <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
                 2000 TL Üzeri Ücretsiz Kargo & Havale İndirimi
               </h2>
-              <p className="text-amber-100 text-xs sm:text-sm font-normal leading-relaxed max-w-xl">
+              <p className="text-amber-100/90 text-xs sm:text-sm font-normal leading-relaxed">
                 Tüm siparişlerinizde 2000 TL sepet tutarını aştığınızda kargo ücreti tarafımızdan karşılanır. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında ek sepet indirimi uygulanır.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
+            <div className="flex flex-col sm:flex-row gap-3.5 shrink-0 items-stretch sm:items-center">
               <Link
                 href="/kategoriler"
-                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-7 py-4 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-lg active:scale-95 text-center shrink-0"
+                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-lg active:scale-95 text-center shrink-0"
               >
                 <span>Alışverişe Başla</span>
                 <span className="material-symbols-outlined text-sm">shopping_bag</span>
               </Link>
               <Link
                 href="/iletisim"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-7 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center shrink-0"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center shrink-0"
               >
                 <span>Toptan Bayi Talebi</span>
                 <span className="material-symbols-outlined text-sm">business</span>

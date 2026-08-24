@@ -107,29 +107,29 @@ export default function Kampanyalar() {
     <div className="w-full bg-[#fcfaf7] dark:bg-slate-950 text-slate-900 dark:text-white antialiased min-h-screen">
       
       {/* 1. HERO SECTION */}
-      <section className="relative h-[62vh] min-h-[500px] max-h-[660px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[65vh] min-h-[520px] max-h-[700px] flex items-center justify-center overflow-hidden">
         <Image
-          src="/uploads/kampanya_hero_banner.jpg"
+          src="/uploads/pekefe_kampanya_hero_v2.jpg"
           alt="PEKEFE Dut Pekmezi ve İspir Balı Özel Kampanyalar"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center filter brightness-[0.45] contrast-105"
+          className="object-cover object-center filter brightness-[0.78] contrast-105"
         />
-        {/* Seamless Cinematic Dark Burgundy Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#120305] via-[#120305]/60 to-black/40 z-10"></div>
+        {/* Balanced Cinematic Dark Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/45 z-10"></div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-4">
+        <div className="relative z-20 text-center px-4 sm:px-6 max-w-5xl mx-auto space-y-4">
           <span className="inline-flex items-center gap-2 text-amber-300 text-xs sm:text-sm font-black tracking-[0.25em] uppercase px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-amber-400/40 shadow-xl font-mono">
             <span className="material-symbols-outlined text-sm text-amber-400">verified</span> CANLI KAMPANYA & AYRICALIKLAR
           </span>
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl text-white font-black leading-tight tracking-tight drop-shadow-2xl">
+          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
             Özel Fırsatlar & Kupon Kodları
           </h1>
-          <p className="text-white text-sm sm:text-base md:text-lg font-bold max-w-3xl mx-auto leading-relaxed drop-shadow-md text-slate-100">
+          <p className="text-amber-50 text-sm sm:text-base md:text-lg font-medium max-w-3xl mx-auto leading-relaxed drop-shadow-md">
             İspir'in hakiki lezzetlerinde geçerli indirim kuponları, sezonluk fırsat paketleri ve ücretsiz kargo ayrıcalıklarını hemen kullanın.
           </p>
-          <div className="w-20 h-1 bg-amber-400 mx-auto mt-2 rounded-full shadow-md"></div>
+          <div className="w-24 h-1 bg-amber-400 mx-auto mt-2 rounded-full shadow-lg"></div>
         </div>
       </section>
 

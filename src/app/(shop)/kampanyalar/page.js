@@ -1,15 +1,66 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 
 export default function Kampanyalar() {
+  const [campaigns, setCampaigns] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [copiedCode, setCopiedCode] = useState(null);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch campaigns
+        const campRes = await fetch("/api/campaigns");
+        if (campRes.ok) {
+          const campData = await campRes.json();
+          setCampaigns(Array.isArray(campData) ? campData.filter(c => c.isActive) : []);
+        }
+
+        // Fetch products for campaign showcase
+        const prodRes = await fetch("/api/products");
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          const list = Array.isArray(prodData) ? prodData : (prodData?.products || []);
+          
+          // Filter products with active campaigns or discounts
+          const discounted = list.filter(p => 
+            p.isCampaignActive || 
+            p.is_campaign_active || 
+            p.is_discounted || 
+            (p.oldPrice && p.price && Number(p.oldPrice) > Number(p.price)) ||
+            (p.list_price && p.price && Number(p.list_price) > Number(p.price))
+          );
+          setProducts(discounted.length > 0 ? discounted : list.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Error fetching campaign data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const handleCopyCode = (code) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setToast({
+      isOpen: true,
+      message: `"${code}" kupon kodu panoya kopyalandı! Sepet sayfasında kullanabilirsiniz.`,
+      type: "success"
+    });
+    setTimeout(() => setCopiedCode(null), 2500);
+  };
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -52,260 +103,230 @@ export default function Kampanyalar() {
     }
   };
 
-  const giftBundles = [
-    {
-      id: 1,
-      title: "İspir Vadisi Zanaat Sandığı",
-      category: "Özel Hediye Koleksiyonu",
-      desc: "İspirin bereketli topraklarından sınırlı sayıda derlenen organik beyaz dut pekmezi, özel cevizli pestil ve el yapımı tahta kaşık ikram seti.",
-      image: "/uploads/ispir_hikayemiz_ilhan_efe_beyaz_dut.jpg",
-      badge: "Sınırlı Hasat",
-      href: "/kategoriler",
-    },
-    {
-      id: 2,
-      title: "Geleneksel Sofra İkilisi: Tahin & Pekmez",
-      category: "İkramlık Seçki",
-      desc: "Bakır kazanlarda 60°C'de yoğunlaştırılan saf İspir dut pekmezi ile taş değirmen yerli susam tahininin muazzam dengesi.",
-      image: "/geleneksel-kazan.png",
-      badge: "Özel Seçki",
-      href: "/kategoriler",
-    },
-    {
-      id: 3,
-      title: "Dağ Karadutu Özü & İncir Reçeli İkramı",
-      category: "Şifalı İksirler",
-      desc: "Toplanması büyük sabır gerektiren yabani Karadeniz karadut özü ve taze incir reçelinden oluşan bağışıklık koruyucu özel paket.",
-      image: "/uploads/ispir_hikayemiz_ilhan_efe_karadut.jpg",
-      badge: "Özel Hasat",
-      href: "/kategoriler",
-    },
-  ];
-
   return (
-    <div className="w-full bg-surface text-on-surface antialiased min-h-screen">
-      {/* 1. HERO SECTION: Quiet Luxury Editorial Banner */}
-      <section className="relative h-[60vh] min-h-[480px] max-h-[650px] flex items-center justify-center overflow-hidden">
+    <div className="w-full bg-[#fcfaf7] dark:bg-slate-950 text-slate-900 dark:text-white antialiased min-h-screen">
+      
+      {/* 1. HERO SECTION */}
+      <section className="relative h-[48vh] min-h-[400px] max-h-[520px] flex items-center justify-center overflow-hidden">
         <Image
           src="/uploads/ispir-yedi-goller-kackar-manzara.webp"
           alt="İspir Vadisi Manzarası"
           fill
           priority
           sizes="100vw"
-          className="object-cover filter brightness-[0.5] contrast-105"
+          className="object-cover filter brightness-[0.4] contrast-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#4A0E17]/85 via-[#4A0E17]/40 to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#3d121c]/90 via-[#3d121c]/50 to-transparent z-10"></div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-6">
-          <span className="inline-block text-amber-200 text-xs font-semibold tracking-[0.3em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-            KÜLTÜR & HASAT AYRICALIKLARI
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-4">
+          <span className="inline-flex items-center gap-1.5 text-amber-300 text-xs font-black tracking-[0.25em] uppercase px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+            <span className="material-symbols-outlined text-sm">local_activity</span> CANLI KAMPANYA & AYRICALIKLAR
           </span>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-white font-bold leading-tight">
-            Özel Seçkiler ve Hasat Ayrıcalıkları
+          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl text-white font-black leading-tight tracking-tight">
+            Özel Fırsatlar & Kupon Kodları
           </h1>
-          <p className="font-light text-amber-100/90 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            İspir'in bereketli topraklarından sınırlı sayıda hazırlanan geleneksel ikramlık paketlerimizi ve sezonluk mahsul önceliklerini keşfedin.
+          <p className="font-light text-amber-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+            İspir'in hakiki lezzetlerinde geçerli indirim kuponları, sezonluk fırsat paketleri ve ücretsiz kargo ayrıcalıklarını hemen kullanın.
           </p>
-          <div className="w-16 h-[1px] bg-amber-400 mx-auto pt-2"></div>
         </div>
       </section>
 
-      {/* 2. HASAT SEÇKİLERİ & HEDİYE KOLEKSİYONLARI */}
-      <section className="py-20 md:py-28 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
-            ÖZEL GURME SEÇKİLERİ
-          </span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface">
-            Zanaatkar Ustalığıyla Hazırlanan İkramlıklar
-          </h2>
-          <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
-          <p className="text-on-surface-variant text-base leading-relaxed">
-            Pekefe ürünleri sadece bir besin değil; sevdiklerinize armağan edebileceğiniz zamansız bir sofra deneyimidir.
+      {/* 2. AKTİF KUPON KARTLARI (TICKET CODES) */}
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+          <div>
+            <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1">
+              HEDİYE & İNDİRİM BİLETLERİ
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Kullanıma Hazır İndirim Kuponları
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md">
+            Aşağıdaki kupon kodunu tek tıkla kopyalayın ve sepet aşamasında kupon kutucuğuna yapıştırarak anında indirim kazanın.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {giftBundles.map((bundle) => (
-            <article
-              key={bundle.id}
-              className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
-            >
-              <div>
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                  <Image
-                    src={bundle.image}
-                    alt={bundle.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <span className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
-                    {bundle.badge}
-                  </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {campaigns.length > 0 ? (
+            campaigns.map((camp) => (
+              <div
+                key={camp.id || camp.code}
+                className="relative bg-white dark:bg-slate-900 border-2 border-dashed border-rose-200 dark:border-slate-700 hover:border-[#6b1d2f] dark:hover:border-amber-500 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group overflow-hidden"
+              >
+                {/* Perforation notch circles for ticket look */}
+                <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#fcfaf7] dark:bg-slate-950 rounded-full border-r border-rose-200 dark:border-slate-700"></div>
+                <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#fcfaf7] dark:bg-slate-950 rounded-full border-l border-rose-200 dark:border-slate-700"></div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="bg-rose-50 dark:bg-slate-800 text-[#6b1d2f] dark:text-amber-400 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-rose-200/60 dark:border-slate-700 tracking-wider">
+                      {camp.type === "percentage" ? `%${camp.value} İNDİRİM` : camp.type === "fixed" ? `₺${camp.value} İNDİRİM` : "ÜCRETSİZ KARGO"}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {camp.minOrder > 0 ? `Min. ₺${camp.minOrder}` : "Limitsiz"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-black text-sm text-slate-900 dark:text-white group-hover:text-[#6b1d2f] dark:group-hover:text-amber-400 transition-colors leading-snug">
+                      {camp.name}
+                    </h3>
+                    {camp.description && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                        {camp.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="p-6 md:p-8 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-secondary block">
-                    {bundle.category}
-                  </span>
-                  <h3 className="font-display text-2xl font-bold text-on-surface group-hover:text-primary transition-colors leading-snug">
-                    {bundle.title}
-                  </h3>
-                  <p className="text-on-surface-variant text-sm leading-relaxed font-light">
-                    {bundle.desc}
-                  </p>
+                <div className="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2">
+                    <span className="font-mono font-black text-xs text-slate-800 dark:text-slate-200 tracking-wider">
+                      {camp.code}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyCode(camp.code)}
+                      className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg transition shadow-2xs cursor-pointer ${
+                        copiedCode === camp.code
+                          ? "bg-emerald-600 text-white"
+                          : "bg-[#6b1d2f] hover:bg-[#831843] text-white"
+                      }`}
+                    >
+                      {copiedCode === camp.code ? "KOPYALANDI ✓" : "KODU KOPYALA"}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="p-6 md:p-8 pt-0">
-                <Link
-                  href={bundle.href}
-                  className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-primary font-bold hover:translate-x-1 transition-transform"
-                >
-                  <span>Koleksiyonu İncele</span>
-                  <span className="material-symbols-outlined text-sm">east</span>
-                </Link>
-              </div>
-            </article>
-          ))}
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center text-slate-400">
+              <span className="material-symbols-outlined text-4xl mb-2 opacity-40">confirmation_number</span>
+              <p className="text-sm font-bold">Şu anda aktif kupon kodu bulunmamaktadır.</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* 3. PEKEFE DOSTU & SADAQAT / ÖNCELİKLİ MAHSUL KULÜBÜ */}
-      <section className="py-20 bg-surface-container-lowest border-y border-slate-200/60">
+      {/* 3. KAMPANYALI & İNDİRİMLİ ÜRÜNLER VİTRİNİ */}
+      <section className="py-12 sm:py-16 bg-white dark:bg-slate-900 border-y border-slate-200/70 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            <div className="lg:col-span-6 space-y-6">
-              <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
-                PEKEFE CEMAATİ & KULÜBÜ
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1">
+                FIRSAT MAHSULLERİ
               </span>
-              <h2 className="font-display text-3xl md:text-5xl font-bold text-on-surface leading-tight">
-                Erken Hasat Daveti & Dostluk Ayrıcalığı
+              <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                Kampanyalı & İndirimli Gurme Ürünler
               </h2>
-              <p className="text-slate-700 text-base md:text-lg leading-relaxed font-light">
-                Doğanın döngüsü sınırlıdır. İspirin bereketli topraklarından toplanan ilk mahsullerimiz her yıl sınırlı miktarda hazırlanır. Pekefe dostu olarak kaydolan misafirlerimiz, yeni sezon mahsullerine ilk erişim hakkına sahip olurlar.
-              </p>
-
-              <div className="space-y-4 pt-2">
-                <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold">
-                    <span className="material-symbols-outlined">nature_people</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-on-surface text-base">Erken Hasat Önceliği</h4>
-                    <p className="text-xs text-on-surface-variant mt-1">
-                      Temmuz ve Ağustos aylarında toplanan ilk sıkım pekmez ve taze pestil mahsullerinden öncelikli haberdar olma hakkı.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-200/60">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0 font-bold">
-                    <span className="material-symbols-outlined">card_giftcard</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-on-surface text-base">Özel Kutulu İkram Paketleri</h4>
-                    <p className="text-xs text-on-surface-variant mt-1">
-                      Özel günlerde sevdiklerinize gönderebileceğiniz isimli ve ahşap kutulu gastronomi sunum ayrıcalığı.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Link
-                  href="/kayit"
-                  className="inline-flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all shadow-md active:scale-95"
-                >
-                  <span>Pekefe Dostu Olun</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </Link>
-              </div>
             </div>
+            <Link
+              href="/kategoriler"
+              className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#6b1d2f] dark:text-amber-400 hover:underline"
+            >
+              <span>Tüm Ürünleri Gör</span>
+              <span className="material-symbols-outlined text-sm">east</span>
+            </Link>
+          </div>
 
-            <div className="lg:col-span-6">
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-                <Image
-                  src="/uploads/ispir_hikayemiz_baba_ogul_beyaz_dut.jpg"
-                  alt="İlhan Efe ve Okan Efe"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                <div className="absolute bottom-6 left-6 text-white space-y-1">
-                  <span className="text-amber-200 text-xs font-mono tracking-widest uppercase font-bold block">İspirin bereketli toprakları</span>
-                  <p className="text-sm font-display italic">"Topraktan sofraya uzanan dürüst üretim ve sadakat mirası."</p>
-                </div>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id || product.slug}
+                product={product}
+                id={product.id}
+                name={product.name}
+                desc={product.desc}
+                shortDesc={product.shortDesc}
+                price={product.price}
+                oldPrice={product.oldPrice || product.list_price}
+                list_price={product.list_price}
+                badgeText1={product.badgeText1}
+                badgeText2={product.badgeText2}
+                isCampaignActive={product.isCampaignActive}
+                discount_end_date={product.discount_end_date}
+                discount_start_date={product.discount_start_date}
+                variants={product.variants}
+                image={product.image}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 4. KURUMSAL & RESTORAN GASTRONOMİ TEDARİĞİ */}
-      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-primary text-white rounded-3xl p-8 md:p-16 relative overflow-hidden shadow-lg">
-          <div className="relative z-10 max-w-3xl space-y-6">
-            <span className="text-amber-200 font-bold text-xs uppercase tracking-[0.25em] block">
-              B2B & KURUMSAL TEDARİK
-            </span>
-            <h2 className="font-display text-3xl md:text-5xl font-bold leading-tight text-white">
-              Gurme Restoran ve Oteller İçin Özel Hacimli Üretim
-            </h2>
-            <p className="text-amber-100/90 text-base md:text-lg font-light leading-relaxed">
-              Özel mutfaklar, butik oteller ve kurumsal hediye çözümleri için İspir vadisinin en saf ürünlerini istenilen ambalaj ve hacimde hazırlıyoruz. Toplu ikramlık talepleriniz için ekibimizle iletişime geçebilirsiniz.
-            </p>
-            <div className="pt-2">
+      {/* 4. ÖDEME & KARGO AYRICALIKLARI (BANNER) */}
+      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-br from-[#3d121c] via-[#501726] to-[#2b0c13] text-white rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            
+            <div className="lg:col-span-2 space-y-4">
+              <span className="text-amber-400 font-black text-xs uppercase tracking-widest block">
+                ÖZEL SEPET AVANTAJLARI
+              </span>
+              <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
+                2000 TL Üzeri Ücretsiz Kargo & Havale İndirimi
+              </h2>
+              <p className="text-amber-100/90 text-xs sm:text-sm font-light leading-relaxed max-w-xl">
+                Tüm siparişlerinizde 2000 TL sepet tutarını aştığınızda kargo ücreti tarafımızdan karşılanır. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında ek sepet indirimi uygulanır.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
+              <Link
+                href="/kategoriler"
+                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-md active:scale-95 text-center"
+              >
+                <span>Alışverişe Başla</span>
+                <span className="material-symbols-outlined text-sm">shopping_bag</span>
+              </Link>
               <Link
                 href="/iletisim"
-                className="inline-flex items-center gap-3 bg-white text-primary px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-amber-100 transition-all shadow-md active:scale-95"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center"
               >
-                <span>Kurumsal İletişime Geçin</span>
-                <span className="material-symbols-outlined text-sm">mail</span>
+                <span>Toptan Bayi Talebi</span>
+                <span className="material-symbols-outlined text-sm">business</span>
               </Link>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* 5. E-POSTA AYRICALIK BÜLTENİ */}
-      <section className="py-20 bg-white border-t border-slate-200">
-        <div className="max-w-3xl mx-auto px-4 text-center space-y-6">
-          <span className="text-primary font-bold text-xs uppercase tracking-[0.25em] block">
-            BÜLTEN ABONELİĞİ
+      {/* 5. E-POSTA BÜLTEN ABONELİĞİ */}
+      <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 text-center space-y-5">
+          <span className="text-[#6b1d2f] dark:text-amber-400 font-black text-xs uppercase tracking-widest block">
+            BÜLTEN AYRICALIĞI
           </span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface">
-            Hasat Dönemlerini İlk Siz Öğrenin
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Yeni Hasat Kampanyalarını Kaçırmayın
           </h2>
-          <p className="text-on-surface-variant text-sm md:text-base leading-relaxed font-light">
-            Erzurum İspir'in yeni sezon üretim takvimi, özel ikramlık seçkileri ve editoryal tarif bültenimiz için e-posta adresinizi bırakabilirsiniz.
+          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed font-light">
+            Erzurum İspir'in yeni sezon hasat takvimi ve özel kupon kodları yayınlandığında ilk siz haberdar olun.
           </p>
 
           {!subscribed ? (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto pt-2">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="E-posta adresiniz"
-                className="flex-1 bg-surface border border-slate-300 rounded-xl px-5 py-4 text-on-surface placeholder:text-slate-400 focus:ring-1 focus:ring-[#7f1d1d] outline-none text-sm"
+                className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#6b1d2f] outline-none text-xs font-semibold"
               />
               <button
                 type="submit"
                 disabled={submitting}
-                className="bg-primary text-white px-8 py-4 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-[#631717] transition-all disabled:opacity-50 active:scale-95"
+                className="bg-[#6b1d2f] hover:bg-[#831843] text-white px-6 py-3 rounded-xl text-xs uppercase tracking-widest font-black transition-all disabled:opacity-50 active:scale-95 cursor-pointer shadow-sm"
               >
-                {submitting ? "Kaydediliyor..." : "Kayıt Ol"}
+                {submitting ? "..." : "Kayıt Ol"}
               </button>
             </form>
           ) : (
-            <div className="p-6 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl max-w-md mx-auto text-emerald-800 font-medium text-sm">
-              ✓ Ayrıcalık bültenimize kaydoldunuz. Yeni sezon gelişmelerini e-postanıza ileteceğiz.
+            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl max-w-md mx-auto text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+              ✓ Ayrıcalık bültenimize kaydoldunuz. Kampanyaları e-postanıza ileteceğiz.
             </div>
           )}
         </div>

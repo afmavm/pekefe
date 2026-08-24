@@ -181,7 +181,7 @@ export function ProductTabs({
                 <div className="p-6 bg-surface-container-low/80 border border-outline-variant/20 rounded-3xl space-y-2.5 shadow-xs">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-secondary text-lg">eco</span>
-                    <span className="text-[11px] text-secondary font-black uppercase tracking-widest block">İçindekiler Temizliği</span>
+                    <span className="text-[11px] text-secondary font-black uppercase tracking-widest block">Doğal İçindekiler &amp; Katkısız Reçete</span>
                   </div>
                   <p className="text-base font-bold text-primary">{ingredientsText}</p>
                   <p className="text-xs text-on-surface-variant font-medium leading-relaxed">Renklendirici, koruyucu, nişasta bazlı glikoz şurubu veya yapay aroma verici içermez.</p>

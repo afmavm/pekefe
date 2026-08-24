@@ -3936,12 +3936,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">İçindekiler Temizlik Metni</label>
+                        <label className="block text-xs font-bold text-slate-700">Doğal İçindekiler & Katkısız Reçete Metni</label>
                         <input
                           type="text"
                           value={form.ingredients || ""}
                           onChange={e => setForm({ ...form, ingredients: e.target.value })}
-                          placeholder="Doğal Dut Şırası, Erzurum Ceviz"
+                          placeholder="Örn: Doğal Dut Şırası, İspir Cevizi, Doğal Nişasta"
                           className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
                         />
                       </div>

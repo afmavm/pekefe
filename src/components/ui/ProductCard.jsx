@@ -24,10 +24,11 @@ function CardCountdownTimer({ endDate }) {
         setTimeLeft(null);
         return;
       }
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((difference / 1000 / 60) % 60);
       const seconds = Math.floor((difference / 1000) % 60);
-      setTimeLeft({ hours, minutes, seconds });
+      setTimeLeft({ days, hours, minutes, seconds });
     };
 
     calculateTime();
@@ -38,13 +39,38 @@ function CardCountdownTimer({ endDate }) {
   if (!timeLeft) return null;
 
   return (
-    <div className="bg-orange-50 border border-orange-200/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 text-[10px] font-bold text-orange-700 shadow-2xs">
-      <span className="flex items-center gap-1 font-mono">
-        <span className="material-symbols-outlined text-xs text-orange-500">schedule</span> Fırsat Bitiş:
-      </span>
-      <span className="font-mono font-black text-orange-800 tracking-wider">
-        {String(timeLeft.hours).padStart(2, "0")}s {String(timeLeft.minutes).padStart(2, "0")}d {String(timeLeft.seconds).padStart(2, "0")}s
-      </span>
+    <div className="bg-gradient-to-r from-rose-50/90 via-amber-50/60 to-rose-50/90 dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-800 border border-rose-200/60 dark:border-rose-900/40 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shadow-2xs">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+        </span>
+        <span className="text-[10px] font-black text-[#6b1d2f] dark:text-rose-300 uppercase tracking-wider truncate">
+          Fırsat Bitiş
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1 font-mono shrink-0">
+        {timeLeft.days > 0 && (
+          <>
+            <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[20px] text-center">
+              {timeLeft.days}g
+            </span>
+            <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
+          </>
+        )}
+        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[24px] text-center">
+          {String(timeLeft.hours).padStart(2, "0")}
+        </span>
+        <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
+        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[24px] text-center">
+          {String(timeLeft.minutes).padStart(2, "0")}
+        </span>
+        <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
+        <span className="bg-rose-600 text-white text-[11px] font-black px-1.5 py-0.5 rounded-md shadow-xs min-w-[24px] text-center animate-pulse">
+          {String(timeLeft.seconds).padStart(2, "0")}
+        </span>
+      </div>
     </div>
   );
 }

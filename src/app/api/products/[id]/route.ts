@@ -609,6 +609,10 @@ export async function PUT(
           if (variant.b2bPrice != null) varAttributes.b2bPrice = Number(variant.b2bPrice);
           if (variant.vatRate != null) varAttributes.vatRate = Number(variant.vatRate);
           if (variant.vatIncluded !== undefined) varAttributes.vatIncluded = Boolean(variant.vatIncluded);
+          if (variant.purchasePrice != null) varAttributes.purchasePrice = Number(variant.purchasePrice);
+          if (variant.cost != null) varAttributes.cost = Number(variant.cost);
+          if (variant.oldPrice != null) varAttributes.oldPrice = Number(variant.oldPrice);
+          if (variant.list_price != null) varAttributes.list_price = Number(variant.list_price);
 
           await prisma.productVariant.create({
             data: {
@@ -617,7 +621,7 @@ export async function PUT(
               stock: Number(variant.stock ?? 0),
               price: Number(variant.price ?? 0),
               barcode: variant.barcode || null,
-              cost: variant.cost != null ? Number(variant.cost) : 0,
+              cost: variant.cost != null ? Number(variant.cost) : (variant.purchasePrice != null ? Number(variant.purchasePrice) : 0),
               attributes: varAttributes
             }
           });

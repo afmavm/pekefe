@@ -1358,9 +1358,20 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         // Set variants if exist
         if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
           setVariants(product.variants.map((v: any) => {
-            const variantAttrs = typeof v.attributes === "string"
-              ? JSON.parse(v.attributes)
-              : (v.attributes || {});
+            let variantAttrs = {};
+            try {
+              variantAttrs = typeof v.attributes === "string"
+                ? JSON.parse(v.attributes)
+                : (v.attributes || {});
+            } catch {}
+
+            const rawVatRate = v.vatRate != null 
+              ? Number(v.vatRate) 
+              : (variantAttrs.vatRate != null ? Number(variantAttrs.vatRate) : (attrs.saleVat != null ? Number(attrs.saleVat) : (product.saleVat != null ? Number(product.saleVat) : 1)));
+            const rawVatIncluded = v.vatIncluded !== undefined 
+              ? Boolean(v.vatIncluded) 
+              : (variantAttrs.vatIncluded !== undefined ? Boolean(variantAttrs.vatIncluded) : true);
+
             return {
               id: v.id,
               sku: v.sku || "",
@@ -1372,10 +1383,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               price: v.price ? Number(v.price) : 0,
               oldPrice: v.oldPrice != null ? Number(v.oldPrice) : (variantAttrs.oldPrice != null ? Number(variantAttrs.oldPrice) : undefined),
               list_price: v.list_price != null ? Number(v.list_price) : (variantAttrs.list_price != null ? Number(variantAttrs.list_price) : undefined),
-              purchasePrice: v.cost ? Number(v.cost) : (variantAttrs.cost ? Number(variantAttrs.cost) : 0),
-              b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : (v.price ? Number(v.price) : 0),
-              vatRate: variantAttrs.vatRate != null ? Number(variantAttrs.vatRate) : 20,
-              vatIncluded: variantAttrs.vatIncluded ?? true,
+              purchasePrice: v.purchasePrice != null ? Number(v.purchasePrice) : (v.cost != null ? Number(v.cost) : (variantAttrs.cost != null ? Number(variantAttrs.cost) : 0)),
+              cost: v.cost != null ? Number(v.cost) : (v.purchasePrice != null ? Number(v.purchasePrice) : (variantAttrs.cost != null ? Number(variantAttrs.cost) : 0)),
+              b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : (v.b2bPrice != null ? Number(v.b2bPrice) : (v.price ? Number(v.price) : 0)),
+              vatRate: rawVatRate,
+              vatIncluded: rawVatIncluded,
             };
           }));
         } else {
@@ -2521,6 +2533,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   };
 
   const openVariantModal = (variantToEdit?: Variant) => {
+    const currentFormVat = form.saleVat !== undefined && form.saleVat !== "" ? Number(form.saleVat) : 1;
+    const currentFormVatIncluded = form.saleVatIncluded !== undefined ? Boolean(form.saleVatIncluded) : true;
+
     if (variantToEdit) {
       setVariantForm({
         id: variantToEdit.id,
@@ -2529,8 +2544,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         stock: variantToEdit.stock,
         price: variantToEdit.price,
         b2bPrice: variantToEdit.b2bPrice ?? (form.salePrice || 0),
-        vatRate: variantToEdit.vatRate ?? 20,
-        vatIncluded: variantToEdit.vatIncluded ?? true,
+        vatRate: variantToEdit.vatRate != null ? Number(variantToEdit.vatRate) : currentFormVat,
+        vatIncluded: variantToEdit.vatIncluded !== undefined ? Boolean(variantToEdit.vatIncluded) : currentFormVatIncluded,
         sku: variantToEdit.sku || "",
         barcode: variantToEdit.barcode || "",
         packagingMarkupPercent: 0,
@@ -2551,8 +2566,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         stock: 1000,
         price: detail.finalPrice > 0 ? detail.finalPrice : (form.webPrice || 0),
         b2bPrice: form.salePrice || 0,
-        vatRate: 20,
-        vatIncluded: true,
+        vatRate: currentFormVat,
+        vatIncluded: currentFormVatIncluded,
         sku: codes.sku,
         barcode: codes.barcode,
         packagingMarkupPercent: 0,
@@ -2580,6 +2595,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
   };
 
   const saveVariant = () => {
+    const currentFormVat = form.saleVat !== undefined && form.saleVat !== "" ? Number(form.saleVat) : 1;
+    const currentFormVatIncluded = form.saleVatIncluded !== undefined ? Boolean(form.saleVatIncluded) : true;
+
     if (variantForm.modalTab === "bulk") {
       if (variantForm.selectedBulkSizes.length === 0 || variantForm.selectedBulkColors.length === 0) {
         toast.error("Lütfen en az 1 ebat ve 1 renk seçin.");
@@ -2600,8 +2618,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             stock: variantForm.stock,
             price: detail.finalPrice > 0 ? detail.finalPrice : form.webPrice,
             b2bPrice: variantForm.b2bPrice || form.salePrice || 0,
-            vatRate: variantForm.vatRate ?? 20,
-            vatIncluded: variantForm.vatIncluded ?? true,
+            vatRate: variantForm.vatRate != null ? Number(variantForm.vatRate) : currentFormVat,
+            vatIncluded: variantForm.vatIncluded !== undefined ? Boolean(variantForm.vatIncluded) : currentFormVatIncluded,
           });
         });
       });
@@ -2665,8 +2683,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             stock: Number(variantForm.stock) || 0,
             price: Number(variantForm.price) || 0,
             b2bPrice: Number(variantForm.b2bPrice) || 0,
-            vatRate: Number(variantForm.vatRate ?? 20),
-            vatIncluded: Boolean(variantForm.vatIncluded ?? true),
+            vatRate: variantForm.vatRate != null ? Number(variantForm.vatRate) : currentFormVat,
+            vatIncluded: variantForm.vatIncluded !== undefined ? Boolean(variantForm.vatIncluded) : currentFormVatIncluded,
             sku: variantForm.sku || v.sku,
             barcode: variantForm.barcode || v.barcode,
             name: `${variantForm.size} - ${variantForm.color}`,
@@ -2685,8 +2703,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           stock: Number(variantForm.stock) || 0,
           price: Number(variantForm.price) || 0,
           b2bPrice: Number(variantForm.b2bPrice) || 0,
-          vatRate: Number(variantForm.vatRate ?? 20),
-          vatIncluded: Boolean(variantForm.vatIncluded ?? true),
+          vatRate: variantForm.vatRate != null ? Number(variantForm.vatRate) : currentFormVat,
+          vatIncluded: variantForm.vatIncluded !== undefined ? Boolean(variantForm.vatIncluded) : currentFormVatIncluded,
         });
       }
       setVariants(updatedVariants);
@@ -2703,8 +2721,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         stock: Number(variantForm.stock) || 0,
         price: Number(variantForm.price) || 0,
         b2bPrice: Number(variantForm.b2bPrice) || 0,
-        vatRate: Number(variantForm.vatRate ?? 20),
-        vatIncluded: Boolean(variantForm.vatIncluded ?? true),
+        vatRate: variantForm.vatRate != null ? Number(variantForm.vatRate) : currentFormVat,
+        vatIncluded: variantForm.vatIncluded !== undefined ? Boolean(variantForm.vatIncluded) : currentFormVatIncluded,
       };
       updatedVariants = [...variants, newVar];
       setVariants(updatedVariants);

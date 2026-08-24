@@ -675,15 +675,18 @@ export async function POST(request: NextRequest) {
             stock: Number(variant.stock ?? 0),
             price: Number(variant.price ?? 0),
             barcode: variant.barcode || null,
-            cost: variant.cost != null ? Number(variant.cost) : 0,
+            cost: variant.cost != null ? Number(variant.cost) : (variant.purchasePrice != null ? Number(variant.purchasePrice) : 0),
             attributes: {
               size: variant.size || '',
               color: variant.color || '',
               barcode: variant.barcode || '',
               name: variant.name || `${variant.size || ''} - ${variant.color || ''}`.trim(),
               b2bPrice: variant.b2bPrice != null ? Number(variant.b2bPrice) : null,
-              vatRate: variant.vatRate != null ? Number(variant.vatRate) : 20,
-              vatIncluded: variant.vatIncluded ?? true,
+              vatRate: variant.vatRate != null ? Number(variant.vatRate) : 1,
+              vatIncluded: variant.vatIncluded !== undefined ? Boolean(variant.vatIncluded) : true,
+              purchasePrice: variant.purchasePrice != null ? Number(variant.purchasePrice) : null,
+              oldPrice: variant.oldPrice != null ? Number(variant.oldPrice) : null,
+              list_price: variant.list_price != null ? Number(variant.list_price) : null,
             }
           }
         });

@@ -945,11 +945,38 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         const res = await fetch("/api/branches");
         if (res.ok) {
           const data = await res.json();
-          setBranches(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setBranches(data);
+            return;
+          }
         }
       } catch (err) {
         console.error("Error fetching branches:", err);
       }
+      // Fallback default branches
+      setBranches([
+        {
+          id: "default-branch",
+          name: "Merkez Şube",
+          code: "MRKZ",
+          address: "İspir / Erzurum",
+          phone: "+90 534 270 91 40",
+          warehouses: [
+            { id: "1", name: "Merkez Depo", code: "WH-MRKZ", type: "Depo", address: "Erzurum OSB, 3. Cadde", branchId: "default-branch" },
+            { id: "3", name: "Üretim Bandı", code: "WH-URT", type: "Üretim", address: "Yakutiye Fabrika Alanı", branchId: "default-branch" }
+          ]
+        },
+        {
+          id: "sube-branch",
+          name: "İstanbul Şube",
+          code: "IST",
+          address: "İstanbul Anadolu Yakası",
+          phone: "+90 534 270 91 40",
+          warehouses: [
+            { id: "2", name: "Şube Depo", code: "WH-SUBE", type: "Depo", address: "İstanbul Anadolu Yakası", branchId: "sube-branch" }
+          ]
+        }
+      ]);
     };
     fetchBranches();
   }, []);

@@ -11,22 +11,74 @@ const BranchSchema = z.object({
   phone: z.string().optional(),
 });
 
+import { withTimeout } from '@/lib/prisma';
+
+const DEFAULT_BRANCHES_FALLBACK = [
+  {
+    id: "default-branch",
+    name: "Merkez Şube",
+    code: "MRKZ",
+    address: "İspir / Erzurum",
+    phone: "+90 534 270 91 40",
+    warehouses: [
+      {
+        id: "1",
+        name: "Merkez Depo",
+        code: "WH-MRKZ",
+        type: "Depo",
+        address: "Erzurum OSB, 3. Cadde",
+        branchId: "default-branch"
+      },
+      {
+        id: "3",
+        name: "Üretim Bandı",
+        code: "WH-URT",
+        type: "Üretim",
+        address: "Yakutiye Fabrika Alanı",
+        branchId: "default-branch"
+      }
+    ]
+  },
+  {
+    id: "sube-branch",
+    name: "İstanbul Şube",
+    code: "IST",
+    address: "İstanbul Anadolu Yakası",
+    phone: "+90 534 270 91 40",
+    warehouses: [
+      {
+        id: "2",
+        name: "Şube Depo",
+        code: "WH-SUBE",
+        type: "Depo",
+        address: "İstanbul Anadolu Yakası",
+        branchId: "sube-branch"
+      }
+    ]
+  }
+];
+
 export async function GET(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, "apiLimit");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const branches = await prisma.branch.findMany({
+    const branchesPromise = prisma.branch.findMany({
       include: {
         warehouses: true,
       },
       orderBy: { name: 'asc' }
     });
 
-    return NextResponse.json(branches);
+    const branches = await withTimeout(branchesPromise, 1500, null);
+
+    if (branches && Array.isArray(branches) && branches.length > 0) {
+      return NextResponse.json(branches);
+    }
+    return NextResponse.json(DEFAULT_BRANCHES_FALLBACK);
   } catch (error) {
-    console.error('Error fetching branches:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Error fetching branches, returning fallback:', error);
+    return NextResponse.json(DEFAULT_BRANCHES_FALLBACK);
   }
 }
 

@@ -196,11 +196,13 @@ export function formatDbProductToStorefront(p) {
     attrs.is_discounted
   );
 
-  const rawOldPrice = isCampaignActive 
-    ? (p.oldPrice || p.marketPrice || p.list_price || p.retail_list_price || attrs.marketPrice || attrs.list_price || 0)
-    : 0;
-    
-  const finalOldPrice = (isCampaignActive && Number(rawOldPrice) > finalPrice) ? Number(rawOldPrice) : 0;
+  const rawOldPrice = p.oldPrice || p.marketPrice || p.list_price || p.retail_list_price || attrs.marketPrice || attrs.list_price || 0;
+  const finalOldPrice = (Number(rawOldPrice) > finalPrice) ? Number(rawOldPrice) : 0;
+
+  const badgeText1 = p.badgeText1 || attrs.badgeText1 || "";
+  const badgeText2 = p.badgeText2 || attrs.badgeText2 || "";
+  const discount_end_date = p.discount_end_date || attrs.discount_end_date || null;
+  const discount_start_date = p.discount_start_date || attrs.discount_start_date || null;
 
   return {
     ...p,
@@ -212,7 +214,12 @@ export function formatDbProductToStorefront(p) {
     shortDesc: resolvedShortDesc,
     price: finalPrice,
     oldPrice: finalOldPrice,
+    list_price: finalOldPrice || p.list_price || attrs.list_price || 0,
     isCampaignActive: isCampaignActive,
+    discount_end_date: discount_end_date,
+    discount_start_date: discount_start_date,
+    badgeText1: badgeText1,
+    badgeText2: badgeText2,
     stock: p.stock != null ? Number(p.stock) : (p.stock_quantity != null ? Number(p.stock_quantity) : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],

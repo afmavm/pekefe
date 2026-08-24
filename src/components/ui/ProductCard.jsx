@@ -82,49 +82,61 @@ function stripHtmlTags(str) {
     .trim();
 }
 
-export function ProductCard({
-  id,
-  name,
-  desc,
-  shortDesc,
-  meta,
-  price,
-  priceMin,
-  priceMax,
-  oldPrice,
-  b2b_price,
-  discount_end_date,
-  isCampaignActive,
-  is_campaign_active,
-  is_discounted,
-  variants = [],
-  image,
-  tag,
-  stock,
-  onAddToCart,
-  className = ""
-}) {
+export function ProductCard(props) {
+  const p = props.product || {};
+  const id = props.id || p.id;
+  const name = props.name || p.name;
+  const desc = props.desc || p.desc;
+  const shortDesc = props.shortDesc || p.shortDesc;
+  const meta = props.meta || p.meta;
+  const price = props.price ?? p.price ?? p.sale_price;
+  const priceMin = props.priceMin ?? p.priceMin;
+  const priceMax = props.priceMax ?? p.priceMax;
+  const oldPrice = props.oldPrice ?? p.oldPrice ?? p.list_price;
+  const list_price = props.list_price ?? p.list_price;
+  const b2b_price = props.b2b_price ?? p.b2b_price;
+  const discount_end_date = props.discount_end_date || p.discount_end_date;
+  const discount_start_date = props.discount_start_date || p.discount_start_date;
+  const isCampaignActive = props.isCampaignActive ?? p.isCampaignActive;
+  const is_campaign_active = props.is_campaign_active ?? p.is_campaign_active;
+  const is_discounted = props.is_discounted ?? p.is_discounted;
+  const attributes = props.attributes || p.attributes || {};
+  const badgeText1 = props.badgeText1 || p.badgeText1 || attributes?.badgeText1 || "";
+  const badgeText2 = props.badgeText2 || p.badgeText2 || attributes?.badgeText2 || "";
+  const variants = props.variants || p.variants || [];
+  const image = props.image || p.image;
+  const tag = props.tag || p.tag;
+  const stock = props.stock ?? p.stock;
+  const onAddToCart = props.onAddToCart;
+  const className = props.className || "";
+
   const [imgError, setImgError] = useState(false);
   const { data: session } = useSession();
 
   const cardDesc = shortDesc || desc || "";
-
   const isB2B = session?.user?.role === "dealer" || session?.user?.customer_type === "B2B";
+
+  // Attributes fallback
+  const finalBadge1 = badgeText1 || attributes?.badgeText1 || "";
+  const finalBadge2 = badgeText2 || attributes?.badgeText2 || "";
+  const finalIsCampaign = isCampaignActive ?? is_campaign_active ?? is_discounted ?? attributes?.isCampaignActive ?? false;
+  const finalEndDate = discount_end_date || attributes?.discount_end_date || null;
 
   const hasVariants = Array.isArray(variants) && variants.length > 0;
   const [selectedVariant, setSelectedVariant] = useState(hasVariants ? variants[0] : null);
 
   // Active campaign status check
-  const activeCampaign = !!(isCampaignActive || is_campaign_active || is_discounted);
+  const activeCampaign = Boolean(finalIsCampaign);
 
   // Numeric computations
-  const numericB2B = b2b_price ? parseNumericPrice(b2b_price) : null;
+  const rawListPrice = oldPrice || list_price || attributes?.oldPrice || attributes?.list_price;
   const numericPrice = parseNumericPrice(price);
-  const numericOld = (activeCampaign && oldPrice) ? parseNumericPrice(oldPrice) : null;
+  const numericOld = rawListPrice ? parseNumericPrice(rawListPrice) : null;
+  const numericB2B = b2b_price ? parseNumericPrice(b2b_price) : null;
 
   // Active Price Resolution
   let activePrice = numericPrice;
-  let activeOldPrice = numericOld;
+  let activeOldPrice = (activeCampaign && numericOld && numericOld > numericPrice) ? numericOld : (numericOld && numericOld > numericPrice ? numericOld : null);
 
   if (selectedVariant) {
     if (selectedVariant.price != null && Number(selectedVariant.price) > 0) {
@@ -132,6 +144,15 @@ export function ProductCard({
     }
     if (selectedVariant.oldPrice != null && Number(selectedVariant.oldPrice) > 0) {
       activeOldPrice = Number(selectedVariant.oldPrice);
+    } else if (activeCampaign && numericOld && numericPrice && numericOld > numericPrice) {
+      // Proportional discount for variant if main product has discount
+      const discountRatio = (numericOld - numericPrice) / numericOld;
+      if (discountRatio > 0 && discountRatio < 1) {
+        const estOld = Math.round(activePrice / (1 - discountRatio));
+        if (estOld > activePrice) {
+          activeOldPrice = estOld;
+        }
+      }
     }
   }
 
@@ -141,8 +162,11 @@ export function ProductCard({
   }
 
   const fmt = (n) => `₺${Number(n).toLocaleString("tr-TR")}`;
-
   const isOutOfStock = stock === 0;
+
+  const discountPercent = (activeOldPrice && activePrice && activeOldPrice > activePrice)
+    ? Math.round(((activeOldPrice - activePrice) / activeOldPrice) * 100)
+    : null;
 
   return (
     <div className={`group relative bg-white dark:bg-slate-900 border border-outline-variant/15 hover:border-[#6b1d2f]/30 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full overflow-hidden ${className}`}>
@@ -152,20 +176,40 @@ export function ProductCard({
         
         {/* Luxury Editorial Image Frame */}
         <div className="w-full aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 relative group/img shadow-xs">
-          {tag ? (
-            <span className="absolute top-3 left-3 bg-[#6b1d2f] text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10">
-              {tag}
-            </span>
-          ) : (activeCampaign && activeOldPrice && activeOldPrice > activePrice) ? (
-            <span className="absolute top-3 left-3 bg-red-600 text-white font-label-sm text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold shadow-md tracking-wider z-10 animate-pulse">
-              %{Math.round(((activeOldPrice - activePrice) / activeOldPrice) * 100)} İNDİRİM
-            </span>
-          ) : null}
-          {isOutOfStock && (
-            <span className="absolute top-3 right-3 bg-slate-800 text-white text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full uppercase font-bold z-10 shadow-md">
-              Tükendi
-            </span>
-          )}
+          
+          {/* Top Left: Badges (Badge 1 & Badge 2 & Tag) */}
+          <div className="absolute top-2.5 left-2.5 z-10 flex flex-col items-start gap-1.5 max-w-[70%] pointer-events-none">
+            {finalBadge1 && (
+              <span className="bg-amber-500 text-amber-950 font-bold text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-xs uppercase tracking-wider truncate">
+                {finalBadge1}
+              </span>
+            )}
+            {finalBadge2 && (
+              <span className="bg-[#6b1d2f] text-white font-bold text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-xs uppercase tracking-wider truncate">
+                {finalBadge2}
+              </span>
+            )}
+            {tag && !finalBadge1 && !finalBadge2 && (
+              <span className="bg-[#6b1d2f] text-white font-bold text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md tracking-wider uppercase">
+                {tag}
+              </span>
+            )}
+          </div>
+
+          {/* Top Right: Discount Badge & Out of Stock */}
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5 pointer-events-none">
+            {discountPercent && discountPercent > 0 && (
+              <span className="bg-red-600 text-white font-black text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md tracking-wider uppercase animate-pulse">
+                %{discountPercent} İNDİRİM
+              </span>
+            )}
+            {isOutOfStock && (
+              <span className="bg-slate-900 text-white text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full uppercase font-bold shadow-md">
+                Tükendi
+              </span>
+            )}
+          </div>
+
           {!imgError && image ? (
             <Image
               src={image}
@@ -239,8 +283,8 @@ export function ProductCard({
       <div className="pt-4 mt-4 border-t border-outline-variant/15 space-y-3">
         
         {/* Live Campaign Countdown Timer for Discounted Items */}
-        {activeCampaign && activeOldPrice && activeOldPrice > activePrice && (
-          <CardCountdownTimer endDate={discount_end_date} />
+        {activeCampaign && finalEndDate && (
+          <CardCountdownTimer endDate={finalEndDate} />
         )}
 
         <div className="flex flex-wrap items-baseline justify-between gap-2">

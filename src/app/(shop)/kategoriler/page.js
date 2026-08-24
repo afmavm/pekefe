@@ -384,10 +384,15 @@ export default function Kategoriler() {
                       price={p.price}
                       priceMin={p.priceMin}
                       priceMax={p.priceMax}
-                      oldPrice={p.oldPrice}
+                      oldPrice={p.oldPrice || p.list_price}
+                      list_price={p.list_price}
                       b2b_price={p.b2b_price}
                       isCampaignActive={p.isCampaignActive}
                       discount_end_date={p.discount_end_date || p.attributes?.discount_end_date}
+                      discount_start_date={p.discount_start_date || p.attributes?.discount_start_date}
+                      badgeText1={p.badgeText1 || p.attributes?.badgeText1}
+                      badgeText2={p.badgeText2 || p.attributes?.badgeText2}
+                      attributes={p.attributes}
                       variants={p.variants || []}
                       image={p.image}
                       tag={p.tag}

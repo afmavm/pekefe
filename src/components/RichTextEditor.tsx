@@ -158,6 +158,103 @@ export default function RichTextEditor({
     insertHTML(`<table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e2e8f0"><thead><tr style="background:#f8fafc"><th style="border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px;font-weight:bold;">Sütun 1</th><th style="border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px;font-weight:bold;">Sütun 2</th><th style="border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px;font-weight:bold;">Sütun 3</th></tr></thead><tbody><tr><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 1</td><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 2</td><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 3</td></tr><tr><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 4</td><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 5</td><td style="border:1px solid #e2e8f0;padding:10px;font-size:13px">Hücre 6</td></tr></tbody></table>`);
   };
 
+  // Formats and cleans pasted rich text while strictly preserving styles, headings, tables, links, colors, and lists
+  const processPastedHtml = (rawHtml: string): string => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtml, "text/html");
+
+      // 1. Remove dangerous and layout-breaking tags
+      const dangerousTags = ["script", "style", "meta", "link", "title", "noscript", "xml", "object", "embed", "iframe"];
+      dangerousTags.forEach(tag => {
+        doc.querySelectorAll(tag).forEach(el => el.remove());
+      });
+
+      // 2. Remove MS Word specific comments and wrappers
+      const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
+      const commentsToRemove: Node[] = [];
+      while (walker.nextNode()) {
+        commentsToRemove.push(walker.currentNode);
+      }
+      commentsToRemove.forEach(c => c.parentNode?.removeChild(c));
+
+      // 3. Normalize all elements to preserve rich formatting
+      doc.querySelectorAll("*").forEach(el => {
+        // Strip out mso classes or office attributes
+        const className = el.getAttribute("class");
+        if (className && (className.includes("Mso") || className.includes("WordSection"))) {
+          el.removeAttribute("class");
+        }
+
+        // Clean useless mso attributes
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith("o:") || attr.name.startsWith("w:") || attr.name.startsWith("v:") || attr.name.startsWith("mso-")) {
+            el.removeAttribute(attr.name);
+          }
+        });
+
+        // Ensure images are responsive & styled
+        if (el.tagName.toLowerCase() === "img") {
+          const img = el as HTMLImageElement;
+          img.style.maxWidth = "100%";
+          img.style.height = "auto";
+          img.style.borderRadius = "8px";
+          img.style.margin = "10px 0";
+          img.style.display = "inline-block";
+        }
+
+        // Ensure tables have visible borders and spacing
+        if (el.tagName.toLowerCase() === "table") {
+          const tbl = el as HTMLTableElement;
+          tbl.style.width = tbl.style.width || "100%";
+          tbl.style.borderCollapse = "collapse";
+          tbl.style.margin = "12px 0";
+          if (!tbl.style.border) tbl.style.border = "1px solid #cbd5e1";
+        }
+        if (el.tagName.toLowerCase() === "td" || el.tagName.toLowerCase() === "th") {
+          const cell = el as HTMLTableCellElement;
+          cell.style.padding = cell.style.padding || "8px 12px";
+          cell.style.border = cell.style.border || "1px solid #e2e8f0";
+        }
+
+        // Ensure links open safely
+        if (el.tagName.toLowerCase() === "a") {
+          const a = el as HTMLAnchorElement;
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener noreferrer");
+          a.style.color = a.style.color || "#d97706";
+          a.style.textDecoration = "underline";
+        }
+      });
+
+      return doc.body.innerHTML;
+    } catch (err) {
+      console.error("HTML parse error on paste:", err);
+      return rawHtml;
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    const htmlData = clipboardData.getData("text/html");
+    const plainText = clipboardData.getData("text/plain");
+
+    if (htmlData && htmlData.trim().length > 0) {
+      const formattedHtml = processPastedHtml(htmlData);
+      insertHTML(formattedHtml);
+    } else if (plainText && plainText.length > 0) {
+      // Convert plain text newlines to rich paragraphs / breaks
+      const formattedPlain = plainText
+        .split(/\r?\n\r?\n/)
+        .map(p => `<p style="margin: 6px 0;">${p.replace(/\r?\n/g, "<br/>")}</p>`)
+        .join("");
+      insertHTML(formattedPlain);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.ctrlKey) {
       if (e.key === "b" || e.key === "B") {
@@ -399,6 +496,7 @@ export default function RichTextEditor({
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
+            onPaste={handlePaste}
             onBlur={() => { saveSelection(); handleInput(); }}
             onKeyUp={saveSelection}
             onMouseUp={saveSelection}

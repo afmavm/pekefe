@@ -152,7 +152,7 @@ export default function Sozlesme() {
               <strong>3.1.</strong> Ürünlerin cinsi, türü, miktarı, gramajı, adedi, satış bedeli, KDV dahil toplam tutarı ve kargo ücreti, siparişin tamamlandığı anda Alıcı tarafından onaylanan sipariş özetinde ve Alıcı'ya gönderilen elektronik faturada açıkça gösterildiği gibidir.
             </p>
             <p>
-              <strong>3.2. Ödeme Şekli:</strong> Alıcı sipariş bedelini <strong>iyzico Güvenli Ödeme Altyapısı</strong> üzerinden Kredi Kartı, Banka Kartı (Tek çekim veya Taksitli) ya da Satıcı'nın banka hesaplarına Havale/EFT yoluyla gerçekleştirebilir. Havale ile yapılan ödemelerde 2 iş günü içerisinde hesaba geçmeyen siparişler otomatik olarak iptal edilir.
+              <strong>3.2. Ödeme Şekli:</strong> Alıcı sipariş bedelini <strong>PAYTR Güvenli Ödeme Altyapısı</strong> üzerinden Kredi Kartı, Banka Kartı (Tek çekim veya Taksitli) ya da Satıcı'nın banka hesaplarına Havale/EFT yoluyla gerçekleştirebilir. Havale ile yapılan ödemelerde 2 iş günü içerisinde hesaba geçmeyen siparişler otomatik olarak iptal edilir.
             </p>
           </section>
 

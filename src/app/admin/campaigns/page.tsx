@@ -997,57 +997,180 @@ export default function CampaignsPage() {
 
       {/* Tab 4: Discounts & Bank */}
       {activeTab === "discounts" && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900">Sepet Altı & Havale İndirimleri</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Sistem genelinde geçerli indirim oranları ve banka havale bilgileri.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
             <div>
-              <label className={labelClass}>Sepet Kampanya Türü</label>
-              <select
-                value={cartDiscountType}
-                onChange={e => setCartDiscountType(e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
+              <h2 className="text-base font-extrabold text-slate-900">Sepet Altı & Havale İndirimleri</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Sistem genelinde geçerli indirim oranları ve banka havale bilgileri.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Sepet Kampanya Türü</label>
+                <select
+                  value={cartDiscountType}
+                  onChange={e => setCartDiscountType(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
+                >
+                  <option value="none">Kampanya Yok</option>
+                  <option value="percentage">Yüzde İndirim (%)</option>
+                  <option value="fixed">Sabit İndirim (₺)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">İndirim Değeri</label>
+                <input
+                  type="number"
+                  disabled={cartDiscountType === "none"}
+                  value={cartDiscountValue}
+                  onChange={e => setCartDiscountValue(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309] disabled:bg-slate-50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Banka Havale İndirimi (%)</label>
+                <input
+                  type="number"
+                  value={bankTransferDiscountRate}
+                  onChange={e => setBankTransferDiscountRate(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleSaveDiscounts}
+                disabled={discountsSaving}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer disabled:opacity-50"
               >
-                <option value="none">Kampanya Yok</option>
-                <option value="percentage">Yüzde İndirim (%)</option>
-                <option value="fixed">Sabit İndirim (₺)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className={labelClass}>İndirim Değeri</label>
-              <input
-                type="number"
-                disabled={cartDiscountType === "none"}
-                value={cartDiscountValue}
-                onChange={e => setCartDiscountValue(Number(e.target.value))}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309] disabled:bg-slate-50"
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Banka Havale İndirimi (%)</label>
-              <input
-                type="number"
-                value={bankTransferDiscountRate}
-                onChange={e => setBankTransferDiscountRate(Number(e.target.value))}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
-              />
+                {discountsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Genel İndirimleri Kaydet
+              </button>
             </div>
           </div>
 
-          <div className="flex justify-end pt-2">
-            <button
-              onClick={handleSaveDiscounts}
-              disabled={discountsSaving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer disabled:opacity-50"
-            >
-              {discountsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Genel İndirimleri Kaydet
-            </button>
+          {/* Bank Accounts Management */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900">Havale / EFT Banka Hesapları</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Müşterilerin ödeme sayfasında göreceği aktif şirket banka hesapları.</p>
+              </div>
+              <button
+                onClick={openAddBank}
+                className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" /> Yeni Banka Ekle
+              </button>
+            </div>
+
+            {banksLoading ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#b45309]" />
+                <p className="text-xs font-bold text-slate-500">Banka hesapları yükleniyor...</p>
+              </div>
+            ) : banks.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                <p className="text-xs font-semibold">Kayıtlı banka hesabı bulunmamaktadır.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {banks.map((b: any) => (
+                  <div key={b.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 flex justify-between items-start">
+                    <div className="space-y-1 min-w-0">
+                      <h4 className="text-xs font-extrabold text-slate-900">{b.name}</h4>
+                      <p className="text-xs font-mono font-bold text-slate-700 break-all">{b.iban || "IBAN Belirtilmemiş"}</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">{b.branch ? `${b.branch} Şubesi • ` : ""}{b.accountNumber ? `Hesap No: ${b.accountNumber}` : ""}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 ml-2">
+                      <button onClick={() => openEditBank(b)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Düzenle">
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => handleDeleteBank(b.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Sil">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* BANK MODAL */}
+      {isBankModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-100 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
+              <h3 className="text-sm font-bold text-slate-900">
+                {editingBank ? "Banka Hesabını Düzenle" : "Yeni Banka Hesabı Ekle"}
+              </h3>
+              <button onClick={() => setIsBankModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3.5">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Banka Adı *</label>
+                <input
+                  type="text"
+                  value={bankForm.name}
+                  onChange={e => setBankForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="örn: Ziraat Bankası"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#b45309] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">IBAN *</label>
+                <input
+                  type="text"
+                  value={bankForm.iban}
+                  onChange={e => setBankForm(prev => ({ ...prev, iban: e.target.value.toUpperCase().replace(/\s+/g, "") }))}
+                  placeholder="TR..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-[#b45309] outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Şube</label>
+                  <input
+                    type="text"
+                    value={bankForm.branch}
+                    onChange={e => setBankForm(prev => ({ ...prev, branch: e.target.value }))}
+                    placeholder="İspir Şubesi"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#b45309] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Hesap No</label>
+                  <input
+                    type="text"
+                    value={bankForm.accountNumber}
+                    onChange={e => setBankForm(prev => ({ ...prev, accountNumber: e.target.value }))}
+                    placeholder="12345678"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#b45309] outline-none"
+                  />
+                </div>
+              </div>
+              <div className="pt-3 flex gap-2 border-t border-slate-100">
+                <button
+                  onClick={() => setIsBankModalOpen(false)}
+                  className="flex-1 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handleSaveBank}
+                  className="flex-1 py-2.5 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition shadow-sm"
+                >
+                  Kaydet
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -1330,22 +1330,26 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         const loadedBranchPrices = attrs.branchPrices || {};
         setBranchPrices(loadedBranchPrices);
 
-        if (product.locations && product.locations.length > 0) {
+        if (product.locations && Array.isArray(product.locations) && product.locations.length > 0) {
           setWarehouses(product.locations.map((loc: any) => ({
-            id: loc.warehouseId,
-            name: loc.warehouse?.name || "Depo",
-            code: loc.warehouse?.code || loc.warehouse?.id || "WH",
-            location: loc.warehouse?.address || "Genel Konum",
-            stockCount: loc.stock || 0,
-            reserved: loc.reserved || 0,
-            minStock: loc.minStock || 0,
-            criticalLimit: loc.criticalLimit || 0,
-            branchId: loc.warehouse?.branchId || "default-branch",
-            price: loadedWarehousePrices[loc.warehouseId] !== undefined ? loadedWarehousePrices[loc.warehouseId] : undefined
+            id: loc.warehouseId || loc.id,
+            name: loc.warehouse?.name || loc.name || "Depo",
+            code: loc.warehouse?.code || loc.code || loc.warehouse?.id || "WH",
+            location: loc.warehouse?.address || loc.location || "Genel Konum",
+            stockCount: loc.stock != null ? Number(loc.stock) : (loc.stockCount != null ? Number(loc.stockCount) : 0),
+            reserved: loc.reserved != null ? Number(loc.reserved) : 0,
+            minStock: loc.minStock != null ? Number(loc.minStock) : 0,
+            criticalLimit: loc.criticalLimit != null ? Number(loc.criticalLimit) : 0,
+            branchId: loc.warehouse?.branchId || loc.branchId || "default-branch",
+            price: loadedWarehousePrices[loc.warehouseId || loc.id] !== undefined ? loadedWarehousePrices[loc.warehouseId || loc.id] : undefined
           })));
+        } else if (attrs.warehouses && Array.isArray(attrs.warehouses) && attrs.warehouses.length > 0) {
+          setWarehouses(attrs.warehouses);
+        } else if (product.warehouses && Array.isArray(product.warehouses) && product.warehouses.length > 0) {
+          setWarehouses(product.warehouses);
         } else {
           setWarehouses([
-            { id: "1", name: "Merkez Depo", code: "WH-MRKZ", location: "Erzurum OSB, 3. Cadde", stockCount: product.stock || 0, reserved: 0, minStock: 0, criticalLimit: 0, branchId: "default-branch", price: loadedWarehousePrices["1"] },
+            { id: "1", name: "Merkez Depo", code: "WH-MRKZ", location: "Erzurum OSB, 3. Cadde", stockCount: Number(product.stock || product.stock_quantity || 0), reserved: 0, minStock: 0, criticalLimit: 0, branchId: "default-branch", price: loadedWarehousePrices["1"] },
             { id: "2", name: "Şube Depo", code: "WH-SUBE", location: "İstanbul Anadolu Yakası", stockCount: 0, reserved: 0, minStock: 0, criticalLimit: 0, branchId: "sube-branch", price: loadedWarehousePrices["2"] },
             { id: "3", name: "Üretim Bandı", code: "WH-URT", location: "Yakutiye Fabrika Alanı", stockCount: 0, reserved: 0, minStock: 0, criticalLimit: 0, branchId: "default-branch", price: loadedWarehousePrices["3"] },
           ]);
@@ -1376,11 +1380,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           setVariants([]);
         }
 
-        // Form successfully populated without URL mutation trigger
-
         // Set marketplaces integration configurations
-        if (attrs.marketplaces && Array.isArray(attrs.marketplaces)) {
-          setMarketplaces(attrs.marketplaces);
+        const loadedMarketplaces = (attrs.marketplaces && Array.isArray(attrs.marketplaces) && attrs.marketplaces.length > 0)
+          ? attrs.marketplaces
+          : ((product.marketplaces && Array.isArray(product.marketplaces) && product.marketplaces.length > 0) ? product.marketplaces : null);
+
+        if (loadedMarketplaces) {
+          setMarketplaces(loadedMarketplaces);
         } else {
           setMarketplaces([
             { id: "1", name: "Trendyol API", syncEnabled: true, apiConnected: true, apiKey: "ty-api-90234892", apiSecret: "••••••••", logoColor: "bg-orange-500" },
@@ -1417,7 +1423,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
   // Selected Warehouse detailed display info helper
   const selectedWarehouseInfo = useMemo(() => {
-    return warehouses.find(w => w.name === form.warehouse) || warehouses[0];
+    if (!warehouses || warehouses.length === 0) return null;
+    return warehouses.find(w => 
+      w.name === form.warehouse || 
+      w.code === form.warehouse || 
+      `${w.name} (${w.code})` === form.warehouse || 
+      w.id === form.warehouse
+    ) || warehouses[0];
   }, [warehouses, form.warehouse]);
 
   // XML Feeds list
@@ -1955,6 +1967,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           b2bActive: form.b2bActive,
           b2bPreOrderable: form.b2bPreOrderable,
           marketplaces: marketplaces,
+          warehouses: warehouses,
           recipeDetails: form.recipeDetails,
           altitude: form.altitude,
           harvestSeason: form.harvestSeason,
@@ -5279,9 +5292,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         min={0}
                         onChange={e => {
                           const val = Math.max(0, parseInt(e.target.value) || 0);
-                          setWarehouses(prev => prev.map(w => w.name === selectedWarehouseInfo.name ? { ...w, stockCount: val } : w));
+                          setWarehouses(prev => prev.map(w => (w.id === selectedWarehouseInfo.id || w.name === selectedWarehouseInfo.name) ? { ...w, stockCount: val } : w));
                         }}
-                        className="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:border-orange-500 outline-none text-center text-slate-800"
+                        className="w-24 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:border-orange-500 outline-none text-center text-slate-800 shadow-xs"
                       />
                       <span className="text-xs font-bold text-slate-500">Adet</span>
                     </div>

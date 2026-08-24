@@ -16,7 +16,7 @@
   "socialWhatsapp": "+90 534 270 91 40",
   "topBarItems": "[{\"id\":\"1\",\"text\":\"Türkiye'nin Her Yerine Güvenli Sevkiyat\",\"icon\":\"truck\",\"enabled\":false},{\"id\":\"2\",\"text\":\"%100 Doğal ve Tescilli Lezzet\",\"icon\":\"shield\",\"enabled\":false}]",
   "companyVkn": "",
-  "companyTaxOffice": "İSPİR",
+  "companyTaxOffice": "",
   "companyMersis": "",
   "footerText": "© 2026 Pekefe Geleneksel Ürünler. Tüm Hakları Saklıdır.",
   "footerSlogan": "İspir Yöresel Ürünleri",
@@ -85,5 +85,7 @@
   "defaultCriticalStockLimit": 5,
   "paymentMethodsConfig": "[{\"id\":\"creditCard\",\"enabled\":true},{\"id\":\"bankTransfer\",\"enabled\":true},{\"id\":\"openAccount\",\"enabled\":true},{\"id\":\"cashOnDelivery\",\"enabled\":false}]",
   "installmentsConfig": "[{\"months\":1,\"label\":\"Tek Cekim\",\"enabled\":true,\"extraFeePercent\":0},{\"months\":2,\"label\":\"2 Taksit\",\"enabled\":true,\"extraFeePercent\":0},{\"months\":3,\"label\":\"3 Taksit\",\"enabled\":true,\"extraFeePercent\":0},{\"months\":6,\"label\":\"6 Taksit\",\"enabled\":true,\"extraFeePercent\":1.5},{\"months\":9,\"label\":\"9 Taksit\",\"enabled\":false,\"extraFeePercent\":3},{\"months\":12,\"label\":\"12 Taksit\",\"enabled\":false,\"extraFeePercent\":5}]",
-  "paytrConfig": "{\"merchantId\":\"735518\",\"merchantKey\":\"wQkmEkdf5NDCEnWg\",\"merchantSalt\":\"AuK7HXRb7NrbyZzw\",\"testMode\":true}"
+  "paytrConfig": "{\"merchantId\":\"735518\",\"merchantKey\":\"wQkmEkdf5NDCEnWg\",\"merchantSalt\":\"AuK7HXRb7NrbyZzw\",\"testMode\":true}",
+  "dealSectionActive": false,
+  "dealProductIds": "[]"
 }

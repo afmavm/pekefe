@@ -30,6 +30,7 @@
         "stock": 1000,
         "price": 250,
         "purchasePrice": 0,
+        "cost": 0,
         "b2bPrice": 250,
         "vatRate": 1,
         "vatIncluded": true
@@ -44,21 +45,22 @@
         "stock": 1000,
         "price": 500,
         "purchasePrice": 0,
+        "cost": 0,
         "b2bPrice": 500,
         "vatRate": 1,
         "vatIncluded": true
       }
     ],
     "locations": [],
-    "createdAt": "2026-08-24T20:35:50.486Z",
+    "createdAt": "2026-08-24T22:19:54.152Z",
     "isDeleted": false,
     "seoTitle": "PEKEFE Cevizli Dut Pestili | Doğal & Geleneksel Yöresel Lezzet - Pekefe",
     "seoDesc": "PEKEFE Cevizli Dut Pestili en uygun fiyat ve katkısız doğallık garantisiyle Pekefe'de! Pestil - Köme kategorisinde tazelik ve yüksek kalite adresinize teslim.",
     "seoKeywords": "pekefe, cevizli, dut, pestili, doğal lezzetler, geleneksel imalat, katkısız yöresel, organik ürün",
     "videoUrl": "",
     "isCampaignActive": false,
-    "discount_start_date": null,
-    "discount_end_date": null,
+    "discount_start_date": "2026-08-24T21:43:00.000Z",
+    "discount_end_date": "2026-08-25T21:43:00.000Z",
     "attributes": {
       "shortDesc": "İspir Cevizli Dut Pestili , Erzurum'un İspir ilçesinin yüksek oksijenli mikroklima vadilerinde yetişen asırlık beyaz dut ağaçlarından elde edilen doğal dut şırasının, özenle seçilmiş kaliteli ceviz içiyle buluştuğu geleneksel bir lezzettir.",
       "sizes": [
@@ -124,6 +126,41 @@
           "syncEnabled": false,
           "apiConnected": false,
           "logoColor": "bg-slate-500"
+        }
+      ],
+      "warehouses": [
+        {
+          "id": "1",
+          "name": "Merkez Depo",
+          "code": "WH-MRKZ",
+          "location": "Erzurum OSB, 3. Cadde",
+          "stockCount": 1000,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
+        },
+        {
+          "id": "2",
+          "name": "Şube Depo",
+          "code": "WH-SUBE",
+          "location": "İstanbul Anadolu Yakası",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "sube-branch"
+        },
+        {
+          "id": "3",
+          "name": "Üretim Bandı",
+          "code": "WH-URT",
+          "location": "Yakutiye Fabrika Alanı",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
         }
       ],
       "recipeDetails": "PEKEFE Cevizli Dut Pestili imalatında hijyenik koşullarda seçilen hammadde oranı %100'dür. Geleneksel bakır kazanlarda odun ateşinde ağır ağır kaynatılarak veya geleneksel presleme yöntemleriyle katkısız biçimde imal edilmiştir. Hiçbir koruyucu, glikoz şurubu veya renklendirici içermez.",

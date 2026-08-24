@@ -52,7 +52,11 @@ export async function fetchLiveSettings() {
           email: data.contactEmail || DEFAULT_SETTINGS.email,
           phone: data.contactPhone || DEFAULT_SETTINGS.phone,
           address: data.contactAddress || DEFAULT_SETTINGS.address,
-          companyTitle: data.siteName ? `${data.siteName} Ltd. Şti.` : DEFAULT_SETTINGS.companyTitle,
+          companyTitle: data.companyName || (data.siteName ? `${data.siteName} Ltd. Şti.` : DEFAULT_SETTINGS.companyTitle),
+          taxOffice: data.companyTaxOffice || "",
+          taxNo: data.companyTaxNo || data.companyVkn || "",
+          mersisNo: data.companyMersisNo || data.companyMersis || "",
+          website: data.companyWebsite ? data.companyWebsite.replace(/^https?:\/\//, '').replace(/\/$/, '') : "www.pekefe.com",
           shippingNote: data.topBarText1 || DEFAULT_SETTINGS.shippingNote,
           mapsLink: data.mapCoordinates
             ? `https://maps.google.com/?q=${encodeURIComponent(data.mapCoordinates)}`
@@ -60,9 +64,7 @@ export async function fetchLiveSettings() {
             ? `https://maps.google.com/?q=${encodeURIComponent(data.contactAddress)}`
             : DEFAULT_SETTINGS.mapsLink,
           instagram: data.socialInstagram || DEFAULT_SETTINGS.instagram,
-          whatsapp: data.socialWhatsapp
-            ? `https://wa.me/${data.socialWhatsapp.replace(/[^0-9]/g, "")}`
-            : DEFAULT_SETTINGS.whatsapp,
+          whatsapp: data.socialWhatsapp || data.contactPhone || DEFAULT_SETTINGS.whatsapp,
           facebook: data.socialFacebook || DEFAULT_SETTINGS.facebook,
           youtube: data.socialYoutube || DEFAULT_SETTINGS.youtube,
         };

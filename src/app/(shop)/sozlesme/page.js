@@ -99,12 +99,18 @@ export default function Sozlesme() {
                   1.1. SATICI BİLGİLERİ
                 </span>
                 <div className="space-y-1.5 text-xs sm:text-sm font-medium">
-                  <p><strong className="text-slate-900 dark:text-white">Unvan:</strong> {settings.companyTitle || "PEKEFE DOĞAL GIDA ÜRÜNLERİ SAN. VE TİC. LTD. ŞTİ."}</p>
-                  <p><strong className="text-slate-900 dark:text-white">Adres:</strong> {settings.address || "Kurtuluş Mah. İyiniyet Sk. No: 12 /3b Yakutiye / Erzurum"}</p>
-                  <p><strong className="text-slate-900 dark:text-white">Telefon:</strong> {settings.phone || "0530 421 59 70"}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Unvan:</strong> {settings.companyTitle || "PEKEFE Geleneksel & Doğal Lezzetler"}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Adres:</strong> {settings.address || "ÇAMLICA MAH. NO: 00 İSPİR/ ERZURUM"}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Telefon:</strong> {settings.phone || "+90 534 270 91 40"}</p>
                   <p><strong className="text-slate-900 dark:text-white">E-Posta:</strong> {settings.email || "info@pekefe.com"}</p>
-                  <p><strong className="text-slate-900 dark:text-white">Müşteri Destek / WhatsApp:</strong> {settings.phone || "0530 421 59 70"}</p>
-                  <p><strong className="text-slate-900 dark:text-white">Web Sitesi:</strong> www.pekefe.com</p>
+                  <p><strong className="text-slate-900 dark:text-white">Müşteri Destek / WhatsApp:</strong> {settings.whatsapp || settings.phone || "+90 534 270 91 40"}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Web Sitesi:</strong> {settings.website || "www.pekefe.com"}</p>
+                  {settings.taxOffice && (
+                    <p><strong className="text-slate-900 dark:text-white">Vergi Dairesi &amp; No:</strong> {settings.taxOffice} V.D. {settings.taxNo ? `/ ${settings.taxNo}` : ""}</p>
+                  )}
+                  {settings.mersisNo && (
+                    <p><strong className="text-slate-900 dark:text-white">MERSİS No:</strong> {settings.mersisNo}</p>
+                  )}
                 </div>
               </div>
 
@@ -253,7 +259,7 @@ export default function Sozlesme() {
               </h2>
             </div>
             <p>
-              Üretim hatası, bozulma, vakum kaçağı veya sevkiyat kaynaklı hasar barındıran ayıplı ürünlerde Alıcı, teslimat tarihinden itibaren <strong>48 saat içerisinde</strong> durumu Satıcı'nın <strong>{settings.phone || "0530 421 59 70"}</strong> numaralı WhatsApp hattına veya <strong>{settings.email || "info@pekefe.com"}</strong> adresine fotoğraflı olarak iletmelidir. Haklı görülen ayıplı mal bildirimlerinde ürün bedeli derhal iade edilir veya Alıcı'ya ücretsiz olarak yeni mahsul sevk edilir.
+              Üretim hatası, bozulma, vakum kaçağı veya sevkiyat kaynaklı hasar barındıran ayıplı ürünlerde Alıcı, teslimat tarihinden itibaren <strong>48 saat içerisinde</strong> durumu Satıcı'nın <strong>{settings.whatsapp || settings.phone || "+90 534 270 91 40"}</strong> numaralı WhatsApp hattına veya <strong>{settings.email || "info@pekefe.com"}</strong> adresine fotoğraflı olarak iletmelidir. Haklı görülen ayıplı mal bildirimlerinde ürün bedeli derhal iade edilir veya Alıcı'ya ücretsiz olarak yeni mahsul sevk edilir.
             </p>
           </section>
 

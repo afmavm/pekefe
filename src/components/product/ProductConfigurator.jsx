@@ -215,19 +215,23 @@ export function ProductConfigurator({
       </div>
 
       {/* Summary Description */}
-      <p className="text-on-surface-variant font-body-md text-sm md:text-base leading-relaxed font-light">
+      <p className="text-slate-700 dark:text-slate-200 font-sans text-sm md:text-[15px] leading-relaxed font-medium">
         {summaryDescription}
       </p>
 
       {/* Micro Pillars */}
-      <div className="grid grid-cols-2 gap-4 border-y border-outline-variant/10 py-6">
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary">eco</span>
-          <span className="font-label-sm text-xs text-on-surface font-bold uppercase tracking-wider">0% Katkı Maddesi</span>
+      <div className="grid grid-cols-2 gap-4 border-y border-outline-variant/15 py-5">
+        <div className="flex items-center gap-3 p-3 bg-surface-container-low/60 rounded-2xl border border-outline-variant/10">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-lg">eco</span>
+          </div>
+          <span className="text-xs text-slate-800 dark:text-slate-100 font-extrabold uppercase tracking-wider">%100 Doğal &amp; Saf</span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-secondary">history_edu</span>
-          <span className="font-label-sm text-xs text-on-surface font-bold uppercase tracking-wider">Asırlık Tarifler</span>
+        <div className="flex items-center gap-3 p-3 bg-surface-container-low/60 rounded-2xl border border-outline-variant/10">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-secondary flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-lg">local_fire_department</span>
+          </div>
+          <span className="text-xs text-slate-800 dark:text-slate-100 font-extrabold uppercase tracking-wider">Odun Ateşinde Bakır</span>
         </div>
       </div>
 

@@ -24,6 +24,7 @@ export function ProductTabs({
   nutrientsData,
   hmfLevelText,
   ritualText,
+  usageGuideText,
   // Tab 4
   reviewsList,
   setIsReviewModalOpen,
@@ -53,6 +54,8 @@ export function ProductTabs({
         : "text-on-surface-variant hover:text-primary hover:bg-surface/70"
     }`;
 
+  const guideContent = usageGuideText || ritualText;
+
   return (
     <div className="border-t border-outline-variant/15 pt-12">
       {/* Segmented Tab Bar */}
@@ -70,7 +73,7 @@ export function ProductTabs({
         </button>
         <button onClick={() => setActiveTab("besin")} className={tabClass("besin")}>
           <span className="material-symbols-outlined text-lg shrink-0">science</span>
-          <span className="truncate">Analiz &amp; Besin Değerleri</span>
+          <span className="truncate">Besin Değerleri &amp; Tüketim Rehberi</span>
         </button>
         <button onClick={() => setActiveTab("yorumlar")} className={tabClass("yorumlar")}>
           <span className="material-symbols-outlined text-lg shrink-0">rate_review</span>
@@ -248,16 +251,23 @@ export function ProductTabs({
                 </table>
               </div>
 
-              {/* Ritual + Disclaimer */}
+              {/* Usage Guide / Ritual + Disclaimer */}
               <div className="lg:col-span-6 space-y-6">
-                <div className="p-7 bg-surface-container-low/80 border border-outline-variant/25 rounded-3xl shadow-sm space-y-3">
+                <div className="p-7 bg-surface-container-low/80 border border-outline-variant/25 rounded-3xl shadow-sm space-y-3.5">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-xl">restaurant_menu</span>
+                      <span className="material-symbols-outlined text-xl">menu_book</span>
                     </div>
-                    <h4 className="font-display-lg text-primary text-base font-bold">Tüketim &amp; Servis Ritüeli</h4>
+                    <h4 className="font-display-lg text-primary text-base font-bold">Kullanım, Tüketim &amp; Saklama Rehberi</h4>
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">{ritualText}</p>
+                  {guideContent && /\<[a-z][\s\S]*>/i.test(guideContent) ? (
+                    <div
+                      className="text-slate-700 dark:text-slate-200 text-sm leading-relaxed space-y-2.5 prose dark:prose-invert max-w-none prose-strong:text-primary dark:prose-strong:text-amber-300 prose-strong:font-bold prose-p:my-1.5 font-medium"
+                      dangerouslySetInnerHTML={{ __html: guideContent }}
+                    />
+                  ) : (
+                    <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium whitespace-pre-line">{guideContent}</p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3.5 bg-amber-500/10 border-2 border-amber-500/30 p-5 rounded-3xl shadow-xs">

@@ -350,6 +350,7 @@ export function useProductDetailState(params) {
 
   const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "Doğal Dut Şırası, Erzurum Ceviz";
   const ritualText      = product?.attributes?.ritual || product?.ritual || "Oda sıcaklığında (18°C - 22°C) muhafaza edilmesi ve seramik veya ahşap kaşık ile tüketilmesi tavsiye edilir.";
+  const usageGuideText  = product?.attributes?.usageGuide || product?.usageGuide || ritualText;
   
   const nutrientsData = useMemo(() => {
     const raw = product?.attributes?.nutrients || product?.nutrients || {};
@@ -410,6 +411,6 @@ export function useProductDetailState(params) {
     getPublicShareUrl, getWhatsAppShareText, isZoomModalOpen, setIsZoomModalOpen,
     zoomScale, setZoomScale, mousePos, setMousePos, isHoveringZoom, setIsHoveringZoom,
     fullDescriptionText, summaryDescription, harvestStoryText, ingredientsText,
-    ritualText, nutrientsData, hmfLevelText, specificationsList, recommendations, productSchema,
+    ritualText, usageGuideText, nutrientsData, hmfLevelText, specificationsList, recommendations, productSchema,
   };
 }

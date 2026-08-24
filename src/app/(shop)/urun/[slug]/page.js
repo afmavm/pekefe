@@ -108,6 +108,7 @@ export default function UrunDetay({ params }) {
           nutrientsData={state.nutrientsData}
           hmfLevelText={state.hmfLevelText}
           ritualText={state.ritualText}
+          usageGuideText={state.usageGuideText}
           reviewsList={state.reviewsList}
           setIsReviewModalOpen={state.setIsReviewModalOpen}
         />

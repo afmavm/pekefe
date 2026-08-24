@@ -39,35 +39,35 @@ function CardCountdownTimer({ endDate }) {
   if (!timeLeft) return null;
 
   return (
-    <div className="bg-gradient-to-r from-rose-50/90 via-amber-50/60 to-rose-50/90 dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-800 border border-rose-200/60 dark:border-rose-900/40 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shadow-2xs">
-      <div className="flex items-center gap-1.5 min-w-0">
-        <span className="relative flex h-2 w-2">
+    <div className="bg-gradient-to-r from-rose-50 via-amber-50/70 to-rose-50 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 border border-rose-200/80 dark:border-rose-900/50 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-xs">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-600"></span>
         </span>
-        <span className="text-[10px] font-black text-[#6b1d2f] dark:text-rose-300 uppercase tracking-wider truncate">
+        <span className="text-[11px] sm:text-xs font-black text-[#6b1d2f] dark:text-rose-300 uppercase tracking-wider truncate">
           Fırsat Bitiş
         </span>
       </div>
 
-      <div className="flex items-center gap-1 font-mono shrink-0">
+      <div className="flex items-center gap-1.5 font-mono shrink-0">
         {timeLeft.days > 0 && (
           <>
-            <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[20px] text-center">
+            <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-xs font-black px-2 py-1 rounded-lg border border-rose-200 dark:border-slate-700 shadow-xs min-w-[26px] text-center">
               {timeLeft.days}g
             </span>
-            <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
+            <span className="text-[#6b1d2f]/50 dark:text-slate-500 text-xs font-black">:</span>
           </>
         )}
-        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[24px] text-center">
+        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-xs sm:text-sm font-black px-2 py-1 rounded-lg border border-rose-200 dark:border-slate-700 shadow-xs min-w-[28px] text-center">
           {String(timeLeft.hours).padStart(2, "0")}
         </span>
-        <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
-        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-[11px] font-black px-1.5 py-0.5 rounded-md border border-rose-200/80 dark:border-slate-700 shadow-xs min-w-[24px] text-center">
+        <span className="text-[#6b1d2f]/50 dark:text-slate-500 text-xs font-black">:</span>
+        <span className="bg-white dark:bg-slate-900 text-[#6b1d2f] dark:text-amber-400 text-xs sm:text-sm font-black px-2 py-1 rounded-lg border border-rose-200 dark:border-slate-700 shadow-xs min-w-[28px] text-center">
           {String(timeLeft.minutes).padStart(2, "0")}
         </span>
-        <span className="text-[#6b1d2f]/40 dark:text-slate-500 text-[10px] font-bold">:</span>
-        <span className="bg-rose-600 text-white text-[11px] font-black px-1.5 py-0.5 rounded-md shadow-xs min-w-[24px] text-center animate-pulse">
+        <span className="text-[#6b1d2f]/50 dark:text-slate-500 text-xs font-black">:</span>
+        <span className="bg-rose-600 text-white text-xs sm:text-sm font-black px-2 py-1 rounded-lg shadow-sm min-w-[28px] text-center animate-pulse">
           {String(timeLeft.seconds).padStart(2, "0")}
         </span>
       </div>
@@ -162,23 +162,18 @@ export function ProductCard(props) {
 
   // Active Price Resolution
   let activePrice = numericPrice;
-  let activeOldPrice = (activeCampaign && numericOld && numericOld > numericPrice) ? numericOld : (numericOld && numericOld > numericPrice ? numericOld : null);
+  let activeOldPrice = (numericOld && numericOld > numericPrice) ? numericOld : null;
 
   if (selectedVariant) {
     if (selectedVariant.price != null && Number(selectedVariant.price) > 0) {
       activePrice = Number(selectedVariant.price);
     }
-    if (selectedVariant.oldPrice != null && Number(selectedVariant.oldPrice) > 0) {
-      activeOldPrice = Number(selectedVariant.oldPrice);
-    } else if (activeCampaign && numericOld && numericPrice && numericOld > numericPrice) {
-      // Proportional discount for variant if main product has discount
-      const discountRatio = (numericOld - numericPrice) / numericOld;
-      if (discountRatio > 0 && discountRatio < 1) {
-        const estOld = Math.round(activePrice / (1 - discountRatio));
-        if (estOld > activePrice) {
-          activeOldPrice = estOld;
-        }
-      }
+    // Only show oldPrice for variant if explicitly defined in database and higher than active price
+    const variantOldPrice = selectedVariant.oldPrice != null ? Number(selectedVariant.oldPrice) : (selectedVariant.list_price != null ? Number(selectedVariant.list_price) : null);
+    if (variantOldPrice && variantOldPrice > activePrice) {
+      activeOldPrice = variantOldPrice;
+    } else {
+      activeOldPrice = null;
     }
   }
 

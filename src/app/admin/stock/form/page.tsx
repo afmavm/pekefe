@@ -1370,6 +1370,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               color: variantAttrs.color || v.color || "",
               stock: v.stock !== undefined ? Number(v.stock) : 0,
               price: v.price ? Number(v.price) : 0,
+              oldPrice: v.oldPrice != null ? Number(v.oldPrice) : (variantAttrs.oldPrice != null ? Number(variantAttrs.oldPrice) : undefined),
+              list_price: v.list_price != null ? Number(v.list_price) : (variantAttrs.list_price != null ? Number(variantAttrs.list_price) : undefined),
               purchasePrice: v.cost ? Number(v.cost) : (variantAttrs.cost ? Number(variantAttrs.cost) : 0),
               b2bPrice: variantAttrs.b2bPrice != null ? Number(variantAttrs.b2bPrice) : (v.price ? Number(v.price) : 0),
               vatRate: variantAttrs.vatRate != null ? Number(variantAttrs.vatRate) : 20,

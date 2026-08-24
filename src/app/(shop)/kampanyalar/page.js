@@ -107,35 +107,34 @@ export default function Kampanyalar() {
     <div className="w-full bg-[#fcfaf7] dark:bg-slate-950 text-slate-900 dark:text-white antialiased min-h-screen">
       
       {/* 1. HERO SECTION */}
-      <section className="relative h-[56vh] min-h-[460px] max-h-[620px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[60vh] min-h-[480px] max-h-[640px] flex items-center justify-center overflow-hidden">
         <Image
           src="/uploads/kampanya_hero_banner.jpg"
           alt="PEKEFE Gurme Kampanyalar ve Özel Seçkiler"
           fill
           priority
           sizes="100vw"
-          className="object-cover filter brightness-[0.42] contrast-110"
+          className="object-cover object-center filter brightness-[0.45] contrast-105"
         />
-        {/* Stronger Cinematic Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1a0509] via-[#1a0509]/65 to-black/50 z-10"></div>
+        {/* Seamless Cinematic Dark Burgundy Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#140306] via-[#140306]/65 to-black/45 z-10"></div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-4">
-          <span className="inline-flex items-center gap-2 text-amber-400 text-xs font-black tracking-[0.25em] uppercase px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-amber-500/40 shadow-xl font-mono">
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-5">
+          <span className="inline-flex items-center gap-2 text-amber-300 text-xs font-black tracking-[0.25em] uppercase px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-amber-400/30 shadow-lg font-mono">
             <span className="material-symbols-outlined text-sm text-amber-400">verified</span> CANLI KAMPANYA & AYRICALIKLAR
           </span>
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl text-white font-black leading-tight tracking-tight drop-shadow-2xl">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-white font-black leading-tight tracking-tight drop-shadow-md">
             Özel Fırsatlar & Kupon Kodları
           </h1>
-          <div className="bg-black/50 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/15 max-w-2xl mx-auto shadow-2xl">
-            <p className="text-white text-xs sm:text-sm md:text-base font-semibold leading-relaxed">
-              İspir'in hakiki lezzetlerinde geçerli indirim kuponları, sezonluk fırsat paketleri ve ücretsiz kargo ayrıcalıklarını hemen kullanın.
-            </p>
-          </div>
+          <p className="font-light text-amber-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
+            İspir'in hakiki lezzetlerinde geçerli indirim kuponları, sezonluk fırsat paketleri ve ücretsiz kargo ayrıcalıklarını hemen kullanın.
+          </p>
+          <div className="w-16 h-0.5 bg-amber-400/60 mx-auto pt-0.5 rounded-full"></div>
         </div>
       </section>
 
       {/* 2. AKTİF KUPON KARTLARI (TICKET CODES) */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+      <section className="py-14 md:py-20 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-200/80 dark:border-slate-800">
           <div>
             <span className="text-[#6b1d2f] dark:text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-1 font-mono">

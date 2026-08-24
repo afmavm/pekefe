@@ -48,10 +48,10 @@ export function ProductTabs({
   );
 
   const tabClass = (key) =>
-    `flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center ${
+    `flex items-center justify-center gap-2 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl text-xs sm:text-[13px] font-bold tracking-normal transition-all cursor-pointer text-center select-none ${
       activeTab === key
         ? "bg-primary text-white shadow-lg shadow-primary/25 ring-2 ring-primary/40"
-        : "text-on-surface-variant hover:text-primary hover:bg-surface/70"
+        : "text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-surface/80"
     }`;
 
   const guideContent = usageGuideText || ritualText;
@@ -62,22 +62,19 @@ export function ProductTabs({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 p-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low/90 shadow-sm mb-8">
         <button onClick={() => setActiveTab("urun_aciklamasi")} className={tabClass("urun_aciklamasi")}>
           <span className="material-symbols-outlined text-lg shrink-0">description</span>
-          <span className="truncate">Ürün Açıklaması</span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold shrink-0 ${activeTab === "urun_aciklamasi" ? "bg-secondary/70 text-on-surface" : "bg-primary/10 text-primary"}`}>
-            Özel Reçete
-          </span>
+          <span className="whitespace-nowrap">Ürün Açıklaması</span>
         </button>
         <button onClick={() => setActiveTab("aciklama")} className={tabClass("aciklama")}>
           <span className="material-symbols-outlined text-lg shrink-0">auto_stories</span>
-          <span className="truncate">Mahsul Hikayesi &amp; Detaylar</span>
+          <span className="whitespace-nowrap">Mahsul Hikayesi</span>
         </button>
         <button onClick={() => setActiveTab("besin")} className={tabClass("besin")}>
           <span className="material-symbols-outlined text-lg shrink-0">science</span>
-          <span className="truncate">Besin Değerleri &amp; Tüketim Rehberi</span>
+          <span className="whitespace-nowrap">Besin Değerleri &amp; Rehber</span>
         </button>
         <button onClick={() => setActiveTab("yorumlar")} className={tabClass("yorumlar")}>
           <span className="material-symbols-outlined text-lg shrink-0">rate_review</span>
-          <span className="truncate">Müşteri Yorumları ({reviewsList.length})</span>
+          <span className="whitespace-nowrap">Müşteri Yorumları ({reviewsList.length})</span>
         </button>
       </div>
 

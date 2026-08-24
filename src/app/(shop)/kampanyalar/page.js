@@ -257,17 +257,24 @@ export default function Kampanyalar() {
 
       {/* 4. ÖDEME & KARGO AYRICALIKLARI (BANNER) */}
       <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-br from-[#3d121c] via-[#501726] to-[#2b0c13] text-white rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden">
+        <div
+          style={{ backgroundColor: "#3d121c", color: "#ffffff" }}
+          className="rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-amber-500/20"
+        >
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
             
             <div className="lg:col-span-2 space-y-4">
-              <span className="text-amber-400 font-black text-xs uppercase tracking-widest block">
+              <span className="text-amber-400 font-black text-xs uppercase tracking-widest block font-mono">
                 ÖZEL SEPET AVANTAJLARI
               </span>
               <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
                 2000 TL Üzeri Ücretsiz Kargo & Havale İndirimi
               </h2>
-              <p className="text-amber-100/90 text-xs sm:text-sm font-light leading-relaxed max-w-xl">
+              <p className="text-amber-100 text-xs sm:text-sm font-normal leading-relaxed max-w-xl">
                 Tüm siparişlerinizde 2000 TL sepet tutarını aştığınızda kargo ücreti tarafımızdan karşılanır. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında ek sepet indirimi uygulanır.
               </p>
             </div>
@@ -275,14 +282,14 @@ export default function Kampanyalar() {
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
               <Link
                 href="/kategoriler"
-                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-md active:scale-95 text-center"
+                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-7 py-4 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-lg active:scale-95 text-center shrink-0"
               >
                 <span>Alışverişe Başla</span>
                 <span className="material-symbols-outlined text-sm">shopping_bag</span>
               </Link>
               <Link
                 href="/iletisim"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-7 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center shrink-0"
               >
                 <span>Toptan Bayi Talebi</span>
                 <span className="material-symbols-outlined text-sm">business</span>

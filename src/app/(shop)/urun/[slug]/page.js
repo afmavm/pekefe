@@ -86,6 +86,8 @@ export default function UrunDetay({ params }) {
             setSelectedVariant={state.setSelectedVariant}
             getVariantLabel={getVariantLabel}
             displayPrice={state.displayPrice}
+            displayOldPrice={state.displayOldPrice}
+            discountPercent={state.discountPercent}
             summaryDescription={state.summaryDescription}
             quantity={state.quantity}
             handleQuantityChange={state.handleQuantityChange}

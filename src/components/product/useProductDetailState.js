@@ -165,9 +165,52 @@ export function useProductDetailState(params) {
 
   const displayPrice = useMemo(() => {
     if (selectedVariant?.price && Number(selectedVariant.price) > 0) return Number(selectedVariant.price);
+    if (product?.sale_price && Number(product.sale_price) > 0) return Number(product.sale_price);
     if (product?.price && Number(product.price) > 0) return Number(product.price);
     return 280;
   }, [selectedVariant, product]);
+
+  const displayOldPrice = useMemo(() => {
+    if (!product) return null;
+    const prodSalePrice = Number(product.sale_price || product.price || 0);
+    const prodOldPrice = Number(product.oldPrice || product.list_price || 0);
+
+    if (selectedVariant) {
+      let vAttrs = {};
+      try {
+        vAttrs = typeof selectedVariant.attributes === "string" 
+          ? JSON.parse(selectedVariant.attributes) 
+          : (selectedVariant.attributes || {});
+      } catch {}
+
+      const vOld = Number(selectedVariant.oldPrice || selectedVariant.list_price || vAttrs.oldPrice || vAttrs.list_price || 0);
+      const vPrice = Number(selectedVariant.price || 0);
+
+      if (vOld > vPrice) {
+        return vOld;
+      }
+
+      // Ana üründe geçerli bir indirim varsa, varyanta da oransal liste fiyatı hesapla
+      if (prodOldPrice > prodSalePrice && prodSalePrice > 0 && vPrice > 0) {
+        const ratio = prodOldPrice / prodSalePrice;
+        const calculatedOld = Math.round(vPrice * ratio);
+        return calculatedOld > vPrice ? calculatedOld : null;
+      }
+
+      return null;
+    }
+
+    // Ana ürün modu
+    if (prodOldPrice > prodSalePrice) {
+      return prodOldPrice;
+    }
+    return null;
+  }, [selectedVariant, product]);
+
+  const discountPercent = useMemo(() => {
+    if (!displayOldPrice || !displayPrice || displayOldPrice <= displayPrice) return 0;
+    return Math.round(((displayOldPrice - displayPrice) / displayOldPrice) * 100);
+  }, [displayPrice, displayOldPrice]);
 
   const [quantity,          setQuantity]         = useState(1);
   const [mainImage,         setMainImage]        = useState(product?.images?.[0] ?? product?.image ?? "/premium-pekefe-kavanoz.png");
@@ -403,7 +446,7 @@ export function useProductDetailState(params) {
 
   return {
     slugOrId, product, isLoading, mediaList, selectedMedia, setSelectedMedia,
-    variantsList, selectedVariant, setSelectedVariant, displayPrice, quantity, handleQuantityChange,
+    variantsList, selectedVariant, setSelectedVariant, displayPrice, displayOldPrice, discountPercent, quantity, handleQuantityChange,
     mainImage, activeTab, setActiveTab, failedImages, setFailedImages, toastOpen, setToastOpen,
     toastMsg, setToastMsg, isFavorite, handleFavoriteToggle, handleAddToCart,
     isReviewModalOpen, setIsReviewModalOpen, isShareModalOpen, setIsShareModalOpen,

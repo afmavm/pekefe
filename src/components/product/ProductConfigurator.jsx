@@ -75,6 +75,8 @@ export function ProductConfigurator({
   setSelectedVariant,
   getVariantLabel,
   displayPrice,
+  displayOldPrice,
+  discountPercent,
   summaryDescription,
   quantity,
   handleQuantityChange,
@@ -192,14 +194,14 @@ export function ProductConfigurator({
       <div className="border-b border-outline-variant/10 pb-6 space-y-2">
         <div className="flex items-baseline gap-3">
           <span className="text-primary font-display-lg text-2xl md:text-3xl font-bold tracking-tight">₺{displayPrice}</span>
-          {product?.oldPrice && Number(product.oldPrice) > Number(displayPrice) && (
+          {displayOldPrice && Number(displayOldPrice) > Number(displayPrice) && (
             <span className="text-sm font-semibold text-slate-400 line-through font-mono">
-              ₺{product.oldPrice}
+              ₺{displayOldPrice}
             </span>
           )}
-          {product?.oldPrice && Number(product.oldPrice) > Number(displayPrice) && (
+          {discountPercent > 0 && (
             <span className="text-xs font-black text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full animate-pulse">
-              %{Math.round(((Number(product.oldPrice) - Number(displayPrice)) / Number(product.oldPrice)) * 100)} İNDİRİM
+              %{discountPercent} İNDİRİM
             </span>
           )}
         </div>

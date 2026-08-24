@@ -29,33 +29,78 @@ function CampaignCountdownTimer({ endDate }) {
   if (!timeLeft) return null;
 
   return (
-    <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-2xl p-4 space-y-2 shadow-md animate-pulse">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-sm">schedule</span> Sınırlı Süreli Kampanya Fırsatı
-        </span>
-        <span className="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full uppercase">Canlı İndirim</span>
-      </div>
-      <div className="flex items-center gap-2 font-mono font-black text-lg justify-center sm:justify-start">
-        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
-          <span className="text-xl leading-none">{String(timeLeft.days).padStart(2, '0')}</span>
-          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Gün</span>
+    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#3d121c] to-slate-900 text-white rounded-2xl p-4 sm:p-4.5 border border-amber-500/30 shadow-lg">
+      {/* Background Subtle Luxury Glow */}
+      <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-[#6b1d2f]/30 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+        
+        {/* Left Side: Campaign Header & Indicator */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-80"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono">
+              Canlı Fırsat
+            </span>
+          </div>
+          <h4 className="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-tight">
+            Sınırlı Süreli Kampanya Fırsatı
+          </h4>
         </div>
-        <span>:</span>
-        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
-          <span className="text-xl leading-none">{String(timeLeft.hours).padStart(2, '0')}</span>
-          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Saat</span>
+
+        {/* Right Side: Luxury Digital Time Blocks */}
+        <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto font-mono">
+          {/* GÜN */}
+          <div className="flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-xl min-w-[44px] shadow-inner">
+            <span className="text-base sm:text-lg font-black text-white leading-none">
+              {String(timeLeft.days).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] font-sans font-bold text-slate-300 uppercase tracking-wider mt-0.5">
+              Gün
+            </span>
+          </div>
+
+          <span className="text-amber-400/60 font-black text-sm pb-2">:</span>
+
+          {/* SAAT */}
+          <div className="flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-xl min-w-[44px] shadow-inner">
+            <span className="text-base sm:text-lg font-black text-white leading-none">
+              {String(timeLeft.hours).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] font-sans font-bold text-slate-300 uppercase tracking-wider mt-0.5">
+              Saat
+            </span>
+          </div>
+
+          <span className="text-amber-400/60 font-black text-sm pb-2">:</span>
+
+          {/* DAKİKA */}
+          <div className="flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-xl min-w-[44px] shadow-inner">
+            <span className="text-base sm:text-lg font-black text-white leading-none">
+              {String(timeLeft.minutes).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] font-sans font-bold text-slate-300 uppercase tracking-wider mt-0.5">
+              Dakika
+            </span>
+          </div>
+
+          <span className="text-amber-400/60 font-black text-sm pb-2">:</span>
+
+          {/* SANİYE */}
+          <div className="flex flex-col items-center justify-center bg-gradient-to-b from-rose-600 to-rose-700 border border-rose-400/40 px-2.5 py-1.5 rounded-xl min-w-[44px] shadow-md animate-pulse">
+            <span className="text-base sm:text-lg font-black text-white leading-none">
+              {String(timeLeft.seconds).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] font-sans font-bold text-rose-100 uppercase tracking-wider mt-0.5">
+              Saniye
+            </span>
+          </div>
         </div>
-        <span>:</span>
-        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
-          <span className="text-xl leading-none">{String(timeLeft.minutes).padStart(2, '0')}</span>
-          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Dakika</span>
-        </div>
-        <span>:</span>
-        <div className="flex flex-col items-center bg-black/20 px-2.5 py-1 rounded-xl">
-          <span className="text-xl leading-none text-amber-300">{String(timeLeft.seconds).padStart(2, '0')}</span>
-          <span className="text-[9px] font-sans text-orange-200 uppercase font-semibold">Saniye</span>
-        </div>
+
       </div>
     </div>
   );

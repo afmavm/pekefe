@@ -168,11 +168,35 @@ export default function Sepet() {
     });
   };
 
+  const parsedCarriers = useMemo(() => {
+    if (!settings?.shippingCarriers) return [];
+    let list = settings.shippingCarriers;
+    if (typeof list === "string") {
+      try {
+        list = JSON.parse(list);
+      } catch (e) {
+        list = [];
+      }
+    }
+    if (Array.isArray(list) && list.length > 0) {
+      return list.filter((c) => c.isActive !== false);
+    }
+    return [];
+  }, [settings]);
+
+  const defaultCarrier = parsedCarriers[0] || null;
+  const isReceiverPay = Boolean(
+    defaultCarrier?.pricingType === "receiver_pay" ||
+    defaultCarrier?.pricingType === "buyer_pays" ||
+    defaultCarrier?.isReceiverPay === true
+  );
+
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const shippingThreshold = Number(settings?.shippingThreshold ?? 5000);
-  const baseShippingFee = Number(settings?.shippingFee ?? 150);
-  const isShippingFree = subtotal >= shippingThreshold;
-  const shippingCost = subtotal === 0 ? 0 : isShippingFree ? 0 : baseShippingFee;
+  const isCouponFreeShipping = appliedCoupon?.type === "free_shipping";
+  const shippingThreshold = Number(defaultCarrier?.freeThreshold ?? settings?.shippingThreshold ?? 5000);
+  const baseShippingFee = Number(defaultCarrier?.fallbackFee ?? settings?.shippingFee ?? 150);
+  const isShippingFree = isCouponFreeShipping || (subtotal >= shippingThreshold);
+  const shippingCost = subtotal === 0 || isReceiverPay ? 0 : isShippingFree ? 0 : baseShippingFee;
   const total = Math.max(0, subtotal - discountAmount + shippingCost);
   const remainingForFreeShipping = Math.max(0, shippingThreshold - subtotal);
   const progressPercent = Math.min(100, (subtotal / shippingThreshold) * 100);
@@ -257,26 +281,47 @@ export default function Sepet() {
               </div>
             ))}
 
-            {/* Shipping Progress */}
-            <div className="bg-secondary-container/20 p-6 rounded-xl border border-secondary-container">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary">local_shipping</span>
-                  <p className="font-bold text-secondary">
-                    {isShippingFree
-                      ? "Tebrikler, Kargonuz Bedava!"
-                      : `Ücretsiz Kargo İçin Son ₺${remainingForFreeShipping}`}
+            {/* Shipping Progress & Information */}
+            {isReceiverPay ? (
+              <div className="bg-amber-500/10 p-5 rounded-2xl border-2 border-amber-500/30 flex items-start sm:items-center gap-3.5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                  <span className="material-symbols-outlined text-2xl">local_shipping</span>
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-sm text-amber-900 dark:text-amber-200">
+                      📦 Ücret Alıcı Ödemeli Kargo
+                    </span>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-2xs">
+                      Kapıda Ödeme
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-800/95 dark:text-amber-300 font-medium leading-relaxed">
+                    Kargo taşıma bedeli sepet tutarınıza <strong>eklenmez (0 TL)</strong>; teslimat anında kapıda doğrudan kuryeye ödenir.
                   </p>
                 </div>
-                <span className="font-label-md text-secondary">{Math.round(progressPercent)}%</span>
               </div>
-              <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-secondary transition-all duration-1000"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
+            ) : (
+              <div className="bg-secondary-container/20 p-6 rounded-xl border border-secondary-container">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary">local_shipping</span>
+                    <p className="font-bold text-secondary">
+                      {isShippingFree
+                        ? "Tebrikler, Kargonuz Bedava!"
+                        : `Ücretsiz Kargo İçin Son ₺${remainingForFreeShipping}`}
+                    </p>
+                  </div>
+                  <span className="font-label-md text-secondary">{Math.round(progressPercent)}%</span>
+                </div>
+                <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-secondary transition-all duration-1000"
+                    style={{ width: `${progressPercent}%` }}
+                  ></div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Order Summary Section */}
@@ -288,16 +333,31 @@ export default function Sepet() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between items-center text-on-surface-variant">
                   <span className="font-body-md">Ara Toplam</span>
-                  <span className="font-label-md">₺{subtotal}</span>
+                  <span className="font-label-md">₺{subtotal.toLocaleString("tr-TR")}</span>
                 </div>
-                <div className="flex justify-between items-center text-on-surface-variant">
-                  <span className="font-body-md">Kargo Ücreti</span>
-                  <span className="font-label-md">
-                    {shippingCost === 0 ? "Ücretsiz" : `₺${shippingCost}`}
-                  </span>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-on-surface-variant">
+                    <span className="font-body-md">Kargo Ücreti</span>
+                    <span className="font-label-md">
+                      {isReceiverPay ? (
+                        <span className="text-amber-700 font-bold px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md text-xs">
+                          Kapıda Alıcı Öder
+                        </span>
+                      ) : shippingCost === 0 ? (
+                        <span className="text-emerald-700 font-bold">Ücretsiz</span>
+                      ) : (
+                        `₺${shippingCost.toLocaleString("tr-TR")}`
+                      )}
+                    </span>
+                  </div>
+                  {isReceiverPay && (
+                    <p className="text-[11px] text-amber-800 font-medium">
+                      * Kargo bedeli teslimatta kuryeye ödenecektir.
+                    </p>
+                  )}
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold">
+                  <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50/60 p-2 rounded-lg border border-emerald-200/60">
                     <span className="font-body-md">Kupon İndirimi ({appliedCoupon?.code})</span>
                     <span className="font-label-md">-₺{discountAmount.toLocaleString("tr-TR")}</span>
                   </div>

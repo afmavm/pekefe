@@ -46,6 +46,19 @@ export default function Odeme() {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [siteSettings, setSiteSettings] = useState(null);
   const [paytrToken, setPaytrToken] = useState(null);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  // Load Applied Coupon from Cart
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pekefe_applied_coupon");
+      if (stored) {
+        setAppliedCoupon(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Error loading applied coupon:", e);
+    }
+  }, []);
 
   // Fetch Bank Accounts and CMS Settings from management backend
   useEffect(() => {
@@ -264,13 +277,16 @@ export default function Odeme() {
   const isShippingFree = isCurrentCarrierAlwaysFree || (subtotal >= carrierFreeThreshold);
   const shippingCost = subtotal === 0 ? 0 : (isCurrentCarrierReceiverPay ? 0 : (isShippingFree ? 0 : carrierFee));
 
+  // Coupon Discount (Dynamic from Cart)
+  const couponDiscount = appliedCoupon ? Number(appliedCoupon.discountAmount || 0) : 0;
+
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
-  const bankDiscount = paymentMethod === "bankTransfer" ? subtotal * (bankDiscountRate / 100) : 0;
+  const bankDiscount = paymentMethod === "bankTransfer" ? Math.max(0, subtotal - couponDiscount) * (bankDiscountRate / 100) : 0;
   
   // Cash on Delivery Fee (Dynamic from Management Settings)
   const codFee = paymentMethod === "cashOnDelivery" ? Number(siteSettings?.cashOnDeliveryFee ?? 25) : 0;
-  const grandTotal = Math.max(0, subtotal - bankDiscount + shippingCost + codFee);
+  const grandTotal = Math.max(0, subtotal - couponDiscount - bankDiscount + shippingCost + codFee);
 
   // Parse dynamic payment methods from Admin / Settings
   const activePaymentMethods = useMemo(() => {
@@ -842,6 +858,58 @@ export default function Odeme() {
                   );
                 })}
               </div>
+
+              {/* Dynamic Carrier Information Banner according to Pricing Type */}
+              <div className="mt-5">
+                {isCurrentCarrierReceiverPay ? (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-950 dark:text-amber-200 flex items-start sm:items-center gap-3.5 shadow-xs animate-in fade-in duration-300">
+                    <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                      <span className="material-symbols-outlined text-2xl">local_shipping</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-black text-sm text-amber-900 dark:text-amber-200">
+                          📦 Ücret Alıcı Ödemeli Teslimat ({selectedCarrier})
+                        </h4>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-2xs">
+                          Kapıda Ödeme
+                        </span>
+                      </div>
+                      <p className="text-xs text-amber-800/95 dark:text-amber-300 font-medium leading-relaxed">
+                        Bu siparişte kargo bedeli sepet tutarınıza <strong>eklenmemiştir (0 TL)</strong>. Kargo taşıma ücreti, siparişiniz adresinize ulaştığında <strong>kargo kuryesine kapıda doğrudan ödenecektir</strong>.
+                      </p>
+                    </div>
+                  </div>
+                ) : isShippingFree ? (
+                  <div className="p-4 sm:p-4.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 flex items-center gap-3.5 shadow-xs animate-in fade-in duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <span className="material-symbols-outlined text-2xl">redeem</span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-xs sm:text-sm text-emerald-900 dark:text-emerald-200">
+                        🎉 Tebrikler! Ücretsiz Kargo Ayrıcalığından Yararlanıyorsunuz
+                      </h4>
+                      <p className="text-xs text-emerald-800/90 dark:text-emerald-300 font-medium mt-0.5">
+                        Siparişiniz <strong>{selectedCarrier}</strong> ile adresinize tamamen ücretsiz olarak ulaştırılacaktır.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-xl">schedule</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs sm:text-sm text-slate-900">
+                        🚚 Standart Güvenli Teslimat ({selectedCarrier})
+                      </h4>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        Kargo ücreti sipariş toplamına dâhil edilmiştir. Teslimat sırasında kapıda herhangi bir ek ücret ödemezsiniz.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
@@ -1154,6 +1222,13 @@ export default function Odeme() {
                 <span>Ürünler Ara Toplamı</span>
                 <span className="font-bold text-on-surface">₺{subtotal.toLocaleString("tr-TR")}</span>
               </div>
+
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-emerald-700 font-semibold bg-emerald-50/60 p-2 rounded-lg border border-emerald-200/60">
+                  <span>Kupon İndirimi ({appliedCoupon?.code})</span>
+                  <span>-₺{(couponDiscount % 1 === 0 ? couponDiscount.toLocaleString("tr-TR") : couponDiscount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</span>
+                </div>
+              )}
 
               {bankDiscount > 0 && (
                 <div className="flex justify-between text-amber-700 font-semibold">

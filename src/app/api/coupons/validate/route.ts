@@ -1,14 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { z } from 'zod';
 import { withRateLimit } from '@/lib/rate-limit';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import fs from 'fs';
+import path from 'path';
 
 const ValidateSchema = z.object({
   code: z.string().min(1),
   cartTotal: z.number().min(0)
 });
+
+const DEFAULT_FALLBACK_COUPONS = [
+  {
+    code: "PEKEFE10",
+    name: "%10 Hoş Geldin İndirimi",
+    type: "percentage",
+    value: 10,
+    minOrder: 0,
+    maxUses: 10000,
+    usedCount: 0,
+    isActive: true,
+    target: "all",
+    startDate: "2026-01-01",
+    endDate: "2030-12-31"
+  },
+  {
+    code: "PEKEFE15",
+    name: "%15 Genel Açılış İndirimi",
+    type: "percentage",
+    value: 15,
+    minOrder: 500,
+    maxUses: 1000,
+    usedCount: 0,
+    isActive: true,
+    target: "all",
+    startDate: "2026-01-01",
+    endDate: "2030-12-31"
+  },
+  {
+    code: "BEDAVAKARGO",
+    name: "2000 TL Üzeri Ücretsiz Kargo",
+    type: "free_shipping",
+    value: 0,
+    minOrder: 2000,
+    maxUses: 2000,
+    usedCount: 0,
+    isActive: true,
+    target: "all",
+    startDate: "2026-01-01",
+    endDate: "2030-12-31"
+  },
+  {
+    code: "HOSGELDIN200",
+    name: "200 TL Hoş Geldin Kuponu",
+    type: "fixed",
+    value: 200,
+    minOrder: 1500,
+    maxUses: 300,
+    usedCount: 0,
+    isActive: true,
+    target: "all",
+    startDate: "2026-01-01",
+    endDate: "2030-12-31"
+  },
+  {
+    code: "BAYIBERKET20",
+    name: "B2B Toptan Bayi İndirimi",
+    type: "percentage",
+    value: 20,
+    minOrder: 5000,
+    maxUses: 100,
+    usedCount: 0,
+    isActive: true,
+    target: "b2b",
+    startDate: "2026-01-01",
+    endDate: "2030-12-31"
+  }
+];
+
+function getLocalCampaigns(): any[] {
+  try {
+    const filePath = path.join(process.cwd(), 'data', 'campaigns.json');
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Error reading local campaigns in coupon validator:', err);
+  }
+  return DEFAULT_FALLBACK_COUPONS;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,141 +110,152 @@ export async function POST(request: NextRequest) {
     }
 
     const { code, cartTotal } = result.data;
-    const upperCode = code.toUpperCase();
+    const upperCode = code.toUpperCase().trim();
 
     // 2. Fetch Session & User Role
-    const session = await getServerSession(authOptions);
     let isB2B = false;
-    
-    if (session?.user?.email) {
-      const account = await prisma.currentAccount.findFirst({
-        where: { email: session.user.email }
-      });
-      if (account && (account.type === "Bayi" || account.dealerGroup !== "Standart")) {
-        isB2B = true;
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.email) {
+        const accountPromise = prisma.currentAccount.findFirst({
+          where: { email: session.user.email }
+        });
+        const account = await withTimeout(accountPromise, 1000, null);
+        if (account && (account.type === "Bayi" || account.dealerGroup !== "Standart")) {
+          isB2B = true;
+        }
       }
+    } catch (authErr) {
+      console.warn("Session check in coupon validation skipped:", authErr);
     }
 
-    // 3. Query Coupon Table First
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: upperCode }
-    });
+    // 3. Query Prisma Coupon Table (with timeout)
+    let foundCoupon: any = null;
+    try {
+      const couponPromise = prisma.coupon.findUnique({
+        where: { code: upperCode }
+      });
+      foundCoupon = await withTimeout(couponPromise, 1000, null);
+    } catch (err) {
+      console.warn("Prisma coupon query timed out/failed:", err);
+    }
 
-    if (coupon) {
-      if (!coupon.isActive) {
+    if (foundCoupon) {
+      if (!foundCoupon.isActive) {
         return NextResponse.json({ error: "Bu kupon artık aktif değil." }, { status: 400 });
       }
 
-      if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+      if (foundCoupon.expiresAt && new Date() > new Date(foundCoupon.expiresAt)) {
         return NextResponse.json({ error: "Kuponun süresi dolmuş." }, { status: 400 });
       }
 
-      if (coupon.maxUses && coupon.uses >= coupon.maxUses) {
+      if (foundCoupon.maxUses && foundCoupon.uses >= foundCoupon.maxUses) {
         return NextResponse.json({ error: "Kupon kullanım sınırına ulaştı." }, { status: 400 });
       }
 
-      if (cartTotal < coupon.minCartAmount) {
-        return NextResponse.json({ error: `Bu kuponu kullanmak için sepet tutarı en az ${coupon.minCartAmount}₺ olmalıdır.` }, { status: 400 });
+      if (cartTotal < (foundCoupon.minCartAmount || 0)) {
+        return NextResponse.json({ error: `Bu kuponu kullanmak için sepet tutarı en az ${foundCoupon.minCartAmount}₺ olmalıdır.` }, { status: 400 });
       }
 
-      // Default coupons are B2C only unless specified
       if (isB2B) {
         return NextResponse.json({ error: "Kupon kodları bayiler için geçerli değildir." }, { status: 400 });
       }
 
       let discountAmount = 0;
-      if (coupon.discountType === "PERCENTAGE") {
-        discountAmount = (cartTotal * coupon.discountValue) / 100;
+      if (foundCoupon.discountType === "PERCENTAGE") {
+        discountAmount = (cartTotal * foundCoupon.discountValue) / 100;
       } else {
-        discountAmount = coupon.discountValue;
+        discountAmount = foundCoupon.discountValue;
       }
 
       return NextResponse.json({
         success: true,
         discountAmount: Math.min(discountAmount, cartTotal),
         coupon: {
-          code: coupon.code,
-          type: coupon.discountType === "PERCENTAGE" ? "percentage" : "fixed",
-          value: coupon.discountValue
+          code: foundCoupon.code,
+          type: foundCoupon.discountType === "PERCENTAGE" ? "percentage" : "fixed",
+          value: foundCoupon.discountValue
         }
       });
     }
 
-    // 4. If not in Coupon table, query Campaign Table
-    const campaign = await prisma.campaign.findUnique({
-      where: { code: upperCode }
-    });
+    // 4. Query Prisma Campaign Table (with timeout)
+    let foundCampaign: any = null;
+    try {
+      const campaignPromise = prisma.campaign.findUnique({
+        where: { code: upperCode }
+      });
+      foundCampaign = await withTimeout(campaignPromise, 1000, null);
+    } catch (err) {
+      console.warn("Prisma campaign query timed out/failed:", err);
+    }
 
-    if (!campaign) {
-      // Built-in fallback for default demo code PEKEFE10 if not present in DB
-      if (upperCode === "PEKEFE10") {
-        const discountAmount = (cartTotal * 10) / 100;
-        return NextResponse.json({
-          success: true,
-          discountAmount: Math.min(discountAmount, cartTotal),
-          coupon: {
-            code: "PEKEFE10",
-            type: "percentage",
-            value: 10
-          }
-        });
-      }
-      return NextResponse.json({ error: "Kupon veya kampanya kodu bulunamadı." }, { status: 404 });
+    // 5. If not in DB, fallback to Local JSON & Default Built-in Codes
+    if (!foundCampaign) {
+      const localCampaigns = getLocalCampaigns();
+      foundCampaign = localCampaigns.find(c => c.code && c.code.toUpperCase() === upperCode);
+    }
+
+    if (!foundCampaign) {
+      return NextResponse.json({ error: "Geçersiz indirim kuponu kodu." }, { status: 404 });
     }
 
     // Validation for Campaigns
-    if (!campaign.isActive) {
+    if (!foundCampaign.isActive) {
       return NextResponse.json({ error: "Bu kampanya kodu şu an aktif değil." }, { status: 400 });
     }
 
     // Date Range Checks
     const nowStr = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
-    if (campaign.startDate && nowStr < campaign.startDate) {
+    if (foundCampaign.startDate && nowStr < foundCampaign.startDate) {
       return NextResponse.json({ error: "Bu kampanya henüz başlamadı." }, { status: 400 });
     }
-    if (campaign.endDate && nowStr > campaign.endDate) {
-      return NextResponse.json({ error: "Bu kampanyanın süresi dolmuş." }, { status: 400 });
+    if (foundCampaign.endDate && nowStr > foundCampaign.endDate) {
+      return NextResponse.json({ error: "Bu kampanyanın kullanım süresi dolmuş." }, { status: 400 });
     }
 
     // Usage Checks
-    if (campaign.maxUses && campaign.usedCount >= campaign.maxUses) {
-      return NextResponse.json({ error: "Bu kampanya kodu kullanım limitine ulaştı." }, { status: 400 });
+    if (foundCampaign.maxUses && foundCampaign.usedCount && foundCampaign.usedCount >= foundCampaign.maxUses) {
+      return NextResponse.json({ error: "Bu kampanya kodu maksimum kullanım limitine ulaştı." }, { status: 400 });
     }
 
-    if (cartTotal < campaign.minOrder) {
-      return NextResponse.json({ error: `Bu kampanya için minimum sipariş tutarı ${campaign.minOrder}₺ olmalıdır.` }, { status: 400 });
+    const minOrderRequired = Number(foundCampaign.minOrder || 0);
+    if (cartTotal < minOrderRequired) {
+      return NextResponse.json({ error: `Bu kampanya için minimum sepet tutarı ${minOrderRequired.toLocaleString("tr-TR")}₺ olmalıdır.` }, { status: 400 });
     }
 
     // Target Audience Checks
-    if (campaign.target === "b2b" && !isB2B) {
-      return NextResponse.json({ error: "Bu kampanya kodu sadece bayilerimize (B2B) özeldir." }, { status: 400 });
+    if (foundCampaign.target === "b2b" && !isB2B) {
+      return NextResponse.json({ error: "Bu kampanya kodu sadece toptan bayilerimize (B2B) özeldir." }, { status: 400 });
     }
-    if (campaign.target === "b2c" && isB2B) {
+    if (foundCampaign.target === "b2c" && isB2B) {
       return NextResponse.json({ error: "Bu kampanya kodu sadece perakende müşterilerimize (B2C) özeldir." }, { status: 400 });
     }
 
     // Calculate discount value
     let discountAmount = 0;
-    if (campaign.type === "percentage") {
-      discountAmount = (cartTotal * campaign.value) / 100;
-    } else if (campaign.type === "fixed") {
-      discountAmount = campaign.value;
-    } else if (campaign.type === "free_shipping") {
-      discountAmount = 150; // Dynamic free shipping amount
+    const campaignVal = Number(foundCampaign.value || 0);
+    if (foundCampaign.type === "percentage") {
+      discountAmount = (cartTotal * campaignVal) / 100;
+    } else if (foundCampaign.type === "fixed") {
+      discountAmount = campaignVal;
+    } else if (foundCampaign.type === "free_shipping") {
+      discountAmount = 150; // Free shipping subsidy
     }
 
     return NextResponse.json({
       success: true,
       discountAmount: Math.min(discountAmount, cartTotal),
       coupon: {
-        code: campaign.code,
-        type: campaign.type,
-        value: campaign.value
+        code: foundCampaign.code,
+        name: foundCampaign.name,
+        type: foundCampaign.type,
+        value: foundCampaign.value
       }
     });
 
   } catch (error: any) {
     console.error('Coupon/Campaign Validate Error:', error);
-    return NextResponse.json({ error: 'Kod doğrulanırken bir sistem hatası oluştu.' }, { status: 500 });
+    return NextResponse.json({ error: 'Kod doğrulanırken bir hata oluştu.' }, { status: 500 });
   }
 }

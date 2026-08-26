@@ -353,7 +353,7 @@ export default function Sepet() {
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                       className="flex-grow bg-surface border border-outline-variant/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm font-medium"
-                      placeholder="Kodu giriniz (PEKEFE10)"
+                      placeholder="Kodu giriniz (örn: PEKEFE15)"
                       type="text"
                     />
                     <button

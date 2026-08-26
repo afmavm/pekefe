@@ -12,79 +12,12 @@ const ValidateSchema = z.object({
   cartTotal: z.number().min(0)
 });
 
-const DEFAULT_FALLBACK_COUPONS = [
-  {
-    code: "PEKEFE10",
-    name: "%10 Hoş Geldin İndirimi",
-    type: "percentage",
-    value: 10,
-    minOrder: 0,
-    maxUses: 10000,
-    usedCount: 0,
-    isActive: true,
-    target: "all",
-    startDate: "2026-01-01",
-    endDate: "2030-12-31"
-  },
-  {
-    code: "PEKEFE15",
-    name: "%15 Genel Açılış İndirimi",
-    type: "percentage",
-    value: 15,
-    minOrder: 500,
-    maxUses: 1000,
-    usedCount: 0,
-    isActive: true,
-    target: "all",
-    startDate: "2026-01-01",
-    endDate: "2030-12-31"
-  },
-  {
-    code: "BEDAVAKARGO",
-    name: "2000 TL Üzeri Ücretsiz Kargo",
-    type: "free_shipping",
-    value: 0,
-    minOrder: 2000,
-    maxUses: 2000,
-    usedCount: 0,
-    isActive: true,
-    target: "all",
-    startDate: "2026-01-01",
-    endDate: "2030-12-31"
-  },
-  {
-    code: "HOSGELDIN200",
-    name: "200 TL Hoş Geldin Kuponu",
-    type: "fixed",
-    value: 200,
-    minOrder: 1500,
-    maxUses: 300,
-    usedCount: 0,
-    isActive: true,
-    target: "all",
-    startDate: "2026-01-01",
-    endDate: "2030-12-31"
-  },
-  {
-    code: "BAYIBERKET20",
-    name: "B2B Toptan Bayi İndirimi",
-    type: "percentage",
-    value: 20,
-    minOrder: 5000,
-    maxUses: 100,
-    usedCount: 0,
-    isActive: true,
-    target: "b2b",
-    startDate: "2026-01-01",
-    endDate: "2030-12-31"
-  }
-];
+const CAMPAIGNS_FILE = path.join(process.cwd(), 'data', 'campaigns.json');
 
 function getLocalCampaigns(): any[] {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'campaigns.json');
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf8');
+    if (fs.existsSync(CAMPAIGNS_FILE)) {
+      const content = fs.readFileSync(CAMPAIGNS_FILE, 'utf8');
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed;
@@ -93,7 +26,37 @@ function getLocalCampaigns(): any[] {
   } catch (err) {
     console.error('Error reading local campaigns in coupon validator:', err);
   }
-  return DEFAULT_FALLBACK_COUPONS;
+  // If no file exists, return the default 2 verified active campaigns from admin panel
+  return [
+    {
+      id: "camp-pef-15",
+      name: "%15 Genel Açılış İndirimi",
+      code: "PEKEFE15",
+      type: "percentage",
+      value: 15,
+      minOrder: 500,
+      maxUses: 1000,
+      usedCount: 14,
+      startDate: "2026-01-01",
+      endDate: "2030-12-31",
+      isActive: true,
+      target: "all"
+    },
+    {
+      id: "camp-kargo-2000",
+      name: "2000 TL Üzeri Ücretsiz Kargo",
+      code: "BEDAVAKARGO",
+      type: "free_shipping",
+      value: 0,
+      minOrder: 2000,
+      maxUses: 2000,
+      usedCount: 42,
+      startDate: "2026-01-01",
+      endDate: "2030-12-31",
+      isActive: true,
+      target: "all"
+    }
+  ];
 }
 
 export async function POST(request: NextRequest) {

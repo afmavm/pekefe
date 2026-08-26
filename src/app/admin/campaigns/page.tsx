@@ -116,6 +116,8 @@ export default function CampaignsPage() {
   const [cartDiscountValue, setCartDiscountValue] = useState<number>(0);
   const [cartDiscountMinAmount, setCartDiscountMinAmount] = useState<number>(0);
   const [bankTransferDiscountRate, setBankTransferDiscountRate] = useState<number>(0);
+  const [campaignsBannerTitle, setCampaignsBannerTitle] = useState<string>("");
+  const [campaignsBannerDesc, setCampaignsBannerDesc] = useState<string>("");
   const [companyName, setCompanyName] = useState<string>("");
   const [bankName, setBankName] = useState<string>("");
   const [bankIban, setBankIban] = useState<string>("");
@@ -260,6 +262,8 @@ export default function CampaignsPage() {
           setCartDiscountValue(data.cartDiscountValue ?? 0);
           setCartDiscountMinAmount(data.cartDiscountMinAmount ?? 0);
           setBankTransferDiscountRate(data.bankTransferDiscountRate ?? 0);
+          setCampaignsBannerTitle(data.campaignsBannerTitle || "");
+          setCampaignsBannerDesc(data.campaignsBannerDesc || "");
           setCompanyName(data.companyName || "");
           setBankName(data.bankName || "");
           setBankIban(data.bankIban || "");
@@ -479,6 +483,8 @@ export default function CampaignsPage() {
         cartDiscountValue: Number(cartDiscountValue),
         cartDiscountMinAmount: Number(cartDiscountMinAmount),
         bankTransferDiscountRate: Number(bankTransferDiscountRate),
+        campaignsBannerTitle,
+        campaignsBannerDesc,
         companyName,
         bankName,
         bankIban,
@@ -1037,6 +1043,35 @@ export default function CampaignsPage() {
                   onChange={e => setBankTransferDiscountRate(Number(e.target.value))}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                  Kampanyalar Sayfası Banner Başlığı (Opsiyonel)
+                </label>
+                <input
+                  type="text"
+                  value={campaignsBannerTitle}
+                  onChange={e => setCampaignsBannerTitle(e.target.value)}
+                  placeholder="örn: 2000 TL Üzeri Ücretsiz Kargo & Havale İndirimi"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Boş bırakılırsa kargo ve havale oranına göre otomatik oluşturulur.</span>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                  Kampanyalar Sayfası Banner Açıklaması (Opsiyonel)
+                </label>
+                <input
+                  type="text"
+                  value={campaignsBannerDesc}
+                  onChange={e => setCampaignsBannerDesc(e.target.value)}
+                  placeholder="örn: Tüm siparişlerinizde kargo tarafımızdan karşılanır..."
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-[#b45309]"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Boş bırakılırsa dinamik kargo ve havale avantaj metni yazılır.</span>
               </div>
             </div>
 

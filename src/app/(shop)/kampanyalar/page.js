@@ -9,6 +9,7 @@ import { Toast } from "@/components/ui/Toast";
 export default function Kampanyalar() {
   const [campaigns, setCampaigns] = useState([]);
   const [products, setProducts] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(null);
   const [email, setEmail] = useState("");
@@ -19,6 +20,12 @@ export default function Kampanyalar() {
   useEffect(() => {
     async function fetchData() {
       try {
+        // Fetch CMS / Shipping & Discount Settings
+        fetch("/api/settings")
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (data) setSettings(data); })
+          .catch(e => console.error("Error loading settings:", e));
+
         // Fetch campaigns
         const campRes = await fetch("/api/campaigns");
         if (campRes.ok) {
@@ -258,49 +265,84 @@ export default function Kampanyalar() {
       </section>
 
       {/* 4. ÖDEME & KARGO AYRICALIKLARI (BANNER) */}
-      <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div
-          style={{ backgroundColor: "#360e17", color: "#ffffff" }}
-          className="rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-amber-500/25"
-        >
-          {/* Subtle Ambient Glow */}
-          <div className="absolute -top-20 -right-20 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      {(() => {
+        let parsedCarriers = [];
+        if (settings?.shippingCarriers) {
+          try {
+            parsedCarriers = typeof settings.shippingCarriers === "string" ? JSON.parse(settings.shippingCarriers) : settings.shippingCarriers;
+          } catch (e) {
+            parsedCarriers = [];
+          }
+        }
+        const activeCarriers = Array.isArray(parsedCarriers) ? parsedCarriers.filter(c => c.isActive !== false) : [];
+        const defaultCarrier = activeCarriers[0] || null;
+        const isReceiverPay = Boolean(
+          defaultCarrier?.pricingType === "receiver_pay" ||
+          defaultCarrier?.pricingType === "buyer_pays" ||
+          defaultCarrier?.isReceiverPay === true
+        );
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            
-            <div className="space-y-4 max-w-2xl">
-              <span className="text-amber-400 font-black text-xs uppercase tracking-widest block font-mono">
-                ÖZEL SEPET AVANTAJLARI
-              </span>
-              <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
-                2000 TL Üzeri Ücretsiz Kargo & Havale İndirimi
-              </h2>
-              <p className="text-amber-100/90 text-xs sm:text-sm font-normal leading-relaxed">
-                Tüm siparişlerinizde 2000 TL sepet tutarını aştığınızda kargo ücreti tarafımızdan karşılanır. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında ek sepet indirimi uygulanır.
-              </p>
+        const shippingThreshold = Number(defaultCarrier?.freeThreshold ?? settings?.shippingThreshold ?? 2000);
+        const bankDiscountRate = Number(settings?.bankTransferDiscountRate ?? 2);
+
+        const dynamicTitle = settings?.campaignsBannerTitle?.trim() || (
+          isReceiverPay
+            ? `Kapıda Alıcı Ödemeli Kargo & %${bankDiscountRate} Havale İndirimi`
+            : `${shippingThreshold.toLocaleString("tr-TR")} TL Üzeri Ücretsiz Kargo & Havale İndirimi`
+        );
+
+        const dynamicDesc = settings?.campaignsBannerDesc?.trim() || (
+          isReceiverPay
+            ? `Tüm siparişlerinizde kargo bedeli sepet tutarınıza eklenmez; teslimat anında kapıda kuryeye ödenir. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında %${bankDiscountRate} ek sepet indirimi uygulanır.`
+            : `Tüm siparişlerinizde ${shippingThreshold.toLocaleString("tr-TR")} TL sepet tutarını aştığınızda kargo ücreti tarafımızdan karşılanır. Ayrıca banka havalesi / EFT ile yapacağınız ödemelerde anında %${bankDiscountRate} ek sepet indirimi uygulanır.`
+        );
+
+        return (
+          <section className="py-12 sm:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+            <div
+              style={{ backgroundColor: "#360e17", color: "#ffffff" }}
+              className="rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-amber-500/25"
+            >
+              {/* Subtle Ambient Glow */}
+              <div className="absolute -top-20 -right-20 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                
+                <div className="space-y-4 max-w-2xl">
+                  <span className="text-amber-400 font-black text-xs uppercase tracking-widest block font-mono">
+                    ÖZEL SEPET AVANTAJLARI
+                  </span>
+                  <h2 className="font-display text-2xl sm:text-4xl font-black text-white leading-tight">
+                    {dynamicTitle}
+                  </h2>
+                  <p className="text-amber-100/90 text-xs sm:text-sm font-normal leading-relaxed">
+                    {dynamicDesc}
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3.5 shrink-0 items-stretch sm:items-center">
+                  <Link
+                    href="/kategoriler"
+                    className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-lg active:scale-95 text-center shrink-0"
+                  >
+                    <span>Alışverişe Başla</span>
+                    <span className="material-symbols-outlined text-sm">shopping_bag</span>
+                  </Link>
+                  <Link
+                    href="/iletisim"
+                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center shrink-0"
+                  >
+                    <span>Toptan Bayi Talebi</span>
+                    <span className="material-symbols-outlined text-sm">business</span>
+                  </Link>
+                </div>
+
+              </div>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-3.5 shrink-0 items-stretch sm:items-center">
-              <Link
-                href="/kategoriler"
-                className="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-black transition-all shadow-lg active:scale-95 text-center shrink-0"
-              >
-                <span>Alışverişe Başla</span>
-                <span className="material-symbols-outlined text-sm">shopping_bag</span>
-              </Link>
-              <Link
-                href="/iletisim"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all border border-white/20 text-center shrink-0"
-              >
-                <span>Toptan Bayi Talebi</span>
-                <span className="material-symbols-outlined text-sm">business</span>
-              </Link>
-            </div>
-
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* 5. E-POSTA BÜLTEN ABONELİĞİ */}
       <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">

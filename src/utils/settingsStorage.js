@@ -57,7 +57,17 @@ export async function fetchLiveSettings() {
           taxNo: data.companyTaxNo || data.companyVkn || "",
           mersisNo: data.companyMersisNo || data.companyMersis || "",
           website: data.companyWebsite ? data.companyWebsite.replace(/^https?:\/\//, '').replace(/\/$/, '') : "www.pekefe.com",
-          shippingNote: data.topBarText1 || DEFAULT_SETTINGS.shippingNote,
+          shippingCarriers: data.shippingCarriers,
+          shippingThreshold: data.shippingThreshold,
+          shippingFee: data.shippingFee,
+          bankTransferDiscountRate: data.bankTransferDiscountRate,
+          cartDiscountType: data.cartDiscountType,
+          cartDiscountValue: data.cartDiscountValue,
+          campaignsBannerTitle: data.campaignsBannerTitle,
+          campaignsBannerDesc: data.campaignsBannerDesc,
+          paymentMethodsConfig: data.paymentMethodsConfig,
+          cashOnDeliveryFee: data.cashOnDeliveryFee,
+          cashOnDeliveryEnabled: data.cashOnDeliveryEnabled,
           mapsLink: data.mapCoordinates
             ? `https://maps.google.com/?q=${encodeURIComponent(data.mapCoordinates)}`
             : data.contactAddress

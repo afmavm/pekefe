@@ -1,0 +1,32 @@
+[
+  {
+    "id": "camp-pef-15",
+    "name": "%15 Genel Açılış İndirimi",
+    "code": "PEKEFE15",
+    "type": "percentage",
+    "value": 15,
+    "minOrder": 500,
+    "maxUses": 1000,
+    "usedCount": 14,
+    "startDate": "2026-08-26",
+    "endDate": "2026-10-24",
+    "isActive": true,
+    "target": "all",
+    "description": "Tüm İspir bal, dut pekmezi ve yöresel ürün siparişlerinde geçerli %15 genel açılış indirimi."
+  },
+  {
+    "id": "camp-kargo-2000",
+    "name": "5000 TL Üzeri Ücretsiz Kargo",
+    "code": "BEDAVAKARGO",
+    "type": "free_shipping",
+    "value": 0,
+    "minOrder": 5000,
+    "maxUses": 2000,
+    "usedCount": 42,
+    "startDate": "2026-08-26",
+    "endDate": "2026-12-31",
+    "isActive": true,
+    "target": "b2c",
+    "description": "5000 TL ve üzerindeki tüm siparişlerde kargo bedeli sistem tarafından karşılanır."
+  }
+]

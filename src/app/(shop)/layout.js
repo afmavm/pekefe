@@ -8,8 +8,8 @@ export const metadata = {
   },
   description: "İspir'in eşsiz doğasından sofranıza uzanan, katkısız ve geleneksel yöntemlerle hazırlanan yöresel ürünler.",
   keywords: ['pekefe', 'ispir pekmezi', 'dut pekmezi', 'organik bal', 'yöresel ürünler', 'erzurum', 'coğrafi işaret'],
-  authors: [{ name: 'Pekefe', url: 'https://www.pekefe.com' }],
-  creator: 'Pekefe Gastronomi',
+  authors: [{ name: 'PEKEFE İspir Yöresel Ürünler', url: 'https://www.pekefe.com' }],
+  creator: 'PEKEFE İspir Yöresel Ürünler',
   openGraph: {
     type: 'website',
     locale: 'tr_TR',

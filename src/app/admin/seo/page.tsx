@@ -71,7 +71,7 @@ const defaults: SeoState = {
   contactPhone: "0544 149 48 51",
   contactEmail: "info@pekefe.com",
   contactAddress: "İspir, Erzurum, Türkiye",
-  companyNameField: "PEKEFE Gastronomi A.Ş.",
+  companyNameField: "PEKEFE İspir Yöresel Ürünler",
   companyVkn: "",
   companyTaxOffice: "",
   companyMersis: "",
@@ -480,7 +480,7 @@ export default function SeoAdminPage() {
 
                 <div>
                   <h4 className="font-bold text-sm text-white line-clamp-1">
-                    {seo.siteName || "PEKEFE Gastronomi"}
+                    {seo.siteName || "PEKEFE İspir Yöresel Ürünler"}
                   </h4>
                   <p className="text-xs text-slate-400 line-clamp-2 mt-1">
                     {seo.siteDescription || "İspir yaylasının geleneksel dut pekmezi ve ham bal koleksiyonu."}
@@ -595,7 +595,7 @@ export default function SeoAdminPage() {
                 value={seo.companyNameField}
                 onChange={(e) => update("companyNameField", e.target.value)}
                 className={inputClass}
-                placeholder="PEKEFE Gastronomi A.Ş."
+                placeholder="PEKEFE İspir Yöresel Ürünler"
               />
             </div>
 

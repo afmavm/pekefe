@@ -17,7 +17,7 @@ export const metadata = {
   metadataBase: new URL("https://www.pekefe.com"),
   title: {
     default: "PEKEFE | Geleneksel İspir Yaylası Dut Pekmezi & Ham Çiçek Balı",
-    template: "%s | PEKEFE Geleneksel Gastronomi",
+    template: "%s | PEKEFE İspir Yöresel Ürünler",
   },
   description: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, bakır kazanlarda ağır ağır üretilen %100 doğal ham dut pekmezi, ham bal ve yöresel lezzetler.",
   keywords: [
@@ -30,11 +30,11 @@ export const metadata = {
     "Erzurum Yöresel Ürünler",
     "Ham Çiçek Balı",
     "İspir Kömesi",
-    "Gıda Zanaatı",
+    "İspir Yöresel Ürünler",
   ],
-  authors: [{ name: "PEKEFE Gastronomi A.Ş." }],
-  creator: "PEKEFE Gastronomi",
-  publisher: "PEKEFE Gastronomi",
+  authors: [{ name: "PEKEFE İspir Yöresel Ürünler" }],
+  creator: "PEKEFE İspir Yöresel Ürünler",
+  publisher: "PEKEFE İspir Yöresel Ürünler",
   verification: {
     google: "QTYkkg0-x4Z8s5nuv0Qg3T0ePXA35ZhKuLp0ryCXS2s",
   },
@@ -56,10 +56,10 @@ export const metadata = {
     },
   },
   openGraph: {
-    title: "PEKEFE | Doğanın En Saf Hali - İspir Dut Pekmezi & Ham Bal",
+    title: "PEKEFE | Doğanın En Saf Hali — İspir Dut Pekmezi & Ham Bal",
     description: "İspir'in 2200m rakımlı yaylalarından geleneksel yöntemlerle hazırlanan %100 doğal ham dut pekmezi ve ham bal koleksiyonu.",
     url: "https://www.pekefe.com",
-    siteName: "PEKEFE Gastronomi",
+    siteName: "PEKEFE İspir Yöresel Ürünler",
     images: [
       {
         url: "https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg",
@@ -94,35 +94,37 @@ export const metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "PEKEFE Gastronomi",
+  name: "PEKEFE İspir Yöresel Ürünler",
+  alternateName: "Pekefe",
   url: "https://www.pekefe.com",
   logo: "https://www.pekefe.com/logo.png",
-  description: "İspir yaylası geleneksel dut pekmezi, ham çiçek balı ve yöresel gastronomi ürünleri üreticisi.",
+  description: "İspir yaylası geleneksel dut pekmezi, ham çiçek balı, İspir Kömesi ve yöresel ürünleri üreten Erzurum İspir merkezli gıda firması.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Kayseri OSB 1. Cadde No: 5",
-    addressLocality: "Kayseri",
-    addressRegion: "Kayseri",
-    postalCode: "38070",
+    streetAddress: "Çamlıca Mahallesi",
+    addressLocality: "İspir",
+    addressRegion: "Erzurum",
+    postalCode: "25900",
     addressCountry: "TR",
   },
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+90-850-000-0000",
+    telephone: "+90-534-270-91-40",
     contactType: "customer service",
-    availableLanguage: ["Turkish", "English"],
+    availableLanguage: ["Turkish"],
+    email: "info@pekefe.com",
   },
   sameAs: [
-    "https://www.instagram.com/pekefe",
-    "https://www.facebook.com/pekefe",
-    "https://twitter.com/pekefe",
+    "https://www.instagram.com/ulkuefe255",
+    "https://www.facebook.com/ulkuefe255",
+    "https://youtube.com/@pekefe",
   ],
 };
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "PEKEFE Gastronomi",
+  name: "PEKEFE İspir Yöresel Ürünler",
   url: "https://www.pekefe.com",
   potentialAction: {
     "@type": "SearchAction",
@@ -130,6 +132,7 @@ const websiteSchema = {
     "query-input": "required name=search_term_string",
   },
 };
+
 
 export default function RootLayout({ children }) {
   return (

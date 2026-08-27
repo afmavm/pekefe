@@ -99,11 +99,14 @@ export async function POST(request: Request) {
       };
     }
 
-    // Local JSON update
+    // Local JSON update with duplicate IBAN prevention
     const currentBanks = getLocalBanks();
-    const existingIndex = currentBanks.findIndex(b => b.id === createdBank.id);
+    const existingIndex = currentBanks.findIndex(
+      b => b.id === createdBank.id || (createdBank.iban && b.iban === createdBank.iban)
+    );
     if (existingIndex >= 0) {
-      currentBanks[existingIndex] = createdBank;
+      currentBanks[existingIndex] = { ...currentBanks[existingIndex], ...createdBank };
+      createdBank = currentBanks[existingIndex];
     } else {
       currentBanks.push(createdBank);
     }

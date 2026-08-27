@@ -1865,7 +1865,7 @@ export default function BackupAdminPage() {
                 className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl font-bold uppercase tracking-wider hover:bg-orange-600 transition shadow-lg disabled:opacity-50 cursor-pointer"
               >
                 {rulesSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                İNDİRİMLERİ KAYDET
+                TÜM AYARLARI KAYDET
               </button>
             </div>
           </div>

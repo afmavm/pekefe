@@ -97,18 +97,27 @@ export default function BankaPage() {
     setSaving(true);
     const tid = toast.loading(editBank ? "Güncelleniyor..." : "Kaydediliyor...");
     try {
-      const payload = { ...form, balance: parseTurkishCurrency(form.balance) || 0 };
+      const payload = { 
+        ...form, 
+        iban: (form.iban || "").replace(/\s+/g, "").toUpperCase(),
+        balance: parseTurkishCurrency(form.balance) || 0 
+      };
       const url     = editBank ? `/api/accounting/banks/${editBank.id}` : "/api/accounting/banks";
       const method  = editBank ? "PATCH" : "POST";
       const res     = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error();
+      const resData = await res.json().catch(() => null);
+
+      if (!res.ok || (resData && resData.success === false)) {
+        throw new Error(resData?.error || "Kayıt işlemi başarısız.");
+      }
+
       toast.dismiss(tid);
       toast.success(editBank ? "Hesap güncellendi." : "Hesap eklendi.");
       setShowForm(false);
       load();
-    } catch {
+    } catch (err: any) {
       toast.dismiss(tid);
-      toast.error("İşlem başarısız.");
+      toast.error(err?.message || "İşlem başarısız.");
     } finally {
       setSaving(false);
     }

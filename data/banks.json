@@ -1,0 +1,24 @@
+[
+  {
+    "id": "bank-ziraat-1",
+    "name": "Ziraat Bankası",
+    "accountNumber": "12345678",
+    "iban": "TR120001000123456789012345",
+    "currency": "TRY",
+    "balance": 0,
+    "branch": "İspir Şubesi",
+    "type": "VADESIZ"
+  },
+  {
+    "id": "bank_1787866753550_ubs8zj",
+    "name": "HALKBANK",
+    "accountNumber": "6659794",
+    "iban": "TR020001200133500009100039",
+    "currency": "TRY",
+    "balance": 0,
+    "branch": "İSPİR ŞUBESİ",
+    "type": "VADESIZ",
+    "logo": "",
+    "createdAt": "2026-08-27T21:39:13.550Z"
+  }
+]

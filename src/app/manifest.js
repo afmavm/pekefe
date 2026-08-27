@@ -6,9 +6,9 @@
 
 export default function manifest() {
   return {
-    name: 'Pekefe — Doğanın En Saf Hali',
-    short_name: 'Pekefe',
-    description: "İspir'in eşsiz doğasından sofranıza uzanan, katkısız ve geleneksel yöntemlerle hazırlanan yöresel ürünler.",
+    name: 'PEKEFE İspir Yöresel Ürünler',
+    short_name: 'PEKEFE',
+    description: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, %100 doğal ham dut pekmezi, ham bal ve yöresel lezzetler.",
     start_url: '/',
     display: 'standalone',
     background_color: '#F9F9FF',

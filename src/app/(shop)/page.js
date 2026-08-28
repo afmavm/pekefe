@@ -624,7 +624,7 @@ export default function Home() {
                 <span className="material-symbols-outlined text-green-700 text-3xl">verified</span>
                 <div>
                   <h4 className="font-label-md font-bold text-xs text-on-surface uppercase tracking-wider">%100 Doğallık Onaylı</h4>
-                  <p className="text-[10px] text-on-surface-variant">Erzurum Tarım İl Müdürlüğü Standartlarına Uyumlu</p>
+                  <p className="text-[10px] text-on-surface-variant">T.C. Tarım ve Orman Bakanlığı &amp; Türk Gıda Kodeksi Standartlarına Uygun</p>
                 </div>
               </div>
             </div>

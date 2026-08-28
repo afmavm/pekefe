@@ -3964,7 +3964,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         rows={4}
                         value={form.harvestStory || ""}
                         onChange={e => setForm({ ...form, harvestStory: e.target.value })}
-                        placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık yabani dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
+                        placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
                         className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none leading-relaxed transition-all resize-none"
                       />
                       <p className="text-[11px] text-slate-400 font-medium">

@@ -181,7 +181,7 @@ export default function Home() {
       name: "İlkbahar (Doğanın Uyanışı)",
       months: "NİSAN - MAYIS",
       climate: "Rakım: 1200m - 1800m | Sıcaklık: 8°C - 18°C",
-      story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık yabani dut ağaçlarının uyandığı dönemdir. Toprak organik gübrelerle beslenir, budama işlemleri el makaslarıyla tamamlanır.",
+      story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık dut ağaçlarının uyandığı dönemdir. Toprak organik gübrelerle beslenir, budama işlemleri el makaslarıyla tamamlanır.",
       image: "/uploads/ispir-kackar-yaylalari-manzara.webp",
       action: "Budama & Toprak Hazırlığı",
     },
@@ -580,7 +580,7 @@ export default function Home() {
               </div>
               <h4 className="font-display-lg text-primary text-lg font-bold">Glikoz Şurubu İçermez</h4>
               <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
-                Pekmez ve tatlılarımızın tamamında sadece yabani dut ağaçlarının kendi öz meyve şekeri bulunur. İlave şeker veya tatlandırıcı eklenmez.
+                Pekmez ve tatlılarımızın tamamında sadece dut ağaçlarının kendi öz meyve şekeri bulunur. İlave şeker veya tatlandırıcı eklenmez.
               </p>
             </div>
             <div className="text-center p-6 space-y-4 border-y md:border-y-0 md:border-x border-outline-variant/30">

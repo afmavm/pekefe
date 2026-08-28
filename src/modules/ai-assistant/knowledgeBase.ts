@@ -7,13 +7,13 @@ export interface CorporateKnowledge {
 }
 
 export const PEKEFE_CORPORATE_KB: CorporateKnowledge = {
-  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, Erzurum İspir'in 2000m+ rakımlı yüksek yaylalarındaki yabani beyaz dut ağaçlarından ve zengin yayla florasından beslenen, katkısız ve geleneksel gastronomi lezzetleri sunan coğrafi işaretli Türk gıda markasıdır.
+  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, Erzurum İspir'in 2000m+ rakımlı yüksek yaylalarındaki beyaz dut ağaçlarından ve zengin yayla florasından beslenen, katkısız ve geleneksel lezzetler sunan coğrafi işaretli Türk gıda markasıdır.
 İletişim: WhatsApp ve canlı destek hattımız üzerinden hafta içi 09:00–18:00 saatleri arasında kesintisiz hizmet verilmektedir.
 Kuruluş Felsefesi: "Yayla Hasadından Sofranıza" — Asırlık tarifler, meşe odunu ateşi, bakır kazanlar ve keten bezlerde doğal güneş kurutması ile %100 saf lezzetler.`,
 
   productDetail: `[ÜRÜN DETAYI — İSPİR HAM DUT PEKMEZİ]
 • İçerik: %100 Saf İspir Beyaz Dut Şırası. 0% İlave Şeker, 0.0% Glikoz / Glikoz Şurubu, 0% Koruyucu ve Katkı Maddesi.
-• Üretim Yöntemi: İspir yaylalarında toplanan yabani beyaz dutlar bakır kazanlarda kısık meşe odun ateşinde kaynatılır.
+• Üretim Yöntemi: İspir yaylalarında toplanan beyaz dutlar bakır kazanlarda kısık meşe odun ateşinde kaynatılır.
 • Kalite Standardı: HMF (Hidroksimetilfurfural) seviyesi < 10 mg/kg (Bağımsız laboratuvar analiz raporlu ve Coğrafi İşaret Tescilli).
 
 [ÜRÜN DETAYI — İSPİR HAM ÇİÇEK BALI]

@@ -376,7 +376,7 @@ export function useProductDetailState(params) {
     if (!product) return "";
     const attrs = product.attributes || {};
     const c = product.desc || attrs.desc || product.description || attrs.description || product.recipeDetails || attrs.recipeDetails || attrs.harvestStory || product.details;
-    return c?.trim() || `${product.name}, İspir'in 2000 rakımlı yüksek yaylalarındaki yabani dut ağaçlarından toplanıp geleneksel yöntemlerle kısık meşe odunu ateşinde ve el yapımı bakır kazanlarda kaynatılarak üretilmiştir.`;
+    return c?.trim() || `${product.name}, İspir'in 2000 rakımlı yüksek yaylalarındaki dut ağaçlarından toplanıp geleneksel yöntemlerle kısık meşe odunu ateşinde ve el yapımı bakır kazanlarda kaynatılarak üretilmiştir.`;
   }, [product]);
 
   const summaryDescription = useMemo(() => {
@@ -390,7 +390,7 @@ export function useProductDetailState(params) {
     if (!product) return "";
     const attrs = product.attributes || {};
     const c = attrs.harvestStory || product.harvestStory || attrs.details || product.details || product.desc || attrs.desc || product.description;
-    return c?.trim() || "İspir'in 2000 rakımlı yaylalarındaki asırlık yabani dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet...";
+    return c?.trim() || "İspir'in 2000 rakımlı yaylalarındaki asırlık dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet...";
   }, [product]);
 
   const ingredientsText = product?.attributes?.ingredients || product?.ingredients || "Doğal Dut Şırası, Erzurum Ceviz";

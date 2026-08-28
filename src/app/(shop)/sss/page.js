@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -24,9 +24,9 @@ const faqData = [
     categoryTitle: "Urunler & Kalite",
     categoryIcon: "verified",
     questions: [
-      { id: "urun-1", q: "Urunleriniz organik mi?", a: "Pekefe urunleri hicbir sentetik katki maddesi, koruyucu veya renklendirici icermez. ISO 22000 standardina uygun uretim hattinda hazirlanir, bagimsiz laboratuvarlarca analiz edilir." },
+      { id: "urun-1", q: "Urunleriniz organik mi?", a: "Pekefe urunleri hicbir sentetik katki maddesi, koruyucu veya renklendirici icermez. T.C. Tarim ve Orman Bakanligi onayli tesisimizde ISO 22000 Gida Guvenligi ve Turk Gida Kodeksi standartlarina tam uygun olarak hazirlanir, bagimsiz akredite laboratuvarlarca periyodik olarak analiz edilir." },
       { id: "urun-2", q: "Ham dut pekmezi nedir?", a: "Dutun taze suyu isil islem uygulanmadan veya max 65 derecede vakumlu sistemlerde yogunlastirilir. Dogal enzimler, antioksidanlar ve vitaminler korunur. Pisirilmis pekmezde ise HMF degeri yukselip besin icerigi azalir." },
-      { id: "urun-3", q: "HMF degeri neden onemli?", a: "HMF (Hidroksimetilfurfural), yuksek sicaklikta islenen gidalarda olusur. AB ve Turk Gida Kodeksi siniri 40 mg/kg dir. Pekefe urunlerinde bu sinirin cok altindadir; akredite lab raporlariyla belgelenir." },
+      { id: "urun-3", q: "HMF degeri neden onemli?", a: "HMF (Hidroksimetilfurfural), yuksek sicaklikta islenen gidalarda olusur. T.C. Tarim ve Orman Bakanligi ve Turk Gida Kodeksi siniri 40 mg/kg dir. Pekefe urunlerinde bu deger 10 mg/kg altindadir; akredite lab raporlariyla belgelenir." },
       { id: "urun-4", q: "Ispir Komesi nedir ve cografi isaret var mi?", a: "Dut suyu ile bugdayununun bakir kazanlarda kaynatilmasiyla yapilan geleneksel bir tatlidir. TURKPATENT Cografi Isaret tescillidir. Yalnizca Ispir sinirlarinda uretilen urunler bu ismi kullanabilir." },
       { id: "urun-5", q: "Ispir bali neden degerli?", a: "1800-2500 m rakimli Kackar florasi, kara cicek, kusburnu, yabani gul ve dag kekigiyle beslenir. Polifenol ve antioksidan bakimindan ova balindan kat kat ustundur. Pekefe bali hasat sonrasi yalnizca suzme isleminden gecirir." },
       { id: "urun-6", q: "Saklama kosullari ve son kullanma tarihi nedir?", a: "Pekmez ve bal; serin, karanlik ve nemsiz ortamda acilmadan 24 ay dayanir. Acildiktan sonra oda sicakliginda muhafaza edilmeli. Kurutulmus urunler 12 ay dayanir." },

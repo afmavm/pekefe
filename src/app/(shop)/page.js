@@ -292,10 +292,10 @@ export default function Home() {
               <span className="text-on-surface italic font-serif font-normal">Yüz Yıllık Ritüeli</span>
             </h2>
             <div className="w-12 h-[1px] bg-secondary-container"></div>
-            <p className="font-body-md text-on-surface-variant text-base leading-relaxed">
+            <p className="font-body-md text-on-surface-variant text-base sm:text-lg leading-relaxed font-medium">
               Bizim hikayemiz, Erzurum'un İspir ilçesinde, endüstriyel tarımın ve yapay koruyucuların girmediği yüksek vadilerde başlar. Dut ağaçlarımız asırlıktır; ilaçlama yapılmaz, tamamen doğanın kendi akışında büyürler. 
             </p>
-            <p className="font-body-md text-on-surface-variant text-base leading-relaxed">
+            <p className="font-body-md text-on-surface-variant text-base sm:text-lg leading-relaxed font-medium">
               Toplanan meyveleri glikoz şurubu, kıvam arttırıcı ya da sentetik asitler eklemeden, sadece odun ateşinde ve İspir'in kuru rüzgarları altında güneşle kurutarak paketliyoruz. Bu bir ticari gıda üretimi değil, kuşaklar boyu aktarılan yavaş gıda (slow food) kültürünün korunmasıdır.
             </p>
           </div>

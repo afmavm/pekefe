@@ -11,6 +11,11 @@ const faqData = [
     categoryIcon: "local_shipping",
     questions: [
       { 
+        id: "siparis-0", 
+        q: "Siparişlerimi nasıl paketleyip gönderiyorsunuz?", 
+        a: "Cam kavanozdaki bal ve pekmezlerimiz kırılmayı önleyen hava kanallı özel zırhlı balonlar (Airbed) ve darbe emici mukavvalarla sarılır. Köme ve pestillerimiz ise hava ve nem geçirmeyen koruyucu ambalajlarda, çift dalga kraft kolilerde sevk edilir. Kargo esnasında oluşabilecek olası hasarlarda ürün koşulsuz olarak ücretsiz yenilenir." 
+      },
+      { 
         id: "siparis-1", 
         q: "Siparişim ne kadar sürede kargoya verilir?", 
         a: "Siparişleriniz genellikle 1-2 iş günü içerisinde özenle hazırlanarak kargoya teslim edilir. Pazartesi - Perşembe günleri saat 14:00'e kadar verilen siparişler aynı gün kargoya verilebilmektedir. Hafta sonu ve resmi tatillerde sipariş kabulü devam etmekte olup, kargo sevkiyatı ilk iş gününde gerçekleştirilir." 

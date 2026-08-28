@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -121,8 +121,8 @@ const faqData = [
       },
       { 
         id: "odeme-5", 
-        q: "Taksit seçenekleri sunuluyor mu?", 
-        a: "Anlaşmalı bankaların kredi kartlarına özel olarak peşin fiyatına veya yasal vade farkıyla 2, 3 ve 6 taksit seçenekleri ödeme sayfasında kart bilgilerinizi girdiğinizde otomatik olarak listelenmektedir." 
+        q: "Kredi kartına taksit imkanı var mı?", 
+        a: "Bankacılık Düzenleme ve Denetleme Kurumu (BDDK) Banka Kartları ve Kredi Kartları Hakkında Yönetmelik'in 26. maddesinin 7. fıkrası uyarınca; Türkiye'de gıda ve doğal besin ürünleri alışverişlerinde bireysel kredi kartlarına taksit yapılması yasal olarak yasaktır. Bu yasal zorunluluk gereği sitemizdeki tüm siparişlerde bireysel kredi kartları ile yalnızca tek çekim (peşin) ödeme yapılabilmektedir. Kurumsal (Ticari) şirket kartlarında ise bankanızın sunduğu ticari taksit imkanları geçerli olabilmektedir." 
       }
     ]
   },

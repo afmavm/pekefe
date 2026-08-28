@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import Link from "next/link";
@@ -98,7 +98,7 @@ export default function Hikayemiz() {
               "Bizim için her kavanoz sadece bir ürün değil; yılların birikimini, alın terini, memleket sevgisini ve dürüst üretim anlayışını taşıyan bir emektir."
             </blockquote>
 
-            <div className="text-on-surface-variant text-base sm:text-lg leading-relaxed space-y-5 font-body">
+            <div className="text-on-surface-variant text-base leading-relaxed space-y-4 font-body">
               <p>
                 1952 yılında Erzurum'un İspir ilçesinde doğan <strong className="text-primary font-bold">İlhan Efe</strong>, Gümüşhane Öğretmen Lisesi'nden mezun olduktan sonra Van ve İspir'in Değirmenli Köyü'nde uzun yıllar köy öğretmenliği yaptı. İspir Halk Eğitim Müdürlüğü görevinden emekli olduktan sonra, çocukluğundan beri tutkusu olan İspir'in asırlık organik dutlarını doğal yöntemlerle insanlara ulaştırma hayalini gerçeğe dönüştürdü.
               </p>

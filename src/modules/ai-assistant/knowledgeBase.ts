@@ -41,7 +41,7 @@ Kuruluş Felsefesi: "Yayla Hasadından Sofranıza" — Asırlık tarifler, meşe
 };
 
 /**
- * Smart context-aware AI assistant reply router for PEKEFE Gastronomi
+ * Smart context-aware AI assistant reply router for PEKEFE İspir Yöresel Ürünler
  */
 export async function queryAiAssistant(message: string, role: string, userEmail?: string): Promise<string> {
   const lowerMsg = message.toLowerCase();

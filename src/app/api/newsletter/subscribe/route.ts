@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         "newsletter_welcome",
         {
           email,
-          brandName: "PEKEFE Gastronomi",
+          brandName: "PEKEFE İspir Yöresel Ürünler",
           siteUrl: hostUrl
         }
       );

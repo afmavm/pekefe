@@ -1,5 +1,5 @@
 /**
- * sitemap.js — PEKEFE Gastronomi Platformu
+ * sitemap.js — PEKEFE İspir Yöresel Ürünler Platformu
  * Next.js App Router tarafından otomatik olarak /sitemap.xml endpoint'ine dönüştürülür.
  */
 

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        const prompt = `Sen "PEKEFE Doğal & Geleneksel Gastronomi" markasının kıdemli E-Ticaret SEO ve İçerik Uzmanısın.
+        const prompt = `Sen "PEKEFE İspir Yöresel Ürünler" markasının kıdemli E-Ticaret SEO ve İçerik Uzmanısın.
 Aşağıdaki ürün bilgilerini derinlemesine inceleyerek profesyonel, araştırmacı, iştah açıcı ve Google'da en üst sıralara çıkacak içerikler üret.
 
 ÜRÜN BİLGİLERİ:

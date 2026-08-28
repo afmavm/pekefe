@@ -1,5 +1,5 @@
 /**
- * robots.js — PEKEFE Gastronomi Platformu
+ * robots.js — PEKEFE İspir Yöresel Ürünler Platformu
  * Next.js App Router tarafından otomatik olarak /robots.txt endpoint'ine dönüştürülür.
  */
 

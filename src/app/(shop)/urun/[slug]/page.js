@@ -6,6 +6,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator } from "@/components/product/ProductConfigurator";
 import { ProductTabs } from "@/components/product/ProductTabs";
+import { HmfInfoSection } from "@/components/product/HmfInfoSection";
 import { ProductModals } from "@/components/product/ProductModals";
 import { ProductRecommendations } from "@/components/product/ProductRecommendations";
 import { useProductDetailState, getVariantLabel } from "@/components/product/useProductDetailState";
@@ -113,6 +114,16 @@ export default function UrunDetay({ params }) {
           usageGuideText={state.usageGuideText}
           reviewsList={state.reviewsList}
           setIsReviewModalOpen={state.setIsReviewModalOpen}
+        />
+
+        {/* ── HMF Bilgi Bloğu (Editorial & Scientific Showcase) ── */}
+        <HmfInfoSection
+          productName={state.product?.name}
+          isMulberryMolasses={
+            state.product?.slug?.includes("pekmez") ||
+            state.product?.slug?.includes("dut") ||
+            state.product?.name?.toLowerCase()?.includes("pekmez")
+          }
         />
 
         {/* ── Recommendations ── */}

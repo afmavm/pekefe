@@ -1,120 +1,283 @@
-﻿[
-    {
-        "variants":  [
-                         {
-                             "sku":  "PKF-DUT-400G",
-                             "id":  "var-dut-400g",
-                             "vatIncluded":  true,
-                             "size":  "400g Cam Kavanoz",
-                             "price":  450,
-                             "stock":  50,
-                             "color":  "Doğal",
-                             "name":  "400g Cam Kavanoz",
-                             "barcode":  "8696510845301",
-                             "vatRate":  1
-                         },
-                         {
-                             "sku":  "PKF-DUT-800G",
-                             "id":  "var-dut-800g",
-                             "vatIncluded":  true,
-                             "size":  "800g Cam Kavanoz",
-                             "price":  850,
-                             "stock":  100,
-                             "color":  "Doğal",
-                             "name":  "800g Cam Kavanoz",
-                             "barcode":  "8696510845302",
-                             "vatRate":  1
-                         }
-                     ],
-        "seoKeywords":  "pekefe, ispir dut gün pekmezi, gün pekmezi, hmf, ispir pekmezi, dut şırası",
-        "meta":  "Dut Pekmezi · İspir Hasadı",
-        "cost":  200,
-        "seoDesc":  "İspir yaylalarının asırlık dutlarından güneş altında yoğunlaştırılmış katkısız PEKEFE İspir Dut Gün Pekmezi. Sıfır ilave şeker, tescilli laboratuvar analizli.",
-        "createdAt":  "2026-08-30T00:13:27.037Z",
-        "categoryDisplay":  "Geleneksel Pekmezler",
-        "image":  "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-        "oldPrice":  520,
-        "shortDesc":  "2200m rakımlı İspir vadisinde güneşin doğal sıcaklığında dinlendirilerek yoğunlaştırılmış, %100 saf ve katkısız geleneksel gün pekmezi.",
-        "desc":  "İspir yaylalarında 2200m rakımda yetişen asırlık beyaz dut ağaçlarından şafak vakti toplanan dutların, yüksek ateşte yakılmadan güneşin doğal sıcaklığında ağır ağır yoğunlaştırılmasıyla üretilen geleneksel İspir Dut Gün Pekmezi.",
-        "list_price":  520,
-        "category":  "Dut Pekmezi",
-        "attributes":  {
-                           "nutrients":  {
-                                             "energy":  "293 kcal",
-                                             "iron":  "10.2 mg",
-                                             "protein":  "0.8 g",
-                                             "calcium":  "400 mg",
-                                             "carb":  "70.2 g"
-                                         },
-                           "hmfLevel":  "\u003c 10 mg/kg (Akredite Laboratuvar Analizli)",
-                           "harvestSeason":  "Temmuz - Ağustos",
-                           "altitude":  "2200 Metre",
-                           "shortDesc":  "2200m rakımlı İspir vadisinde güneşin doğal sıcaklığında dinlendirilerek yoğunlaştırılmış, %100 saf ve katkısız geleneksel gün pekmezi.",
-                           "ingredients":  "%100 Doğal İspir Beyaz Dut Şırası",
-                           "harvestStory":  "İlhan Efe\u0027nin İspir vadisindeki bahçelerinde asırlık dut ağaçlarından şafak vakti çırpılan beyaz dutlar, Kaçkar dağlarının berrak kaynak sularıyla yıkanarak ahşap cendere preslerinden geçirilir.",
-                           "ritual":  "Her sabah aç karnına bir tatlı kaşığı tüketilmesi veya ılık suyla şerbet yapılarak içilmesi tavsiye edilir.",
-                           "specsDimensions":  "Emniyet Kilitli Cam Kavanoz",
-                           "recipeDetails":  "İspir beyaz dutlarının şırası çıkarıldıktan sonra yüksek ateşte kaynatılmadan, yayla güneşinin altında hijyenik tepsilerde dinlendirilerek yoğunlaştırılmıştır.",
-                           "specsMaterial":  "Erzurum / İspir"
-                       },
-        "id":  "PKF-DUT-PEKMEZI",
-        "images":  [
-                       "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-                       "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
-                       "/uploads/ispir-keten-bezde-pestil-serimi.webp"
-                   ],
-        "seoTitle":  "PEKEFE Geleneksel İspir Dut Gün Pekmezi | %100 Doğal Güneş Pekmezi",
-        "stock":  150,
-        "slug":  "ispir-dut-gun-pekmezi",
-        "isCampaignActive":  false,
-        "sale_price":  450,
-        "sku":  "PKF-DUT-001",
-        "isDeleted":  false,
-        "stock_quantity":  150,
-        "name":  "PEKEFE Geleneksel İspir Dut Gün Pekmezi",
-        "price":  450,
-        "brand":  "PEKEFE"
+[
+  {
+    "variants": [
+      {
+        "id": "var-dut-400g",
+        "sku": "PKF-DUT-400G",
+        "barcode": "8696510845301",
+        "name": "400g Cam Kavanoz",
+        "size": "400g Cam Kavanoz",
+        "color": "Doğal",
+        "stock": 50,
+        "price": 450,
+        "purchasePrice": 0,
+        "cost": 0,
+        "b2bPrice": 450,
+        "vatRate": 1,
+        "vatIncluded": true
+      },
+      {
+        "id": "var-dut-800g",
+        "sku": "PKF-DUT-800G",
+        "barcode": "8696510845302",
+        "name": "800g Cam Kavanoz",
+        "size": "800g Cam Kavanoz",
+        "color": "Doğal",
+        "stock": 100,
+        "price": 850,
+        "purchasePrice": 0,
+        "cost": 0,
+        "b2bPrice": 850,
+        "vatRate": 1,
+        "vatIncluded": true
+      }
+    ],
+    "seoKeywords": "pekefe, ispir dut gün pekmezi, gün pekmezi, hmf, ispir pekmezi, dut şırası",
+    "meta": "Dut Pekmezi · İspir Hasadı",
+    "cost": 200,
+    "seoDesc": "İspir yaylalarının asırlık dutlarından güneş altında yoğunlaştırılmış katkısız PEKEFE İspir Dut Gün Pekmezi. Sıfır ilave şeker, tescilli laboratuvar analizli.",
+    "createdAt": "2026-08-29T21:53:15.319Z",
+    "categoryDisplay": "Geleneksel Pekmezler",
+    "image": "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    "oldPrice": 520,
+    "shortDesc": "İspir'in meşhur dutlarından geleneksel yöntemle hazırlanan PEKEFE Dut Gün Pekmezi, dut şırasının yakılmadan güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılmasıyla elde edilir. İlave şeker ve koruyucu içermez.",
+    "desc": "<h1 style=\"text-align: justify;\"><b><u>PEKEFE Geleneksel İspir Dut Gün Pekmezi</u></b></h1><h2 style=\"text-align: justify;\">İspir'in Dutları, Güneşin Doğal Sıcaklığı ve Yılların Geleneği</h2><p style=\"text-align: justify;\">Erzurum'un İspir ilçesinin eşsiz dutlarından elde edilen <strong>PEKEFE Geleneksel İspir Dut Gün Pekmezi</strong>, dutun doğal lezzetini korumayı amaçlayan geleneksel üretim anlayışıyla hazırlanır.</p><p style=\"text-align: justify;\">PEKEFE'nin hikâyesinin temelinde, kurucusu <strong>İlhan Efe'nin İspir'de çocukluk yıllarından itibaren tanıdığı geleneksel pekmez üretimi</strong> bulunur. Yıllar içerisinde edindiği tecrübeyi modern üretim ve hijyen anlayışıyla birleştiren İlhan Efe, İspir'in geleneksel dut pekmezini gelecek nesillere aktarmayı amaçlamıştır.</p><h2 style=\"text-align: justify;\">Dut Şırası Yakılmaz, Güneşin Doğal Sıcaklığından Yararlanılır</h2><p style=\"text-align: justify;\">PEKEFE Dut Gün Pekmezi'nin en önemli özelliklerinden biri, dut şırasının <strong>yüksek ateşte uzun süre kaynatılarak yakılması yerine, güneş ışığının ve doğal sıcaklığın kullanıldığı geleneksel yoğunlaştırma yönteminin tercih edilmesidir.</strong></p><p style=\"text-align: justify;\">İlhan Efe'nin TRT'de gerçekleştirdiği röportajda da özellikle <strong>pekmez şırasının yakılmaması, güneş ışığında uzun sürelerde ve doğal sıcaklıktan yararlanılarak yoğunlaştırılması</strong> üzerinde durulmuştur.</p><p style=\"text-align: justify;\">Bu yaklaşım yalnızca geleneksel lezzetin korunması açısından değil, pekmez üretiminde önemli bir kalite parametresi olan <strong>HMF (5-Hidroksimetilfurfural)</strong> açısından da önem taşır.</p><h2 style=\"text-align: justify;\"><br></h2><h2 style=\"text-align: justify;\"><b><u>HMF Nedir?</u></b></h2><p style=\"text-align: justify;\"><strong>HMF (5-Hidroksimetilfurfural)</strong>, şeker içeren gıdaların özellikle yüksek sıcaklıklara maruz kalması sırasında oluşabilen bir bileşiktir. Pekmez gibi şeker bakımından zengin ürünlerde HMF oluşumu; <strong>sıcaklık, süre, pH ve ürünün bileşimi</strong> gibi birçok faktörden etkilenebilir.</p><p style=\"text-align: justify;\"><br></p><p style=\"text-align: justify;\">Bu nedenle geleneksel pekmez üretiminde şıranın gereğinden fazla ve yüksek sıcaklıklarda ısıtılmaması önemlidir.</p><p style=\"text-align: justify;\">İlhan Efe'nin üretim anlayışında da bu konuya özellikle dikkat çekilmektedir. <strong>Pekmez şırasını yüksek ateşte yakmak yerine, güneşin doğal sıcaklığından yararlanarak daha uzun sürede yoğunlaştırmak</strong>, PEKEFE'nin geleneksel üretim yaklaşımının temel unsurlarından biridir.</p><p style=\"text-align: justify;\"><br></p><p style=\"text-align: justify;\">Buradaki amaç, dut şırasını gereksiz yüksek sıcaklıklara maruz bırakmadan <strong>doğal dut aromasını ve geleneksel üretim karakterini korumaktır.</strong></p><p style=\"text-align: justify;\"><strong><br></strong></p><blockquote><p style=\"text-align: justify;\"><strong>PEKEFE'de amaç yalnızca pekmez yapmak değil; dutun özünü, aromasını ve geleneksel üretim bilgisini koruyarak pekmeze dönüştürmektir.</strong></p><p style=\"text-align: justify;\"><strong><br></strong></p></blockquote><h2 style=\"text-align: justify;\"><b><u>İspir'in Dutundan Gelen Doğal Tat</u></b></h2><p style=\"text-align: justify;\">PEKEFE Geleneksel İspir Dut Gün Pekmezi'nin hammaddesi, İspir'in yöresel dutlarıdır.</p><p style=\"text-align: justify;\">Olgunlaşan dutlar özenle toplanır, işlenerek dut şırası elde edilir ve şıra süzülerek yoğunlaştırma aşamasına hazırlanır.</p><p style=\"text-align: justify;\">Geleneksel yöntemde güneşten yararlanılarak suyundan arındırılan dut şırası, zaman içerisinde kendine özgü yoğun kıvamına ulaşır.</p><p style=\"text-align: justify;\">Böylece ortaya <strong>yoğun dut aromalı, karakteristik kıvam ve tada sahip geleneksel bir dut pekmezi</strong> çıkar.</p><h2 style=\"text-align: justify;\">İlave Şeker ve Koruyucu Eklenmeden</h2><p style=\"text-align: justify;\"><br></p><p style=\"text-align: justify;\">PEKEFE Geleneksel İspir Dut Gün Pekmezi'nin karakteristik tatlılığı <strong>dutun kendi doğal şekerlerinden</strong> gelir.</p><p style=\"text-align: justify;\">Üretim reçetesinde <strong>ilave şeker ve kimyasal koruyucu kullanılmaz.</strong></p><p style=\"text-align: justify;\">Bu sayede ürünün temel lezzet kaynağı dutun kendisidir.</p><p style=\"text-align: justify;\"><br></p><h2 style=\"text-align: justify;\">Geleneksel Bilgi, Modern Üretim</h2><p style=\"text-align: justify;\">PEKEFE'nin farkı, geleneksel yöntemi olduğu gibi tekrarlamak değil; <strong>geleneksel üretim bilgisini modern gıda üretim anlayışıyla bir araya getirmektir.</strong></p><p style=\"text-align: justify;\"><strong><br></strong></p><p style=\"text-align: justify;\">İlhan Efe'nin yıllar boyunca edindiği geleneksel üretim tecrübesi;</p><ul><li><p style=\"text-align: justify;\">hijyenik üretim,</p></li><li><p style=\"text-align: justify;\">kontrollü üretim koşulları,</p></li><li><p style=\"text-align: justify;\">kaliteli hammadde seçimi,</p></li><li><p style=\"text-align: justify;\">uygun yoğunlaştırma süreci</p></li></ul><p style=\"text-align: justify;\">ile bir araya getirilerek PEKEFE'nin üretim anlayışını oluşturur.</p><h2 style=\"text-align: justify;\"><br></h2><h2 style=\"text-align: justify;\">İspir'den Sofranıza</h2><p style=\"text-align: justify;\">PEKEFE Geleneksel İspir Dut Gün Pekmezi; kahvaltıda sade olarak veya tahinle birlikte tüketilebildiği gibi yoğurt, süt ve çeşitli yöresel tariflere de eşlik edebilir.</p><p style=\"text-align: justify;\">Her kavanozda yalnızca dutun lezzeti değil; <strong>İspir'in güneşi, dut bahçeleri ve İlhan Efe'nin yıllara dayanan üretim tecrübesi</strong> bulunur.</p><p style=\"text-align: justify;\"><br></p><h3 style=\"text-align: justify;\">PEKEFE Geleneksel İspir Dut Gün Pekmezi</h3><p><div style=\"text-align: justify;\"><strong>İspir'in dutu.</strong></div><strong><div style=\"text-align: justify;\"><strong>Güneşin doğal sıcaklığı.</strong></div><div style=\"text-align: justify;\"><strong>Yılların tecrübesi.</strong></div><div style=\"text-align: justify;\"><strong>Gelenekten gelen gerçek lezzet.</strong></div></strong></p><p style=\"text-align: justify;\"><strong>PEKEFE — İspir'in geleneksel lezzetlerini geleceğe taşıyoruz.</strong></p>",
+    "list_price": 520,
+    "category": "Dut Pekmezi",
+    "attributes": {
+      "shortDesc": "İspir'in meşhur dutlarından geleneksel yöntemle hazırlanan PEKEFE Dut Gün Pekmezi, dut şırasının yakılmadan güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılmasıyla elde edilir. İlave şeker ve koruyucu içermez.",
+      "sizes": [
+        "400g Cam Kavanoz",
+        "800g Cam Kavanoz",
+        "1 kg Vakum",
+        "5 kg Teneke"
+      ],
+      "colors": [
+        "Sade",
+        "Cevizli",
+        "Fındıklı",
+        "Antep Fıstıklı",
+        "Doğal"
+      ],
+      "barcode": "8693324070972",
+      "unit": "Kg",
+      "manufacturerCode": "PKF-DUT-5403",
+      "stockType": "Ticari Mal",
+      "warehouse": "Merkez Depo",
+      "purchaseCurrency": "TRY",
+      "purchaseVat": "1",
+      "purchaseVatIncluded": true,
+      "saleCurrency": "TRY",
+      "saleVat": "1",
+      "saleVatIncluded": true,
+      "retailPrice": 0,
+      "retailCurrency": "TRY",
+      "retailVat": "1",
+      "retailVatIncluded": true,
+      "webPrice": 0,
+      "webCurrency": "TRY",
+      "webVat": "1",
+      "webVatIncluded": true,
+      "marketCurrency": "TRY",
+      "marketVat": "20",
+      "marketVatIncluded": true,
+      "b2bActive": true,
+      "b2bPreOrderable": false,
+      "marketplaces": [
+        {
+          "id": "1",
+          "name": "Trendyol API",
+          "syncEnabled": false,
+          "apiConnected": true,
+          "apiKey": "ty-api-90234892",
+          "apiSecret": "••••••••",
+          "logoColor": "bg-orange-500"
+        },
+        {
+          "id": "2",
+          "name": "Hepsiburada API",
+          "syncEnabled": false,
+          "apiConnected": true,
+          "apiKey": "hb-api-11029384",
+          "apiSecret": "••••••••",
+          "logoColor": "bg-red-600"
+        },
+        {
+          "id": "3",
+          "name": "Amazon Turkey API",
+          "syncEnabled": false,
+          "apiConnected": false,
+          "logoColor": "bg-slate-500"
+        }
+      ],
+      "warehouses": [
+        {
+          "id": "1",
+          "name": "Merkez Depo",
+          "code": "WH-MRKZ",
+          "location": "Erzurum OSB, 3. Cadde",
+          "stockCount": 1000,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
+        },
+        {
+          "id": "2",
+          "name": "Şube Depo",
+          "code": "WH-SUBE",
+          "location": "İstanbul Anadolu Yakası",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "sube-branch"
+        },
+        {
+          "id": "3",
+          "name": "Üretim Bandı",
+          "code": "WH-URT",
+          "location": "Yakutiye Fabrika Alanı",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
+        }
+      ],
+      "recipeDetails": "İspir beyaz dutlarının şırası çıkarıldıktan sonra yüksek ateşte kaynatılmadan, yayla güneşinin altında hijyenik tepsilerde dinlendirilerek yoğunlaştırılmıştır.",
+      "altitude": "2200 Metre",
+      "harvestSeason": "Temmuz - Ağustos",
+      "harvestStory": "İlhan Efe'nin İspir vadisindeki bahçelerinde asırlık dut ağaçlarından şafak vakti çırpılan beyaz dutlar, Kaçkar dağlarının berrak kaynak sularıyla yıkanarak ahşap cendere preslerinden geçirilir.",
+      "ingredients": "%100 Doğal İspir Beyaz Dut Şırası",
+      "ritual": "Her sabah aç karnına bir tatlı kaşığı tüketilmesi veya ılık suyla şerbet yapılarak içilmesi tavsiye edilir.",
+      "nutrients": {
+        "energy": "293 kcal",
+        "carb": "70.2 g",
+        "protein": "0.8 g",
+        "calcium": "400 mg",
+        "iron": "10.2 mg"
+      },
+      "hmfLevel": "< 10 mg/kg (Akredite Laboratuvar Analizli)",
+      "unitCoefficients": [],
+      "branchPrices": {},
+      "specsMaterial": "Erzurum / İspir",
+      "specsWeight": "",
+      "specsDimensions": "Emniyet Kilitli Cam Kavanoz",
+      "specsBellows": "",
+      "usageGuide": "",
+      "warrantyInfo": "",
+      "warrantyBadgeLabel": "",
+      "warrantyYears": "",
+      "warrantyBadgeDesc": "",
+      "quickOverview1_title": "",
+      "quickOverview1_desc": "",
+      "quickOverview2_title": "",
+      "quickOverview2_desc": "",
+      "quickOverview3_title": "",
+      "quickOverview3_desc": "",
+      "quickOverview1": "",
+      "quickOverview2": "",
+      "quickOverview3": "",
+      "longDescExtra": "",
+      "badgeText1": "",
+      "badgeText2": "",
+      "warehousePrices": {}
     },
-    {
-        "id":  "PKF-1787518012495",
-        "stock":  100,
-        "name":  "PEKEFE Cevizli Dut Pestili",
-        "isDeleted":  false,
-        "slug":  "pefeature-cevizli-dut-pestili",
-        "category":  "Pestil - Köme",
-        "desc":  "İspir dut şırası ve taze İspir cevizinin keten bezlerde güneşte kurutulmasıyla üretilen geleneksel pestil.",
-        "oldPrice":  550,
-        "createdAt":  "2026-08-30T00:13:27.039Z",
-        "cost":  250,
-        "image":  "/uploads/ispir-keten-bezde-pestil-serimi.webp",
-        "list_price":  550,
-        "categoryDisplay":  "Pestil \u0026 Köme",
-        "meta":  "Pestil · İspir",
-        "brand":  "PEKEFE",
-        "price":  500,
-        "variants":  [
-
-                     ],
-        "stock_quantity":  100,
-        "shortDesc":  "Doğal dut şırası ve İspir cevizi ile güneşte kurutulmuş geleneksel lezzet.",
-        "sale_price":  500,
-        "isCampaignActive":  false,
-        "attributes":  {
-                           "ingredients":  "Doğal Dut Şırası, İspir Cevizi, Doğal Nişasta",
-                           "altitude":  "2200 Metre",
-                           "harvestSeason":  "Temmuz - Ağustos",
-                           "nutrients":  {
-                                             "energy":  "293 kcal",
-                                             "iron":  "10.2 mg",
-                                             "protein":  "0.8 g",
-                                             "calcium":  "400 mg",
-                                             "carb":  "70.2 g"
-                                         },
-                           "hmfLevel":  "\u003c 10 mg/kg (Analiz Raporlu)"
-                       },
-        "images":  [
-                       "/uploads/ispir-keten-bezde-pestil-serimi.webp"
-                   ],
-        "sku":  "PKF-PES-9601"
-    }
+    "id": "PKF-DUT-PEKMEZI",
+    "images": [
+      "/pekefe-dut-pekmezi-kavanoz-tr.jpg"
+    ],
+    "seoTitle": "PEKEFE Geleneksel İspir Dut Gün Pekmezi | %100 Doğal Güneş Pekmezi",
+    "stock": 1000,
+    "slug": "ispir-dut-gun-pekmezi",
+    "isCampaignActive": false,
+    "sale_price": 450,
+    "sku": "PKF-DUT-001",
+    "isDeleted": false,
+    "stock_quantity": 1000,
+    "name": "PEKEFE Geleneksel İspir Dut Gün Pekmezi",
+    "price": 450,
+    "brand": "PEKEFE",
+    "model": "",
+    "videoUrl": "",
+    "discount_start_date": null,
+    "discount_end_date": null,
+    "warehouses": [
+      {
+        "id": "1",
+        "name": "Merkez Depo",
+        "code": "WH-MRKZ",
+        "location": "Erzurum OSB, 3. Cadde",
+        "stockCount": 1000,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "default-branch"
+      },
+      {
+        "id": "2",
+        "name": "Şube Depo",
+        "code": "WH-SUBE",
+        "location": "İstanbul Anadolu Yakası",
+        "stockCount": 0,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "sube-branch"
+      },
+      {
+        "id": "3",
+        "name": "Üretim Bandı",
+        "code": "WH-URT",
+        "location": "Yakutiye Fabrika Alanı",
+        "stockCount": 0,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "default-branch"
+      }
+    ],
+    "locations": []
+  },
+  {
+    "id": "PKF-1787518012495",
+    "stock": 100,
+    "name": "PEKEFE Cevizli Dut Pestili",
+    "isDeleted": false,
+    "slug": "pefeature-cevizli-dut-pestili",
+    "category": "Pestil - Köme",
+    "desc": "İspir dut şırası ve taze İspir cevizinin keten bezlerde güneşte kurutulmasıyla üretilen geleneksel pestil.",
+    "oldPrice": 550,
+    "createdAt": "2026-08-30T00:13:27.039Z",
+    "cost": 250,
+    "image": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+    "list_price": 550,
+    "categoryDisplay": "Pestil & Köme",
+    "meta": "Pestil · İspir",
+    "brand": "PEKEFE",
+    "price": 500,
+    "variants": [],
+    "stock_quantity": 100,
+    "shortDesc": "Doğal dut şırası ve İspir cevizi ile güneşte kurutulmuş geleneksel lezzet.",
+    "sale_price": 500,
+    "isCampaignActive": false,
+    "attributes": {
+      "ingredients": "Doğal Dut Şırası, İspir Cevizi, Doğal Nişasta",
+      "altitude": "2200 Metre",
+      "harvestSeason": "Temmuz - Ağustos",
+      "nutrients": {
+        "energy": "293 kcal",
+        "iron": "10.2 mg",
+        "protein": "0.8 g",
+        "calcium": "400 mg",
+        "carb": "70.2 g"
+      },
+      "hmfLevel": "< 10 mg/kg (Analiz Raporlu)"
+    },
+    "images": [
+      "/uploads/ispir-keten-bezde-pestil-serimi.webp"
+    ],
+    "sku": "PKF-PES-9601"
+  }
 ]

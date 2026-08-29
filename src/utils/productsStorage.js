@@ -23,6 +23,29 @@ export function generateSlug(name = "") {
 export const STORAGE_KEY = "pekefe_products_v7";
 export const DEFAULT_PRODUCTS = [
   {
+    id: "PKF-DUT-PEKMEZI",
+    name: "PEKEFE Geleneksel İspir Dut Gün Pekmezi",
+    slug: "ispir-dut-gun-pekmezi",
+    sku: "PKF-DUT-001",
+    category: "Dut Pekmezi",
+    categoryDisplay: "Geleneksel Pekmezler",
+    stock: 150,
+    price: 450,
+    oldPrice: 520,
+    sale_price: 450,
+    cost: 200,
+    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    images: ["/pekefe-dut-pekmezi-kavanoz-tr.jpg", "/uploads/ispir-bakir-kazan-ahsap-cendere.webp", "/uploads/ispir-keten-bezde-pestil-serimi.webp"],
+    meta: "Dut Pekmezi · İspir Hasadı",
+    desc: "İspir yaylalarında 2200m rakımda yetişen asırlık beyaz dut ağaçlarından şafak vakti toplanan dutların, yüksek ateşte yakılmadan güneşin doğal sıcaklığında ağır ağır yoğunlaştırılmasıyla üretilen geleneksel İspir Dut Gün Pekmezi.",
+    shortDesc: "2200m rakımlı İspir vadisinde güneşin doğal sıcaklığında dinlendirilerek yoğunlaştırılmış, %100 saf ve katkısız geleneksel gün pekmezi.",
+    variants: [
+      { id: "var-dut-400g", name: "400g Cam Kavanoz", size: "400g Cam Kavanoz", price: 450, stock: 50 },
+      { id: "var-dut-800g", name: "800g Cam Kavanoz", size: "800g Cam Kavanoz", price: 850, stock: 100 }
+    ],
+    createdAt: new Date().toISOString()
+  },
+  {
     id: "PKF-1787504925641",
     name: "Deneme Pestil",
     sku: "PKF-812100",

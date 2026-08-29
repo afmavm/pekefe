@@ -48,7 +48,7 @@ export function readLocalProducts(): LocalProduct[] {
       fs.writeFileSync(DB_FILE_PATH, JSON.stringify([], null, 2), 'utf8');
       return [];
     }
-    const content = fs.readFileSync(DB_FILE_PATH, 'utf8');
+    const content = fs.readFileSync(DB_FILE_PATH, 'utf8').replace(/^\uFEFF/, '');
     const data = JSON.parse(content);
     return Array.isArray(data) ? data : [];
   } catch (e) {

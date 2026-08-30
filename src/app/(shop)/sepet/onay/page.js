@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { clearCart } from "@/utils/cartStorage";
+import { CheckCircle2, PackageCheck, Truck, Sparkles, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
 
 export default function SepetOnay() {
   const [completedOrder, setCompletedOrder] = useState(null);
@@ -42,193 +43,253 @@ export default function SepetOnay() {
   const total = completedOrder?.total ?? (subtotal + shippingCost);
   const shippingAddress = completedOrder?.shippingAddress;
 
+  const formatPrice = (val) => {
+    return Number(val || 0).toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
   return (
-    <div className="w-full bg-background text-on-surface font-body-md overflow-x-hidden">
-      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
-        {/* Success Indicator Section */}
-        <div className="flex flex-col items-center text-center mb-16 animate-scale-in">
-          <div className="relative w-24 h-24 mb-8">
-            <svg className="w-full h-full text-secondary" viewBox="0 0 52 52">
-              <circle className="fill-secondary/10" cx="26" cy="26" fill="none" r="25"></circle>
-              <path
-                className="fill-none stroke-primary stroke-[3] stroke-dasharray-[100] stroke-dashoffset-[100] animate-draw-checkmark"
-                d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              ></path>
-            </svg>
+    <div className="w-full bg-[#fbf9f6] dark:bg-[#0e0f11] text-slate-900 dark:text-slate-100 min-h-screen py-10 sm:py-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Lüks Onay Rozeti ve Başlık Alanı */}
+        <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
+          <div className="relative mb-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-[#6b1d2f] to-[#8b1e3f] p-0.5 shadow-xl shadow-[#6b1d2f]/20 flex items-center justify-center">
+              <div className="w-full h-full bg-[#6b1d2f] rounded-[22px] flex items-center justify-center text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
+                <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-amber-300 drop-shadow-md animate-scale-in" />
+              </div>
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-amber-400 text-slate-900 rounded-full p-1.5 shadow-md border-2 border-white dark:border-slate-900">
+              <Sparkles className="w-4 h-4" />
+            </div>
           </div>
-          <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-primary mb-4 leading-tight">
+
+          <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase bg-[#6b1d2f]/10 text-[#6b1d2f] dark:text-rose-400 mb-3 border border-[#6b1d2f]/20">
+            Sipariş Onaylandı
+          </span>
+
+          <h1 className="font-serif font-black text-3xl sm:text-4xl lg:text-5xl text-[#6b1d2f] dark:text-white tracking-tight mb-3">
             Siparişiniz Alındı!
           </h1>
-          <p className="font-body-lg text-on-surface-variant max-w-2xl mx-auto">
-            Değerli siparişiniz için teşekkür ederiz. Geleneksel lezzetlerimizi sizin için özenle hazırlamaya başladık.
+          <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+            Değerli siparişiniz için teşekkür ederiz. İspir'in geleneksel doğal lezzetlerini sizin için özenle hazırlamaya başladık.
           </p>
         </div>
 
-        {/* Order Info Bento Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          {/* Details Card */}
-          <div className="lg:col-span-4 bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(139,0,0,0.04)] border border-outline-variant/20 h-fit">
-            <h3 className="font-headline-md text-primary mb-6">Sipariş Bilgileri</h3>
-            <div className="space-y-6">
-              <div>
-                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
-                  SİPARİŞ NUMARASI
+        {/* 2 Sütunlu Lüks Bilgi & Sipariş Özeti Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          
+          {/* Sol Sütun: Sipariş Bilgileri & Teslimat Adresi */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 shadow-xs border border-slate-200/80 dark:border-slate-800 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h3 className="font-serif font-bold text-lg text-[#6b1d2f] dark:text-rose-400 flex items-center gap-2">
+                  <PackageCheck className="w-5 h-5 text-[#6b1d2f]" /> Sipariş Bilgileri
+                </h3>
+                <span className="text-[11px] font-mono font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  Hazırlanıyor
                 </span>
-                <p className="font-body-lg font-bold text-on-surface text-lg">{orderNum}</p>
               </div>
-              <div>
-                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
-                  TARİH
-                </span>
-                <p className="font-body-lg text-on-surface">{orderDate}</p>
-              </div>
-              <div>
-                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
-                  TAHMİNİ TESLİMAT
-                </span>
-                <p className="font-body-lg text-on-surface">2-3 İş Günü İçinde (Soğuk Zincir Kargo)</p>
-              </div>
-              <div>
-                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
-                  ÖDEME YÖNTEMİ
-                </span>
-                <p className="font-body-lg text-on-surface font-semibold">
-                  {completedOrder?.paymentMethod === "bankTransfer"
-                    ? "Banka Havalesi / EFT (%2 İndirimli)"
-                    : completedOrder?.paymentMethod === "openAccount"
-                    ? "B2B Vadeli Açık Hesap"
-                    : "Kredi / Banka Kartı"}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-center gap-3">
-                <span className="material-symbols-outlined text-amber-600 text-2xl">workspace_premium</span>
+
+              <div className="space-y-4 text-sm">
                 <div>
-                  <p className="font-bold text-xs uppercase tracking-wider text-amber-800">Kazanılan Lezzet Puanı</p>
-                  <p className="font-extrabold text-sm text-amber-900">+{Math.floor(total)} PTS Pekefe Lezzet Puanı Hesabınıza Tanımlandı!</p>
+                  <span className="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest block mb-1">
+                    SİPARİŞ NUMARASI
+                  </span>
+                  <p className="font-mono font-black text-slate-900 dark:text-white text-base bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 inline-block">
+                    {orderNum}
+                  </p>
                 </div>
-              </div>
-              <div className="pt-6 border-t border-outline-variant/30">
-                <span className="block font-label-md text-label-sm text-on-surface-variant uppercase tracking-widest mb-1 text-xs">
-                  TESLİMAT ADRESİ
-                </span>
-                <p className="font-body-md text-on-surface-variant whitespace-pre-line leading-relaxed text-sm">
-                  {shippingAddress ? (
-                    <>
-                      {shippingAddress.name && <strong className="block text-primary font-bold">{shippingAddress.name}</strong>}
-                      {shippingAddress.address || shippingAddress.fullAddress || shippingAddress.street || "Adres Bilgisi Kaydedildi"}
-                      {shippingAddress.phone && <span className="block text-xs font-mono text-slate-500 mt-1">Tel: {shippingAddress.phone}</span>}
-                    </>
-                  ) : (
-                    completedOrder?.address || "Adres Bilgisi Kaydedildi"
-                  )}
-                </p>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest block mb-1">
+                      TARİH
+                    </span>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 text-xs sm:text-sm">{orderDate}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest block mb-1">
+                      TAHMİNİ TESLİMAT
+                    </span>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 text-xs sm:text-sm">2-3 İş Günü</p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <span className="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest block mb-1">
+                    ÖDEME YÖNTEMİ
+                  </span>
+                  <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm">
+                    <CreditCard className="w-4 h-4 text-[#6b1d2f]" />
+                    <span>
+                      {completedOrder?.paymentMethod === "bankTransfer"
+                        ? "Banka Havalesi / EFT"
+                        : completedOrder?.paymentMethod === "openAccount"
+                        ? "B2B Vadeli Açık Hesap"
+                        : "Kredi / Banka Kartı"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Kazanılan Lezzet Puanı Rozet Kutusu */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/5 border border-amber-400/40 text-amber-950 dark:text-amber-200 flex items-center gap-3.5 shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center shrink-0 border border-amber-400/30">
+                    <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-[10px] uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                      Kazanılan Sadakat Puanı
+                    </p>
+                    <p className="font-mono font-black text-sm text-amber-900 dark:text-amber-200">
+                      +{formatPrice(total)} PTS Lezzet Puanı
+                    </p>
+                  </div>
+                </div>
+
+                {/* Teslimat Adresi */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest block flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#6b1d2f]" /> TESLİMAT ADRESİ
+                  </span>
+                  <div className="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {shippingAddress ? (
+                      <>
+                        {shippingAddress.name && <p className="font-bold text-[#6b1d2f] dark:text-rose-400">{shippingAddress.name}</p>}
+                        <p>{shippingAddress.address || shippingAddress.fullAddress || shippingAddress.street || "Adres Bilgisi Kaydedildi"}</p>
+                        {shippingAddress.city && <p className="text-slate-500 font-medium">{shippingAddress.district ? `${shippingAddress.district} / ` : ""}{shippingAddress.city}</p>}
+                        {shippingAddress.phone && <p className="font-mono font-semibold text-slate-600 dark:text-slate-400 mt-1">Tel: {shippingAddress.phone}</p>}
+                      </>
+                    ) : (
+                      <p>{completedOrder?.address || "Adres Bilgisi Kaydedildi"}</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Summary & Breakdown */}
-          <div className="lg:col-span-8 flex flex-col gap-gutter">
-            <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(139,0,0,0.04)] border border-outline-variant/20">
-              <h3 className="font-headline-md text-primary mb-6">Sipariş Özeti</h3>
-              <div className="space-y-6">
+          {/* Sağ Sütun: Sipariş Özeti & Ürün Kalemleri */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 shadow-xs border border-slate-200/80 dark:border-slate-800">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+                <h3 className="font-serif font-bold text-lg text-[#6b1d2f] dark:text-rose-400">
+                  Sipariş Özeti ({items.length} Kalem)
+                </h3>
+                <span className="text-xs font-mono font-bold text-slate-500">
+                  {completedOrder?.cargoCompany || "Yurtiçi Kargo"}
+                </span>
+              </div>
+
+              {/* Ürün Listesi */}
+              <div className="space-y-4 divide-y divide-slate-100 dark:divide-slate-800/60">
                 {items.map((item, idx) => (
-                  <div key={item.id || idx} className="flex items-center gap-6 border-b border-outline-variant/10 pb-4 last:border-0 last:pb-0">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 relative bg-surface p-2 flex items-center justify-center">
-                      <Image
-                        className="object-contain"
-                        alt={item.name}
-                        src={item.img || item.image || "/premium-pekefe-kavanoz.png"}
-                        fill
-                        sizes="80px"
-                      />
+                  <div key={item.id || idx} className="flex items-center justify-between gap-4 pt-4 first:pt-0">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 p-1 flex items-center justify-center shrink-0 relative overflow-hidden">
+                        <Image
+                          className="object-contain p-0.5"
+                          alt={item.name}
+                          src={item.img || item.image || "/pekefe-dut-pekmezi-kavanoz.jpg"}
+                          fill
+                          sizes="64px"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug line-clamp-2">
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                          Adet: <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">{item.quantity}</span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-grow">
-                      <p className="font-body-lg font-semibold text-on-surface">{item.name}</p>
-                      <p className="font-body-md text-sm text-on-surface-variant">{item.desc || "Premium Kavanoz"} • Adet: {item.quantity}</p>
-                    </div>
-                    <div className="text-right font-mono">
-                      <p className="font-body-lg font-bold text-primary">₺{item.price * item.quantity}</p>
+
+                    <div className="text-right shrink-0">
+                      <p className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-rose-400">
+                        ₺{formatPrice((item.price || 0) * (item.quantity || 1))}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 pt-8 border-t border-outline-variant/30 space-y-3">
-                <div className="flex justify-between font-body-md text-on-surface-variant">
-                  <span>Ara Toplam</span>
-                  <span className="font-mono">₺{subtotal}</span>
+              {/* Fiyat Dökümü */}
+              <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 space-y-2.5 text-sm">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>Ürünler Ara Toplamı</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">₺{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex justify-between font-body-md text-on-surface-variant">
-                  <span>Kargo Ücreti</span>
-                  <span className="text-secondary font-semibold font-mono">
-                    {shippingCost === 0 ? "ÜCRETSİZ" : `₺${shippingCost}`}
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>Kargo Bedeli</span>
+                  <span className="font-bold font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md text-xs">
+                    {shippingCost === 0 ? "ÜCRETSİZ" : `₺${formatPrice(shippingCost)}`}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-outline-variant/20">
-                  <span className="font-headline-md text-on-surface text-lg">Toplam</span>
-                  <span className="font-display-lg text-headline-lg text-primary font-mono">₺{total}</span>
+                <div className="flex justify-between items-baseline pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <span className="font-serif font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                    Genel Toplam
+                  </span>
+                  <span className="font-mono font-black text-2xl sm:text-3xl text-[#6b1d2f] dark:text-rose-400">
+                    ₺{formatPrice(total)}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Next Steps */}
-            <div className="bg-primary/5 rounded-xl p-8 border border-primary/10">
-              <div className="flex gap-4 items-start">
-                <span className="material-symbols-outlined text-primary scale-125 mt-1">info</span>
-                <div>
-                  <h4 className="font-body-lg font-bold text-primary mb-2">Şimdi Ne Olacak?</h4>
-                  <ul className="space-y-3 text-on-surface-variant font-body-md">
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-2 flex-shrink-0"></span>
-                      <span>
-                        Sipariş onayınız E-posta adresinize ve SMS olarak yönlendirildi.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-2 flex-shrink-0"></span>
-                      <span>Ürünleriniz tazelik kontrolünden geçtikten sonra kargoya teslim edilecektir.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-2 flex-shrink-0"></span>
-                      <span>Kargo takip numaranız SMS ve E-posta yoluyla size ulaştırılacaktır.</span>
-                    </li>
-                  </ul>
+            {/* Şimdi Ne Olacak? Bilgilendirme Kutusu */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <h4 className="font-serif font-bold text-base text-[#6b1d2f] dark:text-rose-400 mb-4 flex items-center gap-2">
+                <Truck className="w-4 h-4 text-[#6b1d2f]" /> Sipariş Süreci Nasıl İlerleyecek?
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+                <div className="bg-[#6b1d2f]/5 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-[#6b1d2f]/10 space-y-1">
+                  <span className="w-5 h-5 rounded-full bg-[#6b1d2f] text-white flex items-center justify-center text-[10px] font-bold">1</span>
+                  <p className="font-bold text-slate-900 dark:text-white">Sipariş Onayı</p>
+                  <p className="text-slate-500 leading-normal">Detaylar E-posta ve SMS ile iletildi.</p>
+                </div>
+                <div className="bg-[#6b1d2f]/5 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-[#6b1d2f]/10 space-y-1">
+                  <span className="w-5 h-5 rounded-full bg-[#6b1d2f] text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                  <p className="font-bold text-slate-900 dark:text-white">Tazelik Kontrolü</p>
+                  <p className="text-slate-500 leading-normal">Özenle paketlenip soğuk zincire verilir.</p>
+                </div>
+                <div className="bg-[#6b1d2f]/5 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-[#6b1d2f]/10 space-y-1">
+                  <span className="w-5 h-5 rounded-full bg-[#6b1d2f] text-white flex items-center justify-center text-[10px] font-bold">3</span>
+                  <p className="font-bold text-slate-900 dark:text-white">Hızlı Sevkiyat</p>
+                  <p className="text-slate-500 leading-normal">Takip kodu SMS ile cebinize gelir.</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6">
+        {/* Lüks Aksiyon Butonları (Call to Actions) */}
+        <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            className="w-full sm:w-auto px-12 py-4 bg-primary text-white font-body-md font-bold rounded-lg text-center hover:opacity-95 transition-all active:scale-95 shadow-md"
-            href="/"
-          >
-            Ana Sayfaya Dön
-          </Link>
-          <Link
-            className="w-full sm:w-auto px-12 py-4 border-2 border-secondary text-secondary font-body-md font-bold rounded-lg text-center hover:bg-secondary/5 transition-all active:scale-95"
+            className="w-full sm:w-auto px-8 py-3.5 bg-[#6b1d2f] hover:bg-[#831843] text-white font-bold rounded-xl text-center transition-all shadow-md shadow-[#6b1d2f]/20 flex items-center justify-center gap-2 group cursor-pointer"
             href="/hesap"
           >
-            Sipariş Takibi
+            <ShoppingBag className="w-4 h-4" /> Siparişlerimi Görüntüle <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link
+            className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-center transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            href="/"
+          >
+            <Home className="w-4 h-4" /> Alışverişe Devam Et
           </Link>
         </div>
 
-        {/* Brand Quote */}
-        <div className="mt-section-gap border-t border-outline-variant/30 pt-12 text-center max-w-3xl mx-auto">
-          <span className="material-symbols-outlined text-secondary-fixed-dim text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>
-            format_quote
-          </span>
-          <p className="font-display-lg text-headline-md italic text-primary-container mb-4">
-            "Doğadan sofranıza uzanan bu yolculukta bizi tercih ettiğiniz için teşekkürler."
+        {/* Marka Dipnotu */}
+        <div className="mt-16 border-t border-slate-200/60 dark:border-slate-800 pt-8 text-center max-w-2xl mx-auto">
+          <p className="font-serif italic text-slate-600 dark:text-slate-400 text-sm sm:text-base mb-2">
+            "Doğadan sofranıza uzanan bu eşsiz lezzet yolculuğunda bizi tercih ettiğiniz için teşekkür ederiz."
           </p>
-          <p className="font-label-md text-label-md text-secondary tracking-widest uppercase">
-            Pekefe Geleneksel Lezzetler Ekibi
+          <p className="text-[11px] font-mono font-extrabold text-[#6b1d2f] dark:text-amber-400 uppercase tracking-widest">
+            PEKEFE GELENEKSEL DOĞAL LEZZETLER
           </p>
         </div>
+
       </main>
     </div>
   );

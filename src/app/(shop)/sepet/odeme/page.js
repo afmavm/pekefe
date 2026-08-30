@@ -9,6 +9,7 @@ import { Toast } from "@/components/ui/Toast";
 import { getCart, clearCart, addToCart } from "@/utils/cartStorage";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { turkeyLocations } from "@/data/turkey-locations";
+import { CreditCard, Landmark, FileText, Truck, ShieldCheck, Check, Scale, Lock } from "lucide-react";
 
 export default function Odeme() {
   const router = useRouter();
@@ -174,13 +175,70 @@ export default function Odeme() {
     setCvv(value);
   };
 
-  // Calculate Total Cart Desi / Weight
-  const totalCartDesi = useMemo(() => {
+  // Extract true physical weight in Kg from variant label, name, or metadata
+  const extractItemWeightInKg = (item) => {
+    if (!item) return 0.5;
+    
+    // 1. Direct numeric properties
+    if (item.weight && !isNaN(Number(item.weight))) {
+      const w = Number(item.weight);
+      return w >= 50 ? w / 1000 : w;
+    }
+    if (item.kg && !isNaN(Number(item.kg))) {
+      return Number(item.kg);
+    }
+    if (item.gram && !isNaN(Number(item.gram))) {
+      return Number(item.gram) / 1000;
+    }
+
+    // 2. Parse from variantLabel, name or description
+    const text = `${item.variantLabel || ""} ${item.name || ""} ${item.desc || ""}`.toLowerCase();
+    
+    // e.g. "1.5 kg", "1 kg", "2.5kg", "5 kg teneke"
+    const kgMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:kg|kilo|kilogram)\b/);
+    if (kgMatch) {
+      const val = parseFloat(kgMatch[1].replace(",", "."));
+      if (!isNaN(val) && val > 0) return val;
+    }
+
+    // e.g. "400g", "500 gr", "850 gr", "1000 g"
+    const grMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:gr|g|gram)\b/);
+    if (grMatch) {
+      const val = parseFloat(grMatch[1].replace(",", "."));
+      if (!isNaN(val) && val > 0) return val / 1000;
+    }
+
+    // e.g. "500 ml", "1 lt"
+    const ltMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:lt|litre|l)\b/);
+    if (ltMatch) {
+      const val = parseFloat(ltMatch[1].replace(",", "."));
+      if (!isNaN(val) && val > 0) return val;
+    }
+    const mlMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:ml)\b/);
+    if (mlMatch) {
+      const val = parseFloat(mlMatch[1].replace(",", "."));
+      if (!isNaN(val) && val > 0) return val / 1000;
+    }
+
+    // Fallback: 500g standard jar
+    return 0.5;
+  };
+
+  // Calculate True Total Cart Weight in Kilograms
+  const totalCartWeightKg = useMemo(() => {
     return cartItems.reduce((acc, item) => {
-      const d = Number(item.desi || item.weight || item.kg || 1);
-      return acc + d * (item.quantity || 1);
+      const itemKg = extractItemWeightInKg(item);
+      return acc + itemKg * (item.quantity || 1);
     }, 0);
   }, [cartItems]);
+
+  // Calculate Accurate Volumetric Desi (Cam ambalaj koruma kutusu payı dahil standart desi)
+  const totalCartDesi = useMemo(() => {
+    if (totalCartWeightKg <= 0) return 1;
+    // 1 kg pekmez kavanozu koruma paketiyle ~1.5 desi hacmindedir
+    const calculatedDesi = Math.ceil(totalCartWeightKg * 1.5);
+    return Math.max(1, calculatedDesi);
+  }, [totalCartWeightKg]);
 
   // Helper function to match Desi/Weight Tiers configured in Admin Panel
   const getCarrierTierFee = (carrierObj, totalDesi) => {
@@ -307,27 +365,33 @@ export default function Odeme() {
       {
         id: "creditCard",
         label: "Kredi / Banka Kartı",
-        icon: "credit_card",
+        iconType: "creditCard",
+        badge: null,
+        desc: "3D Secure Güvenli Ödeme",
         enabled: configMap ? configMap.creditCard !== false : true,
       },
       {
         id: "bankTransfer",
         label: "Banka Havalesi / EFT",
-        icon: "account_balance",
+        iconType: "bankTransfer",
         badge: (siteSettings?.bankTransferDiscountRate ?? 0) > 0 ? `%${siteSettings.bankTransferDiscountRate} İndirimli` : null,
+        desc: "Anında FAST / Havale",
         enabled: configMap ? configMap.bankTransfer !== false : true,
       },
       {
         id: "openAccount",
         label: "B2B Vadeli Açık Hesap",
-        icon: "receipt_long",
+        iconType: "openAccount",
+        badge: "Kurumsal",
+        desc: "Anlaşmalı Bayiler",
         enabled: configMap ? configMap.openAccount !== false : true,
       },
       {
         id: "cashOnDelivery",
         label: "Kapıda Ödeme",
-        icon: "local_shipping",
+        iconType: "cashOnDelivery",
         badge: (siteSettings?.cashOnDeliveryFee ?? 0) > 0 ? `+₺${siteSettings.cashOnDeliveryFee}` : null,
+        desc: "Teslimatta Kapıda Öde",
         enabled: configMap ? configMap.cashOnDelivery === true : (siteSettings?.cashOnDeliveryEnabled ?? false),
       },
     ];
@@ -773,10 +837,16 @@ export default function Odeme() {
                   <p className="text-xs text-on-surface-variant mt-0.5">Teslimat hızınızı ve kargo firmanızı belirleyin.</p>
                 </div>
               </div>
-              {totalCartDesi > 0 && (
-                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface-variant">
-                  <span className="material-symbols-outlined text-sm text-primary">scale</span>
-                  <span>Sepet Hacmi: <strong className="text-primary">{totalCartDesi} Desi/Kg</strong></span>
+              {totalCartWeightKg > 0 && (
+                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs">
+                  <Scale className="w-3.5 h-3.5 text-[#6b1d2f] dark:text-amber-400" />
+                  <span>
+                    Sepet Hacmi:{" "}
+                    <strong className="text-[#6b1d2f] dark:text-amber-400 font-mono">
+                      {totalCartWeightKg < 1 ? `${Math.round(totalCartWeightKg * 1000)} Gr` : `${totalCartWeightKg.toFixed(2)} Kg`}
+                    </strong>
+                    {" "}({totalCartDesi} Desi)
+                  </span>
                 </div>
               )}
             </div>
@@ -785,15 +855,15 @@ export default function Odeme() {
             <div>
               <div className="flex sm:hidden justify-between items-center mb-3">
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Kargo Firması Tercihi</label>
-                {totalCartDesi > 0 && (
-                  <span className="text-[11px] font-semibold text-primary bg-primary/5 px-2.5 py-1 rounded-full border border-primary/10 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">scale</span>
-                    <span>{totalCartDesi} Desi</span>
+                {totalCartWeightKg > 0 && (
+                  <span className="text-[11px] font-semibold text-[#6b1d2f] dark:text-amber-400 bg-amber-50 dark:bg-slate-800 px-2.5 py-1 rounded-full border border-amber-200/60 dark:border-slate-700 flex items-center gap-1">
+                    <Scale className="w-3 h-3" />
+                    <span>{totalCartWeightKg < 1 ? `${Math.round(totalCartWeightKg * 1000)} Gr` : `${totalCartWeightKg.toFixed(2)} Kg`} · {totalCartDesi} Desi</span>
                   </span>
                 )}
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeCarriers.map((c) => {
                   const fee = getCarrierTierFee(c, totalCartDesi);
                   const isCarrierAlwaysFree = Boolean(
@@ -817,39 +887,45 @@ export default function Odeme() {
                       key={c.id || c.name}
                       type="button"
                       onClick={() => setSelectedCarrier(c.name)}
-                      className={`p-4 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-between gap-3 min-h-[105px] relative group overflow-hidden ${
+                      className={`p-4 sm:p-5 rounded-2xl border-2 text-xs font-bold transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 relative group overflow-hidden ${
                         isSelected
-                          ? "border-primary bg-primary/5 text-primary shadow-md ring-2 ring-primary/20 scale-[1.02]"
-                          : "border-outline-variant/30 text-gray-700 bg-white hover:border-primary/40 hover:bg-surface-container-lowest"
+                          ? "border-[#6b1d2f] dark:border-amber-400 bg-amber-50/20 dark:bg-slate-800/80 shadow-md ring-2 ring-[#6b1d2f]/15"
+                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50"
                       }`}
                     >
                       {/* Selection Checkmark Badge */}
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shadow-xs">
-                          <span className="material-symbols-outlined text-xs font-bold">check</span>
+                        <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-[#6b1d2f] text-white flex items-center justify-center shadow-xs z-10">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </div>
                       )}
 
-                      {/* Logo Container */}
-                      <div className="h-14 w-full flex items-center justify-center px-2 py-1 bg-white rounded-xl border border-slate-100 shadow-2xs overflow-hidden">
+                      {/* Logo Container with generous height & centered crisp display */}
+                      <div className="h-16 md:h-20 w-full flex items-center justify-center p-3 bg-white rounded-xl border border-slate-100 dark:border-slate-800 shadow-2xs overflow-hidden">
                         {logo ? (
-                          <img src={logo} alt={c.name} className="max-h-12 w-auto max-w-[150px] md:max-w-[170px] object-contain transition-transform group-hover:scale-105" />
+                          <img
+                            src={logo}
+                            alt={c.name}
+                            className="h-10 md:h-12 w-auto max-w-[85%] object-contain transition-transform duration-300 group-hover:scale-105"
+                          />
                         ) : (
-                          <span className="text-base font-black text-on-surface">{c.name}</span>
+                          <span className="text-base font-black text-slate-800">{c.name}</span>
                         )}
                       </div>
 
                       {/* Footer Info & Fee Pill */}
-                      <div className="flex items-center justify-between w-full pt-2.5 border-t border-outline-variant/15">
-                        <span className="text-[11px] font-bold text-on-surface-variant truncate max-w-[100px]">{c.name}</span>
-                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full transition-colors ${
+                      <div className="flex items-center justify-between w-full pt-3 border-t border-slate-100 dark:border-slate-800 gap-2">
+                        <span className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">
+                          {c.name}
+                        </span>
+                        <span className={`text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full transition-colors shrink-0 ${
                           subtotal === 0 ? "hidden" : isReceiverPay
-                            ? "bg-amber-500 text-white shadow-xs"
+                            ? "bg-amber-500 text-white shadow-2xs"
                             : isFree
-                            ? "bg-emerald-600 text-white shadow-xs"
+                            ? "bg-emerald-600 text-white shadow-2xs"
                             : isSelected
-                            ? "bg-primary text-white shadow-xs"
-                            : "bg-surface-container-high text-on-surface"
+                            ? "bg-[#6b1d2f] text-white shadow-2xs"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                         }`}>
                           {subtotal === 0 ? "" : isReceiverPay ? "Kapıda Alıcı Öder" : isFree ? "ÜCRETSİZ" : `+₺${fee}`}
                         </span>
@@ -932,27 +1008,53 @@ export default function Odeme() {
             </div>
 
             {/* Payment Method Selector Tabs */}
-            <div className={`grid grid-cols-1 ${activePaymentMethods.length === 2 ? 'sm:grid-cols-2' : activePaymentMethods.length >= 4 ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3'} gap-3`}>
-              {activePaymentMethods.map((method) => (
-                <button
-                  key={method.id}
-                  type="button"
-                  onClick={() => setPaymentMethod(method.id)}
-                  className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer relative ${
-                    paymentMethod === method.id
-                      ? "border-primary bg-primary/5 shadow-sm text-primary"
-                      : "border-outline-variant/30 text-gray-600 hover:border-gray-300"
-                  }`}
-                >
-                  {method.badge && (
-                    <span className="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                      {method.badge}
-                    </span>
-                  )}
-                  <span className="material-symbols-outlined text-2xl">{method.icon}</span>
-                  <span className="font-bold text-xs text-center">{method.label}</span>
-                </button>
-              ))}
+            <div className={`grid grid-cols-1 ${activePaymentMethods.length === 2 ? 'sm:grid-cols-2' : activePaymentMethods.length >= 4 ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3'} gap-3.5`}>
+              {activePaymentMethods.map((method) => {
+                const isSelected = paymentMethod === method.id;
+                return (
+                  <button
+                    key={method.id}
+                    type="button"
+                    onClick={() => setPaymentMethod(method.id)}
+                    className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer relative group text-center ${
+                      isSelected
+                        ? "border-[#6b1d2f] dark:border-amber-400 bg-amber-50/25 dark:bg-slate-800 shadow-md ring-2 ring-[#6b1d2f]/15"
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    {method.badge && (
+                      <span className="absolute -top-2.5 right-3 bg-amber-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        {method.badge}
+                      </span>
+                    )}
+
+                    {/* Modern Icon Box */}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                      isSelected
+                        ? "bg-[#6b1d2f] text-white shadow-md shadow-[#6b1d2f]/20 scale-105"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:scale-105"
+                    }`}>
+                      {method.iconType === "creditCard" && <CreditCard className="w-6 h-6" />}
+                      {method.iconType === "bankTransfer" && <Landmark className="w-6 h-6" />}
+                      {method.iconType === "openAccount" && <FileText className="w-6 h-6" />}
+                      {method.iconType === "cashOnDelivery" && <Truck className="w-6 h-6" />}
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <span className={`block font-extrabold text-xs sm:text-sm leading-tight ${
+                        isSelected ? "text-[#6b1d2f] dark:text-amber-400 font-black" : "text-slate-900 dark:text-white"
+                      }`}>
+                        {method.label}
+                      </span>
+                      {method.desc && (
+                        <span className="block text-[10px] text-slate-400 font-medium leading-tight">
+                          {method.desc}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* TAB 1: CREDIT CARD / PAYTR */}

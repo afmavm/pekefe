@@ -1099,52 +1099,80 @@ export default function Odeme() {
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    {/* Visual Credit Card Luxury Preview */}
-                    <div className="max-w-md mx-auto p-6 rounded-3xl bg-gradient-to-br from-[#1b1c1e] via-[#2a2b2e] to-[#121315] text-white shadow-2xl space-y-5 relative overflow-hidden border border-slate-700/80">
-                      {/* Gold Accent Glow */}
-                      <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                    {/* Visual Credit Card Luxury Preview - High Contrast & Guaranteed Background */}
+                    <div
+                      style={{
+                        background: "linear-gradient(135deg, #18191c 0%, #2a2d34 50%, #111214 100%)",
+                        boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
+                      }}
+                      className="max-w-md mx-auto p-6 sm:p-7 rounded-3xl text-white space-y-5 relative overflow-hidden border border-slate-700/80 select-none"
+                    >
+                      {/* Gold Accent Ambient Glow */}
+                      <div
+                        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(0,0,0,0) 70%)" }}
+                        className="absolute top-0 right-0 w-44 h-44 pointer-events-none"
+                      />
 
+                      {/* Header Row: Bank / Security Badge & Brands */}
                       <div className="flex justify-between items-center relative z-10">
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                          <span className="text-[11px] font-mono font-bold tracking-widest text-amber-400 uppercase">PEKEFE GÜVENLİ ÖDEME</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400" />
+                          <span className="text-xs font-mono font-extrabold tracking-widest text-amber-400 uppercase">
+                            PEKEFE GÜVENLİ ÖDEME
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-300">
-                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">VISA</span>
-                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">MASTER</span>
-                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">TROY</span>
+                        <div className="flex items-center gap-1.5 text-[10px] font-black">
+                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">VISA</span>
+                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">MASTER</span>
+                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">TROY</span>
                         </div>
                       </div>
 
-                      {/* EMV Chip & Contactless Wave */}
+                      {/* EMV Gold Chip & Contactless Indicator */}
                       <div className="flex items-center justify-between py-1 relative z-10">
-                        <div className="w-11 h-8 rounded-lg bg-gradient-to-tr from-amber-300 via-amber-400 to-amber-200 border border-amber-500/40 shadow-inner flex items-center justify-center">
-                          <div className="w-8 h-5 border border-amber-700/30 rounded grid grid-cols-2" />
+                        <div
+                          style={{
+                            background: "linear-gradient(135deg, #ffd700 0%, #e6b800 50%, #cca300 100%)",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.3) inset, 0 2px 6px rgba(0,0,0,0.2)",
+                          }}
+                          className="w-12 h-9 rounded-lg border border-amber-300 flex items-center justify-center"
+                        >
+                          <div className="w-9 h-6 border border-amber-900/40 rounded grid grid-cols-2 gap-0.5 p-0.5 opacity-70">
+                            <div className="border border-amber-900/30 rounded-xs" />
+                            <div className="border border-amber-900/30 rounded-xs" />
+                          </div>
                         </div>
-                        <span className="material-symbols-outlined text-xl text-slate-400">contactless</span>
+                        <span className="material-symbols-outlined text-2xl text-slate-300">contactless</span>
                       </div>
 
-                      {/* Live Card Number Preview */}
-                      <div className="text-xl sm:text-2xl font-mono font-bold tracking-[0.2em] text-slate-100 relative z-10">
+                      {/* Live Card Number Preview - Bold Crystal Legible */}
+                      <div className="text-xl sm:text-2xl font-mono font-black tracking-[0.2em] text-white drop-shadow-md relative z-10">
                         {cardNumber || "•••• •••• •••• ••••"}
                       </div>
 
-                      <div className="flex justify-between items-end text-xs font-mono text-slate-300 pt-1 relative z-10">
+                      {/* Footer Row: Cardholder & Expiry Date */}
+                      <div className="flex justify-between items-end text-xs font-mono text-slate-300 pt-2 border-t border-white/10 relative z-10">
                         <div>
-                          <span className="text-[9px] text-slate-400 block uppercase tracking-wider">KART SAHİBİ</span>
-                          <span className="font-bold uppercase tracking-wider text-sm text-slate-100">
+                          <span className="text-[10px] text-slate-400 font-extrabold block uppercase tracking-wider">
+                            KART SAHİBİ
+                          </span>
+                          <span className="font-extrabold uppercase tracking-wider text-sm text-white drop-shadow-xs">
                             {nameOnCard || "AD SOYAD"}
                           </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-[9px] text-slate-400 block uppercase tracking-wider">SON KULLANMA</span>
-                          <span className="font-bold text-sm text-slate-100">{expiry || "AA/YY"}</span>
+                          <span className="text-[10px] text-slate-400 font-extrabold block uppercase tracking-wider">
+                            SON KULLANMA
+                          </span>
+                          <span className="font-extrabold text-sm text-amber-300 tracking-wider font-mono drop-shadow-xs">
+                            {expiry || "AA/YY"}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Modern Quiet Luxury Form Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 sm:p-6 bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 sm:p-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl">
                       <div className="md:col-span-2 space-y-1.5">
                         <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                           KART ÜZERİNDEKİ İSİM *
@@ -1154,7 +1182,7 @@ export default function Odeme() {
                           value={nameOnCard}
                           onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
                           placeholder="AHMET YILMAZ"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-semibold uppercase text-slate-900 dark:text-white"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-semibold uppercase text-slate-900 dark:text-white shadow-xs"
                         />
                       </div>
 
@@ -1172,7 +1200,7 @@ export default function Odeme() {
                             setCardNumber(formatted);
                           }}
                           placeholder="4543 0000 0000 0000"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold tracking-wider text-slate-900 dark:text-white"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold tracking-wider text-slate-900 dark:text-white shadow-xs"
                         />
                       </div>
 
@@ -1192,7 +1220,7 @@ export default function Odeme() {
                             setExpiry(val);
                           }}
                           placeholder="AA / YY"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white shadow-xs"
                         />
                       </div>
 
@@ -1206,7 +1234,7 @@ export default function Odeme() {
                           value={cvv}
                           onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                           placeholder="123"
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white shadow-xs"
                         />
                       </div>
                     </div>

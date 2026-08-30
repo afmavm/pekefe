@@ -3888,13 +3888,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                   {/* KISA AÇIKLAMA */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">Kısa Açıklama</label>
-                    <input
-                      type="text"
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-700">Kısa Açıklama</label>
+                      <span className="text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100 rounded-full px-2 py-0.5">
+                        {form.shortDesc?.length || 0} karakter · Vitrin &amp; Liste Özeti
+                      </span>
+                    </div>
+                    <textarea
+                      rows={3}
                       value={form.shortDesc || ""}
                       onChange={e => setForm({ ...form, shortDesc: e.target.value })}
-                      placeholder="Ürünün kısa özeti veya tek satırlık açıklaması"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all text-slate-800"
+                      placeholder="Ürünün vitrin ve listelerde görünecek özet açıklaması (1-3 cümle)..."
+                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all resize-y text-slate-800 leading-relaxed"
                     />
                   </div>
 

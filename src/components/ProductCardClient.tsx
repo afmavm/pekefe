@@ -184,7 +184,37 @@ export default function ProductCardClient({
     }
   };
 
-  const listPriceVal = product.list_price ?? product.oldPrice ?? product.price;
+  const currentActivePrice = selectedVariant && Number(selectedVariant.price) > 0
+    ? Number(selectedVariant.price)
+    : (product.sale_price ?? product.price ?? 0);
+
+  const baseOldPrice = Number(product.list_price ?? product.oldPrice ?? 0);
+  const basePrice = Number(product.sale_price ?? product.price ?? 0);
+
+  let listPriceVal = baseOldPrice;
+  if (selectedVariant) {
+    let vAttrs: any = {};
+    try {
+      vAttrs = typeof selectedVariant.attributes === "string" ? JSON.parse(selectedVariant.attributes) : (selectedVariant.attributes || {});
+    } catch {}
+
+    const vOld = Number(
+      selectedVariant.oldPrice ||
+      selectedVariant.list_price ||
+      selectedVariant.marketPrice ||
+      vAttrs.oldPrice ||
+      vAttrs.list_price ||
+      0
+    );
+
+    if (vOld > currentActivePrice) {
+      listPriceVal = vOld;
+    } else if (baseOldPrice > basePrice && basePrice > 0 && currentActivePrice > 0) {
+      listPriceVal = Math.round(currentActivePrice * (baseOldPrice / basePrice));
+    } else {
+      listPriceVal = currentActivePrice;
+    }
+  }
 
   return (
     <div className="group relative bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-[2.25rem] overflow-hidden hover:border-amber-500/40 dark:hover:border-amber-500/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(245,158,11,0.08)] dark:hover:shadow-[0_20px_50px_rgba(245,158,11,0.05)] lg:hover:-translate-y-2 transition-[transform,box-shadow,border-color] duration-500 ease-out will-change-transform flex flex-col h-full">

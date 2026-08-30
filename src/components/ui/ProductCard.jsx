@@ -168,10 +168,32 @@ export function ProductCard(props) {
     if (selectedVariant.price != null && Number(selectedVariant.price) > 0) {
       activePrice = Number(selectedVariant.price);
     }
-    // Only show oldPrice for variant if explicitly defined in database and higher than active price
-    const variantOldPrice = selectedVariant.oldPrice != null ? Number(selectedVariant.oldPrice) : (selectedVariant.list_price != null ? Number(selectedVariant.list_price) : null);
-    if (variantOldPrice && variantOldPrice > activePrice) {
-      activeOldPrice = variantOldPrice;
+    
+    let vAttrs = selectedVariant.attributes;
+    if (typeof vAttrs === "string") {
+      try { vAttrs = JSON.parse(vAttrs); } catch (e) {}
+    }
+
+    // 1. Explicit variant old price in DB
+    const explicitVariantOld = Number(
+      selectedVariant.oldPrice != null ? selectedVariant.oldPrice :
+      (selectedVariant.list_price != null ? selectedVariant.list_price :
+      (selectedVariant.marketPrice != null ? selectedVariant.marketPrice :
+      (vAttrs?.oldPrice != null ? vAttrs.oldPrice :
+      (vAttrs?.list_price != null ? vAttrs.list_price : 0))))
+    );
+
+    if (explicitVariantOld && explicitVariantOld > activePrice) {
+      activeOldPrice = explicitVariantOld;
+    } else if (numericOld && numericOld > numericPrice && numericPrice > 0 && activePrice > 0) {
+      // 2. Proportional dynamic old price based on main product discount ratio
+      const discountRatio = numericOld / numericPrice;
+      const proportionalOldPrice = Math.round(activePrice * discountRatio);
+      if (proportionalOldPrice > activePrice) {
+        activeOldPrice = proportionalOldPrice;
+      } else {
+        activeOldPrice = null;
+      }
     } else {
       activeOldPrice = null;
     }

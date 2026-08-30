@@ -194,9 +194,18 @@ export function useProductDetailState(params) {
       );
       const vPrice = Number(selectedVariant.price || 0);
 
-      // Yalnızca veritabanında varyanta ait geçerli bir eski fiyat tanımlanmışsa çek
+      // 1. Varyanta özel girilmiş eski liste fiyatı varsa onu göster
       if (vOld > vPrice) {
         return vOld;
+      }
+
+      // 2. Ana üründe indirim varsa, varyant fiyatına indirim oranını orantılı yansıt
+      if (prodOldPrice > prodSalePrice && prodSalePrice > 0 && vPrice > 0) {
+        const discountRatio = prodOldPrice / prodSalePrice;
+        const dynamicOldPrice = Math.round(vPrice * discountRatio);
+        if (dynamicOldPrice > vPrice) {
+          return dynamicOldPrice;
+        }
       }
 
       return null;

@@ -1436,6 +1436,34 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           ]);
         }
 
+        // Set dynamic sizes and colors from loaded product attributes and variants
+        const productSizes: string[] = [];
+        const productColors: string[] = [];
+
+        if (attrs.sizes && Array.isArray(attrs.sizes)) {
+          productSizes.push(...attrs.sizes);
+        }
+        if (attrs.colors && Array.isArray(attrs.colors)) {
+          productColors.push(...attrs.colors);
+        }
+        if (product.variants && Array.isArray(product.variants)) {
+          product.variants.forEach((v: any) => {
+            let va: any = {};
+            try {
+              va = typeof v.attributes === "string" ? JSON.parse(v.attributes) : (v.attributes || {});
+            } catch {}
+            if (v.size || va.size) productSizes.push(v.size || va.size);
+            if (v.color || va.color) productColors.push(v.color || va.color);
+          });
+        }
+
+        if (productSizes.length > 0) {
+          setSizes(prev => Array.from(new Set([...prev, ...productSizes])).filter(Boolean));
+        }
+        if (productColors.length > 0) {
+          setColors(prev => Array.from(new Set([...prev, ...productColors])).filter(Boolean));
+        }
+
         setTimeout(() => {
           isInitialized.current = true;
         }, 300);
@@ -2166,17 +2194,43 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
     }
   };
 
+  // Helper to persist sizes/colors changes immediately to LocalStorage and Product DB
+  const syncOptionsPermanently = async (updatedSizes: string[], updatedColors: string[]) => {
+    try {
+      localStorage.setItem("pekefe_stock_sizes", JSON.stringify(updatedSizes));
+      localStorage.setItem("pekefe_stock_colors", JSON.stringify(updatedColors));
+      if (productId) {
+        await fetch(`/api/products/${encodeURIComponent(productId)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            attributes: {
+              sizes: updatedSizes,
+              colors: updatedColors
+            }
+          })
+        });
+      }
+    } catch (e) {
+      console.warn("Silent options sync error:", e);
+    }
+  };
+
   // Add/Edit/Remove Custom Size/Ebat Options
   const addSizeOption = () => {
     if (!newSizeName.trim()) return;
-    if (sizes.includes(newSizeName.trim())) {
+    const val = newSizeName.trim();
+    if (sizes.includes(val)) {
       toast.warning("Bu ebat seçeneği zaten mevcut.");
       return;
     }
-    setSizes(prev => [...prev, newSizeName.trim()]);
-    setVariantForm(prev => ({ ...prev, size: newSizeName.trim() }));
+    const nextSizes = [...sizes, val];
+    setSizes(nextSizes);
+    setVariantForm(prev => ({ ...prev, size: val }));
     setNewSizeName("");
-    toast.success("Ebat seçeneği başarıyla eklendi.");
+    setIsDirty(true);
+    syncOptionsPermanently(nextSizes, colors);
+    toast.success("Ebat seçeneği veritabanına kalıcı olarak kaydedildi.");
   };
 
   const saveSizeEdit = (oldName: string) => {
@@ -2193,13 +2247,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       toast.warning("Bu ebat seçeneği zaten mevcut.");
       return;
     }
-    setSizes(prev => prev.map(s => s === oldName ? val : s));
+    const nextSizes = sizes.map(s => s === oldName ? val : s);
+    setSizes(nextSizes);
     if (variantForm.size === oldName) {
       setVariantForm(prev => ({ ...prev, size: val }));
     }
     setVariants(prev => prev.map(v => v.size === oldName ? { ...v, size: val } : v));
     setEditingSizeName(null);
     setEditingSizeNewValue("");
+    setIsDirty(true);
+    syncOptionsPermanently(nextSizes, colors);
     toast.success("Gramaj/ambalaj seçeneği başarıyla güncellendi.");
   };
 
@@ -2208,24 +2265,31 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       toast.error("En az bir ebat seçeneği kalmalıdır.");
       return;
     }
-    setSizes(prev => prev.filter(s => s !== name));
+    const nextSizes = sizes.filter(s => s !== name);
+    setSizes(nextSizes);
     if (variantForm.size === name) {
-      setVariantForm(prev => ({ ...prev, size: sizes.find(s => s !== name) || "" }));
+      setVariantForm(prev => ({ ...prev, size: nextSizes[0] || "" }));
     }
-    toast.success("Ebat seçeneği kaldırıldı.");
+    setIsDirty(true);
+    syncOptionsPermanently(nextSizes, colors);
+    toast.success("Ebat seçeneği veritabanından kaldırıldı.");
   };
 
   // Add/Edit/Remove Custom Color/Deri Tipi Options
   const addColorOption = () => {
     if (!newColorName.trim()) return;
-    if (colors.includes(newColorName.trim())) {
-      toast.warning("Bu deri tipi/renk seçeneği zaten mevcut.");
+    const val = newColorName.trim();
+    if (colors.includes(val)) {
+      toast.warning("Bu ürün çeşidi seçeneği zaten mevcut.");
       return;
     }
-    setColors(prev => [...prev, newColorName.trim()]);
-    setVariantForm(prev => ({ ...prev, color: newColorName.trim() }));
+    const nextColors = [...colors, val];
+    setColors(nextColors);
+    setVariantForm(prev => ({ ...prev, color: val }));
     setNewColorName("");
-    toast.success("Deri tipi/renk seçeneği başarıyla eklendi.");
+    setIsDirty(true);
+    syncOptionsPermanently(sizes, nextColors);
+    toast.success("Ürün çeşidi veritabanına kalıcı olarak kaydedildi.");
   };
 
   const saveColorEdit = (oldName: string) => {
@@ -2242,14 +2306,17 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       toast.warning("Bu ürün çeşidi zaten mevcut.");
       return;
     }
-    setColors(prev => prev.map(c => c === oldName ? val : c));
+    const nextColors = colors.map(c => c === oldName ? val : c);
+    setColors(nextColors);
     if (variantForm.color === oldName) {
       setVariantForm(prev => ({ ...prev, color: val }));
     }
     setVariants(prev => prev.map(v => v.color === oldName ? { ...v, color: val } : v));
     setEditingColorName(null);
     setEditingColorNewValue("");
-    toast.success("Ürün çeşidi/tipi adı başarıyla güncellendi.");
+    setIsDirty(true);
+    syncOptionsPermanently(sizes, nextColors);
+    toast.success("Ürün çeşidi başarıyla güncellendi.");
   };
 
   const removeColorOption = (name: string) => {

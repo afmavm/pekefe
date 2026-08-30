@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface HmfInfoSectionProps {
   productName?: string;
@@ -63,39 +64,57 @@ export function HmfInfoSection({
 
       <div className="max-w-5xl mx-auto space-y-12 md:space-y-16 relative z-10">
         
-        {/* ─── 1. HEADER & INTRO: HMF NEDİR? ─── */}
-        <header className="space-y-4 text-center md:text-left max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/70 dark:bg-amber-950/60 border border-amber-300/40 dark:border-amber-700/40 text-amber-900 dark:text-amber-200 text-xs font-semibold tracking-wider uppercase">
-            <span className="material-symbols-outlined text-sm text-[#b45309] dark:text-amber-400" aria-hidden="true">
-              info
-            </span>
-            <span>Bilgilendirici Rehber &amp; Geleneksel Bilgi</span>
+        {/* ─── 1. HEADER & INTRO: HMF NEDİR? (Grid with Scientific Photo) ─── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <header className="lg:col-span-7 space-y-4 text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/70 dark:bg-amber-950/60 border border-amber-300/40 dark:border-amber-700/40 text-amber-900 dark:text-amber-200 text-xs font-semibold tracking-wider uppercase">
+              <span className="material-symbols-outlined text-sm text-[#b45309] dark:text-amber-400" aria-hidden="true">
+                biotech
+              </span>
+              <span>Bilgilendirici Rehber &amp; Laboratuvar Analizi</span>
+            </div>
+
+            <h2
+              id="hmf-info-title"
+              className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-[#360e17] dark:text-amber-100 leading-tight tracking-tight"
+            >
+              HMF Nedir? <br />
+              <span className="text-lg sm:text-2xl md:text-3xl font-light italic text-[#8B2635] dark:text-amber-300/90 font-serif">
+                Pekmez üretiminde sıcaklık ve süre neden önemlidir?
+              </span>
+            </h2>
+
+            <div className="w-16 h-0.5 bg-[#b45309] rounded-full opacity-80" />
+
+            <div className="space-y-3 text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-sans pt-1">
+              <p>
+                <strong className="text-slate-900 dark:text-white font-semibold">HMF (5-Hidroksimetilfurfural)</strong>, şeker içeren gıdaların yüksek sıcaklığa maruz kalması sırasında oluşabilen doğal bir bileşiktir.
+              </p>
+              <p>
+                Özellikle dut pekmezi, bal, reçel ve benzeri meyve şekeri bakımından zengin ürünlerde <strong className="text-slate-900 dark:text-white font-semibold">sıcaklık ve ısıl işlem süresi</strong>, HMF oluşumunu etkileyen önemli faktörler arasında yer alır.
+              </p>
+              <p>
+                Pekmez üretiminde dut şırasının <strong className="text-slate-900 dark:text-white font-semibold">çok yüksek sıcaklıklarda ve uzun süre kaynatılması</strong>, HMF oluşumunun artmasına neden olabilir. Bu nedenle geleneksel pekmez üretiminde sıcaklığın kontrol edilmesi ve şıranın gereğinden fazla ısıya maruz bırakılmaması büyük önem taşır.
+              </p>
+            </div>
+          </header>
+
+          <div className="lg:col-span-5 relative">
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 dark:border-slate-700 group">
+              <Image
+                src="/uploads/hmf-bilimsel-laboratuvar-analizi.jpg"
+                alt="PEKEFE İspir Dut Şırası Laboratuvar Analizi ve HMF Testi"
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex flex-col justify-end p-5 text-white">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300 font-bold">Akredite Laboratuvar Standartları</span>
+                <span className="text-xs font-serif font-bold">Saf Dut Şırası ve HMF Kontrollü Analiz</span>
+              </div>
+            </div>
           </div>
-
-          <h2
-            id="hmf-info-title"
-            className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-[#360e17] dark:text-amber-100 leading-tight tracking-tight"
-          >
-            HMF Nedir? <br className="hidden sm:block" />
-            <span className="text-lg sm:text-2xl md:text-3xl font-light italic text-[#8B2635] dark:text-amber-300/90 font-serif">
-              Pekmez üretiminde sıcaklık ve süre neden önemlidir?
-            </span>
-          </h2>
-
-          <div className="w-16 h-0.5 bg-[#b45309] rounded-full mx-auto md:mx-0 opacity-80" />
-
-          <div className="space-y-3.5 text-slate-700 dark:text-slate-300 text-base md:text-[16.5px] leading-relaxed font-sans pt-2">
-            <p>
-              <strong className="text-slate-900 dark:text-white font-semibold">HMF (5-Hidroksimetilfurfural)</strong>, şeker içeren gıdaların yüksek sıcaklığa maruz kalması sırasında oluşabilen doğal bir bileşiktir.
-            </p>
-            <p>
-              Özellikle dut pekmezi, bal, reçel ve benzeri meyve şekeri bakımından zengin ürünlerde <strong className="text-slate-900 dark:text-white font-semibold">sıcaklık ve ısıl işlem süresi</strong>, HMF oluşumunu etkileyen önemli faktörler arasında yer alır.
-            </p>
-            <p>
-              Pekmez üretiminde dut şırasının <strong className="text-slate-900 dark:text-white font-semibold">çok yüksek sıcaklıklarda ve uzun süre kaynatılması</strong>, HMF oluşumunun artmasına neden olabilir. Bu nedenle geleneksel pekmez üretiminde sıcaklığın kontrol edilmesi ve şıranın gereğinden fazla ısıya maruz bırakılmaması büyük önem taşır.
-            </p>
-          </div>
-        </header>
+        </div>
 
         {/* ─── 2. 4 AŞAMALI GÖRSEL ANLATIM KARTLARI ─── */}
         <div className="space-y-4">

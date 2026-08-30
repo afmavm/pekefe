@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,7 +12,7 @@ const FALLBACK_POSTS = [
     title: "HMF Nedir? Pekmez Üretiminde Sıcaklık, Süre ve Güneşin Önemi",
     slug: "hmf-nedir-pekmez-uretiminde-sicakligin-onemi",
     category: "Geleneksel Üretim & Bilim",
-    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    image: "/uploads/hmf-bilimsel-laboratuvar-analizi.jpg",
     metaDesc: "Dut pekmezi üretiminde HMF (5-Hidroksimetilfurfural) nedir? Yüksek ateşte yakmadan, yayla güneşinde doğal ve kontrollü yoğunlaştırmanın bilimsel incelikleri.",
     content: `HMF (5-Hidroksimetilfurfural), şeker içeren gıdaların yüksek sıcaklığa maruz kalması sırasında oluşabilen doğal bir bileşiktir. Özellikle dut pekmezi, bal, reçel ve benzeri meyve şekeri bakımından zengin ürünlerde sıcaklık ve ısıl işlem süresi, HMF oluşumunu etkileyen önemli faktörler arasında yer alır.
 

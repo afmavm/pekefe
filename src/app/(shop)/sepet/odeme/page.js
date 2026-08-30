@@ -1100,26 +1100,45 @@ export default function Odeme() {
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    {/* 3D Interactive Flipping Credit Card */}
-                    <div className="max-w-md mx-auto [perspective:1000px] py-1">
+                    {/* 3D Interactive Flipping Credit Card with Guaranteed Dimensions */}
+                    <div
+                      style={{
+                        width: "100%",
+                        maxWidth: "430px",
+                        height: "235px",
+                        minHeight: "235px",
+                        perspective: "1000px",
+                        margin: "0 auto",
+                      }}
+                      className="py-1"
+                    >
                       <div
                         onClick={() => setIsCardFlipped(!isCardFlipped)}
                         style={{
+                          width: "100%",
+                          height: "100%",
+                          minHeight: "235px",
+                          position: "relative",
                           transformStyle: "preserve-3d",
                           transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
                           transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}
-                        className="relative w-full h-[225px] sm:h-[235px] cursor-pointer group select-none"
+                        className="cursor-pointer select-none"
                       >
                         {/* KART ÖN YÜZÜ */}
                         <div
                           style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            minHeight: "235px",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                             background: "linear-gradient(135deg, #18191c 0%, #2a2d34 50%, #111214 100%)",
                             boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
                           }}
-                          className="absolute inset-0 p-6 sm:p-7 rounded-3xl text-white flex flex-col justify-between overflow-hidden border border-slate-700/80"
+                          className="p-6 sm:p-7 rounded-3xl text-white flex flex-col justify-between overflow-hidden border border-slate-700/80"
                         >
                           {/* Gold Accent Ambient Glow */}
                           <div
@@ -1192,13 +1211,18 @@ export default function Odeme() {
                         {/* KART ARKA YÜZÜ (3D FLIP 180 DEG) */}
                         <div
                           style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            minHeight: "235px",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                             transform: "rotateY(180deg)",
                             background: "linear-gradient(135deg, #111214 0%, #202227 50%, #161719 100%)",
                             boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
                           }}
-                          className="absolute inset-0 rounded-3xl text-white flex flex-col justify-between py-5 overflow-hidden border border-slate-700/80"
+                          className="rounded-3xl text-white flex flex-col justify-between py-5 overflow-hidden border border-slate-700/80"
                         >
                           {/* Siyah Manyetik Şerit */}
                           <div className="w-full h-11 bg-[#09090a] shadow-inner border-y border-black/50" />

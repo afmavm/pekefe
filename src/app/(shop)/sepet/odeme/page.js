@@ -49,6 +49,7 @@ export default function Odeme() {
   const [paytrToken, setPaytrToken] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [copiedIban, setCopiedIban] = useState(false);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
 
   const handleCopyIban = (iban) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -1099,74 +1100,130 @@ export default function Odeme() {
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    {/* Visual Credit Card Luxury Preview - High Contrast & Guaranteed Background */}
-                    <div
-                      style={{
-                        background: "linear-gradient(135deg, #18191c 0%, #2a2d34 50%, #111214 100%)",
-                        boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
-                      }}
-                      className="max-w-md mx-auto p-6 sm:p-7 rounded-3xl text-white space-y-5 relative overflow-hidden border border-slate-700/80 select-none"
-                    >
-                      {/* Gold Accent Ambient Glow */}
+                    {/* 3D Interactive Flipping Credit Card */}
+                    <div className="max-w-md mx-auto [perspective:1000px] py-1">
                       <div
-                        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(0,0,0,0) 70%)" }}
-                        className="absolute top-0 right-0 w-44 h-44 pointer-events-none"
-                      />
-
-                      {/* Header Row: Bank / Security Badge & Brands */}
-                      <div className="flex justify-between items-center relative z-10">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400" />
-                          <span className="text-xs font-mono font-extrabold tracking-widest text-amber-400 uppercase">
-                            PEKEFE GÜVENLİ ÖDEME
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-black">
-                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">VISA</span>
-                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">MASTER</span>
-                          <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">TROY</span>
-                        </div>
-                      </div>
-
-                      {/* EMV Gold Chip & Contactless Indicator */}
-                      <div className="flex items-center justify-between py-1 relative z-10">
+                        onClick={() => setIsCardFlipped(!isCardFlipped)}
+                        style={{
+                          transformStyle: "preserve-3d",
+                          transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                          transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                        }}
+                        className="relative w-full h-[225px] sm:h-[235px] cursor-pointer group select-none"
+                      >
+                        {/* KART ÖN YÜZÜ */}
                         <div
                           style={{
-                            background: "linear-gradient(135deg, #ffd700 0%, #e6b800 50%, #cca300 100%)",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.3) inset, 0 2px 6px rgba(0,0,0,0.2)",
+                            backfaceVisibility: "hidden",
+                            WebkitBackfaceVisibility: "hidden",
+                            background: "linear-gradient(135deg, #18191c 0%, #2a2d34 50%, #111214 100%)",
+                            boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
                           }}
-                          className="w-12 h-9 rounded-lg border border-amber-300 flex items-center justify-center"
+                          className="absolute inset-0 p-6 sm:p-7 rounded-3xl text-white flex flex-col justify-between overflow-hidden border border-slate-700/80"
                         >
-                          <div className="w-9 h-6 border border-amber-900/40 rounded grid grid-cols-2 gap-0.5 p-0.5 opacity-70">
-                            <div className="border border-amber-900/30 rounded-xs" />
-                            <div className="border border-amber-900/30 rounded-xs" />
+                          {/* Gold Accent Ambient Glow */}
+                          <div
+                            style={{ background: "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(0,0,0,0) 70%)" }}
+                            className="absolute top-0 right-0 w-44 h-44 pointer-events-none"
+                          />
+
+                          {/* Header: Security Badge & Brand Pills */}
+                          <div className="flex justify-between items-center relative z-10">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400 animate-pulse" />
+                              <span className="text-xs font-mono font-extrabold tracking-widest text-amber-400 uppercase">
+                                PEKEFE GÜVENLİ ÖDEME
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-black">
+                              <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">VISA</span>
+                              <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">MASTER</span>
+                              <span className="px-2 py-0.5 rounded bg-white/20 text-white font-mono border border-white/10">TROY</span>
+                            </div>
+                          </div>
+
+                          {/* Orijinal EMV Akıllı Altın Çip & Temassız Dalga */}
+                          <div className="flex items-center justify-between py-1 relative z-10">
+                            <div
+                              style={{
+                                background: "linear-gradient(135deg, #ffd700 0%, #e6b800 50%, #cca300 100%)",
+                                boxShadow: "0 2px 5px rgba(0,0,0,0.3) inset, 0 2px 6px rgba(0,0,0,0.2)",
+                              }}
+                              className="relative w-12 h-9 rounded-lg border border-[#b8860b] overflow-hidden flex items-center justify-center shadow-md"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent pointer-events-none" />
+                              <svg className="w-full h-full p-1 relative z-10" viewBox="0 0 48 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2" y="2" width="44" height="32" rx="4" stroke="#7a5806" strokeWidth="1.2" />
+                                <path d="M16 2v32M32 2v32" stroke="#7a5806" strokeWidth="1.2" />
+                                <path d="M2 18h44" stroke="#7a5806" strokeWidth="1.2" />
+                                <circle cx="24" cy="18" r="6" stroke="#7a5806" strokeWidth="1.2" fill="#daa520" fillOpacity="0.45" />
+                                <path d="M2 10h14M32 10h14M2 26h14M32 26h14" stroke="#7a5806" strokeWidth="1" />
+                              </svg>
+                            </div>
+                            <span className="material-symbols-outlined text-2xl text-slate-300">contactless</span>
+                          </div>
+
+                          {/* Live Card Number Preview */}
+                          <div className="text-xl sm:text-2xl font-mono font-black tracking-[0.2em] text-white drop-shadow-md relative z-10">
+                            {cardNumber || "•••• •••• •••• ••••"}
+                          </div>
+
+                          {/* Footer: Cardholder & Expiry */}
+                          <div className="flex justify-between items-end text-xs font-mono text-slate-300 pt-1.5 border-t border-white/10 relative z-10">
+                            <div className="min-w-0 pr-2">
+                              <span className="text-[9px] text-slate-400 font-extrabold block uppercase tracking-wider">
+                                KART SAHİBİ
+                              </span>
+                              <span className="font-extrabold uppercase tracking-wider text-xs sm:text-sm text-white drop-shadow-xs truncate block">
+                                {nameOnCard || "AD SOYAD"}
+                              </span>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-[9px] text-slate-400 font-extrabold block uppercase tracking-wider">
+                                SON KULLANMA
+                              </span>
+                              <span className="font-extrabold text-xs sm:text-sm text-amber-300 tracking-wider font-mono drop-shadow-xs">
+                                {expiry || "AA/YY"}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <span className="material-symbols-outlined text-2xl text-slate-300">contactless</span>
-                      </div>
 
-                      {/* Live Card Number Preview - Bold Crystal Legible */}
-                      <div className="text-xl sm:text-2xl font-mono font-black tracking-[0.2em] text-white drop-shadow-md relative z-10">
-                        {cardNumber || "•••• •••• •••• ••••"}
-                      </div>
+                        {/* KART ARKA YÜZÜ (3D FLIP 180 DEG) */}
+                        <div
+                          style={{
+                            backfaceVisibility: "hidden",
+                            WebkitBackfaceVisibility: "hidden",
+                            transform: "rotateY(180deg)",
+                            background: "linear-gradient(135deg, #111214 0%, #202227 50%, #161719 100%)",
+                            boxShadow: "0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
+                          }}
+                          className="absolute inset-0 rounded-3xl text-white flex flex-col justify-between py-5 overflow-hidden border border-slate-700/80"
+                        >
+                          {/* Siyah Manyetik Şerit */}
+                          <div className="w-full h-11 bg-[#09090a] shadow-inner border-y border-black/50" />
 
-                      {/* Footer Row: Cardholder & Expiry Date */}
-                      <div className="flex justify-between items-end text-xs font-mono text-slate-300 pt-2 border-t border-white/10 relative z-10">
-                        <div>
-                          <span className="text-[10px] text-slate-400 font-extrabold block uppercase tracking-wider">
-                            KART SAHİBİ
-                          </span>
-                          <span className="font-extrabold uppercase tracking-wider text-sm text-white drop-shadow-xs">
-                            {nameOnCard || "AD SOYAD"}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 font-extrabold block uppercase tracking-wider">
-                            SON KULLANMA
-                          </span>
-                          <span className="font-extrabold text-sm text-amber-300 tracking-wider font-mono drop-shadow-xs">
-                            {expiry || "AA/YY"}
-                          </span>
+                          {/* İmza Paneli ve Canlı CVV Alanı */}
+                          <div className="px-6 space-y-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 uppercase font-bold">
+                              <span>GÜVENLİK İMZASI</span>
+                              <span className="text-amber-400 font-black">CVV / CVC KODU</span>
+                            </div>
+                            <div className="flex items-center h-10 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 rounded-lg px-3 justify-between border border-slate-300 shadow-inner">
+                              <div className="h-4 w-3/5 bg-slate-300/40 rounded-sm" />
+                              <span className="font-mono font-black text-slate-900 tracking-widest text-base sm:text-lg">
+                                {cvv ? cvv : "•••"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Güvenlik Bilgisi */}
+                          <div className="px-6 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                            <span>256-BIT SSL ŞİFRELİ</span>
+                            <span className="text-amber-400 font-extrabold flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3" /> 3D SECURE GÜVENLİK
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1180,6 +1237,7 @@ export default function Odeme() {
                         <input
                           type="text"
                           value={nameOnCard}
+                          onFocus={() => setIsCardFlipped(false)}
                           onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
                           placeholder="AHMET YILMAZ"
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-semibold uppercase text-slate-900 dark:text-white shadow-xs"
@@ -1194,6 +1252,7 @@ export default function Odeme() {
                           type="text"
                           maxLength={19}
                           value={cardNumber}
+                          onFocus={() => setIsCardFlipped(false)}
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, "").slice(0, 16);
                             const formatted = val.replace(/(.{4})/g, "$1 ").trim();
@@ -1212,6 +1271,7 @@ export default function Odeme() {
                           type="text"
                           maxLength={5}
                           value={expiry}
+                          onFocus={() => setIsCardFlipped(false)}
                           onChange={(e) => {
                             let val = e.target.value.replace(/\D/g, "").slice(0, 4);
                             if (val.length >= 3) {
@@ -1232,6 +1292,8 @@ export default function Odeme() {
                           type="password"
                           maxLength={4}
                           value={cvv}
+                          onFocus={() => setIsCardFlipped(true)}
+                          onBlur={() => setIsCardFlipped(false)}
                           onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                           placeholder="123"
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white shadow-xs"

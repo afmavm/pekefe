@@ -110,6 +110,65 @@ export default function B2b() {
     }
   };
 
+  const getProductPackDetails = (product) => {
+    const name = (product.name || "").toLowerCase();
+    const cat = (product.category?.name || product.category || "").toLowerCase();
+    const rawPrice = Number(product.price || 300);
+
+    // 1. Pestil & Köme (Paket/Kutu)
+    if (name.includes("pestil") || name.includes("köme") || name.includes("kome") || cat.includes("pestil")) {
+      const multiplier = 10;
+      return {
+        packSize: "Koli (10 Paket - 500g)",
+        multiplier,
+        casePrice: Number(product.b2bPrice || rawPrice) * multiplier,
+        unitType: "Koli",
+      };
+    }
+
+    // 2. Kuru Fasulye & Bakliyat (Paket)
+    if (name.includes("fasulye") || name.includes("bakliyat") || cat.includes("fasulye") || cat.includes("bakliyat")) {
+      const multiplier = 10;
+      return {
+        packSize: "Koli (10 Paket - 1 Kg)",
+        multiplier,
+        casePrice: Number(product.b2bPrice || rawPrice) * multiplier,
+        unitType: "Koli",
+      };
+    }
+
+    // 3. Bal & Arı Ürünleri (Kavanoz)
+    if (name.includes("bal") || name.includes("polen") || name.includes("propolis") || cat.includes("bal")) {
+      const multiplier = 12;
+      return {
+        packSize: "Koli (12 Kavanoz)",
+        multiplier,
+        casePrice: Number(product.b2bPrice || rawPrice) * multiplier,
+        unitType: "Koli",
+      };
+    }
+
+    // 4. Pekmez & Şurup (Kavanoz)
+    if (name.includes("pekmez") || cat.includes("pekmez")) {
+      const multiplier = 12;
+      return {
+        packSize: "Koli (12 Kavanoz)",
+        multiplier,
+        casePrice: Number(product.b2bPrice || rawPrice) * multiplier,
+        unitType: "Koli",
+      };
+    }
+
+    // 5. Genel / Özel ambalaj
+    const multiplier = 12;
+    return {
+      packSize: product.unit && product.unit !== "Adet" ? `Koli (10 ${product.unit})` : "Koli (12 Adet)",
+      multiplier,
+      casePrice: Number(product.b2bPrice || rawPrice) * multiplier,
+      unitType: "Koli",
+    };
+  };
+
   const fetchLiveProductsData = async () => {
     try {
       const res = await fetch("/api/products");
@@ -119,13 +178,14 @@ export default function B2b() {
         if (prods.length > 0) {
           const mapped = prods.map((p) => {
             const rawPrice = Number(p.price || 300);
+            const pack = getProductPackDetails(p);
             return {
               sku: p.sku || `PKF-B2B-${String(p.id || "100").slice(-4).toUpperCase()}`,
               name: p.name,
               category: (p.category?.name || p.category || "pekmez").toLowerCase(),
-              packSize: p.unit || "Koli (12 Kavanoz)",
+              packSize: pack.packSize,
               unitPrice: rawPrice,
-              casePrice: Number(p.b2bPrice || rawPrice) * 12,
+              casePrice: pack.casePrice,
               img: p.image || p.images?.[0] || "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
               stock: p.stock ?? 50,
             };

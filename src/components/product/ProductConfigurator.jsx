@@ -266,10 +266,10 @@ export function ProductConfigurator({
           <span className="text-[11px] sm:text-xs text-slate-800 dark:text-slate-100 font-bold uppercase tracking-wider">%100 Doğal &amp; Katkısız</span>
         </div>
         <div className="flex items-center gap-3 p-3 bg-slate-50/80 dark:bg-slate-900/40 rounded-xl border border-slate-200/60 dark:border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-secondary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-lg">local_fire_department</span>
+          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-lg">wb_sunny</span>
           </div>
-          <span className="text-[11px] sm:text-xs text-slate-800 dark:text-slate-100 font-bold uppercase tracking-wider">Odun Ateşinde Bakır</span>
+          <span className="text-[11px] sm:text-xs text-slate-800 dark:text-slate-100 font-bold uppercase tracking-wider">Güneşte Yoğunlaştırma</span>
         </div>
       </div>
 

@@ -107,7 +107,7 @@ export function ProductTabs({
                   {[
                     { icon: "verified", title: "%100 Doğal İçerik", desc: "Katkı maddesi, koruyucu veya ilave şeker içermez." },
                     { icon: "terrain", title: "İspir Yöresi Hasadı", desc: "İspirin bereketli yaylalarında yetişen asırlık mahsuller.", color: "text-secondary" },
-                    { icon: "local_fire_department", title: "Odun Ateşinde Bakır Kazan", desc: "Geleneksel yöntemlerle kısık ateşte yavaş pişirme." },
+                    { icon: "wb_sunny", title: "Güneşte Doğal Yoğunlaştırma", desc: "Dut şırası yakılmadan güneşin doğal sıcaklığında yoğunlaştırılır.", color: "text-amber-500" },
                   ].map(({ icon, title, desc, color }) => (
                     <div key={title} className="p-5 bg-surface-container-low border border-outline-variant/15 rounded-2xl flex items-start gap-3 shadow-xs hover:border-primary/30 transition-colors">
                       <span className={`material-symbols-outlined ${color || "text-primary"} text-2xl shrink-0`}>{icon}</span>
@@ -164,7 +164,7 @@ export function ProductTabs({
               icon="auto_stories"
               label="PEKEFE ZANAATKARLIK VE YAVAŞ ÜRETİM"
               subtitle="Asırlık Zanaatkarlık ve Yavaş Üretim"
-              badge={<><span className="material-symbols-outlined text-base text-secondary">local_fire_department</span><span>Geleneksel Odun Ateşi</span></>}
+              badge={<><span className="material-symbols-outlined text-base text-amber-500">wb_sunny</span><span>Güneşte Doğal Yoğunlaştırma</span></>}
             />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               <div className="lg:col-span-7 space-y-6">

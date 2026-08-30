@@ -425,7 +425,7 @@ export function useProductDetailState(params) {
     if (product?.specifications?.length > 0) return product.specifications;
     return [
       { key: "Menşei",                      value: attrs.specsMaterial   || product?.specsMaterial   || "Erzurum / İspir" },
-      { key: "Pişirme / Kurutma Yöntemi",   value: attrs.specsBellows    || product?.specsBellows    || "Odun Ateşinde Bakır Kazanlar" },
+      { key: "Yoğunlaştırma Yöntemi",       value: attrs.specsBellows    || product?.specsBellows    || "Güneşte Doğal Yoğunlaştırma (Geleneksel Gün Pekmezi)" },
       { key: "Şeker & Glikoz Oranı",        value: attrs.specsWeight     || product?.specsWeight     || "0.0% (Sadece Doğal Meyve Şekeri)" },
       { key: "Ambalaj Özelliği / Kalınlık", value: attrs.specsDimensions || product?.specsDimensions || "Gıdaya Uygun Cam Kavanoz & Vakumlu Kapak" },
       { key: "HMF Seviyesi",                value: hmfLevelText },

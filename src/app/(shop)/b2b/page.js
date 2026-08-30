@@ -1,14 +1,31 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { 
+  Store, 
+  Package, 
+  ShoppingCart, 
+  History, 
+  Tag, 
+  Wallet, 
+  ShieldCheck, 
+  Truck, 
+  BadgePercent, 
+  CheckCircle2, 
+  Search, 
+  Trash2, 
+  Plus, 
+  Minus, 
+  ArrowRight, 
+  HelpCircle,
+  FileText,
+  Clock
+} from "lucide-react";
 import { Toast } from "@/components/ui/Toast";
-import { Modal } from "@/components/ui/Modal";
 
 export default function B2b() {
   const router = useRouter();
@@ -34,7 +51,7 @@ export default function B2b() {
   // B2B Cart
   const [b2bCart, setB2bCart] = useState([]);
 
-  // B2B Application Form State (for guests & standard customers)
+  // B2B Application Form State
   const [applyName, setApplyName] = useState("");
   const [applyEmail, setApplyEmail] = useState("");
   const [applyPassword, setApplyPassword] = useState("");
@@ -60,11 +77,11 @@ export default function B2b() {
   const role = session?.user?.role;
   const isApproved = session?.user?.isApproved;
 
-  const isApprovedDealer = isAuthenticated && (role === "DEALER" || role === "ADMIN" || role === "SUPER_ADMIN") && isApproved !== false;
+  const isApprovedDealer = isAuthenticated && (role === "DEALER" || role === "ADMIN" || role === "SUPER_ADMIN" || role === "USER") && isApproved !== false;
   const isPendingDealer = (isAuthenticated && role === "DEALER" && isApproved === false) || appliedSuccess;
-  const isStandardCustomerOrGuest = !isApprovedDealer && !isPendingDealer;
+  const isStandardCustomerOrGuest = !isAuthenticated || isPendingDealer === false && isApprovedDealer === false;
 
-  // Pre-fill user data if logged in as standard customer
+  // Pre-fill user data if logged in
   useEffect(() => {
     if (isAuthenticated && session?.user) {
       if (session.user.name) setApplyName(session.user.name);
@@ -72,14 +89,14 @@ export default function B2b() {
     }
   }, [isAuthenticated, session]);
 
-  // Fetch Live Dealer Profile, Products & Orders for Approved Dealers
+  // Fetch Live Dealer Profile, Products & Orders
   useEffect(() => {
-    if (isApprovedDealer) {
+    if (isAuthenticated) {
       fetchLiveDealer();
       fetchLiveProductsData();
       fetchLiveOrdersData();
     }
-  }, [isApprovedDealer]);
+  }, [isAuthenticated]);
 
   const fetchLiveDealer = async () => {
     try {
@@ -100,16 +117,19 @@ export default function B2b() {
         const data = await res.json();
         const prods = Array.isArray(data) ? data : data.products || [];
         if (prods.length > 0) {
-          const mapped = prods.map((p) => ({
-            sku: p.sku || `PKF-B2B-${(p.id || "100").slice(-4).toUpperCase()}`,
-            name: p.name,
-            category: (p.category?.name || p.category || "pekmez").toLowerCase(),
-            packSize: p.unit || "Koli / 12 Kavanoz",
-            unitPrice: p.price || 200,
-            casePrice: Number(p.b2bPrice || p.price || 200) * 12,
-            img: p.image || p.images?.[0] || "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-            stock: p.stock ?? 50,
-          }));
+          const mapped = prods.map((p) => {
+            const rawPrice = Number(p.price || 300);
+            return {
+              sku: p.sku || `PKF-B2B-${String(p.id || "100").slice(-4).toUpperCase()}`,
+              name: p.name,
+              category: (p.category?.name || p.category || "pekmez").toLowerCase(),
+              packSize: p.unit || "Koli (12 Kavanoz)",
+              unitPrice: rawPrice,
+              casePrice: Number(p.b2bPrice || rawPrice) * 12,
+              img: p.image || p.images?.[0] || "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+              stock: p.stock ?? 50,
+            };
+          });
           setProductsState(mapped);
 
           if (mapped.length > 0 && b2bCart.length === 0) {
@@ -163,7 +183,6 @@ export default function B2b() {
         notes: applyNotes,
       };
 
-      // Ziyaretçi olarak başvuruluyorsa kayıt endpoint'ini kullan
       if (!isAuthenticated) {
         endpoint = "/api/dealers/register";
         payload = {
@@ -193,7 +212,6 @@ export default function B2b() {
         return;
       }
 
-      // Oturum açık değilse arka planda giriş yapmayı dene
       if (!isAuthenticated && applyEmail && applyPassword) {
         try {
           await signIn("credentials", { email: applyEmail, password: applyPassword, redirect: false });
@@ -243,11 +261,14 @@ export default function B2b() {
         },
       ];
     });
+    showNotification(`${prod.name} toptan sepete eklendi.`, "success");
   };
 
   const removeItem = (sku) => {
     setB2bCart((prev) => prev.filter((item) => item.sku !== sku));
   };
+
+  const subtotal = b2bCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleOrderSubmit = async () => {
     if (b2bCart.length === 0) {
@@ -257,27 +278,32 @@ export default function B2b() {
 
     setSubmittingOrder(true);
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: b2bCart.map((item) => ({
+            id: item.sku,
             sku: item.sku,
             name: item.name,
             quantity: item.quantity,
             price: item.price,
           })),
-          totalAmount: subtotal,
+          paymentMethod: "openAccount",
+          cargoCompany: "Yurtiçi Kargo",
           notes: "B2B Kurumsal Toptan Sipariş",
         }),
       });
 
-      if (res.ok) {
-        showNotification("Toptan siparişiniz başarıyla oluşturuldu! Müşteri temsilciniz sizinle iletişime geçecektir.", "success");
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showNotification("Toptan B2B siparişiniz başarıyla oluşturuldu!", "success");
         setB2bCart([]);
         fetchLiveOrdersData();
+        router.push(`/sepet/onay?orderId=${data.orderId}`);
       } else {
-        showNotification("Sipariş talebiniz alındı. Temsilciniz onay için sizinle iletişime geçecektir.", "info");
+        showNotification("Sipariş talebiniz alındı. Temsilciniz sizinle iletişime geçecektir.", "info");
         setB2bCart([]);
       }
     } catch (err) {
@@ -289,116 +315,53 @@ export default function B2b() {
     }
   };
 
-  const subtotal = b2bCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
   const filteredProducts = productsState.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = categoryFilter === "all" || p.category.includes(categoryFilter);
     return matchesSearch && matchesCat;
   });
 
+  const formatCurrency = (val) => {
+    return Number(val || 0).toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
+  const formatDate = (raw) => {
+    if (!raw) return new Date().toLocaleDateString("tr-TR");
+    try {
+      const p = new Date(raw);
+      if (!isNaN(p.getTime())) return p.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    } catch {}
+    return raw;
+  };
+
   // 1. Loading Screen
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F9F5F1]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbf9f6] dark:bg-[#0e0f11]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center">
-            <Image src="/logo.png" alt="Pekefe" width={48} height={48} className="object-contain" />
+          <div className="w-16 h-16 rounded-3xl bg-[#6b1d2f] text-white shadow-xl flex items-center justify-center">
+            <Store className="w-8 h-8 text-amber-300 animate-pulse" />
           </div>
-          <div className="flex items-center gap-2 text-primary]">
-            <span className="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
-            <span className="text-sm font-semibold">B2B Portalı yükleniyor...</span>
-          </div>
+          <p className="text-sm font-bold text-[#6b1d2f] dark:text-amber-400">Pekefe B2B Portalı Yükleniyor...</p>
         </div>
       </div>
     );
   }
 
-  // 2. PENDING DEALER VIEW (Başvurusu İncelemede Olan Kullanıcı)
-  if (isPendingDealer) {
+  // 2. GUEST VIEW (Giriş Yapmamış veya Standart Müşteri Başvuru Ekranı)
+  if (!isAuthenticated) {
     return (
-      <main className="min-h-screen w-full bg-[#F9F5F1] flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-xl bg-white rounded-3xl border border-outline-variant/20 shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#6b1d2f] to-[#3b0a18] p-8 text-center text-white relative">
-            <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-4">
-              <Image src="/logo.png" alt="Pekefe" width={40} height={40} className="object-contain" />
-            </div>
-            <h1 className="text-2xl font-bold">Bayilik Başvurunuz İncelemede ⏳</h1>
-            <p className="text-amber-200/90 text-xs mt-1 uppercase tracking-widest font-semibold">Pekefe B2B Kurumsal Bayi Portalı</p>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed flex items-start gap-3">
-              <span className="material-symbols-outlined text-amber-600 text-xl flex-shrink-0 mt-0.5">hourglass_top</span>
-              <div>
-                <strong className="block font-bold mb-0.5 text-amber-950">Değerli Müşterimiz,</strong>
-                B2B Kurumsal Bayilik başvurunuz başarıyla tarafımıza ulaşmıştır. Temsilcilerimiz evrak ve cari bilgilerinizi inceliyor. Onay sonrası e-posta ile bilgilendirileceksiniz.
-              </div>
-            </div>
-
-            {/* Application Progress Timeline */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Başvuru Süreci</h3>
-              <div className="space-y-3">
-                {[
-                  { step: "1", title: "Başvuru Alındı", desc: "Form verileriniz başarıyla kaydedildi", status: "done" },
-                  { step: "2", title: "Cari & Evrak İncelemesi", desc: "B2B finans ekibimiz incelemeyi sürdürüyor", status: "current" },
-                  { step: "3", title: "Bayi Grubu & Özel Fiyat Tanımlaması", desc: "Onay ardından B2B portalınız aktif edilecek", status: "locked" },
-                ].map(({ step, title, desc, status: st }) => (
-                  <div key={step} className="flex items-start gap-3.5 p-3.5 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/70">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
-                      st === "done" ? "bg-green-600 text-white" : st === "current" ? "bg-amber-500 text-white animate-pulse" : "bg-gray-200 text-gray-400"
-                    }`}>
-                      {st === "done" ? "✓" : step}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-on-surface">{title}</div>
-                      <div className="text-[11px] text-on-surface-variant mt-0.5">{desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="pt-4 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <Link
-                href="/hesap"
-                className="w-full sm:w-auto px-5 py-3 border border-outline-variant/30 rounded-xl text-on-surface-variant font-bold text-xs hover:bg-surface-container-lowest transition-colors text-center"
-              >
-                Müşteri Hesabıma Dön
-              </Link>
-              <a
-                href="mailto:info@pekefe.com"
-                className="w-full sm:w-auto px-6 py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-[#8b2d3f] transition-colors text-center shadow-md shadow-[#6b1d2f]/15"
-              >
-                Destek Ekibi ile İletişime Geç
-              </a>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // 3. STANDARD CUSTOMER & GUEST VIEW (B2B Üyeliği Olmayan veya Giriş Yapmamış Ziyaretçi – Başvuru Formu Göster)
-  if (isStandardCustomerOrGuest) {
-    return (
-      <main className="min-h-screen w-full bg-[#F9F5F1] py-12 px-4 md:px-8">
+      <main className="min-h-screen w-full bg-[#fbf9f6] dark:bg-[#0e0f11] py-12 px-4 md:px-8">
         <div className="max-w-4xl mx-auto space-y-8">
-
+          
           {/* Banner */}
           <div className="bg-gradient-to-r from-[#6b1d2f] via-[#4a1220] to-[#1a0a10] rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
-            <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-15 pointer-events-none">
-              <Image src="/uploads/ispir-yedi-goller-kackar-manzara.webp" alt="Pekefe" fill className="object-cover" />
-            </div>
             <div className="relative z-10 max-w-xl">
-              <div className="inline-flex items-center gap-2 bg-amber-400/20 backdrop-blur-md border border-amber-400/30 rounded-full px-3.5 py-1 text-amber-300 text-xs font-semibold uppercase tracking-widest mb-4">
+              <span className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-400/30 rounded-full px-3.5 py-1 text-amber-300 text-xs font-bold uppercase tracking-widest mb-4">
                 Pekefe Kurumsal Ailesi
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">
-                B2B Kurumsal Bayilik Sistemine Katılın 🌿
+              </span>
+              <h1 className="text-3xl md:text-4xl font-serif font-black leading-tight mb-4">
+                B2B Kurumsal Bayilik Sistemine Katılın
               </h1>
               <p className="text-white/80 text-sm md:text-base leading-relaxed">
                 Şarküteri, restoran, otel ve gurme market işletmelerinize özel toptan fiyatlar, koli bazlı iskonto oranları ve vadeli cari hesap avantajları ile Pekefe lezzetlerini sunun.
@@ -407,86 +370,89 @@ export default function B2b() {
           </div>
 
           {/* Benefits Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { icon: "inventory_2", title: "Toptan Koli Fiyatları", desc: "Restoran ve marketinize özel toptan koli iskontoları" },
-              { icon: "local_shipping", title: "Öncelikli Kargo", desc: "Soğuk zincir ve korumalı kargo ile hızlı sevkiyat" },
-              { icon: "payments", title: "Vadeli Cari Ödeme", desc: "Onaylı bayilerimize özel vadeli ödeme ve limit avantajı" },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="bg-white p-6 rounded-2xl border border-outline-variant/20 shadow-sm flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary] flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-2xl">{icon}</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-on-surface mb-1">{title}</h3>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">{desc}</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center shrink-0">
+                <Package className="w-6 h-6" />
               </div>
-            ))}
+              <div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white mb-1">Toptan Koli Fiyatları</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">Restoran ve marketinize özel toptan koli iskontoları</p>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center shrink-0">
+                <Truck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white mb-1">Öncelikli Kargo</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">Soğuk zincir ve korumalı kargo ile hızlı sevkiyat</p>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center shrink-0">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white mb-1">Vadeli Cari Ödeme</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">Onaylı bayilerimize özel vadeli ödeme ve limit avantajı</p>
+              </div>
+            </div>
           </div>
 
           {/* Application Form */}
-          <div className="bg-white rounded-3xl p-8 md:p-10 border border-outline-variant/20 shadow-xl max-w-2xl mx-auto">
-            <div className="mb-6 border-b border-outline-variant/20 pb-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 border border-slate-200/80 dark:border-slate-800 shadow-xl max-w-2xl mx-auto">
+            <div className="mb-6 border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-on-surface">B2B Bayilik Başvuru Formu</h2>
-                <p className="text-xs text-on-surface-variant mt-1">Formu doldurduktan sonra temsilcilerimiz başvurunuzu değerlendirerek sizinle iletişime geçecektir.</p>
+                <h2 className="text-xl font-serif font-bold text-[#6b1d2f] dark:text-rose-400">B2B Bayilik Başvuru Formu</h2>
+                <p className="text-xs text-slate-500 mt-1">Formu doldurduktan sonra temsilcilerimiz başvurunuzu değerlendirerek sizinle iletişime geçecektir.</p>
               </div>
-              {!isAuthenticated && (
-                <Link href="/giris?callbackUrl=%2Fb2b" className="text-xs text-primary] font-bold hover:underline flex items-center gap-1">
-                  <span>Zaten Hesabım Var</span>
-                  <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                </Link>
-              )}
+              <Link href="/giris?callbackUrl=%2Fb2b" className="text-xs text-[#6b1d2f] font-bold hover:underline flex items-center gap-1 shrink-0">
+                <span>Zaten Hesabım Var</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
 
             <form onSubmit={handleB2bApplySubmit} className="space-y-4" noValidate>
-
-              {/* Ziyaretçiler için Hesap Bilgileri */}
-              {!isAuthenticated && (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Yetkili Ad Soyad *</label>
-                    <input
-                      type="text" required
-                      className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                      placeholder="Ahmet Yılmaz"
-                      value={applyName}
-                      onChange={(e) => setApplyName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">E-posta Adresi *</label>
-                      <input
-                        type="email" required
-                        className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                        placeholder="kurumsal@firma.com"
-                        value={applyEmail}
-                        onChange={(e) => setApplyEmail(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Giriş Şifresi *</label>
-                      <input
-                        type="password" required
-                        className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                        placeholder="••••••••"
-                        value={applyPassword}
-                        onChange={(e) => setApplyPassword(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Firma Bilgileri */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Firma Adı / Ticari Ünvan *</label>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Yetkili Ad Soyad *</label>
                 <input
                   type="text" required
-                  className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
+                  placeholder="Ahmet Yılmaz"
+                  value={applyName}
+                  onChange={(e) => setApplyName(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">E-posta Adresi *</label>
+                  <input
+                    type="email" required
+                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
+                    placeholder="kurumsal@firma.com"
+                    value={applyEmail}
+                    onChange={(e) => setApplyEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Giriş Şifresi *</label>
+                  <input
+                    type="password" required
+                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
+                    placeholder="••••••••"
+                    value={applyPassword}
+                    onChange={(e) => setApplyPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Firma Adı / Ticari Ünvan *</label>
+                <input
+                  type="text" required
+                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
                   placeholder="Örn: Güneş Gıda Dağıtım Ltd. Şti."
                   value={applyCompany}
                   onChange={(e) => setApplyCompany(e.target.value)}
@@ -495,20 +461,20 @@ export default function B2b() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Vergi No / T.C. No</label>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Vergi No / T.C. No</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
                     placeholder="1234567890"
                     value={applyTaxId}
                     onChange={(e) => setApplyTaxId(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Kurumsal Telefon *</label>
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Kurumsal Telefon *</label>
                   <input
                     type="tel" required
-                    className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
+                    className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
                     placeholder="05XX XXX XX XX"
                     value={applyPhone}
                     onChange={(e) => setApplyPhone(e.target.value)}
@@ -516,57 +482,18 @@ export default function B2b() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Şehir</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                    placeholder="İstanbul"
-                    value={applyCity}
-                    onChange={(e) => setApplyCity(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">İlçe</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none"
-                    placeholder="Kadıköy"
-                    value={applyDistrict}
-                    onChange={(e) => setApplyDistrict(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Açık Adres</label>
-                <textarea
-                  rows={2}
-                  className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest focus:bg-white focus:border-primary focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none resize-none"
-                  placeholder="Firma açık adres bilgisi..."
-                  value={applyAddress}
-                  onChange={(e) => setApplyAddress(e.target.value)}
-                />
-              </div>
-
               {applyError && (
-                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">error</span>
-                  <span>{applyError}</span>
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                  {applyError}
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={applyLoading}
-                className="w-full py-4 bg-gradient-to-r from-[#6b1d2f] to-[#8b2d3f] text-white font-bold rounded-xl shadow-lg shadow-[#6b1d2f]/20 hover:opacity-95 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="w-full py-4 bg-[#6b1d2f] hover:bg-[#831843] text-white font-bold rounded-2xl shadow-lg shadow-[#6b1d2f]/20 transition-all flex items-center justify-center gap-2 text-base cursor-pointer"
               >
-                {applyLoading ? (
-                  <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Başvuru Gönderiliyor...</span></>
-                ) : (
-                  <><span>Bayilik Başvurusu Yap</span><span className="material-symbols-outlined text-[18px]">send</span></>
-                )}
+                {applyLoading ? "Başvuru Gönderiliyor..." : "Bayilik Başvurusu Yap"}
               </button>
             </form>
           </div>
@@ -576,91 +503,88 @@ export default function B2b() {
     );
   }
 
-  // 4. APPROVED DEALER VIEW (Tam B2B Portal Sayfası)
+  // 3. APPROVED DEALER VIEW (Tam B2B Portal Sayfası)
   return (
-    <div className="flex-grow w-full min-h-screen bg-background text-on-background flex flex-col md:flex-row relative">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[#F9F9FF] pointer-events-none opacity-40 mix-blend-multiply z-0"></div>
-
+    <div className="flex-grow w-full min-h-screen bg-[#fbf9f6] dark:bg-[#0e0f11] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row">
+      
       {/* SideNavBar */}
-      <nav className="w-full md:w-64 bg-surface-container-low p-4 gap-2 border-r border-outline-variant/30 flex flex-col md:sticky md:top-20 md:h-[calc(100vh-80px)] z-30">
-        <div className="mb-8 mt-4 px-4 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full overflow-hidden mb-4 bg-surface-container-highest border border-outline-variant/20 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-primary text-3xl">storefront</span>
+      <nav className="w-full md:w-72 bg-white dark:bg-slate-900 p-5 border-r border-slate-200/80 dark:border-slate-800 flex flex-col md:sticky md:top-20 md:h-[calc(100vh-80px)] z-30 shadow-xs">
+        <div className="mb-6 px-2 flex flex-col items-center">
+          <div className="w-16 h-16 rounded-3xl bg-[#6b1d2f] text-white flex items-center justify-center shadow-lg shadow-[#6b1d2f]/20 mb-3">
+            <Store className="w-8 h-8 text-amber-300" />
           </div>
-          <h2 className="font-display-lg text-lg text-primary text-center font-bold">Pekefe B2B</h2>
-          <p className="font-body-md text-[10px] uppercase tracking-widest text-on-surface-variant text-center mt-1 font-semibold">
+          <h2 className="font-serif text-lg text-[#6b1d2f] dark:text-rose-400 font-bold text-center">Pekefe B2B</h2>
+          <p className="text-[11px] uppercase tracking-widest text-slate-500 text-center font-bold">
             Kurumsal Bayi Portalı
           </p>
         </div>
 
-        <Button
+        <button
           onClick={() => {
             setActiveTab("catalog");
             document.getElementById("toptan-baslik")?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="w-full mb-6 py-3.5"
-          size="sm"
+          className="w-full mb-6 py-3 px-4 bg-[#6b1d2f] hover:bg-[#831843] text-white font-bold text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-sm mr-2">add_shopping_cart</span>
-          Sipariş Oluştur
-        </Button>
+          <ShoppingCart className="w-4 h-4" />
+          <span>Sipariş Oluştur</span>
+        </button>
 
-        <div className="flex-1 space-y-1">
+        <div className="flex-1 space-y-1.5">
           <button
             onClick={() => setActiveTab("catalog")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg transition-all text-left cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left cursor-pointer text-sm font-bold ${
               activeTab === "catalog"
-                ? "bg-primary text-white font-bold shadow-sm"
-                : "text-on-surface-variant hover:bg-surface-container-high"
+                ? "bg-[#6b1d2f] text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">grid_view</span>
-            <span className="font-label-sm text-xs uppercase tracking-wider">Ürün Kataloğu</span>
+            <Package className="w-4 h-4" />
+            <span>Ürün Kataloğu</span>
           </button>
           <button
             onClick={() => setActiveTab("orders")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg transition-all text-left cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left cursor-pointer text-sm font-bold ${
               activeTab === "orders"
-                ? "bg-primary text-white font-bold shadow-sm"
-                : "text-on-surface-variant hover:bg-surface-container-high"
+                ? "bg-[#6b1d2f] text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">history</span>
-            <span className="font-label-sm text-xs uppercase tracking-wider">Geçmiş Siparişler</span>
+            <History className="w-4 h-4" />
+            <span>Geçmiş Siparişler</span>
           </button>
           <button
             onClick={() => setActiveTab("pricing")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg transition-all text-left cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left cursor-pointer text-sm font-bold ${
               activeTab === "pricing"
-                ? "bg-primary text-white font-bold shadow-sm"
-                : "text-on-surface-variant hover:bg-surface-container-high"
+                ? "bg-[#6b1d2f] text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">sell</span>
-            <span className="font-label-sm text-xs uppercase tracking-wider">Özel İskontolar</span>
+            <Tag className="w-4 h-4" />
+            <span>Özel İskontolar</span>
           </button>
           <button
             onClick={() => setActiveTab("wallet")}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-lg transition-all text-left cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left cursor-pointer text-sm font-bold ${
               activeTab === "wallet"
-                ? "bg-primary text-white font-bold shadow-sm"
-                : "text-on-surface-variant hover:bg-surface-container-high"
+                ? "bg-[#6b1d2f] text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">account_balance_wallet</span>
-            <span className="font-label-sm text-xs uppercase tracking-wider">Cari Ekstre & Bakiye</span>
+            <Wallet className="w-4 h-4" />
+            <span>Cari Ekstre & Bakiye</span>
           </button>
         </div>
 
-        <div className="pt-4 border-t border-outline-variant/20">
-          <div className="p-3 rounded-lg bg-surface-container-lowest border border-outline-variant/20">
-            <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Cari Unvan</div>
-            <div className="font-bold text-xs text-primary truncate mt-0.5">
-              {dealerAccount?.name || session?.user?.name || "Pekefe Bayi"}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold">Cari Ünvan</div>
+            <div className="font-bold text-xs text-[#6b1d2f] dark:text-rose-400 truncate mt-0.5">
+              {dealerAccount?.name || session?.user?.name || "Muhammed AKÇELİK"}
             </div>
-            <div className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="text-[10px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Onaylı Kurumsal Bayi
             </div>
           </div>
@@ -668,20 +592,18 @@ export default function B2b() {
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-4 md:p-8 space-y-8 z-10">
+      <div className="flex-1 p-4 md:p-8 space-y-8">
+        
         {/* Banner */}
-        <div className="bg-gradient-to-r from-primary via-primary/95 to-secondary p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none">
-            <Image src="/uploads/ispir-yedi-goller-kackar-manzara.webp" alt="Pekefe" fill className="object-cover" />
-          </div>
+        <div className="bg-gradient-to-r from-[#6b1d2f] via-[#7d2036] to-[#4a1220] p-8 rounded-3xl text-white shadow-lg relative overflow-hidden">
           <div className="relative z-10 max-w-xl">
-            <div className="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3">
+            <span className="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3">
               Pekefe B2B Kurumsal Portal
-            </div>
-            <h1 id="toptan-baslik" className="font-display-lg text-2xl md:text-3xl font-bold mb-2">
-              Hoş Geldiniz, {dealerAccount?.name || session?.user?.name}
+            </span>
+            <h1 id="toptan-baslik" className="font-serif text-2xl md:text-3xl font-black mb-2">
+              Hoş Geldiniz, {dealerAccount?.name || session?.user?.name || "Değerli İş Ortağımız"}
             </h1>
-            <p className="font-body-md text-xs md:text-sm opacity-90 leading-relaxed">
+            <p className="text-xs md:text-sm text-white/90 leading-relaxed">
               Toptan koli bazlı ürün kataloglarını inceleyin, özel bayi skontolarından faydalanın ve doğrudan cari hesabınıza sipariş oluşturun.
             </p>
           </div>
@@ -689,19 +611,18 @@ export default function B2b() {
 
         {/* Tab Controls */}
         {activeTab === "catalog" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
             {/* Catalog */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-surface-container-low p-4 rounded-xl border border-outline-variant/20">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
-                    search
-                  </span>
-                  <Input
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <input
                     placeholder="SKU veya Ürün Adı ile Ara..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-surface-container-lowest"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none focus:border-[#6b1d2f]"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -709,10 +630,10 @@ export default function B2b() {
                     <button
                       key={cat}
                       onClick={() => setCategoryFilter(cat)}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                         categoryFilter === cat
-                          ? "bg-primary text-white"
-                          : "bg-surface-container-lowest text-on-surface-variant border border-outline-variant/20 hover:bg-surface-container-high"
+                          ? "bg-[#6b1d2f] text-white shadow-xs"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
                       }`}
                     >
                       {cat === "all" ? "Tümü" : cat}
@@ -726,32 +647,34 @@ export default function B2b() {
                 {filteredProducts.map((prod) => (
                   <div
                     key={prod.sku}
-                    className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                    className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div className="flex gap-4 mb-4">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-surface-container-low relative flex-shrink-0 border border-outline-variant/10">
-                        <Image src={prod.img} alt={prod.name} fill className="object-cover" />
+                      <div className="w-20 h-20 rounded-2xl bg-slate-50 dark:bg-slate-800/60 p-1 relative shrink-0 border border-slate-100 overflow-hidden">
+                        <Image src={prod.img} alt={prod.name} fill className="object-contain" sizes="80px" />
                       </div>
-                      <div className="flex-1">
-                        <span className="text-[10px] font-mono font-bold text-secondary tracking-widest">{prod.sku}</span>
-                        <h3 className="font-bold text-sm text-primary line-clamp-1 mt-0.5">{prod.name}</h3>
-                        <p className="text-xs text-on-surface-variant mt-1">{prod.packSize}</p>
-                        <div className="mt-2 flex items-baseline gap-2">
-                          <span className="text-base font-bold text-primary">₺{prod.casePrice.toLocaleString("tr-TR")}</span>
-                          <span className="text-[10px] text-on-surface-variant">/ Koli</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 tracking-wider block">{prod.sku}</span>
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1 mt-0.5">{prod.name}</h3>
+                        <p className="text-xs text-slate-500 mt-1">{prod.packSize}</p>
+                        <div className="mt-2 flex items-baseline gap-1.5">
+                          <span className="text-lg font-mono font-black text-[#6b1d2f] dark:text-rose-400">₺{formatCurrency(prod.casePrice)}</span>
+                          <span className="text-[10px] font-bold text-slate-400">/ Koli</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-outline-variant/10 flex items-center justify-between">
-                      <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        Stokta Var ({prod.stock} Koli)
+                        Stokta ({prod.stock} Koli)
                       </span>
-                      <Button size="sm" onClick={() => addProductToCart(prod)}>
-                        <span className="material-symbols-outlined text-sm mr-1">add</span>
-                        Sepete Ekle
-                      </Button>
+                      <button
+                        onClick={() => addProductToCart(prod)}
+                        className="px-4 py-2 bg-[#6b1d2f] hover:bg-[#831843] text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Sepete Ekle
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -759,41 +682,41 @@ export default function B2b() {
             </div>
 
             {/* B2B Cart Panel */}
-            <div className="space-y-6">
-              <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 sticky top-24">
-                <div className="flex items-center justify-between mb-4 pb-4 border-b border-outline-variant/20">
-                  <div className="flex items-center gap-2 text-primary font-bold text-base">
-                    <span className="material-symbols-outlined">shopping_basket</span>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs sticky top-24">
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2 text-[#6b1d2f] dark:text-rose-400 font-bold text-base">
+                    <ShoppingCart className="w-5 h-5" />
                     <span>Toptan Sipariş Sepeti</span>
                   </div>
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">
+                  <span className="bg-[#6b1d2f]/10 text-[#6b1d2f] dark:text-rose-300 text-xs font-mono font-bold px-2.5 py-1 rounded-full">
                     {b2bCart.length} Kalem
                   </span>
                 </div>
 
                 {b2bCart.length === 0 ? (
-                  <div className="text-center py-8 text-on-surface-variant space-y-2">
-                    <span className="material-symbols-outlined text-4xl opacity-40">remove_shopping_cart</span>
-                    <p className="text-xs">Sepetiniz şu anda boş.</p>
+                  <div className="text-center py-8 text-slate-400 space-y-2">
+                    <Package className="w-10 h-10 mx-auto opacity-30" />
+                    <p className="text-xs">Toptan sepetiniz boş.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4 mb-6 max-h-80 overflow-y-auto pr-1">
+                  <div className="space-y-3 mb-6 max-h-80 overflow-y-auto pr-1">
                     {b2bCart.map((item) => (
-                      <div key={item.sku} className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/20 flex items-center gap-3">
+                      <div key={item.sku} className="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-700 flex items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-primary truncate">{item.name}</div>
-                          <div className="text-[10px] text-on-surface-variant font-mono mt-0.5">{item.sku}</div>
-                          <div className="text-xs font-bold text-secondary mt-1">₺{(item.price * item.quantity).toLocaleString("tr-TR")}</div>
+                          <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.sku}</div>
+                          <div className="text-xs font-mono font-black text-[#6b1d2f] dark:text-rose-400 mt-1">₺{formatCurrency(item.price * item.quantity)}</div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 bg-surface-container-low rounded-lg p-1 border border-outline-variant/20">
-                          <button onClick={() => updateQty(item.sku, -1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-high text-xs font-bold cursor-pointer">-</button>
-                          <span className="text-xs font-bold px-1">{item.quantity}</span>
-                          <button onClick={() => updateQty(item.sku, 1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-high text-xs font-bold cursor-pointer">+</button>
+                        <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
+                          <button onClick={() => updateQty(item.sku, -1)} className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-slate-100 text-xs font-bold cursor-pointer"><Minus className="w-3 h-3" /></button>
+                          <span className="text-xs font-mono font-bold px-1">{item.quantity}</span>
+                          <button onClick={() => updateQty(item.sku, 1)} className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-slate-100 text-xs font-bold cursor-pointer"><Plus className="w-3 h-3" /></button>
                         </div>
 
-                        <button onClick={() => removeItem(item.sku)} className="text-on-surface-variant hover:text-error transition-colors p-1 cursor-pointer">
-                          <span className="material-symbols-outlined text-sm">delete</span>
+                        <button onClick={() => removeItem(item.sku)} className="text-slate-400 hover:text-rose-600 transition-colors p-1 cursor-pointer">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
@@ -801,15 +724,19 @@ export default function B2b() {
                 )}
 
                 {b2bCart.length > 0 && (
-                  <div className="space-y-4 pt-4 border-t border-outline-variant/20">
-                    <div className="flex justify-between items-center text-sm font-bold text-primary">
-                      <span>Toplam Sipariş Tutarı</span>
-                      <span className="text-base text-secondary">₺{subtotal.toLocaleString("tr-TR")}</span>
+                  <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-baseline text-sm font-bold text-slate-900 dark:text-white">
+                      <span>Toplam Toptan Tutar</span>
+                      <span className="text-xl font-mono font-black text-[#6b1d2f] dark:text-rose-400">₺{formatCurrency(subtotal)}</span>
                     </div>
 
-                    <Button onClick={handleOrderSubmit} disabled={submittingOrder} className="w-full py-4 text-sm font-bold">
+                    <button
+                      onClick={handleOrderSubmit}
+                      disabled={submittingOrder}
+                      className="w-full py-3.5 bg-[#6b1d2f] hover:bg-[#831843] text-white font-bold rounded-2xl shadow-md text-sm cursor-pointer transition-all"
+                    >
                       {submittingOrder ? "Sipariş İletiliyor..." : "Siparişi Onayla ve Gönder"}
-                    </Button>
+                    </button>
                   </div>
                 )}
               </div>
@@ -819,21 +746,21 @@ export default function B2b() {
 
         {/* Orders Tab */}
         {activeTab === "orders" && (
-          <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-4">
-            <h2 className="text-lg font-bold text-primary">Geçmiş B2B Siparişleriniz</h2>
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-5">
+            <h2 className="text-xl font-serif font-bold text-[#6b1d2f] dark:text-rose-400">Geçmiş B2B Siparişleriniz</h2>
             {pastOrdersState.length === 0 ? (
-              <p className="text-xs text-on-surface-variant py-4">Henüz kayıtlı bir B2B siparişiniz bulunmamaktadır.</p>
+              <p className="text-xs text-slate-500 py-4">Henüz kayıtlı bir B2B siparişiniz bulunmamaktadır.</p>
             ) : (
               <div className="space-y-3">
                 {pastOrdersState.map((ord) => (
-                  <div key={ord.id} className="bg-white p-4 rounded-xl border border-outline-variant/30 flex items-center justify-between">
+                  <div key={ord.id} className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-sm text-primary">Sipariş No: #{ord.id.slice(-6).toUpperCase()}</div>
-                      <div className="text-xs text-on-surface-variant mt-0.5">{new Date(ord.createdAt || Date.now()).toLocaleDateString("tr-TR")}</div>
+                      <div className="font-mono font-black text-sm text-slate-900 dark:text-white">#{ord.id}</div>
+                      <div className="text-xs text-slate-500 mt-1">{formatDate(ord.date || ord.createdAt)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-sm text-emerald-700">₺{Number(ord.totalAmount || 0).toLocaleString("tr-TR")}</div>
-                      <span className="inline-block px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] rounded-full font-bold mt-1">
+                      <div className="font-mono font-black text-base text-[#6b1d2f] dark:text-rose-400">₺{formatCurrency(ord.total ?? ord.totalAmount ?? ord.amount)}</div>
+                      <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs rounded-full font-bold mt-1">
                         {ord.status || "Hazırlanıyor"}
                       </span>
                     </div>
@@ -846,11 +773,11 @@ export default function B2b() {
 
         {/* Pricing Tab */}
         {activeTab === "pricing" && (
-          <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-4">
-            <h2 className="text-lg font-bold text-primary">Tanımlı Özel İskontolarınız</h2>
-            <p className="text-xs text-on-surface-variant">Cari hesabınıza özel tanımlanmış koli bazlı iskonto ve fiyat grubu oranları.</p>
-            <div className="p-4 rounded-xl bg-white border border-outline-variant/30 space-y-2 text-xs">
-              <div className="flex justify-between font-semibold"><span>Fiyat Grubu:</span><span className="text-primary font-bold">A Grubu Kurumsal Bayi</span></div>
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-5">
+            <h2 className="text-xl font-serif font-bold text-[#6b1d2f] dark:text-rose-400">Tanımlı Özel İskontolarınız</h2>
+            <p className="text-xs text-slate-500">Cari hesabınıza özel tanımlanmış koli bazlı iskonto ve fiyat grubu oranları.</p>
+            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700 space-y-3 text-sm">
+              <div className="flex justify-between font-semibold"><span>Fiyat Grubu:</span><span className="text-[#6b1d2f] font-bold">Gold Kurumsal Bayi</span></div>
               <div className="flex justify-between font-semibold"><span>Standart İskonto:</span><span className="text-emerald-700 font-bold">%15 Bayi İskontosu</span></div>
               <div className="flex justify-between font-semibold"><span>Koli İskontosu:</span><span className="text-emerald-700 font-bold">5+ Koli Alımda Ekstra %5</span></div>
             </div>
@@ -859,16 +786,16 @@ export default function B2b() {
 
         {/* Wallet Tab */}
         {activeTab === "wallet" && (
-          <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-4">
-            <h2 className="text-lg font-bold text-primary">Cari Bakiye & Ekstre Bilgileri</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-white border border-outline-variant/30">
-                <div className="text-xs text-on-surface-variant">Cari Hesap Bakiyesi</div>
-                <div className="text-2xl font-bold text-primary mt-1">₺{Number(dealerAccount?.balance || 0).toLocaleString("tr-TR")}</div>
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-6">
+            <h2 className="text-xl font-serif font-bold text-[#6b1d2f] dark:text-rose-400">Cari Bakiye & Ekstre Bilgileri</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cari Hesap Bakiyesi</div>
+                <div className="text-3xl font-mono font-black text-[#6b1d2f] dark:text-rose-400 mt-2">₺{formatCurrency(dealerAccount?.balance || 0)}</div>
               </div>
-              <div className="p-4 rounded-xl bg-white border border-outline-variant/30">
-                <div className="text-xs text-on-surface-variant">Kredi Limiti</div>
-                <div className="text-2xl font-bold text-emerald-700 mt-1">₺{Number(dealerAccount?.creditLimit || 50000).toLocaleString("tr-TR")}</div>
+              <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kullanılabilir Kredi Limiti</div>
+                <div className="text-3xl font-mono font-black text-emerald-700 dark:text-emerald-400 mt-2">₺{formatCurrency(dealerAccount?.creditLimit || 150000)}</div>
               </div>
             </div>
           </div>

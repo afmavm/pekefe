@@ -10,6 +10,31 @@ const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'public', 'data', 'blog_post
 
 const defaultBlogPosts = [
   {
+    id: "blog-hmf",
+    title: "HMF Nedir? Pekmez Üretiminde Sıcaklık, Süre ve Güneşin Önemi",
+    slug: "hmf-nedir-pekmez-uretiminde-sicakligin-onemi",
+    category: "Geleneksel Üretim & Bilim",
+    image: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    metaDesc: "Dut pekmezi üretiminde HMF (5-Hidroksimetilfurfural) nedir? Yüksek ateşte yakmadan, yayla güneşinde doğal ve kontrollü yoğunlaştırmanın bilimsel incelikleri.",
+    content: `<h2>HMF (5-Hidroksimetilfurfural) Nedir?</h2>
+<p>HMF (5-Hidroksimetilfurfural), şeker içeren gıdaların yüksek sıcaklığa maruz kalması sırasında oluşabilen doğal bir bileşiktir. Özellikle dut pekmezi, bal, reçel ve benzeri meyve şekeri bakımından zengin ürünlerde sıcaklık ve ısıl işlem süresi, HMF oluşumunu etkileyen önemli faktörler arasında yer alır.</p>
+
+<h3>Pekmez Üretiminde Sıcaklık ve Süre Neden Önemlidir?</h3>
+<p>Pekmez üretiminde dut şırasının çok yüksek sıcaklıklarda ve uzun süre kaynatılması, HMF oluşumunun artmasına neden olabilir. Bu nedenle geleneksel pekmez üretiminde sıcaklığın kontrol edilmesi ve şıranın gereğinden fazla ısıya maruz bırakılmaması büyük önem taşır.</p>
+
+<h3>PEKEFE'de HMF'ye Neden Dikkat Ediyoruz?</h3>
+<p>PEKEFE'nin geleneksel üretim anlayışında dut şırasını yüksek ateşte uzun süre kaynatmak yerine, güneş ışığının ve doğal sıcaklığın etkisinden yararlanarak kontrollü biçimde yoğunlaştırmak esastır. Bu yaklaşım, İlhan Efe'nin İspir vadisinde yıllardır sürdürdüğü geleneksel üretim anlayışının ve zanaatkarlığının önemli bir parçasıdır.</p>
+
+<blockquote>“Şırayı yakmadan, güneşin doğal sıcaklığından yararlanarak, uzun sürede yoğunlaştırmak.” — İlhan Efe</blockquote>
+
+<h3>Doğal Üretim, Kontrollü Süreç</h3>
+<p>HMF oluşumu yalnızca sıcaklığa bağlı değildir. Süre, pH dengesi, meyve şekeri konsantrasyonu ve ortam koşulları da HMF miktarını etkileyebilir. Bu nedenle PEKEFE'nin yaklaşımı: <strong>“HMF yoktur” demek değil; yüksek sıcaklıkta gereksiz ve uzun süreli kaynatmadan kaçınan geleneksel üretim yöntemini benimsemektir.</strong></p>`,
+    isFeatured: true,
+    isActive: true,
+    createdAt: "2026-08-30T10:00:00.000Z",
+    updatedAt: "2026-08-30T10:00:00.000Z",
+  },
+  {
     id: "blog-1",
     title: "Geleneksel İspir Dut Pekmezi Nasıl Üretilir? Sırları ve Şifası",
     slug: "geleneksel-ispir-dut-pekmezi-nasil-uretilir",

@@ -27,6 +27,10 @@ export function ProductGallery({
     selectedMedia &&
     (selectedMedia.type === "video" || isVideoUrl(selectedMedia.url));
 
+  const badge1 = product?.badgeText1 || product?.attributes?.badgeText1;
+  const badge2 = product?.badgeText2 || product?.attributes?.badgeText2;
+  const tag = product?.tag;
+
   return (
     <div className="lg:col-span-7 space-y-6">
       {/* Hero Display */}
@@ -37,11 +41,24 @@ export function ProductGallery({
         className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant/15 aspect-[4/5] md:aspect-square max-h-[650px] w-full relative shadow-md group cursor-zoom-in"
         title="Görseli büyütmek için tıklayın"
       >
-        {product?.tag && (
-          <span className="absolute top-4 left-4 backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest z-10">
-            {product.tag}
-          </span>
-        )}
+        {/* Top Left: Badges (Badge 1 & Badge 2 & Tag) */}
+        <div className="absolute top-4 left-4 z-10 flex flex-col items-start gap-1.5 max-w-[75%] pointer-events-none">
+          {badge1 && (
+            <span className="bg-amber-500 text-amber-950 font-black text-[11px] sm:text-xs px-3.5 py-1 rounded-full shadow-lg backdrop-blur-xs uppercase tracking-wider">
+              {badge1}
+            </span>
+          )}
+          {badge2 && (
+            <span className="bg-[#6b1d2f] text-white font-black text-[11px] sm:text-xs px-3.5 py-1 rounded-full shadow-lg backdrop-blur-xs uppercase tracking-wider">
+              {badge2}
+            </span>
+          )}
+          {tag && !badge1 && !badge2 && (
+            <span className="backdrop-blur-md bg-secondary/90 text-white font-label-sm text-[10px] px-3.5 py-1.5 rounded-full uppercase font-bold shadow-md tracking-widest">
+              {tag}
+            </span>
+          )}
+        </div>
 
         {isVideo ? (
           <div className="w-full h-full relative flex items-center justify-center bg-on-surface rounded-xl overflow-hidden">

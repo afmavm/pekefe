@@ -232,17 +232,29 @@ export default function ProductCardClient({
           />
         </button>
 
-        {/* Kampanya / İndirim Rozeti */}
-        {product.is_discounted && product.discount_display_text && !isOutOfStock && (
-          <div className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md shadow-amber-500/20 animate-pulse">
-            <Tag className="w-3.5 h-3.5" /> {product.discount_display_text}
-          </div>
-        )}
-        {isOutOfStock && (
-          <div className="absolute top-4 left-4 z-20 bg-slate-700 dark:bg-slate-800 text-slate-200 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
-            {tc("out_of_stock").toUpperCase()}
-          </div>
-        )}
+        {/* Sol Üst Rozetler (Badge 1, Badge 2 & İndirim) */}
+        <div className="absolute top-4 left-4 z-20 flex flex-col items-start gap-1.5 max-w-[70%] pointer-events-none">
+          {((product as any).badgeText1 || product.attributes?.badgeText1) && (
+            <span className="bg-amber-500 text-amber-950 font-black text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-xs uppercase tracking-wider truncate">
+              {(product as any).badgeText1 || product.attributes?.badgeText1}
+            </span>
+          )}
+          {((product as any).badgeText2 || product.attributes?.badgeText2) && (
+            <span className="bg-[#6b1d2f] text-white font-black text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-xs uppercase tracking-wider truncate">
+              {(product as any).badgeText2 || product.attributes?.badgeText2}
+            </span>
+          )}
+          {product.is_discounted && product.discount_display_text && !isOutOfStock && !((product as any).badgeText1 || product.attributes?.badgeText1) && (
+            <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md shadow-amber-500/20 animate-pulse">
+              <Tag className="w-3.5 h-3.5" /> {product.discount_display_text}
+            </div>
+          )}
+          {isOutOfStock && (
+            <div className="bg-slate-700 dark:bg-slate-800 text-slate-200 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
+              {tc("out_of_stock").toUpperCase()}
+            </div>
+          )}
+        </div>
 
         {/* Video Özellikli Rozeti */}
         {(Boolean((product as any).videoUrl) || (Array.isArray(product.images) && product.images.some((m: any) => m?.type === "video" || isVideoUrl(m?.url || m)))) && (

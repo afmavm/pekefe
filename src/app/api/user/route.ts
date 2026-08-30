@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAuth, AuthSession, requireOwnership } from '@/lib/auth-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
+import { readLocalOrders } from '@/lib/jsonOrderDb';
 import bcrypt from 'bcryptjs';
 
 // Kullanıcı Kendi Bilgilerini Getirir
@@ -12,7 +13,6 @@ export const GET = withAuth<any>(
 
     try {
       // Güvenlik: userId query param'a bakmak yerine her zaman session.user.id kullan
-      // Bu sayede hiçbir kullanıcı başka birinin verisini GET edemez
       const targetUserId = session.user.id;
 
       // requireOwnership kontrolü: Ya admin ya da targetUserId sahibi
@@ -35,27 +35,64 @@ export const GET = withAuth<any>(
         return NextResponse.json({ error: 'Kullanıcı bulunamadı.' }, { status: 404 });
       }
 
-      // Bağlı olduğu cari hesabı da bulalım (bayi ise)
+      // Bağlı olduğu cari hesabı bulalım
       const currentAccount = await prisma.currentAccount.findFirst({
         where: { email: user.email || "" }
       });
 
-      return NextResponse.json({ user, currentAccount });
+      // Siparişlerden kazanılan sadakat puanlarını hesapla (1 TL = 1 PTS)
+      const localOrders = readLocalOrders();
+      const userEmail = (user.email || "").toLowerCase();
+      const userName = (user.name || "").toLowerCase();
+      const userOrders = localOrders.filter(
+        (o) => (o.email && o.email.toLowerCase() === userEmail) ||
+               (o.client && o.client.toLowerCase() === userName) ||
+               (o.customerName && o.customerName.toLowerCase() === userName)
+      );
+      const ordersPoints = userOrders.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
+
+      const calculatedLoyaltyPoints = Math.max(
+        Number(currentAccount?.loyaltyPoints || 0),
+        ordersPoints
+      );
+
+      const accountData = currentAccount
+        ? { ...currentAccount, loyaltyPoints: calculatedLoyaltyPoints }
+        : {
+            id: `CARI-${targetUserId}`,
+            name: user.name || "Pekefe Müşterisi",
+            email: user.email,
+            loyaltyPoints: calculatedLoyaltyPoints
+          };
+
+      return NextResponse.json({ user, currentAccount: accountData });
     } catch (error) {
-      console.warn('[API USER WARNING] DB erişimi yok, aktif oturum bilgisi sunuluyor:', error);
+      console.warn('[API USER WARNING] DB erişimi yok, yerel sipariş motorundan puan hesaplanıyor:', error);
+      
+      const localOrders = readLocalOrders();
+      const userEmail = (session.user?.email || "").toLowerCase();
+      const userName = (session.user?.name || "").toLowerCase();
+      const userOrders = localOrders.filter(
+        (o) => (o.email && o.email.toLowerCase() === userEmail) ||
+               (o.client && o.client.toLowerCase() === userName) ||
+               (o.customerName && o.customerName.toLowerCase() === userName)
+      );
+      const ordersPoints = userOrders.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
+
       return NextResponse.json({
         user: {
-          id: session.user?.id || "admin-001",
-          name: session.user?.name || "Pekefe Yönetici",
-          email: session.user?.email || "admin@pekefe.com",
-          role: session.user?.role || "SUPER_ADMIN",
+          id: session.user?.id || "user-001",
+          name: session.user?.name || "Muhammed AKÇELİK",
+          email: session.user?.email || "afmavm@gmail.com",
+          role: session.user?.role || "USER",
           isApproved: true,
           image: session.user?.image || ""
         },
         currentAccount: {
           id: "CARI-001",
-          name: "Pekefe Yönetici Cari",
-          email: "admin@pekefe.com"
+          name: session.user?.name || "Muhammed AKÇELİK",
+          email: session.user?.email || "afmavm@gmail.com",
+          loyaltyPoints: ordersPoints
         }
       });
     }

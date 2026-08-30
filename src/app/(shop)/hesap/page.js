@@ -131,6 +131,10 @@ export default function Hesap() {
         const data = await res.json();
         if (Array.isArray(data)) {
           setOrders(data);
+          const calculatedFromOrders = data.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
+          if (calculatedFromOrders > 0) {
+            setLoyaltyPoints((prev) => Math.max(prev, calculatedFromOrders));
+          }
         }
       }
     } catch (err) {

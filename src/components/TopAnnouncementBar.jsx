@@ -1,12 +1,11 @@
 "use client";
 
 import { useCMS } from "@/context/CMSContext";
-import { Phone, MessageCircle, Sparkles, ShieldCheck, Truck, Star, Package, Clock, Award, Tag, Zap } from "lucide-react";
+import { Phone, MessageCircle, ShieldCheck, Truck, Star, Package, Clock, Award, Tag, Zap } from "lucide-react";
 
 const ICON_MAP = {
   truck: Truck,
   shield: ShieldCheck,
-  sparkles: Sparkles,
   star: Star,
   package: Package,
   clock: Clock,
@@ -61,7 +60,7 @@ export default function TopAnnouncementBar() {
         {enabledItems.length > 0 && (
           <div className="hidden lg:flex items-center gap-4 text-[11px] text-amber-200/90 shrink-0">
             {enabledItems.map((item, idx) => {
-              const IconComp = ICON_MAP[item.icon] || Sparkles;
+              const IconComp = ICON_MAP[item.icon] || ShieldCheck;
               return (
                 <span key={item.id || idx} className={`flex items-center gap-1.5 ${idx === 0 ? "bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10" : ""}`}>
                   <IconComp className={`w-3.5 h-3.5 ${idx === 0 ? "text-amber-400" : "text-emerald-400"}`} />
@@ -75,7 +74,7 @@ export default function TopAnnouncementBar() {
         {/* Center: Dynamic Announcement */}
         {(text1 || text2) && (
           <div className="flex-1 overflow-hidden text-center text-xs tracking-wide font-bold text-white flex items-center justify-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
+            <Award className="w-3.5 h-3.5 text-amber-300 shrink-0" />
             {text1 && <span className="truncate">{text1}</span>}
             {text2 && (
               <span className="hidden md:inline-block text-amber-200/80 font-normal">

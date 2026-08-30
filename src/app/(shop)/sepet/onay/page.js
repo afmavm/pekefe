@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { clearCart } from "@/utils/cartStorage";
-import { CheckCircle2, PackageCheck, Truck, Sparkles, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
+import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
 
 function SepetOnayContent() {
   const searchParams = useSearchParams();
@@ -89,8 +89,8 @@ function SepetOnayContent() {
                 <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-amber-300 drop-shadow-md animate-scale-in" />
               </div>
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-amber-400 text-slate-900 rounded-full p-1.5 shadow-md border-2 border-white dark:border-slate-900">
-              <Sparkles className="w-4 h-4" />
+            <div className="absolute -bottom-2 -right-2 bg-emerald-600 text-white rounded-full p-1.5 shadow-md border-2 border-white dark:border-slate-900">
+              <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
 
@@ -165,7 +165,7 @@ function SepetOnayContent() {
                 {/* Kazanılan Lezzet Puanı Rozet Kutusu */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/5 border border-amber-400/40 text-amber-950 dark:text-amber-200 flex items-center gap-3.5 shadow-xs">
                   <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center shrink-0 border border-amber-400/30">
-                    <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
                     <p className="font-extrabold text-[10px] uppercase tracking-wider text-amber-800 dark:text-amber-300">

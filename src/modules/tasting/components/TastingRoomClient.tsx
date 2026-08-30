@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MapPin, Calendar, Clock, Users, ShieldCheck, Sparkles, CheckCircle2, ArrowRight, Loader2, Compass } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, ShieldCheck, Award, CheckCircle2, ArrowRight, Loader2, Compass } from "lucide-react";
 import { toast } from "sonner";
 import { TastingRoomLocation } from "../types";
 

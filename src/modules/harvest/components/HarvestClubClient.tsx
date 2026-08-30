@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Sparkles, CheckCircle2, ShieldCheck, ArrowRight, Compass, Feather, Calendar, MapPin, Award, Loader2 } from "lucide-react";
+import { Award, CheckCircle2, ShieldCheck, ArrowRight, Compass, Feather, Calendar, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { HarvestBatch } from "../types";
 
@@ -61,7 +61,7 @@ export default function HarvestClubClient() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/harvest/pre-order", {
+      const res = await fetch("/api/harvest-reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,7 +73,7 @@ export default function HarvestClubClient() {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessReservation(data.reservationCode);
-        toast.success("Rekolte ön sipariş rezervasyonunuz kabul edildi.");
+        toast.success("Hasat ön sipariş kaydınız alındı!");
       } else {
         toast.error(data.message || "Rezervasyon oluşturulamadı.");
       }
@@ -91,7 +91,7 @@ export default function HarvestClubClient() {
       <section className="relative py-24 md:py-32 overflow-hidden border-b border-amber-900/10 dark:border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-900/5 dark:bg-amber-500/10 border border-amber-900/15 dark:border-amber-500/20 text-[#6b1d2f] dark:text-amber-400 text-xs font-bold uppercase tracking-[0.25em] mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Award className="w-3.5 h-3.5" />
             PEKEFE Geleneksel Rekolte Kulübü
           </div>
           <h1 className="text-4xl md:text-6xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-6">

@@ -11,7 +11,7 @@ import {
   Building2, 
   GitCommit, 
   ChevronRight,
-  Sparkles
+  Crown
 } from "lucide-react";
 import { CurrentAccount, SubAccount } from "../types";
 
@@ -94,9 +94,10 @@ export default function DealerTierCenter({ dealer, allDealers }: DealerTierCente
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-850/50">
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tanımlı Ayrıcalıklar</p>
             <p className="text-xs text-slate-700 dark:text-slate-300 font-bold mt-1">{tier.benefit}</p>
-            <span className="inline-flex mt-2 items-center gap-1 px-2 py-0.5 bg-orange-50 dark:bg-amber-950/20 text-[#f97316] rounded-md text-[9px] font-black uppercase border border-orange-100 dark:border-amber-900/35">
-              <Sparkles className="w-3 h-3" /> {tier.pointsMult}
-            </span>
+            <div className="flex items-center gap-1.5 px-3 py-1 mt-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-900/50 w-fit">
+              <Crown className="w-3.5 h-3.5" />
+              <span className="text-xs font-bold">{tier.pointsMult}</span>
+            </div>
           </div>
         </div>
 

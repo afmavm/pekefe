@@ -295,7 +295,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
                       onClick={() => setQuery(tag)}
                       className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-orange-500 hover:text-white text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer border-none flex items-center gap-1.5"
                     >
-                      <Sparkles className="w-3 h-3 text-orange-400" /> {tag}
+                      <Tag className="w-3 h-3 text-orange-500" /> {tag}
                     </button>
                   ))}
                 </div>

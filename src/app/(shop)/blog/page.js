@@ -323,7 +323,7 @@ export default function Blog() {
             {/* Most Popular / Son Eklenenler */}
             <div>
               <h4 className="font-bold text-on-surface text-lg mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary">auto_awesome</span>
+                <span className="material-symbols-outlined text-secondary">menu_book</span>
                 Öne Çıkan Yazılar
               </h4>
               <div className="space-y-6">

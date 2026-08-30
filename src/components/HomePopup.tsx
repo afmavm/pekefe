@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useCMS } from "@/context/CMSContext";
-import { X, Copy, Check, Clock, Sparkles } from "lucide-react";
+import { X, Copy, Check, Clock, Gift } from "lucide-react";
 import { Link } from "@/navigation";
 
 export default function HomePopup() {
@@ -143,7 +143,7 @@ export default function HomePopup() {
           {/* Badge */}
           {config.badge && (
             <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-black text-amber-900 bg-amber-100 rounded-full w-max mb-3 border border-amber-200">
-              <Sparkles className="w-3 h-3 text-amber-600" />
+              <Gift className="w-3.5 h-3.5 text-amber-600" />
               {config.badge}
             </span>
           )}

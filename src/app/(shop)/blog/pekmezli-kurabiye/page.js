@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -249,7 +249,7 @@ export default function PekmezliKurabiyeTarifi() {
               </div>
               <div className="relative flex items-start gap-4 sm:gap-6">
                 <div className="w-12 h-12 flex-shrink-0 bg-secondary rounded-full flex items-center justify-center text-white shadow-inner">
-                  <span className="material-symbols-outlined">auto_awesome</span>
+                  <span className="material-symbols-outlined">restaurant</span>
                 </div>
                 <div>
                   <h4 className="font-headline-md text-lg text-primary font-bold mb-2">Pekefe'nin Sırrı</h4>

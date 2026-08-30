@@ -1647,7 +1647,7 @@ export default function Odeme() {
           <div className="flex justify-between items-end mb-6">
             <div>
               <span className="text-secondary font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                <span className="material-symbols-outlined text-sm">verified</span>
                 Müşterilerin Tercihi
               </span>
               <h2 className="text-xl md:text-2xl font-bold text-primary mt-1">

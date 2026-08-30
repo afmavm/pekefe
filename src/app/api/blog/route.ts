@@ -13,7 +13,7 @@ const defaultBlogPosts = [
     id: "blog-hmf",
     title: "HMF Nedir? Pekmez Üretiminde Sıcaklık, Süre ve Güneşin Önemi",
     slug: "hmf-nedir-pekmez-uretiminde-sicakligin-onemi",
-    category: "Geleneksel Üretim & Bilim",
+    category: "Geleneksel Üretim",
     image: "/uploads/hmf-bilimsel-laboratuvar-analizi.jpg",
     metaDesc: "Dut pekmezi üretiminde HMF (5-Hidroksimetilfurfural) nedir? Yüksek ateşte yakmadan, yayla güneşinde doğal ve kontrollü yoğunlaştırmanın bilimsel incelikleri.",
     content: `<h2>HMF (5-Hidroksimetilfurfural) Nedir?</h2>
@@ -38,7 +38,7 @@ const defaultBlogPosts = [
     id: "blog-1",
     title: "Geleneksel İspir Dut Pekmezi Nasıl Üretilir? Sırları ve Şifası",
     slug: "geleneksel-ispir-dut-pekmezi-nasil-uretilir",
-    category: "Üretim",
+    category: "Geleneksel Üretim",
     image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=800&q=80",
     metaDesc: "İspir'in 2200m rakımlı el değmemiş yaylalarında yetişen saf beyaz dutların bakır kazanlarda ve meşe odun ateşinde karamelize edilmeden pişirilme hikayesi. Hemen tadın!",
     content: `<h2>Doğanın En Saf Tatlısı: 2200 Metrede İspir Beyaz Dut Hasadı</h2>
@@ -69,7 +69,7 @@ const defaultBlogPosts = [
     id: "blog-2",
     title: "Ham Çiçek Balı ve İşlenmiş Bal Arasındaki 5 Hayati Fark",
     slug: "ham-cicek-bali-ve-islenmis-bal-arasindaki-farklar",
-    category: "Sağlık",
+    category: "Sağlık & Beslenme",
     image: "https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=800&q=80",
     metaDesc: "Pastörize edilmemiş, 45°C üzerinde ısıtılmamış hakiki ham çiçek balının polen zenginliği ve laboratuvar analiz gerçekleri. Hakiki bal satın alın!",
     content: `<h2>Ham Bal Nedir? Market Ballarından Nasıl Ayrılır?</h2>
@@ -98,7 +98,7 @@ const defaultBlogPosts = [
     id: "blog-3",
     title: "Erzurum İspir Pestil ve Köme Hazırlamanın Asırlık Sırları",
     slug: "pestil-ve-kome-hazirlamanin-incelikleri",
-    category: "Tarifler",
+    category: "Yöresel Tarifler",
     image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80",
     metaDesc: "Keten bezlerde dağ güneşiyle kurutulan cevizli İspir kömesi ve doğal dut pestilinin asırlık üretim gelenekleri. Taze köme siparişi verin!",
     content: `<h2>Geleneksel Lezzet Mirası: İspir Cevizli Köme ve Dut Pestili</h2>

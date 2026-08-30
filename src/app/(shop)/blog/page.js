@@ -208,16 +208,19 @@ export default function Blog() {
         <div className="lg:grid lg:grid-cols-12 lg:gap-gutter">
           {/* Main Content Area */}
           <div className="lg:col-span-9">
-            {/* Category Navigation */}
-            <nav className="flex items-center gap-8 mb-12 overflow-x-auto pb-4 scrollbar-hide border-b border-outline-variant/30">
+            {/* Category Navigation (Clean Quiet Luxury Pills, No Scrollbar) */}
+            <nav 
+              aria-label="Blog Kategorileri"
+              className="flex items-center gap-2.5 mb-10 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`font-label-md pb-2 whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none ${
                     selectedCategory === cat.id
-                      ? "text-primary border-b-2 border-primary font-bold"
-                      : "text-on-surface-variant hover:text-primary"
+                      ? "bg-[#360e17] text-white shadow-md ring-2 ring-[#360e17]/20"
+                      : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-amber-900/30 hover:text-[#b45309] border border-slate-200/60 dark:border-slate-700"
                   }`}
                 >
                   {cat.name}

@@ -1003,45 +1003,75 @@ export default function StockProductionPage() {
                                     <p><b>Maliyet:</b> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
                                     <span className="text-[10px] text-slate-400 font-normal">Hammadde (Satış Yok)</span>
                                   </div>
-                                ) : (
-                                  <div className="text-xs font-semibold flex flex-col gap-1">
-                                    {/* Maliyet */}
-                                    <div className="text-slate-500 text-[11px]">
-                                      <span className="font-bold text-slate-600">Maliyet:</span> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                ) : (() => {
+                                  const cost = Number(p.cost || 0);
+                                  
+                                  let attrs: any = p.attributes || {};
+                                  if (typeof attrs === "string") {
+                                    try { attrs = JSON.parse(attrs); } catch { attrs = {}; }
+                                  }
+
+                                  // 1. Web Satış Fiyatı (E-ticaret Mağaza Satış Fiyatı)
+                                  const webPrice = Number(
+                                    p.sale_price !== null && p.sale_price !== undefined
+                                      ? p.sale_price
+                                      : (p.price || attrs.webPrice || attrs.salePrice || 0)
+                                  );
+
+                                  // 2. B2B Bayi Taban Fiyatı (DB'deki gerçek B2B değeri)
+                                  const rawB2b = p.b2b_base_price ?? attrs.b2bPrice ?? (p.variants && p.variants[0]?.b2bPrice);
+                                  const b2bPrice = rawB2b !== null && rawB2b !== undefined && rawB2b !== "" ? Number(rawB2b) : null;
+
+                                  // 3. Perakende Satış Fiyatı (Mağaza Perakende Fiyatı)
+                                  const retailPrice = Number(
+                                    attrs.retailPrice !== undefined && attrs.retailPrice !== null && attrs.retailPrice !== ""
+                                      ? attrs.retailPrice
+                                      : (p.price || webPrice)
+                                  );
+
+                                  // 4. Piyasa / Çizgili Liste Fiyatı
+                                  const marketPrice = Number(p.oldPrice || p.list_price || attrs.marketPrice || 0);
+
+                                  return (
+                                    <div className="text-xs font-semibold flex flex-col gap-1">
+                                      {/* Maliyet */}
+                                      <div className="text-slate-500 text-[11px]">
+                                        <span className="font-bold text-slate-600">Maliyet:</span> {cost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                      </div>
+
+                                      {/* Sadece Web Modu veya Tüm Fiyatlar */}
+                                      {(priceDisplayMode === "web" || priceDisplayMode === "all") && (
+                                        <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-max border border-emerald-200/60">
+                                          <span className="text-[9px] uppercase font-bold tracking-wider">Web:</span>
+                                          <span className="font-extrabold">{webPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</span>
+                                        </div>
+                                      )}
+
+                                      {/* Sadece B2B Modu veya Tüm Fiyatlar */}
+                                      {(priceDisplayMode === "b2b" || priceDisplayMode === "all") && (
+                                        <div className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md w-max border border-blue-200/60">
+                                          <span className="text-[9px] uppercase font-bold tracking-wider">B2B:</span>
+                                          <span className="font-extrabold">
+                                            {b2bPrice !== null
+                                              ? `${b2bPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
+                                              : `${webPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
+                                            }
+                                          </span>
+                                        </div>
+                                      )}
+
+                                      {/* Sadece Perakende Modu veya Tüm Fiyatlar */}
+                                      {(priceDisplayMode === "retail" || priceDisplayMode === "all") && (
+                                        <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md w-max border border-purple-200/60">
+                                          <span className="text-[9px] uppercase font-bold tracking-wider">Perakende:</span>
+                                          <span className="font-extrabold">
+                                            {retailPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
-
-                                    {/* Sadece Web Modu veya Tüm Fiyatlar */}
-                                    {(priceDisplayMode === "web" || priceDisplayMode === "all") && (
-                                      <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-max border border-emerald-200/60">
-                                        <span className="text-[9px] uppercase font-bold tracking-wider">Web:</span>
-                                        <span className="font-extrabold">{resolveProductPrice(p).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</span>
-                                      </div>
-                                    )}
-
-                                    {/* Sadece B2B Modu veya Tüm Fiyatlar */}
-                                    {(priceDisplayMode === "b2b" || priceDisplayMode === "all") && (
-                                      <div className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md w-max border border-blue-200/60">
-                                        <span className="text-[9px] uppercase font-bold tracking-wider">B2B:</span>
-                                        <span className="font-extrabold">
-                                          {(p.b2b_base_price 
-                                            ? Number(p.b2b_base_price)
-                                            : (p.attributes?.b2bPrice ? Number(p.attributes.b2bPrice) : (resolveProductPrice(p) * 0.85))
-                                          ).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {/* Sadece Perakende Modu veya Tüm Fiyatlar */}
-                                    {(priceDisplayMode === "retail" || priceDisplayMode === "all") && (
-                                      <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md w-max border border-purple-200/60">
-                                        <span className="text-[9px] uppercase font-bold tracking-wider">Perakende:</span>
-                                        <span className="font-extrabold">
-                                          {(p.list_price || p.oldPrice || p.attributes?.retailPrice || p.price || resolveProductPrice(p)).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                                  );
+                                })()}
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex flex-col gap-0.5">

@@ -58,6 +58,9 @@ interface Product {
   price: number;
   sale_price?: number | null;
   list_price?: number | null;
+  oldPrice?: number | null;
+  b2b_base_price?: number | null;
+  b2b_active?: boolean;
   isRawMaterial: boolean;
   category?: string;
   criticalLimit?: number;
@@ -80,6 +83,7 @@ export default function StockProductionPage() {
   
   const [activeTab, setActiveTab] = useState<"URUNLER" | "KATEGORILER">("URUNLER");
   const [searchTerm, setSearchTerm] = useState("");
+  const [priceDisplayMode, setPriceDisplayMode] = useState<"all" | "web" | "b2b" | "retail">("all");
 
   // Selection and Export States
   const [selectedRows, setSelectedRows] = useState<Set<string | number>>(new Set());
@@ -840,17 +844,67 @@ export default function StockProductionPage() {
             {/* URUNLER TAB (SİSTEM ÜRÜN KATALOĞU) */}
             {activeTab === "URUNLER" && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                   <div>
                     <h3 className="text-base font-extrabold text-slate-900">Sistem Ürün Kataloğu</h3>
                     <p className="text-xs text-slate-500 mt-0.5">Stoktaki ham maddeler ve hazır satış mamullerinin tamamı</p>
                   </div>
-                  <button
-                    onClick={openAddProductModal}
-                    className="px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow shadow-[#b45309]/10"
-                  >
-                    <Plus className="w-4 h-4" /> YENİ ÜRÜN EKLE
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Fiyat Gösterim Modu Seçici */}
+                    <div className="inline-flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setPriceDisplayMode("all")}
+                        className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          priceDisplayMode === "all"
+                            ? "bg-white text-[#b45309] shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Tüm Fiyatlar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPriceDisplayMode("web")}
+                        className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          priceDisplayMode === "web"
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Sadece Web
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPriceDisplayMode("b2b")}
+                        className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          priceDisplayMode === "b2b"
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Sadece B2B
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPriceDisplayMode("retail")}
+                        className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                          priceDisplayMode === "retail"
+                            ? "bg-purple-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Sadece Perakende
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={openAddProductModal}
+                      className="px-4 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow shadow-[#b45309]/10"
+                    >
+                      <Plus className="w-4 h-4" /> YENİ ÜRÜN EKLE
+                    </button>
+                  </div>
                 </div>
                 <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
                   <table className="w-full text-left whitespace-nowrap">
@@ -944,16 +998,50 @@ export default function StockProductionPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4">
-                                <div className="text-xs font-semibold text-slate-600 flex flex-col gap-0.5">
-                                  <p><b>Maliyet:</b> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
-                                  <p className="text-slate-900 font-extrabold">
-                                    <b>Satış:</b> {p.isRawMaterial ? (
-                                      <span className="text-slate-400 font-normal">—</span>
-                                    ) : (
-                                      `${resolveProductPrice(p).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
+                                {p.isRawMaterial ? (
+                                  <div className="text-xs font-semibold text-slate-500">
+                                    <p><b>Maliyet:</b> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
+                                    <span className="text-[10px] text-slate-400 font-normal">Hammadde (Satış Yok)</span>
+                                  </div>
+                                ) : (
+                                  <div className="text-xs font-semibold flex flex-col gap-1">
+                                    {/* Maliyet */}
+                                    <div className="text-slate-500 text-[11px]">
+                                      <span className="font-bold text-slate-600">Maliyet:</span> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                    </div>
+
+                                    {/* Sadece Web Modu veya Tüm Fiyatlar */}
+                                    {(priceDisplayMode === "web" || priceDisplayMode === "all") && (
+                                      <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-max border border-emerald-200/60">
+                                        <span className="text-[9px] uppercase font-bold tracking-wider">Web:</span>
+                                        <span className="font-extrabold">{resolveProductPrice(p).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</span>
+                                      </div>
                                     )}
-                                  </p>
-                                </div>
+
+                                    {/* Sadece B2B Modu veya Tüm Fiyatlar */}
+                                    {(priceDisplayMode === "b2b" || priceDisplayMode === "all") && (
+                                      <div className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md w-max border border-blue-200/60">
+                                        <span className="text-[9px] uppercase font-bold tracking-wider">B2B:</span>
+                                        <span className="font-extrabold">
+                                          {(p.b2b_base_price 
+                                            ? Number(p.b2b_base_price)
+                                            : (p.attributes?.b2bPrice ? Number(p.attributes.b2bPrice) : (resolveProductPrice(p) * 0.85))
+                                          ).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* Sadece Perakende Modu veya Tüm Fiyatlar */}
+                                    {(priceDisplayMode === "retail" || priceDisplayMode === "all") && (
+                                      <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md w-max border border-purple-200/60">
+                                        <span className="text-[9px] uppercase font-bold tracking-wider">Perakende:</span>
+                                        <span className="font-extrabold">
+                                          {(p.list_price || p.oldPrice || p.attributes?.retailPrice || p.price || resolveProductPrice(p)).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex flex-col gap-0.5">

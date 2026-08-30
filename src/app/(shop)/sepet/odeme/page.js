@@ -48,6 +48,15 @@ export default function Odeme() {
   const [siteSettings, setSiteSettings] = useState(null);
   const [paytrToken, setPaytrToken] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [copiedIban, setCopiedIban] = useState(false);
+
+  const handleCopyIban = (iban) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText((iban || "").replace(/\s+/g, ""));
+      setCopiedIban(true);
+      setTimeout(() => setCopiedIban(false), 2500);
+    }
+  };
 
   // Load Applied Coupon from Cart
   useEffect(() => {
@@ -901,24 +910,24 @@ export default function Odeme() {
                       )}
 
                       {/* Logo Container with generous height & centered crisp display */}
-                      <div className="h-16 md:h-20 w-full flex items-center justify-center p-3 bg-white rounded-xl border border-slate-100 dark:border-slate-800 shadow-2xs overflow-hidden">
+                      <div className="h-16 md:h-18 w-full flex items-center justify-center p-3 bg-white rounded-xl border border-slate-100 dark:border-slate-800 shadow-2xs overflow-hidden">
                         {logo ? (
                           <img
                             src={logo}
                             alt={c.name}
-                            className="h-10 md:h-12 w-auto max-w-[85%] object-contain transition-transform duration-300 group-hover:scale-105"
+                            className="h-9 md:h-11 w-auto max-w-[90%] object-contain transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
                           <span className="text-base font-black text-slate-800">{c.name}</span>
                         )}
                       </div>
 
-                      {/* Footer Info & Fee Pill */}
+                      {/* Footer Info & Fee Pill - NO TRUNCATE */}
                       <div className="flex items-center justify-between w-full pt-3 border-t border-slate-100 dark:border-slate-800 gap-2">
-                        <span className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">
+                        <span className="text-xs font-black text-slate-900 dark:text-white leading-tight">
                           {c.name}
                         </span>
-                        <span className={`text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full transition-colors shrink-0 ${
+                        <span className={`text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full transition-colors shrink-0 ${
                           subtotal === 0 ? "hidden" : isReceiverPay
                             ? "bg-amber-500 text-white shadow-2xs"
                             : isFree
@@ -1002,7 +1011,7 @@ export default function Odeme() {
                 </div>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1 text-xs font-bold">
-                <span className="material-symbols-outlined text-sm">lock</span>
+                <ShieldCheck className="w-3.5 h-3.5" />
                 <span>256-bit SSL Güvenlik</span>
               </div>
             </div>
@@ -1059,7 +1068,7 @@ export default function Odeme() {
 
             {/* TAB 1: CREDIT CARD / PAYTR */}
             {paymentMethod === "creditCard" && (
-              <div className="space-y-4 pt-2 animate-in fade-in duration-200">
+              <div className="space-y-5 pt-2 animate-in fade-in duration-200">
                 {paytrToken ? (
                   <div id="paytr-iframe-container" className="bg-slate-50 p-4 md:p-6 rounded-2xl border-2 border-emerald-500 shadow-xl space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-slate-200">
@@ -1089,50 +1098,70 @@ export default function Odeme() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    {/* Visual Credit Card Preview & Form Container */}
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white shadow-xl space-y-4 relative overflow-hidden border border-slate-700">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-mono font-bold tracking-widest text-amber-400 uppercase">KREDİ / BANKA KARTINIZ</span>
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                          <span className="px-2 py-0.5 rounded bg-white/10">VISA</span>
-                          <span className="px-2 py-0.5 rounded bg-white/10">MASTER</span>
-                          <span className="px-2 py-0.5 rounded bg-white/10">TROY</span>
+                  <div className="space-y-5">
+                    {/* Visual Credit Card Luxury Preview */}
+                    <div className="max-w-md mx-auto p-6 rounded-3xl bg-gradient-to-br from-[#1b1c1e] via-[#2a2b2e] to-[#121315] text-white shadow-2xl space-y-5 relative overflow-hidden border border-slate-700/80">
+                      {/* Gold Accent Glow */}
+                      <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                      <div className="flex justify-between items-center relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                          <span className="text-[11px] font-mono font-bold tracking-widest text-amber-400 uppercase">PEKEFE GÜVENLİ ÖDEME</span>
                         </div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-300">
+                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">VISA</span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">MASTER</span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/10 font-mono">TROY</span>
+                        </div>
+                      </div>
+
+                      {/* EMV Chip & Contactless Wave */}
+                      <div className="flex items-center justify-between py-1 relative z-10">
+                        <div className="w-11 h-8 rounded-lg bg-gradient-to-tr from-amber-300 via-amber-400 to-amber-200 border border-amber-500/40 shadow-inner flex items-center justify-center">
+                          <div className="w-8 h-5 border border-amber-700/30 rounded grid grid-cols-2" />
+                        </div>
+                        <span className="material-symbols-outlined text-xl text-slate-400">contactless</span>
                       </div>
 
                       {/* Live Card Number Preview */}
-                      <div className="text-xl md:text-2xl font-mono tracking-widest text-slate-100 py-2">
+                      <div className="text-xl sm:text-2xl font-mono font-bold tracking-[0.2em] text-slate-100 relative z-10">
                         {cardNumber || "•••• •••• •••• ••••"}
                       </div>
 
-                      <div className="flex justify-between items-end text-xs font-mono text-slate-300">
+                      <div className="flex justify-between items-end text-xs font-mono text-slate-300 pt-1 relative z-10">
                         <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">KART SAHİBİ</span>
-                          <span className="font-bold uppercase tracking-wider">{nameOnCard || "AD SOYAD"}</span>
+                          <span className="text-[9px] text-slate-400 block uppercase tracking-wider">KART SAHİBİ</span>
+                          <span className="font-bold uppercase tracking-wider text-sm text-slate-100">
+                            {nameOnCard || "AD SOYAD"}
+                          </span>
                         </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">SON KULLANMA</span>
-                          <span className="font-bold">{expiry || "AA/YY"}</span>
+                        <div className="text-right">
+                          <span className="text-[9px] text-slate-400 block uppercase tracking-wider">SON KULLANMA</span>
+                          <span className="font-bold text-sm text-slate-100">{expiry || "AA/YY"}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Form Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl">
+                    {/* Modern Quiet Luxury Form Inputs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 sm:p-6 bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl">
                       <div className="md:col-span-2 space-y-1.5">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART ÜZERİNDEKİ İSİM *</label>
+                        <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          KART ÜZERİNDEKİ İSİM *
+                        </label>
                         <input
                           type="text"
                           value={nameOnCard}
                           onChange={(e) => setNameOnCard(e.target.value.toUpperCase())}
                           placeholder="AHMET YILMAZ"
-                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-medium uppercase"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-semibold uppercase text-slate-900 dark:text-white"
                         />
                       </div>
 
                       <div className="md:col-span-2 space-y-1.5">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">KART NUMARASI *</label>
+                        <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          KART NUMARASI *
+                        </label>
                         <input
                           type="text"
                           maxLength={19}
@@ -1143,12 +1172,14 @@ export default function Odeme() {
                             setCardNumber(formatted);
                           }}
                           placeholder="4543 0000 0000 0000"
-                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold tracking-wider"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold tracking-wider text-slate-900 dark:text-white"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">SON KULLANMA TARİHİ *</label>
+                        <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          SON KULLANMA TARİHİ *
+                        </label>
                         <input
                           type="text"
                           maxLength={5}
@@ -1161,19 +1192,21 @@ export default function Odeme() {
                             setExpiry(val);
                           }}
                           placeholder="AA / YY"
-                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold text-center"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">CVV / GÜVENLİK KODU *</label>
+                        <label className="block text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          CVV / GÜVENLİK KODU *
+                        </label>
                         <input
                           type="password"
                           maxLength={4}
                           value={cvv}
                           onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                           placeholder="123"
-                          className="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-sm outline-none font-mono font-bold text-center"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all text-sm outline-none font-mono font-bold text-center text-slate-900 dark:text-white"
                         />
                       </div>
                     </div>
@@ -1184,105 +1217,168 @@ export default function Odeme() {
 
             {/* TAB 2: BANK TRANSFER */}
             {paymentMethod === "bankTransfer" && (
-              <div className="p-6 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-                  <span className="material-symbols-outlined text-amber-700">account_balance</span>
-                  <span>
-                    Pekefe Resmi Banka Hesap Bilgileri {bankDiscountRate > 0 ? `(%${bankDiscountRate} Ekstra İndirim Uygulandı)` : ""}
-                  </span>
+              <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200/80 dark:border-amber-900/40 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 text-[#6b1d2f] dark:text-amber-400 font-extrabold text-sm sm:text-base">
+                    <Landmark className="w-5 h-5 text-amber-700 dark:text-amber-400" />
+                    <span>Pekefe Resmi Banka Hesap Bilgileri</span>
+                  </div>
+                  {bankDiscountRate > 0 && (
+                    <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-2xs">
+                      %{bankDiscountRate} İndirim Uygulandı
+                    </span>
+                  )}
                 </div>
                 
-                <div className="bg-white p-4 rounded-xl border border-amber-200/80 space-y-3 text-xs font-mono">
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-2xs space-y-4">
                   {bankAccounts && bankAccounts.length > 0 ? (
                     bankAccounts.map((bank, idx) => (
-                      <div key={bank.id || idx} className={`space-y-1.5 ${idx > 0 ? "pt-3 border-t border-amber-100" : ""}`}>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1.5">
-                          <span className="text-on-surface-variant font-sans font-medium">Banka:</span>
-                          <span className="font-bold text-on-surface">{bank.name} {bank.branch ? `- ${bank.branch}` : ""}</span>
+                      <div key={bank.id || idx} className={`space-y-3 ${idx > 0 ? "pt-4 border-t border-slate-100 dark:border-slate-800" : ""}`}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-slate-400 text-[10px] block uppercase font-bold">Banka / Şube</span>
+                            <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                              {bank.name} {bank.branch ? `- ${bank.branch}` : ""}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 text-[10px] block uppercase font-bold">Alıcı Ünvanı</span>
+                            <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                              {siteSettings?.companyName || siteSettings?.companyNameField || "İlhan EFE - Pekefe Gıda"}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1.5">
-                          <span className="text-on-surface-variant font-sans font-medium">Alıcı Ünvanı:</span>
-                          <span className="font-bold text-on-surface">
-                            {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center pt-0.5">
-                          <span className="text-on-surface-variant font-sans font-medium">IBAN:</span>
-                          <span className="font-bold text-primary text-sm tracking-wider select-all">
-                            {bank.iban || "TR42 0001 0002 0003 0004 0005 01"}
-                            {bank.currency && bank.currency !== "TRY" ? ` (${bank.currency})` : ""}
-                          </span>
+
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
+                            <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all">
+                              {bank.iban || "TR02 0001 2001 3350 0009 1000 39"}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyIban(bank.iban || "TR020001200133500009100039")}
+                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
+                          >
+                            {copiedIban ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="text-emerald-600 font-black">Kopyalandı!</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="material-symbols-outlined text-sm">content_copy</span>
+                                <span>Kopyala</span>
+                              </>
+                            )}
+                          </button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between border-b border-outline-variant/20 pb-2">
-                        <span className="text-on-surface-variant font-sans">Banka:</span>
-                        <span className="font-bold text-on-surface">
-                          {siteSettings?.bankName || "Ziraat Bankası - İspir Şubesi"}
-                        </span>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-slate-400 text-[10px] block uppercase font-bold">Banka / Şube</span>
+                          <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                            {siteSettings?.bankName || "Halkbank - İspir Şubesi"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 text-[10px] block uppercase font-bold">Alıcı Ünvanı</span>
+                          <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                            {siteSettings?.companyName || siteSettings?.companyNameField || "İlhan EFE"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex justify-between border-b border-outline-variant/20 pb-2">
-                        <span className="text-on-surface-variant font-sans">Alıcı Ünvanı:</span>
-                        <span className="font-bold text-on-surface">
-                          {siteSettings?.companyName || siteSettings?.companyNameField || "Pekefe Gıda San. ve Tic. Ltd. Şti."}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-on-surface-variant font-sans">IBAN:</span>
-                        <span className="font-bold text-primary text-sm tracking-wider select-all">
-                          {siteSettings?.bankIban || "TR42 0001 0002 0003 0004 0005 01"}
-                        </span>
+
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
+                          <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all">
+                            {siteSettings?.bankIban || "TR02 0001 2001 3350 0009 1000 39"}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyIban(siteSettings?.bankIban || "TR020001200133500009100039")}
+                          className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
+                        >
+                          {copiedIban ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-600 font-black">Kopyalandı!</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="material-symbols-outlined text-sm">content_copy</span>
+                              <span>Kopyala</span>
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
-                  * Siparişinizi onayladıktan sonra üretilecek Sipariş Numarasını havale açıklama kısmına yazmanız gerekmektedir. Ödeme onayınızın ardından siparişiniz kargoya verilecektir.
-                </p>
+                <div className="flex items-start gap-2 text-xs text-amber-900/90 dark:text-amber-300 font-medium">
+                  <span className="material-symbols-outlined text-base text-amber-700 shrink-0">info</span>
+                  <p>
+                    Siparişinizi tamamladıktan sonra ekranda oluşacak <strong>Sipariş Numaranızı</strong> havale açıklamasına ekleyiniz. Ödeme teyidinin ardından siparişiniz aynı gün kargoya hazırlanır.
+                  </p>
+                </div>
               </div>
             )}
 
             {/* TAB 3: B2B OPEN ACCOUNT */}
             {paymentMethod === "openAccount" && (
-              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <span className="material-symbols-outlined text-primary">verified</span>
+              <div className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2.5 text-[#6b1d2f] dark:text-amber-400 font-extrabold text-sm sm:text-base">
+                  <ShieldCheck className="w-5 h-5 text-amber-600" />
                   <span>B2B Kurumsal Bayi Vadeli Cari Ödeme</span>
                 </div>
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  Bu ödeme yöntemi yalnızca anlaşmalı onaylı B2B kurumsal bayilerimiz için geçerlidir. Sipariş tutarı cari hesabınıza borç olarak yansıtılacak ve belirlenen vadede tahsil edilecektir.
+                
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  Bu ödeme yöntemi anlaşmalı ve cari hesabı onaylı <strong>B2B kurumsal bayilerimiz</strong> için geçerlidir. Sipariş tutarı kurumsal cari hesabınıza borç olarak işlenir ve mutabık kalınan vadede faturalandırılır.
                 </p>
-                <div className="p-3 bg-surface rounded-xl border border-outline-variant/30 flex justify-between text-xs">
-                  <span className="font-semibold text-gray-600">İşlem Türü:</span>
-                  <span className="font-bold text-primary">Cari Hesap Vadeli Borçlandırma</span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">İşlem Türü</span>
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-100">Cari Hesap Vadeli Borçlandırma</span>
+                  </div>
+                  <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Onay Statüsü</span>
+                    <span className="text-xs font-black text-emerald-600 flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Yetkili Bayi Hesabı
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* TAB 4: CASH ON DELIVERY */}
             {paymentMethod === "cashOnDelivery" && (
-              <div className="p-6 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-3 text-purple-900 font-bold text-sm">
-                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md">
-                    <span className="material-symbols-outlined text-xl">local_shipping</span>
+              <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/50 dark:bg-slate-800/60 border border-amber-200/80 dark:border-slate-700 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md">
+                    <Truck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-purple-900">Kapıda Ödeme (Kargo Teslimatı)</h4>
-                    <p className="text-xs text-purple-700 mt-0.5">Siparişiniz kurye tarafından teslim edilirken ödeme yapın.</p>
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Kapıda Ödeme (Kargo Teslimatı)</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">Siparişiniz kurye tarafından teslim edilirken ödeme yapın.</p>
                   </div>
                 </div>
 
-                <p className="text-xs text-purple-800 leading-relaxed">
-                  Kargonuz teslim edilirken nakit veya kredi kartı (POS cihazı) ile kapıda ödeme yapabilirsiniz.
-                  {codFee > 0 && ` Kapıda ödeme hizmet bedeli (+₺${codFee}) toplam tutara eklenmiştir.`}
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  Kargonuz adresinize ulaştığında nakit veya POS cihazı ile banka/kredi kartınızla kapıda güvenle ödeyebilirsiniz.
+                  {codFee > 0 && ` Kapıda ödeme hizmet bedeli (+₺${codFee}) sipariş toplamına dâhildir.`}
                 </p>
 
-                <div className="p-3 bg-white rounded-xl border border-purple-200/80 flex justify-between text-xs">
-                  <span className="font-semibold text-gray-600">Ödeme Yöntemi:</span>
-                  <span className="font-bold text-purple-700">Teslimatta Nakit / Kredi Kartı POS</span>
+                <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                  <span className="font-semibold text-slate-500">Ödeme Türü:</span>
+                  <span className="font-bold text-[#6b1d2f] dark:text-amber-400">Kapıda Nakit / Kredi Kartı POS</span>
                 </div>
               </div>
             )}

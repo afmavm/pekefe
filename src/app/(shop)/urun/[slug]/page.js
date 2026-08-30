@@ -116,15 +116,16 @@ export default function UrunDetay({ params }) {
           setIsReviewModalOpen={state.setIsReviewModalOpen}
         />
 
-        {/* ── HMF Bilgi Bloğu (Editorial & Scientific Showcase) ── */}
-        <HmfInfoSection
-          productName={state.product?.name}
-          isMulberryMolasses={
-            state.product?.slug?.includes("pekmez") ||
-            state.product?.slug?.includes("dut") ||
-            state.product?.name?.toLowerCase()?.includes("pekmez")
-          }
-        />
+        {/* ── HMF Bilgi Bloğu (Sadece PEKEFE Geleneksel İspir Dut Gün Pekmezi için) ── */}
+        {(state.product?.slug === "ispir-dut-gun-pekmezi" ||
+          state.product?.id === "PKF-DUT-PEKMEZI" ||
+          state.product?.sku === "PKF-DUT-001" ||
+          state.product?.name?.toLowerCase().includes("dut gün pekmezi")) && (
+          <HmfInfoSection
+            productName={state.product?.name}
+            isMulberryMolasses={true}
+          />
+        )}
 
         {/* ── Recommendations ── */}
         <ProductRecommendations

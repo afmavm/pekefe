@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { clearCart } from "@/utils/cartStorage";
 import { CheckCircle2, PackageCheck, Truck, Sparkles, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
 
-export default function SepetOnay() {
+function SepetOnayContent() {
+  const searchParams = useSearchParams();
+  const queryOrderId = searchParams.get("orderId");
   const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
+    let loaded = false;
     try {
       let storedData = localStorage.getItem("pekefe_completed_order") || sessionStorage.getItem("pekefe_completed_order");
       if (!storedData && typeof document !== "undefined") {
@@ -18,22 +22,47 @@ export default function SepetOnay() {
       }
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        setCompletedOrder(parsed);
-
-        // Auto-promote order status to 'Hazırlanıyor' upon reaching order confirmation page
-        if (parsed?.orderId) {
-          fetch('/api/orders', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: parsed.orderId, status: 'Hazırlanıyor' })
-          }).catch(err => console.error("Auto promote order status error:", err));
+        if (!queryOrderId || parsed.orderId === queryOrderId) {
+          setCompletedOrder(parsed);
+          loaded = true;
         }
       }
     } catch (e) {
-      console.error("Error reading completed order", e);
+      console.error("Error reading completed order from storage:", e);
     }
+
+    // If queryOrderId is provided, fetch latest details from orders API
+    if (queryOrderId) {
+      fetch(`/api/orders?personal=true`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((ordersList) => {
+          if (Array.isArray(ordersList)) {
+            const found = ordersList.find((o) => o.id === queryOrderId || o.orderNumber === queryOrderId);
+            if (found) {
+              setCompletedOrder((prev) => ({
+                ...prev,
+                orderId: found.id || queryOrderId,
+                date: found.date ? new Date(found.date).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }) : prev?.date,
+                total: Number(found.total ?? found.amount ?? 0),
+                subtotal: Number(found.total ?? found.amount ?? 0),
+                shippingCost: Number(found.shippingFee || 0),
+                paymentMethod: found.method === "Banka Havalesi" ? "bankTransfer" : found.method === "Açık Hesap" ? "openAccount" : "creditCard",
+                cargoCompany: found.cargoCompany || prev?.cargoCompany || "Yurtiçi Kargo",
+                items: Array.isArray(found.items) && found.items.length > 0 ? found.items : prev?.items || [],
+                shippingAddress: {
+                  name: found.client || found.customerName || prev?.shippingAddress?.name,
+                  address: found.address || prev?.shippingAddress?.address,
+                  phone: found.phone || prev?.shippingAddress?.phone,
+                }
+              }));
+            }
+          }
+        })
+        .catch((err) => console.error("Error fetching order by query id:", err));
+    }
+
     clearCart();
-  }, []);
+  }, [queryOrderId]);
 
   const orderNum = completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);
   const orderDate = completedOrder?.date || new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
@@ -292,5 +321,13 @@ export default function SepetOnay() {
 
       </main>
     </div>
+  );
+}
+
+export default function SepetOnay() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 font-mono">Yükleniyor...</div>}>
+      <SepetOnayContent />
+    </Suspense>
   );
 }

@@ -42,7 +42,7 @@ function SepetOnayContent() {
               setCompletedOrder((prev) => ({
                 ...prev,
                 orderId: found.id || queryOrderId,
-                date: found.date ? new Date(found.date).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }) : prev?.date,
+                date: found.date || prev?.date,
                 total: Number(found.total ?? found.amount ?? 0),
                 subtotal: Number(found.total ?? found.amount ?? 0),
                 shippingCost: Number(found.shippingFee || 0),
@@ -65,7 +65,22 @@ function SepetOnayContent() {
   }, [queryOrderId]);
 
   const orderNum = completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);
-  const orderDate = completedOrder?.date || new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  
+  const formatDate = (raw) => {
+    if (!raw) return new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    try {
+      const parsed = new Date(raw);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+      }
+    } catch {}
+    if (typeof raw === "string" && raw.trim().length > 3 && !raw.includes("Invalid")) {
+      return raw;
+    }
+    return new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const orderDate = formatDate(completedOrder?.date);
   const items = completedOrder?.items || [];
   const subtotal = completedOrder?.subtotal ?? items.reduce((a, b) => a + Number(b.price || 0) * Number(b.quantity || 1), 0);
   const shippingCost = completedOrder?.shippingCost ?? 0;

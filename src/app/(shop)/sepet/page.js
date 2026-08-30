@@ -97,10 +97,12 @@ export default function Sepet() {
 
   const updateQuantity = (id, delta) => {
     updateCartQty(id, delta);
+    setCartItems(getCart());
   };
 
   const removeItem = (id) => {
     removeFromCart(id);
+    setCartItems(getCart());
   };
 
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });

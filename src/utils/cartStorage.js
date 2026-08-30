@@ -161,13 +161,15 @@ export function addToCart(product, quantity = 1) {
 
 export function updateCartQty(id, delta) {
   try {
-    const store = useCartStore.getState();
     const targetId = String(id);
-    const items = Array.isArray(store.items) ? store.items : [];
-    const existing = items.find(item => String(item.id) === targetId);
+    const currentItems = getCart();
+    const existing = currentItems.find(item => String(item.id) === targetId);
+
     if (existing) {
-      const nextQty = (existing.quantity || 1) + delta;
-      const maxStock = existing.stock != null ? Number(existing.stock) : existing.stock_quantity != null ? Number(existing.stock_quantity) : 999;
+      const nextQty = Number(existing.quantity || 1) + delta;
+      const maxStock = existing.stock != null 
+        ? Number(existing.stock) 
+        : (existing.stock_quantity != null ? Number(existing.stock_quantity) : 999);
 
       if (delta > 0 && nextQty > maxStock) {
         if (typeof window !== "undefined") {
@@ -180,25 +182,45 @@ export function updateCartQty(id, delta) {
         return false;
       }
 
+      let updatedList = [];
       if (nextQty <= 0) {
-        store.removeItem(targetId);
+        updatedList = currentItems.filter(item => String(item.id) !== targetId);
       } else {
-        store.updateQuantity(targetId, nextQty);
+        updatedList = currentItems.map(item =>
+          String(item.id) === targetId ? { ...item, quantity: nextQty, qty: nextQty } : item
+        );
       }
-    } else {
-      store.removeItem(targetId);
+
+      saveCart(updatedList);
+
+      try {
+        const store = useCartStore.getState();
+        if (store) {
+          if (nextQty <= 0) store.removeItem(targetId);
+          else store.updateQuantity(targetId, nextQty);
+        }
+      } catch {}
+      return true;
     }
-    saveCart(getCart());
   } catch (e) {
     console.error("Error updating cart qty", e);
   }
+  return false;
 }
 
 export function removeFromCart(id) {
   try {
-    const store = useCartStore.getState();
-    store.removeItem(String(id));
-    saveCart(getCart());
+    const targetId = String(id);
+    const currentItems = getCart();
+    const updatedList = currentItems.filter(item => String(item.id) !== targetId);
+    saveCart(updatedList);
+
+    try {
+      const store = useCartStore.getState();
+      if (store?.removeItem) {
+        store.removeItem(targetId);
+      }
+    } catch {}
   } catch (e) {
     console.error("Error removing from cart", e);
   }
@@ -206,9 +228,13 @@ export function removeFromCart(id) {
 
 export function clearCart() {
   try {
-    const store = useCartStore.getState();
-    store.clearCart();
     saveCart([]);
+    try {
+      const store = useCartStore.getState();
+      if (store?.clearCart) {
+        store.clearCart();
+      }
+    } catch {}
   } catch (e) {
     console.error("Error clearing cart", e);
   }

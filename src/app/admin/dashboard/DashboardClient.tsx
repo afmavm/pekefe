@@ -294,12 +294,27 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
   useEffect(() => {
     if (!pollingActive) return;
 
-    // Poll every 8 seconds for real-time B2B/B2C order webhook syncing
+    // 1. Initial fetch & 5-second aggressive live sync
+    fetchDashboardData(false);
     const interval = setInterval(() => {
       fetchDashboardData(false);
-    }, 8000);
+    }, 5000);
 
-    return () => clearInterval(interval);
+    // 2. React instantly when tab gains focus or storage changes (e.g. order placed in another tab)
+    const handleFocus = () => fetchDashboardData(false);
+    const handleStorage = () => fetchDashboardData(false);
+    const handleCustomOrderEvent = () => fetchDashboardData(false);
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("pekefe-order-updated", handleCustomOrderEvent);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("pekefe-order-updated", handleCustomOrderEvent);
+    };
   }, [pollingActive]);
 
   const kpis = data?.kpis || {};

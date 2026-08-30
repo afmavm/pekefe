@@ -1465,7 +1465,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           router.push(`/admin/orders`);
                         } else if (item.type === "APPLICATION" || item.type === "DEALER_APPLICATION") {
                           setNotificationsOpen(false);
-                          router.push(`/admin/applications`);
+                          router.push(`/admin/dealers?view=b2b`);
                         }
                       }}
                       className={[
@@ -1482,6 +1482,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           <Ticket className="w-4.5 h-4.5" />
                         ) : item.type === "APPLICATION" || item.type === "DEALER_APPLICATION" ? (
                           <ClipboardList className="w-4.5 h-4.5" />
+                        ) : item.type === "B2B_ORDER" ? (
+                          <Store className="w-4.5 h-4.5" />
                         ) : (
                           <ShoppingBag className="w-4.5 h-4.5" />
                         )}

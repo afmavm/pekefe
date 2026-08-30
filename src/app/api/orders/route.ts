@@ -279,8 +279,31 @@ export const POST = withAuth<any>(
           data: { balance: { increment: orderTotal } }
         });
 
+        // 3) Siparişteki ürünlerin stoklarını düşür
+        if (items && Array.isArray(items) && items.length > 0) {
+          for (const it of items) {
+            const deductQty = Number(it.quantity || 1);
+            if (it.sku) {
+              await tx.product.updateMany({
+                where: { sku: it.sku },
+                data: { stock: { decrement: deductQty } }
+              });
+            }
+          }
+        }
+
         return order;
       }, { maxWait: 10000, timeout: 30000 });
+
+      // Yerel JSON veritabanında da stok düşür
+      if (items && Array.isArray(items) && items.length > 0) {
+        try {
+          const { deductLocalProductStock } = await import('@/lib/jsonProductDb');
+          for (const it of items) {
+            deductLocalProductStock(it, Number(it.quantity || 1));
+          }
+        } catch (e) {}
+      }
 
 
       // ─── WhatsApp Bildirimi (fire-and-forget) ──────────────────

@@ -463,7 +463,30 @@ export async function POST(request: NextRequest) {
       console.error("[LOCAL ORDER SAVE ERROR]:", localOrderSaveErr);
     }
 
-    // 4. Arka Plan Bildirimleri (Asenkron - Kullanıcıyı bekletmez)
+    // 4. Stok Düşürme İşlemi (Hem Ana Ürün Hem Varyantlar için Canlı Senkronizasyon)
+    try {
+      const { deductLocalProductStock } = await import('@/lib/jsonProductDb');
+      for (const item of cart) {
+        const qty = Number(item.quantity || 1);
+        deductLocalProductStock(item, qty);
+
+        // Prisma üzerinde de stok düşür
+        try {
+          if (item.productId || item.id) {
+            const prodId = String(item.productId || item.id).split('_')[0];
+            await prisma.product.updateMany({
+              where: { id: prodId },
+              data: { stock: { decrement: qty } }
+            });
+          }
+        } catch (dbStockErr) {}
+      }
+      console.log(`[STOCK DEDUCTION SUCCESS] All cart items deducted from stock for order ${finalOrderId}`);
+    } catch (stockDeductErr) {
+      console.error("[STOCK DEDUCTION ERROR]:", stockDeductErr);
+    }
+
+    // 5. Arka Plan Bildirimleri (Asenkron - Kullanıcıyı bekletmez)
     (async () => {
       try {
         if (customerEmail !== "guest@nexab2b.com") {

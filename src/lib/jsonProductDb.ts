@@ -188,7 +188,30 @@ export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
       const newStock = Math.max(0, currentStock - deductQty);
       products[idx].stock = newStock;
       products[idx].stock_quantity = newStock;
-      saveLocalProduct(products[idx]);
+
+      // 1. Varyant Stoğunu Düşür
+      if (Array.isArray(products[idx].variants) && products[idx].variants.length > 0) {
+        const targetVariantSku = typeof itemInfo === 'object' ? (itemInfo.variantSku || itemInfo.sku || '') : '';
+        const targetGramaj = typeof itemInfo === 'object' ? (itemInfo.weight || itemInfo.gramaj || itemInfo.variant || '') : '';
+
+        products[idx].variants = products[idx].variants.map((v: any) => {
+          const vSku = String(v.sku || v.variantSku || '').trim();
+          const vName = String(v.name || v.gramaj || v.title || '').toLowerCase();
+          const isMatch = (targetVariantSku && vSku === targetVariantSku) || 
+                          (targetGramaj && vName.includes(String(targetGramaj).toLowerCase())) ||
+                          (targetIdStr.includes(vSku));
+          
+          if (isMatch) {
+            const vCurrent = Number(v.stock ?? v.stock_quantity ?? 1000);
+            const vNew = Math.max(0, vCurrent - deductQty);
+            console.log(`[VARIANT STOCK SUCCESS] Deducted ${deductQty} from variant "${v.sku || v.name}". Old: ${vCurrent} -> New: ${vNew}`);
+            return { ...v, stock: vNew, stock_quantity: vNew };
+          }
+          return v;
+        });
+      }
+
+      saveLocalProduct(products[idx], true);
       console.log(`[JSON DB STOCK SUCCESS] Deducted ${deductQty} from "${products[idx].name}". Old Stock: ${currentStock} -> New Stock: ${newStock}`);
       return true;
     } else {

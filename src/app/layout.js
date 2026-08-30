@@ -74,7 +74,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "PEKEFE | Geleneksel İspir Dut Pekmezi & Ham Bal",
-    description: "%100 Katkısız, 2200m rakımlı İspir yaylalarından odun ateşinde ağır ağır üretilen sınırlı rekolte lezzetler.",
+    description: "%100 Katkısız, 2200m rakımlı İspir yaylalarından güneş altında doğal olarak yoğunlaştırılan sınırlı rekolte lezzetler.",
     images: ["https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg"],
     creator: "@pekefe",
   },

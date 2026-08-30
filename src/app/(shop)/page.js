@@ -154,8 +154,8 @@ export default function Home() {
       image: "/uploads/ispir-karadut-kaynatma-bakir-kazan.webp",
     },
     {
-      title: "Geleneksel Pişirme (Odun Ateşi)",
-      desc: "Dut şırası odun ateşinde, geleneksel el yapımı kalın bakır kazanlarda (herle) yavaşça karıştırılarak ideal pekmez kıvamına gelene dek kaynatılır.",
+      title: "Güneşte Doğal Yoğunlaştırma",
+      desc: "Dut şırası yüksek ateşte yakılmadan, geleneksel gün pekmezi yöntemiyle güneşin doğal sıcaklığından yararlanılarak ideal pekmez kıvamına gelene dek yoğunlaştırılır.",
       image: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
     },
     {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
-  Search, X, ShoppingBag, ArrowRight, Sparkles, Tag, 
+  Search, X, ShoppingBag, ArrowRight, Tag, 
   Layers, Package, Check, ChevronRight, Zap, Flame, Clock
 } from "lucide-react";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";

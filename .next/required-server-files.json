@@ -317,9 +317,6 @@
       "iyzipay",
       "@prisma/client"
     ],
-    "eslint": {
-      "ignoreDuringBuilds": true
-    },
     "turbopack": {
       "root": "C:\\Users\\ETicaret"
     },

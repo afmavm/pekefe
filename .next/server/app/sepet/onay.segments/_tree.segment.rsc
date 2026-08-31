@@ -1,3 +1,3 @@
-:HL["/_next/static/css/6d6b47ab51fa6033.css","style"]
+:HL["/_next/static/css/06f849ab49eb3572.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(shop)","param":null,"prefetchHints":0,"slots":{"children":{"name":"sepet","param":null,"prefetchHints":0,"slots":{"children":{"name":"onay","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}}}},"staleTime":300,"buildId":"6cs5hyqtKV6DHdF3MWQ4_"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(shop)","param":null,"prefetchHints":0,"slots":{"children":{"name":"sepet","param":null,"prefetchHints":0,"slots":{"children":{"name":"onay","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}}}},"staleTime":300,"buildId":"aSO2RYCDnFzeBHJWq3-GX"}

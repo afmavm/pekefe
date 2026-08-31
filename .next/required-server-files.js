@@ -317,9 +317,6 @@ self.__SERVER_FILES_MANIFEST={
       "iyzipay",
       "@prisma/client"
     ],
-    "eslint": {
-      "ignoreDuringBuilds": true
-    },
     "turbopack": {
       "root": "C:\\Users\\ETicaret"
     },

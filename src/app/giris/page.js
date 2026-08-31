@@ -6,6 +6,20 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Toast } from "@/components/ui/Toast";
 import { signIn } from "next-auth/react";
+import { 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  ArrowRight, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Sparkles, 
+  Truck, 
+  Leaf, 
+  Award,
+  Loader2
+} from "lucide-react";
 
 function GirisForm() {
   const router = useRouter();
@@ -31,6 +45,11 @@ function GirisForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      showNotification("Lütfen e-posta ve şifrenizi giriniz.", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -60,8 +79,10 @@ function GirisForm() {
               const { getSession } = await import("next-auth/react");
               const session = await getSession();
               const role = session?.user?.role;
-              if (role === "admin" || role === "ADMIN" || role === "SUPER_ADMIN") {
+              if (role === "admin" || role === "ADMIN" || role === "SUPER_ADMIN" || role === "ORDER_MANAGER") {
                 router.push("/admin/dashboard");
+              } else if (role === "DEALER") {
+                router.push("/b2b");
               } else {
                 router.push("/hesap");
               }
@@ -69,7 +90,7 @@ function GirisForm() {
               router.push("/hesap");
             }
           }
-        }, 1200);
+        }, 1000);
       }
     } catch {
       setLoading(false);
@@ -78,11 +99,11 @@ function GirisForm() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col md:flex-row overflow-hidden bg-white">
+    <main className="min-h-screen flex flex-col md:flex-row overflow-hidden bg-[#fbf9f6] dark:bg-[#0e0f11]">
       {/* Sol Panel: Görsel */}
-      <section className="hidden md:flex md:w-[52%] relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#3b0a18]/80 via-[#3b0a18]/20 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-transparent to-[#1a0009]/30 pointer-events-none" />
+      <section className="hidden md:flex md:w-[50%] lg:w-[52%] relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#2a0812]/90 via-[#4a1220]/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-transparent to-[#1a0009]/40 pointer-events-none" />
         <Image
           src="/ispir-dut-hasadi.png"
           alt="Pekefe – İspir Dut Hasadı"
@@ -92,92 +113,91 @@ function GirisForm() {
           priority
           quality={100}
         />
+        
         {/* Üst rozet */}
         <div className="absolute top-8 left-8 z-30">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-lg">
             <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-white/90 text-xs font-semibold tracking-widest uppercase">
+            <span className="text-white text-xs font-bold tracking-widest uppercase">
               Doğal · Geleneksel · İspir
             </span>
           </div>
         </div>
+
         {/* Alt içerik */}
         <div className="absolute bottom-12 left-10 right-10 z-30">
-          <p className="text-amber-300/80 text-xs font-semibold tracking-[0.25em] uppercase mb-3">
+          <div className="inline-block bg-amber-400/20 backdrop-blur-md border border-amber-400/30 rounded-full px-3 py-1 text-amber-300 text-[11px] font-extrabold tracking-widest uppercase mb-3">
             2200m Rakımdan Sofranıza
-          </p>
-          <h2 className="text-white font-bold leading-[1.1] mb-4"
-            style={{ fontSize: "clamp(2.2rem, 4vw, 3.2rem)" }}>
-            Gelenekten<br />Geleceğe
+          </div>
+          <h2 className="text-white font-serif font-black leading-tight mb-4 text-3xl lg:text-4xl">
+            Gelenekten<br />Geleceğe Miras
           </h2>
-          <p className="text-white/75 leading-relaxed max-w-sm"
-            style={{ fontSize: "clamp(0.85rem, 1.2vw, 1rem)" }}>
-            Anadolu'nun bereketli yaylalarından süzülen en saf lezzetler,
-            modern sofranızla buluşuyor.
+          <p className="text-white/85 text-sm lg:text-base leading-relaxed max-w-md">
+            Anadolu'nun bereketli Kaçkar yaylalarından süzülen en saf coğrafi işaretli lezzetler, sofranızla buluşuyor.
           </p>
-          <div className="flex items-center gap-4 mt-6">
-            {[
-              { icon: "eco", label: "%100 Doğal" },
-              { icon: "verified", label: "Coğrafi İşaret" },
-              { icon: "local_shipping", label: "Hızlı Teslimat" },
-            ].map(({ icon, label }) => (
-              <div key={label} className="flex items-center gap-1.5 text-white/70">
-                <span className="material-symbols-outlined text-amber-400" style={{ fontSize: "15px" }}>{icon}</span>
-                <span className="text-xs font-medium">{label}</span>
-              </div>
-            ))}
+          <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/15">
+            <div className="flex items-center gap-2 text-white/90 text-xs font-semibold">
+              <Leaf className="w-4 h-4 text-amber-400" />
+              <span>%100 Doğal</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90 text-xs font-semibold">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>Coğrafi İşaret</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90 text-xs font-semibold">
+              <Truck className="w-4 h-4 text-amber-400" />
+              <span>Korumalı Kargo</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Sağ Panel: Form */}
-      <section className="flex-1 flex flex-col justify-center items-center px-6 md:px-12 lg:px-16 bg-white min-h-screen">
-        <div className="w-full max-w-[420px] flex flex-col justify-center flex-grow py-10">
+      <section className="flex-1 flex flex-col justify-center items-center px-6 md:px-12 lg:px-16 bg-white dark:bg-slate-900 min-h-screen">
+        <div className="w-full max-w-[420px] flex flex-col justify-center flex-grow py-12">
 
           {/* Logo + Marka */}
-          <div className="text-center mb-10">
-            <Link href="/" className="inline-flex flex-col items-center gap-3 group mb-6">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex flex-col items-center gap-3 group mb-4">
               <div className="relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#6b1d2f]/10 to-[#6b1d2f]/5 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow overflow-hidden border border-[#6b1d2f]/10">
+                <div className="w-20 h-20 rounded-3xl bg-[#6b1d2f] text-white flex items-center justify-center shadow-xl shadow-[#6b1d2f]/20 group-hover:scale-105 transition-all overflow-hidden p-2">
                   <Image
                     src="/logo.png"
                     alt="Pekefe Logo"
-                    width={68}
-                    height={68}
+                    width={64}
+                    height={64}
                     className="object-contain"
-                    quality={100}
                     priority
                   />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center shadow">
-                  <span className="material-symbols-outlined text-white" style={{ fontSize: "11px" }}>verified</span>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center shadow-md border-2 border-white dark:border-slate-900">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-950 font-bold" />
                 </div>
               </div>
-              <span className="text-2xl font-bold text-[#6b1d2f] tracking-tight">Pekefe</span>
+              <span className="text-2xl font-serif font-black text-[#6b1d2f] dark:text-rose-400 tracking-tight">Pekefe</span>
             </Link>
-            <h1 className="font-bold text-[#1a0a10] mb-2 leading-tight"
-              style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)" }}>
+            <h1 className="font-serif font-bold text-slate-900 dark:text-white text-2xl lg:text-3xl mb-2">
               Hoş Geldiniz 👋
             </h1>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Hesabınıza giriş yaparak özel tekliflerden yararlanın
+            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">
+              Hesabınıza giriş yaparak siparişlerinizi ve avantajlarınızı yönetin
             </p>
           </div>
 
           {/* Form */}
-          <form className="space-y-5" onSubmit={handleSubmit} noValidate autoComplete="off">
+          <form className="space-y-4" onSubmit={handleSubmit} noValidate autoComplete="off">
             {/* E-posta */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
                 E-posta Adresi
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">mail</span>
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
                   type="email"
                   autoComplete="off"
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all duration-200 text-sm outline-none placeholder:text-gray-400"
-                  placeholder=""
+                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all placeholder:text-slate-400"
+                  placeholder="adiniz@eposta.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -187,37 +207,35 @@ function GirisForm() {
 
             {/* Şifre */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-                Şifre
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
+                Giriş Şifresi
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">lock</span>
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  className="w-full pl-11 pr-12 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all duration-200 text-sm outline-none placeholder:text-gray-400"
-                  placeholder=""
+                  className="w-full pl-11 pr-12 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition-all placeholder:text-slate-400"
+                  placeholder="••••••••"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#6b1d2f] transition-colors cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#6b1d2f] transition-colors cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {/* Hatırla & Unut */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#6b1d2f] focus:ring-[#6b1d2f]" />
-                <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">Beni Hatırla</span>
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#6b1d2f] focus:ring-[#6b1d2f]" />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 group-hover:text-slate-900">Beni Hatırla</span>
               </label>
               <a
                 href="#"
@@ -225,7 +243,7 @@ function GirisForm() {
                   e.preventDefault();
                   showNotification("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "success");
                 }}
-                className="text-sm text-[#6b1d2f] hover:underline underline-offset-4 font-semibold"
+                className="text-xs text-[#6b1d2f] dark:text-rose-400 hover:underline font-bold"
               >
                 Şifremi Unuttum
               </a>
@@ -235,35 +253,43 @@ function GirisForm() {
             <button
               type="submit"
               disabled={loading || success}
-              className={`w-full text-white font-bold py-4 rounded-xl shadow-lg transition-all duration-300 hover:shadow-[#6b1d2f]/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 cursor-pointer text-sm ${
+              className={`w-full text-white font-bold py-4 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm cursor-pointer mt-2 ${
                 success
-                  ? "bg-green-600 shadow-green-500/20"
-                  : "bg-gradient-to-r from-[#6b1d2f] to-[#8b2d3f] hover:from-[#7a2035] hover:to-[#9b3349] shadow-[#6b1d2f]/20"
+                  ? "bg-emerald-600 shadow-emerald-500/20"
+                  : "bg-[#6b1d2f] hover:bg-[#831843] shadow-[#6b1d2f]/20 hover:scale-[1.01]"
               }`}
             >
               {loading ? (
-                <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Giriş Yapılıyor...</span></>
+                <><Loader2 className="w-4 h-4 animate-spin" /><span>Giriş Yapılıyor...</span></>
               ) : success ? (
-                <><span className="material-symbols-outlined text-[18px]">check_circle</span><span>Başarılı! Yönlendiriliyorsunuz...</span></>
+                <><CheckCircle2 className="w-4 h-4" /><span>Giriş Başarılı! Yönlendiriliyorsunuz...</span></>
               ) : (
-                <><span>Giriş Yap</span><span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
+                <><span>Giriş Yap</span><ArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
 
-          {/* Kayıt linki */}
-          <p className="mt-8 text-center text-sm text-gray-500">
-            Henüz bir hesabınız yok mu?{" "}
-            <Link className="text-[#6b1d2f] font-bold hover:underline underline-offset-4" href="/kayit">
-              Ücretsiz Kayıt Ol
-            </Link>
-          </p>
+          {/* Kayıt linki & B2B Başvuru */}
+          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center space-y-3">
+            <p className="text-xs text-slate-500">
+              Henüz bir hesabınız yok mu?{" "}
+              <Link className="text-[#6b1d2f] dark:text-rose-400 font-bold hover:underline" href="/kayit">
+                Ücretsiz Kayıt Ol
+              </Link>
+            </p>
+            <p className="text-xs text-slate-500">
+              Kurumsal işletme misiniz?{" "}
+              <Link className="text-amber-600 dark:text-amber-400 font-bold hover:underline" href="/b2b">
+                B2B Bayilik Başvurusu Yap
+              </Link>
+            </p>
+          </div>
         </div>
 
         {/* Footer */}
-        <footer className="mt-auto w-full max-w-[420px] border-t border-gray-100 py-5 flex justify-between items-center text-xs text-gray-400">
-          <span>© 2026 Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</span>
-          <div className="flex gap-4">
+        <footer className="mt-auto w-full max-w-[420px] border-t border-slate-100 dark:border-slate-800 py-4 flex justify-between items-center text-[11px] text-slate-400">
+          <span>© 2026 Pekefe</span>
+          <div className="flex gap-3">
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/sss">Destek</Link>
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/gizlilik">Gizlilik</Link>
             <Link className="hover:text-[#6b1d2f] transition-colors" href="/hikayemiz">Hakkımızda</Link>
@@ -283,7 +309,7 @@ function GirisForm() {
 
 export default function Giris() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-slate-500 text-sm">Yükleniyor...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#fbf9f6] flex items-center justify-center text-slate-500 text-sm">Yükleniyor...</div>}>
       <GirisForm />
     </Suspense>
   );

@@ -140,7 +140,7 @@ async function getInitialDashboardData() {
 
     const criticalStockCount = finalProducts.filter(p => Number(p.stock) <= Number(p.criticalLimit || 5)).length;
 
-    const totalRevenue = finalOrders.reduce((sum, o) => {
+    const totalRevenue = finalOrders.reduce((sum, o: any) => {
       const val = typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
       return sum + val;
     }, 0);
@@ -252,7 +252,7 @@ async function getInitialDashboardData() {
       quantity: Math.max(1, Math.floor(Number(p.stock || 0) * 0.2))
     }));
 
-    const recentOrdersMapped = finalOrders.slice(0, 8).map(o => ({
+    const recentOrdersMapped = finalOrders.slice(0, 8).map((o: any) => ({
       id: o.id,
       orderNumber: o.orderNumber || o.id,
       total: typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0),

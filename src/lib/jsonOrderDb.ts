@@ -98,3 +98,5 @@ export function updateLocalOrderStatus(id: string, updates: Partial<LocalOrder>)
   }
   return null;
 }
+
+export const getLocalOrders = readLocalOrders;

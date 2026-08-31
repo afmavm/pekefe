@@ -32,12 +32,8 @@ export CHECKPOINT_DISABLE=1
 export PRISMA_HIDE_UPDATE_MESSAGE=1
 
 # Run lightweight seed directly in Node without CLI sub-process spawning
-node scripts/db_seed.js 2>/dev/null || true
-
-# Check if production build is present, build if missing
-if [ ! -f .next/BUILD_ID ]; then
-  echo "[3.5/4] Verified production build bundle."
-fi
+# Build production bundle if needed
+npm run build 2>/dev/null || npx next build
 
 # 4. Instant PM2 Clean Restart for pekefe-app process on Port 4000
 echo "[4/4] Performing instant PM2 process restart on Port 4000..."

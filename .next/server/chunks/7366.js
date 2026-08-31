@@ -1,0 +1,1 @@
+"use strict";exports.id=7366,exports.ids=[7366],exports.modules={7366:(a,b,c)=>{c.r(b),c.d(b,{notifyLiveSync:()=>e,useLiveSync:()=>f});var d=c(67484);function e(a="all"){}function f(a){(0,d.useRef)(a)}}};

@@ -434,40 +434,28 @@ export default function Odeme() {
 
     // Validate Required Fields
     if (!formData.firstName || !formData.lastName || !formData.address || !formData.phone || !formData.city) {
-      setErrorMsg("Lütfen teslimat adresi ve iletişim bilgilerini eksiksiz doldurunuz.");
+      const msg = "Lütfen teslimat adresi ve iletişim bilgilerini eksiksiz doldurunuz.";
+      setErrorMsg(msg);
+      setToast({ isOpen: true, message: msg, type: "error" });
       return;
     }
 
     if (formData.phone.length < 10) {
-      setErrorMsg("Lütfen geçerli bir telefon numarası giriniz.");
+      const msg = "Lütfen geçerli bir telefon numarası giriniz.";
+      setErrorMsg(msg);
+      setToast({ isOpen: true, message: msg, type: "error" });
       return;
     }
 
     if (cartItems.length === 0) {
-      setErrorMsg("Sepetinizde ürün bulunmuyor. Lütfen mağerimizden ürün ekleyin.");
+      const msg = "Sepetinizde ürün bulunmuyor. Lütfen mağazamızdan ürün ekleyin.";
+      setErrorMsg(msg);
+      setToast({ isOpen: true, message: msg, type: "error" });
       return;
     }
 
     // Payment-Specific Validations
-    if (paymentMethod === "creditCard") {
-      if (!nameOnCard || nameOnCard.trim().length < 3) {
-        setErrorMsg("Lütfen kart üzerindeki ad soyadı eksiksiz giriniz.");
-        return;
-      }
-      if (cardNumber.replace(/\s+/g, "").length < 16) {
-        setErrorMsg("Lütfen 16 haneli kart numaranızı kontrol ediniz.");
-        return;
-      }
-      if (expiry.length < 5) {
-        setErrorMsg("Lütfen geçerli bir son kullanma tarihi giriniz (AA/YY).");
-        return;
-      }
-      if (cvv.length < 3) {
-        setErrorMsg("Lütfen 3 haneli CVV kodunu giriniz.");
-        return;
-      }
-    }
-
+    // Not: PayTR iFrame entegrasyonunda kart bilgileri PayTR'in BDDK/PCI-DSS onayli guvenli iframe formunda girilir.
     setIsSubmitting(true);
 
     const instantOrderObj = {

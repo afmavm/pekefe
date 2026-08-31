@@ -51,9 +51,9 @@ export interface PayTRRefundResult {
 }
 
 export function getPayTRCredentials() {
-  const merchantId = (process.env.PAYTR_MERCHANT_ID || '').trim();
-  const merchantKey = (process.env.PAYTR_MERCHANT_KEY || '').trim();
-  const merchantSalt = (process.env.PAYTR_MERCHANT_SALT || '').trim();
+  const merchantId = (process.env.PAYTR_MERCHANT_ID || '735518').trim();
+  const merchantKey = (process.env.PAYTR_MERCHANT_KEY || 'wQkmEkdf5NDCEnWg').trim();
+  const merchantSalt = (process.env.PAYTR_MERCHANT_SALT || 'AuK7HXRb7NrbyZzw').trim();
   const testMode = (process.env.PAYTR_TEST_MODE || '0').trim();
 
   return { merchantId, merchantKey, merchantSalt, testMode };

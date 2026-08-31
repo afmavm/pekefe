@@ -536,6 +536,14 @@ export default function Odeme() {
 
         const data = await res.json();
 
+        if (!res.ok || !data.token) {
+          const errMsg = data.error || "PayTR ödeme jetonu üretilemedi. Lütfen bilgilerinizi kontrol ediniz.";
+          setErrorMsg(errMsg);
+          setToast({ isOpen: true, message: errMsg, type: "error" });
+          setIsSubmitting(false);
+          return;
+        }
+
         const completedOrderObject = {
           orderId: data.orderId || `PKF-${Date.now()}`,
           date: new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
@@ -578,7 +586,9 @@ export default function Odeme() {
       } catch (paytrErr) {
         console.error("PayTR Token Error:", paytrErr);
         setIsSubmitting(false);
-        setErrorMsg("PayTR ödeme servisine bağlanırken bir sorun oluştu.");
+        const errMsg = "PayTR ödeme servisine bağlanırken bir sorun oluştu.";
+        setErrorMsg(errMsg);
+        setToast({ isOpen: true, message: errMsg, type: "error" });
         return;
       }
     }
@@ -1692,6 +1702,40 @@ export default function Odeme() {
             })}
           </div>
         </section>
+      )}
+
+      {/* PAYTR FULL SCREEN 3D SECURE OVERLAY MODAL */}
+      {paytrToken && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="p-4 sm:p-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base">PayTR 3D Secure Güvenli Ödeme</h3>
+                  <p className="text-xs text-slate-400">256-Bit SSL Korumalı Güvenli Ödeme Penceresi</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPaytrToken(null)}
+                className="text-xs font-bold text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              >
+                ✕ Kapat
+              </button>
+            </div>
+            <div className="flex-1 w-full bg-white overflow-y-auto min-h-[620px]">
+              <iframe
+                src={`https://www.paytr.com/odeme/guvenli/${paytrToken}`}
+                id="paytriframe-modal"
+                style={{ width: '100%', minHeight: '650px', border: 'none' }}
+                allow="payment"
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       <Toast

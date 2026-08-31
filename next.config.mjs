@@ -31,6 +31,10 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   serverExternalPackages: ["iyzipay", "@prisma/client"],
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
   images: {
     unoptimized: true,
     formats: ["image/avif", "image/webp"],

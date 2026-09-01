@@ -1527,14 +1527,15 @@ export default function Odeme() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <a
-                  href={`https://www.paytr.com/odeme/guvenli/${paytrToken}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.open(`https://www.paytr.com/odeme/guvenli/${paytrToken}`, '_blank', 'noopener,noreferrer');
+                  }}
                   className="text-xs font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1"
                 >
                   Tam Ekranda Aç ↗
-                </a>
+                </button>
                 <button
                   type="button"
                   onClick={() => setPaytrToken(null)}
@@ -1546,8 +1547,9 @@ export default function Odeme() {
             </div>
             <div className="flex-1 w-full bg-white overflow-y-auto min-h-[620px]">
               <iframe
+                key={paytrToken}
                 src={`https://www.paytr.com/odeme/guvenli/${paytrToken}`}
-                id="paytriframe-modal"
+                id="paytriframe"
                 style={{ width: '100%', minHeight: '650px', border: 'none' }}
                 allow="payment"
               />

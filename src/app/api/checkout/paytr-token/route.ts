@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const customerEmail = email || `${phone.replace(/\D/g, '')}@pekefe.com`;
 
     // PayTR 3D Secure Akışı: Sipariş kaydı ve stok düşümü YALNIZCA PayTR ödeme onayı (Webhook success) geldikten sonra yapılır.
-    // Burada erken sipariş veya bildirim tetiklenmez.
+    const fullAddress = `${address}${district ? `, ${district}` : ''} / ${city}`;
 
     // PayTR Basket Format
     const paytrBasket = cart.map((item: any) => ({

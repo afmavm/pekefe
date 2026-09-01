@@ -103,7 +103,7 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
     const noInstallment = '0'; // 0 = taksit seçenekleri gösterilsin, 1 = sadece tek çekim
     const maxInstallment = '0'; // 0 = varsayılan taksit sınırı yok
     const currency = 'TL';
-    const debugOn = testMode === '1' ? '1' : '0';
+    const debugOn = '1'; // Enable PayTR on-screen diagnostic reporting
 
     // Official PayTR iFrame Hash String Calculation:
     // merchant_id + user_ip + merchant_oid + email + payment_amount + user_basket + no_installment + max_installment + currency + test_mode

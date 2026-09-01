@@ -491,7 +491,23 @@ export default function Odeme() {
     // PayTR Credit Card Flow
     if (paymentMethod === "creditCard") {
       try {
+        let detectedClientIp = "";
+        try {
+          const ipFetch = await fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(1500) });
+          if (ipFetch.ok) {
+            const ipJson = await ipFetch.json();
+            detectedClientIp = ipJson.ip;
+          }
+        } catch (e) {}
+
         const paytrPayload = {
+          clientIp: detectedClientIp,
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          district: formData.district || "",
           cart: cartItems.map((item) => ({
             id: String(item.id),
             sku: item.sku || item.id,
@@ -500,12 +516,6 @@ export default function Odeme() {
             quantity: Number(item.quantity),
           })),
           cartTotal: grandTotal,
-          name: `${formData.firstName} ${formData.lastName}`.trim(),
-          phone: formData.phone,
-          email: formData.email,
-          address: formData.address,
-          city: formData.city,
-          district: formData.district || "",
           shippingFee: shippingCost,
           selectedCarrierName: selectedCarrier,
           shippingAddress: {

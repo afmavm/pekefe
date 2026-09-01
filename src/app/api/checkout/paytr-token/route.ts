@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       district,
       shippingFee = 0,
       selectedCarrierName = 'Kargo',
+      clientIp = '',
     } = body;
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
@@ -58,15 +59,18 @@ export async function POST(request: NextRequest) {
       console.error("[STOCK CHECK WARNING] Live stock check error:", stockErr);
     }
 
-    // Extract customer IP robustly across proxies, Cloudflare, cPanel Apache
+    // Extract customer IP robustly across proxies, Cloudflare, cPanel Apache and frontend detection
     const cfIp = request.headers.get('cf-connecting-ip');
     const realIp = request.headers.get('x-real-ip');
     const forwardedFor = request.headers.get('x-forwarded-for');
     const clientIpHeader = request.headers.get('x-client-ip');
     
-    let userIp = cfIp || realIp || (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || clientIpHeader || '88.255.12.34';
+    let userIp = (clientIp || '').trim() || cfIp || realIp || (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || clientIpHeader || '88.255.12.34';
+    if (userIp.includes('::ffff:')) {
+      userIp = userIp.replace('::ffff:', '');
+    }
     if (!userIp || userIp === '::1' || userIp === '127.0.0.1' || userIp.startsWith('10.') || userIp.startsWith('192.168.')) {
-      userIp = '88.255.12.34'; // Valid Public IPv4 fallback for PayTR token validation
+      userIp = (clientIp || '').trim() || '88.255.12.34';
     }
 
     // Generate Unique Order ID (e.g. PKF-2026-0001 -> PKF20260001)

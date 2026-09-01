@@ -42,14 +42,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const merchantOid = postData.merchant_oid;
+    const merchantOid = postData.merchant_oid || '';
+    const baseOrderId = merchantOid.includes('T') ? merchantOid.split('T')[0] : merchantOid;
     const status = postData.status; // 'success' or 'failed'
     const failedReason = postData.failed_reason_msg || 'Ödeme başarısız.';
 
     let order: any = null;
     try {
-      order = await prisma.order.findUnique({
-        where: { id: merchantOid },
+      order = await prisma.order.findFirst({
+        where: { 
+          OR: [
+            { id: merchantOid },
+            { id: baseOrderId }
+          ]
+        },
         include: { currentAccount: true },
       });
     } catch (e) {

@@ -102,14 +102,20 @@ export async function POST(request: NextRequest) {
       ? `http://${request.headers.get('host')}/sepet/odeme?error=paytr` 
       : 'https://www.pekefe.com/sepet/odeme?error=paytr';
 
+    // PayTR requires unique merchant_oid per attempt so previously used IDs never invalidate
+    const paytrMerchantOid = `${customOrderId}T${Date.now()}`;
+    const cleanPhone = (phone || '05000000000').replace(/\D/g, '');
+    const cleanUserName = (name || 'Pekefe Müşterisi').trim();
+    const cleanUserAddress = (fullAddress || 'Türkiye').trim();
+
     // Create PayTR Token
     const paytrResult = await createPayTRToken({
-      merchantOid: customOrderId,
+      merchantOid: paytrMerchantOid,
       email: customerEmail,
       paymentAmount: grandTotal,
-      userName: name,
-      userAddress: fullAddress,
-      userPhone: phone,
+      userName: cleanUserName,
+      userAddress: cleanUserAddress,
+      userPhone: cleanPhone,
       userIp: userIp,
       basket: paytrBasket,
       okUrl: targetOkUrl,

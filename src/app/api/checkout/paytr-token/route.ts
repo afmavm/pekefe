@@ -112,11 +112,35 @@ export async function POST(request: NextRequest) {
     const cleanUserName = (name || 'Pekefe Müşterisi').trim();
     const cleanUserAddress = (fullAddress || 'Türkiye').trim();
 
+    // ====== PAYTR DIAGNOSTIC LOGGING ======
+    const basketSum = paytrBasket.reduce((sum: number, item: any) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    const basketSumKurus = Math.round(basketSum * 100);
+    const grandTotalKurus = Math.round(grandTotal * 100);
+    
+    console.log('===== [PAYTR DIAGNOSTIC] =====');
+    console.log('clientIp from browser:', clientIp);
+    console.log('cfIp:', cfIp, '| realIp:', realIp, '| forwardedFor:', forwardedFor, '| clientIpHeader:', clientIpHeader);
+    console.log('FINAL userIp sent to PayTR:', userIp);
+    console.log('merchantOid:', paytrMerchantOid);
+    console.log('email:', customerEmail);
+    console.log('grandTotal (TL):', grandTotal, '| grandTotalKurus:', grandTotalKurus);
+    console.log('basketSum (TL):', basketSum, '| basketSumKurus:', basketSumKurus);
+    console.log('MATCH?:', grandTotalKurus === basketSumKurus ? '✅ YES' : '❌ NO - MISMATCH!');
+    console.log('basket items:', JSON.stringify(paytrBasket));
+    console.log('shippingFee:', shippingFee);
+    console.log('okUrl:', targetOkUrl);
+    console.log('failUrl:', targetFailUrl);
+    console.log('host header:', request.headers.get('host'));
+    console.log('==============================');
+
+    // FIX: Force payment_amount to match basket sum exactly
+    const correctedPaymentAmount = basketSum;
+
     // Create PayTR Token
     const paytrResult = await createPayTRToken({
       merchantOid: paytrMerchantOid,
       email: customerEmail,
-      paymentAmount: grandTotal,
+      paymentAmount: correctedPaymentAmount,
       userName: cleanUserName,
       userAddress: cleanUserAddress,
       userPhone: cleanPhone,
@@ -125,6 +149,8 @@ export async function POST(request: NextRequest) {
       okUrl: targetOkUrl,
       failUrl: targetFailUrl,
     });
+
+    console.log('[PAYTR TOKEN RESULT]:', JSON.stringify(paytrResult));
 
     if (!paytrResult.success || !paytrResult.token) {
       return NextResponse.json(

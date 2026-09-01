@@ -91,14 +91,17 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
     // Convert payment amount to Kuruş (e.g. 100.50 TL -> 10050)
     const totalKurus = Math.round(paymentAmount * 100);
 
-    // Format user basket for PayTR: Array of [name, price_in_tl_str, quantity]
+    // Format user basket strictly according to PayTR specification
+    // PayTR requires user_basket items: [ [ "Ürün Adı", "10.00", 1 ] ]
     const paytrBasketItems = basket.map((item) => [
-      item.name.replace(/"/g, "'"),
+      String(item.name || 'Urun')
+        .replace(/["'\\]/g, '')
+        .trim(),
       Number(item.price).toFixed(2),
-      Number(item.quantity),
+      Math.max(1, Number(item.quantity) || 1),
     ]);
 
-    const userBasketStr = Buffer.from(JSON.stringify(paytrBasketItems)).toString('base64');
+    const userBasketStr = Buffer.from(JSON.stringify(paytrBasketItems), 'utf8').toString('base64');
 
     const noInstallment = '0'; // 0 = taksit seçenekleri gösterilsin, 1 = sadece tek çekim
     const maxInstallment = '0'; // 0 = varsayılan taksit sınırı yok
@@ -110,7 +113,7 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
     const hashString = `${merchantId}${userIp}${cleanMerchantOid}${email}${totalKurus}${userBasketStr}${noInstallment}${maxInstallment}${currency}${testMode}`;
     const paytrToken = crypto
       .createHmac('sha256', merchantKey)
-      .update(hashString + merchantSalt)
+      .update(Buffer.from(hashString + merchantSalt, 'utf8'))
       .digest('base64');
 
     const bodyParams = new URLSearchParams({

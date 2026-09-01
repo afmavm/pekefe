@@ -30,6 +30,10 @@ generate_htaccess() {
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Pass real client IP to PM2 Node.js process for PayTR iframe validation
+    RequestHeader set X-Real-IP "%{REMOTE_ADDR}s"
+    RequestHeader set X-Forwarded-For "%{REMOTE_ADDR}s"
+    
     # Allow CORS for mobile app WebViews
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"

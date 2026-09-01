@@ -1354,6 +1354,12 @@
       "namedRegex": "^/api/gallery(?:/)?$"
     },
     {
+      "page": "/api/get-ip",
+      "regex": "^/api/get\\-ip(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/get\\-ip(?:/)?$"
+    },
+    {
       "page": "/api/harvest/pre-order",
       "regex": "^/api/harvest/pre\\-order(?:/)?$",
       "routeKeys": {},

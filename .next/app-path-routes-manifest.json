@@ -59,6 +59,7 @@
   "/api/feedback/[id]/route": "/api/feedback/[id]",
   "/api/feedback/route": "/api/feedback",
   "/api/forgot-password/route": "/api/forgot-password",
+  "/api/get-ip/route": "/api/get-ip",
   "/api/harvest/pre-order/route": "/api/harvest/pre-order",
   "/api/integrations/[id]/logs/route": "/api/integrations/[id]/logs",
   "/api/integrations/[id]/route": "/api/integrations/[id]",

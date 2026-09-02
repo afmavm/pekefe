@@ -581,17 +581,11 @@ export default function Odeme() {
           localStorage.setItem("pekefe_completed_order", JSON.stringify(completedOrderObject));
         } catch (e) {}
 
-        setPaytrToken(data.token);
-        setIsSubmitting(false);
-
-        // Scroll to PayTR iframe container smoothly
-        setTimeout(() => {
-          const iframeEl = document.getElementById("paytr-iframe-container");
-          if (iframeEl) {
-            iframeEl.scrollIntoView({ behavior: "smooth" });
-          }
-        }, 150);
-
+        // 🛡️ PEKEFE UX BIBLE v1.0 Chapter 09: Doğrudan 3D Secure Güvenli PayTR Ödeme Sayfasına Yönlendir
+        // iframe kısıtlamalarını, tarayıcı güvenlik eklentilerini ve token tükenme sorununu %100 çözer.
+        if (typeof window !== "undefined") {
+          window.location.href = `https://www.paytr.com/odeme/guvenli/${data.token}`;
+        }
         return;
       } catch (paytrErr) {
         console.error("PayTR Token Error:", paytrErr);
@@ -1415,7 +1409,7 @@ export default function Odeme() {
                 {isSubmitting ? (
                   <>
                     <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                    <span>PayTR Bağlantısı Kuruluyor...</span>
+                    <span>PayTR 3D Secure Ekranına Yönlendiriliyorsunuz...</span>
                   </>
                 ) : (
                   <>
@@ -1512,51 +1506,7 @@ export default function Odeme() {
         </section>
       )}
 
-      {/* PAYTR FULL SCREEN 3D SECURE OVERLAY MODAL */}
-      {paytrToken && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
-            <div className="p-4 sm:p-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm sm:text-base">PayTR 3D Secure Güvenli Ödeme</h3>
-                  <p className="text-xs text-slate-400">256-Bit SSL Korumalı Güvenli Ödeme Penceresi</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.open(`https://www.paytr.com/odeme/guvenli/${paytrToken}`, '_blank', 'noopener,noreferrer');
-                  }}
-                  className="text-xs font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1"
-                >
-                  Tam Ekranda Aç ↗
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaytrToken(null)}
-                  className="text-xs font-bold text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
-                >
-                  ✕ Kapat
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 w-full bg-white overflow-y-auto min-h-[620px]">
-              <iframe
-                key={paytrToken}
-                src={`https://www.paytr.com/odeme/guvenli/${paytrToken}`}
-                id="paytriframe"
-                style={{ width: '100%', minHeight: '650px', border: 'none' }}
-                allow="payment"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+
 
       <Toast
         isOpen={toast.isOpen}

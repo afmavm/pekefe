@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 export interface PayTRBasketItem {
   name: string;
@@ -51,10 +53,30 @@ export interface PayTRRefundResult {
 }
 
 export function getPayTRCredentials() {
-  const merchantId = (process.env.PAYTR_MERCHANT_ID || '735518').trim();
-  const merchantKey = (process.env.PAYTR_MERCHANT_KEY || 'wQkmEkdf5NDCEnWg').trim();
-  const merchantSalt = (process.env.PAYTR_MERCHANT_SALT || 'AuK7HXRb7NrbyZzw').trim();
-  const testMode = (process.env.PAYTR_TEST_MODE || '0').trim();
+  let merchantId = (process.env.PAYTR_MERCHANT_ID || '735518').trim();
+  let merchantKey = (process.env.PAYTR_MERCHANT_KEY || 'wQkmEkdf5NDCEnWg').trim();
+  let merchantSalt = (process.env.PAYTR_MERCHANT_SALT || 'AuK7HXRb7NrbyZzw').trim();
+  let testMode = (process.env.PAYTR_TEST_MODE || '0').trim();
+
+  // Dynamically read from admin panel settings (cms_settings_fallback.json) if available
+  try {
+    const settingsPath = path.join(process.cwd(), 'public', 'data', 'cms_settings_fallback.json');
+    if (fs.existsSync(settingsPath)) {
+      const raw = fs.readFileSync(settingsPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed?.paytrConfig) {
+        const cfg = typeof parsed.paytrConfig === 'string' ? JSON.parse(parsed.paytrConfig) : parsed.paytrConfig;
+        if (cfg.merchantId) merchantId = String(cfg.merchantId).trim();
+        if (cfg.merchantKey) merchantKey = String(cfg.merchantKey).trim();
+        if (cfg.merchantSalt) merchantSalt = String(cfg.merchantSalt).trim();
+        if (cfg.testMode !== undefined) {
+          testMode = (cfg.testMode === true || cfg.testMode === '1' || cfg.testMode === 1) ? '1' : '0';
+        }
+      }
+    }
+  } catch (e) {
+    // Keep environment variable fallback
+  }
 
   return { merchantId, merchantKey, merchantSalt, testMode };
 }

@@ -61,6 +61,9 @@ interface Product {
   oldPrice?: number | null;
   b2b_base_price?: number | null;
   b2b_active?: boolean;
+  active?: boolean;
+  isPublished?: boolean;
+  isDeleted?: boolean;
   isRawMaterial: boolean;
   category?: string;
   criticalLimit?: number;
@@ -109,12 +112,14 @@ export default function StockProductionPage() {
     price: 0,
     cost: 0,
     image: "",
+    active: true,
     isRawMaterial: false,
     desc: "",
     seoTitle: "",
     seoDesc: "",
     unit: "Adet"
   });
+  const [togglingProductId, setTogglingProductId] = useState<string | null>(null);
 
   // Category CRUD Modal State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -524,6 +529,97 @@ export default function StockProductionPage() {
     }
   };
 
+  // Fast 1-click Toggle Publish Status
+  const handleToggleProductStatus = async (product: Product) => {
+    const currentActive = product.active !== false && product.isDeleted !== true;
+    const newActive = !currentActive;
+    
+    setTogglingProductId(product.id);
+
+    // Optimistic local state update (0ms UI lag)
+    setProducts(prev => {
+      const updated = prev.map(p => {
+        if (p.id === product.id || p.sku === product.sku) {
+          return { ...p, active: newActive, isPublished: newActive };
+        }
+        return p;
+      });
+      saveProducts(updated);
+      return updated;
+    });
+
+    try {
+      const res = await fetch(`/api/products/${encodeURIComponent(product.id || product.sku)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: newActive, isPublished: newActive })
+      });
+
+      if (res.ok) {
+        toast.success(newActive ? `"${product.name}" yayına alındı.` : `"${product.name}" yayından kaldırıldı (Taslak).`);
+        await refreshProducts();
+      } else {
+        const fallbackRes = await fetch(`/api/products/${encodeURIComponent(product.id || product.sku)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...product, active: newActive, isPublished: newActive })
+        });
+        if (fallbackRes.ok) {
+          toast.success(newActive ? `"${product.name}" yayına alındı.` : `"${product.name}" yayından kaldırıldı (Taslak).`);
+          await refreshProducts();
+        } else {
+          toast.error("Durum güncellenirken hata oluştu.");
+          await loadData();
+        }
+      }
+    } catch (err) {
+      console.error("Toggle error:", err);
+      toast.error("Bağlantı hatası.");
+      await loadData();
+    } finally {
+      setTogglingProductId(null);
+    }
+  };
+
+  // Bulk Publish / Unpublish
+  const handleBulkToggleStatus = async (publish: boolean) => {
+    const selectedIds = Array.from(selectedRows);
+    if (selectedIds.length === 0) return;
+
+    setLoading(true);
+    let successCount = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const prod = products.find(p => p.id === id);
+        if (!prod) continue;
+        const res = await fetch(`/api/products/${encodeURIComponent(prod.id || prod.sku)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ active: publish, isPublished: publish })
+        });
+        if (res.ok) successCount++;
+      } catch (e) {}
+    }
+
+    setProducts(prev => {
+      const updated = prev.map(p => {
+        if (selectedRows.has(p.id)) {
+          return { ...p, active: publish, isPublished: publish };
+        }
+        return p;
+      });
+      saveProducts(updated);
+      return updated;
+    });
+
+    toast.success(`${successCount} adet ürün ${publish ? "yayına alındı" : "yayından kaldırıldı"}.`);
+    setSelectedRows(new Set());
+    await refreshProducts();
+    await loadData();
+    setLoading(false);
+  };
+
   // Category CRUD
   const openAddCategoryModal = () => {
     setEditingCategory(null);
@@ -817,6 +913,30 @@ export default function StockProductionPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Bulk Publish / Unpublish Action Buttons */}
+                {selectedRows.size > 0 && (
+                  <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-right-2 duration-200">
+                    <button
+                      type="button"
+                      onClick={() => handleBulkToggleStatus(true)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer shadow-xs"
+                      title="Seçilen ürünleri mağazada yayına al"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Toplu Yayına Al ({selectedRows.size})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleBulkToggleStatus(false)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer shadow-xs"
+                      title="Seçilen ürünleri yayından kaldır (Taslak yap)"
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                      Yayından Kaldır ({selectedRows.size})
+                    </button>
+                  </div>
+                )}
               </>
             )}
             <div className="relative">
@@ -936,13 +1056,14 @@ export default function StockProductionPage() {
                         <th className="px-6 py-5">Maliyet / Fiyat</th>
                         <th className="px-6 py-5">Mevcut Stok</th>
                         <th className="px-6 py-5">Tip</th>
+                        <th className="px-6 py-5">Yayın Durumu</th>
                         <th className="px-6 py-5 text-right">İşlem</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 bg-white">
                       {filteredAllProducts.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="p-8 text-center text-xs font-semibold text-slate-400">
+                          <td colSpan={10} className="p-8 text-center text-xs font-semibold text-slate-400">
                             Ürün bulunamadı.
                           </td>
                         </tr>
@@ -1105,6 +1226,38 @@ export default function StockProductionPage() {
                                   </span>
                                 )}
                               </td>
+                              <td className="px-6 py-4">
+                                {p.isRawMaterial ? (
+                                  <span className="text-[10px] text-slate-400 italic">Dahili Hammadde</span>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      disabled={togglingProductId === p.id}
+                                      onClick={() => handleToggleProductStatus(p)}
+                                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        p.active !== false && p.isDeleted !== true ? "bg-emerald-500" : "bg-slate-300"
+                                      } ${togglingProductId === p.id ? "opacity-50 cursor-wait" : ""}`}
+                                      title={p.active !== false && p.isDeleted !== true ? "Yayından kaldır (Taslağa al)" : "Web ve mağazada yayına al"}
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                          p.active !== false && p.isDeleted !== true ? "translate-x-4" : "translate-x-0"
+                                        }`}
+                                      />
+                                    </button>
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border flex items-center gap-1 ${
+                                      p.active !== false && p.isDeleted !== true
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                                        : "bg-slate-100 text-slate-500 border-slate-200"
+                                    }`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${p.active !== false && p.isDeleted !== true ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+                                      {p.active !== false && p.isDeleted !== true ? "Yayında" : "Taslak"}
+                                    </span>
+                                  </div>
+                                )}
+                              </td>
                               <td className="px-6 py-4 text-right space-x-1.5">
                                 <Link
                                   href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${encodeURIComponent(p.sku)}`}
@@ -1247,6 +1400,32 @@ export default function StockProductionPage() {
                 {modalTab === 'genel' && (
                   <div className="space-y-5">
                     
+                    {/* Active / Published Status Toggle Switch */}
+                    <div className="flex items-center justify-between p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-xl">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${productForm.active !== false ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+                          Yayın Durumu (Web ve Mağaza Satışı)
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                          {productForm.active !== false 
+                            ? "Ürün şu anda mağaza vitrininde ve katalogda yayında (Satışa Açık)." 
+                            : "Ürün yayından kaldırıldı (Taslak / Müşterilere gizli)."}
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={productForm.active !== false}
+                          onChange={(e) => {
+                            setProductForm(prev => ({ ...prev, active: e.target.checked }));
+                          }}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                      </label>
+                    </div>
+
                     {/* Raw Material Toggle Switch */}
                     <div className="flex items-center justify-between p-4 bg-orange-500/5 border border-orange-500/10 rounded-xl">
                       <div>

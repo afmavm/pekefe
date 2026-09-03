@@ -1327,7 +1327,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         });
 
         // Set status
-        setStatus(product.isDeleted ? "Arşivlendi" : "Yayında");
+        const isInactive = Boolean(product.isDeleted || product.active === false || attrs.isActive === false || attrs.isPublished === false);
+        setStatus(isInactive ? "Arşivlendi" : "Yayında");
 
         // Parse images if string
         const parsedImages = typeof product.images === "string"
@@ -1977,6 +1978,9 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         model: form.model || "",
         category: resolvedCategory,
         stock: totalStock,
+        active: status === "Yayında",
+        isPublished: status === "Yayında",
+        isDeleted: status === "Arşivlendi",
         warehouses: warehouses,
         variants: variants,
         criticalLimit: 5,
@@ -2002,6 +2006,8 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         seoDesc: form.seoDesc,
         seoKeywords: form.seoKeywords,
         attributes: {
+          isActive: status === "Yayında",
+          isPublished: status === "Yayında",
           shortDesc: form.shortDesc,
           sizes: sizes,
           colors: colors,

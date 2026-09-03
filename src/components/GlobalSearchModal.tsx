@@ -99,7 +99,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
     const q = query.toLowerCase().trim();
 
     return products.filter((p) => {
-      if (!p) return false;
+      if (!p || p.active === false || p.isDeleted === true) return false;
       const nameMatch = (p.name || "").toLowerCase().includes(q);
       const categoryMatch = (p.category || "").toLowerCase().includes(q) || (p.categoryDisplay || "").toLowerCase().includes(q);
       const descMatch = (p.desc || "").toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q);

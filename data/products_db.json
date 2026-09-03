@@ -52,7 +52,13 @@
         "stock": 100
       }
     ],
-    "createdAt": "2026-09-03T20:58:10.170Z"
+    "createdAt": "2026-09-03T22:13:47.784Z",
+    "videoUrl": "",
+    "discount_start_date": null,
+    "discount_end_date": null,
+    "warehouses": [],
+    "locations": [],
+    "isDeleted": false
   },
   {
     "id": "PKF-DUT-SIRKESI",

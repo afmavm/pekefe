@@ -121,7 +121,7 @@ export default function Home() {
       }
       return url;
     };
-    return productsState.filter(Boolean).map(p => {
+    return productsState.filter(p => p && p.active !== false && p.isDeleted !== true).map(p => {
       const rawPrice = p.price;
       // Handle all price formats: number, "300", "300 TL", "₺300"
       let numericPrice = 0;

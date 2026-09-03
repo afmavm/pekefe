@@ -694,6 +694,66 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const { active, isPublished, isDeleted } = body;
+
+    let targetId = id;
+    try {
+      const target = await prisma.product.findFirst({
+        where: { OR: [{ id }, { sku: id }] },
+        select: { id: true, attributes: true }
+      });
+      if (target) {
+        targetId = target.id;
+        let attrs: any = target.attributes || {};
+        if (typeof attrs === "string") {
+          try { attrs = JSON.parse(attrs); } catch {}
+        }
+        if (active !== undefined) attrs.isActive = Boolean(active);
+        if (isPublished !== undefined) attrs.isPublished = Boolean(isPublished);
+
+        await prisma.product.update({
+          where: { id: target.id },
+          data: {
+            attributes: attrs,
+            ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
+          }
+        });
+      }
+    } catch (dbErr) {
+      console.warn("[API PATCH PRODUCT NOTICE] Prisma update fallback:", dbErr);
+    }
+
+    // Always update local disk DB & in-memory products
+    const localProducts = readLocalProducts();
+    const localItem = localProducts.find((p: any) => p.id === id || p.sku === id || decodeURIComponent(id) === p.sku);
+    if (localItem) {
+      const updatedLocal = saveLocalProduct({
+        ...localItem,
+        ...(active !== undefined ? { active: Boolean(active) } : {}),
+        ...(isPublished !== undefined ? { isPublished: Boolean(isPublished) } : {}),
+        ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
+      }, true);
+      revalidatePath('/', 'layout');
+      revalidatePath('/admin/stock');
+      return NextResponse.json(updatedLocal);
+    }
+
+    revalidatePath('/', 'layout');
+    revalidatePath('/admin/stock');
+    return NextResponse.json({ success: true, active });
+  } catch (error: any) {
+    console.error("Error in PATCH product status:", error);
+    return NextResponse.json({ error: error.message || "Durum güncellenemedi" }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

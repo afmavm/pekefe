@@ -347,8 +347,8 @@ export default function Hikayemiz() {
                     <span className="material-symbols-outlined text-lg">verified</span>
                   </div>
                   <div>
-                    <h4 className="font-display-lg text-primary text-base font-bold">Düşük HMF Seviyesi (&lt; 10 mg/kg)</h4>
-                    <p className="text-xs text-on-surface-variant font-body mt-0.5 leading-relaxed">Dut şırası ateşte yakılmadan İspir güneşiyle yoğunlaştırıldığı için kanserojen riski taşıyan HMF oluşmaz; akredite laboratuvar raporlarıyla belgelenir.</p>
+                    <h4 className="font-display-lg text-primary text-base font-bold">Kontrollü Sıcaklık &amp; İdeal HMF Seviyesi</h4>
+                    <p className="text-xs text-on-surface-variant font-body mt-0.5 leading-relaxed">Pekmez şırasının yüksek sıcaklıklarda uzun süre kaynatılmaması ve güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılması, PEKEFE'nin geleneksel üretim anlayışının temelini oluşturur; HMF seviyesi akredite laboratuvar analizleriyle düzenli olarak takip edilir (&lt; 10 mg/kg).</p>
                   </div>
                 </div>
 

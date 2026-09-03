@@ -40,7 +40,7 @@ const DEFAULT_INITIAL_SLIDES = [
     tag: "Güneşin Doğal Sıcaklığıyla Yoğunlaşan Gün Pekmezi",
     title: "Şırayı Ateşte Yakmadan,",
     highlightTitle: "Güneşin Doğal Sıcaklığıyla.",
-    subtitle: "İlhan Efe zanaatkar yaklaşımıyla; dut şırası ateşte yakılmadan İspir güneşi altında sabırla yoğunlaştırılır. Sıfır ilave şeker, sıfır yanık HMF.",
+    subtitle: "İlhan Efe zanaatkar yaklaşımıyla; dut şırası yüksek sıcaklıkta uzun süre kaynatılmadan İspir güneşi altında sabırla yoğunlaştırılır. %100 saf ve doğal lezzet.",
     image: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
     active: true,
     objectPositionX: 50,

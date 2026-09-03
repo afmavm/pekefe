@@ -69,8 +69,8 @@ export default function Tesisimiz() {
           </div>
           <div className="space-y-1 border-l border-slate-100 dark:border-slate-800">
             <div className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">&lt; 10 mg</div>
-            <div className="text-xs font-bold text-slate-800 dark:text-amber-100">Sıfır Yanık HMF</div>
-            <div className="text-[11px] text-slate-500">Kanserojen Yanık Yok</div>
+            <div className="text-xs font-bold text-slate-800 dark:text-amber-100">Kontrollü HMF</div>
+            <div className="text-[11px] text-slate-500">Doğal Sıcaklıkla Koruma</div>
           </div>
           <div className="space-y-1 border-l border-slate-100 dark:border-slate-800">
             <div className="text-2xl sm:text-3xl font-black text-[#360e17] dark:text-amber-300 font-mono">2200m+</div>

@@ -15,7 +15,7 @@ Kuruluş Felsefesi: "Dut şırasını ateşte yakmadan, güneş ışığında ve
 • İçerik: %100 Saf İspir Beyaz Dut Şırası. 0% İlave Şeker, 0.0% Glikoz / Glikoz Şurubu, 0% Koruyucu ve Katkı Maddesi.
 • Üretim Yöntemi: Dört kişilik hasavan (dokuma bez) ile toprağa değmeden toplanan beyaz dutların şırası, ateşte yakılmadan İspir güneşinin doğal sıcaklığında sabırla dinlendirilerek yoğunlaştırılır (Gün Pekmezi).
 • Besin Değeri: 2 yemek kaşığı (20g) pekmezde 2mg organik demir ve 80mg kalsiyum bulunur. Kansızlık, anemi, mide/ülser ve çocuk gelişimine şifadır.
-• Kalite Standardı: HMF (5-Hidroksimetilfurfural) seviyesi < 10 mg/kg (Güneşle yoğunlaştığı için yanık şeker HMF'si oluşmaz).
+• Kalite Standardı: Pekmez şırasının yüksek sıcaklıklarda uzun süre kaynatılmaması ve güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılması esastır. HMF parametresi akredite laboratuvar analizleriyle takip edilir (< 10 mg/kg).
 
 [ÜRÜN DETAYI — DOĞAL FERMANTASYON İSPİR DUT SİRKESİ]
 • İçerik: İspir beyaz dutları ve doğal sirke anası ile meşe fıçılarda aylarca fermente edilen canlı, filtresiz probiyotik sirke.

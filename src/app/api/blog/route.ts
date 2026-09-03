@@ -48,8 +48,8 @@ const defaultBlogPosts = [
 <p>Endüstriyel üretimlerde kullanılan yüksek basınçlı çelik tanklar ve şeker takviyelerinin aksine, <strong>PEKEFE geleneksel yöntemlere sadık kalır:</strong></p>
 <ul>
   <li><strong>Sıfır İlave Şeker ve Glukoz:</strong> Pekmezimiz %100 öz meyve şekerinden oluşur. Hiçbir renklendirici veya koruyucu içermez.</li>
-  <li><strong>Geleneksel Bakır Kazanlar:</strong> Meşe odunu ateşinde, bakır kazanların eşit ısı iletimi sayesinde pekmezimiz karamelize olmadan, HMF değeri yükselmeden ve besin değerlerini kaybetmeden saatlerce pişirilir.</li>
-  <li><strong>Doğal Gün Güneşi Kıvamı:</strong> Kaynatılan şıra, güneşte dinlendirilerek ideal kıvama ulaşır ve el değmeden steril cam kavanozlara doldurulur.</li>
+  <li><strong>Güneşte Doğal Yoğunlaştırma:</strong> Dut şırası yüksek sıcaklıklarda uzun süre kaynatılmadan, İspir yayla güneşinin doğal sıcaklığından yararlanılarak sabırla yoğunlaştırılır.</li>
+  <li><strong>Doğal Gün Güneşi Kıvamı:</strong> Şıra güneşte dinlendirilerek ideal kıvama ulaşır ve el değmeden steril cam kavanozlara doldurulur.</li>
 </ul>
 
 <div style="background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">

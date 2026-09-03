@@ -219,7 +219,7 @@ export default function Home() {
       title: "HMF (Hidroksimetilfurfural) Seviyesi",
       value: "< 10 mg/kg",
       normal: "Yasal Üst Limit: 40 mg/kg",
-      desc: "HMF, şıranın yüksek ateşte aşırı kaynatılarak yakılması sonucu oluşan zararlı bileşiktir. PEKEFE Dut Gün Pekmezi ateşte yakılmadan İspir güneşinde doğal sıcaklıkla yoğunlaştırıldığı için HMF değeri standartların çok altındadır.",
+      desc: "Pekmez şırasının yüksek sıcaklıklarda uzun süre kaynatılmaması ve güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılması, PEKEFE'nin geleneksel üretim anlayışının temelini oluşturur. HMF seviyesi akredite laboratuvar analizleriyle takip edilir.",
       icon: "science",
     },
     {

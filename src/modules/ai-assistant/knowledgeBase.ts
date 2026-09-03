@@ -7,22 +7,26 @@ export interface CorporateKnowledge {
 }
 
 export const PEKEFE_CORPORATE_KB: CorporateKnowledge = {
-  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, Erzurum İspir'in 2000m+ rakımlı yüksek yaylalarındaki beyaz dut ağaçlarından ve zengin yayla florasından beslenen, katkısız ve geleneksel lezzetler sunan coğrafi işaretli Türk gıda markasıdır.
+  brandIdentity: `PEKEFE Geleneksel & Doğal Lezzetler, Erzurum İspir'in 2000m+ rakımlı yüksek vadilerindeki asırlık beyaz dut ağaçlarından ve zengin yayla florasından beslenen, emekli öğretmen İlhan Efe tarafından TKDK desteğiyle kurulan Avrupa Birliği ve Bakanlık onaylı modern tesisinde üretim yapan Türk gıda markasıdır.
 İletişim: WhatsApp ve canlı destek hattımız üzerinden hafta içi 09:00–18:00 saatleri arasında kesintisiz hizmet verilmektedir.
-Kuruluş Felsefesi: "Yayla Hasadından Sofranıza" — Asırlık tarifler, meşe odunu ateşi, bakır kazanlar ve keten bezlerde doğal güneş kurutması ile %100 saf lezzetler.`,
+Kuruluş Felsefesi: "Dut şırasını ateşte yakmadan, güneş ışığında ve doğal sıcaklıkta sabırla yoğunlaştırarak" geleneksel Dut Gün Pekmezi üretimi ve sıfır atık döngüsü ile posaların hayvan yemine dönüştürülmesi.`,
 
-  productDetail: `[ÜRÜN DETAYI — İSPİR HAM DUT PEKMEZİ]
+  productDetail: `[ÜRÜN DETAYI — GELENEKSEL İSPİR DUT GÜN PEKMEZİ]
 • İçerik: %100 Saf İspir Beyaz Dut Şırası. 0% İlave Şeker, 0.0% Glikoz / Glikoz Şurubu, 0% Koruyucu ve Katkı Maddesi.
-• Üretim Yöntemi: İspir yaylalarında toplanan beyaz dutlar bakır kazanlarda kısık meşe odun ateşinde kaynatılır.
-• Kalite Standardı: HMF (Hidroksimetilfurfural) seviyesi < 10 mg/kg (Bağımsız laboratuvar analiz raporlu ve Coğrafi İşaret Tescilli).
+• Üretim Yöntemi: Dört kişilik hasavan (dokuma bez) ile toprağa değmeden toplanan beyaz dutların şırası, ateşte yakılmadan İspir güneşinin doğal sıcaklığında sabırla dinlendirilerek yoğunlaştırılır (Gün Pekmezi).
+• Besin Değeri: 2 yemek kaşığı (20g) pekmezde 2mg organik demir ve 80mg kalsiyum bulunur. Kansızlık, anemi, mide/ülser ve çocuk gelişimine şifadır.
+• Kalite Standardı: HMF (5-Hidroksimetilfurfural) seviyesi < 10 mg/kg (Güneşle yoğunlaştığı için yanık şeker HMF'si oluşmaz).
+
+[ÜRÜN DETAYI — DOĞAL FERMANTASYON İSPİR DUT SİRKESİ]
+• İçerik: İspir beyaz dutları ve doğal sirke anası ile meşe fıçılarda aylarca fermente edilen canlı, filtresiz probiyotik sirke.
+• Özellik: Canlı enzimler, yumuşak meyvemsi içim.
 
 [ÜRÜN DETAYI — İSPİR HAM ÇİÇEK BALI]
-• İçerik: 2200m+ Kaçkar yayla çiçeklerinin nektarından elde edilmiş %100 saf süzme ham bal.
-• Özellik: Isıl işlem görmemiş, filtrelenmemiş besleyici doğal arı balı.
+• İçerik: 2200m+ Kaçkar yayla çiçeklerinin nektarından elde edilmiş %100 saf süzme ham bal. Isıl işlem görmemiş, pastörize edilmemiş.
 
-[ÜRÜN DETAYI — İSPİR CEVİZLİ KÖME & PESTİL]
-• Malzeme: Yerli İspir cevizi (%35-50 oranında), dut şırası, süzme bal ve tam buğday unu.
-• Kurutma: Keten bezler üzerinde İspir güneşinde doğal yöntemlerle kurutulur. Koruyucu içermez.
+[ÜRÜN DETAYI — İSPİR CEVİZLİ KÖME & YAPRAK PESTİL]
+• Malzeme: Yerli İspir cevizi (%40), saf dut şırası herlesi, süt ve doğal buğday nişastası.
+• Kurutma: Keten bezler üzerinde İspir'in nemsiz dağ güneşi altında doğal yöntemlerle kurutulur.
 
 [TÜKETİM VE SAKLAMA TAVSİYESİ]
 • Muhafaza: Oda sıcaklığında (18°C – 22°C), serin ve doğrudan güneş ışığı almayan yerde saklayınız.

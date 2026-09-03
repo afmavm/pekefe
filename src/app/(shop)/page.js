@@ -285,18 +285,18 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           <div className="lg:col-span-5 space-y-6">
             <span className="text-secondary font-label-md text-sm uppercase tracking-[0.2em] font-semibold block">
-              Köklere Dönüş
+              Köklere Dönüş · İlhan Efe Mirası
             </span>
             <h2 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold leading-tight">
-              Katkısız ve Saf Lezzetlerin <br />
-              <span className="text-on-surface italic font-serif font-normal">Yüz Yıllık Ritüeli</span>
+              Güneşle Yoğunlaşan <br />
+              <span className="text-on-surface italic font-serif font-normal">Geleneksel İspir Dut Gün Pekmezi</span>
             </h2>
             <div className="w-12 h-[1px] bg-secondary-container"></div>
             <p className="font-body-md text-on-surface-variant text-base leading-relaxed">
-              Bizim hikayemiz, Erzurum'un İspir ilçesinde, endüstriyel tarımın ve yapay koruyucuların girmediği yüksek vadilerde başlar. Dut ağaçlarımız asırlıktır; ilaçlama yapılmaz, tamamen doğanın kendi akışında büyürler. 
+              Bizim hikayemiz, Erzurum'un İspir ilçesinde emekli öğretmen <strong>İlhan Efe</strong>'nin çocukluktan bildiği pekmez zanaatını, TKDK desteği ve Avrupa Birliği hijyen standartlarıyla buluşturmasıyla başlar. Asırlık beyaz dutlarımız, 4 kişinin gergin tuttuğu <strong>hasavan (keten bez)</strong> üzerine toprağa değmeden dökülür.
             </p>
             <p className="font-body-md text-on-surface-variant text-base leading-relaxed">
-              Toplanan meyveleri glikoz şurubu, kıvam arttırıcı ya da sentetik asitler eklemeden, sadece odun ateşinde ve İspir'in kuru rüzgarları altında güneşle kurutarak paketliyoruz. Bu bir ticari gıda üretimi değil, kuşaklar boyu aktarılan yavaş gıda (slow food) kültürünün korunmasıdır.
+              PEKEFE'de <strong>dut şırası yüksek ateşte yakılmaz</strong>; İspir'in nemsiz yayla güneşi altında doğal sıcaklıktan yararlanılarak sabırla yoğunlaştırılır. Şıra yanmadığı için HMF değeri ideal seviyelerde kalır, dutun canlı meyve şekeri ve mineral yapısı %100 korunur. Üretim posaları kurutulup hayvan yemi olarak çiftçilerimize kazandırılır.
             </p>
           </div>
           <div className="lg:col-span-7">
@@ -315,15 +315,15 @@ export default function Home() {
               </div>
               <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all sm:mt-12">
                 <Image
-                  src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
-                  alt="Geleneksel Bakır Kazanlar"
+                  src="/uploads/ispir_hikayemiz_ilhan_efe_beyaz_dut.jpg"
+                  alt="İlhan Efe Geleneksel Hasat"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 hover:scale-105"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10"></div>
-                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20 drop-shadow">Geleneksel Kazanlar</span>
+                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20 drop-shadow">İlhan Efe Hasadı</span>
               </div>
             </div>
           </div>

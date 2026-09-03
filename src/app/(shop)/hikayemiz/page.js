@@ -310,7 +310,7 @@ export default function Hikayemiz() {
             
             {/* Image: Okan Efe in Orchard */}
             <div className="lg:col-span-5">
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-outline-variant/20 group">
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/20 group">
                 <Image
                   src="/uploads/ispir_hikayemiz_okan_efe_bahce.jpg"
                   alt="Okan Efe İspir Dut Bahçesinde"
@@ -318,10 +318,14 @@ export default function Hikayemiz() {
                   sizes="(max-width: 1024px) 100vw, 42vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
-                <span className="absolute bottom-6 left-6 text-white font-display-lg text-lg font-bold z-20">
-                  Okan Efe · Gelecek Vizyonu
-                </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+                <div className="absolute bottom-6 left-6 right-6 text-white z-20 space-y-1">
+                  <span className="text-amber-300 text-xs font-mono tracking-widest uppercase block font-bold">
+                    Zanaatın Geleceği · Genç Vizyon
+                  </span>
+                  <h3 className="font-display-lg text-xl font-bold">Okan Efe</h3>
+                  <p className="text-xs text-slate-200 font-body">İspir asırlık beyaz dut bahçelerinde yeni nesil kalite standartları.</p>
+                </div>
               </div>
             </div>
 
@@ -330,31 +334,41 @@ export default function Hikayemiz() {
               <span className="text-secondary font-label-md tracking-[0.2em] uppercase block text-xs font-bold">
                 BÖLÜM IV · GELECEĞE MİRAS
               </span>
-              <h2 className="font-display-lg text-primary text-3xl sm:text-4xl font-bold">
+              <h2 className="font-display-lg text-primary text-3xl sm:text-4xl lg:text-[40px] font-bold leading-tight">
                 Topraktan Sofranıza Güvenle Ulaşan Asil Dokunuş
               </h2>
               <p className="text-on-surface-variant text-base leading-relaxed font-body">
-                İlk günkü tutkuyu hiç kaybetmeden, İspir'in bereketli topraklarında organik ve geleneksel yöntemlerle yetiştirilen doğal mahsulleri en saf haliyle sunuyoruz. Paketlediğimiz her ürünü nem, ışık ve dış etkenlerden koruyan özel şeffaf hijyen vakumlarıyla ambalajlıyoruz.
+                Okan Efe'nin dinamik vizyonuyla; İspir'in asırlık beyaz dutlarından elde edilen geleneksel <strong>Dut Gün Pekmezi</strong> ve keten sergilerde kurutulan yaprak pestillerimiz, uluslararası gıda güvenliği standartlarında geleceğe taşınıyor. Paketlediğimiz her ürünü nem, ışık ve hava temasından koruyan özel şeffaf hijyen vakumlarıyla ambalajlıyoruz.
               </p>
               
-              <div className="space-y-4 pt-2">
-                <div className="flex gap-4 items-start bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+              <div className="space-y-3.5 pt-2">
+                <div className="flex gap-4 items-start bg-white p-4 sm:p-5 rounded-2xl border border-outline-variant/15 shadow-sm hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0 border border-primary/20">
                     <span className="material-symbols-outlined text-lg">verified</span>
                   </div>
                   <div>
                     <h4 className="font-display-lg text-primary text-base font-bold">Düşük HMF Seviyesi (&lt; 10 mg/kg)</h4>
-                    <p className="text-xs text-on-surface-variant font-body mt-0.5">Yüksek ısı uygulanmadığı için kanserojen riski taşıyan HMF oluşmaz, akredite lab raporlarıyla belgelenir.</p>
+                    <p className="text-xs text-on-surface-variant font-body mt-0.5 leading-relaxed">Dut şırası ateşte yakılmadan İspir güneşiyle yoğunlaştırıldığı için kanserojen riski taşıyan HMF oluşmaz; akredite laboratuvar raporlarıyla belgelenir.</p>
                   </div>
                 </div>
 
-                <div className="flex gap-4 items-start bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold shrink-0">
+                <div className="flex gap-4 items-start bg-white p-4 sm:p-5 rounded-2xl border border-outline-variant/15 shadow-sm hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold shrink-0 border border-amber-500/20">
                     <span className="material-symbols-outlined text-lg">eco</span>
                   </div>
                   <div>
-                    <h4 className="font-display-lg text-primary text-base font-bold">Sıfır Rafine Şeker &amp; Koruyucu</h4>
-                    <p className="text-xs text-on-surface-variant font-body mt-0.5">Meyvenin kendi fruktoz ve tat dengesi dışında ilave tatlandırıcı veya koruyucu madde kesinlikle kullanılmaz.</p>
+                    <h4 className="font-display-lg text-primary text-base font-bold">Sıfır Rafine Şeker &amp; Koruyucu Madde</h4>
+                    <p className="text-xs text-on-surface-variant font-body mt-0.5 leading-relaxed">%100 saf meyve özü. Glikoz şurubu, tatlandırıcı, kıvam arttırıcı veya sentetik koruyucular üretimimizin hiçbir aşamasında yer almaz.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start bg-white p-4 sm:p-5 rounded-2xl border border-outline-variant/15 shadow-sm hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-800 flex items-center justify-center font-bold shrink-0 border border-emerald-500/20">
+                    <span className="material-symbols-outlined text-lg">recycling</span>
+                  </div>
+                  <div>
+                    <h4 className="font-display-lg text-primary text-base font-bold">Sıfır Atık Modeli &amp; Kadın İstihdamı</h4>
+                    <p className="text-xs text-on-surface-variant font-body mt-0.5 leading-relaxed">Şırası çıkarılan dut posaları kurutulup hayvan yemi yapılarak çiftçilerimize kazandırılır; çoğunluğu kadın 10 kişilik kadromuzla yerel kalkınma desteklenir.</p>
                   </div>
                 </div>
               </div>

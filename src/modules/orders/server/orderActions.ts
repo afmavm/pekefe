@@ -4,7 +4,7 @@ import { prisma, withTimeout } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { emailNotificationService } from "@/lib/email-notification-service";
-import { readLocalOrders, saveLocalOrder } from "@/lib/jsonOrderDb";
+import { readLocalOrders, saveLocalOrder, updateLocalOrderStatus } from "@/lib/jsonOrderDb";
 
 /**
  * Asserts that the current session belongs to a verified ADMIN or DEALER profile.
@@ -30,19 +30,40 @@ async function assertAuth() {
 export async function updateOrderStatusAction(orderId: string, status: string) {
   try {
     await assertAuth();
-    const updated = await prisma.order.update({
-      where: { id: orderId },
-      data: { status },
-      include: { currentAccount: true }
-    });
+    let updated: any = null;
+
+    try {
+      updated = await prisma.order.update({
+        where: { id: orderId },
+        data: { status },
+        include: { currentAccount: true }
+      });
+    } catch (dbErr) {
+      console.warn("Prisma order update fallback to local disk DB:", dbErr);
+    }
+
+    // Also update local JSON DB
+    const localUpdated = updateLocalOrderStatus(orderId, { status });
+    if (!updated && localUpdated) {
+      updated = {
+        ...localUpdated,
+        total: localUpdated.amount,
+        currentAccount: {
+          name: localUpdated.client,
+          email: localUpdated.email,
+          phone: localUpdated.phone,
+          address: localUpdated.address
+        }
+      };
+    }
 
     // Send Status Update Email to Customer
-    const recipientEmail = updated.currentAccount?.email;
+    const recipientEmail = updated?.currentAccount?.email || localUpdated?.email;
     if (recipientEmail && recipientEmail !== "guest@nexab2b.com") {
       try {
         let cargoCompany = "Belirtilmedi";
         let trackingNo = "—";
-        if (updated.summary && updated.summary.startsWith("[")) {
+        if (updated?.summary && updated.summary.startsWith("[")) {
           const carrierMatch = updated.summary.match(/^\[([^\]|]+)(?:\s*\|\s*([^\]]+))?\]/);
           if (carrierMatch) {
             cargoCompany = carrierMatch[1].trim();
@@ -51,13 +72,13 @@ export async function updateOrderStatusAction(orderId: string, status: string) {
         }
 
         const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
-        const orderDateStr = updated.date ? new Date(updated.date).toLocaleDateString("tr-TR") : new Date().toLocaleDateString("tr-TR");
+        const orderDateStr = updated?.date ? new Date(updated.date).toLocaleDateString("tr-TR") : new Date().toLocaleDateString("tr-TR");
 
         await emailNotificationService.queueEmail(recipientEmail, "order_status_updated", {
-          kullanici_adi: updated.currentAccount?.name || "Değerli Müşterimiz",
-          siparis_no: updated.id,
+          kullanici_adi: updated?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
+          siparis_no: orderId,
           siparis_durumu: status,
-          siparis_tutari: Number(updated.total).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
+          siparis_tutari: Number(updated?.total || localUpdated?.amount || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
           kargo_sirketi: cargoCompany,
           takip_no: trackingNo,
           tarih: orderDateStr,
@@ -76,47 +97,129 @@ export async function updateOrderStatusAction(orderId: string, status: string) {
 }
 
 /**
+ * Cancels a single order, releasing balance / logging transactions if applicable.
+ */
+export async function cancelOrderAction(orderId: string, reason?: string) {
+  try {
+    await assertAuth();
+    let updatedOrder: any = null;
+
+    try {
+      const existingOrder = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { currentAccount: true }
+      });
+
+      if (existingOrder) {
+        updatedOrder = await prisma.$transaction(async (tx) => {
+          const order = await tx.order.update({
+            where: { id: orderId },
+            data: { status: "İptal Edildi" }
+          });
+
+          // If it wasn't already cancelled, reverse the balance and record transaction
+          if (existingOrder.status !== "İptal Edildi" && existingOrder.status !== "İptal") {
+            const reverseAmount = Number(existingOrder.total);
+
+            if (existingOrder.currentAccountId) {
+              await tx.transaction.create({
+                data: {
+                  currentAccountId: existingOrder.currentAccountId,
+                  type: "IPTAL",
+                  amount: -reverseAmount,
+                  description: `Sipariş İptali: #${orderId}${reason ? ` (${reason})` : ""}`,
+                  paymentMethod: existingOrder.method || "Belirtilmedi",
+                  date: new Date(),
+                }
+              });
+
+              await tx.currentAccount.update({
+                where: { id: existingOrder.currentAccountId },
+                data: { balance: { decrement: reverseAmount } }
+              });
+            }
+          }
+
+          return order;
+        });
+      }
+    } catch (dbErr) {
+      console.warn("Prisma cancel order fallback to local disk DB:", dbErr);
+    }
+
+    // Always update local disk DB
+    const localUpdated = updateLocalOrderStatus(orderId, { status: "İptal Edildi" });
+
+    // Send cancellation email if customer email exists
+    const customerEmail = updatedOrder?.currentAccount?.email || localUpdated?.email;
+    if (customerEmail && customerEmail !== "guest@nexab2b.com") {
+      try {
+        const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
+        await emailNotificationService.queueEmail(customerEmail, "order_status_updated", {
+          kullanici_adi: updatedOrder?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
+          siparis_no: orderId,
+          siparis_durumu: "İptal Edildi",
+          siparis_tutari: Number(updatedOrder?.total || localUpdated?.amount || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
+          kargo_sirketi: "—",
+          takip_no: "—",
+          tarih: new Date().toLocaleDateString("tr-TR"),
+          detay_linki: `${hostUrl}/hesap`
+        });
+      } catch (mailErr) {
+        console.error("Order cancellation email failed:", mailErr);
+      }
+    }
+
+    return { success: true, order: updatedOrder || localUpdated };
+  } catch (error: any) {
+    console.error("Error in cancelOrderAction:", error);
+    return { success: false, error: error.message || "Sipariş iptal edilirken bir hata oluştu." };
+  }
+}
+
+/**
  * Bulk updates the status of multiple orders.
  */
 export async function bulkUpdateOrderStatusAction(orderIds: string[], status: string) {
   try {
     await assertAuth();
-    const result = await prisma.order.updateMany({
-      where: {
-        id: { in: orderIds }
-      },
-      data: { status }
-    });
-
-    // Send status update emails for bulk orders
-    if (Array.isArray(orderIds) && orderIds.length > 0) {
-      prisma.order.findMany({
-        where: { id: { in: orderIds } },
-        include: { currentAccount: true }
-      }).then(orders => {
-        orders.forEach(ord => {
-          const recipientEmail = ord.currentAccount?.email;
-          if (recipientEmail && recipientEmail !== "guest@nexab2b.com") {
-            const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
-            emailNotificationService.queueEmail(recipientEmail, "order_status_updated", {
-              kullanici_adi: ord.currentAccount?.name || "Değerli Müşterimiz",
-              siparis_no: ord.id,
-              siparis_durumu: status,
-              siparis_tutari: Number(ord.total).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
-              kargo_sirketi: "Standart Kargo",
-              takip_no: "—",
-              tarih: ord.date ? new Date(ord.date).toLocaleDateString("tr-TR") : new Date().toLocaleDateString("tr-TR"),
-              detay_linki: `${hostUrl}/hesap`
-            }).catch(e => console.error("Bulk status email error:", e));
-          }
-        });
-      }).catch(e => console.error("Error fetching bulk orders for status email:", e));
+    
+    try {
+      await prisma.order.updateMany({
+        where: {
+          id: { in: orderIds }
+        },
+        data: { status }
+      });
+    } catch (dbErr) {
+      console.warn("Prisma bulk update fallback to local disk DB:", dbErr);
     }
 
-    return { success: true, count: result.count };
+    // Update all in local DB
+    orderIds.forEach(id => {
+      updateLocalOrderStatus(id, { status });
+    });
+
+    return { success: true };
   } catch (error: any) {
     console.error("Error in bulkUpdateOrderStatusAction:", error);
-    return { success: false, error: error.message || "Toplu sipariş güncellemesi başarısız oldu." };
+    return { success: false, error: error.message || "Toplu sipariş durumu güncellenemedi." };
+  }
+}
+
+/**
+ * Bulk cancels multiple orders.
+ */
+export async function bulkCancelOrdersAction(orderIds: string[], reason?: string) {
+  try {
+    await assertAuth();
+    for (const id of orderIds) {
+      await cancelOrderAction(id, reason);
+    }
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in bulkCancelOrdersAction:", error);
+    return { success: false, error: error.message || "Toplu sipariş iptal edilemedi." };
   }
 }
 

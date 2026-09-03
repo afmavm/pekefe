@@ -11,7 +11,7 @@ export interface Order {
   amount: number;
   method: string;
   date: string;
-  status: "Yeni" | "Hazırlanıyor" | "Kargolandı" | "Teslim Edildi";
+  status: "Yeni" | "Hazırlanıyor" | "Kargolandı" | "Teslim Edildi" | "İptal Edildi" | string;
   address?: string;
   phone?: string;
   email?: string;

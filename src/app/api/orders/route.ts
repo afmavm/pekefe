@@ -450,37 +450,53 @@ export const PATCH = withAuth<any>(
         // ─── İptal / İade durumunda cari bakiyeyi geri al ───────────
         if (
           existingOrder &&
-          (status === "İptal" || status === "İade" || status === "Iptal") &&
+          (status === "İptal" || status === "İade" || status === "Iptal" || status === "İptal Edildi") &&
           existingOrder.status !== "İptal" &&
-          existingOrder.status !== "İade"
+          existingOrder.status !== "İade" &&
+          existingOrder.status !== "İptal Edildi"
         ) {
           const reverseAmount = Number(existingOrder.total);
 
-          // Ters Transaction kaydı
-          await tx.transaction.create({
-            data: {
-              currentAccountId: existingOrder.currentAccountId,
-              type: status === "İade" ? "IADE" : "IPTAL",
-              amount: -reverseAmount,
-              description: `Sipariş ${status}: #${orderId}`,
-              paymentMethod: existingOrder.method || "Belirtilmedi",
-              date: new Date(),
-            }
-          });
+          if (existingOrder.currentAccountId) {
+            // Ters Transaction kaydı
+            await tx.transaction.create({
+              data: {
+                currentAccountId: existingOrder.currentAccountId,
+                type: status === "İade" ? "IADE" : "IPTAL",
+                amount: -reverseAmount,
+                description: `Sipariş ${status}: #${orderId}`,
+                paymentMethod: existingOrder.method || "Belirtilmedi",
+                date: new Date(),
+              }
+            });
 
-          // Bakiyeyi düşür
-          await tx.currentAccount.update({
-            where: { id: existingOrder.currentAccountId },
-            data: { balance: { decrement: reverseAmount } }
-          });
+            // Bakiyeyi düşür
+            await tx.currentAccount.update({
+              where: { id: existingOrder.currentAccountId },
+              data: { balance: { decrement: reverseAmount } }
+            });
+          }
         }
 
         return order;
       }, { maxWait: 10000, timeout: 30000 });
 
+      // Always update local disk DB as well
+      const { updateLocalOrderStatus } = await import('@/lib/jsonOrderDb');
+      updateLocalOrderStatus(orderId, { status });
+
       return NextResponse.json(updatedOrder);
     } catch (error) {
       console.error('Error updating order status:', error);
+      // Fallback update in local DB
+      try {
+        const body = await req.clone().json().catch(() => ({}));
+        if (body?.orderId && body?.status) {
+          const { updateLocalOrderStatus } = await import('@/lib/jsonOrderDb');
+          const localUpdated = updateLocalOrderStatus(body.orderId, { status: body.status });
+          if (localUpdated) return NextResponse.json(localUpdated);
+        }
+      } catch (fErr) {}
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
   },

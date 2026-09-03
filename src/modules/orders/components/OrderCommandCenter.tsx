@@ -22,6 +22,8 @@ import autoTable from "jspdf-autotable";
 // Import Server Actions
 import { 
   updateOrderStatusAction, 
+  cancelOrderAction,
+  bulkCancelOrdersAction,
   bulkUpdateOrderStatusAction, 
   bulkGenerateInvoicesAction,
   getFulfillmentDetailsAction,
@@ -87,6 +89,21 @@ export default function OrderCommandCenter() {
   // Actions Loader States
   const [isGenerating, setIsGenerating] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
+
+  // Cancellation Modal State
+  const [cancelModal, setCancelModal] = useState<{
+    isOpen: boolean;
+    orderId: string | null;
+    orderNumber: string | null;
+    isBulk: boolean;
+    reason: string;
+  }>({
+    isOpen: false,
+    orderId: null,
+    orderNumber: null,
+    isBulk: false,
+    reason: "",
+  });
 
   // Invoices for slide-over drawer
   const [orderInvoices, setOrderInvoices] = useState<any[]>([]);
@@ -402,6 +419,61 @@ export default function OrderCommandCenter() {
       refreshOrders();
     } else {
       toast.error(result.error || "Güncelleme sırasında bir hata oluştu.");
+    }
+  };
+
+  // Cancellation Handlers
+  const handleOpenCancelModal = (orderId: string, orderNumber: string) => {
+    setCancelModal({
+      isOpen: true,
+      orderId,
+      orderNumber,
+      isBulk: false,
+      reason: "",
+    });
+  };
+
+  const handleOpenBulkCancelModal = () => {
+    if (selectedRows.size === 0) return;
+    setCancelModal({
+      isOpen: true,
+      orderId: null,
+      orderNumber: `${selectedRows.size} Adet Seçili Sipariş`,
+      isBulk: true,
+      reason: "",
+    });
+  };
+
+  const handleConfirmCancel = async () => {
+    setIsActionPending(true);
+    try {
+      if (cancelModal.isBulk) {
+        const ids = Array.from(selectedRows);
+        const result = await bulkCancelOrdersAction(ids, cancelModal.reason);
+        if (result.success) {
+          toast.success(`${ids.length} adet sipariş başarıyla iptal edildi.`);
+          setSelectedRows(new Set());
+          refreshOrders();
+        } else {
+          toast.error(result.error || "Toplu iptal işlemi başarısız oldu.");
+        }
+      } else if (cancelModal.orderId) {
+        const result = await cancelOrderAction(cancelModal.orderId, cancelModal.reason);
+        if (result.success) {
+          toast.success("Sipariş başarıyla iptal edildi.");
+          if (selectedOrder?.id === cancelModal.orderId) {
+            setSelectedOrder(prev => prev ? { ...prev, status: "İptal Edildi" } : null);
+          }
+          refreshOrders();
+        } else {
+          toast.error(result.error || "İptal işlemi başarısız oldu.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || "İptal sırasında hata oluştu.");
+    } finally {
+      setIsActionPending(false);
+      setCancelModal({ isOpen: false, orderId: null, orderNumber: null, isBulk: false, reason: "" });
     }
   };
 
@@ -1698,15 +1770,34 @@ export default function OrderCommandCenter() {
                             </td>
                           )}
                           <td className="p-4 text-center">
-                            <button
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setActiveDrawerTab("general");
-                              }}
-                              className="p-1.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 hover:border-slate-350 transition text-slate-600 cursor-pointer shadow-sm inline-flex items-center justify-center"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setActiveDrawerTab("general");
+                                }}
+                                className="p-1.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 hover:border-slate-300 transition text-slate-600 cursor-pointer shadow-xs inline-flex items-center justify-center"
+                                title="Sipariş Detayı"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              {order.status !== "İptal Edildi" ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenCancelModal(order.id, order.orderNumber);
+                                  }}
+                                  className="p-1.5 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 text-rose-600 transition cursor-pointer shadow-xs inline-flex items-center justify-center"
+                                  title="Siparişi İptal Et"
+                                >
+                                  <Ban className="w-3.5 h-3.5" />
+                                </button>
+                              ) : (
+                                <span className="p-1.5 text-slate-300 inline-flex items-center justify-center" title="Sipariş Zaten İptal Edildi">
+                                  <Ban className="w-3.5 h-3.5 opacity-40" />
+                                </span>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1749,7 +1840,7 @@ export default function OrderCommandCenter() {
         ) : (
           /* KANBAN GÖRÜNÜMÜ */
           <div className="flex overflow-x-auto gap-4 pb-4 select-none">
-            {["Yeni", "Hazırlanıyor", "Kargolandı", "Teslim Edildi"].map(colName => {
+            {["Yeni", "Hazırlanıyor", "Kargolandı", "Teslim Edildi", "İptal Edildi"].map(colName => {
               const colOrders = filteredAndSortedOrders.filter(o => o.status === colName);
               return (
                 <div key={colName} className="flex-1 min-w-[280px] bg-slate-100 border border-slate-200 rounded-2xl p-4 flex flex-col space-y-3">
@@ -1825,6 +1916,12 @@ export default function OrderCommandCenter() {
               className="flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
             >
               <Layers className="w-3.5 h-3.5" /> Çeki Listesi Al
+            </button>
+            <button 
+              onClick={handleOpenBulkCancelModal}
+              className="flex items-center gap-1 px-3 py-2 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded-xl text-xs font-bold transition cursor-pointer"
+            >
+              <Ban className="w-3.5 h-3.5" /> Seçilenleri İptal Et
             </button>
           </div>
 
@@ -1914,7 +2011,14 @@ export default function OrderCommandCenter() {
 
                   {/* Status Actions */}
                   <div className="space-y-3 bg-white p-4 border border-slate-200 rounded-xl">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">Durum Yönetimi</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Durum Yönetimi</p>
+                      {selectedOrder.status === "İptal Edildi" && (
+                        <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
+                          <Ban className="w-3 h-3" /> Sipariş İptal Edilmiştir
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-2 pt-1">
                       {["Yeni", "Hazırlanıyor", "Kargolandı", "Teslim Edildi"].map(st => (
                         <button
@@ -1926,6 +2030,20 @@ export default function OrderCommandCenter() {
                           {st === "Kargolandı" ? "Kargoya Ver" : st}
                         </button>
                       ))}
+
+                      {/* İptal Butonu */}
+                      <button
+                        disabled={isActionPending || selectedOrder.status === "İptal Edildi"}
+                        onClick={() => handleOpenCancelModal(selectedOrder.id, selectedOrder.orderNumber)}
+                        className={`px-3 py-1.5 border rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                          selectedOrder.status === "İptal Edildi"
+                            ? "bg-rose-600 text-white border-rose-600 cursor-not-allowed opacity-90 shadow-xs"
+                            : "bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-700"
+                        }`}
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                        {selectedOrder.status === "İptal Edildi" ? "İptal Edildi" : "Siparişi İptal Et"}
+                      </button>
                     </div>
                   </div>
 
@@ -2172,6 +2290,90 @@ export default function OrderCommandCenter() {
           <MessageSquare className="w-5 h-5" />
         </button>
       </div>
+
+      {/* 7. SİPARİŞ İPTAL ONAY MODALI */}
+      {cancelModal.isOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => {
+            if (!isActionPending) {
+              setCancelModal({ isOpen: false, orderId: null, orderNumber: null, isBulk: false, reason: "" });
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Ban className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900">
+                  {cancelModal.isBulk ? "Toplu Sipariş İptali" : "Siparişi İptal Et"}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {cancelModal.isBulk ? (
+                    <strong className="text-slate-800">{cancelModal.orderNumber}</strong>
+                  ) : (
+                    <>
+                      <strong className="text-slate-800">#{cancelModal.orderNumber}</strong> numaralı sipariş
+                    </>
+                  )}{" "}
+                  iptal edilecek ve durumu <em>"İptal Edildi"</em> olarak güncellenecektir.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-700 block">
+                İptal Sebebi <span className="text-slate-400 font-normal">(İsteğe Bağlı)</span>
+              </label>
+              <textarea
+                value={cancelModal.reason}
+                onChange={(e) => setCancelModal(prev => ({ ...prev, reason: e.target.value }))}
+                placeholder="Örn: Müşteri talebi, stok yetersizliği, hatalı ödeme..."
+                rows={3}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-rose-400 font-medium transition"
+              />
+            </div>
+
+            <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-[11px] text-amber-900 leading-relaxed">
+              ⚠️ İptal edilen sipariş için müşteriye otomatik e-posta bildirimi gönderilecek ve ilgili cari hesap hareketleri ters kayıtla dengelenecektir.
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                disabled={isActionPending}
+                onClick={() => setCancelModal({ isOpen: false, orderId: null, orderNumber: null, isBulk: false, reason: "" })}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+              >
+                Vazgeç
+              </button>
+              <button
+                type="button"
+                disabled={isActionPending}
+                onClick={handleConfirmCancel}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isActionPending ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span>İşleniyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <Ban className="w-3.5 h-3.5" />
+                    <span>{cancelModal.isBulk ? "Seçilenleri İptal Et" : "İptali Onayla"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

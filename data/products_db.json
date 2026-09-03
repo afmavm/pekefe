@@ -96,7 +96,9 @@
       "nutrients": "Canlı probiyotik enzimler, potasyum ve doğal meyve asitleri.",
       "sizes": [
         "500ml Cam Şişe"
-      ]
+      ],
+      "isActive": true,
+      "isPublished": true
     },
     "variants": [
       {
@@ -107,7 +109,15 @@
         "stock": 80
       }
     ],
-    "createdAt": "2026-09-03T20:58:10.170Z"
+    "createdAt": "2026-09-03T22:25:58.993Z",
+    "active": true,
+    "isPublished": true,
+    "videoUrl": "",
+    "discount_start_date": null,
+    "discount_end_date": null,
+    "warehouses": [],
+    "locations": [],
+    "isDeleted": false
   },
   {
     "id": "PKF-ISPIR-KOME",

@@ -1026,11 +1026,11 @@ export default function StockProductionPage() {
                     </button>
                   </div>
                 </div>
-                <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+                <div className="overflow-x-auto border border-slate-200/90 rounded-2xl shadow-xs bg-white">
                   <table className="w-full text-left whitespace-nowrap">
-                    <thead className="bg-slate-50 text-slate-400 text-[10px] font-bold tracking-wider uppercase border-b border-slate-100">
+                    <thead className="bg-slate-50/80 text-slate-500 text-[11px] font-bold tracking-wider uppercase border-b border-slate-200">
                       <tr>
-                        <th className="px-6 py-5 w-12 text-center">
+                        <th className="px-4 py-4 w-10 text-center">
                           <input 
                             type="checkbox"
                             checked={filteredAllProducts.length > 0 && filteredAllProducts.every(p => selectedRows.has(p.id))}
@@ -1049,34 +1049,46 @@ export default function StockProductionPage() {
                             className="rounded border-slate-300 text-orange-500 focus:ring-0 cursor-pointer"
                           />
                         </th>
-                        <th className="px-6 py-5">#</th>
-                        <th className="px-6 py-5">Görsel</th>
-                        <th className="px-6 py-5">Ürün Detayı</th>
-                        <th className="px-6 py-5">Kategori</th>
-                        <th className="px-6 py-5">Maliyet / Fiyat</th>
-                        <th className="px-6 py-5">Mevcut Stok</th>
-                        <th className="px-6 py-5">Tip</th>
-                        <th className="px-6 py-5">Yayın Durumu</th>
-                        <th className="px-6 py-5 text-right">İşlem</th>
+                        <th className="px-3 py-4 w-12 text-center text-slate-400">#</th>
+                        <th className="px-3 py-4 w-16 text-center">Görsel</th>
+                        <th className="px-4 py-4 min-w-[240px]">Ürün Bilgisi</th>
+                        <th className="px-4 py-4 w-36 text-center">Kategori</th>
+                        <th className="px-4 py-4 min-w-[220px]">Maliyet / Fiyat</th>
+                        <th className="px-4 py-4 w-32 text-center">Mevcut Stok</th>
+                        <th className="px-4 py-4 w-28 text-center">Tip</th>
+                        <th className="px-4 py-4 w-48 text-center">Yayın Durumu</th>
+                        <th className="px-4 py-4 w-28 text-right">İşlem</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-50 bg-white">
+                    <tbody className="divide-y divide-slate-100 bg-white">
                       {filteredAllProducts.length === 0 ? (
                         <tr>
-                          <td colSpan={10} className="p-8 text-center text-xs font-semibold text-slate-400">
+                          <td colSpan={10} className="p-12 text-center text-xs font-semibold text-slate-400">
                             Ürün bulunamadı.
                           </td>
                         </tr>
                       ) : (
                         filteredAllProducts.map((p, index) => {
                           const isLowStock = p.stock < (p.criticalLimit || 10);
-                          
+                          const isLive = p.active !== false && p.isDeleted !== true;
+                          const isSelected = selectedRows.has(p.id);
+
                           return (
-                            <tr key={p.id} className={`hover:bg-slate-50 transition-colors ${selectedRows.has(p.id) ? "bg-orange-50/20" : ""}`}>
-                              <td className="px-6 py-4 text-center">
+                            <tr 
+                              key={p.id} 
+                              className={`transition-colors duration-150 ${
+                                isSelected 
+                                  ? "bg-orange-50/40" 
+                                  : isLive 
+                                    ? "hover:bg-slate-50/80" 
+                                    : "bg-slate-50/40 hover:bg-slate-100/50"
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <td className="px-4 py-3.5 text-center">
                                 <input 
                                   type="checkbox"
-                                  checked={selectedRows.has(p.id)}
+                                  checked={isSelected}
                                   onChange={() => {
                                     setSelectedRows(prev => {
                                       const next = new Set(prev);
@@ -1088,41 +1100,60 @@ export default function StockProductionPage() {
                                   className="rounded border-slate-300 text-orange-500 focus:ring-0 cursor-pointer"
                                 />
                               </td>
-                              <td className="px-6 py-4 font-semibold text-slate-500">
+
+                              {/* Index */}
+                              <td className="px-3 py-3.5 text-center text-xs font-semibold text-slate-400">
                                 {index + 1}
                               </td>
-                              <td className="px-6 py-4">
+
+                              {/* Image */}
+                              <td className="px-3 py-3.5 text-center">
                                 {p.image ? (
-                                  <div className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center overflow-hidden relative">
-                                    <Image src={p.image} alt={p.name} fill sizes="48px" className="object-contain p-1" />
+                                  <div className="w-11 h-11 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden relative shadow-2xs">
+                                    <Image src={p.image} alt={p.name} fill sizes="44px" className="object-contain p-0.5" />
                                   </div>
                                 ) : (
-                                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400/10 to-amber-400/15 border border-orange-200/40 flex items-center justify-center font-bold text-orange-500 text-sm select-none">
+                                  <div className="w-11 h-11 mx-auto rounded-xl bg-gradient-to-br from-orange-400/15 to-amber-400/20 border border-orange-200/50 flex items-center justify-center font-black text-orange-600 text-sm select-none shadow-2xs">
                                     {p.name.charAt(0).toUpperCase()}
                                   </div>
                                 )}
                               </td>
-                              <td className="px-6 py-4">
+
+                              {/* Product Name & SKU */}
+                              <td className="px-4 py-3.5">
                                 <Link
                                   href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${encodeURIComponent(p.sku)}`}
                                   prefetch={false}
-                                  className="font-bold text-slate-900 text-sm hover:text-orange-600 transition-colors block"
-                                  title="Gelişmiş Stok Kartını Düzenle (SEO Uyumlu)"
+                                  className="font-bold text-slate-900 text-sm hover:text-orange-600 transition-colors block line-clamp-1"
+                                  title="Gelişmiş Stok Kartını Düzenle"
                                 >
                                   {p.name}
                                 </Link>
-                                <p className="text-[10px] font-semibold text-slate-400">SKU: {p.sku}</p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60">
+                                    SKU: {p.sku}
+                                  </span>
+                                  {!isLive && (
+                                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                      Taslak Modunda
+                                    </span>
+                                  )}
+                                </div>
                               </td>
-                              <td className="px-6 py-4">
-                                <span className="px-2.5 py-1 bg-slate-50 text-slate-600 rounded-lg text-[9px] font-bold uppercase tracking-wider border border-slate-200">
+
+                              {/* Category */}
+                              <td className="px-4 py-3.5 text-center">
+                                <span className="inline-block px-2.5 py-1 bg-slate-100/80 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200/70 max-w-[130px] truncate">
                                   {p.category || "Genel"}
                                 </span>
                               </td>
-                              <td className="px-6 py-4">
+
+                              {/* Pricing */}
+                              <td className="px-4 py-3.5">
                                 {p.isRawMaterial ? (
                                   <div className="text-xs font-semibold text-slate-500">
-                                    <p><b>Maliyet:</b> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
-                                    <span className="text-[10px] text-slate-400 font-normal">Hammadde (Satış Yok)</span>
+                                    <p><span className="text-slate-400">Maliyet:</span> {(p.cost || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</p>
+                                    <span className="text-[10px] text-slate-400 font-normal italic">Dahili Hammadde</span>
                                   </div>
                                 ) : (() => {
                                   const cost = Number(p.cost || 0);
@@ -1132,144 +1163,143 @@ export default function StockProductionPage() {
                                     try { attrs = JSON.parse(attrs); } catch { attrs = {}; }
                                   }
 
-                                  // 1. Web Satış Fiyatı (E-ticaret Mağaza Satış Fiyatı)
                                   const webPrice = Number(
                                     p.sale_price !== null && p.sale_price !== undefined
                                       ? p.sale_price
                                       : (p.price || attrs.webPrice || attrs.salePrice || 0)
                                   );
 
-                                  // 2. B2B Bayi Taban Fiyatı (DB'deki gerçek B2B değeri)
                                   const rawB2b = p.b2b_base_price ?? attrs.b2bPrice ?? (p.variants && p.variants[0]?.b2bPrice);
                                   const b2bPrice = rawB2b !== null && rawB2b !== undefined && rawB2b !== "" ? Number(rawB2b) : null;
 
-                                  // 3. Perakende Satış Fiyatı (Mağaza Perakende Fiyatı)
                                   const retailPrice = Number(
                                     attrs.retailPrice !== undefined && attrs.retailPrice !== null && attrs.retailPrice !== ""
                                       ? attrs.retailPrice
                                       : (p.price || webPrice)
                                   );
 
-                                  // 4. Piyasa / Çizgili Liste Fiyatı
-                                  const marketPrice = Number(p.oldPrice || p.list_price || attrs.marketPrice || 0);
-
                                   return (
-                                    <div className="text-xs font-semibold flex flex-col gap-1">
-                                      {/* Maliyet */}
-                                      <div className="text-slate-500 text-[11px]">
-                                        <span className="font-bold text-slate-600">Maliyet:</span> {cost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                    <div className="text-xs space-y-1">
+                                      {/* Maliyet satırı */}
+                                      <div className="text-[11px] text-slate-400">
+                                        Maliyet: <span className="font-semibold text-slate-600">{cost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</span>
                                       </div>
 
-                                      {/* Sadece Web Modu veya Tüm Fiyatlar */}
-                                      {(priceDisplayMode === "web" || priceDisplayMode === "all") && (
-                                        <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-max border border-emerald-200/60">
-                                          <span className="text-[9px] uppercase font-bold tracking-wider">Web:</span>
-                                          <span className="font-extrabold">{webPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺</span>
-                                        </div>
-                                      )}
-
-                                      {/* Sadece B2B Modu veya Tüm Fiyatlar */}
-                                      {(priceDisplayMode === "b2b" || priceDisplayMode === "all") && (
-                                        <div className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md w-max border border-blue-200/60">
-                                          <span className="text-[9px] uppercase font-bold tracking-wider">B2B:</span>
-                                          <span className="font-extrabold">
-                                            {b2bPrice !== null
-                                              ? `${b2bPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
-                                              : `${webPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`
-                                            }
+                                      {/* Fiyat rozetleri */}
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        {(priceDisplayMode === "web" || priceDisplayMode === "all") && (
+                                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
+                                            <span className="text-[8px] font-bold uppercase opacity-70">Web:</span>
+                                            {webPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
                                           </span>
-                                        </div>
-                                      )}
+                                        )}
 
-                                      {/* Sadece Perakende Modu veya Tüm Fiyatlar */}
-                                      {(priceDisplayMode === "retail" || priceDisplayMode === "all") && (
-                                        <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md w-max border border-purple-200/60">
-                                          <span className="text-[9px] uppercase font-bold tracking-wider">Perakende:</span>
-                                          <span className="font-extrabold">
+                                        {(priceDisplayMode === "b2b" || priceDisplayMode === "all") && (
+                                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/70">
+                                            <span className="text-[8px] font-bold uppercase opacity-70">B2B:</span>
+                                            {(b2bPrice !== null ? b2bPrice : webPrice).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                          </span>
+                                        )}
+
+                                        {(priceDisplayMode === "retail" || priceDisplayMode === "all") && (
+                                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/70">
+                                            <span className="text-[8px] font-bold uppercase opacity-70">Perakende:</span>
                                             {retailPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
                                           </span>
-                                        </div>
-                                      )}
+                                        )}
+                                      </div>
                                     </div>
                                   );
                                 })()}
                               </td>
-                              <td className="px-6 py-4">
-                                <div className="flex flex-col gap-0.5">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className={`text-sm font-black px-2 py-0.5 w-max rounded-md border ${
+
+                              {/* Stok */}
+                              <td className="px-4 py-3.5 text-center">
+                                <div className="inline-flex flex-col items-center gap-0.5">
+                                  <div className="inline-flex items-center gap-1">
+                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg border ${
                                       isLowStock 
-                                        ? "text-red-600 bg-red-50 border-red-200 animate-pulse font-bold" 
+                                        ? "text-red-600 bg-red-50 border-red-200 animate-pulse" 
                                         : "text-slate-800 bg-slate-50 border-slate-200"
                                     }`}>
                                       {p.stock.toLocaleString("tr-TR")}
                                     </span>
                                     <button
                                       onClick={() => openQuickStockModal(p)}
-                                      className="p-1 hover:bg-slate-100 text-slate-400 hover:text-orange-500 rounded transition border border-slate-200 bg-slate-50 cursor-pointer flex items-center justify-center shrink-0"
+                                      className="p-1 hover:bg-slate-200/70 text-slate-400 hover:text-orange-600 rounded-md transition border border-slate-200 bg-slate-50 cursor-pointer"
                                       title="Stok Miktarını Hızlı Güncelle"
                                     >
-                                      <Edit className="w-3.5 h-3.5" />
+                                      <Edit className="w-3 h-3" />
                                     </button>
                                   </div>
-                                  <span className="text-[9px] text-slate-400 font-semibold">Limit: {p.criticalLimit || 0}</span>
+                                  <span className="text-[9px] text-slate-400 font-medium">Limit: {p.criticalLimit || 0}</span>
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
+
+                              {/* Tip */}
+                              <td className="px-4 py-3.5 text-center">
                                 {p.isRawMaterial ? (
-                                  <span className="px-2.5 py-1 bg-orange-50 text-orange-600 border border-orange-100 rounded-lg text-[9px] font-bold uppercase tracking-wider">
+                                  <span className="inline-block px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200/80 rounded-lg text-[9px] font-extrabold uppercase tracking-wider">
                                     Hammadde
                                   </span>
                                 ) : (
-                                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-bold uppercase tracking-wider">
+                                  <span className="inline-block px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-lg text-[9px] font-extrabold uppercase tracking-wider">
                                     Mamul
                                   </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4">
+
+                              {/* Yayın Durumu (Switch + Rozet) */}
+                              <td className="px-4 py-3.5 text-center">
                                 {p.isRawMaterial ? (
                                   <span className="text-[10px] text-slate-400 italic">Dahili Hammadde</span>
                                 ) : (
-                                  <div className="flex items-center gap-2">
+                                  <div className="inline-flex items-center justify-center gap-2.5">
+                                    {/* Modern iOS Toggle Switch */}
                                     <button
                                       type="button"
                                       disabled={togglingProductId === p.id}
                                       onClick={() => handleToggleProductStatus(p)}
-                                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        p.active !== false && p.isDeleted !== true ? "bg-emerald-500" : "bg-slate-300"
+                                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-2xs ${
+                                        isLive ? "bg-emerald-500 hover:bg-emerald-600" : "bg-slate-300 hover:bg-slate-400"
                                       } ${togglingProductId === p.id ? "opacity-50 cursor-wait" : ""}`}
-                                      title={p.active !== false && p.isDeleted !== true ? "Yayından kaldır (Taslağa al)" : "Web ve mağazada yayına al"}
+                                      title={isLive ? "Yayından kaldır (Taslağa al)" : "Web ve mağazada yayına al"}
                                     >
                                       <span
                                         aria-hidden="true"
-                                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                                          p.active !== false && p.isDeleted !== true ? "translate-x-4" : "translate-x-0"
+                                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                          isLive ? "translate-x-4" : "translate-x-0"
                                         }`}
                                       />
                                     </button>
-                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border flex items-center gap-1 ${
-                                      p.active !== false && p.isDeleted !== true
-                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
-                                        : "bg-slate-100 text-slate-500 border-slate-200"
+
+                                    {/* Durum Rozeti */}
+                                    <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full border transition-all ${
+                                      isLive
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-2xs"
+                                        : "bg-slate-100 text-slate-600 border-slate-200"
                                     }`}>
-                                      <span className={`w-1.5 h-1.5 rounded-full ${p.active !== false && p.isDeleted !== true ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
-                                      {p.active !== false && p.isDeleted !== true ? "Yayında" : "Taslak"}
+                                      <span className={`w-1.5 h-1.5 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+                                      {isLive ? "Yayında" : "Taslak"}
                                     </span>
                                   </div>
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-right space-x-1.5">
+
+                              {/* Actions */}
+                              <td className="px-4 py-3.5 text-right space-x-1">
                                 <Link
                                   href={`/admin/stock/form?slug=${generateSlug(p.name)}&id=${p.id}&sku=${encodeURIComponent(p.sku)}`}
                                   prefetch={false}
-                                  className="p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-orange-600 hover:text-orange-900 transition-all inline-flex items-center justify-center cursor-pointer shadow-xs"
+                                  className="p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200/80 rounded-lg text-orange-600 hover:text-orange-900 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
                                   title="Gelişmiş Stok Kartını Aç"
                                 >
                                   <Edit className="w-3.5 h-3.5" />
                                 </Link>
                                 <button
                                   onClick={() => handleDeleteProduct(p.id)}
-                                  className="p-1.5 bg-slate-50 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-lg text-slate-400 hover:text-red-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"
+                                  className="p-1.5 bg-slate-50 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-lg text-slate-400 hover:text-red-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
+                                  title="Ürünü Sil"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>

@@ -259,13 +259,13 @@ export default function Hikayemiz() {
             
             <div className="text-on-surface-variant text-base leading-relaxed space-y-4 font-body">
               <p>
-                İlhan Efe'nin kurduğu mütevazı zanaat anlayışı, oğlu <strong className="text-primary font-bold">Okan Efe</strong>'nin vizyonuyla daha da güçlendi. Artan müşteri taleplerini karşılamak ve hijyen standartlarını uluslararası düzeye taşımak amacıyla Tarım ve Kırsal Kalkınmayı Destekleme Kurumu (TKDK) desteğiyle modern üretim tesisi kuruldu.
+                İlhan Efe'nin kurduğu mütevazı zanaat anlayışı, oğlu <strong className="text-primary font-bold">Okan Efe</strong>'nin vizyonuyla daha da güçlendi. Artan talepleri karşılamak ve hijyen standartlarını en üst düzeye taşımak amacıyla Tarım ve Kırsal Kalkınmayı Destekleme Kurumu (TKDK) desteğiyle Avrupa Birliği ve Bakanlık onaylı modern üretim tesisi kuruldu.
               </p>
               <p>
-                TKDK hibe desteğiyle kurulan bu tesiste, babadan kalma odun ateşi zanaatı; besin değerini, renk ve vitaminleri tam koruyan <strong className="text-primary font-bold">vakumlu düşük sıcaklık pişirme teknolojisi</strong> ile birleştirildi.
+                TKDK desteğiyle kurulan bu modern tesiste, asırlık miras olan <strong className="text-primary font-bold">dut şırasını ateşte yakmadan, İspir güneşinin doğal sıcaklığında sabırla yoğunlaştırma (Dut Gün Pekmezi zanaatı)</strong>, paslanmaz çelik hijyenik dinlendirme tekneleri ve el değmeden steril vakum paketleme altyapısıyla buluşturuldu.
               </p>
               <p>
-                Bugün Pekefe, 10 yılı aşkın süredir aynı disiplinle hareket ediyor: Seri üretime asla geçmeden, her mahsulü kendi mevsiminde, kendi bahçesinden el işçiliğiyle toplayarak işliyoruz.
+                Bugün Pekefe, 10 yılı aşkın süredir aynı disiplinle hareket ediyor: Seri üretime asla geçmeden, her mahsulü kendi mevsiminde, asırlık İspir bahçelerinden 4 kişilik hasavan bezleriyle toprağa değmeden toplayarak zanaatkar ruhla işliyoruz.
               </p>
             </div>
 

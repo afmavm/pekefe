@@ -53,7 +53,7 @@ export default function Tesisimiz() {
             Zanaatın ve Bilimin <br className="hidden md:block" /> Buluştuğu Butik Tesisimiz
           </h1>
           <p className="text-amber-100/90 max-w-2xl mx-auto text-base sm:text-lg md:text-xl leading-relaxed font-light drop-shadow">
-            Doğanın sunduğu en saf lezzetleri, 60°C vakumlu pişirme teknolojisi ve en yüksek hijyen standartlarında geleceğe taşıyoruz.
+            Doğanın sunduğu en saf lezzetleri, şırayı ateşte yakmadan İspir yayla güneşinin doğal sıcaklığı ve TKDK onaylı hijyen standartlarında geleceğe taşıyoruz.
           </p>
           <div className="w-16 h-[2px] bg-[#b45309] mx-auto rounded-full pt-1" />
         </div>
@@ -63,9 +63,9 @@ export default function Tesisimiz() {
       <section className="relative z-20 -mt-12 max-w-5xl mx-auto px-4">
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-black text-[#b45309] font-mono">60-65°C</div>
-            <div className="text-xs font-bold text-slate-800 dark:text-amber-100">Vakumlu Düşük Isı</div>
-            <div className="text-[11px] text-slate-500">Besin Değeri Koruma</div>
+            <div className="text-2xl sm:text-3xl font-black text-[#b45309] font-mono">Doğal Güneş</div>
+            <div className="text-xs font-bold text-slate-800 dark:text-amber-100">Şırayı Yakmama</div>
+            <div className="text-[11px] text-slate-500">Doğal Sıcaklık &amp; Kıvam</div>
           </div>
           <div className="space-y-1 border-l border-slate-100 dark:border-slate-800">
             <div className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">&lt; 10 mg</div>

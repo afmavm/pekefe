@@ -1,10 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Hikayemiz() {
+  const [isTrtModalOpen, setIsTrtModalOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsTrtModalOpen(false);
+        setZoomLevel(1);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -120,20 +134,39 @@ export default function Hikayemiz() {
             
             {/* TRT Haber Interview Archival Photo */}
             <div className="lg:col-span-5 relative">
-              <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-amber-500/30 group">
+              <div 
+                onClick={() => {
+                  setIsTrtModalOpen(true);
+                  setZoomLevel(1);
+                }}
+                className="relative aspect-square sm:aspect-[4/3] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-amber-500/40 group cursor-pointer hover:border-amber-400 transition-all"
+                title="Büyütmek ve Orijinal Haberi Okumak İçin Tıklayın"
+              >
                 <Image
                   src="/uploads/trthaber_ilhan_efe_roportaj.jpg"
                   alt="TRT Haber Memleketten Haber Var İlhan Efe Röportajı"
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                <div className="absolute bottom-4 left-4 right-4 z-20">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
+                
+                {/* Floating Zoom Action Badge */}
+                <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md text-amber-300 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-400/40 flex items-center gap-1.5 shadow-lg group-hover:bg-amber-400 group-hover:text-black transition-all">
+                  <span className="material-symbols-outlined text-sm">zoom_in</span>
+                  <span>Haberi Büyüt &amp; Oku</span>
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4 z-20 space-y-1">
                   <span className="inline-block bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1 shadow">
                     TRT HABER · 21 EYLÜL 2017
                   </span>
                   <p className="text-xs text-amber-200 font-mono">Memleketten Haber Var Programı Özel Yayını</p>
+                  <p className="text-[11px] text-amber-100/75 italic flex items-center gap-1 pt-0.5">
+                    <span className="material-symbols-outlined text-[15px]">touch_app</span>
+                    Orijinal haber kupürünü büyütüp okumak için tıklayın
+                  </p>
                 </div>
               </div>
             </div>
@@ -405,7 +438,7 @@ export default function Hikayemiz() {
             </div>
             <h3 className="font-display-lg text-primary text-xl font-bold">Modern Gelenek</h3>
             <p className="text-xs text-on-surface-variant leading-relaxed font-body">
-              Atalarımızın asırlık usullerini, mineralleri koruyan vakumlu pişirme teknolojileriyle harmanlıyoruz.
+              Atalarımızın asırlık usullerini, şırayı yakmadan güneşte doğal yoğunlaştırma zanaatı ve TKDK onaylı hijyen standartlarıyla geleceğe taşıyoruz.
             </p>
           </div>
 
@@ -445,6 +478,114 @@ export default function Hikayemiz() {
           </div>
         </div>
       </section>
+
+      {/* ─── TRT HABER / ARŞİV LIGHTBOX & HIGH-LEGIBILITY TRANSCRIPT MODAL ─── */}
+      {isTrtModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 md:p-8 animate-fade-in"
+          onClick={() => setIsTrtModalOpen(false)}
+        >
+          <div 
+            className="relative bg-[#20080d] text-white border border-amber-500/40 rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Top Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-[#360e17]">
+              <div className="flex items-center gap-3">
+                <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                  TRT HABER ARŞİVİ
+                </span>
+                <span className="text-amber-200 text-xs sm:text-sm font-mono hidden sm:inline">
+                  21 Eylül 2017 · "Memleketten Haber Var"
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setZoomLevel(prev => prev === 1 ? 1.4 : 1)}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Yakınlaştır / Uzaklaştır"
+                >
+                  <span className="material-symbols-outlined text-base">{zoomLevel === 1 ? 'zoom_in' : 'zoom_out'}</span>
+                  <span className="hidden sm:inline">{zoomLevel === 1 ? '%140 Büyüt' : 'Normal Boyut'}</span>
+                </button>
+                <button
+                  onClick={() => setIsTrtModalOpen(false)}
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Kapat"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Two Column / High Res Image + Crisp Full Transcript */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto max-h-[calc(92vh-75px)]">
+              {/* Image View with Zoom */}
+              <div className="lg:col-span-6 bg-black/50 flex items-center justify-center p-4 border-b lg:border-b-0 lg:border-r border-white/10 overflow-hidden min-h-[380px]">
+                <div 
+                  className="relative w-full max-w-[480px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-300 cursor-zoom-in"
+                  style={{ transform: `scale(${zoomLevel})` }}
+                  onClick={() => setZoomLevel(prev => prev === 1 ? 1.4 : 1)}
+                  title="Tıklayarak büyütebilirsiniz"
+                >
+                  <Image
+                    src="/uploads/trthaber_ilhan_efe_roportaj.jpg"
+                    alt="TRT Haber İlhan Efe Orijinal Haber Kupürü"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+
+              {/* Crisp High-Legibility Full Transcript */}
+              <div className="lg:col-span-6 p-6 sm:p-8 space-y-5 overflow-y-auto bg-[#26090e]">
+                <div className="border-b border-amber-500/20 pb-4">
+                  <span className="text-amber-400 font-mono text-[11px] uppercase tracking-widest font-bold block">
+                    ORİJİNAL HABER METNİ &amp; BELGESEL DEŞİFRESİ
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-white mt-1">
+                    ERZURUM'DAN HABER VAR
+                  </h3>
+                  <p className="text-xs text-amber-200/80 font-mono mt-0.5">
+                    İspir · Emekli Öğretmen İlhan Efe &amp; Pekefe Tesisi
+                  </p>
+                </div>
+
+                <div className="space-y-3.5 text-xs sm:text-sm text-amber-100/90 leading-relaxed font-sans">
+                  <p>
+                    Kırsal alanda önemli faaliyetleri destekleyen <strong>Tarım ve Kırsal Kalkınmayı Destekleme Kurumu (TKDK)</strong> dikkat çeken yatırımlardan birini daha TRT Haber aracılığı ile tanıttı. Erzurum'u Karadeniz'e bağlayan İspir ilçesinde emekli öğretmen İlhan Efe'ye ait pekmez üretim tesisi, 21 Eylül Perşembe günü TRT Haber'de yayınlanan <em>'Memleketten Haber Var'</em> isimli programa konuk oldu.
+                  </p>
+                  <p>
+                    Başta pekmez, köme ve pestil gibi yöreye özgü ürünler üreten başarılı girişimci, ürünlerini <strong>'Pekefe'</strong> markasıyla pazara hazırlıyor. Ürünlerini geleneksel üretim teknikleri, gıda hijyeni ve kalite kuralları ile üreten İlhan Efe; Gıda, Tarım ve Hayvancılık Bakanlığı tarafından gerekli üretim izinleri alarak markalaştırdığı ürünlerini Avrupa Birliği standartlarındaki tesisinde üretiyor.
+                  </p>
+                  <p>
+                    Bu üretimi sayesinde TRT Haber kanalı tarafından yayınlanan 'Memleketten haber var' adlı programın konuğu olmayı başaran İlhan Efe, üretim tesisi ile ilgili şu bilgileri aktardı:
+                  </p>
+                  <blockquote className="bg-black/35 border-l-4 border-amber-400 p-4 rounded-r-xl italic text-amber-200/95 space-y-2">
+                    <p>
+                      "Emekliliğimden sonra boş durmamak için uğraşlar arıyordum. Bu bağlamda çocukluğumdan beri bildiğim iş olan pekmez üretimini yapmaya karar verdim. Pekmezleri önceleri kendi imkânlarımla ilçemizin meşhur olan dutlarıyla yapıyordum. Ancak bu üretim sınırlı ve istediğim üretim kurallarını içermiyordu. Bu sıralarda TKDK uzmanları ilçemizde tanıtım toplantısı düzenlemişlerdi. Toplantıda yerel ürünlerin üretimi için kurumun destek verdiğini ifade ettiler. Daha sonra yaptığımız görüşmeler neticesinde işimi geliştirmeye karar verdim. 2013 yılında hibe desteği alarak 500 bin liralık modern bir tesis kurdum."
+                    </p>
+                    <p className="font-semibold text-white not-italic bg-amber-400/10 p-2.5 rounded-lg border border-amber-400/30">
+                      "Tesiste pekmez şırasını yakmadan üretim yapıyoruz. Güneş ışığında uzun sürelerde pekmezi pişiriyor ve doğal sıcaklık kullanıyoruz. Şıranın ateşte yakılması durumunda meyve şekeri yanmakta böylece lezzeti bozulmaktadır. Ayrıca ateşte yanmış meyve şekerleri insan sağlığı için zararlıdır."
+                    </p>
+                    <p>
+                      "Böylece doğal ürünleri doğal kaynaklarla tüketime hazırlıyoruz. Üretimin sonunda ise posa haline gelen dutlarımızı kurutup çuvallayarak hayvan yemi yaparak çiftçilerimize kazandırmaktayız. Yeni ürün olarak dut sirkesi üretimine başladık. Talep edilmesi nedeniyle dut sirkesi üretimini artırmayı hedefliyoruz. Sonuç olarak yıllık ortalama 40-50 ton doğal pekmez üretimi yapmaktayız. Tesisimizde şu an çoğunluğu bayan olmak üzere 10 çalışanımız bulunmaktadır. Önemli bir aile işletmesi olmayı başardık."
+                    </p>
+                  </blockquote>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-amber-300/80 font-mono">
+                  <span>✓ Arşiv Belgesi Doğrulandı</span>
+                  <span>T.C. TKDK &amp; TRT Haber</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

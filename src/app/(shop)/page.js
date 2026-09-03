@@ -144,28 +144,28 @@ export default function Home() {
 
   const steps = [
     {
-      title: "Hasavan ile Doğal Hasat",
+      title: "Hasavan İle Doğal Hasat",
       desc: "İspir vadisindeki asırlık dut ağaçlarından, dört kişinin gergin tuttuğu hasavan (dokuma keten bez) üzerine toprağa değmeden silkelenen en olgun beyaz dutlar seçilir.",
       image: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
     },
     {
       title: "Öz Şıranın Çıkarılması",
-      desc: "Toplanan dutlar soğuk kaynak sularıyla yıkanarak hijyenik cenderelerde preslenir; posasından arındırılmış berrak, tatlı ve aromatik öz şıra elde edilir.",
+      desc: "Toplanan dutlar kaynak sularıyla temizlenir, geleneksel ahşap pres cenderelerde sıkılarak posasından arındırılmış saf öz şıra elde edilir.",
       image: "/uploads/ispir-karadut-kaynatma-bakir-kazan.webp",
     },
     {
       title: "Güneşte Doğal Yoğunlaştırma (Gün Pekmezi)",
-      desc: "Dut şırası yüksek ateşte yakılmadan, İlhan Efe zanaatkar yaklaşımıyla geniş kaplarda İspir güneşi ve doğal sıcaklık altında sabırla ideal kıvama ulaştırılır.",
+      desc: "Dut şırası yüksek ateşte yakılmaz; İlhan Efe zanaatkar yaklaşımıyla geniş hijyenik kaplarda İspir'in dağ güneşi altında sabırla ideal kıvamına ulaştırılır.",
       image: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
     },
     {
       title: "Keten Bezlerde Güneşle Kurutma",
-      desc: "İncecik keten sergiler üzerine dökülen pestil harcı, İspir'in yüksek rakımlı kuru havası ve bol dağ güneşi altında 2 gün boyunca doğal olarak kurutulur.",
+      desc: "İncecik keten sergiler üzerine dökülen dut herlesi, İspir'in nemsiz dağ rüzgarı ve bol güneşi altında 2 gün boyunca doğal olarak kurutulur.",
       image: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
     },
     {
-      title: "Sıfır Atık & Hijyenik Paketleme",
-      desc: "Kalan dut posaları kurutulup hayvan yemi olarak yöre çiftçilerine kazandırılırken; Gün Pekmezimiz, cevizli kömemiz ve pestillerimiz hijyenik cam ve nem bariyerli vakumlarda paketlenir.",
+      title: "Usta Sarımı, Sıfır Atık & Hijyenik Paketleme",
+      desc: "Usta ellerden fındık ezmeli ve cevizli sarma pestiller hazırlanıp nem bariyerli vakumlarda paketlenirken; kalan dut posaları hayvan yemi olarak yöre çiftçilerine kazandırılır.",
       image: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
       gallery: [
         { label: "Vakumlu Cevizli Pestil", src: "/ispir-vakum-cevizli-pestil-beyaz.png" },
@@ -181,36 +181,36 @@ export default function Home() {
       name: "İlkbahar (Doğanın Uyanışı)",
       months: "NİSAN - MAYIS",
       climate: "Rakım: 1200m - 1800m | Sıcaklık: 8°C - 18°C",
-      story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık dut ağaçlarının uyandığı dönemdir. Toprak organik gübrelerle beslenir, budama işlemleri el makaslarıyla tamamlanır.",
+      story: "Erzurum İspir'in karlı zirvelerinden gelen kaynak sularının toprağı beslediği, asırlık dut ağaçlarının uyandığı dönemdir. Toprak organik olarak beslenir, budama işlemleri el makaslarıyla tamamlanır.",
       image: "/uploads/ispir-kackar-yaylalari-manzara.webp",
       action: "Budama & Toprak Hazırlığı",
     },
     yaz: {
       label: "Yaz",
-      name: "Yaz (Altın Hasat Dönemi)",
+      name: "Yaz (Altın Hasat & Gün Pekmezi)",
       months: "HAZİRAN - AĞUSTOS",
       climate: "Rakım: 1800m - 2200m | Sıcaklık: 24°C - 32°C",
-      story: "Dutların en tatlı ve dolgun olduğu dönem. Şafak vakti çarşaflar gerilerek hasat başlar. Odun ateşinde kaynatılan herleler (şıralar) keten bezlerin üzerine dökülerek İspir güneşi altında kurumaya bırakılır.",
+      story: "Dutların en tatlı ve dolgun olduğu dönemdir. Dört kişilik hasavan bezleri gerilerek toprağa değmeden hasat başlar. Sıkılan saf dut şırası ateşte yakılmadan, geniş kaplarda İspir'in parlak güneşi altında sabırla yoğunlaştırılarak Dut Gün Pekmezi'ne dönüştürülür. Pestil harçları ise keten bezler üzerine serilerek yayla rüzgarında kurutulur.",
       image: "/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg",
-      action: "Hasat & Odun Ateşinde Kaynatma",
+      action: "Hasavan Hasadı & Güneşte Yoğunlaştırma",
     },
     sonbahar: {
       label: "Sonbahar",
-      name: "Sonbahar (Hasat Toplama)",
+      name: "Sonbahar (Hasat Toplama & Köme)",
       months: "EYLÜL - KASIM",
       climate: "Rakım: 1500m - 2000m | Sıcaklık: 12°C - 20°C",
-      story: "Yerli İspir cevizlerinin kabuklarından ayrılıp ipe dizildiği, dut kömelerinin (cevizli sucuk) şıra banyolarıyla hazırlandığı ve sonbahar hasadının toplandığı dönem.",
+      story: "Yerli İspir cevizlerinin kabuklarından ayrılıp ipe dizildiği, dut şırası herlesine kat kat daldırılarak hazırlanan cevizli kömelerin güneş altında dinlendirildiği ve sonbahar hasadının toplandığı dönem.",
       image: "/ispir-kome-gercek-hasat.jpg",
       action: "Ceviz Hasadı & Köme Yapımı",
     },
     kis: {
       label: "Kış",
-      name: "Kış (Dinlenme & Olgunlaşma)",
+      name: "Kış (Dinlenme & Mahzen Olgunlaşması)",
       months: "ARALIK - MART",
       climate: "Rakım: 2000m+ | Sıcaklık: -15°C - 2°C",
-      story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Biz de bu sürede depolanan pestil, köme ve pekmezlerimizin nem bariyerli ortamlarda asaletini korumasını sağlıyor, bahar dönemi için planlarımızı yapıyoruz.",
+      story: "Toprağın kar örtüsü altında dinlendiği dönemdir. Depolanan gün pekmezi, köme ve yaprak pestillerimiz iklimlendirmeli mahzenlerimizde nem bariyerli vakumlarla asaletini korur.",
       image: "/uploads/ispir-modern-hijyenik-tesis-dolum.webp",
-      action: "Soğuk Depolama & Kalite Kontrol",
+      action: "İklimlendirmeli Mahzen & Kalite Kontrol",
     },
   };
 
@@ -218,52 +218,52 @@ export default function Home() {
     {
       title: "HMF (Hidroksimetilfurfural) Seviyesi",
       value: "< 10 mg/kg",
-      normal: "Sanayi Limiti: 40 mg/kg",
-      desc: "HMF, yüksek sıcaklıkta aşırı kaynatma sonucu oluşan karamelize zararlı bileşiktir. PEKEFE pekmezleri vakumlu kontrollü kazanlarda üretildiği için HMF değeri standartların çok altındadır.",
+      normal: "Yasal Üst Limit: 40 mg/kg",
+      desc: "HMF, şıranın yüksek ateşte aşırı kaynatılarak yakılması sonucu oluşan zararlı bileşiktir. PEKEFE Dut Gün Pekmezi ateşte yakılmadan İspir güneşinde doğal sıcaklıkla yoğunlaştırıldığı için HMF değeri standartların çok altındadır.",
       icon: "science",
     },
     {
       title: "İlave Sakkaroz (Beyaz Şeker)",
       value: "0.0% (Bulunmadı)",
-      normal: "Endüstriyel Ortalama: %15 - %35 şeker şurubu",
-      desc: "Mahsullerimize hiçbir aşamada şeker, glikoz veya mısır şurubu eklenmez. Elde edilen tat tamamen dut meyvesinin kendi doğal fruktoz ve glikoz dengesinden kaynaklanır.",
+      normal: "Endüstriyel Ortalama: %15 - %35 şurup",
+      desc: "Mahsullerimize hiçbir aşamada rafine şeker, glikoz veya mısır şurubu eklenmez. Elde edilen tat tamamen dut meyvesinin kendi doğal fruktoz ve glikoz dengesinden kaynaklanır.",
       icon: "check_circle",
     },
     {
-      title: "Kıvam ve Doğal Nem",
-      value: "14.2% - 15.5%",
-      normal: "Katkılı Pekmez: %25+ (Sulu/Pektinli)",
-      desc: "Geleneksel koyulaştırma tekniği sayesinde yapay kıvam arttırıcı nişasta veya pektin kullanılmaksızın, suyun yavaşça uçurulmasıyla elde edilen kadifemsi zengin gövde.",
-      icon: "opacity",
+      title: "Organik Demir & Kalsiyum Dengesi",
+      value: "20g = 2mg Fe / 80mg Ca",
+      normal: "Doğal Mineral Zenginliği",
+      desc: "Yalnızca 2 yemek kaşığı (20 gram) pekmez; 2 miligram organik demir ve 80 miligram kalsiyum içerir. Kansızlık, kemik gelişimi ve mide sağlığına güçlü bir doğal destektir.",
+      icon: "health_and_safety",
     },
     {
-      title: "Doğal Antioksidan Değeri",
+      title: "Doğal Meyve Aroması & Canlılık",
       value: "Maksimum Koruma",
-      normal: "Isıl Aşınmış Pekmez: Kaybolmuş besin yapısı",
-      desc: "Geleneksel yöntemlerle, vitamin ve minerallerin (demir, kalsiyum, potasyum) zarar görmeyeceği hassas sıcaklıklarda işleme yapılarak besleyici değer maksimum düzeyde korunur.",
-      icon: "health_and_safety",
+      normal: "Yanık ve Kararma Yoktur",
+      desc: "Güneşte sabırla yoğunlaştırma sayesinde meyvenin açık kehribar rengi, taze dut kokusu ve polifenolleri tam olarak korunur, acımsı karamelize tat oluşmaz.",
+      icon: "wb_sunny",
     },
   ];
 
   const recipes = {
     tahini: {
-      title: "Dut Pekmezi & Taş Değirmen Tahin Eşleşmesi",
+      title: "Dut Gün Pekmezi & Taş Değirmen Tahin Eşleşmesi",
       quote: "Sessiz bir sabah kahvaltısının en asil ritüeli.",
-      description: "İspir'in yoğun gövdeli, karamelize dut pekmezi ile kepeği alınmış susamdan taş değirmende çekilen sıcak tahinin %40'a %60 oranında asimetrik birleşimi. Üzerine eklenen hafif kavrulmuş İspir cevizi, pekmezin yoğun tatlılığını dengeler ve mükemmel bir tekstür uyumu sunar.",
-      tips: "Karıştırma işlemini seramik veya ahşap kaşık kullanarak dairesel hareketlerle yapın; metal kaşık pekmezin doğal asiditesini bozabilir.",
+      description: "İspir'in güneşte doğal yoğunlaşan akışkan kıvamlı Dut Gün Pekmezi ile kepeği alınmış susamdan taş değirmende çekilen taze tahinin %40'a %60 asimetrik birleşimi. Üzerine eklenen hafif kavrulmuş yerli İspir cevizi, pekmezin doğal meyve tatlılığını dengeler ve damakta ipeksi bir gastronomi deneyimi sunar.",
+      tips: "Karıştırma işlemini seramik veya ahşap kaşık kullanarak dairesel hareketlerle yapın; metal kaşık pekmezin doğal meyve asiditesini etkileyebilir.",
       bg: "/uploads/tahini_pekmez_pair.jpg",
     },
     kaymak: {
       title: "Çıtır Karadeniz Fındığı & Doğal Bal ile Tatlandırılmış Pestil",
       quote: "Şeker ilavesiz, %100 saf ham çiçek balı tatlandırmalı.",
-      description: "İspir yaylalarının 2200m+ rakımlı el değmemiş çiçeklerinden toplanan %100 saf ham bal ile doğal olarak tatlandırılan incecik dut pestili, özenle çifte kavrulmuş çıtır Karadeniz fındığı ile buluşuyor. Yapay şeker veya ilave tatlandırıcı kullanılmaksızın sadece doğal ham balın saf aromasıyla hazırlanan bu lezzet, mükemmel bir doku ve enerji sunar.",
+      description: "İspir yaylalarının 2200m+ rakımlı el değmemiş çiçeklerinden toplanan saf ham bal ile doğal olarak tatlandırılan incecik dut pestili, özenle çifte kavrulmuş çıtır Karadeniz fındığı ile buluşuyor. Yapay şeker veya glukoz kullanılmaksızın sadece doğal ham balın saf aromasıyla hazırlanır.",
       tips: "Pestil dilimlerini servis etmeden önce oda sıcaklığında 5 dakika dinlendirerek doğal bal ve taze fındık aromalarının damakta tam olarak açılmasını sağlayabilirsiniz.",
       bg: "/uploads/findik_pestil_pair.jpg",
     },
     cheese: {
       title: "İspir Dut Kömesi & Olgunlaştırılmış Keçi Peyniri",
       quote: "Zıt kutupların muhteşem lezzet harmonisi.",
-      description: "Dut kömesinin (cevizli sucuk) içerdiği ceviz aroması ve yoğun tatlı şıra kaplaması, hafif tuzlu ve sert karakterdeki olgun keçi peyniri ile eşsiz bir kontrast oluşturur. Şarküteri tahtalarının gizli yıldızı olan bu ikili, slow food gurmelerinin favori eşleşmesidir.",
+      description: "Dut kömesinin (cevizli sucuk) içerdiği yerli ceviz aroması ve yoğun tatlı şıra kaplaması, hafif tuzlu ve sert karakterdeki olgun keçi peyniri ile eşsiz bir kontrast oluşturur. Şarküteri tahtalarının gizli yıldızı olan bu ikili, slow food gurmelerinin favori eşleşmesidir.",
       tips: "Keçi peynirini ince dilimler halinde kesin ve oda sıcaklığında, ince halkalar şeklinde dilimlenmiş kömelerle birlikte servis edin.",
       bg: "/uploads/kome_peynir_pair.jpg",
     },
@@ -345,7 +345,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Timeline Controls */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className="lg:col-span-4 space-y-3">
               {steps.map((step, idx) => (
                 <button
                   key={idx}
@@ -353,20 +353,20 @@ export default function Home() {
                     setActiveStep(idx);
                     setStepImageOverride(null);
                   }}
-                  className={`w-full text-left p-6 rounded-xl border transition-all duration-350 cursor-pointer flex items-start gap-4 ${
+                  className={`w-full text-left p-4 sm:p-5 rounded-xl border transition-all duration-350 cursor-pointer flex items-start gap-4 ${
                     activeStep === idx
-                      ? "bg-white border-primary shadow-sm text-primary"
-                      : "bg-white/40 border-outline-variant/30 text-on-surface-variant hover:bg-white"
+                      ? "bg-white border-primary shadow-md text-primary ring-1 ring-primary/20"
+                      : "bg-white/50 border-outline-variant/30 text-on-surface-variant hover:bg-white hover:border-primary/40"
                   }`}
                 >
-                  <span className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center border ${
-                    activeStep === idx ? "bg-primary text-white border-primary" : "bg-surface text-on-surface-variant border-outline-variant"
+                  <span className={`w-8 h-8 rounded-full font-bold text-xs flex-shrink-0 flex items-center justify-center border transition-colors ${
+                    activeStep === idx ? "bg-primary text-white border-primary shadow-sm" : "bg-surface text-on-surface-variant border-outline-variant/60"
                   }`}>
                     {idx + 1}
                   </span>
-                  <div>
-                    <h4 className="font-label-md font-bold text-sm uppercase tracking-wider">{step.title}</h4>
-                    <p className="text-xs text-on-surface-variant mt-1 line-clamp-1">{step.desc}</p>
+                  <div className="min-w-0">
+                    <h4 className="font-label-md font-bold text-xs sm:text-sm uppercase tracking-wider text-primary">{step.title}</h4>
+                    <p className="text-[11px] text-on-surface-variant/90 mt-1 line-clamp-2 leading-relaxed">{step.desc}</p>
                   </div>
                 </button>
               ))}
@@ -375,7 +375,7 @@ export default function Home() {
             {/* Timeline Visual Display */}
             <div className="lg:col-span-8">
               <div className="bg-white rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm grid grid-cols-1 md:grid-cols-2">
-                <div className="h-80 md:h-full min-h-[320px] relative">
+                <div className="h-80 md:h-full min-h-[340px] relative">
                   <Image
                     src={stepImageOverride || steps[activeStep].image}
                     alt={steps[activeStep].title}
@@ -383,11 +383,11 @@ export default function Home() {
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover transition-all duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent z-10"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/15 to-transparent z-10"></div>
                 </div>
-                <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
-                  <span className="text-xs text-secondary uppercase font-label-sm tracking-widest">Aşama {activeStep + 1}</span>
-                  <h3 className="font-display-lg text-primary text-2xl font-bold">{steps[activeStep].title}</h3>
+                <div className="p-8 md:p-12 flex flex-col justify-center space-y-5">
+                  <span className="text-xs text-secondary uppercase font-label-sm tracking-widest font-bold">Aşama {activeStep + 1}</span>
+                  <h3 className="font-display-lg text-primary text-2xl font-bold leading-snug">{steps[activeStep].title}</h3>
                   <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
                     {steps[activeStep].desc}
                   </p>
@@ -402,7 +402,7 @@ export default function Home() {
                             key={gIdx}
                             onClick={() => setStepImageOverride(g.src)}
                             className={`relative aspect-square rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                              (stepImageOverride || steps[activeStep].image) === g.src ? "border-primary ring-2 ring-primary/20" : "border-outline-variant/30 opacity-70 hover:opacity-100"
+                              (stepImageOverride || steps[activeStep].image) === g.src ? "border-primary ring-2 ring-primary/20 shadow-sm" : "border-outline-variant/30 opacity-70 hover:opacity-100"
                             }`}
                             title={g.label}
                           >
@@ -413,8 +413,8 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-1.5 text-xs text-secondary font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">verified_user</span>
+                  <div className="flex items-center gap-1.5 text-xs text-secondary font-semibold pt-1">
+                    <span className="material-symbols-outlined text-[18px]">verified_user</span>
                     Kimyasal Katkı ve Yapay Koruyucu Yoktur
                   </div>
                 </div>
@@ -802,62 +802,77 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-xl p-8 border border-outline-variant/15 shadow-sm space-y-6">
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className="material-symbols-outlined text-sm text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-              ))}
+          <div className="bg-white rounded-2xl p-8 border border-outline-variant/20 shadow-sm hover:shadow-md transition-all space-y-6 flex flex-col justify-between relative overflow-hidden group">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-base text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  ))}
+                </div>
+                <span className="text-[10px] font-mono uppercase bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-200/50">Doğrulanmış Alıcı</span>
+              </div>
+              <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
+                “Pekefe'nin Dut Gün Pekmezini tattıktan sonra market raflarındaki hiçbir ticari pekmezi tüketemez olduk. Şıranın yanmadığı açık kehribar renginden ve boğazı yakmayan o saf meyve tatlılığından hemen anlaşılıyor. Emeğinize sağlık.”
+              </p>
             </div>
-            <p className="text-sm text-on-surface-variant italic leading-relaxed font-body-md">
-              "Pekefe'nin dut pekmezini aldıktan sonra diğer hiçbir ticari pekmezi yiyemez olduk. Yoğun kıvamı, gerçek meyve şekeri aroması harika. Paketleme ve kargo hızı için ayrıca teşekkürler."
-            </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-outline-variant/10">
-              <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-bold flex items-center justify-center text-xs">
+            <div className="flex items-center gap-3 pt-5 border-t border-outline-variant/15">
+              <div className="w-11 h-11 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm border border-primary/20 shadow-inner">
                 A.T
               </div>
               <div>
-                <h4 className="font-label-md font-bold text-on-surface text-xs">Alperen Tan</h4>
-                <p className="text-[10px] text-on-surface-variant">Ankara · Gurme Yazar</p>
+                <h4 className="font-display-lg font-bold text-primary text-sm">Alperen Tan</h4>
+                <p className="text-[11px] text-on-surface-variant">Ankara · Gastronomi Yazarı &amp; Gurme</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-8 border border-outline-variant/15 shadow-sm space-y-6">
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className="material-symbols-outlined text-sm text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-              ))}
+          <div className="bg-white rounded-2xl p-8 border border-outline-variant/20 shadow-sm hover:shadow-md transition-all space-y-6 flex flex-col justify-between relative overflow-hidden group">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-base text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  ))}
+                </div>
+                <span className="text-[10px] font-mono uppercase bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-200/50">Doğrulanmış Alıcı</span>
+              </div>
+              <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
+                “Danışanlarıma özellikle tavsiye ettiğim hakiki bir demir ve kalsiyum deposu. İlave şekersiz olması, HMF değerinin düşüklüğü ve yaprak dut pestilinin keten bezde güneşte kurutulması geleneksel gıdanın en saf örneği.”
+              </p>
             </div>
-            <p className="text-sm text-on-surface-variant italic leading-relaxed font-body-md">
-              "Cevizli pestil rulosu çocukluğumda köyde yediklerimin aynısı. İncecik, ağızda eriyen bir yapısı var. İçerisindeki cevizin tazeliği kokusundan bile belli oluyor. Katkısız olması en büyük tercih sebebimiz."
-            </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-outline-variant/10">
-              <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-bold flex items-center justify-center text-xs">
+            <div className="flex items-center gap-3 pt-5 border-t border-outline-variant/15">
+              <div className="w-11 h-11 rounded-full bg-secondary/10 text-secondary font-bold flex items-center justify-center text-sm border border-secondary/20 shadow-inner">
                 S.D
               </div>
               <div>
-                <h4 className="font-label-md font-bold text-on-surface text-xs">Selin Demir</h4>
-                <p className="text-[10px] text-on-surface-variant">İstanbul · Diyetisyen</p>
+                <h4 className="font-display-lg font-bold text-primary text-sm">Uzm. Dyt. Selin Demir</h4>
+                <p className="text-[11px] text-on-surface-variant">İstanbul · Beslenme ve Diyet Uzmanı</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-8 border border-outline-variant/15 shadow-sm space-y-6">
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className="material-symbols-outlined text-sm text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-              ))}
+          <div className="bg-white rounded-2xl p-8 border border-outline-variant/20 shadow-sm hover:shadow-md transition-all space-y-6 flex flex-col justify-between relative overflow-hidden group">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-base text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  ))}
+                </div>
+                <span className="text-[10px] font-mono uppercase bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-200/50">Kurumsal Bayi</span>
+              </div>
+              <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
+                “İspir Cevizli Dut Kömesi ve Doğal Dut Sirkesi şarküterimizin en çok talep gören ürünleri oldu. Ceviz tazeliği, ipeksi yumuşaklığı ve TKDK onaylı hijyenik tesis standardı müşterilerimize tam güven veriyor.”
+              </p>
             </div>
-            <p className="text-sm text-on-surface-variant italic leading-relaxed font-body-md">
-              "İspir dut kömesi tam kıvamında kurutulmuş. Bayat veya sert değil, ısırırken ipeksi bir dokusu var. Bayi portalından sipariş verip şarküterimizde satıyoruz, müşterilerimizden mükemmel geri dönüşler aldık."
-            </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-outline-variant/10">
-              <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-bold flex items-center justify-center text-xs">
+            <div className="flex items-center gap-3 pt-5 border-t border-outline-variant/15">
+              <div className="w-11 h-11 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm border border-primary/20 shadow-inner">
                 M.E
               </div>
               <div>
-                <h4 className="font-label-md font-bold text-on-surface text-xs">Mustafa Efe</h4>
-                <p className="text-[10px] text-on-surface-variant">İzmir · Şarküteri Sahibi</p>
+                <h4 className="font-display-lg font-bold text-primary text-sm">Mustafa Efe</h4>
+                <p className="text-[11px] text-on-surface-variant">İzmir · Gurme Şarküteri İşletmecisi</p>
               </div>
             </div>
           </div>

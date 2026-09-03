@@ -34,7 +34,9 @@
       "sizes": [
         "400g Cam Kavanoz",
         "800g Cam Kavanoz"
-      ]
+      ],
+      "isActive": true,
+      "isPublished": true
     },
     "variants": [
       {
@@ -52,13 +54,15 @@
         "stock": 100
       }
     ],
-    "createdAt": "2026-09-03T22:13:47.784Z",
+    "createdAt": "2026-09-03T22:22:16.984Z",
     "videoUrl": "",
     "discount_start_date": null,
     "discount_end_date": null,
     "warehouses": [],
     "locations": [],
-    "isDeleted": false
+    "isDeleted": false,
+    "active": true,
+    "isPublished": true
   },
   {
     "id": "PKF-DUT-SIRKESI",

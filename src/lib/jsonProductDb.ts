@@ -21,6 +21,8 @@ export interface LocalProduct {
   list_price?: number | null;
   sale_price?: number | null;
   cost: number;
+  active?: boolean;
+  isPublished?: boolean;
   image?: string | null;
   images?: string[];
   desc?: string | null;
@@ -66,6 +68,14 @@ export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string
     ? { ...product.attributes }
     : {};
 
+  const resolvedActive = product.active !== undefined 
+    ? Boolean(product.active) 
+    : (incomingAttrs.isActive !== undefined ? Boolean(incomingAttrs.isActive) : (incomingAttrs.active !== undefined ? Boolean(incomingAttrs.active) : true));
+  
+  const resolvedPublished = product.isPublished !== undefined
+    ? Boolean(product.isPublished)
+    : resolvedActive;
+
   const newProduct: LocalProduct = {
     id: generatedId,
     name: product.name || 'Yeni Ürün',
@@ -80,6 +90,8 @@ export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string
     list_price: product.list_price != null ? Number(product.list_price) : Number(product.price ?? product.sale_price ?? 100),
     sale_price: Number(product.sale_price ?? product.price ?? 100),
     cost: Number(product.cost ?? 50),
+    active: resolvedActive,
+    isPublished: resolvedPublished,
     image: product.image || '/logo.png',
     images: product.images || [],
     desc: product.desc || '',
@@ -93,6 +105,8 @@ export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string
     discount_end_date: product.discount_end_date ? String(product.discount_end_date) : null,
     attributes: {
       ...incomingAttrs,
+      isActive: resolvedActive,
+      isPublished: resolvedPublished,
       ...(product.harvestStory ? { harvestStory: product.harvestStory } : {}),
       ...(product.ingredients ? { ingredients: product.ingredients } : {}),
       ...(product.ritual ? { ritual: product.ritual } : {}),
@@ -129,6 +143,8 @@ export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string
     current[existingIndex] = {
       ...current[existingIndex],
       ...newProduct,
+      active: resolvedActive,
+      isPublished: resolvedPublished,
       id: current[existingIndex].id || newProduct.id,
       sku: product.sku || current[existingIndex].sku
     };

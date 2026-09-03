@@ -267,12 +267,28 @@ export function formatDbProductToStorefront(p) {
   const discount_end_date = p.discount_end_date || attrs.discount_end_date || null;
   const discount_start_date = p.discount_start_date || attrs.discount_start_date || null;
 
+  const isActive = p.active !== undefined 
+    ? Boolean(p.active) 
+    : (attrs.isActive !== undefined 
+      ? Boolean(attrs.isActive) 
+      : (attrs.active !== undefined 
+        ? Boolean(attrs.active) 
+        : !p.isDeleted));
+
+  const isPublished = p.isPublished !== undefined 
+    ? Boolean(p.isPublished) 
+    : (attrs.isPublished !== undefined 
+      ? Boolean(attrs.isPublished) 
+      : isActive);
+
   return {
     ...p,
     id: p.id || p.sku,
     slug: autoSlug,
     name: p.name || "",
     sku: p.sku || "",
+    active: isActive,
+    isPublished: isPublished,
     desc: resolvedDesc,
     shortDesc: resolvedShortDesc,
     price: finalPrice,
@@ -286,7 +302,11 @@ export function formatDbProductToStorefront(p) {
     stock: p.stock != null ? Number(p.stock) : (p.stock_quantity != null ? Number(p.stock_quantity) : 0),
     image: p.image || (Array.isArray(images) && images[0] ? images[0] : ""),
     images: Array.isArray(images) ? images : [],
-    attributes: attrs,
+    attributes: {
+      ...attrs,
+      isActive: isActive,
+      isPublished: isPublished
+    },
     variants: formattedVariants
   };
 }

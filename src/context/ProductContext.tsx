@@ -77,6 +77,9 @@ export interface Product {
   discount_end_date?: string | Date | null;
   stock_quantity?: number | null;
   isCampaignActive?: boolean;
+  active?: boolean;
+  isPublished?: boolean;
+  isDeleted?: boolean;
   cost: number;
   image: string;
   images?: string[];

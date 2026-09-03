@@ -414,8 +414,24 @@ export async function GET(request: NextRequest) {
         try { parsedAttributes = JSON.parse(p.attributes); } catch { parsedAttributes = {}; }
       }
 
+      const isActiveProduct = (p as any).active !== undefined 
+        ? Boolean((p as any).active) 
+        : (parsedAttributes.isActive !== undefined 
+          ? Boolean(parsedAttributes.isActive) 
+          : (parsedAttributes.active !== undefined 
+            ? Boolean(parsedAttributes.active) 
+            : !(p as any).isDeleted));
+
+      const isPublishedProduct = (p as any).isPublished !== undefined 
+        ? Boolean((p as any).isPublished) 
+        : (parsedAttributes.isPublished !== undefined 
+          ? Boolean(parsedAttributes.isPublished) 
+          : isActiveProduct);
+
       const baseObj = {
         ...(p as any),
+        active: isActiveProduct,
+        isPublished: isPublishedProduct,
         price: Number(p.price || 0),
         oldPrice: p.oldPrice != null ? Number(p.oldPrice) : null,
         list_price: p.list_price != null ? Number(p.list_price) : null,
@@ -424,7 +440,11 @@ export async function GET(request: NextRequest) {
         b2b_base_price: p.b2b_base_price != null ? Number(p.b2b_base_price) : null,
         retail_list_price: (p as any).retail_list_price != null ? Number((p as any).retail_list_price) : null,
         images: parsedImages,
-        attributes: parsedAttributes,
+        attributes: {
+          ...parsedAttributes,
+          isActive: isActiveProduct,
+          isPublished: isPublishedProduct
+        },
       };
       return Object.assign({}, baseObj, calculated, {
         slug: (p as any).slug || generateSlugServer((p as any).name || '')

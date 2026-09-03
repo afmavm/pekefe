@@ -144,28 +144,28 @@ export default function Home() {
 
   const steps = [
     {
-      title: "Hasat",
-      desc: "İspir vadisindeki yaşlı dut ağaçlarından, şafak vakti çadırlar gerilerek sallama yöntemiyle toplanan en olgun ve tatlı dutlar seçilir.",
+      title: "Hasavan ile Doğal Hasat",
+      desc: "İspir vadisindeki asırlık dut ağaçlarından, dört kişinin gergin tuttuğu hasavan (dokuma keten bez) üzerine toprağa değmeden silkelenen en olgun beyaz dutlar seçilir.",
       image: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
     },
     {
-      title: "Hazırlık",
-      desc: "Toplanan dutlar soğuk kaynak sularıyla yıkanarak preslenir ve posasından arındırılmış berrak, tatlı şıra elde edilir.",
+      title: "Öz Şıranın Çıkarılması",
+      desc: "Toplanan dutlar soğuk kaynak sularıyla yıkanarak hijyenik cenderelerde preslenir; posasından arındırılmış berrak, tatlı ve aromatik öz şıra elde edilir.",
       image: "/uploads/ispir-karadut-kaynatma-bakir-kazan.webp",
     },
     {
-      title: "Güneşte Doğal Yoğunlaştırma",
-      desc: "Dut şırası yüksek ateşte yakılmadan, geleneksel gün pekmezi yöntemiyle güneşin doğal sıcaklığından yararlanılarak ideal pekmez kıvamına gelene dek yoğunlaştırılır.",
+      title: "Güneşte Doğal Yoğunlaştırma (Gün Pekmezi)",
+      desc: "Dut şırası yüksek ateşte yakılmadan, İlhan Efe zanaatkar yaklaşımıyla geniş kaplarda İspir güneşi ve doğal sıcaklık altında sabırla ideal kıvama ulaştırılır.",
       image: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
     },
     {
-      title: "Güneşte Doğal Kurutma",
-      desc: "İncecik keten sergiler üzerine dökülen pestil harcı, İspir'in yüksek rakımlı kuru havası ve bol güneşi altında 2 gün boyunca doğal olarak kurutulur.",
+      title: "Keten Bezlerde Güneşle Kurutma",
+      desc: "İncecik keten sergiler üzerine dökülen pestil harcı, İspir'in yüksek rakımlı kuru havası ve bol dağ güneşi altında 2 gün boyunca doğal olarak kurutulur.",
       image: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
     },
     {
-      title: "Vakumlu Koruma & Hijyenik Paketleme",
-      desc: "Güneş altında olgunlaşan cevizli ve sade dut pestillerimiz ile taze kömelerimiz; nem, hava ve dış etkenlerle teması tamamen kesecek biçimde şeffaf hijyenik koruma vakumlarına el işçiliğiyle ambalajlanır. Ürünlerimizin tazeliği, ipeksi esnekliği ve aroması ilk günkü tazeliğiyle muhafaza edilir.",
+      title: "Sıfır Atık & Hijyenik Paketleme",
+      desc: "Kalan dut posaları kurutulup hayvan yemi olarak yöre çiftçilerine kazandırılırken; Gün Pekmezimiz, cevizli kömemiz ve pestillerimiz hijyenik cam ve nem bariyerli vakumlarda paketlenir.",
       image: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp",
       gallery: [
         { label: "Vakumlu Cevizli Pestil", src: "/ispir-vakum-cevizli-pestil-beyaz.png" },

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import Link from "next/link";
@@ -78,7 +78,7 @@ export default function Hikayemiz() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10 opacity-90"></div>
               <div className="absolute bottom-6 left-6 right-6 text-white z-20 space-y-1">
-                <span className="text-amber-300 text-xs font-mono tracking-widest uppercase block font-bold">İspirin bereketli toprakları · Hasat Sezonu</span>
+                <span className="text-amber-300 text-xs font-mono tracking-widest uppercase block font-bold">İspir'in bereketli toprakları · Hasat Sezonu</span>
                 <h3 className="font-display-lg text-xl font-bold">İlhan Efe ve Okan Efe</h3>
                 <p className="text-xs text-slate-200 font-body">Asırlık beyaz dut ağaçlarının gölgesinde baba-oğul omuz omuza.</p>
               </div>
@@ -95,20 +95,83 @@ export default function Hikayemiz() {
             </h2>
             
             <blockquote className="font-display-lg text-base sm:text-lg italic text-primary/80 leading-relaxed border-l-4 border-secondary pl-5 py-1 bg-white p-4 rounded-r-xl border border-outline-variant/15 shadow-sm">
-              "Bizim için her kavanoz sadece bir ürün değil; yılların birikimini, alın terini, memleket sevgisini ve dürüst üretim anlayışını taşıyan bir emektir."
+              "Bizim için her kavanoz sadece bir ürün değil; yılların birikimini, alın terini, memleket sevgisini ve dürüst üretim anlayışını taşıyan bir emektir." — İlhan Efe
             </blockquote>
 
             <div className="text-on-surface-variant text-base leading-relaxed space-y-4 font-body">
               <p>
-                1952 yılında Erzurum'un İspir ilçesinde doğan <strong className="text-primary font-bold">İlhan Efe</strong>, Gümüşhane Öğretmen Lisesi'nden mezun olduktan sonra Van ve İspir'in Değirmenli Köyü'nde uzun yıllar köy öğretmenliği yaptı. İspir Halk Eğitim Müdürlüğü görevinden emekli olduktan sonra, çocukluğundan beri tutkusu olan İspir'in asırlık organik dutlarını doğal yöntemlerle insanlara ulaştırma hayalini gerçeğe dönüştürdü.
+                1952 yılında Erzurum'un İspir ilçesinde doğan <strong className="text-primary font-bold">İlhan Efe</strong>, Gümüşhane Öğretmen Lisesi'nden mezun olduktan sonra Van ve İspir'in Değirmenli Köyü'nde uzun yıllar köy öğretmenliği yaptı. İspir Halk Eğitim Müdürlüğü görevinden emekli olduktan sonra, çocukluğundan beri tutkusu ve bildiği iş olan İspir'in asırlık dutlarını en doğru ve saf yöntemlerle insanlara ulaştırma hayalini gerçeğe dönüştürdü.
               </p>
               <p>
-                O dönem üretilen pekmezlerin yüksek ısıda odun ateşinde aşırı kaynatılarak besin değerlerini yitirdiğini fark eden İlhan Efe, dutun yapısındaki değerli mineralleri ve vitaminleri koruyan özel bir doğal yoğunlaştırma sistemi geliştirdi. İlk üretimler ailesi ve dostları içindi.
+                Geleneksel üretimde şıranın yüksek ateşte kontrolsüzce kaynatılarak yakıldığını, meyve şekerlerinin yanmasıyla hem lezzetin bozulduğunu hem de sağlığa zararlı HMF maddesinin yükseldiğini gözlemleyen İlhan Efe; <strong className="text-primary font-bold">"Dut şırasını ateşte yakmadan, güneş ışığında uzun sürelerde ve doğal sıcaklık kullanarak pişirme"</strong> ilkesini benimsedi.
               </p>
               <p>
-                Trabzon Arıcılar Birliği Başkanı <strong className="text-primary font-bold">Avni Haliloğlu</strong>'nun bu doğal pekmezin tadına bakıp takdir etmesiyle başlayan yolculuk, zamanla Türkiye'nin dört bir yanından gelen yoğun taleplerle büyüdü.
+                2013 yılında Tarım ve Kırsal Kalkınmayı Destekleme Kurumu (TKDK) desteğiyle 500 bin liralık Avrupa Birliği ve Bakanlık onaylı modern tesisini kurarak geleneksel zanaatı çağdaş hijyen standartlarıyla taçlandırdı.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── TRT HABER & TKDK SPECIAL EDITORIAL SPOTLIGHT ─── */}
+      <section className="py-16 bg-[#360e17] text-white relative overflow-hidden reveal-element">
+        <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            
+            {/* TRT Haber Interview Archival Photo */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-amber-500/30 group">
+                <Image
+                  src="/uploads/trthaber_ilhan_efe_roportaj.jpg"
+                  alt="TRT Haber Memleketten Haber Var İlhan Efe Röportajı"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+                <div className="absolute bottom-4 left-4 right-4 z-20">
+                  <span className="inline-block bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1 shadow">
+                    TRT HABER · 21 EYLÜL 2017
+                  </span>
+                  <p className="text-xs text-amber-200 font-mono">Memleketten Haber Var Programı Özel Yayını</p>
+                </div>
+              </div>
+            </div>
+
+            {/* TRT Haber Documentary Transcript & Vision */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-2">
+                <span className="text-amber-400 font-mono text-xs uppercase tracking-widest font-bold">
+                  BASINDA BİZ · ULUSAL BAŞARI HİKAYESİ
+                </span>
+                <h2 className="font-display-lg text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
+                  "Tesiste Pekmez Şırasını Yakmadan, Güneş Işığında Doğal Sıcaklıkla Pişiriyoruz"
+                </h2>
+              </div>
+
+              <blockquote className="text-amber-100/90 text-sm sm:text-base leading-relaxed italic bg-white/5 border-l-4 border-amber-400 p-5 rounded-r-2xl">
+                "Şıranın ateşte yakılması durumunda meyve şekeri yanmakta böylece lezzeti bozulmaktadır. Ayrıca ateşte yanmış meyve şekerleri insan sağlığı için zararlıdır. Biz doğal ürünleri doğal kaynaklarla tüketime hazırlıyoruz. Üretimin sonunda ise posa haline gelen dutlarımızı kurutup çuvallayarak hayvan yemi yapıyor, çiftçilerimize kazandırıyoruz. Yıllık ortalama 40-50 ton doğal pekmez üretmekteyiz. Çoğunluğu bayan olmak üzere 10 çalışanımızla örnek bir aile işletmesi olmayı başardık."
+                <footer className="text-xs text-amber-300 font-bold font-sans mt-3 not-italic">
+                  — İlhan Efe / TRT Haber & TKDK Bülteni
+                </footer>
+              </blockquote>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+                <div className="bg-white/10 rounded-2xl p-4 border border-white/10 text-center">
+                  <div className="text-xl font-mono font-bold text-amber-300">40 - 50 Ton</div>
+                  <div className="text-[11px] text-amber-100/80 mt-1">Yıllık Doğal Üretim</div>
+                </div>
+                <div className="bg-white/10 rounded-2xl p-4 border border-white/10 text-center">
+                  <div className="text-xl font-mono font-bold text-emerald-400">Sıfır Atık</div>
+                  <div className="text-[11px] text-amber-100/80 mt-1">Döngüsel Hayvan Yemi</div>
+                </div>
+                <div className="bg-white/10 rounded-2xl p-4 border border-white/10 text-center col-span-2 sm:col-span-1">
+                  <div className="text-xl font-mono font-bold text-rose-300">10 Çalışan</div>
+                  <div className="text-[11px] text-amber-100/80 mt-1">Kadın İstihdamı & Aile</div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -143,13 +206,13 @@ export default function Hikayemiz() {
               </div>
               <div className="space-y-3">
                 <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Geleneksel Beyaz Dut Hasadı
+                  Geleneksel Hasavan İle Hasat
                 </span>
                 <h3 className="font-display-lg text-primary text-2xl font-bold">
-                  Güneşte Olgunlaşan Organik İspir Dutları
+                  Asırlık Ağaçlardan Hasavana Dökülen Beyaz Dutlar
                 </h3>
                 <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-                  Şafak vakti ağaçların altına gerilen keten çarşaflarla silkelenerek toplanan İspir beyaz dutları, yüksek meyve şekeri ve doğal aromasııyla Pekefe dut pekmezinin ve ipeksi pestilin temelini oluşturur.
+                  Dört kişinin köşelerinden gergin tuttuğu hasavan (dokuma keten bez) üzerine ağaçtan silkelenen ballı İspir beyaz dutları, toprağa değmeden toplanır. Meyvenin ezilmeden aynı gün sıkılarak şıraya dönüştürülmesi, PEKEFE Dut Gün Pekmezi'nin berrak altın sarısı renginin ve düşük HMF değerinin sırrıdır.
                 </p>
               </div>
             </div>

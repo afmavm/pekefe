@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import Link from "next/link";
@@ -111,20 +111,23 @@ export default function Tesisimiz() {
           {/* Text Content */}
           <div className="lg:col-span-6 space-y-6">
             <span className="text-[#b45309] font-bold text-xs uppercase tracking-[0.25em] block">
-              BÖLÜM I · BİLİMSEL ÜRETİM YAKLAŞIMI
+              BÖLÜM I · ŞIRAYI YAKMADAN, DOĞAL SICAKLIKLA
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#360e17] dark:text-amber-100 leading-tight">
-              Açık Ateşte Değil, <br />
-              <span className="italic font-normal text-[#b45309]">Vakum Altında Pişiriyoruz</span>
+              Ateşte Yakarak Değil, <br />
+              <span className="italic font-normal text-[#b45309]">Güneşin Doğal Sıcaklığıyla</span>
             </h2>
             <div className="w-12 h-[2px] bg-[#b45309]" />
 
             <div className="space-y-4 text-slate-600 dark:text-slate-300 text-base leading-relaxed">
               <p>
-                Geleneksel açık kazanlarda 100°C'nin üzerinde yapılan aşırı kaynatma işlemi, meyvenin içindeki vitaminleri, polifenolleri ve canlı enzimleri yok eder. En kritik tehlike ise aşırı ısıyla birlikte şekerin yanması ve sağlığa zararlı <strong>HMF (Hidroksimetilfurfural)</strong> maddesinin oluşmasıdır.
+                Geleneksel açık kazanlarda 100°C'nin üzerinde yapılan kontrolsüz ve aşırı kaynatma, dut şırasındaki meyve şekerlerinin yanmasına yol açar. Yanmış meyve şekeri hem dutun o asil kokusunu acılaştırır hem de sağlığa zararlı <strong>HMF (5-Hidroksimetilfurfural)</strong> oranını artırır.
               </p>
               <p>
-                PEKEFE olarak İspir'deki modern tesisimizde <strong>"Vakum Altında Düşük Isı"</strong> teknolojisini kullanıyoruz. Basıncı düşürerek suyun kaynama noktasını 60-65°C'ye indiriyoruz. Böylece meyvenin özü hiçbir besin kaybı yaşamadan, yanık kokusu ve kararma olmadan en saf haliyle kavanozlanır.
+                Kurucumuz emekli öğretmen <strong>İlhan Efe</strong>'nin TRT Haber bültenlerinde dile getirdiği gibi: <em>"Tesiste pekmez şırasını yakmadan üretim yapıyoruz. Güneş ışığında uzun sürelerde ve doğal sıcaklık kullanarak pişiriyoruz."</em>
+              </p>
+              <p>
+                Ayrıca üretim sonunda posa haline gelen dutlarımız kurutulup çuvallanarak <strong>hayvan yemi olarak yöre çiftçilerine kazandırılmakta</strong>, böylece tesisimizde sıfır atıklı döngüsel bir ekonomi işletilmektedir.
               </p>
             </div>
 
@@ -132,16 +135,16 @@ export default function Tesisimiz() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
                 <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base">check_circle</span> Besin Değeri Koruması
+                  <span className="material-symbols-outlined text-base">wb_sunny</span> Güneşle Doğal Yoğunlaşma
                 </div>
-                <p className="text-[11px] text-slate-500 leading-normal">Doğal antioksidan ve vitaminler %100 canlı tutulur.</p>
+                <p className="text-[11px] text-slate-500 leading-normal">Yanık riski olmadan dutun canlı meyve aroması ve vitaminleri korunur.</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
                 <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base">check_circle</span> Sıfır Yanık &amp; Açık Renk
+                  <span className="material-symbols-outlined text-base">recycling</span> Sıfır Atık &amp; Çiftçiye Destek
                 </div>
-                <p className="text-[11px] text-slate-500 leading-normal">Acımsı tat ve kararma olmaksızın berrak altın kıvam.</p>
+                <p className="text-[11px] text-slate-500 leading-normal">Dut posaları kurutularak doğal hayvan yemine dönüştürülür.</p>
               </div>
             </div>
           </div>

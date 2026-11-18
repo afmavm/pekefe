@@ -12,27 +12,80 @@ export const revalidate = 0;
 
 const READ_NOTIFS_FILE = path.join(process.cwd(), "data", "admin_read_notifications.json");
 
-function getReadNotifIds(): Set<string> {
+interface ReadState {
+  ids: Set<string>;
+  lastReadAllAt: number;
+}
+
+function getLocalReadState(): ReadState {
   try {
     if (fs.existsSync(READ_NOTIFS_FILE)) {
       const raw = fs.readFileSync(READ_NOTIFS_FILE, "utf-8");
-      const list = JSON.parse(raw);
-      if (Array.isArray(list)) {
-        // Never allow a permanent "all" wildcard to silence future notifications
-        return new Set(list.filter((id) => id !== "all"));
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return {
+          ids: new Set(parsed.filter((id) => typeof id === "string" && id !== "all")),
+          lastReadAllAt: 0,
+        };
+      }
+      if (parsed && typeof parsed === "object") {
+        const list = Array.isArray(parsed.ids) ? parsed.ids : [];
+        return {
+          ids: new Set(list.filter((id: any) => typeof id === "string" && id !== "all")),
+          lastReadAllAt: Number(parsed.lastReadAllAt || 0),
+        };
       }
     }
   } catch {}
-  return new Set();
+  return { ids: new Set(), lastReadAllAt: 0 };
 }
 
-function saveReadNotifIds(ids: Set<string>) {
+function saveLocalReadState(state: ReadState) {
   try {
-    ids.delete("all");
+    state.ids.delete("all");
     const dir = path.dirname(READ_NOTIFS_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(READ_NOTIFS_FILE, JSON.stringify(Array.from(ids), null, 2), "utf-8");
+    fs.writeFileSync(
+      READ_NOTIFS_FILE,
+      JSON.stringify(
+        {
+          ids: Array.from(state.ids),
+          lastReadAllAt: state.lastReadAllAt || 0,
+        },
+        null,
+        2
+      ),
+      "utf-8"
+    );
+  } catch (err) {
+    console.error("saveLocalReadState error:", err);
+  }
+}
+
+async function getMergedReadState(): Promise<ReadState> {
+  const state = getLocalReadState();
+  try {
+    const dbMarkers = await withTimeout(
+      prisma.adminNotification.findMany({
+        where: {
+          isRead: true,
+          type: { in: ["READ_MARKER", "READ_WATERMARK"] },
+        },
+        select: { type: true, title: true, message: true },
+      }),
+      1500,
+      []
+    );
+    for (const m of dbMarkers || []) {
+      if (m.type === "READ_WATERMARK") {
+        const ts = Number(m.message || 0);
+        if (ts > state.lastReadAllAt) state.lastReadAllAt = ts;
+      } else if (m.title && m.title !== "all") {
+        state.ids.add(m.title);
+      }
+    }
   } catch {}
+  return state;
 }
 
 function normalizeOrderKey(rawId?: string): string {
@@ -51,7 +104,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const readIds = getReadNotifIds();
+    const readState = await getMergedReadState();
+    const readIds = readState.ids;
+    const lastReadAllAt = readState.lastReadAllAt || 0;
     const synthesizedNotifs: any[] = [];
     const seenOrderKeys = new Set<string>();
 
@@ -109,7 +164,9 @@ export async function GET(request: NextRequest) {
       const rawId = String(o.id);
       const normKey = normalizeOrderKey(rawId);
       const id = `notif-order-${rawId}`;
+      const createdTime = o.date ? new Date(o.date).getTime() : Date.now();
       const isRead =
+        (lastReadAllAt > 0 && !Number.isNaN(createdTime) && createdTime <= lastReadAllAt) ||
         readIds.has(id) ||
         Array.from(readIds).some(
           (r) => r.startsWith("notif-order-") && normalizeOrderKey(r.replace("notif-order-", "")) === normKey
@@ -141,7 +198,10 @@ export async function GET(request: NextRequest) {
       const pendingDealers = await withTimeout(dealersPromise, 1500, []);
       pendingDealers.forEach((d: any) => {
         const id = `notif-dealer-${d.id}`;
-        const isRead = readIds.has(id);
+        const createdTime = d.createdAt ? new Date(d.createdAt).getTime() : Date.now();
+        const isRead =
+          (lastReadAllAt > 0 && !Number.isNaN(createdTime) && createdTime <= lastReadAllAt) ||
+          readIds.has(id);
         synthesizedNotifs.push({
           id,
           type: "DEALER_APPLICATION",
@@ -194,9 +254,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, all } = body;
-    const readIds = getReadNotifIds();
+    const readState = await getMergedReadState();
+    const readIds = readState.ids;
 
     if (all) {
+      const nowTs = Date.now();
+      readState.lastReadAllAt = nowTs;
+
       const localOrders = readLocalOrders();
       localOrders.forEach((o) => {
         if (o.id) readIds.add(`notif-order-${o.id}`);
@@ -219,14 +283,36 @@ export async function POST(request: NextRequest) {
         pendingDealers.forEach((d: any) => {
           if (d.id) readIds.add(`notif-dealer-${d.id}`);
         });
+
+        await withTimeout(
+          prisma.adminNotification.upsert({
+            where: { id: "admin-read-watermark" },
+            update: { message: String(nowTs), isRead: true, type: "READ_WATERMARK", title: "READ_ALL" },
+            create: { id: "admin-read-watermark", title: "READ_ALL", message: String(nowTs), type: "READ_WATERMARK", isRead: true },
+          }),
+          1500,
+          null as any
+        );
       } catch {}
     } else if (id) {
       readIds.add(id);
+      try {
+        const markerId = `read-${String(id).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 120)}`;
+        await withTimeout(
+          prisma.adminNotification.upsert({
+            where: { id: markerId },
+            update: { title: String(id), isRead: true, type: "READ_MARKER", message: "read" },
+            create: { id: markerId, title: String(id), message: "read", type: "READ_MARKER", isRead: true },
+          }),
+          1500,
+          null as any
+        );
+      } catch {}
     } else {
       return NextResponse.json({ error: "Geçersiz parametreler" }, { status: 400 });
     }
 
-    saveReadNotifIds(readIds);
+    saveLocalReadState(readState);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("POST Admin Notifications Error:", error);

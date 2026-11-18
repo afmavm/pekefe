@@ -556,6 +556,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
+  const getStoredIdSet = (key: string): Set<string> => {
+    try {
+      if (typeof window === "undefined") return new Set();
+      const raw = localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? new Set(arr) : new Set();
+    } catch {
+      return new Set();
+    }
+  };
+
+  const addStoredIds = (key: string, ids: string[]) => {
+    try {
+      if (typeof window === "undefined" || ids.length === 0) return;
+      const set = getStoredIdSet(key);
+      ids.forEach((id) => {
+        if (id) set.add(id);
+      });
+      // Keep bounded to last 200 entries
+      const arr = Array.from(set).slice(-200);
+      localStorage.setItem(key, JSON.stringify(arr));
+    } catch {}
+  };
+
   const fetchNotifications = async () => {
     try {
       const res = await fetch(`/api/admin/notifications?t=${Date.now()}`, {
@@ -567,18 +591,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       });
       if (!res.ok) return;
       const data = await res.json();
-      const list = data.notifications || [];
-      const newUnread = data.unreadCount || 0;
+      const localReadSet = getStoredIdSet("pekefe_read_notif_ids");
+      const rawList = data.notifications || [];
+      const list = rawList.map((n: any) =>
+        n?.id && localReadSet.has(n.id) ? { ...n, isRead: 1 } : n
+      );
+      const newUnread = list.filter((n: any) => !n.isRead).length;
+      const toastedSet = getStoredIdSet("pekefe_toasted_notif_ids");
 
       if (!isNotifInitializedRef.current) {
         isNotifInitializedRef.current = true;
         list.forEach((n: any) => {
           if (n?.id) seenNotifIdsRef.current.add(n.id);
         });
-        // İlk açılışta okunmamış yeni sipariş varsa görsel ve sesli uyarı göster
-        const unreadOrders = list.filter((n: any) => !n.isRead && (n.type === "ORDER" || n.type === "B2B_ORDER"));
+        // İlk açılışta yalnızca daha önce hiç toast gösterilmemiş okunmamış sipariş varsa uyar
+        const unreadOrders = list.filter(
+          (n: any) =>
+            !n.isRead &&
+            !toastedSet.has(n.id) &&
+            (n.type === "ORDER" || n.type === "B2B_ORDER")
+        );
         if (unreadOrders.length > 0) {
           const newest = unreadOrders[0];
+          addStoredIds("pekefe_toasted_notif_ids", [newest.id]);
           playOrderSound();
           toast.success(newest.title, {
             description: newest.message,
@@ -586,14 +621,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             icon: "📦",
             action: {
               label: "Siparişi Gör",
-              onClick: () => router.push("/admin/orders"),
+              onClick: () => {
+                markAsRead(newest.id);
+                router.push("/admin/orders");
+              },
             },
           });
         }
       } else {
-        const brandNewItems = list.filter((n: any) => n?.id && !seenNotifIdsRef.current.has(n.id));
+        const brandNewItems = list.filter(
+          (n: any) => n?.id && !n.isRead && !seenNotifIdsRef.current.has(n.id)
+        );
         if (brandNewItems.length > 0) {
           brandNewItems.forEach((n: any) => seenNotifIdsRef.current.add(n.id));
+          addStoredIds(
+            "pekefe_toasted_notif_ids",
+            brandNewItems.map((n: any) => n.id)
+          );
 
           // Siparişler sayfasını anında yenilemek için global event tetikle
           if (typeof window !== "undefined") {
@@ -626,7 +670,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   icon: "📦",
                   action: {
                     label: "Siparişi Gör",
-                    onClick: () => router.push("/admin/orders"),
+                    onClick: () => {
+                      markAsRead(notif.id);
+                      router.push("/admin/orders");
+                    },
                   },
                 });
               }
@@ -648,10 +695,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const markAsRead = async (id: string) => {
     try {
+      addStoredIds("pekefe_read_notif_ids", [id]);
+      addStoredIds("pekefe_toasted_notif_ids", [id]);
+      setNotifications((prev) => {
+        const updated = prev.map((n: any) => (n.id === id ? { ...n, isRead: 1 } : n));
+        setUnreadCount(updated.filter((n: any) => !n.isRead).length);
+        return updated;
+      });
       await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id }),
+        keepalive: true,
       });
       await fetchNotifications();
     } catch (e) {}
@@ -659,10 +714,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const markAllAsRead = async () => {
     try {
+      const allIds = notifications.map((n: any) => n.id).filter(Boolean);
+      addStoredIds("pekefe_read_notif_ids", allIds);
+      addStoredIds("pekefe_toasted_notif_ids", allIds);
+      setNotifications((prev) => prev.map((n: any) => ({ ...n, isRead: 1 })));
+      setUnreadCount(0);
       await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ all: true })
+        body: JSON.stringify({ all: true }),
+        keepalive: true,
       });
       await fetchNotifications();
       toast.success("Tüm bildirimler okundu olarak işaretlendi.");

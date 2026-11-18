@@ -322,6 +322,25 @@ export const DELETE = withAuth<any>(
       data.users = data.users.filter(u => u.id !== id);
       saveUsersAndRoles(data);
 
+      // Mark user as deleted in MySQL (Prisma) so GET does not re-sync them back
+      try {
+        await withTimeout(
+          prisma.user.updateMany({
+            where: {
+              OR: [
+                { id: userToDelete.id },
+                ...(userToDelete.email ? [{ email: userToDelete.email.toLowerCase() }] : []),
+              ],
+            },
+            data: { isDeleted: true, isApproved: false },
+          }),
+          2500,
+          { count: 0 }
+        );
+      } catch (dbErr) {
+        console.warn("[USER DELETE DB WARNING]:", dbErr);
+      }
+
       return NextResponse.json({ success: true, message: "Kullanıcı başarıyla silindi." });
     } catch (error: any) {
       return NextResponse.json({ success: false, error: error.message || "Kullanıcı silinemedi." }, { status: 500 });

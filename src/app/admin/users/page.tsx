@@ -232,16 +232,20 @@ export default function AdminUsersPage() {
   const handleDeleteUser = async (id: string, name: string) => {
     if (!confirm(`'${name}' adlı kullanıcıyı silmek istediğinize emin misiniz?`)) return;
     try {
-      const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        setUsers((prev) => prev.filter((u) => u.id !== id));
         toast.success("Kullanıcı başarıyla silindi.");
         fetchData();
       } else {
-        toast.error(data.error || "Silinemedi.");
+        toast.error(data.error || "Kullanıcı silinemedi.");
       }
-    } catch (e: any) {
-      toast.error(e.message || "Silme hatası.");
+    } catch (err: any) {
+      toast.error(err?.message || "Kullanıcı silinirken bir hata oluştu.");
     }
   };
 

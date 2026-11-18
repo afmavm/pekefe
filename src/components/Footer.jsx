@@ -71,18 +71,45 @@ export default function Footer() {
               </a>
 
               {/* WhatsApp Direct Line */}
-              <a
-                className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
-                href={settings.whatsapp || "https://wa.me/904425110000"}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Pekefe WhatsApp Canlı Destek"
-                title="WhatsApp Canlı İletişim"
-              >
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.481 1.332 5.001L2 22l5.127-1.343c1.472.804 3.136 1.227 4.881 1.227h.004c5.506 0 9.99-4.478 9.99-9.985 0-2.667-1.039-5.176-2.928-7.064C17.186 3.041 14.677 2 12.012 2zm5.82 14.153c-.247.697-1.43 1.328-1.974 1.411-.504.077-1.161.115-3.32-.777-2.76-1.141-4.54-3.957-4.677-4.14-.136-.183-1.116-1.485-1.116-2.833 0-1.348.705-2.01.956-2.28.247-.27.538-.338.718-.338.18 0 .359.004.516.012.167.008.391-.063.612.467.225.539.764 1.86.832 1.997.067.137.112.298.022.476-.09.178-.135.29-.27.447-.135.158-.283.353-.404.474-.135.135-.276.282-.119.551.157.27.697 1.15 1.498 1.863 1.03 0.918 1.898 1.203 2.168 1.338.27.135.427.112.585-.067.157-.18.674-.787.854-1.056.18-.27.359-.225.606-.135.247.09 1.571.741 1.841.876.27.135.449.202.516.315.067.113.067.653-.18 1.35z"/>
-                </svg>
-              </a>
+              {(() => {
+                const rawWa = String(settings.whatsapp || "905441494851").trim();
+                let waUrl = "https://wa.me/905441494851";
+                if (rawWa.startsWith("http://") || rawWa.startsWith("https://")) {
+                  waUrl = rawWa;
+                } else if (rawWa.startsWith("wa.me")) {
+                  waUrl = `https://${rawWa}`;
+                } else {
+                  let digits = rawWa.replace(/\D/g, "");
+                  if (digits.startsWith("0") && digits.length === 11) {
+                    digits = `90${digits.slice(1)}`;
+                  } else if (digits.length === 10) {
+                    digits = `90${digits}`;
+                  }
+                  if (digits) waUrl = `https://wa.me/${digits}`;
+                }
+                return (
+                  <a
+                    className="w-10 h-10 rounded-xl bg-white border border-outline-variant/40 shadow-sm flex items-center justify-center text-[#6b1d2f] hover:text-white hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(
+                          new CustomEvent("pekefe:open-whatsapp", { detail: { whatsappUrl: waUrl } })
+                        );
+                      }
+                    }}
+                    aria-label="Pekefe WhatsApp Canlı Destek"
+                    title="WhatsApp Canlı İletişim"
+                  >
+                    <svg className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.481 1.332 5.001L2 22l5.127-1.343c1.472.804 3.136 1.227 4.881 1.227h.004c5.506 0 9.99-4.478 9.99-9.985 0-2.667-1.039-5.176-2.928-7.064C17.186 3.041 14.677 2 12.012 2zm5.82 14.153c-.247.697-1.43 1.328-1.974 1.411-.504.077-1.161.115-3.32-.777-2.76-1.141-4.54-3.957-4.677-4.14-.136-.183-1.116-1.485-1.116-2.833 0-1.348.705-2.01.956-2.28.247-.27.538-.338.718-.338.18 0 .359.004.516.012.167.008.391-.063.612.467.225.539.764 1.86.832 1.997.067.137.112.298.022.476-.09.178-.135.29-.27.447-.135.158-.283.353-.404.474-.135.135-.276.282-.119.551.157.27.697 1.15 1.498 1.863 1.03 0.918 1.898 1.203 2.168 1.338.27.135.427.112.585-.067.157-.18.674-.787.854-1.056.18-.27.359-.225.606-.135.247.09 1.571.741 1.841.876.27.135.449.202.516.315.067.113.067.653-.18 1.35z"/>
+                    </svg>
+                  </a>
+                );
+              })()}
 
               {/* Facebook */}
               <a

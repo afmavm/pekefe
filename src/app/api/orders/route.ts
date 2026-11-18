@@ -57,8 +57,9 @@ export const GET = withAuth<any>(
       const map = new Map<string, any>();
 
       (orders || []).forEach(o => {
-        const idKey = o.id || o.orderNumber;
-        if (idKey) map.set(idKey, o);
+        const rawKey = o.id || o.orderNumber || '';
+        const normKey = String(rawKey).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        if (normKey) map.set(normKey, o);
       });
 
       const isAdmin = isAdminRole(session?.user?.role) && !isPersonal;
@@ -72,33 +73,34 @@ export const GET = withAuth<any>(
             return;
           }
         }
-        const idKey = lo.id || lo.orderNumber;
-        if (idKey) {
-          const existing = map.get(idKey);
-          map.set(idKey, {
-            id: lo.id,
-            total: lo.amount ?? lo.total ?? 0,
-            shippingFee: lo.shippingFee ?? 0,
-            status: lo.status || 'Yeni',
-            summary: lo.summary || '',
-            type: lo.type || 'B2C',
-            method: lo.method || 'Belirtilmedi',
-            date: lo.date || new Date().toISOString(),
-            currentAccount: {
+        const rawKey = lo.id || lo.orderNumber || '';
+        const normKey = String(rawKey).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        if (normKey) {
+          const existing = map.get(normKey);
+          map.set(normKey, {
+            ...existing,
+            id: existing?.id || lo.id,
+            total: lo.amount ?? lo.total ?? existing?.total ?? 0,
+            shippingFee: lo.shippingFee ?? existing?.shippingFee ?? 0,
+            status: lo.status || existing?.status || 'Yeni',
+            summary: lo.summary || existing?.summary || '',
+            type: lo.type || existing?.type || 'B2C',
+            method: lo.method || existing?.method || 'Belirtilmedi',
+            date: existing?.date || lo.date || lo.createdAt || new Date().toISOString(),
+            currentAccount: existing?.currentAccount || {
               name: lo.client || lo.customerName || 'Müşteri',
               address: lo.address || '',
               phone: lo.phone || '',
               email: lo.email || '',
             },
-            ...existing
           });
         }
       });
 
-      const mergedOrders = Array.from(map.values());
-
-      // Sort orders by date ascending to assign sequential numbers
-      const sortedOrders = [...mergedOrders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Sort mergedOrders DESCENDING (newest first) by real timestamp
+      const mergedOrders = Array.from(map.values()).sort(
+        (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+      );
 
       const formattedOrders = mergedOrders.map(order => {
         let orderNumber = order.id;
@@ -155,7 +157,12 @@ export const GET = withAuth<any>(
         };
       });
 
-      return NextResponse.json(formattedOrders);
+      return NextResponse.json(formattedOrders, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
     } catch (error) {
       console.warn('[API ORDERS WARNING] DB erişimi yok, varsayılan sipariş havuzu sunuluyor:', error);
       const fallbackOrders = [

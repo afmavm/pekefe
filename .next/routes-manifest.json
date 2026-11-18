@@ -1311,6 +1311,12 @@
       "namedRegex": "^/api/checkout/callback(?:/)?$"
     },
     {
+      "page": "/api/checkout/confirm-paytr",
+      "regex": "^/api/checkout/confirm\\-paytr(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/checkout/confirm\\-paytr(?:/)?$"
+    },
+    {
       "page": "/api/checkout/initiate",
       "regex": "^/api/checkout/initiate(?:/)?$",
       "routeKeys": {},

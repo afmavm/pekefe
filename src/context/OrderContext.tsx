@@ -11,6 +11,7 @@ export interface Order {
   amount: number;
   method: string;
   date: string;
+  createdAt?: string;
   status: "Yeni" | "Hazırlanıyor" | "Kargolandı" | "Teslim Edildi" | "İptal Edildi" | string;
   address?: string;
   phone?: string;
@@ -37,51 +38,64 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch(`/api/orders?t=${Date.now()}`, {
-        cache: 'no-store',
+        cache: "no-store",
         headers: {
-          'Pragma': 'no-cache',
-          'Cache-Control': 'no-cache, no-store, must-revalidate'
-        }
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
       });
-      if (!res.ok) return; // Auth failure, silently skip
+      if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data)) setOrders(data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   }, []);
 
   useEffect(() => {
     fetchOrders();
+    // Canlı sipariş akışı için 4 saniyede bir otomatik yoklama + bildirim olayı dinleyicisi
+    const interval = setInterval(fetchOrders, 4000);
+    const handleNewOrderEvent = () => {
+      fetchOrders();
+    };
+    window.addEventListener("pekefe:new-order", handleNewOrderEvent);
+    window.addEventListener("focus", handleNewOrderEvent);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("pekefe:new-order", handleNewOrderEvent);
+      window.removeEventListener("focus", handleNewOrderEvent);
+    };
   }, [fetchOrders]);
 
   const addOrder = async (order: Order) => {
     try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order)
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
       });
       if (res.ok) fetchOrders();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // ✅ Artık DB'ye persist ediyor
   const updateOrderStatus = async (id: string, status: Order["status"]) => {
-    // Optimistic update (önce UI'ı güncelle)
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
 
     try {
-      const res = await fetch('/api/orders', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: id, status })
+      const res = await fetch("/api/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: id, status }),
       });
       if (!res.ok) {
-        // Rollback on failure
         fetchOrders();
       }
     } catch (err) {
       console.error(err);
-      fetchOrders(); // Rollback
+      fetchOrders();
     }
   };
 

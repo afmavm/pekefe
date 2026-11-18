@@ -425,7 +425,29 @@ export default function OrderCommandCenter() {
       return matchesType && matchSearch && matchStatus && matchClientType && matchPayment;
     });
 
+    const parseOrderTimestamp = (o: any): number => {
+      if (o?.createdAt) {
+        const t = new Date(o.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      const raw = String(o?.date || "").trim();
+      // Match DD.MM.YYYY HH:mm or DD.MM.YYYY
+      const trMatch = raw.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+      if (trMatch) {
+        const [, dd, mm, yyyy, hh = "00", min = "00"] = trMatch;
+        return new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:00`).getTime();
+      }
+      const fallback = new Date(raw).getTime();
+      return isNaN(fallback) ? 0 : fallback;
+    };
+
     return [...matches].sort((a, b) => {
+      if (sortField === "date") {
+        const timeA = parseOrderTimestamp(a);
+        const timeB = parseOrderTimestamp(b);
+        return sortDirection === "asc" ? timeA - timeB : timeB - timeA;
+      }
+
       let valA = a[sortField] ?? "";
       let valB = b[sortField] ?? "";
 

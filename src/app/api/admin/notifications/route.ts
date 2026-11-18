@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, withTimeout } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { isAdminRole } from "@/lib/auth-helpers";
 import { readLocalOrders } from "@/lib/jsonOrderDb";
 import fs from "fs";
 import path from "path";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const READ_NOTIFS_FILE = path.join(process.cwd(), "data", "admin_read_notifications.json");
 
@@ -13,7 +17,10 @@ function getReadNotifIds(): Set<string> {
     if (fs.existsSync(READ_NOTIFS_FILE)) {
       const raw = fs.readFileSync(READ_NOTIFS_FILE, "utf-8");
       const list = JSON.parse(raw);
-      if (Array.isArray(list)) return new Set(list);
+      if (Array.isArray(list)) {
+        // Never allow a permanent "all" wildcard to silence future notifications
+        return new Set(list.filter((id) => id !== "all"));
+      }
     }
   } catch {}
   return new Set();
@@ -21,17 +28,23 @@ function getReadNotifIds(): Set<string> {
 
 function saveReadNotifIds(ids: Set<string>) {
   try {
+    ids.delete("all");
     const dir = path.dirname(READ_NOTIFS_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(READ_NOTIFS_FILE, JSON.stringify(Array.from(ids), null, 2), "utf-8");
   } catch {}
 }
 
+function normalizeOrderKey(rawId?: string): string {
+  if (!rawId) return "";
+  return String(rawId).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+}
+
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const isDev = process.env.NODE_ENV === "development";
   const userRole = session?.user?.role;
-  const isAuthorized = isDev || (session && (userRole === "ADMIN" || userRole === "SUPER_ADMIN" || userRole === "ORDER_MANAGER" || userRole === "STOCK_MANAGER"));
+  const isAuthorized = isDev || (session && isAdminRole(userRole));
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
@@ -40,39 +53,95 @@ export async function GET(request: NextRequest) {
   try {
     const readIds = getReadNotifIds();
     const synthesizedNotifs: any[] = [];
+    const seenOrderKeys = new Set<string>();
 
-    // 1. Yerel & Veritabanı Siparişlerinden Canlı Bildirimler Üret
+    // 1. Hem MySQL (Prisma) hem Yerel JSON Siparişlerinden Canlı Bildirimler Üret
+    let dbOrders: any[] = [];
+    try {
+      dbOrders = await withTimeout(
+        prisma.order.findMany({
+          include: { currentAccount: true },
+          orderBy: { date: "desc" },
+          take: 40,
+        }),
+        2000,
+        []
+      );
+    } catch {}
+
     const localOrders = readLocalOrders();
-    localOrders.forEach((o) => {
-      const id = `notif-order-${o.id || o.orderNumber}`;
-      const isRead = readIds.has(id) || readIds.has("all");
-      const clientName = o.client || o.customerName || "Müşteri";
-      const totalAmount = Number(o.total || o.amount || 0).toLocaleString("tr-TR");
+    const combinedOrders: any[] = [];
+
+    for (const o of dbOrders || []) {
+      const key = normalizeOrderKey(o.id);
+      if (key && !seenOrderKeys.has(key)) {
+        seenOrderKeys.add(key);
+        combinedOrders.push({
+          id: o.id,
+          client: o.currentAccount?.name || "Müşteri",
+          total: Number(o.total || 0),
+          method: o.method || "Kredi Kartı",
+          type: o.type || "B2C",
+          status: o.status || "Yeni",
+          date: o.date ? new Date(o.date).toISOString() : new Date().toISOString(),
+        });
+      }
+    }
+
+    for (const lo of localOrders || []) {
+      const rawId = lo.id || lo.orderNumber || "";
+      const key = normalizeOrderKey(rawId);
+      if (key && !seenOrderKeys.has(key)) {
+        seenOrderKeys.add(key);
+        combinedOrders.push({
+          id: rawId,
+          client: lo.client || lo.customerName || "Müşteri",
+          total: Number(lo.total ?? lo.amount ?? 0),
+          method: lo.method || "Kredi Kartı",
+          type: lo.type || "B2C",
+          status: lo.status || "Yeni",
+          date: lo.date || lo.createdAt || new Date().toISOString(),
+        });
+      }
+    }
+
+    combinedOrders.forEach((o) => {
+      const rawId = String(o.id);
+      const normKey = normalizeOrderKey(rawId);
+      const id = `notif-order-${rawId}`;
+      const isRead =
+        readIds.has(id) ||
+        Array.from(readIds).some(
+          (r) => r.startsWith("notif-order-") && normalizeOrderKey(r.replace("notif-order-", "")) === normKey
+        );
+
+      const clientName = o.client || "Müşteri";
+      const totalAmount = Number(o.total || 0).toLocaleString("tr-TR");
       const paymentMethod = o.method || "Kredi Kartı";
-      const isB2B = o.type === "B2B" || (o.notes && o.notes.includes("B2B"));
+      const isB2B = o.type === "B2B";
 
       synthesizedNotifs.push({
         id,
-        orderId: o.id || o.orderNumber,
+        orderId: rawId,
         type: isB2B ? "B2B_ORDER" : "ORDER",
-        title: isB2B ? `Yeni Toptan B2B Siparişi: #${o.id}` : `Yeni Sipariş: #${o.id}`,
+        title: isB2B ? `Yeni Toptan B2B Siparişi: #${rawId}` : `Yeni Sipariş: #${rawId}`,
         message: `${clientName} tarafından ₺${totalAmount} tutarında (${paymentMethod}) sipariş oluşturuldu.`,
         isRead: isRead ? 1 : 0,
         createdAt: o.date ? new Date(o.date).toISOString() : new Date().toISOString(),
       });
     });
 
-    // 2. Bayilik Başvuruları & Kurumsal Talepler (Varsa dosya / Prisma)
+    // 2. Bayilik Başvuruları & Kurumsal Talepler
     try {
       const dealersPromise = prisma.user.findMany({
         where: { role: "DEALER", isApproved: false },
         take: 10,
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
       });
       const pendingDealers = await withTimeout(dealersPromise, 1500, []);
       pendingDealers.forEach((d: any) => {
         const id = `notif-dealer-${d.id}`;
-        const isRead = readIds.has(id) || readIds.has("all");
+        const isRead = readIds.has(id);
         synthesizedNotifs.push({
           id,
           type: "DEALER_APPLICATION",
@@ -85,19 +154,29 @@ export async function GET(request: NextRequest) {
     } catch {}
 
     // Tarihe göre yeniden eskiye sırala
-    synthesizedNotifs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    synthesizedNotifs.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
     const unreadCount = synthesizedNotifs.filter((n) => !n.isRead).length;
 
-    return NextResponse.json({
-      notifications: synthesizedNotifs.slice(0, 30),
-      unreadCount,
-    });
+    return NextResponse.json(
+      {
+        notifications: synthesizedNotifs.slice(0, 30),
+        unreadCount,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+        },
+      }
+    );
   } catch (error: any) {
     console.error("GET Admin Notifications Error:", error);
     return NextResponse.json({
       notifications: [],
-      unreadCount: 0
+      unreadCount: 0,
     });
   }
 }
@@ -106,7 +185,7 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const isDev = process.env.NODE_ENV === "development";
   const userRole = session?.user?.role;
-  const isAuthorized = isDev || (session && (userRole === "ADMIN" || userRole === "SUPER_ADMIN" || userRole === "ORDER_MANAGER"));
+  const isAuthorized = isDev || (session && isAdminRole(userRole));
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
@@ -119,8 +198,28 @@ export async function POST(request: NextRequest) {
 
     if (all) {
       const localOrders = readLocalOrders();
-      localOrders.forEach((o) => readIds.add(`notif-order-${o.id || o.orderNumber}`));
-      readIds.add("all");
+      localOrders.forEach((o) => {
+        if (o.id) readIds.add(`notif-order-${o.id}`);
+        if (o.orderNumber) readIds.add(`notif-order-${o.orderNumber}`);
+      });
+      try {
+        const dbOrders = await withTimeout(
+          prisma.order.findMany({ select: { id: true }, take: 50, orderBy: { date: "desc" } }),
+          1500,
+          []
+        );
+        dbOrders.forEach((o: any) => {
+          if (o.id) readIds.add(`notif-order-${o.id}`);
+        });
+        const pendingDealers = await withTimeout(
+          prisma.user.findMany({ where: { role: "DEALER", isApproved: false }, select: { id: true } }),
+          1500,
+          []
+        );
+        pendingDealers.forEach((d: any) => {
+          if (d.id) readIds.add(`notif-dealer-${d.id}`);
+        });
+      } catch {}
     } else if (id) {
       readIds.add(id);
     } else {

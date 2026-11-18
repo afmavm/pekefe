@@ -10,10 +10,12 @@ import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, Ar
 function SepetOnayContent() {
   const searchParams = useSearchParams();
   const queryOrderId = searchParams.get("orderId");
+  const queryOid = searchParams.get("oid");
   const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
     let loaded = false;
+    let parsedOrder = null;
     try {
       let storedData = localStorage.getItem("pekefe_completed_order") || sessionStorage.getItem("pekefe_completed_order");
       if (!storedData && typeof document !== "undefined") {
@@ -22,6 +24,7 @@ function SepetOnayContent() {
       }
       if (storedData) {
         const parsed = JSON.parse(storedData);
+        parsedOrder = parsed;
         if (!queryOrderId || parsed.orderId === queryOrderId) {
           setCompletedOrder(parsed);
           loaded = true;
@@ -29,6 +32,19 @@ function SepetOnayContent() {
       }
     } catch (e) {
       console.error("Error reading completed order from storage:", e);
+    }
+
+    // PayTR 3D Secure onay dönüşünde siparişi sunucuya anında kesinleştir (idempotent)
+    if (queryOid || parsedOrder?.orderId) {
+      fetch("/api/checkout/confirm-paytr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oid: queryOid || "",
+          orderId: queryOrderId || parsedOrder?.orderId || "",
+          completedOrder: parsedOrder,
+        }),
+      }).catch(() => {});
     }
 
     // If queryOrderId is provided, fetch latest details from orders API

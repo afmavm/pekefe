@@ -49,16 +49,45 @@ git fetch origin main 2>/dev/null || true
 git reset --hard origin/main 2>/dev/null || true
 git pull origin main --force 2>/dev/null || true
 
-# Yedeklenen canlı .env ve canlı veritabanlarını geri yükle
+# Yedeklenen canlı .env ve canlı veritabanlarını güvenli birleştirerek geri yükle
 if [ -f "$BACKUP_TMP/.env" ]; then
   cp -f "$BACKUP_TMP/.env" "$CURRENT_DIR/.env" 2>/dev/null || true
 fi
 mkdir -p "$CURRENT_DIR/data" 2>/dev/null || true
-for dbfile in orders_db.json paytr_pending_orders.json users_roles_db.json current_accounts_db.json; do
+for dbfile in paytr_pending_orders.json users_roles_db.json current_accounts_db.json; do
   if [ -f "$BACKUP_TMP/$dbfile" ]; then
     cp -f "$BACKUP_TMP/$dbfile" "$CURRENT_DIR/data/$dbfile" 2>/dev/null || true
   fi
 done
+# Canlı sunucudaki orders_db.json ile yeni gelen siparişleri birleştir (hiçbir sipariş kaybolmasın)
+if [ -f "$BACKUP_TMP/orders_db.json" ]; then
+  node -e "
+    const fs = require('fs');
+    try {
+      const live = JSON.parse(fs.readFileSync('$BACKUP_TMP/orders_db.json', 'utf8'));
+      const repo = JSON.parse(fs.readFileSync('$CURRENT_DIR/data/orders_db.json', 'utf8'));
+      const map = new Map();
+      [...(Array.isArray(repo) ? repo : []), ...(Array.isArray(live) ? live : [])].forEach(o => {
+        if (o && o.id) map.set(o.id, o);
+      });
+      const merged = Array.from(map.values()).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      fs.writeFileSync('$CURRENT_DIR/data/orders_db.json', JSON.stringify(merged, null, 2), 'utf8');
+    } catch (e) {}
+  " 2>/dev/null || true
+fi
+# Bildirim kilidindeki eski 'all' jokerini temizle
+if [ -f "$CURRENT_DIR/data/admin_read_notifications.json" ]; then
+  node -e "
+    const fs = require('fs');
+    try {
+      const p = '$CURRENT_DIR/data/admin_read_notifications.json';
+      const arr = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (Array.isArray(arr)) {
+        fs.writeFileSync(p, JSON.stringify(arr.filter(x => x !== 'all'), null, 2), 'utf8');
+      }
+    } catch (e) {}
+  " 2>/dev/null || true
+fi
 rm -rf "$BACKUP_TMP" 2>/dev/null || true
 
 # 3. .env kontrolü (İzole Port 4000 ve izole veritabanı)

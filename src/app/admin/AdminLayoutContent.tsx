@@ -455,27 +455,48 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [notifLoading, setNotifLoading] = useState(false);
   const prevUnreadCountRef = useRef(0);
   const latestNotifIdRef = useRef<string | null>(null);
+  const seenNotifIdsRef = useRef<Set<string>>(new Set());
+  const isNotifInitializedRef = useRef(false);
+  const sharedAudioCtxRef = useRef<any>(null);
+
+  const getUnlockedAudioCtx = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return null;
+      if (!sharedAudioCtxRef.current) {
+        sharedAudioCtxRef.current = new AudioCtx();
+      }
+      if (sharedAudioCtxRef.current.state === "suspended") {
+        sharedAudioCtxRef.current.resume().catch(() => {});
+      }
+      return sharedAudioCtxRef.current;
+    } catch {
+      return null;
+    }
+  };
 
   const playOrderSound = () => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtx();
-      // A pleasant two-tone chime: D5 then F#5
-      const playTone = (freq: number, startAt: number, duration: number) => {
+      const ctx = getUnlockedAudioCtx();
+      if (!ctx) return;
+      // Canlı, dikkat çekici 4 tonlu kasa/sipariş çan sesi: D5 -> F#5 -> A5 -> D6
+      const playTone = (freq: number, startAt: number, duration: number, peak = 0.42) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.type = "sine";
+        osc.type = "triangle";
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.001, ctx.currentTime + startAt);
-        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + startAt + 0.05);
+        gain.gain.exponentialRampToValueAtTime(peak, ctx.currentTime + startAt + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startAt + duration);
         osc.start(ctx.currentTime + startAt);
         osc.stop(ctx.currentTime + startAt + duration);
       };
-      playTone(587.33, 0, 0.35);  // D5
-      playTone(739.99, 0.3, 0.45); // F#5
+      playTone(587.33, 0, 0.25, 0.45);     // D5
+      playTone(739.99, 0.18, 0.25, 0.45);  // F#5
+      playTone(880.00, 0.36, 0.30, 0.48);  // A5
+      playTone(1174.66, 0.56, 0.55, 0.50); // D6
     } catch (err) {
       console.warn("Could not play notification sound:", err);
     }
@@ -537,42 +558,80 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch("/api/admin/notifications");
+      const res = await fetch(`/api/admin/notifications?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      });
       if (!res.ok) return;
       const data = await res.json();
       const list = data.notifications || [];
       const newUnread = data.unreadCount || 0;
 
-      // Check if we have a previous latest notification ID stored
-      if (latestNotifIdRef.current && list.length > 0) {
-        const index = list.findIndex((n: any) => n.id === latestNotifIdRef.current);
-        const newItems = index === -1 ? list : list.slice(0, index);
-
-        // Process from oldest new item to newest
-        newItems.reverse().forEach((notif: any) => {
-          if (notif.type === "TICKET") {
-            playTicketSound();
-            toast.info(notif.title, {
-              description: notif.message,
-              duration: 8000,
-              icon: "🎫"
-            });
-          } else if (notif.type === "APPLICATION" || notif.type === "DEALER_APPLICATION") {
-            playApplicationSound();
-            toast.success(notif.title, {
-              description: notif.message,
-              duration: 8000,
-              icon: "🤝"
-            });
-          } else {
-            playOrderSound();
-            toast.success(notif.title, {
-              description: notif.message,
-              duration: 8000,
-              icon: "📦"
-            });
-          }
+      if (!isNotifInitializedRef.current) {
+        isNotifInitializedRef.current = true;
+        list.forEach((n: any) => {
+          if (n?.id) seenNotifIdsRef.current.add(n.id);
         });
+        // İlk açılışta okunmamış yeni sipariş varsa görsel ve sesli uyarı göster
+        const unreadOrders = list.filter((n: any) => !n.isRead && (n.type === "ORDER" || n.type === "B2B_ORDER"));
+        if (unreadOrders.length > 0) {
+          const newest = unreadOrders[0];
+          playOrderSound();
+          toast.success(newest.title, {
+            description: newest.message,
+            duration: 10000,
+            icon: "📦",
+            action: {
+              label: "Siparişi Gör",
+              onClick: () => router.push("/admin/orders"),
+            },
+          });
+        }
+      } else {
+        const brandNewItems = list.filter((n: any) => n?.id && !seenNotifIdsRef.current.has(n.id));
+        if (brandNewItems.length > 0) {
+          brandNewItems.forEach((n: any) => seenNotifIdsRef.current.add(n.id));
+
+          // Siparişler sayfasını anında yenilemek için global event tetikle
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("pekefe:new-order"));
+          }
+
+          brandNewItems
+            .slice()
+            .reverse()
+            .forEach((notif: any) => {
+              if (notif.type === "TICKET") {
+                playTicketSound();
+                toast.info(notif.title, {
+                  description: notif.message,
+                  duration: 10000,
+                  icon: "🎫",
+                });
+              } else if (notif.type === "APPLICATION" || notif.type === "DEALER_APPLICATION") {
+                playApplicationSound();
+                toast.success(notif.title, {
+                  description: notif.message,
+                  duration: 10000,
+                  icon: "🤝",
+                });
+              } else {
+                playOrderSound();
+                toast.success(notif.title, {
+                  description: notif.message,
+                  duration: 12000,
+                  icon: "📦",
+                  action: {
+                    label: "Siparişi Gör",
+                    onClick: () => router.push("/admin/orders"),
+                  },
+                });
+              }
+            });
+        }
       }
 
       if (list.length > 0) {
@@ -661,14 +720,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // Real-time notification polling: initial load + every 8 seconds
+  // Real-time notification polling: initial load + every 4 seconds + unlock Web Audio on interaction
   useEffect(() => {
-    prevUnreadCountRef.current = -1; // sentinel so first load never plays sound
-    fetchNotifications().then(() => {
-      prevUnreadCountRef.current = unreadCount;
-    });
-    const interval = setInterval(fetchNotifications, 8000);
-    return () => clearInterval(interval);
+    const unlockAudio = () => {
+      getUnlockedAudioCtx();
+    };
+    window.addEventListener("click", unlockAudio, { passive: true });
+    window.addEventListener("keydown", unlockAudio, { passive: true });
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 4000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

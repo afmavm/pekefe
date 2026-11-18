@@ -122,17 +122,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // PayTR requires unique merchant_oid per attempt so previously used IDs never invalidate
+    const paytrMerchantOid = `${customOrderId}T${Date.now()}`;
+
     const isLocalhost = request.headers.get('host')?.includes('localhost');
     const targetOkUrl = isLocalhost 
-      ? `http://${request.headers.get('host')}/sepet/onay` 
-      : 'https://www.pekefe.com/sepet/onay';
+      ? `http://${request.headers.get('host')}/sepet/onay?oid=${encodeURIComponent(paytrMerchantOid)}&orderId=${encodeURIComponent(customOrderId)}` 
+      : `https://www.pekefe.com/sepet/onay?oid=${encodeURIComponent(paytrMerchantOid)}&orderId=${encodeURIComponent(customOrderId)}`;
     
     const targetFailUrl = isLocalhost 
       ? `http://${request.headers.get('host')}/sepet/odeme?error=paytr` 
       : 'https://www.pekefe.com/sepet/odeme?error=paytr';
 
-    // PayTR requires unique merchant_oid per attempt so previously used IDs never invalidate
-    const paytrMerchantOid = `${customOrderId}T${Date.now()}`;
     const cleanPhone = (phone || '05000000000').replace(/\D/g, '');
     const cleanUserName = (name || 'Pekefe Müşterisi').trim();
     const cleanUserAddress = (fullAddress || 'Türkiye').trim();
@@ -209,6 +210,7 @@ export async function POST(request: NextRequest) {
       success: true,
       token: paytrResult.token,
       orderId: customOrderId,
+      merchantOid: paytrMerchantOid,
     });
   } catch (error: any) {
     console.error('[PAYTR TOKEN ROUTE ERROR]:', error);

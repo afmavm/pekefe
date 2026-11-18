@@ -256,7 +256,13 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
   const fetchDashboardData = async (showSpinner = false) => {
     if (showSpinner) setLoading(true);
     try {
-      const res = await fetch(`/api/admin/dashboard?range=Bu Ay&mode=core`);
+      const res = await fetch(`/api/admin/dashboard?range=Bu%20Ay&mode=core&t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      });
       if (res.ok) {
         const freshData = await res.json();
         
@@ -339,7 +345,7 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
     { value: otherCount, color: "#3b82f6", label: "Diğer" }
   ];
 
-  const monthlyOrdersTrend = kpis.monthlyOrdersTrend || [12, 19, 14, 25, 22, 18, 31, 28, 24, 35];
+  const monthlyOrdersTrend = kpis.monthlyOrdersTrend || [0, 0, 0, 0, 0, 0];
 
   // Dynamic AP/AR progress for cards
   const arValue = kpis.totalAR || 0;
@@ -933,7 +939,7 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
                     >
                       <td className="px-5 py-4">
                         <span className="font-mono text-xs font-semibold text-slate-500">
-                          {order.id.startsWith('OR-') || order.id.startsWith('B2B-') ? order.id : `#${order.id.slice(-8).toUpperCase()}`}
+                          #{order.orderNumber || order.id}
                         </span>
                       </td>
                       <td className="px-5 py-4">

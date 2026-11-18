@@ -185,14 +185,14 @@ async function getInitialDashboardData() {
     }, 0);
 
     const averageOrderValue = activeOrders.length > 0 ? Math.round(totalRevenue / activeOrders.length) : 0;
-    const activeVisitors = 42;
-    const activeCarts = 3;
-    const totalCost = finalProducts.reduce((sum, p) => sum + (Number(p.cost || 0) * Number(p.stock || 0)), 0);
-    const totalProfit = Math.max(0, totalRevenue - (totalRevenue * 0.4));
-    const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 45;
+    const totalProfit = Math.max(0, totalRevenue - (totalRevenue * 0.55));
+    const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
 
-    // ERP Stok & Depo Değerlemeleri
-    const totalStockValue = finalProducts.reduce((sum, p) => sum + (Number(p.stock || 0) * Number(p.price || 0)), 0);
+    // ERP Stok & Depo Değerlemeleri (Maliyet bazlı tutarlı hesaplama)
+    const totalStockValue = finalProducts.reduce((sum, p) => {
+      const unitCost = Number(p.cost || 0) > 0 ? Number(p.cost) : Number(p.price || 0);
+      return sum + (Number(p.stock || 0) * unitCost);
+    }, 0);
 
     const criticalStocksList = finalProducts
       .filter(p => Number(p.stock) <= Number(p.criticalLimit || 5))
@@ -332,8 +332,6 @@ async function getInitialDashboardData() {
         orderCount: activeOrders.length,
         cancelledOrderCount,
         averageOrderValue,
-        activeVisitors,
-        activeCarts,
         activeDealerCount,
         criticalStockCount,
         activeIntegrationCount: 3,

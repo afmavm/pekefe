@@ -354,15 +354,23 @@ export default function OrderCommandCenter() {
     }
   };
 
+  const normalizeTrStatus = (status?: string) => {
+    if (!status) return "";
+    return String(status)
+      .replace(/İ/g, "i")
+      .replace(/I/g, "ı")
+      .toLocaleLowerCase("tr-TR")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
   const isCancelled = (status?: string) => {
-    if (!status) return false;
-    const s = String(status).toLowerCase();
+    const s = normalizeTrStatus(status);
     return s.includes("iptal") || s.includes("cancel");
   };
 
   const isReturned = (status?: string) => {
-    if (!status) return false;
-    const s = String(status).toLowerCase();
+    const s = normalizeTrStatus(status);
     return s.includes("iade") || s.includes("refund");
   };
 

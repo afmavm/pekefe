@@ -36,7 +36,7 @@ Kuruluş Felsefesi: "Dut şırasını ateşte yakmadan, güneş ışığında ve
 • Kargo Politikası: Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Teslimat süresi 1-3 iş günüdür.
 • Anlaşmalı Kargolar: Yurtiçi Kargo, MNG Kargo, Aras Kargo.
 • Ücretsiz Kargo: 500 TL ve üzeri siparişlerde kargo ücretsizdir.
-• İade Politikası: 14 gün içinde, ambalajı açılmamış ve koruma bandı bozulmamış ürünlerde koşulsuz iade hakkı.
+• İade Politikası: Mesafeli Sözleşmeler Yönetmeliği Md. 15/ç gereği çabuk bozulabilen veya ambalajı/koruma bandı açılmış gıda ürünlerinde keyfi cayma hakkı kullanılamaz. Ancak kargo sırasında hasar gören veya teslim edildikten sonra üründe herhangi bir kusur tespit edilen gıda ürünleri 6502 sayılı Kanun kapsamında ücretsiz iade alınır veya değiştirilir.
 • Ödeme Yöntemleri: Kredi kartı (taksit seçeneği), Havale/EFT ve kapıda ödeme.
 
 [B2B VE TOPTAN BAYİLİK]

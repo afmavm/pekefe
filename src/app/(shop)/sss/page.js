@@ -138,13 +138,13 @@ const faqData = [
     questions: [
       { 
         id: "iade-1", 
-        q: "Ürünleri nasıl iade edebilirim?", 
-        a: "Siparişinizi teslim aldığınız tarihten itibaren 14 takvim günü içerisinde iade talebinde bulunabilirsiniz. Gıda güvenliği ve hijyen mevzuatı gereği iade edilecek ürünlerin ambalajının açılmamış, emniyet bandının zarar görmemiş ve orijinal formunun bozulmamış olması zorunludur." 
+        q: "Gıda ürünlerinde iade koşulları nelerdir?", 
+        a: "Mesafeli Sözleşmeler Yönetmeliği Madde 15/ç uyarınca çabuk bozulabilen veya tesliminden sonra ambalajı, emniyet bandı ya da koruyucu mührü açılmış gıda ürünlerinde sebepsiz (keyfi) cayma hakkı kullanılamaz. Ancak ambalajı açılmamış uygun ürünlerde 14 gün içinde iade talebi oluşturabilirsiniz; kargo sırasında hasar gören veya teslim sonrasında herhangi bir kusur tespit edilen gıda ürünleri ise 6502 sayılı Kanun kapsamında her koşulda iade alınır veya ücretsiz değiştirilir." 
       },
       { 
         id: "iade-2", 
-        q: "Kargoda hasar gören veya yanlış gelen ürünler için ne yapmalıyım?", 
-        a: "Teslimat anında dış pakette ezilme veya akma fark ederseniz kargo görevlisine 'Hasar Tespit Tutanağı' tutturunuz. Paketi açtıktan sonra bir sorun fark ederseniz, ürünün fotoğraflarını çekerek 24 saat içinde WhatsApp hattımıza veya info@pekefe.com adresimize iletmeniz yeterlidir; derhal yenisi ücretsiz olarak gönderilir." 
+        q: "Kargoda hasar gören veya kusurlu çıkan ürünler için ne yapmalıyım?", 
+        a: "Teslimat anında dış pakette ezilme, kırılma veya akma fark ederseniz kargo görevlisine 'Hasar Tespit Tutanağı' tutturunuz. Paketi açtıktan sonra üretim/kalite kaynaklı bir kusur veya bozulma fark ederseniz, ürünün fotoğraflarını çekerek WhatsApp hattımıza veya info@pekefe.com adresimize iletmeniz yeterlidir; ürün ücretsiz olarak iade alınır veya derhal yenisi gönderilir." 
       },
       { 
         id: "iade-3", 

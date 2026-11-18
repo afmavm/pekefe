@@ -108,13 +108,13 @@ export default function TeslimatVeIade() {
           </h2>
           <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
             <p>
-              • <strong>14 Gün İçinde İade:</strong> Teslimat tarihinden itibaren 14 takvim günü içerisinde koşulsuz iade talebinde bulunabilirsiniz.
+              • <strong>Gıda Ürünlerinde Cayma Hakkı İstisnası (Yönetmelik Md. 15/ç):</strong> 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesi uyarınca; çabuk bozulabilen veya ambalajı, emniyet bandı, mührü açılmış gıda ürünlerinde hijyen ve gıda güvenliği gerekçesiyle keyfi (sebepsiz) iade/cayma hakkı kullanılamaz. Ambalajı açılmamış ve hijyen koşulu bozulmamış uygun ürünlerde ise teslimattan itibaren 14 gün içinde iade talebi oluşturulabilir.
             </p>
             <p>
-              • <strong>Gıda Hijyen Kuralı:</strong> 6502 sayılı Tüketicinin Korunması Hakkında Kanun uyarınca ambalajı açılmış, koruyucu emniyet bandı yırtılmış veya kullanılmış gıda ürünlerinin iadesi kabul edilememektedir.
+              • <strong>Kargo Hasarı veya Kusurlu (Ayıplı) Ürün İadesi:</strong> Kargo taşınması sırasında hasar görmüş (kırık, sızıntı, ezilme) veya teslim edildikten sonra üründe üretim/kalite kaynaklı herhangi bir kusur tespit edilmiş tüm gıda ürünleri <strong>iade alınır</strong> veya ücretsiz yenisiyle değiştirilir. Bu durumda iade kargo ücreti tamamen firmamıza aittir.
             </p>
             <p>
-              • <strong>Ücret İadesi:</strong> İade edilen ürün depomuza ulaşıp onaylandıktan sonra en geç 5 iş günü içerisinde ödemeniz aynı ödeme kanalı üzerinden iade edilir.
+              • <strong>Ücret İadesi:</strong> İade talebiniz onaylanıp ürün depomuza ulaştıktan sonra en geç 5 iş günü (yasal azami 14 gün) içerisinde ödemeniz aynı ödeme kanalı üzerinden eksiksiz iade edilir.
             </p>
           </div>
         </section>

@@ -58,7 +58,7 @@ Kuruluş Felsefesi: "Dut şırasını ateşte yakmadan, g\xfcneş ışığında 
 • Kargo Politikası: Hafta i\xe7i saat 15:00'e kadar verilen siparişler aynı g\xfcn kargoya teslim edilir. Teslimat s\xfcresi 1-3 iş g\xfcn\xfcd\xfcr.
 • Anlaşmalı Kargolar: Yurti\xe7i Kargo, MNG Kargo, Aras Kargo.
 • \xdccretsiz Kargo: 500 TL ve \xfczeri siparişlerde kargo \xfccretsizdir.
-• İade Politikası: 14 g\xfcn i\xe7inde, ambalajı a\xe7ılmamış ve koruma bandı bozulmamış \xfcr\xfcnlerde koşulsuz iade hakkı.
+• İade Politikası: Mesafeli S\xf6zleşmeler Y\xf6netmeliği Md. 15/\xe7 gereği \xe7abuk bozulabilen veya ambalajı/koruma bandı a\xe7ılmış gıda \xfcr\xfcnlerinde keyfi cayma hakkı kullanılamaz. Ancak kargo sırasında hasar g\xf6ren veya teslim edildikten sonra \xfcr\xfcnde herhangi bir kusur tespit edilen gıda \xfcr\xfcnleri 6502 sayılı Kanun kapsamında \xfccretsiz iade alınır veya değiştirilir.
 • \xd6deme Y\xf6ntemleri: Kredi kartı (taksit se\xe7eneği), Havale/EFT ve kapıda \xf6deme.
 
 [B2B VE TOPTAN BAYİLİK]

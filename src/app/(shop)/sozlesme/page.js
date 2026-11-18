@@ -219,31 +219,31 @@ export default function Sozlesme() {
             </p>
           </section>
 
-          {/* MADDE 7 & 8: CAYMA HAKKI VE İSTİSNALARI */}
+          {/* MADDE 7: CAYMA HAKKI, GIDA İSTİSNALARI VE AYIPLI MAL İADESİ */}
           <section className="bg-surface-container-low/70 dark:bg-slate-900/60 p-6 sm:p-8 rounded-3xl border border-outline-variant/20 shadow-xs space-y-4">
             <div className="flex items-center gap-3 border-b border-outline-variant/15 pb-3">
               <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-black text-sm">
                 7
               </div>
               <h2 className="font-display-lg text-lg sm:text-xl text-primary font-bold">
-                Madde 7 - Cayma Hakkı ve İstisnaları (Gıda &amp; Hijyen Güvenliği)
+                Madde 7 - Cayma Hakkı, Gıda İstisnaları ve Kusurlu Ürün İadesi
               </h2>
             </div>
 
             <p>
-              <strong>7.1. Genel Kural:</strong> Alıcı, hiçbir gerekçe göstermeksizin ve cezai şart ödemeksizin, ürünün kendisine veya gösterdiği adresteki kişiye tesliminden itibaren <strong>14 (on dört) gün</strong> içinde cayma hakkını kullanabilir.
+              <strong>7.1. Genel Cayma Hakkı ve Gıda İstisnası (Yönetmelik Madde 15/ç):</strong> Alıcı, kural olarak ürünün kendisine veya gösterdiği adresteki kişiye tesliminden itibaren <strong>14 (on dört) gün</strong> içinde cayma hakkını kullanabilir. Ancak <em>Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin (ç) bendi</em> uyarınca; çabuk bozulabilen veya son kullanma tarihi geçme ihtimali olan mallar ile tesliminden sonra ambalaj, bant, mühür, paket gibi koruyucu unsurları açılmış olan ve iadesi sağlık ve hijyen açısından uygun olmayan gıda ürünlerinde <strong>sebepsiz (keyfi) cayma hakkı kullanılamaz</strong>.
             </p>
 
-            <div className="p-5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl space-y-2">
-              <span className="text-xs font-black text-rose-700 dark:text-rose-300 uppercase tracking-wider block flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-base">warning</span>
-                7.2. GIDA ÜRÜNLERİNDE CAYMA HAKKI İSTİSNALARI (YÖNETMELİK MADDE 15)
+            <div className="p-5 bg-amber-50 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800 rounded-2xl space-y-2">
+              <span className="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">verified_user</span>
+                7.2. KARGO HASARI VE KUSURLU (AYIPLI) GIDA ÜRÜNLERİNDE İADE HAKKI (6502 SK MD. 8–11)
               </span>
-              <p className="text-xs sm:text-sm text-rose-900 dark:text-rose-200 leading-relaxed font-medium">
-                Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin (ç) bendi uyarınca: <em>"Çabuk bozulabilen veya son kullanma tarihi geçme ihtimali olan malların teslimine ilişkin sözleşmeler"</em> ile <em>"Tesliminden sonra ambalaj, bant, mühür, paket gibi koruyucu unsurları açılmış olan ve iadesi sağlık ve hijyen açısından uygun olmayan gıda ürünleri"</em> cayma hakkı kapsamı <strong>dışındadır</strong>.
+              <p className="text-xs sm:text-sm text-amber-950 dark:text-amber-100 leading-relaxed font-medium">
+                Gıda ürünlerinde sebepsiz cayma hakkı istisnası bulunmakla birlikte; <strong>kargo taşıması sırasında hasar gören</strong> (kırılma, sızıntı, ezilme, ambalaj yırtılması) veya <strong>teslim edildikten sonra üründe üretim/kalite kaynaklı herhangi bir kusur (bozulma, vakum kaçağı, küflenme, son kullanma tarihi sorunu, hatalı/eksik ürün)</strong> tespit edilen tüm gıda ürünleri <strong>6502 sayılı Tüketicinin Korunması Hakkında Kanun kapsamında iade alınır</strong>.
               </p>
-              <p className="text-xs sm:text-sm text-rose-900 dark:text-rose-200 leading-relaxed font-medium pt-1">
-                Bu doğrultuda; vakumlu ambalajı açılmış, koruyucu güvenlik kilidi bozulmuş veya ısı zinciri kesintiye uğramış pestil, köme ve pekmez türevi doğal gıda ürünlerinde cayma hakkı kullanılamaz.
+              <p className="text-xs sm:text-sm text-amber-950 dark:text-amber-100 leading-relaxed font-medium pt-1">
+                Bu durumda Alıcı; sözleşmeden dönerek ödediği bedelin eksiksiz iadesini talep etme veya ayıpsız misli ile ücretsiz değiştirilmesini isteme hakkına sahiptir. Kusurlu veya kargoda hasarlı ürünlerin iade kargo bedeli tamamen Satıcı'ya aittir.
               </p>
             </div>
           </section>
@@ -259,7 +259,7 @@ export default function Sozlesme() {
               </h2>
             </div>
             <p>
-              Üretim hatası, bozulma, vakum kaçağı veya sevkiyat kaynaklı hasar barındıran ayıplı ürünlerde Alıcı, teslimat tarihinden itibaren <strong>48 saat içerisinde</strong> durumu Satıcı'nın <strong>{settings.whatsapp || settings.phone || "+90 534 270 91 40"}</strong> numaralı WhatsApp hattına veya <strong>{settings.email || "info@pekefe.com"}</strong> adresine fotoğraflı olarak iletmelidir. Haklı görülen ayıplı mal bildirimlerinde ürün bedeli derhal iade edilir veya Alıcı'ya ücretsiz olarak yeni mahsul sevk edilir.
+              Kargo sırasında hasar görmüş veya teslim sonrasında kusur tespit edilen ürünlerde sürecin hızlı sonuçlandırılması için Alıcı'nın durumu (mümkünse teslimattan itibaren <strong>48 saat içerisinde</strong>) ürün fotoğrafı ile birlikte Satıcı'nın <strong>{settings.whatsapp || settings.phone || "+90 544 149 48 51"}</strong> numaralı WhatsApp hattına veya <strong>{settings.email || "info@pekefe.com"}</strong> adresine iletmesi önerilir. 6502 sayılı Kanun kapsamındaki ayıplı mal bildirim ve iade hakları saklı olup, inceleme sonrasında ürün bedeli derhal iade edilir veya Alıcı'ya ücretsiz olarak yeni ürün sevk edilir.
             </p>
           </section>
 

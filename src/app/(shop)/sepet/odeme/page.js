@@ -1434,7 +1434,7 @@ export default function Odeme() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-base">assignment_return</span>
-                <span>{siteSettings?.companyDefaultReturnDays ?? 14} gün içinde koşulsuz ücretsiz iade garantisi.</span>
+                <span>Kusurlu veya kargoda hasarlı ürünlerde {siteSettings?.companyDefaultReturnDays ?? 14} gün içinde ücretsiz iade ve değişim garantisi.</span>
               </div>
             </div>
           </div>

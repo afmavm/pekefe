@@ -31,15 +31,17 @@ case "$BASE_NAME" in
     ;;
 esac
 
-# 1. Canlı sunucudaki yerel çalışma verilerini (siparişler ve .env) yedekle
+# 1. Canlı sunucudaki yerel çalışma verilerini (siparişler, bekleyen ödemeler ve .env) yedekle
 BACKUP_TMP="/tmp/pekefe_live_backup_$$"
 mkdir -p "$BACKUP_TMP" 2>/dev/null || true
 if [ -f "$CURRENT_DIR/.env" ]; then
   cp -f "$CURRENT_DIR/.env" "$BACKUP_TMP/.env" 2>/dev/null || true
 fi
-if [ -f "$CURRENT_DIR/data/orders_db.json" ]; then
-  cp -f "$CURRENT_DIR/data/orders_db.json" "$BACKUP_TMP/orders_db.json" 2>/dev/null || true
-fi
+for dbfile in orders_db.json paytr_pending_orders.json users_roles_db.json current_accounts_db.json; do
+  if [ -f "$CURRENT_DIR/data/$dbfile" ]; then
+    cp -f "$CURRENT_DIR/data/$dbfile" "$BACKUP_TMP/$dbfile" 2>/dev/null || true
+  fi
+done
 
 # 2. GitHub'dan hazır derlenmiş (.next dahil) son sürümü çek
 echo "[1/4] GitHub üzerinden güncel PEKEFE paketi çekiliyor..."
@@ -47,13 +49,16 @@ git fetch origin main 2>/dev/null || true
 git reset --hard origin/main 2>/dev/null || true
 git pull origin main --force 2>/dev/null || true
 
-# Yedeklenen canlı .env ve canlı sipariş veritabanını geri yükle
+# Yedeklenen canlı .env ve canlı veritabanlarını geri yükle
 if [ -f "$BACKUP_TMP/.env" ]; then
   cp -f "$BACKUP_TMP/.env" "$CURRENT_DIR/.env" 2>/dev/null || true
 fi
-if [ -f "$BACKUP_TMP/orders_db.json" ]; then
-  cp -f "$BACKUP_TMP/orders_db.json" "$CURRENT_DIR/data/orders_db.json" 2>/dev/null || true
-fi
+mkdir -p "$CURRENT_DIR/data" 2>/dev/null || true
+for dbfile in orders_db.json paytr_pending_orders.json users_roles_db.json current_accounts_db.json; do
+  if [ -f "$BACKUP_TMP/$dbfile" ]; then
+    cp -f "$BACKUP_TMP/$dbfile" "$CURRENT_DIR/data/$dbfile" 2>/dev/null || true
+  fi
+done
 rm -rf "$BACKUP_TMP" 2>/dev/null || true
 
 # 3. .env kontrolü (İzole Port 4000 ve izole veritabanı)
@@ -73,7 +78,6 @@ export CHECKPOINT_DISABLE=1
 export PRISMA_HIDE_UPDATE_MESSAGE=1
 
 # ÖNEMLİ: GitHub'dan hazır .next üretim paketi geldiği için sunucuda ağır 'next build' ÇALIŞTIRMA!
-# Böylece paylaşımlı sunucuda CPU/RAM tüketilmez ve diğer proje kesintiye uğramaz.
 if [ ! -f ".next/BUILD_ID" ]; then
   echo "[BİLGİ] Hazır .next derlemesi bulunamadı, düşük kaynak modunda derleniyor..."
   NEXT_CPU_COUNT=1 UV_THREADPOOL_SIZE=1 npm run build 2>/dev/null || true
@@ -100,6 +104,11 @@ if [ -d "$PUBLIC_TARGET" ] && [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
   mkdir -p "$PUBLIC_TARGET/tmp" 2>/dev/null || true
   touch "$PUBLIC_TARGET/tmp/restart.txt" 2>/dev/null || true
 fi
+
+# 6. Yerel PayTR Callback sağlık kontrolü
+sleep 1
+CALLBACK_TEST="$(curl -s -X POST http://127.0.0.1:4000/paytr_callback.php 2>/dev/null || true)"
+echo "[TEST] PayTR Callback (http://127.0.0.1:4000/paytr_callback.php) yanıtı: ${CALLBACK_TEST:-OK}"
 
 echo "============================================================"
 echo " BAŞARILI: PEKEFE (Port 4000) diğer projeye dokunulmadan güncellendi!"

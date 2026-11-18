@@ -322,6 +322,20 @@ self.__SERVER_FILES_MANIFEST={
       "root": "C:\\Users\\ETicaret"
     },
     "distDirRoot": ".next",
+    "_originalRewrites": {
+      "beforeFiles": [],
+      "afterFiles": [
+        {
+          "source": "/paytr_callback.php",
+          "destination": "/api/webhooks/paytr"
+        },
+        {
+          "source": "/callback.php",
+          "destination": "/api/webhooks/paytr"
+        }
+      ],
+      "fallback": []
+    },
     "_originalRedirects": [
       {
         "source": "/admin/products",

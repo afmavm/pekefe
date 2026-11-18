@@ -2171,6 +2171,24 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/callback.php/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/callback.php">> = Specific
+  const handler = {} as typeof import("../../src/app/callback.php/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/paytr_callback.php/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/paytr_callback.php">> = Specific
+  const handler = {} as typeof import("../../src/app/paytr_callback.php/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 
 
 

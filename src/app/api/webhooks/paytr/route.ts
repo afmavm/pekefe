@@ -1,189 +1,273 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { validatePayTRCallback, getPayTRCredentials } from '@/lib/paytr';
+import { prisma, withTimeout } from '@/lib/prisma';
+import { validatePayTRCallback } from '@/lib/paytr';
 import { emailNotificationService } from '@/lib/email-notification-service';
 import { WhatsAppNotificationService } from '@/lib/whatsapp-service';
+import { readLocalOrders, saveLocalOrder, updateLocalOrderStatus } from '@/lib/jsonOrderDb';
+import { deductLocalProductStock } from '@/lib/jsonProductDb';
+import fs from 'fs';
+import path from 'path';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+const PENDING_PAYTR_PATH = path.join(process.cwd(), 'data', 'paytr_pending_orders.json');
+
+function getPendingPayTROrder(merchantOid: string, baseOrderId: string) {
+  try {
+    if (!fs.existsSync(PENDING_PAYTR_PATH)) return null;
+    const list = JSON.parse(fs.readFileSync(PENDING_PAYTR_PATH, 'utf-8'));
+    if (!Array.isArray(list)) return null;
+    return (
+      list.find(
+        (x: any) =>
+          x.merchantOid === merchantOid ||
+          x.orderId === baseOrderId ||
+          x.orderId === merchantOid
+      ) || null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function okResponse() {
   return new NextResponse('OK', {
     status: 200,
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }
 
+export async function GET() {
+  return okResponse();
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const textData = await request.text();
-    const params = new URLSearchParams(textData);
+    const contentType = request.headers.get('content-type') || '';
     const postData: Record<string, string> = {};
 
-    params.forEach((value, key) => {
-      postData[key] = value;
-    });
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      formData.forEach((value, key) => {
+        postData[key] = String(value);
+      });
+    } else {
+      const textData = await request.text();
+      if (textData.trim().startsWith('{')) {
+        try {
+          const json = JSON.parse(textData);
+          Object.keys(json).forEach((k) => {
+            postData[k] = String(json[k]);
+          });
+        } catch {}
+      } else {
+        const params = new URLSearchParams(textData);
+        params.forEach((value, key) => {
+          postData[key] = value;
+        });
+      }
+    }
 
     console.log('[PAYTR WEBHOOK NOTIFICATION RECEIVED]:', postData);
 
-    // 1. PayTR Test ping / Canlıya geçiş kontrolü (Parametre boş veya test amaçlı ise)
+    // 1. PayTR Test ping / Canlıya geçiş kontrolü
     if (!postData.merchant_oid || !postData.hash) {
-      console.log('[PAYTR PING / HEALTH CHECK RECEIVED] Responding OK.');
-      return new NextResponse('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
+      return okResponse();
     }
 
-    // 2. Hash Doğrulaması (Test ve Canlı Geçişte Her Koşulda OK 200 Yanıtı Garantisi)
+    // 2. Hash Doğrulaması
     const isValid = validatePayTRCallback(postData);
     if (!isValid) {
-      console.warn('[PAYTR WEBHOOK HASH MISMATCH / ACTIVATION CHECK] Responding OK 200 for activation:', postData);
-      return new NextResponse('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
+      console.warn('[PAYTR WEBHOOK HASH MISMATCH] Responding OK 200:', postData);
+      return okResponse();
     }
 
     const merchantOid = postData.merchant_oid || '';
     const baseOrderId = merchantOid.includes('T') ? merchantOid.split('T')[0] : merchantOid;
     const status = postData.status; // 'success' or 'failed'
-    const failedReason = postData.failed_reason_msg || 'Ödeme başarısız.';
+    const paidTotalTl = Number(postData.total_amount || 0) / 100;
 
-    let order: any = null;
-    try {
-      order = await prisma.order.findFirst({
-        where: { 
-          OR: [
-            { id: merchantOid },
-            { id: baseOrderId }
-          ]
+    // 3. Siparişi veritabanında veya bekleyen siparişlerde bul
+    let order: any = await withTimeout(
+      prisma.order.findFirst({
+        where: {
+          OR: [{ id: merchantOid }, { id: baseOrderId }],
         },
         include: { currentAccount: true },
-      });
-    } catch (e) {
-      console.warn('[PAYTR WEBHOOK DB WARN] Prisma error:', e);
-    }
+      }),
+      2500,
+      null
+    );
 
-    if (!order) {
-      console.log(`[PAYTR WEBHOOK] Test or local order processed: ${merchantOid}`);
-      return new NextResponse('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
-    }
+    const pendingOrder = getPendingPayTROrder(merchantOid, baseOrderId);
 
     if (status === 'success') {
-      // Mark order as PAID / Yeni
+      const finalOrderId = order?.id || pendingOrder?.orderId || baseOrderId || merchantOid;
+      const customerName = order?.currentAccount?.name || pendingOrder?.name || 'PayTR Müşterisi';
+      const customerEmail = order?.currentAccount?.email || pendingOrder?.email || 'info@pekefe.com';
+      const customerPhone = order?.currentAccount?.phone || pendingOrder?.phone || '';
+      const customerAddress = order?.currentAccount?.address || pendingOrder?.address || 'Türkiye';
+      const orderTotal = Number(order?.total || pendingOrder?.total || paidTotalTl || 1);
+      const orderSummary =
+        order?.summary ||
+        pendingOrder?.summary ||
+        `PayTR 3D Secure Ödemeli Sipariş (${orderTotal.toLocaleString('tr-TR')} TL)`;
+
+      // Yerel JSON sipariş veritabanına kaydet / güncelle
       try {
-        await prisma.order.update({
-          where: { id: merchantOid },
-          data: {
+        const localOrders = readLocalOrders();
+        const existingLocal = localOrders.find(
+          (o) => o.id === finalOrderId || o.id === merchantOid || o.id === baseOrderId
+        );
+        if (existingLocal) {
+          updateLocalOrderStatus(existingLocal.id, {
             status: 'Yeni',
             method: `PayTR Kredi Kartı (${postData.payment_type || '3D Secure'})`,
-          },
-        });
-      } catch (e) {}
-
-      // Create financial transaction in ERP
-      if (order.currentAccountId) {
-        try {
-          await prisma.transaction.create({
-            data: {
-              currentAccountId: order.currentAccountId,
-              type: 'Satış Faturası',
-              amount: order.total,
-              description: `${order.id} nolu sipariş PayTR 3D Secure ödemesi başarıyla alındı.`,
-              paymentMethod: 'Kredi Kartı',
-            },
           });
-        } catch (e) {}
+        } else {
+          saveLocalOrder({
+            id: finalOrderId,
+            orderNumber: finalOrderId,
+            client: customerName,
+            customerName,
+            email: customerEmail,
+            phone: customerPhone,
+            address: customerAddress,
+            date: new Date().toISOString(),
+            status: 'Yeni',
+            amount: orderTotal,
+            total: orderTotal,
+            shippingFee: Number(pendingOrder?.shippingFee || 0),
+            type: 'B2C',
+            method: `PayTR Kredi Kartı (${postData.payment_type || '3D Secure'})`,
+            summary: orderSummary,
+            cargoCompany: pendingOrder?.cargoCompany || 'Kargo',
+            items: Array.isArray(pendingOrder?.items) ? pendingOrder.items : [],
+          });
 
-        // Add Loyalty Points
-        const earnedLoyaltyPoints = Math.floor(Number(order.total));
-        if (earnedLoyaltyPoints > 0) {
-          try {
-            await prisma.currentAccount.update({
-              where: { id: order.currentAccountId },
-              data: {
-                loyaltyPoints: { increment: earnedLoyaltyPoints },
-              },
+          if (Array.isArray(pendingOrder?.items)) {
+            pendingOrder.items.forEach((item: any) => {
+              deductLocalProductStock(item.id || item.productId, item.quantity || 1);
             });
-          } catch (e) {}
+          }
         }
+      } catch (localErr) {
+        console.warn('[PAYTR LOCAL ORDER SAVE WARN]:', localErr);
       }
 
-      // Add Admin Notification
+      // Prisma MySQL veritabanına kaydet / güncelle (zaman aşımlı, bloklamayan)
       try {
-        const notifId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-        const notifTitle = `${order.currentAccount?.name || 'Müşteri'} cari hesabından PayTR ödemeli yeni sipariş.`;
-        const notifMsg = `${order.currentAccount?.name || 'Müşteri'} tarafından PayTR ile ₺${Number(order.total).toLocaleString('tr-TR')} tutarında ödeme yapıldı. Sipariş No: ${order.id}`;
+        if (order) {
+          await withTimeout(
+            prisma.order.update({
+              where: { id: order.id },
+              data: {
+                status: 'Yeni',
+                method: `PayTR Kredi Kartı (${postData.payment_type || '3D Secure'})`,
+              },
+            }),
+            2500,
+            null
+          );
+        } else {
+          let account: any = await withTimeout(
+            prisma.currentAccount.findFirst({
+              where: { email: customerEmail },
+            }),
+            2000,
+            null
+          );
 
-        await prisma.$executeRawUnsafe(
-          `INSERT INTO admin_notifications (id, title, message, type, isRead, createdAt, orderId) 
-           VALUES (?, ?, ?, 'ORDER', 0, ?, ?)`,
-          notifId,
-          notifTitle,
-          notifMsg,
-          new Date().toISOString(),
-          order.id
-        );
-      } catch (err) {}
+          if (!account) {
+            account = await withTimeout(
+              prisma.currentAccount.create({
+                data: {
+                  name: customerName,
+                  email: customerEmail,
+                  phone: customerPhone,
+                  address: customerAddress,
+                  type: 'B2C',
+                  cariTipi: 'INDIVIDUAL',
+                },
+              }),
+              2000,
+              null
+            );
+          }
 
-      // Send Email Notification
-      if (order.currentAccount?.email) {
-        try {
-          const orderDateStr = new Date().toLocaleDateString("tr-TR", {
-            day: "2-digit", month: "long", year: "numeric",
-            hour: "2-digit", minute: "2-digit"
-          });
-          await emailNotificationService.queueEmail(order.currentAccount.email, "order_received", {
-            kullanici_adi: order.currentAccount.name,
-            siparis_no: order.id,
-            siparis_tutari: Number(order.total).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            siparis_icerik: order.summary || 'Sipariş Ürünleri',
-            odeme_yontemi: 'PayTR 3D Secure Kredi Kartı',
-            kargo_adresi: order.currentAccount.address || 'Teslimat Adresi',
-            kargo_sirketi: 'Kargo',
-            tarih: orderDateStr,
-            detay_linki: 'https://www.pekefe.com/hesap'
-          });
-        } catch (emailErr) {}
+          if (account?.id) {
+            order = await withTimeout(
+              prisma.order.create({
+                data: {
+                  id: finalOrderId,
+                  currentAccountId: account.id,
+                  total: orderTotal,
+                  shippingFee: Number(pendingOrder?.shippingFee || 0),
+                  status: 'Yeni',
+                  summary: orderSummary,
+                  type: 'B2C',
+                  method: `PayTR Kredi Kartı (${postData.payment_type || '3D Secure'})`,
+                },
+              }),
+              2500,
+              null
+            );
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[PAYTR PRISMA SYNC WARN]:', dbErr);
       }
 
-      // Send WhatsApp Notification
-      if (order.currentAccount?.phone) {
-        try {
-          const msg = `Sayın ${order.currentAccount.name}, #${order.id} nolu Pekefe siparişinizin PayTR ödemesi (₺${Number(order.total).toLocaleString('tr-TR')}) başarıyla alındı. Teşekkür ederiz!`;
-          await WhatsAppNotificationService.sendWhatsApp(order.currentAccount.phone, msg);
-        } catch (waErr) {}
-      }
-
-      console.log(`[PAYTR SUCCESS] Order ${merchantOid} processed successfully.`);
-      return new NextResponse('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
-    } else {
-      // Mark order as FAILED
-      try {
-        await prisma.order.update({
-          where: { id: merchantOid },
-          data: {
-            status: 'İptal / Başarısız',
-          },
+      // E-posta ve WhatsApp bildirimlerini arka planda (non-blocking) tetikle
+      if (customerEmail) {
+        const orderDateStr = new Date().toLocaleDateString('tr-TR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
         });
-      } catch (e) {}
+        emailNotificationService
+          .queueEmail(customerEmail, 'order_received', {
+            kullanici_adi: customerName,
+            siparis_no: finalOrderId,
+            siparis_tutari: orderTotal.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+            siparis_icerik: orderSummary,
+            odeme_yontemi: 'PayTR 3D Secure Kredi Kartı',
+            kargo_adresi: customerAddress,
+            kargo_sirketi: pendingOrder?.cargoCompany || 'Kargo',
+            tarih: orderDateStr,
+            detay_linki: 'https://www.pekefe.com/hesap',
+          })
+          .catch(() => {});
+      }
 
-      console.warn(`[PAYTR FAILED] Order ${merchantOid} payment failed: ${failedReason}`);
-      return new NextResponse('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
+      if (customerPhone) {
+        const msg = `Sayın ${customerName}, #${finalOrderId} nolu Pekefe siparişinizin PayTR ödemesi (₺${orderTotal.toLocaleString('tr-TR')}) başarıyla alındı. Teşekkür ederiz!`;
+        WhatsAppNotificationService.sendWhatsApp(customerPhone, msg).catch(() => {});
+      }
+
+      console.log(`[PAYTR SUCCESS] Order ${finalOrderId} (${merchantOid}) confirmed.`);
+      return okResponse();
+    } else {
+      // Başarısız ödeme bildirimi
+      if (order?.id) {
+        await withTimeout(
+          prisma.order.update({
+            where: { id: order.id },
+            data: { status: 'İptal / Başarısız' },
+          }),
+          2000,
+          null
+        );
+      }
+      return okResponse();
     }
   } catch (error: any) {
     console.error('[PAYTR WEBHOOK EXCEPTION]:', error);
-    return new NextResponse('OK', {
-      status: 200,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
+    return okResponse();
   }
 }
-

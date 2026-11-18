@@ -117,6 +117,18 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/paytr_callback.php",
+        destination: "/api/webhooks/paytr",
+      },
+      {
+        source: "/callback.php",
+        destination: "/api/webhooks/paytr",
+      },
+    ];
+  },
   async headers() {
     return [
       {

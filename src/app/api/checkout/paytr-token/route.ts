@@ -3,9 +3,34 @@ import { prisma } from '@/lib/prisma';
 import { createPayTRToken } from '@/lib/paytr';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { withRateLimit } from '@/lib/rate-limit';
-import { saveLocalOrder } from '@/lib/jsonOrderDb';
-import { readLocalProducts, deductLocalProductStock } from '@/lib/jsonProductDb';
-import { emailNotificationService } from '@/lib/email-notification-service';
+import { readLocalProducts } from '@/lib/jsonProductDb';
+import fs from 'fs';
+import path from 'path';
+
+const PENDING_PAYTR_PATH = path.join(process.cwd(), 'data', 'paytr_pending_orders.json');
+
+function savePendingPayTROrder(record: any) {
+  try {
+    const dir = path.dirname(PENDING_PAYTR_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    let list: any[] = [];
+    if (fs.existsSync(PENDING_PAYTR_PATH)) {
+      try {
+        list = JSON.parse(fs.readFileSync(PENDING_PAYTR_PATH, 'utf-8'));
+        if (!Array.isArray(list)) list = [];
+      } catch {
+        list = [];
+      }
+    }
+    list = list.filter((x) => x.merchantOid !== record.merchantOid && x.orderId !== record.orderId);
+    list.unshift(record);
+    // Keep last 200 pending attempts
+    if (list.length > 200) list = list.slice(0, 200);
+    fs.writeFileSync(PENDING_PAYTR_PATH, JSON.stringify(list, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('[PAYTR PENDING SAVE WARN]:', e);
+  }
+}
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, 'apiLimit');
@@ -158,6 +183,27 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    const orderSummary =
+      `${selectedCarrierName ? `[${selectedCarrierName}] ` : ''}` +
+      cart.map((item: any) => `${item.name} (${item.quantity})`).join(', ');
+
+    savePendingPayTROrder({
+      merchantOid: paytrMerchantOid,
+      orderId: customOrderId,
+      name: cleanUserName,
+      email: customerEmail,
+      phone: cleanPhone,
+      address: cleanUserAddress,
+      city,
+      district: district || '',
+      total: correctedPaymentAmount,
+      shippingFee: Number(shippingFee),
+      cargoCompany: selectedCarrierName || 'Kargo',
+      summary: orderSummary,
+      items: cart,
+      createdAt: new Date().toISOString(),
+    });
 
     return NextResponse.json({
       success: true,

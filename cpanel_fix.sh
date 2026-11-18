@@ -11,14 +11,12 @@ is_safe_pekefe_dir() {
   if [ -z "$target_dir" ]; then
     return 1
   fi
-  # Explicitly block root public_html or home root where the sibling project lives
   case "$target_dir" in
     "/home/ata3a6icilikcom"|"/home/ata3a6icilikcom/"|"/home/ata3a6icilikcom/public_html"|"/home/ata3a6icilikcom/public_html/")
       echo "[GUARD] Engellendi: Ana dizin ($target_dir) diğer projeye ait olduğu için dokunulmadı."
       return 1
       ;;
   esac
-  # Only allow paths whose basename contains 'pekefe'
   local base_name
   base_name="$(basename "$target_dir")"
   case "$base_name" in
@@ -39,30 +37,35 @@ generate_htaccess() {
   fi
 
   mkdir -p "$dir" 2>/dev/null || true
+  chmod 755 "$dir" 2>/dev/null || true
+
+  # Remove any stale standalone .php files so Apache/LiteSpeed never invokes suPHP (which throws 500)
+  # and instead proxies /paytr_callback.php directly to Next.js Port 4000
+  rm -f "$dir/paytr_callback.php" "$dir/callback.php" "$dir/public/paytr_callback.php" "$dir/public/callback.php" 2>/dev/null || true
+
   cat <<'EOT' > "$dir/.htaccess"
 # PEKEFE PM2 Reverse Proxy Routing (Port 4000 - Isolated from sibling projects)
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Force HTTPS for mobile apps & webviews
+    # 1. PayTR Callback / Webhook bildirimlerini HTTPS yönlendirmesine veya suPHP'ye takılmadan doğrudan Port 4000 Webhook API'sine ilet
+    RewriteRule ^(paytr_callback\.php|callback\.php|api/webhooks/paytr|api/paytr/callback|api/checkout/callback|api/payment/callback)/?$ http://127.0.0.1:4000/api/webhooks/paytr [P,L]
+
+    # 2. Force HTTPS for browser & mobile webviews
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # Skip proxy ONLY for actual static files (images, css, js, fonts, php callbacks)
+    # 3. Skip proxy ONLY for actual static asset files (NEVER skip .php so suPHP 500 error cannot occur)
     RewriteCond %{REQUEST_FILENAME} -f
-    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js|json|xml|txt|ttf|eot|php)$ [NC]
+    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|css|js|json|xml|txt|ttf|eot)$ [NC]
     RewriteRule ^ - [L]
 
-    # Proxy ALL page requests (including root / homepage) to PM2 Node.js process (pekefe-app) on Port 4000
+    # 4. Proxy ALL page and API requests to PM2 Node.js process (pekefe-app) on Port 4000
     RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Pass real client IP to PM2 Node.js process for PayTR iframe validation
-    RequestHeader set X-Real-IP "%{REMOTE_ADDR}s"
-    RequestHeader set X-Forwarded-For "%{REMOTE_ADDR}s"
-
-    # Allow CORS for mobile app WebViews
+    # Allow CORS for mobile app WebViews and PayTR callbacks
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
     Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
@@ -72,6 +75,7 @@ generate_htaccess() {
     </FilesMatch>
 </IfModule>
 EOT
+  chmod 644 "$dir/.htaccess" 2>/dev/null || true
   echo "[SUCCESS] İzole .htaccess oluşturuldu: $dir/.htaccess"
 }
 
@@ -79,4 +83,4 @@ generate_htaccess "$CURRENT_DIR"
 if [ -d "$PUBLIC_TARGET" ] && [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
   generate_htaccess "$PUBLIC_TARGET"
 fi
-echo "[SUCCESS] PM2 Reverse Proxy .htaccess diğer projelere dokunulmadan güvenle yapılandırıldı!"
+echo "[SUCCESS] PM2 Reverse Proxy .htaccess ve PayTR Callback yönlendirmesi güvenle yapılandırıldı!"

@@ -131,7 +131,18 @@
   "onMatchHeaders": [],
   "rewrites": {
     "beforeFiles": [],
-    "afterFiles": [],
+    "afterFiles": [
+      {
+        "source": "/paytr_callback.php",
+        "destination": "/api/webhooks/paytr",
+        "regex": "^/paytr_callback\\.php(?:/)?$"
+      },
+      {
+        "source": "/callback.php",
+        "destination": "/api/webhooks/paytr",
+        "regex": "^/callback\\.php(?:/)?$"
+      }
+    ],
     "fallback": []
   },
   "dynamicRoutes": [
@@ -1672,6 +1683,12 @@
       "namedRegex": "^/blog/pekmezli\\-kurabiye(?:/)?$"
     },
     {
+      "page": "/callback.php",
+      "regex": "^/callback\\.php(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/callback\\.php(?:/)?$"
+    },
+    {
       "page": "/favicon.ico",
       "regex": "^/favicon\\.ico(?:/)?$",
       "routeKeys": {},
@@ -1754,6 +1771,12 @@
       "regex": "^/mensei\\-dogrulama(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/mensei\\-dogrulama(?:/)?$"
+    },
+    {
+      "page": "/paytr_callback.php",
+      "regex": "^/paytr_callback\\.php(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/paytr_callback\\.php(?:/)?$"
     },
     {
       "page": "/rekolte-kulubu",

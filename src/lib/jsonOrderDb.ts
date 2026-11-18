@@ -56,10 +56,20 @@ export function readLocalOrders(): LocalOrder[] {
   return [];
 }
 
+function normalizeOrderKey(val?: string): string {
+  return String(val || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+}
+
 export function saveLocalOrder(order: LocalOrder): LocalOrder {
   try {
     const orders = readLocalOrders();
-    const existingIndex = orders.findIndex((o) => o.id === order.id || (o.orderNumber && order.orderNumber && o.orderNumber === order.orderNumber));
+    const targetNorm = normalizeOrderKey(order.id || order.orderNumber);
+    const existingIndex = orders.findIndex(
+      (o) =>
+        o.id === order.id ||
+        (o.orderNumber && order.orderNumber && o.orderNumber === order.orderNumber) ||
+        (targetNorm && (normalizeOrderKey(o.id) === targetNorm || normalizeOrderKey(o.orderNumber) === targetNorm))
+    );
     
     const formattedOrder: LocalOrder = {
       ...order,
@@ -89,7 +99,13 @@ export function saveLocalOrder(order: LocalOrder): LocalOrder {
 export function updateLocalOrderStatus(id: string, updates: Partial<LocalOrder>): LocalOrder | null {
   try {
     const orders = readLocalOrders();
-    const idx = orders.findIndex((o) => o.id === id || o.orderNumber === id);
+    const targetNorm = normalizeOrderKey(id);
+    const idx = orders.findIndex(
+      (o) =>
+        o.id === id ||
+        o.orderNumber === id ||
+        (targetNorm && (normalizeOrderKey(o.id) === targetNorm || normalizeOrderKey(o.orderNumber) === targetNorm))
+    );
     if (idx >= 0) {
       orders[idx] = { ...orders[idx], ...updates };
       fs.writeFileSync(LOCAL_ORDERS_PATH, JSON.stringify(orders, null, 2), 'utf-8');

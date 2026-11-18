@@ -82,7 +82,13 @@ export const GET = withAuth<any>(
             id: existing?.id || lo.id,
             total: lo.amount ?? lo.total ?? existing?.total ?? 0,
             shippingFee: lo.shippingFee ?? existing?.shippingFee ?? 0,
-            status: lo.status || existing?.status || 'Yeni',
+            status: (() => {
+              const exStatus = String(existing?.status || '');
+              const loStatus = String(lo.status || '');
+              if (/iptal|iade/i.test(exStatus)) return exStatus;
+              if (/iptal|iade/i.test(loStatus)) return loStatus;
+              return lo.status || existing?.status || 'Yeni';
+            })(),
             summary: lo.summary || existing?.summary || '',
             type: lo.type || existing?.type || 'B2C',
             method: lo.method || existing?.method || 'Belirtilmedi',

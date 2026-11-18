@@ -105,15 +105,34 @@ export async function cancelOrderAction(orderId: string, reason?: string) {
     let updatedOrder: any = null;
 
     try {
-      const existingOrder = await prisma.order.findUnique({
-        where: { id: orderId },
-        include: { currentAccount: true }
-      });
+      let existingOrder = await withTimeout(
+        prisma.order.findUnique({
+          where: { id: orderId },
+          include: { currentAccount: true }
+        }),
+        2000,
+        null
+      );
+
+      if (!existingOrder) {
+        const dashless = orderId.replace(/[^a-zA-Z0-9]/g, "");
+        if (dashless && dashless !== orderId) {
+          existingOrder = await withTimeout(
+            prisma.order.findUnique({
+              where: { id: dashless },
+              include: { currentAccount: true }
+            }),
+            2000,
+            null
+          );
+        }
+      }
 
       if (existingOrder) {
+        const dbOrderId = existingOrder.id;
         updatedOrder = await prisma.$transaction(async (tx) => {
           const order = await tx.order.update({
-            where: { id: orderId },
+            where: { id: dbOrderId },
             data: { status: "İptal Edildi" }
           });
 
@@ -127,7 +146,7 @@ export async function cancelOrderAction(orderId: string, reason?: string) {
                   currentAccountId: existingOrder.currentAccountId,
                   type: "IPTAL",
                   amount: -reverseAmount,
-                  description: `Sipariş İptali: #${orderId}${reason ? ` (${reason})` : ""}`,
+                  description: `Sipariş İptali: #${dbOrderId}${reason ? ` (${reason})` : ""}`,
                   paymentMethod: existingOrder.method || "Belirtilmedi",
                   date: new Date(),
                 }

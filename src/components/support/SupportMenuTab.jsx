@@ -9,7 +9,7 @@ import { MessageCircle, MessageSquare, Bot, Ticket, HelpCircle } from "lucide-re
  * Complies with AGENTS.md design tokens and max 400 lines rule.
  */
 export function SupportMenuTab({
-  whatsappUrl,
+  onWhatsAppClick,
   onLiveChatClick,
   onAiAssistantClick,
   onTicketClick,
@@ -18,11 +18,10 @@ export function SupportMenuTab({
   return (
     <div className="p-4 space-y-3 overflow-y-auto max-h-[420px] custom-scrollbar bg-transparent">
       {/* 1. WhatsApp Destek */}
-      <a
-        href={whatsappUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="flex items-center gap-3.5 p-3.5 bg-surface-container-low hover:bg-surface-container border border-outline-variant/20 hover:border-emerald-500/40 rounded-2xl group transition-all cursor-pointer shadow-sm"
+      <button
+        type="button"
+        onClick={onWhatsAppClick}
+        className="w-full flex items-center gap-3.5 p-3.5 bg-surface-container-low hover:bg-surface-container border border-outline-variant/20 hover:border-emerald-500/40 rounded-2xl group transition-all text-left cursor-pointer shadow-sm"
       >
         <div className="w-11 h-11 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shrink-0 border border-emerald-500/20">
           <MessageCircle className="w-5 h-5" />
@@ -31,9 +30,9 @@ export function SupportMenuTab({
           <h4 className="font-bold text-on-surface text-sm mb-0.5 group-hover:text-emerald-500 transition-colors">
             WhatsApp Destek
           </h4>
-          <p className="text-xs text-on-surface-variant/80 truncate">Hızlı yanıt için bize yazın</p>
+          <p className="text-xs text-on-surface-variant/80 truncate">Hazır mesaj seçin veya bize yazın</p>
         </div>
-      </a>
+      </button>
 
       {/* 2. Canlı Destek */}
       <button

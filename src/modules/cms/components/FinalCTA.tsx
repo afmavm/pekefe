@@ -50,15 +50,20 @@ export default function FinalCTA({ whatsappUrl }: FinalCTAProps) {
             <ShoppingBag className="w-5.5 h-5.5" />
             <span>{t("cta_quick_order")}</span>
           </button>
-          <a 
-            href={whatsappUrl} 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-lg px-8 py-5 rounded-2xl transition-all duration-300 shadow-md hover:shadow-emerald-500/10"
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(
+                  new CustomEvent("pekefe:open-whatsapp", { detail: { whatsappUrl } })
+                );
+              }
+            }}
+            className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-lg px-8 py-5 rounded-2xl transition-all duration-300 shadow-md hover:shadow-emerald-500/10 cursor-pointer"
           >
             <Phone className="w-5.5 h-5.5" />
             <span>{t("cta_whatsapp")}</span>
-          </a>
+          </button>
         </div>
       </div>
     </section>

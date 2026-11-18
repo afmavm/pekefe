@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { MessageCircle, X, Bot, ArrowLeft } from "lucide-react";
 import { getSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 import { SupportMenuTab } from "./support/SupportMenuTab";
 import { SupportChatTab } from "./support/SupportChatTab";
 import { SupportTicketModal } from "./support/SupportTicketModal";
+import { SupportWhatsAppTab } from "./support/SupportWhatsAppTab";
 
 /**
  * SupportWidget Component
@@ -15,16 +16,31 @@ import { SupportTicketModal } from "./support/SupportTicketModal";
  */
 export default function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("menu"); // "menu" | "chatbot"
+  const [activeTab, setActiveTab] = useState("menu"); // "menu" | "chatbot" | "whatsapp"
+  const [customWhatsappUrl, setCustomWhatsappUrl] = useState<string | null>(null);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [settings] = useState(getSettings() || DEFAULT_SETTINGS);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleOpenWhatsapp = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (detail?.whatsappUrl) {
+        setCustomWhatsappUrl(detail.whatsappUrl);
+      }
+      setActiveTab("whatsapp");
+      setIsOpen(true);
+    };
+    window.addEventListener("pekefe:open-whatsapp", handleOpenWhatsapp);
+    return () => window.removeEventListener("pekefe:open-whatsapp", handleOpenWhatsapp);
+  }, []);
 
   // Hide widget on admin routes
   if (pathname?.startsWith("/admin")) return null;
 
   const getWhatsAppLink = () => {
-    const rawNumber = settings.whatsapp || settings.phone || "904425110000";
+    if (customWhatsappUrl) return customWhatsappUrl;
+    const rawNumber = settings.whatsapp || settings.phone || "905441494851";
     if (rawNumber.startsWith("http") || rawNumber.startsWith("wa.me")) {
       return rawNumber.startsWith("http") ? rawNumber : `https://${rawNumber}`;
     }
@@ -34,8 +50,7 @@ export default function SupportWidget() {
   };
 
   const handleLiveChat = () => {
-    window.open(getWhatsAppLink(), "_blank");
-    setIsOpen(false);
+    setActiveTab("whatsapp");
   };
 
   return (
@@ -52,19 +67,33 @@ export default function SupportWidget() {
           <div className="bg-surface-container-highest text-on-surface p-5 flex justify-between items-center shrink-0 border-b border-outline-variant/15">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center border border-secondary/20 shrink-0">
-                {activeTab === "menu" ? <LifeBuoyIcon /> : <Bot className="w-5 h-5" />}
+                {activeTab === "menu" ? (
+                  <LifeBuoyIcon />
+                ) : activeTab === "whatsapp" ? (
+                  <MessageCircle className="w-5 h-5 text-emerald-500" />
+                ) : (
+                  <Bot className="w-5 h-5" />
+                )}
               </div>
               <div>
                 <h3 className="font-extrabold text-sm text-primary tracking-tight">
-                  {activeTab === "menu" ? "Pekefe Destek" : "Akıllı Asistan (AI)"}
+                  {activeTab === "menu"
+                    ? "Pekefe Destek"
+                    : activeTab === "whatsapp"
+                    ? "WhatsApp Hızlı Mesaj"
+                    : "Akıllı Asistan (AI)"}
                 </h3>
                 <p className="text-[11px] text-on-surface-variant font-medium">
-                  {activeTab === "menu" ? "Size nasıl yardımcı olabiliriz?" : "7/24 Yanıtlamaya Hazır"}
+                  {activeTab === "menu"
+                    ? "Size nasıl yardımcı olabiliriz?"
+                    : activeTab === "whatsapp"
+                    ? "Konu seçip anında yazın"
+                    : "7/24 Yanıtlamaya Hazır"}
                 </p>
               </div>
             </div>
 
-            {activeTab === "chatbot" ? (
+            {activeTab !== "menu" ? (
               <button
                 type="button"
                 onClick={() => setActiveTab("menu")}
@@ -87,10 +116,15 @@ export default function SupportWidget() {
           {/* Active Tab Content */}
           {activeTab === "menu" ? (
             <SupportMenuTab
-              whatsappUrl={getWhatsAppLink()}
+              onWhatsAppClick={() => setActiveTab("whatsapp")}
               onLiveChatClick={handleLiveChat}
               onAiAssistantClick={() => setActiveTab("chatbot")}
               onTicketClick={() => setIsTicketModalOpen(true)}
+              onClose={() => setIsOpen(false)}
+            />
+          ) : activeTab === "whatsapp" ? (
+            <SupportWhatsAppTab
+              whatsappBaseUrl={getWhatsAppLink()}
               onClose={() => setIsOpen(false)}
             />
           ) : (

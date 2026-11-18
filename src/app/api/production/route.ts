@@ -2,39 +2,60 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> =>
+  Promise.race([promise, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))]);
+
 export async function GET() {
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response;
 
   try {
-    // Fetch finished goods (mamul) with their BOM
-    const finishedGoods = await prisma.product.findMany({
-      where: { isRawMaterial: false, isDeleted: false },
-      include: {
-        recipe: {
+    const [finishedGoods, rawMaterials, productionHistory] = await Promise.all([
+      withTimeout(
+        prisma.product.findMany({
+          where: { isRawMaterial: false, isDeleted: false },
           include: {
-            ingredient: true
+            recipe: {
+              include: {
+                ingredient: true
+              }
+            }
           }
-        }
-      }
-    });
-
-    // Fetch raw materials (hammadde)
-    const rawMaterials = await prisma.product.findMany({
-      where: { isRawMaterial: true, isDeleted: false }
-    });
-
-    // Fetch recent production orders
-    const productionHistory = await prisma.productionOrder.findMany({
-      orderBy: { date: 'desc' },
-      take: 20
-    });
+        }).catch(() => []),
+        2500,
+        []
+      ),
+      withTimeout(
+        prisma.product.findMany({
+          where: { isRawMaterial: true, isDeleted: false }
+        }).catch(() => []),
+        2500,
+        []
+      ),
+      withTimeout(
+        prisma.productionOrder.findMany({
+          orderBy: { date: 'desc' },
+          take: 20
+        }).catch(() => []),
+        2500,
+        []
+      )
+    ]);
 
     return NextResponse.json({
       finishedGoods,
       rawMaterials,
       productionHistory
-    });
+    }, { headers: NO_CACHE_HEADERS });
 
   } catch (error) {
     console.warn('[API PRODUCTION] Veritabanı erişimi yok, boş üretim verisi döndürülüyor:', error);
@@ -42,7 +63,7 @@ export async function GET() {
       finishedGoods: [],
       rawMaterials: [],
       productionHistory: []
-    });
+    }, { headers: NO_CACHE_HEADERS });
   }
 }
 

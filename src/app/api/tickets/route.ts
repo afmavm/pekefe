@@ -81,16 +81,19 @@ export async function GET(request: Request) {
       whereClause = { email };
     }
 
-    const tickets = await prisma.ticket.findMany({
-      where: whereClause,
-      include: {
-        messages: {
-          orderBy: { createdAt: 'desc' },
-          take: 1
-        }
-      },
-      orderBy: { updatedAt: 'desc' }
-    });
+    const tickets = await Promise.race([
+      prisma.ticket.findMany({
+        where: whereClause,
+        include: {
+          messages: {
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          }
+        },
+        orderBy: { updatedAt: 'desc' }
+      }),
+      new Promise<any[]>((resolve) => setTimeout(() => resolve([]), 2500))
+    ]);
 
     const emails = tickets.map((t) => t.email).filter(Boolean);
     const accounts = emails.length > 0 ? await prisma.currentAccount.findMany({

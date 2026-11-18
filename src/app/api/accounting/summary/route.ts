@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-helpers";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> =>
+  Promise.race([promise, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))]);
+
 export async function GET(req: Request) {
   try {
     const auth = await requireAdmin();
@@ -21,19 +33,28 @@ export async function GET(req: Request) {
     const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
     // Get all sales/income invoices for the year (monthly)
-    const invoices = await prisma.invoice.findMany({
-      where: { 
-        date: { gte: startOfYear, lte: endOfYear }, 
-        type: { in: ["SATIS", "e-Fatura", "e-Arşiv"] } 
-      },
-      select: { date: true, totalAmount: true, status: true },
-    }).catch(() => []);
+    const invoices = await withTimeout(
+      prisma.invoice.findMany({
+        where: { 
+          date: { gte: startOfYear, lte: endOfYear }, 
+          type: { in: ["SATIS", "e-Fatura", "e-Arşiv"] },
+          isDeleted: false
+        },
+        select: { date: true, totalAmount: true, status: true },
+      }).catch(() => []),
+      2500,
+      []
+    );
 
     // Get all expenses for the year (monthly)
-    const expenses = await prisma.expense.findMany({
-      where: { date: { gte: startOfYear, lte: endOfYear } },
-      select: { date: true, amount: true, category: true, status: true },
-    }).catch(() => []);
+    const expenses = await withTimeout(
+      prisma.expense.findMany({
+        where: { date: { gte: startOfYear, lte: endOfYear } },
+        select: { date: true, amount: true, category: true, status: true },
+      }).catch(() => []),
+      2500,
+      []
+    );
 
     const paidStatuses = ["PAID", "Paid", "ODENDI"];
 
@@ -69,18 +90,31 @@ export async function GET(req: Request) {
     const totalExpense = monthlyExpense.reduce((s, m) => s + m.total, 0);
 
     // Pending/overdue counts
-    const pendingInvoices = await prisma.invoice.count({ 
-      where: { 
-        status: { in: ["PENDING", "BEKLIYOR", "BEKLEMEDE", "Draft", "TASLAK", "Sent", "Gönderildi", "Overdue", "UNPAID", "ODENMEDI"] },
-        type: { not: "e-İrsaliye" }
-      } 
-    }).catch(() => 0);
-
-    const overdueTax = await prisma.taxDeclaration.count({
-      where: { status: "BEKLIYOR", dueDate: { lt: new Date() } },
-    }).catch(() => 0);
-
-    const pendingTax = await prisma.taxDeclaration.count({ where: { status: "BEKLIYOR" } }).catch(() => 0);
+    const [pendingInvoices, overdueTax, pendingTax] = await Promise.all([
+      withTimeout(
+        prisma.invoice.count({ 
+          where: { 
+            status: { in: ["PENDING", "BEKLIYOR", "BEKLEMEDE", "Draft", "TASLAK", "Sent", "Gönderildi", "Overdue", "UNPAID", "ODENMEDI"] },
+            type: { not: "e-İrsaliye" },
+            isDeleted: false
+          } 
+        }).catch(() => 0),
+        2000,
+        0
+      ),
+      withTimeout(
+        prisma.taxDeclaration.count({
+          where: { status: "BEKLIYOR", dueDate: { lt: new Date() } },
+        }).catch(() => 0),
+        2000,
+        0
+      ),
+      withTimeout(
+        prisma.taxDeclaration.count({ where: { status: "BEKLIYOR" } }).catch(() => 0),
+        2000,
+        0
+      )
+    ]);
 
     return NextResponse.json({
       totalIncome,
@@ -92,7 +126,7 @@ export async function GET(req: Request) {
       pendingInvoices,
       pendingTax,
       overdueTax,
-    });
+    }, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("Summary error:", error);
     return NextResponse.json({

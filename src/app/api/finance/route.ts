@@ -17,11 +17,14 @@ export const GET = withAuth<any>(
     const rateLimitResponse = await withRateLimit(req, "apiLimit");
     if (rateLimitResponse) return rateLimitResponse;
 
+const withTimeout = <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> =>
+  Promise.race([promise, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))]);
+
     try {
       const [transactions, banks, invoices] = await Promise.all([
-        prisma.transaction.findMany({ orderBy: { date: 'desc' } }),
-        prisma.bank.findMany(),
-        prisma.invoice.findMany({ orderBy: { date: 'desc' } })
+        withTimeout(prisma.transaction.findMany({ orderBy: { date: 'desc' } }), 2500, []),
+        withTimeout(prisma.bank.findMany(), 2500, []),
+        withTimeout(prisma.invoice.findMany({ where: { isDeleted: false }, orderBy: { date: 'desc' } }), 2500, [])
       ]);
       
       return NextResponse.json({ 
@@ -41,7 +44,7 @@ export const GET = withAuth<any>(
       }, { headers: NO_CACHE_HEADERS });
     } catch (error) {
       console.error('Error fetching finance data:', error);
-      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+      return NextResponse.json({ transactions: [], banks: [], invoices: [] }, { headers: NO_CACHE_HEADERS });
     }
   },
   { role: 'ADMIN', requireApproved: true }

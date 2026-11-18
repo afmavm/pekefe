@@ -2,21 +2,28 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, fallback: T): Promise<T> =>
+  Promise.race([promise, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))]);
+
 export async function GET(request: Request) {
   try {
     const auth = await requireAdmin();
     if (!auth.authorized) return auth.response;
 
-    const integrations = await prisma.integration.findMany();
-    return NextResponse.json(integrations);
+    const integrations = await withTimeout(prisma.integration.findMany(), 2500, []);
+    return NextResponse.json(integrations, { headers: NO_CACHE_HEADERS });
   } catch (error: any) {
-    console.warn("Integrations GET Warning, returning fallback integrations:", error);
-    const fallbackIntegrations = [
-      { id: "1", name: "Trendyol API", type: "MARKETPLACE", status: "Active", lastSync: "10 Dk Önce", logo: "/logos/trendyol.png", settings: { syncEnabled: true } },
-      { id: "2", name: "Hepsiburada API", type: "MARKETPLACE", status: "Active", lastSync: "25 Dk Önce", logo: "/logos/hepsiburada.png", settings: { syncEnabled: true } },
-      { id: "3", name: "Amazon Turkey API", type: "MARKETPLACE", status: "Inactive", lastSync: "-", logo: "/logos/amazon.png", settings: { syncEnabled: false } }
-    ];
-    return NextResponse.json(fallbackIntegrations);
+    console.warn("Integrations GET Warning, returning empty list:", error);
+    return NextResponse.json([], { headers: NO_CACHE_HEADERS });
   }
 }
 

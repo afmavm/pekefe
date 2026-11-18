@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { parseOrderSummaryBackend } from "@/modules/orders/server/orderActions";
+import { readLocalOrders } from "@/lib/jsonOrderDb";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+
+function readCmsFallback(): any {
+  try {
+    const p = path.join(process.cwd(), "public", "data", "cms_settings_fallback.json");
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, "utf-8"));
+    }
+  } catch {}
+  return {};
+}
+
+function deterministicUuid(seed: string): string {
+  const hex = crypto.createHash("sha256").update(seed).digest("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,11 +45,34 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Fatura bulunamadı.", { status: 404 });
     }
 
-    const cmsData = await prisma.cMSData.findUnique({
+    const dbCmsData = await prisma.cMSData.findUnique({
       where: { id: "singleton" },
-    });
+    }).catch(() => null);
+    const fallbackCms = readCmsFallback();
+    const cmsData: any = { ...fallbackCms, ...(dbCmsData || {}) };
 
-    const banks = await prisma.bank.findMany();
+    const banks = await prisma.bank.findMany().catch(() => []);
+
+    // Bağlı siparişi bul (notes içindeki sipariş no veya cari hesap üzerinden)
+    const orderIdFromNotes =
+      invoice.notes?.match(/\[Sipariş:\s*([^\]]+)\]/)?.[1] ||
+      invoice.notes?.match(/#?([A-Z]{2,4}-\d{4}-\d+)/i)?.[1] ||
+      null;
+
+    let linkedOrder: any = null;
+    if (orderIdFromNotes) {
+      linkedOrder = await prisma.order.findFirst({
+        where: { id: orderIdFromNotes },
+      }).catch(() => null);
+      if (!linkedOrder) {
+        const localOrders = readLocalOrders();
+        linkedOrder = localOrders.find(
+          (o) =>
+            String(o.id).toUpperCase() === orderIdFromNotes.toUpperCase() ||
+            String(o.orderNumber || "").toUpperCase() === orderIdFromNotes.toUpperCase()
+        ) || null;
+      }
+    }
 
     const account = invoice.currentAccount;
     const isCompany = account.cariTipi === "KURUMSAL";
@@ -57,10 +99,20 @@ export async function GET(request: NextRequest) {
     const odemeSekliLabel: Record<string,string> = { NAKIT: "Nakit", KREDIKARTI: "Kredi Kartı", EFT: "EFT/Havale", CEK: "Çek", SENET: "Senet", KAPIDAODEME: "Kapıda Ödeme", DIGER: "Diğer" };
     const tasiyiciLabel: Record<string,string> = { ARAS: "Aras Kargo", MNG: "MNG Kargo", YURTICI: "Yurt İçi Kargo", PTT: "PTT Kargo", UPS: "UPS Kargo", DHL: "DHL Express", FEDEX: "FedEx", TRENDYOL: "Trendyol Express", DIGER: "Diğer" };
 
-    // Payment method from notes
-    const paymentCode = invoice.notes?.match(/\[Ödeme:\s*([^\]]+)\]/)?.[1] || "CARI_HESAP";
+    // Payment method from notes or linked order
+    const paymentCode = invoice.notes?.match(/\[Ödeme:\s*([^\]]+)\]/)?.[1] || (linkedOrder?.method ? linkedOrder.method : "CARI_HESAP");
     const paymentMethodMap: Record<string,string> = { CARI_HESAP: "Cari Hesap (Vadeli)", HAVALE_EFT: "Banka Havalesi/EFT", KREDI_KARTI: "Kredi Kartı", NAKIT: "Nakit" };
     const paymentMethodLabel = paymentMethodMap[paymentCode] || paymentCode;
+
+    // Kargo / Taşıyıcı bilgisi (notes veya bağlı siparişten)
+    const linkedCarrierFromSummary = linkedOrder?.summary?.match(/^\[([^\]|]+)/)?.[1]?.trim() || "";
+    const resolvedCarrier =
+      (efTasiyici ? (tasiyiciLabel[efTasiyici] || efTasiyici) : "") ||
+      linkedOrder?.cargoCompany ||
+      linkedCarrierFromSummary ||
+      "";
+    const resolvedOrderNo = linkedOrder?.orderNumber || linkedOrder?.id || orderIdFromNotes || "";
+    const resolvedOrderDate = linkedOrder?.date ? new Date(linkedOrder.date).toLocaleDateString("tr-TR") : "";
 
     // Dynamic resolution of Serial No / Fatura No
     const parsedEFaturaNo = invoice.notes?.match(/\[e-Fatura No:\s*([A-Za-z0-9]+)\]/)?.[1]
@@ -87,7 +139,7 @@ export async function GET(request: NextRequest) {
     // Dynamic currency resolution
     const currency = invoice.notes?.match(/\[Para:\s*([A-Z]+)/)?.[1] || account.currency || "TRY";
 
-    const uuid = invoice.notes?.match(/UUID: ([a-z0-9-]+)/)?.[1] || "c4e12e34-5678-abcd-ef90-123456789abc";
+    const uuid = invoice.notes?.match(/UUID: ([a-z0-9-]+)/)?.[1] || deterministicUuid(invoice.id);
 
     const invoiceDate = new Date(invoice.date).toLocaleDateString("tr-TR");
     const invoiceTime = new Date(invoice.date).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
@@ -358,13 +410,12 @@ export async function GET(request: NextRequest) {
             ? `<img src="${cmsData.logoUrl}" alt="${cmsData.siteName || 'Logo'}" style="max-height:60px; max-width:200px; object-fit:contain; margin-bottom:8px; display:block;" />`
             : ``
           }
-          <div class="company-title">${cmsData?.companyName || "PEKEFE B2B E-TİCARET A.Ş."}</div>
+          <div class="company-title">${cmsData?.companyName || cmsData?.siteName || "PEKEFE Geleneksel & Doğal Lezzetler"}</div>
           <div class="company-details">
-            ${cmsData?.contactAddress ? cmsData.contactAddress.replace(/\n/g, "<br>") : "Merkez Mahallesi İstiklal Caddesi No:45/A<br>Şişli / İSTANBUL"}<br>
-            Tel: ${cmsData?.contactPhone || "+90 (212) 555 12 34"}<br>
-            E-Posta: ${cmsData?.contactEmail || "muhasebe@atakb2b.com"} | Web: ${cmsData?.siteName ? `www.${cmsData.siteName.toLowerCase().replace(/[^a-z0-9]/g, "")}.com` : "www.atakb2b.com"}<br>
-            Mersis No: 0123456789012345 | Ticaret Sicil No: 987654<br>
-            Şişli Vergi Dairesi - VKN: 1234567890
+            ${cmsData?.contactAddress ? cmsData.contactAddress.replace(/\n/g, "<br>") : "İspir / ERZURUM"}<br>
+            Tel: ${cmsData?.contactPhone || "+90 534 270 91 40"}<br>
+            E-Posta: ${cmsData?.contactEmail || "info@pekefe.com"} | Web: www.pekefe.com<br>
+            ${cmsData?.companyMersis ? `Mersis No: ${cmsData.companyMersis} | ` : ""}${cmsData?.companyTaxOffice ? `${cmsData.companyTaxOffice} - ` : ""}${cmsData?.companyTaxNo ? `VKN: ${cmsData.companyTaxNo}` : ""}
           </div>
         </td>
         <td class="info-section">
@@ -423,11 +474,13 @@ export async function GET(request: NextRequest) {
             <strong>Ödeme Yöntemi:</strong> ${paymentMethodLabel}<br>
             ${efOdemeSekli ? `<strong>Ödeme Şekli:</strong> ${odemeSekliLabel[efOdemeSekli] || efOdemeSekli}<br>` : ""}
             ${efOdemeArac ? `<strong>Ödeme Aracı Kurum:</strong> ${efOdemeArac}<br>` : ""}
+            ${resolvedOrderNo ? `<strong>Sipariş No:</strong> #${resolvedOrderNo}<br>` : ""}
+            ${resolvedOrderDate ? `<strong>Sipariş Tarihi:</strong> ${resolvedOrderDate}<br>` : ""}
             <strong>Vade Tarihi:</strong> ${new Date(invoice.dueDate).toLocaleDateString("tr-TR")}<br>
-            ${efTasiyici ? `<strong>Taşıyıcı Firma:</strong> ${tasiyiciLabel[efTasiyici] || efTasiyici}<br>` : ""}
+            ${resolvedCarrier ? `<strong>Taşıyıcı / Kargo Firması:</strong> ${resolvedCarrier}<br>` : ""}
             ${efTasiyiciVKN ? `<strong>Taşıyıcı VKN/TCKN:</strong> ${efTasiyiciVKN}<br>` : ""}
             ${efGonderim ? `<strong>Gönderim Tarihi:</strong> ${new Date(efGonderim).toLocaleDateString("tr-TR")}<br>` : ""}
-            ${efWebSite ? `<strong>Satış Web Sitesi:</strong> <a href="${efWebSite}" style="color:#2980b9;">${efWebSite}</a><br>` : ""}
+            <strong>Satış Web Sitesi:</strong> ${efWebSite || "https://www.pekefe.com"}<br>
             <strong>Para Birimi:</strong> ${currency}<br>
             <br>
             <span style="font-size: 9px; color: #777;">
@@ -471,12 +524,22 @@ export async function GET(request: NextRequest) {
       </tbody>
     </table>
 
-    <!-- Totals Area -->
+    <!-- Totals Area (Matematiksel olarak %100 tutarlı Matrah + KDV = Ödenecek Toplam) -->
+    ${(() => {
+      const netMatrah = Math.round((grossTotal - totalDiscount) * 100) / 100;
+      const calculatedVat = Math.round(parsedItems.reduce((s, it) => s + (it.netRowTotal * it.vatRate / 100), 0) * 100) / 100;
+      const dbTax = Math.round(invoice.taxAmount.toNumber() * 100) / 100;
+      const dbTotal = Math.round(invoice.totalAmount.toNumber() * 100) / 100;
+      const resolvedVat = dbTax > 0 ? dbTax : calculatedVat;
+      const expectedGrand = Math.round((netMatrah + resolvedVat) * 100) / 100;
+      // Eğer DB'deki totalAmount sadece KDV hariç matrah olarak kaydedilmişse (dbTotal <= netMatrah), KDV dahil gerçek toplamı göster
+      const resolvedGrandTotal = dbTotal > netMatrah ? dbTotal : expectedGrand;
+      return `
     <table style="width: 100%;">
       <tr>
         <td style="vertical-align: top; width: 60%;">
           <div class="company-details" style="font-style: italic;">
-            <strong>Yazıyla:</strong> # ${convertToText(invoice.totalAmount.toNumber(), currency)} #
+            <strong>Yazıyla:</strong> # ${convertToText(resolvedGrandTotal, currency)} #
           </div>
           <div class="barcode">
             <svg style="height: 40px; width: 160px;"></svg>
@@ -496,21 +559,23 @@ export async function GET(request: NextRequest) {
             </tr>
             <tr>
               <td class="lbl">KDV Matrahı:</td>
-              <td class="val">${formatCurrency(grossTotal - totalDiscount, currency)}</td>
+              <td class="val">${formatCurrency(netMatrah, currency)}</td>
             </tr>
             ` : ""}
             <tr>
               <td class="lbl">Hesaplanan KDV:</td>
-              <td class="val">${formatCurrency(invoice.taxAmount.toNumber(), currency)}</td>
+              <td class="val">${formatCurrency(resolvedVat, currency)}</td>
             </tr>
             <tr class="grand-total">
               <td class="lbl" style="font-size: 11px;">Ödenecek Toplam Tutar:</td>
-              <td class="val" style="font-size: 12px;">${formatCurrency(invoice.totalAmount.toNumber(), currency)}</td>
+              <td class="val" style="font-size: 12px;">${formatCurrency(resolvedGrandTotal, currency)}</td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
+      `;
+    })()}
 
     <!-- Bank Account Details (IBAN) & Custom Invoice Footer HTML -->
     ${cmsData?.companyInvoiceFooter ? `

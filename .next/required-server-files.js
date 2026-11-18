@@ -323,8 +323,7 @@ self.__SERVER_FILES_MANIFEST={
     },
     "distDirRoot": ".next",
     "_originalRewrites": {
-      "beforeFiles": [],
-      "afterFiles": [
+      "beforeFiles": [
         {
           "source": "/paytr_callback.php",
           "destination": "/api/webhooks/paytr"
@@ -334,7 +333,13 @@ self.__SERVER_FILES_MANIFEST={
           "destination": "/api/webhooks/paytr"
         }
       ],
-      "fallback": []
+      "afterFiles": [],
+      "fallback": [
+        {
+          "source": "/uploads/:path*",
+          "destination": "/api/uploads/:path*"
+        }
+      ]
     },
     "_originalRedirects": [
       {

@@ -158,6 +158,7 @@
   "/api/products/route": "/api/products",
   "/api/recommendations/route": "/api/recommendations",
   "/api/settings/route": "/api/settings",
+  "/api/uploads/[...path]/route": "/api/uploads/[...path]",
   "/api/user/route": "/api/user",
   "/api/webhooks/paytr/route": "/api/webhooks/paytr",
   "/callback.php/route": "/callback.php",

@@ -98,15 +98,18 @@ export async function POST(request: NextRequest) {
 
     const localFilePath = path.join(localUploadDir, finalFilename);
     await writeFile(localFilePath, buffer);
+    try { fs.chmodSync(localFilePath, 0o644); } catch {}
 
-    // Eğer cPanel ortamındaysak, doğrudan public_html/uploads altına da kopyala/yaz
-    const cpanelDir = "/home/ata3a6icilikcom/public_html/uploads";
-    if (fs.existsSync("/home/ata3a6icilikcom/public_html")) {
+    // Çoklu proje izolasyonu: Yalnızca PEKEFE canlı DocumentRoot'u altına kopyala (diğer projenin public_html/uploads dizinine dokunma)
+    const pekefePublicRoot = "/home/ata3a6icilikcom/public_html/pekefe.com";
+    const cpanelDir = path.join(pekefePublicRoot, "uploads");
+    if (fs.existsSync(pekefePublicRoot)) {
       if (!fs.existsSync(cpanelDir)) {
         fs.mkdirSync(cpanelDir, { recursive: true });
       }
       const cpanelFilePath = path.join(cpanelDir, finalFilename);
       await writeFile(cpanelFilePath, buffer);
+      try { fs.chmodSync(cpanelFilePath, 0o644); } catch {}
     }
 
     const fileUrl = `/uploads/${finalFilename}`;

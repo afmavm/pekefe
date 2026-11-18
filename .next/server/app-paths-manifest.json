@@ -158,6 +158,7 @@
   "/api/products/route": "app/api/products/route.js",
   "/api/recommendations/route": "app/api/recommendations/route.js",
   "/api/settings/route": "app/api/settings/route.js",
+  "/api/uploads/[...path]/route": "app/api/uploads/[...path]/route.js",
   "/api/user/route": "app/api/user/route.js",
   "/api/webhooks/paytr/route": "app/api/webhooks/paytr/route.js",
   "/callback.php/route": "app/callback.php/route.js",

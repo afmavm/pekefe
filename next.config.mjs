@@ -118,16 +118,24 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: "/paytr_callback.php",
-        destination: "/api/webhooks/paytr",
-      },
-      {
-        source: "/callback.php",
-        destination: "/api/webhooks/paytr",
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: "/paytr_callback.php",
+          destination: "/api/webhooks/paytr",
+        },
+        {
+          source: "/callback.php",
+          destination: "/api/webhooks/paytr",
+        },
+      ],
+      fallback: [
+        {
+          source: "/uploads/:path*",
+          destination: "/api/uploads/:path*",
+        },
+      ],
+    };
   },
   async headers() {
     return [

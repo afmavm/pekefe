@@ -130,7 +130,9 @@ mkdir -p "$CURRENT_DIR/tmp"
 touch "$CURRENT_DIR/tmp/restart.txt"
 
 if [ -d "$PUBLIC_TARGET" ] && [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
-  mkdir -p "$PUBLIC_TARGET/tmp" 2>/dev/null || true
+  mkdir -p "$PUBLIC_TARGET/tmp" "$PUBLIC_TARGET/uploads" 2>/dev/null || true
+  cp -rn "$CURRENT_DIR/public/uploads/"* "$PUBLIC_TARGET/uploads/" 2>/dev/null || true
+  chmod 644 "$PUBLIC_TARGET/uploads/"* 2>/dev/null || true
   touch "$PUBLIC_TARGET/tmp/restart.txt" 2>/dev/null || true
 fi
 

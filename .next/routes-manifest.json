@@ -130,8 +130,7 @@
   ],
   "onMatchHeaders": [],
   "rewrites": {
-    "beforeFiles": [],
-    "afterFiles": [
+    "beforeFiles": [
       {
         "source": "/paytr_callback.php",
         "destination": "/api/webhooks/paytr",
@@ -143,7 +142,14 @@
         "regex": "^/callback\\.php(?:/)?$"
       }
     ],
-    "fallback": []
+    "afterFiles": [],
+    "fallback": [
+      {
+        "source": "/uploads/:path*",
+        "destination": "/api/uploads/:path*",
+        "regex": "^/uploads(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+      }
+    ]
   },
   "dynamicRoutes": [
     {
@@ -481,6 +487,14 @@
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/api/tickets/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/uploads/[...path]",
+      "regex": "^/api/uploads/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPpath": "nxtPpath"
+      },
+      "namedRegex": "^/api/uploads/(?<nxtPpath>.+?)(?:/)?$"
     },
     {
       "page": "/blog/[slug]",

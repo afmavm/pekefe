@@ -323,8 +323,7 @@
     },
     "distDirRoot": ".next",
     "_originalRewrites": {
-      "beforeFiles": [],
-      "afterFiles": [
+      "beforeFiles": [
         {
           "source": "/paytr_callback.php",
           "destination": "/api/webhooks/paytr"
@@ -334,7 +333,13 @@
           "destination": "/api/webhooks/paytr"
         }
       ],
-      "fallback": []
+      "afterFiles": [],
+      "fallback": [
+        {
+          "source": "/uploads/:path*",
+          "destination": "/api/uploads/:path*"
+        }
+      ]
     },
     "_originalRedirects": [
       {

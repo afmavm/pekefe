@@ -75,7 +75,8 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN announcement1Enabled TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN announcement2Enabled TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN contactPhoneEnabled TINYINT(1) NOT NULL DEFAULT 1",
-    "ALTER TABLE CMSData ADD COLUMN socialWhatsappEnabled TINYINT(1) NOT NULL DEFAULT 1"
+    "ALTER TABLE CMSData ADD COLUMN socialWhatsappEnabled TINYINT(1) NOT NULL DEFAULT 1",
+    "ALTER TABLE CMSData ADD COLUMN shippingCarriers LONGTEXT NULL"
   ];
 
   try {
@@ -193,7 +194,11 @@ export async function PUT(req: Request) {
 
     let existing: any = readLocalSettingsFallback() || {};
     try {
-      const rows: any[] = await prisma.$queryRawUnsafe(`SELECT * FROM CMSData WHERE id = 'singleton' LIMIT 1`);
+      const rows: any[] = await withTimeout(
+        prisma.$queryRawUnsafe(`SELECT * FROM CMSData WHERE id = 'singleton' LIMIT 1`),
+        1500,
+        [] as any[]
+      );
       if (rows && rows.length > 0) {
         existing = { ...rows[0], ...existing };
       }
@@ -237,31 +242,37 @@ export async function PUT(req: Request) {
       const cPhoneEn = data.contactPhoneEnabled ? 1 : 0;
       const sWaEn = data.socialWhatsappEnabled ? 1 : 0;
 
-      await prisma.$executeRawUnsafe(
-        `INSERT INTO CMSData (id, announcementActive, announcement1Enabled, announcement2Enabled, contactPhoneEnabled, socialWhatsappEnabled, announcement, announcement2, contactPhone, socialWhatsapp, topBarItems, paytrConfig, paymentMethodsConfig, installmentsConfig) 
-         VALUES ('singleton', ${annAct}, ${ann1En}, ${ann2En}, ${cPhoneEn}, ${sWaEn}, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE 
-         announcementActive = VALUES(announcementActive),
-         announcement1Enabled = VALUES(announcement1Enabled),
-         announcement2Enabled = VALUES(announcement2Enabled),
-         contactPhoneEnabled = VALUES(contactPhoneEnabled),
-         socialWhatsappEnabled = VALUES(socialWhatsappEnabled),
-         announcement = VALUES(announcement),
-         announcement2 = VALUES(announcement2),
-         contactPhone = VALUES(contactPhone),
-         socialWhatsapp = VALUES(socialWhatsapp),
-         topBarItems = VALUES(topBarItems),
-         paytrConfig = VALUES(paytrConfig),
-         paymentMethodsConfig = VALUES(paymentMethodsConfig),
-         installmentsConfig = VALUES(installmentsConfig)`,
-        data.announcement || '',
-        data.announcement2 || '',
-        data.contactPhone || '',
-        data.socialWhatsapp || '',
-        typeof data.topBarItems === 'string' ? data.topBarItems : JSON.stringify(data.topBarItems || []),
-        typeof data.paytrConfig === 'string' ? data.paytrConfig : JSON.stringify(data.paytrConfig || {}),
-        typeof data.paymentMethodsConfig === 'string' ? data.paymentMethodsConfig : JSON.stringify(data.paymentMethodsConfig || []),
-        typeof data.installmentsConfig === 'string' ? data.installmentsConfig : JSON.stringify(data.installmentsConfig || [])
+      await withTimeout(
+        prisma.$executeRawUnsafe(
+          `INSERT INTO CMSData (id, announcementActive, announcement1Enabled, announcement2Enabled, contactPhoneEnabled, socialWhatsappEnabled, announcement, announcement2, contactPhone, socialWhatsapp, topBarItems, paytrConfig, paymentMethodsConfig, installmentsConfig, shippingCarriers) 
+           VALUES ('singleton', ${annAct}, ${ann1En}, ${ann2En}, ${cPhoneEn}, ${sWaEn}, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE 
+           announcementActive = VALUES(announcementActive),
+           announcement1Enabled = VALUES(announcement1Enabled),
+           announcement2Enabled = VALUES(announcement2Enabled),
+           contactPhoneEnabled = VALUES(contactPhoneEnabled),
+           socialWhatsappEnabled = VALUES(socialWhatsappEnabled),
+           announcement = VALUES(announcement),
+           announcement2 = VALUES(announcement2),
+           contactPhone = VALUES(contactPhone),
+           socialWhatsapp = VALUES(socialWhatsapp),
+           topBarItems = VALUES(topBarItems),
+           paytrConfig = VALUES(paytrConfig),
+           paymentMethodsConfig = VALUES(paymentMethodsConfig),
+           installmentsConfig = VALUES(installmentsConfig),
+           shippingCarriers = VALUES(shippingCarriers)`,
+          data.announcement || '',
+          data.announcement2 || '',
+          data.contactPhone || '',
+          data.socialWhatsapp || '',
+          typeof data.topBarItems === 'string' ? data.topBarItems : JSON.stringify(data.topBarItems || []),
+          typeof data.paytrConfig === 'string' ? data.paytrConfig : JSON.stringify(data.paytrConfig || {}),
+          typeof data.paymentMethodsConfig === 'string' ? data.paymentMethodsConfig : JSON.stringify(data.paymentMethodsConfig || []),
+          typeof data.installmentsConfig === 'string' ? data.installmentsConfig : JSON.stringify(data.installmentsConfig || []),
+          typeof data.shippingCarriers === 'string' ? data.shippingCarriers : JSON.stringify(data.shippingCarriers || [])
+        ),
+        2500,
+        null as any
       );
     } catch (dbErr) {
       console.warn('[API SETTINGS WARNING] Raw SQL save failed, but disk data was saved:', dbErr);

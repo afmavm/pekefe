@@ -695,24 +695,19 @@ export default function CargoPage() {
   const handleSaveCarriersList = async (updatedCarriers: Carrier[]) => {
     setSavingCarriers(true);
     try {
-      const currentSettings = settings || {};
-      const updatedSettings = {
-        ...currentSettings,
-        id: "singleton",
-        siteName: currentSettings.siteName || "PEKEFE Geleneksel & Doğal Lezzetler",
-        shippingCarriers: JSON.stringify(updatedCarriers)
-      };
-
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedSettings)
+        body: JSON.stringify({
+          shippingCarriers: JSON.stringify(updatedCarriers),
+        }),
       });
 
       if (res.ok) {
         const data = await res.json();
         toast.success("Kargo firmaları başarıyla kaydedildi!");
-        setCarriers(updatedCarriers);
+        const persisted = parseCarriers(data?.shippingCarriers);
+        setCarriers(persisted.length > 0 || updatedCarriers.length === 0 ? persisted : updatedCarriers);
         setSettings(data);
       } else {
         const errData = await res.json().catch(() => ({}));

@@ -33,11 +33,11 @@
   "app\\admin\\AdminLayoutContent.tsx -> @/modules/cms/super-admin/superActions": {
     "id": 11,
     "files": [
-      "static/chunks/11.19f67c20e11e0478.js"
+      "static/chunks/11.7e036cca2f384bb9.js"
     ]
   },
   "app\\admin\\orders\\[type]\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
-    "id": 40037,
+    "id": 18954,
     "files": [
       "static/chunks/164f4fb6-65fb7b51181b1996.js",
       "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
@@ -46,11 +46,11 @@
       "static/chunks/4233-0e26f2761d4498e2.js",
       "static/chunks/3280-4dc55331dbd8c33b.js",
       "static/chunks/6827.425d9e2b482afeb4.js",
-      "static/chunks/694.c362c6064ed351f1.js"
+      "static/chunks/1113.ea5e127ebd40e1b5.js"
     ]
   },
   "app\\admin\\orders\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
-    "id": 40037,
+    "id": 18954,
     "files": [
       "static/chunks/164f4fb6-65fb7b51181b1996.js",
       "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
@@ -59,7 +59,7 @@
       "static/chunks/4233-0e26f2761d4498e2.js",
       "static/chunks/3280-4dc55331dbd8c33b.js",
       "static/chunks/6827.425d9e2b482afeb4.js",
-      "static/chunks/694.c362c6064ed351f1.js"
+      "static/chunks/1113.ea5e127ebd40e1b5.js"
     ]
   },
   "app\\giris\\page.js -> next-auth/react": {
@@ -69,7 +69,7 @@
   "modules\\cms\\builder\\workspace.tsx -> ./cmsBuilderActions": {
     "id": 46358,
     "files": [
-      "static/chunks/6358.7810eaf63add1147.js"
+      "static/chunks/6358.8cf7b6180d46c712.js"
     ]
   },
   "utils\\cartStorage.js -> sonner": {

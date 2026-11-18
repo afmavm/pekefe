@@ -22,7 +22,10 @@ const createPrismaClient = () => {
   } else if (dbUrl.startsWith("mysql:")) {
     if (!dbUrl.includes("connect_timeout")) {
       const separator = dbUrl.includes("?") ? "&" : "?";
-      dbUrl = `${dbUrl}${separator}connect_timeout=1&pool_timeout=1`;
+      dbUrl = `${dbUrl}${separator}connection_limit=5&connect_timeout=2&pool_timeout=2`;
+    } else if (!dbUrl.includes("connection_limit")) {
+      const separator = dbUrl.includes("?") ? "&" : "?";
+      dbUrl = `${dbUrl}${separator}connection_limit=5`;
     }
   }
 
@@ -145,9 +148,7 @@ const createPrismaClient = () => {
 // while preserving the extended runtime middleware behavior.
 export const prisma = (globalForPrisma.prisma || createPrismaClient()) as unknown as PrismaClient;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+globalForPrisma.prisma = prisma;
 
 // Auto backup cron initialization — build sırasında başlatma
 const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';

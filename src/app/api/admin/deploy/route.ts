@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     try {
       const pm2ListOutput = execSync('pm2 jlist', { encoding: 'utf-8' });
       const apps = JSON.parse(pm2ListOutput);
-      const mainApp = apps.find((app: any) => app.name === 'b2b-ecommerce');
+      const mainApp = apps.find((app: any) => app.name === 'pekefe-app');
       if (mainApp) {
         pm2Info.active = true;
         pm2Info.status = mainApp.pm2_env?.status || 'offline';
@@ -182,9 +182,9 @@ export async function POST(request: NextRequest) {
     console.error('Error clearing deploy log file:', err);
   }
 
-  // Dağıtımı arka planda başlat (asenkron)
+  // Dağıtımı arka planda başlat (asenkron - yalnızca pekefe-app izole dağıtım betiği)
   const isWindows = process.platform === 'win32';
-  const scriptPath = path.join(process.cwd(), isWindows ? 'deploy.bat' : 'deploy.sh');
+  const scriptPath = path.join(process.cwd(), isWindows ? 'deploy.bat' : 'deploy_github.sh');
   const command = isWindows ? `"${scriptPath}"` : `bash "${scriptPath}"`;
   
   // Komutu arka planda çalıştırıyoruz ve çıktıyı deploy.log dosyasına yönlendiriyoruz

@@ -265,3 +265,145 @@ export function deleteLocalProduct(targetId: string): boolean {
     return false;
   }
 }
+
+export function saveLocalProductsBulk(
+  incomingProducts: any[],
+  updateExisting: boolean = true
+): { added: number; updated: number; total: number; products: LocalProduct[] } {
+  const current = readLocalProducts();
+  let added = 0;
+  let updated = 0;
+  const processedResults: LocalProduct[] = [];
+
+  for (let i = 0; i < incomingProducts.length; i++) {
+    const p = incomingProducts[i];
+    if (!p || !p.name) continue;
+
+    const timestamp = Date.now() + i;
+    const cleanSku = String(p.sku || '').trim();
+    const cleanSkuLower = cleanSku.toLowerCase();
+    const cleanId = String(p.id || '').trim().toLowerCase();
+
+    const existingIndex = current.findIndex(existing => {
+      const eId = String(existing.id || '').trim().toLowerCase();
+      const eSku = String(existing.sku || '').trim().toLowerCase();
+      return (cleanId && eId === cleanId) || (cleanSkuLower && eSku === cleanSkuLower);
+    });
+
+    const incomingAttrs = typeof p.attributes === 'object' && p.attributes !== null
+      ? { ...p.attributes }
+      : {};
+
+    const resolvedActive = p.active !== undefined 
+      ? Boolean(p.active) 
+      : (incomingAttrs.isActive !== undefined ? Boolean(incomingAttrs.isActive) : (incomingAttrs.active !== undefined ? Boolean(incomingAttrs.active) : true));
+    
+    const resolvedPublished = p.isPublished !== undefined
+      ? Boolean(p.isPublished)
+      : resolvedActive;
+
+    const basePrice = Number(p.price ?? p.sale_price ?? 0);
+    const salePrice = Number(p.sale_price ?? p.price ?? basePrice);
+    const listPrice = Number(p.list_price ?? p.oldPrice ?? salePrice);
+    const cost = Number(p.cost ?? Math.round(salePrice * 0.45));
+    const stockQty = Number(p.stock ?? p.stock_quantity ?? 0);
+    const criticalLimit = Number(p.criticalLimit ?? 5);
+
+    if (existingIndex !== -1) {
+      if (updateExisting) {
+        const existing = current[existingIndex];
+        const updatedItem: LocalProduct = {
+          ...existing,
+          name: p.name || existing.name,
+          sku: cleanSku || existing.sku,
+          brand: p.brand !== undefined ? p.brand : existing.brand,
+          model: p.model !== undefined ? p.model : existing.model,
+          category: p.category || existing.category,
+          stock: stockQty,
+          stock_quantity: stockQty,
+          price: salePrice,
+          sale_price: salePrice,
+          oldPrice: listPrice,
+          list_price: listPrice,
+          cost: cost,
+          active: resolvedActive,
+          isPublished: resolvedPublished,
+          image: p.image || existing.image || '/logo.png',
+          images: Array.isArray(p.images) && p.images.length > 0 ? p.images : existing.images,
+          desc: p.desc || existing.desc || '',
+          shortDesc: p.shortDesc || existing.shortDesc || '',
+          attributes: {
+            ...(existing.attributes || {}),
+            ...incomingAttrs,
+            isActive: resolvedActive,
+            isPublished: resolvedPublished,
+            unit: p.unit || (existing.attributes as any)?.unit || 'Adet',
+            barcode: p.barcode || (existing.attributes as any)?.barcode || '',
+          }
+        };
+        current[existingIndex] = updatedItem;
+        updated++;
+        processedResults.push(updatedItem);
+      }
+    } else {
+      const generatedSku = cleanSku || `PKF-${Math.floor(100000 + Math.random() * 900000)}`;
+      const generatedId = p.id || `PKF-${timestamp}`;
+      const newItem: LocalProduct = {
+        id: generatedId,
+        name: String(p.name).trim(),
+        sku: generatedSku,
+        brand: p.brand || '',
+        model: p.model || '',
+        category: p.category || 'Pestil - Köme',
+        stock: stockQty,
+        stock_quantity: stockQty,
+        price: salePrice,
+        oldPrice: listPrice,
+        list_price: listPrice,
+        sale_price: salePrice,
+        cost: cost,
+        active: resolvedActive,
+        isPublished: resolvedPublished,
+        image: p.image || '/logo.png',
+        images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []),
+        desc: p.desc || p.shortDesc || '',
+        shortDesc: p.shortDesc || '',
+        seoTitle: p.seoTitle || p.name,
+        seoDesc: p.seoDesc || p.shortDesc || p.name,
+        seoKeywords: p.seoKeywords || '',
+        videoUrl: p.videoUrl || '',
+        isCampaignActive: Boolean(p.isCampaignActive),
+        discount_start_date: null,
+        discount_end_date: null,
+        attributes: {
+          ...incomingAttrs,
+          isActive: resolvedActive,
+          isPublished: resolvedPublished,
+          unit: p.unit || 'Adet',
+          barcode: p.barcode || '',
+          criticalLimit: criticalLimit
+        },
+        variants: Array.isArray(p.variants) ? p.variants : [],
+        warehouses: [],
+        locations: [{ warehouseId: 'wh-1', stock: stockQty }],
+        createdAt: new Date().toISOString(),
+        isDeleted: false
+      };
+      current.unshift(newItem);
+      added++;
+      processedResults.push(newItem);
+    }
+  }
+
+  _writeLock = _writeLock.then(() => {
+    try {
+      const dir = path.dirname(DB_FILE_PATH);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(DB_FILE_PATH, JSON.stringify(current, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Error batch saving local JSON products:', e);
+    }
+  });
+
+  return { added, updated, total: added + updated, products: processedResults };
+}

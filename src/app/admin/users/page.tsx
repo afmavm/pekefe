@@ -25,6 +25,13 @@ export default function AdminUsersPage() {
   const [editingUser, setEditingUser] = useState<SubUser | null>(null);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 
+  // Quick Password Change Modal State
+  const [passwordModalUser, setPasswordModalUser] = useState<(SubUser & { hasPassword?: boolean }) | null>(null);
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [confirmUserPassword, setConfirmUserPassword] = useState("");
+  const [showQuickPassword, setShowQuickPassword] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
   // User Form
   const [userForm, setUserForm] = useState({
     name: "",
@@ -161,6 +168,64 @@ export default function AdminUsersPage() {
       }
     } catch (e: any) {
       toast.error(e.message || "Kaydetme hatası.");
+    }
+  };
+
+  const openPasswordModal = (user: SubUser & { hasPassword?: boolean }) => {
+    setPasswordModalUser(user);
+    setNewUserPassword("");
+    setConfirmUserPassword("");
+    setShowQuickPassword(false);
+  };
+
+  const generateRandomPassword = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
+    let pass = "Pkf.";
+    for (let i = 0; i < 6; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewUserPassword(pass);
+    setConfirmUserPassword(pass);
+    setShowQuickPassword(true);
+  };
+
+  const handleQuickPasswordSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordModalUser) return;
+    if (!newUserPassword.trim() || newUserPassword.trim().length < 6) {
+      toast.error("Yeni parola en az 6 karakter olmalıdır.");
+      return;
+    }
+    if (newUserPassword !== confirmUserPassword) {
+      toast.error("Girdiğiniz parolalar birbiriyle eşleşmiyor!");
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      const res = await fetch("/api/admin/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: passwordModalUser.id,
+          email: passwordModalUser.email,
+          password: newUserPassword.trim()
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || `"${passwordModalUser.name}" için yeni parola veritabanına kaydedildi.`);
+        setPasswordModalUser(null);
+        setNewUserPassword("");
+        setConfirmUserPassword("");
+        fetchData();
+      } else {
+        toast.error(data.error || "Parola güncellenemedi.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Bağlantı hatası oluştu.");
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -387,6 +452,7 @@ export default function AdminUsersPage() {
                   <th className="p-4">Kullanıcı Bilgisi</th>
                   <th className="p-4">Departman & İletişim</th>
                   <th className="p-4">Rol & Sorumluluk</th>
+                  <th className="p-4">Parola Durumu</th>
                   <th className="p-4">Durum</th>
                   <th className="p-4 text-right">İşlemler</th>
                 </tr>
@@ -394,13 +460,14 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-400 font-semibold">
+                    <td colSpan={6} className="p-8 text-center text-slate-400 font-semibold">
                       Arama kriterlerine uygun alt kullanıcı bulunamadı.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map(user => {
                     const roleObj = roles.find(r => r.name === user.role);
+                    const hasPassword = Boolean((user as any).hasPassword || user.passwordHash);
                     return (
                       <tr key={user.id} className="hover:bg-slate-50/60 transition">
                         <td className="p-4">
@@ -429,14 +496,38 @@ export default function AdminUsersPage() {
                         <td className="p-4">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold inline-flex items-center gap-1 ${
                             user.role === "SUPER_ADMIN" ? "bg-red-100 text-red-700 border border-red-200" :
+                            user.role === "ADMIN" ? "bg-orange-100 text-orange-800 border border-orange-200" :
                             user.role === "STOCK_MANAGER" ? "bg-amber-100 text-amber-800 border border-amber-200" :
                             user.role === "ORDER_MANAGER" ? "bg-blue-100 text-blue-800 border border-blue-200" :
                             user.role === "ACCOUNTANT" ? "bg-emerald-100 text-emerald-800 border border-emerald-200" :
+                            user.role === "DEALER" ? "bg-indigo-100 text-indigo-800 border border-indigo-200" :
                             "bg-slate-100 text-slate-700 border border-slate-200"
                           }`}>
                             <Shield className="w-3 h-3" />
                             {roleObj ? roleObj.label : user.roleLabel || user.role}
                           </span>
+                        </td>
+
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold inline-flex items-center gap-1 ${
+                              hasPassword
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}>
+                              <Lock className="w-3 h-3" />
+                              {hasPassword ? "Kayıtlı" : "Tanımsız"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => openPasswordModal(user as any)}
+                              className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-[10px] font-extrabold transition cursor-pointer inline-flex items-center gap-1"
+                              title="Kullanıcı parolasını güncelle ve veritabanına kaydet"
+                            >
+                              <Key className="w-3 h-3" />
+                              <span>Parola Güncelle</span>
+                            </button>
+                          </div>
                         </td>
 
                         <td className="p-4">
@@ -451,6 +542,15 @@ export default function AdminUsersPage() {
 
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => openPasswordModal(user as any)}
+                              className="p-2 hover:bg-purple-50 text-slate-400 hover:text-purple-600 rounded-lg transition cursor-pointer border-none"
+                              title="Parola Güncelle"
+                            >
+                              <Key className="w-4 h-4" />
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => openEditUserModal(user)}
@@ -796,6 +896,109 @@ export default function AdminUsersPage() {
               </div>
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* 8. MODAL: QUICK PASSWORD UPDATE MODAL */}
+      {passwordModalUser && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            
+            {/* Header */}
+            <div className="p-5 bg-white border-b border-slate-100 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center shadow-md shadow-purple-600/20">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">Parolayı Güncelle</h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {passwordModalUser.name} ({passwordModalUser.email})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPasswordModalUser(null)}
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition cursor-pointer border-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <form onSubmit={handleQuickPasswordSave} className="p-6 space-y-4">
+              <div className="p-3 bg-purple-50/70 border border-purple-100 rounded-xl text-[11px] text-purple-900 font-medium flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                <span>
+                  Belirlediğiniz yeni parola şifrelenerek (bcrypt) veritabanına kaydedilir ve kullanıcı anında yeni parolasıyla giriş yapabilir.
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700">Yeni Parola *</label>
+                  <button
+                    type="button"
+                    onClick={generateRandomPassword}
+                    className="text-[11px] font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Güçlü Parola Üret
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showQuickPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={newUserPassword}
+                    onChange={e => setNewUserPassword(e.target.value)}
+                    placeholder="En az 6 karakter"
+                    className="w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-purple-500 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickPassword(!showQuickPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 transition cursor-pointer border-none bg-transparent"
+                  >
+                    {showQuickPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">Yeni Parola Tekrar *</label>
+                <input
+                  type={showQuickPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  value={confirmUserPassword}
+                  onChange={e => setConfirmUserPassword(e.target.value)}
+                  placeholder="Parolayı tekrar giriniz"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-purple-500 outline-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPasswordModalUser(null)}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer border-none"
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition cursor-pointer border-none shadow-md shadow-purple-600/20 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {savingPassword ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  <span>{savingPassword ? "Kaydediliyor..." : "Parolayı Kaydet"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

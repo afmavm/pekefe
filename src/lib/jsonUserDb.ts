@@ -25,6 +25,8 @@ export interface SubUser {
   warehouseId?: string;
   status: "active" | "passive";
   passwordHash?: string;
+  customer_type?: "b2c" | "b2b";
+  isApproved?: boolean;
   createdAt: string;
   updatedAt: string;
   lastLogin?: string;
@@ -38,6 +40,15 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     description: "Tüm sistem modüllerine, ayarlara ve kullanıcı yönetimine sınırsız tam yetki.",
     color: "bg-red-500 text-white",
     permissions: ["*"],
+    isSystem: true
+  },
+  {
+    id: "role-admin",
+    name: "ADMIN",
+    label: "Sistem Yöneticisi",
+    description: "Admin paneli modüllerine, sipariş, stok ve muhasebe operasyonlarına yönetim yetkisi.",
+    color: "bg-orange-600 text-white",
+    permissions: ["view_dashboard", "use_ai_assistant", "manage_orders", "manage_cargo", "manage_despatch", "manage_stock", "manage_inventory", "manage_warehouses", "manage_production", "manage_accounting", "manage_invoices", "manage_finance", "view_reports", "manage_cms", "manage_blog", "manage_campaigns", "manage_tickets", "manage_users"],
     isSystem: true
   },
   {
@@ -92,6 +103,24 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     description: "Destek talepleri, müşteri geri bildirimleri ve sipariş durum izleme.",
     color: "bg-cyan-600 text-white",
     permissions: ["view_dashboard", "view_orders", "manage_tickets", "manage_feedback"],
+    isSystem: true
+  },
+  {
+    id: "role-dealer",
+    name: "DEALER",
+    label: "B2B Bayi / Kurumsal Müşteri",
+    description: "B2B Toptan Bayi Portalı ve cari hesap erişim yetkisi.",
+    color: "bg-indigo-600 text-white",
+    permissions: [],
+    isSystem: true
+  },
+  {
+    id: "role-user",
+    name: "USER",
+    label: "Bireysel Müşteri (B2C)",
+    description: "Mağaza müşterisi, sipariş takibi ve hesap yönetimi yetkisi.",
+    color: "bg-slate-600 text-white",
+    permissions: [],
     isSystem: true
   }
 ];
@@ -166,6 +195,13 @@ function ensureDbFile(): UserDbData {
     const parsed = JSON.parse(content);
     if (!Array.isArray(parsed.roles) || parsed.roles.length === 0) {
       parsed.roles = DEFAULT_ROLES;
+    } else {
+      const existingRoleNames = new Set(parsed.roles.map((r: RoleDefinition) => r.name));
+      for (const defRole of DEFAULT_ROLES) {
+        if (!existingRoleNames.has(defRole.name)) {
+          parsed.roles.push(defRole);
+        }
+      }
     }
     if (!Array.isArray(parsed.users)) {
       parsed.users = [];
@@ -192,5 +228,94 @@ export function saveUsersAndRoles(data: UserDbData): boolean {
   } catch (e) {
     console.error("Error saving users_roles_db.json:", e);
     return false;
+  }
+}
+
+export function findLocalUser(params: { id?: string; email?: string }): SubUser | null {
+  const data = readUsersAndRoles();
+  const cleanEmail = params.email?.trim().toLowerCase();
+  const cleanId = params.id?.trim();
+
+  if (cleanEmail) {
+    const byEmail = data.users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    if (byEmail) return byEmail;
+  }
+  if (cleanId) {
+    const byId = data.users.find(u => u.id === cleanId);
+    if (byId) return byId;
+  }
+  return null;
+}
+
+export function upsertLocalUser(input: {
+  id?: string;
+  name?: string;
+  email: string;
+  phone?: string;
+  role?: string;
+  roleLabel?: string;
+  department?: string;
+  warehouseId?: string;
+  status?: "active" | "passive";
+  passwordHash?: string;
+  customPermissions?: string[];
+  customer_type?: "b2c" | "b2b";
+  isApproved?: boolean;
+  lastLogin?: string;
+}): SubUser {
+  const data = readUsersAndRoles();
+  const cleanEmail = input.email.trim().toLowerCase();
+  const userIndex = data.users.findIndex(
+    u => (u.email && u.email.toLowerCase() === cleanEmail) || (input.id && u.id === input.id)
+  );
+
+  const targetRole = input.role || (userIndex !== -1 ? data.users[userIndex].role : "USER");
+  const roleObj = data.roles.find(r => r.name === targetRole || r.id === targetRole);
+  const resolvedRoleLabel = input.roleLabel || (roleObj ? roleObj.label : targetRole);
+
+  if (userIndex !== -1) {
+    const existing = data.users[userIndex];
+    const updated: SubUser = {
+      ...existing,
+      name: input.name !== undefined ? input.name.trim() : existing.name,
+      email: cleanEmail,
+      phone: input.phone !== undefined ? input.phone : existing.phone,
+      role: input.role !== undefined ? input.role : existing.role,
+      roleLabel: resolvedRoleLabel || existing.roleLabel,
+      department: input.department !== undefined ? input.department : existing.department,
+      warehouseId: input.warehouseId !== undefined ? input.warehouseId : existing.warehouseId,
+      status: input.status !== undefined ? input.status : existing.status,
+      passwordHash: input.passwordHash !== undefined ? input.passwordHash : existing.passwordHash,
+      customPermissions: input.customPermissions !== undefined ? input.customPermissions : existing.customPermissions,
+      customer_type: input.customer_type !== undefined ? input.customer_type : existing.customer_type,
+      isApproved: input.isApproved !== undefined ? input.isApproved : existing.isApproved,
+      lastLogin: input.lastLogin !== undefined ? input.lastLogin : existing.lastLogin,
+      updatedAt: new Date().toISOString()
+    };
+    data.users[userIndex] = updated;
+    saveUsersAndRoles(data);
+    return updated;
+  } else {
+    const newUser: SubUser = {
+      id: input.id || `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      name: (input.name || cleanEmail.split("@")[0] || "Kullanıcı").trim(),
+      email: cleanEmail,
+      phone: input.phone || "",
+      role: targetRole,
+      roleLabel: resolvedRoleLabel,
+      customPermissions: input.customPermissions || (roleObj ? roleObj.permissions : []),
+      department: input.department || (targetRole === "USER" ? "Bireysel Müşteri" : targetRole === "DEALER" ? "B2B Bayi" : "Genel"),
+      warehouseId: input.warehouseId || "",
+      status: input.status || "active",
+      passwordHash: input.passwordHash,
+      customer_type: input.customer_type || (targetRole === "USER" ? "b2c" : "b2b"),
+      isApproved: input.isApproved ?? true,
+      lastLogin: input.lastLogin,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    data.users.unshift(newUser);
+    saveUsersAndRoles(data);
+    return newUser;
   }
 }

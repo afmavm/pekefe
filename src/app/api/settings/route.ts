@@ -160,6 +160,24 @@ export async function GET() {
 
     merged.shippingCarriers = cleanMockCarriers(merged.shippingCarriers);
 
+    // Ensure paytrConfig reflects live mode when PAYTR_TEST_MODE="0"
+    if (merged.paytrConfig) {
+      try {
+        const parsedPaytr = typeof merged.paytrConfig === 'string' ? JSON.parse(merged.paytrConfig) : merged.paytrConfig;
+        if (process.env.PAYTR_TEST_MODE === '0' && parsedPaytr.testMode === true && (!diskData?.paytrConfig || JSON.parse(diskData.paytrConfig).testMode === false)) {
+          parsedPaytr.testMode = false;
+        }
+        merged.paytrConfig = JSON.stringify(parsedPaytr);
+      } catch {}
+    } else {
+      merged.paytrConfig = JSON.stringify({
+        merchantId: process.env.PAYTR_MERCHANT_ID || '735518',
+        merchantKey: process.env.PAYTR_MERCHANT_KEY || 'wQkmEkdf5NDCEnWg',
+        merchantSalt: process.env.PAYTR_MERCHANT_SALT || 'AuK7HXRb7NrbyZzw',
+        testMode: process.env.PAYTR_TEST_MODE === '1',
+      });
+    }
+
     MEMORY_SETTINGS = merged;
     return jsonNoCache(merged);
   } catch (error) {
@@ -220,8 +238,8 @@ export async function PUT(req: Request) {
       const sWaEn = data.socialWhatsappEnabled ? 1 : 0;
 
       await prisma.$executeRawUnsafe(
-        `INSERT INTO CMSData (id, announcementActive, announcement1Enabled, announcement2Enabled, contactPhoneEnabled, socialWhatsappEnabled, announcement, announcement2, contactPhone, socialWhatsapp, topBarItems) 
-         VALUES ('singleton', ${annAct}, ${ann1En}, ${ann2En}, ${cPhoneEn}, ${sWaEn}, ?, ?, ?, ?, ?)
+        `INSERT INTO CMSData (id, announcementActive, announcement1Enabled, announcement2Enabled, contactPhoneEnabled, socialWhatsappEnabled, announcement, announcement2, contactPhone, socialWhatsapp, topBarItems, paytrConfig, paymentMethodsConfig, installmentsConfig) 
+         VALUES ('singleton', ${annAct}, ${ann1En}, ${ann2En}, ${cPhoneEn}, ${sWaEn}, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE 
          announcementActive = VALUES(announcementActive),
          announcement1Enabled = VALUES(announcement1Enabled),
@@ -232,12 +250,18 @@ export async function PUT(req: Request) {
          announcement2 = VALUES(announcement2),
          contactPhone = VALUES(contactPhone),
          socialWhatsapp = VALUES(socialWhatsapp),
-         topBarItems = VALUES(topBarItems)`,
+         topBarItems = VALUES(topBarItems),
+         paytrConfig = VALUES(paytrConfig),
+         paymentMethodsConfig = VALUES(paymentMethodsConfig),
+         installmentsConfig = VALUES(installmentsConfig)`,
         data.announcement || '',
         data.announcement2 || '',
         data.contactPhone || '',
         data.socialWhatsapp || '',
-        typeof data.topBarItems === 'string' ? data.topBarItems : JSON.stringify(data.topBarItems || [])
+        typeof data.topBarItems === 'string' ? data.topBarItems : JSON.stringify(data.topBarItems || []),
+        typeof data.paytrConfig === 'string' ? data.paytrConfig : JSON.stringify(data.paytrConfig || {}),
+        typeof data.paymentMethodsConfig === 'string' ? data.paymentMethodsConfig : JSON.stringify(data.paymentMethodsConfig || []),
+        typeof data.installmentsConfig === 'string' ? data.installmentsConfig : JSON.stringify(data.installmentsConfig || [])
       );
     } catch (dbErr) {
       console.warn('[API SETTINGS WARNING] Raw SQL save failed, but disk data was saved:', dbErr);

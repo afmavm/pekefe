@@ -242,61 +242,74 @@ export default function OrderCommandCenter() {
     return items;
   };
 
-  const calculateLogisticDetails = (summaryText: string) => {
-    const items = parseOrderSummary(summaryText);
+  const calculateLogisticDetails = (summaryText: string, parsedItems?: { name: string; quantity: number }[]) => {
+    const items = parsedItems && parsedItems.length > 0 ? parsedItems : parseOrderSummary(summaryText);
     if (!items || items.length === 0) {
-      return { koli: 1, weight: 1.5, desi: 1.0 };
+      return { koli: 1, weight: 1.0, desi: 0.8, totalPieces: 1 };
     }
 
     let totalWeight = 0;
     let totalDesi = 0;
-    let estimatedKoli = 0;
+    let totalPieces = 0;
 
     for (const item of items) {
-      let itemWeight = 1.5;
-      let itemDesi = 1.0;
-      let isLarge = false;
+      const q = item.quantity || 1;
+      totalPieces += q;
+      const name = (item.name || "").toLowerCase();
 
-      const name = item.name.toLowerCase();
-      if (name.includes("körük") || name.includes("koruk")) {
-        itemWeight = 2.0;
-        itemDesi = 1.5;
+      // Akıllı Gramaj ve Ağırlık Tespiti (Örn: 500 Gr, 850 Gr, 1000 Gr, 1 Kg, 5 Kg)
+      const kgMatch = name.match(/(\d+(?:[.,]\d+)?)\s*kg/i);
+      const grMatch = name.match(/(\d+)\s*(?:gr|gram)/i);
+
+      let itemWeight = 1.0;
+      let itemDesi = 0.8;
+
+      if (kgMatch) {
+        const kg = parseFloat(kgMatch[1].replace(",", "."));
+        itemWeight = kg + (kg >= 5 ? 0.6 : 0.25);
+        itemDesi = Math.max(0.6, Math.round(itemWeight * 0.85 * 10) / 10);
+      } else if (grMatch) {
+        const gr = parseInt(grMatch[1], 10);
+        const kg = gr / 1000;
+        itemWeight = Math.round((kg + (kg >= 0.8 ? 0.35 : 0.25)) * 10) / 10;
+        itemDesi = Math.max(0.4, Math.round(itemWeight * 0.7 * 10) / 10);
       } else if (name.includes("kovan")) {
         itemWeight = 12.0;
         itemDesi = 8.0;
-        isLarge = true;
+      } else if (name.includes("körük") || name.includes("koruk")) {
+        itemWeight = 1.8;
+        itemDesi = 1.5;
       } else if (name.includes("maske")) {
-        itemWeight = 0.5;
+        itemWeight = 0.4;
         itemDesi = 0.5;
       } else if (name.includes("demir")) {
-        itemWeight = 1.0;
-        itemDesi = 0.2;
+        itemWeight = 0.8;
+        itemDesi = 0.3;
       } else if (name.includes("tel")) {
-        itemWeight = 5.0;
-        itemDesi = 1.0;
+        itemWeight = 4.5;
+        itemDesi = 1.2;
       } else if (name.includes("süzme") || name.includes("suzme")) {
-        itemWeight = 25.0;
-        itemDesi = 15.0;
-        isLarge = true;
-      } else if (name.includes("bal")) {
-        itemWeight = 1.5;
-        itemDesi = 0.8;
+        itemWeight = 2.0;
+        itemDesi = 1.4;
+      } else if (name.includes("bal") || name.includes("pekmez")) {
+        itemWeight = 1.4;
+        itemDesi = 1.0;
+      } else if (name.includes("pestil") || name.includes("köme")) {
+        itemWeight = 0.6;
+        itemDesi = 0.5;
       }
 
-      totalWeight += itemWeight * item.quantity;
-      totalDesi += itemDesi * item.quantity;
-      
-      if (isLarge) {
-        estimatedKoli += item.quantity;
-      } else {
-        estimatedKoli += item.quantity * 0.25; // Small items packed 4 per box
-      }
+      totalWeight += itemWeight * q;
+      totalDesi += itemDesi * q;
     }
 
+    const koli = (totalDesi > 15 || totalWeight > 20) ? Math.ceil(Math.max(totalDesi / 15, totalWeight / 20)) : 1;
+
     return {
-      koli: Math.max(1, Math.ceil(estimatedKoli)),
-      weight: Math.round(totalWeight * 10) / 10,
-      desi: Math.round(totalDesi * 10) / 10
+      koli,
+      weight: Math.max(0.5, Math.round(totalWeight * 10) / 10),
+      desi: Math.max(0.5, Math.round(totalDesi * 10) / 10),
+      totalPieces: Math.max(1, totalPieces)
     };
   };
 
@@ -341,22 +354,39 @@ export default function OrderCommandCenter() {
     }
   };
 
+  const isCancelled = (status?: string) => {
+    if (!status) return false;
+    const s = String(status).toLowerCase();
+    return s.includes("iptal") || s.includes("cancel");
+  };
+
+  const isReturned = (status?: string) => {
+    if (!status) return false;
+    const s = String(status).toLowerCase();
+    return s.includes("iade") || s.includes("refund");
+  };
+
   // Metrikler & KPI'lar
   const metrics = useMemo(() => {
     const relevant = orders.filter((o) => isAll ? true : (isB2B ? o.type === "B2B" : o.type === "B2C"));
-    const totalVolume = relevant.reduce((sum, o) => sum + o.amount, 0);
-    const totalCount = relevant.length;
+    const activeOrders = relevant.filter(o => !isCancelled(o.status) && !isReturned(o.status));
+    const totalVolume = activeOrders.reduce((sum, o) => sum + (Number(o.amount || (o as any).total) || 0), 0);
+    const totalCount = activeOrders.length;
+    const cancelledCount = relevant.filter(o => isCancelled(o.status)).length;
+    const returnsCount = relevant.filter(o => isReturned(o.status)).length;
     const avgBasket = totalCount > 0 ? Math.round(totalVolume / totalCount) : 0;
     
     return {
       totalVolume,
       totalCount,
-      processing: relevant.filter((o) => o.status === "Hazırlanıyor").length,
-      shipped: relevant.filter((o) => o.status === "Kargolandı" || (o.status as any) === "Kargoya Verildi").length,
-      pendingTransfers: relevant.filter((o) => o.status === "Yeni" && o.method?.toLowerCase().includes("havale")).length,
+      allCount: relevant.length,
+      cancelledCount,
+      returnsCount,
+      processing: activeOrders.filter((o) => o.status === "Hazırlanıyor").length,
+      shipped: activeOrders.filter((o) => o.status === "Kargolandı" || (o.status as any) === "Kargoya Verildi").length,
+      pendingTransfers: activeOrders.filter((o) => o.status === "Yeni" && o.method?.toLowerCase().includes("havale")).length,
       avgBasket,
-      activeDealers: new Set(relevant.filter(o => o.type === "B2B").map(o => o.client)).size,
-      returnsCount: relevant.filter(o => o.status?.includes("İade")).length
+      activeDealers: new Set(activeOrders.filter(o => o.type === "B2B").map(o => o.client)).size,
     };
   }, [orders, isAll, isB2B]);
 
@@ -369,7 +399,18 @@ export default function OrderCommandCenter() {
                           order.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           order.summary.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchStatus = statusFilter === "Tümü" || order.status === statusFilter;
+      let matchStatus = true;
+      if (statusFilter === "Tümü") {
+        matchStatus = true;
+      } else if (statusFilter === "Aktif") {
+        matchStatus = !isCancelled(order.status) && !isReturned(order.status);
+      } else if (statusFilter === "İptal Edildi" || statusFilter === "İptal") {
+        matchStatus = isCancelled(order.status);
+      } else if (statusFilter === "İade" || statusFilter === "İade Talebi" || statusFilter === "İade Tamamlandı") {
+        matchStatus = isReturned(order.status);
+      } else {
+        matchStatus = order.status === statusFilter;
+      }
       
       let matchClientType = true;
       if (clientTypeFilter !== "Tümü") {
@@ -479,43 +520,36 @@ export default function OrderCommandCenter() {
 
   // Bulk Invoicing
   const handleBulkGenerateInvoices = async () => {
-    const selectedIds = Array.from(selectedRows);
-    if (selectedIds.length === 0) return;
+    const selectedOrders = orders.filter(o => 
+      selectedRows.has(o.id) || 
+      (o.orderNumber && selectedRows.has(o.orderNumber))
+    );
+    
+    if (selectedOrders.length === 0) {
+      toast.error("Lütfen faturalandırmak için en az bir sipariş seçiniz.");
+      return;
+    }
 
-    // Open print window first to avoid browser blocking
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      toast.error("Yazıcı penceresi engellendi. Pop-up izni veriniz.");
+      toast.error("Yazıcı penceresi engellendi. Tarayıcınızdan pop-up izni veriniz.");
       return;
     }
 
-    setIsGenerating(true);
-    let result;
-    try {
-      result = await bulkGenerateInvoicesAction(selectedIds);
-    } catch (error: any) {
-      setIsGenerating(false);
-      printWindow.close();
-      toast.error(error.message || "Faturalandırma servisi çağrılırken bir hata oluştu.");
-      return;
-    }
-    setIsGenerating(false);
-
-    if (!result || !result.success) {
-      printWindow.close();
-      toast.error(result?.error || "Toplu faturalandırma sırasında hata oluştu.");
-      return;
-    }
-
-    // Build beautiful A4 invoice pages
-    const selectedOrders = orders.filter(o => selectedRows.has(o.id));
-    const companyName = cmsSettings?.companyName || "PEKEFE GERÇEK HASAT E-TİCARET";
-    const logoUrl = cmsSettings?.logoUrl || "/uploads/1779836095322-585290292-Logo.jpg";
-    const fullLogoUrl = window.location.origin + logoUrl;
+    const companyName = cmsSettings?.companyName ? `PEKEFE · ${cmsSettings.companyName}` : "PEKEFE · İLHAN EFE";
+    const companyAddress = cmsSettings?.contactAddress || "Çamlıca Mah. No: 00, İspir / ERZURUM";
+    const companyPhone = cmsSettings?.contactPhone || cmsSettings?.companyGsm || "+90 534 270 91 40";
+    const companyEmail = cmsSettings?.contactEmail || "info@pekefe.com";
+    const companyTaxNo = cmsSettings?.companyTaxNo || "29353587754";
+    const logoUrl = cmsSettings?.logoUrl || "/logo.png";
+    const fullLogoUrl = typeof window !== "undefined" ? window.location.origin + logoUrl : logoUrl;
 
     const invoicesHtml = selectedOrders.map(order => {
       const clientAcc = findClientAccount(order.client);
-      const receiptItems = parseOrderSummary(order.summary, order.amount);
+      let receiptItems = parseOrderSummary(order.summary, order.amount);
+      if (!receiptItems || receiptItems.length === 0) {
+        receiptItems = [{ name: order.summary || "PEKEFE Geleneksel Ürün", quantity: 1, price: order.amount || 0, taxRate: 20 }];
+      }
       
       const subtotal = receiptItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const vat = subtotal * 0.20;
@@ -535,25 +569,26 @@ export default function OrderCommandCenter() {
       const clientEmail = order.email || clientAcc?.email || "Belirtilmedi";
 
       return `
-        <div class="card" style="padding: 45px; border: 1px solid #e2e8f0; border-radius: 24px; margin: 20px auto; max-width: 800px; background: #fff; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04); page-break-after: always; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid ${primaryColor}; padding-bottom: 25px; margin-bottom: 25px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-              <img src="${fullLogoUrl}" alt="Logo" style="max-height: 55px; max-width: 180px; object-fit: contain;" onError="this.style.display='none'" />
+        <div class="card" style="padding: 40px; border: 1px solid #e2e8f0; border-radius: 20px; margin: 20px auto; max-width: 800px; background: #fff; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04); page-break-after: always; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid ${primaryColor}; padding-bottom: 20px; margin-bottom: 25px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <img src="${fullLogoUrl}" alt="PEKEFE" style="max-height: 55px; max-width: 140px; object-fit: contain;" onerror="this.style.display='none'" />
               <div>
-                <h2 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.5px;">${companyName.toUpperCase()}</h2>
-                <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b; font-weight: 500; max-width: 320px; line-height: 1.5;">${cmsSettings?.contactAddress || "Kayseri OSB 1. Cadde No: 5, Türkiye"}</p>
+                <h2 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px;">${companyName.toUpperCase()}</h2>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.4;">${companyAddress}</p>
+                <p style="margin: 2px 0 0 0; font-size: 10px; color: #64748b;">Tel: ${companyPhone} · ${companyEmail} · VKN: ${companyTaxNo}</p>
               </div>
             </div>
             <div style="text-align: right;">
-              <span class="badge" style="background: ${primaryColor}1a; color: ${primaryColor}; padding: 6px 12px; font-size: 10px; font-weight: 800; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid ${primaryColor}26; display: inline-block;">${order.type} SİPARİŞ</span>
-              <p style="margin: 8px 0 0 0; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 18px; color: #1e293b; letter-spacing: -0.5px;">#${order.orderNumber}</p>
-              <p style="margin: 3px 0 0 0; font-size: 10px; color: #94a3b8; font-weight: 600;">Makbuz Tarihi: ${new Date().toLocaleDateString("tr-TR")}</p>
+              <span class="badge" style="background: ${primaryColor}1a; color: ${primaryColor}; padding: 6px 12px; font-size: 10px; font-weight: 800; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid ${primaryColor}26; display: inline-block;">${order.type || 'B2C'} SİPARİŞ</span>
+              <p style="margin: 8px 0 0 0; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 17px; color: #1e293b; letter-spacing: -0.5px;">#${order.orderNumber || order.id}</p>
+              <p style="margin: 3px 0 0 0; font-size: 10px; color: #94a3b8; font-weight: 600;">Tarih: ${order.date || new Date().toLocaleDateString("tr-TR")}</p>
             </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
             <div>
-              <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; tracking: 1px; color: #94a3b8; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">Alıcı Bilgileri</div>
+              <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">Alıcı Bilgileri</div>
               <div style="font-size: 12px; line-height: 1.6; color: #1e293b;">
                 <p style="margin: 0; font-weight: 800; font-size: 13px;">${order.client}</p>
                 <p style="margin: 4px 0 0 0; color: #475569; font-weight: 500; max-width: 320px;">${clientAddress}</p>
@@ -561,31 +596,33 @@ export default function OrderCommandCenter() {
               </div>
             </div>
             <div style="border-left: 1px solid #f1f5f9; padding-left: 30px;">
-              <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; tracking: 1px; color: #94a3b8; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">Ödeme & Sevkiyat</div>
+              <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">Ödeme & Sevkiyat</div>
               <div style="font-size: 12px; line-height: 1.6; color: #1e293b;">
                 <p style="margin: 0; font-weight: 500;"><b>Sipariş Tarihi:</b> <span style="font-weight: 700;">${order.date}</span></p>
-                <p style="margin: 4px 0 0 0; font-weight: 500;"><b>Ödeme Yöntemi:</b> <span style="font-weight: 700;">${order.method}</span></p>
+                <p style="margin: 4px 0 0 0; font-weight: 500;"><b>Ödeme Yöntemi:</b> <span style="font-weight: 700;">${order.method || 'Kredi Kartı / Havale'}</span></p>
+                <p style="margin: 4px 0 0 0; font-weight: 500;"><b>Durum:</b> <span style="font-weight: 700; color: ${primaryColor};">${order.status || 'Hazırlanıyor'}</span></p>
               </div>
             </div>
           </div>
 
-          <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; tracking: 1px; color: #94a3b8; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">Sipariş Kalemleri</div>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-              <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase;">
-                <th style="padding-bottom: 10px; width: 50%;">Açıklama</th>
-                <th style="padding-bottom: 10px; text-align: center; width: 15%;">Miktar</th>
-                <th style="padding-bottom: 10px; text-align: right; width: 15%;">Birim Fiyat</th>
-                <th style="padding-bottom: 10px; text-align: right; width: 20%;">Toplam</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsRowsHtml}
-            </tbody>
-          </table>
+          <div style="border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 25px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                  <th style="padding: 12px 10px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Ürün Açıklaması</th>
+                  <th style="padding: 12px 10px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">Miktar</th>
+                  <th style="padding: 12px 10px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Birim Fiyat</th>
+                  <th style="padding: 12px 10px; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Toplam Tutar</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsRowsHtml}
+              </tbody>
+            </table>
+          </div>
 
-          <div style="margin-top: 35px; display: flex; justify-content: flex-end;">
-            <div style="width: 280px; font-size: 12px; border-top: 2px solid #e2e8f0; padding-top: 15px;">
+          <div style="display: flex; justify-content: flex-end;">
+            <div style="width: 280px; font-size: 12px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #64748b;">
                 <span>Ara Toplam:</span>
                 <span style="color: #1e293b; font-weight: 700;">₺${subtotal.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}</span>
@@ -601,9 +638,9 @@ export default function OrderCommandCenter() {
             </div>
           </div>
 
-          <div style="margin-top: 60px; border-top: 1px solid #f1f5f9; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8; line-height: 1.6;">
-            <p style="margin: 0; color: #475569; font-weight: 800;">Bizi tercih ettiğiniz için teşekkür ederiz!</p>
-            <p style="margin: 4px 0 0 0;">PEKEFE Geleneksel & Doğal Lezzetler Destek Hattı: info@pekefe.com</p>
+          <div style="margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: center; font-size: 11px; color: #94a3b8; line-height: 1.6;">
+            <p style="margin: 0; color: #475569; font-weight: 800;">PEKEFE · Geleneksel ve Doğal Lezzetleri Tercih Ettiğiniz İçin Teşekkür Ederiz!</p>
+            <p style="margin: 4px 0 0 0;">Müşteri Destek & Sipariş Takibi: ${companyEmail} · www.pekefe.com</p>
           </div>
         </div>
       `;
@@ -612,37 +649,42 @@ export default function OrderCommandCenter() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Toplu Sipariş Faturaları / Makbuzları</title>
-          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+          <title>Toplu Sipariş Faturaları - PEKEFE</title>
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
           <style>
-            body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 20px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 20px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
             @media print {
               body { background: #fff; padding: 0; }
-              .card { border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
+              .card { border: none !important; box-shadow: none !important; margin: 0 !important; padding: 20px !important; page-break-after: always; }
             }
           </style>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            };
+          </script>
         </head>
-        <body onload="window.print()">
+        <body>
           ${invoicesHtml}
         </body>
       </html>
     `);
     printWindow.document.close();
 
-    const count = result.count ?? 0;
-    const existingCount = result.existingCount ?? 0;
-    
-    if (count > 0 && existingCount > 0) {
-      toast.success(`İşlem tamamlandı: ${count} adet yeni fatura oluşturuldu. ${existingCount} adet önceden oluşturulmuş fatura ile birlikte yazdırılıyor.`);
-    } else if (count > 0) {
-      toast.success(`İşlem tamamlandı: ${count} adet yeni fatura oluşturuldu ve yazdırılıyor.`);
-    } else if (existingCount > 0) {
-      toast.success(`Seçili siparişlerin faturaları zaten mevcut. ${existingCount} adet fatura yazdırılıyor...`);
-    } else {
-      toast.success("Seçili siparişlerin fatura çıktıları hazırlandı ve yazdırılıyor.");
-    }
+    // Background invoice sync
+    const selectedIds = selectedOrders.map(o => o.id);
+    bulkGenerateInvoicesAction(selectedIds)
+      .then(res => {
+        if (res && res.success) {
+          refreshOrders();
+        }
+      })
+      .catch(() => {});
+
+    toast.success(`${selectedOrders.length} adet fatura hazırlandı ve yazdırılıyor.`);
     setSelectedRows(new Set());
-    refreshOrders();
   };
 
   // Bulk Kargo Labels Print
@@ -654,18 +696,34 @@ export default function OrderCommandCenter() {
       return;
     }
 
-    const companyName = cmsSettings?.companyName || "PEKEFE GERÇEK HASAT";
+    const companyName = cmsSettings?.companyName ? `PEKEFE · ${cmsSettings.companyName}` : "PEKEFE · İLHAN EFE";
+    const companyAddress = cmsSettings?.contactAddress || "Çamlıca Mah. No: 00, İspir / ERZURUM";
+    const companyPhone = cmsSettings?.contactPhone || cmsSettings?.companyGsm || "0534 270 91 40";
+    const companyTaxNo = cmsSettings?.companyTaxNo || "29353587754";
+    const logoUrl = cmsSettings?.logoUrl || "/logo.png";
+    const fullLogoUrl = typeof window !== "undefined" ? window.location.origin + logoUrl : logoUrl;
 
     const labelsHtml = selectedOrders.map(o => {
       const clientAcc = findClientAccount(o.client);
       const clientAddress = o.address || clientAcc?.address || "Açık adres belirtilmemiştir.";
       const clientPhone = o.phone || clientAcc?.phone || "Belirtilmedi";
       
-      let tierBadge = "MÜŞTERİ";
-      if (o.type === "B2B") {
-        const group = clientAcc?.dealerGroup || "Standart";
-        tierBadge = `${group.toUpperCase()} BAYİ`;
-      }
+      const orderItems = parseOrderSummary(o.summary, o.amount);
+      const logistics = calculateLogisticDetails(o.summary, orderItems);
+
+      const itemsHtml = orderItems.length > 0 
+        ? orderItems.slice(0, 5).map(item => `
+            <tr style="border-bottom: 1px dotted #ccc;">
+              <td style="padding: 0.8mm 0; font-weight: 700; color: #000; max-width: 65mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</td>
+              <td style="padding: 0.8mm 0; text-align: right; font-weight: 900; color: #000; white-space: nowrap;">${item.quantity} Adet</td>
+            </tr>
+          `).join("") + (orderItems.length > 5 ? `<tr><td colspan="2" style="font-size: 7px; font-weight: 800; color: #555; padding-top: 0.5mm;">+ ${orderItems.length - 5} kalem daha...</td></tr>` : "")
+        : `<tr><td colspan="2" style="padding: 0.8mm 0; font-weight: 600; color: #333;">${o.summary || 'Standart Sevkiyat Paketi'}</td></tr>`;
+
+      // Gerçek Kargo Şirketi ve Takip Kodu
+      const orderCarrier = o.cargoCompany || 
+        (o.summary && o.summary.startsWith("[") ? o.summary.match(/^\[([^\]|]+)/)?.[1]?.trim() : null) || 
+        "Yurtiçi Kargo";
 
       // Deterministic SVG Barcode Pattern generation to avoid print dithering into solid black block
       let barcodeData = o.trackingNo || "";
@@ -677,6 +735,29 @@ export default function OrderCommandCenter() {
       }
       if (!barcodeData) {
         barcodeData = o.orderNumber || o.id.slice(-8).toUpperCase();
+      }
+
+      // Tarih / Saat formatlama (gerçek veriden)
+      const formatOrderDate = (dateStr?: string) => {
+        if (!dateStr) return new Date().toLocaleDateString("tr-TR");
+        try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return dateStr;
+          return `${d.toLocaleDateString("tr-TR")} - ${d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`;
+        } catch {
+          return dateStr;
+        }
+      };
+
+      // Sipariş Tipi (Gerçek kanaldan)
+      let orderTypeLabel = "Standart Perakende";
+      if (o.type === "B2B") {
+        orderTypeLabel = "B2B Kurumsal Bayi";
+      } else if (o.summary && o.summary.startsWith("[")) {
+        const pMatch = o.summary.match(/^\[([^\]|]+)/);
+        if (pMatch && pMatch[1]) {
+          orderTypeLabel = `${pMatch[1].trim()} Siparişi`;
+        }
       }
       let x = 10;
       const svgRects: string[] = [];
@@ -707,65 +788,80 @@ export default function OrderCommandCenter() {
       }).join("");
 
       return `
-        <div style="width: 100mm; height: 150mm; padding: 5mm; box-sizing: border-box; background: #fff; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 2px solid #000; color: #000; position: relative;">
+        <div style="width: 100mm; height: 150mm; padding: 4.5mm; box-sizing: border-box; background: #fff; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 2px solid #000; color: #000; position: relative;">
           
-          <!-- 1. ÜST BÖLÜM (LOGO & TIER BADGE) -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 3mm; height: 16mm; box-sizing: border-box;">
-            <div>
-              <h1 style="margin: 0; font-size: 16px; font-weight: 900; letter-spacing: -0.5px;">${companyName.toUpperCase()}</h1>
-              <span style="font-size: 8px; font-weight: 800; tracking-widest">YERLİ İMALAT SANAYİ</span>
-            </div>
-            <div style="background: #000; color: #fff; padding: 1mm 2.5mm; font-size: 9px; font-weight: 900; letter-spacing: 0.5px; border-radius: 0px; text-transform: uppercase;">
-              ${tierBadge}
+          <!-- 1. ÜST BÖLÜM (LOGO & FİRMA BİLGİLERİ) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 2mm; min-height: 16mm; box-sizing: border-box; gap: 3mm;">
+            <div style="display: flex; align-items: center; gap: 3mm; flex: 1; min-width: 0;">
+              <img src="${fullLogoUrl}" alt="PEKEFE" style="height: 13mm; max-width: 30mm; object-fit: contain;" onerror="this.style.display='none'" />
+              <div style="min-width: 0;">
+                <h1 style="margin: 0; font-size: 13px; font-weight: 900; letter-spacing: -0.3px; line-height: 1.15; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${companyName.toUpperCase()}</h1>
+                <div style="font-size: 7px; font-weight: 600; color: #111; line-height: 1.25; margin-top: 0.5mm;">
+                  ${companyAddress}<br />
+                  Tel: ${companyPhone} · www.pekefe.com${companyTaxNo ? ` · VKN: ${companyTaxNo}` : ""}
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- 2. SİPARİŞ BİLGİLERİ KUTUSU -->
-          <div style="border: 1.5px solid #000; padding: 2.5mm; margin-top: 3mm; box-sizing: border-box;">
-            <table style="width: 100%; font-size: 9px; border-collapse: collapse; font-weight: bold;">
+          <div style="border: 1.5px solid #000; padding: 2mm; margin-top: 2mm; box-sizing: border-box;">
+            <table style="width: 100%; font-size: 8.5px; border-collapse: collapse; font-weight: bold;">
               <tr>
-                <td style="width: 30%; padding-bottom: 1mm;">Sipariş No:</td>
-                <td style="font-size: 11px; font-weight: 900; padding-bottom: 1mm;">#${o.orderNumber}</td>
+                <td style="width: 28%; padding-bottom: 0.8mm;">Sipariş No:</td>
+                <td style="font-size: 11px; font-weight: 900; padding-bottom: 0.8mm;">#${o.orderNumber}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 1mm;">Tarih / Saat:</td>
-                <td style="padding-bottom: 1mm;">${o.date} - 16:55</td>
+                <td style="padding-bottom: 0.8mm;">Tarih / Saat:</td>
+                <td style="padding-bottom: 0.8mm;">${formatOrderDate(o.date)}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 1mm;">Ödeme Türü:</td>
-                <td style="padding-bottom: 1mm;">${o.method || 'Havale/EFT'}</td>
+                <td style="padding-bottom: 0.8mm;">Ödeme Türü:</td>
+                <td style="padding-bottom: 0.8mm;">${o.method || 'Banka Havalesi'}</td>
               </tr>
               <tr>
                 <td>Lojistik:</td>
-                <td>${o.address?.includes("Yurtiçi") ? "Yurtiçi Kargo" : "Aras Kargo"} | Paket: 1/1</td>
+                <td>${orderCarrier} | Paket: 1/${logistics.koli}</td>
               </tr>
             </table>
           </div>
 
-          <!-- 3. ALICI / TESLİMAT ADRESİ (EN BÜYÜK ALAN) -->
-          <div style="margin-top: 3mm; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start;">
-            <p style="font-size: 8px; font-weight: 900; margin: 0 0 1.5mm 0; border-bottom: 1px solid #000; padding-bottom: 0.5mm; letter-spacing: 0.5px;">ALICI / TESLİMAT ADRESİ</p>
-            <h3 style="margin: 0 0 1.5mm 0; font-size: 13px; font-weight: 900; text-transform: uppercase;">${o.client}</h3>
-            <p style="margin: 0; font-size: 10px; line-height: 1.35; font-weight: 700; word-break: break-word;">${clientAddress}</p>
-            <p style="margin: 2.5mm 0 0 0; font-size: 12px; font-weight: 900;">TEL: ${clientPhone}</p>
+          <!-- 3. ALICI / TESLİMAT ADRESİ -->
+          <div style="margin-top: 2mm; display: flex; flex-direction: column; justify-content: flex-start;">
+            <p style="font-size: 7.5px; font-weight: 900; margin: 0 0 1mm 0; border-bottom: 1px solid #000; padding-bottom: 0.4mm; letter-spacing: 0.5px;">ALICI / TESLİMAT ADRESİ</p>
+            <h3 style="margin: 0 0 1mm 0; font-size: 12px; font-weight: 900; text-transform: uppercase;">${o.client}</h3>
+            <p style="margin: 0; font-size: 9.5px; line-height: 1.3; font-weight: 700; word-break: break-word;">${clientAddress}</p>
+            <p style="margin: 1.5mm 0 0 0; font-size: 11px; font-weight: 900;">TEL: ${clientPhone}</p>
           </div>
 
-          <!-- 4. B2B & SEKTÖREL BİLGİLER VE ÖNCELİK ROZETLERİ -->
-          <div style="border-top: 1.5px dashed #000; padding-top: 2.5mm; margin-top: 2mm; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
-            <div style="font-size: 8px; font-weight: 800; line-height: 1.4;">
+          <!-- 4. SİPARİŞ İÇERİĞİ (ÜRÜN LİSTESİ) -->
+          <div style="border: 1.5px solid #000; margin-top: 2mm; padding: 2mm; box-sizing: border-box;">
+            <div style="font-size: 7.5px; font-weight: 900; letter-spacing: 0.5px; border-bottom: 1px solid #000; padding-bottom: 0.8mm; margin-bottom: 1mm; display: flex; justify-content: space-between;">
+              <span>SİPARİŞ İÇERİĞİ (ÜRÜN LİSTESİ)</span>
+              <span>MİKTAR</span>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 8px; line-height: 1.25;">
+              ${itemsHtml}
+            </table>
+          </div>
+
+          <!-- 5. B2B & SEKTÖREL BİLGİLER VE ÖNCELİK ROZETLERİ -->
+          <div style="border-top: 1.5px dashed #000; padding-top: 1.5mm; margin-top: 1.5mm; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
+            <div style="font-size: 7.5px; font-weight: 800; line-height: 1.35;">
               ${o.type === "B2B" ? `
-                <div>Cari Kodu: ${clientAcc?.id || 'CR00045'}</div>
-                <div>Vade Koşulu: ${clientAcc?.vadeGun || '30'} Gün Vade</div>
-                <div>Lojistik: 1 Koli | 4.8 Desi | 14.8 kg</div>
+                <div>Cari Kodu: ${(clientAcc as any)?.code || clientAcc?.id || (o.taxId ? `VKN: ${o.taxId}` : `#CR-${o.client.slice(0, 3).toUpperCase()}`)}</div>
+                <div>Vade / Koşul: ${clientAcc?.vadeGun ? `${clientAcc.vadeGun} Gün Vade` : (o.method || "Cari Hesap")}</div>
+                <div>Lojistik: ${logistics.koli} Koli | ${logistics.desi} Desi | ${logistics.weight} kg</div>
+                <div style="margin-top: 0.5mm; font-weight: 900;">Depo Durumu: ${o.status || 'Hazırlanıyor'} (${logistics.totalPieces} Adet Ürün)</div>
               ` : `
-                <div>Sipariş Tipi: Standart Perakende</div>
-                <div>Lojistik: 1 Koli | 2.4 Desi | 3.5 kg</div>
+                <div>Sipariş Tipi: ${orderTypeLabel}</div>
+                <div>Lojistik: ${logistics.koli} Koli | ${logistics.desi} Desi | ${logistics.weight} kg</div>
+                <div style="margin-top: 0.5mm; font-weight: 900;">Depo Durumu: ${o.status || 'Hazırlanıyor'} (${logistics.totalPieces} Adet Ürün)</div>
               `}
-              <div style="margin-top: 1mm; font-weight: 900;">Üretim: Hazır Stok (Standart Ürün)</div>
             </div>
             
             <div style="display: flex; gap: 1mm;">
-              <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900;">ACİL</span>
+              <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900;">${o.status === "Yeni" || o.status === "Hazırlanıyor" ? "ACİL" : "SEVK"}</span>
               ${o.type === "B2B" ? `
                 <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900; background: #000; color: #fff;">TOPTAN</span>
               ` : `
@@ -774,14 +870,14 @@ export default function OrderCommandCenter() {
             </div>
           </div>
 
-          <!-- 5. BARKOD VE QR KOD ALANI -->
-          <div style="border-top: 2px solid #000; padding-top: 3mm; margin-top: 3mm; display: flex; justify-content: space-between; align-items: center; height: 26mm; box-sizing: border-box;">
+          <!-- 6. BARKOD VE QR KOD ALANI -->
+          <div style="border-top: 2px solid #000; padding-top: 2mm; margin-top: 2mm; display: flex; justify-content: space-between; align-items: center; height: 24mm; box-sizing: border-box;">
             <!-- Barkod sol -->
             <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-              <div style="display: flex; height: 15mm; align-items: stretch; width: 92%;">
+              <div style="display: flex; height: 14mm; align-items: stretch; width: 92%;">
                 ${barcodeSvg}
               </div>
-              <p style="margin: 1mm 0 0 0; font-size: 11px; font-weight: 900; letter-spacing: 2px; text-align: left;">*${barcodeData}*</p>
+              <p style="margin: 0.5mm 0 0 0; font-size: 11px; font-weight: 900; letter-spacing: 2px; text-align: left;">*${barcodeData}*</p>
             </div>
 
             <!-- Gelişmiş QR Kod sağ -->
@@ -792,8 +888,8 @@ export default function OrderCommandCenter() {
             </div>
           </div>
 
-          <!-- 6. OPERASYON BİLGİLERİ (FOOTER) -->
-          <div style="border-top: 1px solid #cbd5e1; padding-top: 1mm; margin-top: 1.5mm; font-size: 6.5px; font-weight: 700; display: flex; justify-content: space-between; color: #64748b;">
+          <!-- 7. OPERASYON BİLGİLERİ (FOOTER) -->
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 1mm; margin-top: 1mm; font-size: 6.5px; font-weight: 700; display: flex; justify-content: space-between; color: #64748b;">
             <span>Oluşturan: Sistem Admin</span>
             <span>Yazdırma: ${new Date().toLocaleString("tr-TR")}</span>
           </div>
@@ -850,6 +946,13 @@ export default function OrderCommandCenter() {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
+    const companyName = cmsSettings?.companyName ? `PEKEFE · ${cmsSettings.companyName}` : "PEKEFE · İLHAN EFE";
+    const companyAddress = cmsSettings?.contactAddress || "Çamlıca Mah. No: 00, İspir / ERZURUM";
+    const companyPhone = cmsSettings?.contactPhone || cmsSettings?.companyGsm || "0534 270 91 40";
+    const companyTaxNo = cmsSettings?.companyTaxNo || "29353587754";
+    const logoUrl = cmsSettings?.logoUrl || "/logo.png";
+    const fullLogoUrl = typeof window !== "undefined" ? window.location.origin + logoUrl : logoUrl;
+
     const rowsHtml = Object.entries(consolidatedMap).map(([name, data]) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 12px; font-weight: bold; color: #1e293b; font-size: 13px;">${name}</td>
@@ -861,26 +964,29 @@ export default function OrderCommandCenter() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Toplu Çeki Listesi</title>
+          <title>Toplu Çeki Listesi - ${companyName}</title>
           <style>
-            body { font-family: sans-serif; padding: 40px; background: #fff; color: #334155; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 32px; background: #fff; color: #334155; }
+            table { width: 100%; border-collapse: collapse; margin-top: 24px; }
             th { background: #f8fafc; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; border-bottom: 2px solid #e2e8f0; text-align: left; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid ${primaryColor}; padding-bottom: 20px; }
-            .badge { background: ${primaryColor}; color: white; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 6px; }
+            .badge { background: ${primaryColor}; color: white; padding: 6px 14px; font-size: 13px; font-weight: 800; border-radius: 6px; display: inline-block; }
           </style>
         </head>
         <body onload="window.print()">
-          <div class="header">
-            <div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px;">PEKEFE GERÇEK HASAT SEVKİYAT</h1>
-              <p style="margin: 5px 0 0 0; color: #64748b; font-size: 12px;">Toplu Çeki Listesi (Warehouse Picking)</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid ${primaryColor}; padding-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <img src="${fullLogoUrl}" alt="PEKEFE" style="height: 48px; object-fit: contain;" onerror="this.style.display='none'" />
+              <div>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: #1e293b;">${companyName}</h1>
+                <p style="margin: 3px 0 0 0; color: #64748b; font-size: 12px; font-weight: 600;">Depo Sevkiyat & Toplu Çeki Listesi (Warehouse Picking List)</p>
+                <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 10px;">${companyAddress} · Tel: ${companyPhone}${companyTaxNo ? ` · VKN: ${companyTaxNo}` : ""}</p>
+              </div>
             </div>
-            <div>
+            <div style="text-align: right;">
               <span class="badge">${selectedOrders.length} Sipariş Birleştirildi</span>
+              <p style="margin: 6px 0 0 0; font-size: 11px; color: #64748b; font-weight: 600;">Oluşturulma: ${new Date().toLocaleString("tr-TR")}</p>
             </div>
           </div>
-          <p style="font-size: 11px; color: #94a3b8; margin-top: 15px;">Yazdırılma Tarihi: ${new Date().toLocaleString("tr-TR")}</p>
           <table>
             <thead>
               <tr>
@@ -1284,13 +1390,19 @@ export default function OrderCommandCenter() {
             </div>
             <div>
               <p className="text-base font-extrabold text-slate-800">₺{metrics.totalVolume.toLocaleString("tr-TR")}</p>
-              <p className="text-[9px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
-                <span>↑ %14.8</span> <span className="text-slate-400">düne göre</span>
-              </p>
+              {metrics.totalVolume > 0 ? (
+                <p className="text-[9px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                  <span>↑ Aktif Net Ciro</span> <span className="text-slate-400">{metrics.cancelledCount > 0 ? `(${metrics.cancelledCount} iptal hariç)` : "operasyonel"}</span>
+                </p>
+              ) : (
+                <p className="text-[9px] text-rose-500 font-bold mt-1 flex items-center gap-1">
+                  <span>{metrics.cancelledCount > 0 ? `${metrics.cancelledCount} İptal Hariç (₺0)` : "İşlem hacmi yok"}</span>
+                </p>
+              )}
             </div>
             {/* Sparkline simulation */}
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-orange-500/10">
-              <div className="h-full bg-orange-500 w-[68%]" />
+              <div className="h-full bg-orange-500 transition-all duration-500" style={{ width: metrics.totalVolume > 0 ? "68%" : "0%" }} />
             </div>
           </div>
 
@@ -1302,10 +1414,16 @@ export default function OrderCommandCenter() {
             </div>
             <div>
               <p className="text-base font-extrabold text-slate-800">{metrics.totalCount} Adet</p>
-              <p className="text-[9px] text-slate-400 font-bold mt-1">Havuzda aktif sipariş</p>
+              <p className="text-[9px] font-bold mt-1">
+                {metrics.cancelledCount > 0 ? (
+                  <span className="text-rose-500">{metrics.cancelledCount} İptal Sipariş Harici</span>
+                ) : (
+                  <span className="text-slate-400">Havuzda aktif sipariş</span>
+                )}
+              </p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-blue-500/10">
-              <div className="h-full bg-blue-500 w-[55%]" />
+              <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: metrics.totalCount > 0 ? "55%" : "0%" }} />
             </div>
           </div>
 
@@ -1320,7 +1438,7 @@ export default function OrderCommandCenter() {
               <p className="text-[9px] text-amber-600 font-bold mt-1">MRP / Sevkiyat bandında</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-amber-500/10">
-              <div className="h-full bg-amber-500 w-[40%]" />
+              <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: metrics.processing > 0 ? "40%" : "0%" }} />
             </div>
           </div>
 
@@ -1335,7 +1453,7 @@ export default function OrderCommandCenter() {
               <p className="text-[9px] text-indigo-600 font-bold mt-1">Yolda / Dağıtımda</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-indigo-500/10">
-              <div className="h-full bg-indigo-500 w-[80%]" />
+              <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: metrics.shipped > 0 ? "80%" : "0%" }} />
             </div>
           </div>
 
@@ -1347,10 +1465,16 @@ export default function OrderCommandCenter() {
             </div>
             <div>
               <p className="text-base font-extrabold text-slate-800">₺{metrics.avgBasket.toLocaleString("tr-TR")}</p>
-              <p className="text-[9px] text-purple-600 font-bold mt-1">AOV operasyonel hacim</p>
+              <p className="text-[9px] font-bold mt-1">
+                {metrics.totalCount > 0 ? (
+                  <span className="text-purple-600">AOV operasyonel hacim</span>
+                ) : (
+                  <span className="text-slate-400">Aktif sipariş bulunmuyor</span>
+                )}
+              </p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-purple-500/10">
-              <div className="h-full bg-purple-500 w-[62%]" />
+              <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: metrics.avgBasket > 0 ? "62%" : "0%" }} />
             </div>
           </div>
 
@@ -1362,10 +1486,12 @@ export default function OrderCommandCenter() {
             </div>
             <div>
               <p className="text-base font-extrabold text-slate-800">{metrics.activeDealers} Cari</p>
-              <p className="text-[9px] text-emerald-600 font-bold mt-1">Son 30 gün sipariş veren</p>
+              <p className="text-[9px] text-emerald-600 font-bold mt-1">
+                {metrics.activeDealers > 0 ? "Son 30 gün aktif sipariş veren" : "Aktif sipariş veren cari yok"}
+              </p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-emerald-500/10">
-              <div className="h-full bg-emerald-500 w-[45%]" />
+              <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: metrics.activeDealers > 0 ? "45%" : "0%" }} />
             </div>
           </div>
 
@@ -1411,6 +1537,7 @@ export default function OrderCommandCenter() {
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
                   >
                     <option value="Tümü">Tüm Durumlar</option>
+                    <option value="Aktif">Aktif Siparişler (İptal/İade Hariç)</option>
                     <option value="Yeni">Yeni Sipariş</option>
                     <option value="Ödeme Bekliyor">Ödeme Bekliyor</option>
                     <option value="Ödeme Bekleniyor">Ödeme Bekleniyor</option>
@@ -1512,6 +1639,102 @@ export default function OrderCommandCenter() {
           /* LIST GÖRÜNÜMÜ */
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             
+            {/* Quick Status Tabs Bar */}
+            <div className="px-5 py-2.5 border-b border-slate-100 flex flex-wrap items-center gap-2 bg-slate-50/40">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Hızlı Filtre:</span>
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("Tümü"); setCurrentPage(1); }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === "Tümü"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <span>Tümü</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "Tümü" ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  {metrics.allCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("Aktif"); setCurrentPage(1); }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === "Aktif"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                }`}
+              >
+                <span>Aktif Siparişler</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "Aktif" ? "bg-emerald-700 text-white" : "bg-emerald-50 text-emerald-600 font-extrabold"}`}>
+                  {metrics.totalCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("Hazırlanıyor"); setCurrentPage(1); }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === "Hazırlanıyor"
+                    ? "bg-amber-600 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700"
+                }`}
+              >
+                <span>Hazırlanan</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "Hazırlanıyor" ? "bg-amber-700 text-white" : "bg-amber-50 text-amber-600 font-extrabold"}`}>
+                  {metrics.processing}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("Kargolandı"); setCurrentPage(1); }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === "Kargolandı"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700"
+                }`}
+              >
+                <span>Kargoda</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "Kargolandı" ? "bg-indigo-700 text-white" : "bg-indigo-50 text-indigo-600 font-extrabold"}`}>
+                  {metrics.shipped}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("İptal Edildi"); setCurrentPage(1); }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === "İptal Edildi"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-rose-600 hover:bg-rose-50"
+                }`}
+              >
+                <span>İptal Edilenler</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "İptal Edildi" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-700 font-extrabold"}`}>
+                  {metrics.cancelledCount}
+                </span>
+              </button>
+
+              {metrics.returnsCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setStatusFilter("İade"); setCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                    statusFilter === "İade"
+                      ? "bg-pink-600 text-white shadow-xs"
+                      : "bg-white border border-slate-200 text-pink-600 hover:bg-pink-50"
+                  }`}
+                >
+                  <span>İadeler</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === "İade" ? "bg-pink-700 text-white" : "bg-pink-100 text-pink-700 font-extrabold"}`}>
+                    {metrics.returnsCount}
+                  </span>
+                </button>
+              )}
+            </div>
+
             {/* Table Action Bar */}
             <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <span className="text-xs text-slate-500 font-bold">{filteredAndSortedOrders.length} sipariş listeleniyor</span>
@@ -1748,11 +1971,11 @@ export default function OrderCommandCenter() {
                             <td className="p-4">
                               <div className="flex flex-col text-[10px] text-slate-500 font-semibold space-y-0.5">
                                 <span className="flex items-center gap-1 text-slate-700">
-                                  <Truck className="w-3 h-3 text-slate-400" /> {order.address?.includes("Yurtiçi") ? "Yurtiçi Kargo" : "Aras Kargo"}
+                                  <Truck className="w-3 h-3 text-slate-400" /> {order.cargoCompany || (order.summary && order.summary.startsWith("[") ? order.summary.match(/^\[([^\]|]+)/)?.[1]?.trim() : null) || "Yurtiçi Kargo"}
                                 </span>
                                 {(() => {
                                   const logDetails = calculateLogisticDetails(order.summary);
-                                  return <span>{logDetails.koli} Koli · {logDetails.desi} Desi</span>;
+                                  return <span>{logDetails.koli} Koli · {logDetails.desi} Desi · {logDetails.weight} kg</span>;
                                 })()}
                               </div>
                             </td>

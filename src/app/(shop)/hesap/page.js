@@ -14,6 +14,7 @@ export default function Hesap() {
   const status = sessionResult.status || "unauthenticated";
   const [activeTab, setActiveTab] = useState("orders"); // orders, addresses, info, favorites
   const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
 
   // Auth Form State for Unauthenticated View
@@ -131,10 +132,10 @@ export default function Hesap() {
         const data = await res.json();
         if (Array.isArray(data)) {
           setOrders(data);
-          const calculatedFromOrders = data.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
-          if (calculatedFromOrders > 0) {
-            setLoyaltyPoints((prev) => Math.max(prev, calculatedFromOrders));
-          }
+          const isCancelled = (s) => s && (s.toLowerCase().includes("iptal") || s.toLowerCase().includes("cancel") || s.toLowerCase().includes("iade") || s.toLowerCase().includes("refund"));
+          const activeOrders = data.filter(o => !isCancelled(o.status));
+          const calculatedFromOrders = activeOrders.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
+          setLoyaltyPoints(calculatedFromOrders);
         }
       }
     } catch (err) {
@@ -187,6 +188,14 @@ export default function Hesap() {
 
   const handlePassSubmit = async (e) => {
     e.preventDefault();
+    if (!passwordForm.currentPassword) {
+      showNotification("Güvenliğiniz için lütfen mevcut şifrenizi giriniz.", "error");
+      return;
+    }
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      showNotification("Yeni şifreniz en az 6 karakter olmalıdır.", "error");
+      return;
+    }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       showNotification("Yeni şifreleriniz birbiriyle eşleşmiyor.", "error");
       return;
@@ -198,18 +207,19 @@ export default function Hesap() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
           password: passwordForm.newPassword,
         }),
       });
 
+      const resData = await res.json();
       if (res.ok) {
         setSavedPassSuccess(true);
         setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        showNotification("Şifreniz başarıyla güncellendi.", "success");
+        showNotification(resData.message || "Şifreniz başarıyla güncellenerek veritabanına kaydedildi.", "success");
         setTimeout(() => setSavedPassSuccess(false), 3000);
       } else {
-        const errData = await res.json();
-        showNotification(errData.error || "Şifre güncellenirken hata oluştu.", "error");
+        showNotification(resData.error || "Şifre güncellenirken hata oluştu.", "error");
       }
     } catch (err) {
       console.error("Error updating password:", err);
@@ -829,18 +839,45 @@ export default function Hesap() {
               <div className="bg-surface-container-lowest p-8 rounded-xl premium-shadow border border-outline-variant/10">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="material-symbols-outlined text-primary text-2xl">lock_reset</span>
-                  <h2 className="font-headline-md text-xl font-bold">Şifre Güncelleme</h2>
+                  <div>
+                    <h2 className="font-headline-md text-xl font-bold">Şifre Güncelleme</h2>
+                    <p className="text-xs text-on-surface-variant mt-0.5">Mevcut şifrenizi doğrulayarak yeni şifrenizi güvenli şekilde veritabanına kaydedin.</p>
+                  </div>
                 </div>
                 <form onSubmit={handlePassSubmit} className="space-y-6">
                   <div className="max-w-md space-y-2 group">
                     <label className="font-label-md text-on-surface-variant uppercase tracking-wider block transition-colors group-focus-within:text-primary">
-                      Yeni Şifre
+                      Mevcut Şifre
                     </label>
                     <div className="relative">
                       <input
-                        className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 font-body-md text-on-surface focus:outline-none focus:border-primary transition-all"
+                        className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 font-body-md text-on-surface focus:outline-none focus:border-primary transition-all pr-12"
+                        placeholder="••••••••"
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary material-symbols-outlined cursor-pointer"
+                      >
+                        {showCurrentPassword ? "visibility_off" : "visibility"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="max-w-md space-y-2 group">
+                    <label className="font-label-md text-on-surface-variant uppercase tracking-wider block transition-colors group-focus-within:text-primary">
+                      Yeni Şifre (En az 6 karakter)
+                    </label>
+                    <div className="relative">
+                      <input
+                        className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 font-body-md text-on-surface focus:outline-none focus:border-primary transition-all pr-12"
                         placeholder="••••••••"
                         type={showPassword ? "text" : "password"}
+                        minLength={6}
                         value={passwordForm.newPassword}
                         onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                         required
@@ -863,6 +900,7 @@ export default function Hesap() {
                       className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 font-body-md text-on-surface focus:outline-none focus:border-primary transition-all"
                       placeholder="••••••••"
                       type={showPassword ? "text" : "password"}
+                      minLength={6}
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                       required

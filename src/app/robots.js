@@ -1,15 +1,33 @@
 /**
- * robots.js — PEKEFE İspir Yöresel Ürünler Platformu
+ * robots.js — PEKEFE İspir Yöresel Ürünler Platformu (pekefe.com)
  * Next.js App Router tarafından otomatik olarak /robots.txt endpoint'ine dönüştürülür.
  */
 
 export default function robots() {
+  const disallowedPrivateRoutes = [
+    '/hesap',
+    '/hesap/',
+    '/hesabim',
+    '/hesabim/',
+    '/sepet',
+    '/sepet/',
+    '/giris',
+    '/login',
+    '/kayit',
+    '/reset-password',
+    '/admin',
+    '/admin/',
+    '/api/',
+    '/_next/',
+  ];
+
   return {
     rules: [
       {
         userAgent: '*',
         allow: [
           '/',
+          '/llms.txt',
           '/rekolte-kulubu',
           '/mensei-dogrulama',
           '/akademi',
@@ -28,28 +46,15 @@ export default function robots() {
           '/sozlesme',
           '/urun/',
         ],
-        disallow: [
-          '/hesap',
-          '/hesap/',
-          '/sepet',
-          '/sepet/',
-          '/giris',
-          '/kayit',
-          '/b2b',
-          '/admin',
-          '/admin/',
-          '/api/',
-          '/_next/',
-        ],
+        disallow: disallowedPrivateRoutes,
       },
       {
-        userAgent: [
-          'AhrefsBot',
-          'SemrushBot',
-          'DotBot',
-          'MJ12bot',
-          'BLEXBot',
-        ],
+        userAgent: ['GPTBot', 'ChatGPT-User', 'ClaudeBot', 'PerplexityBot', 'Google-Extended'],
+        allow: ['/', '/llms.txt', '/urun/', '/kategoriler', '/hikayemiz', '/tesisimiz', '/sss', '/blog/'],
+        disallow: disallowedPrivateRoutes,
+      },
+      {
+        userAgent: ['AhrefsBot', 'SemrushBot', 'DotBot', 'MJ12bot', 'BLEXBot'],
         disallow: '/',
       },
     ],

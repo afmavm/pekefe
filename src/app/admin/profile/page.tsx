@@ -51,13 +51,19 @@ export default function AdminProfilePage() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword && newPassword !== confirmPassword) {
-      toast.error("Yeni şifreleriniz birbiriyle uyuşmuyor!");
-      return;
-    }
-    if (newPassword && newPassword.length < 6) {
-      toast.error("Yeni şifre en az 6 karakter olmalıdır.");
-      return;
+    if (newPassword) {
+      if (profile?.hasPassword && !currentPassword.trim()) {
+        toast.error("Şifrenizi değiştirmek için lütfen mevcut şifrenizi giriniz.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        toast.error("Yeni şifreleriniz birbiriyle uyuşmuyor!");
+        return;
+      }
+      if (newPassword.length < 6) {
+        toast.error("Yeni şifre en az 6 karakter olmalıdır.");
+        return;
+      }
     }
 
     try {

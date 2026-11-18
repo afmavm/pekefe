@@ -48,6 +48,42 @@
       "destination": "/admin/stock/form",
       "statusCode": 308,
       "regex": "^(?!/_next)/admin/products/form(?:/)?$"
+    },
+    {
+      "source": "/gizlilik-politikasi",
+      "destination": "/gizlilik",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/gizlilik-politikasi(?:/)?$"
+    },
+    {
+      "source": "/kvkk",
+      "destination": "/gizlilik",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kvkk(?:/)?$"
+    },
+    {
+      "source": "/kullanim-sartlari",
+      "destination": "/sozlesme",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kullanim-sartlari(?:/)?$"
+    },
+    {
+      "source": "/mesafeli-satis-sozlesmesi",
+      "destination": "/sozlesme",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/mesafeli-satis-sozlesmesi(?:/)?$"
+    },
+    {
+      "source": "/iptal-iade-kosullari",
+      "destination": "/teslimat",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/iptal-iade-kosullari(?:/)?$"
+    },
+    {
+      "source": "/hesabim",
+      "destination": "/hesap",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hesabim(?:/)?$"
     }
   ],
   "headers": [
@@ -1096,6 +1132,12 @@
       "namedRegex": "^/api/admin/payments/paytr\\-status(?:/)?$"
     },
     {
+      "page": "/api/admin/products/bulk",
+      "regex": "^/api/admin/products/bulk(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/products/bulk(?:/)?$"
+    },
+    {
       "page": "/api/admin/profile",
       "regex": "^/api/admin/profile(?:/)?$",
       "routeKeys": {},
@@ -1178,6 +1220,12 @@
       "regex": "^/api/auth/register(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/auth/register(?:/)?$"
+    },
+    {
+      "page": "/api/auth/reset-password",
+      "regex": "^/api/auth/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/reset\\-password(?:/)?$"
     },
     {
       "page": "/api/b2b/limits",

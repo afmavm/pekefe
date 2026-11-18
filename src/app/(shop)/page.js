@@ -260,13 +260,6 @@ export default function Home() {
       tips: "Pestil dilimlerini servis etmeden önce oda sıcaklığında 5 dakika dinlendirerek doğal bal ve taze fındık aromalarının damakta tam olarak açılmasını sağlayabilirsiniz.",
       bg: "/uploads/findik_pestil_pair.jpg",
     },
-    cheese: {
-      title: "İspir Dut Kömesi & Olgunlaştırılmış Keçi Peyniri",
-      quote: "Zıt kutupların muhteşem lezzet harmonisi.",
-      description: "Dut kömesinin (cevizli sucuk) içerdiği yerli ceviz aroması ve yoğun tatlı şıra kaplaması, hafif tuzlu ve sert karakterdeki olgun keçi peyniri ile eşsiz bir kontrast oluşturur. Şarküteri tahtalarının gizli yıldızı olan bu ikili, slow food gurmelerinin favori eşleşmesidir.",
-      tips: "Keçi peynirini ince dilimler halinde kesin ve oda sıcaklığında, ince halkalar şeklinde dilimlenmiş kömelerle birlikte servis edin.",
-      bg: "/uploads/kome_peynir_pair.jpg",
-    },
   };
 
   return (
@@ -738,17 +731,6 @@ export default function Home() {
                   <h4 className="font-label-md font-bold text-sm uppercase tracking-wider">Fındık & Pestil</h4>
                   <p className="text-xs text-on-surface-variant mt-1 line-clamp-1">Doğal ham bal ile tatlandırılmış çıtır fındık dokusu.</p>
                 </button>
-                <button
-                  onClick={() => setActiveRecipe("cheese")}
-                  className={`w-full text-left p-6 rounded-xl border transition-all cursor-pointer ${
-                    activeRecipe === "cheese"
-                      ? "bg-white border-primary shadow-sm text-primary"
-                      : "bg-white/40 border-outline-variant/30 text-on-surface-variant hover:bg-white"
-                  }`}
-                >
-                  <h4 className="font-label-md font-bold text-sm uppercase tracking-wider">Köme & Keçi Peyniri</h4>
-                  <p className="text-xs text-on-surface-variant mt-1 line-clamp-1">Tuzlu ve tatlının asil zıtlığı.</p>
-                </button>
               </div>
               <div className="p-6 bg-white/50 border border-outline-variant/20 rounded-xl hidden lg:block">
                 <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">Slow Food İpucu</span>
@@ -760,30 +742,35 @@ export default function Home() {
 
             {/* Display Column */}
             <div className="lg:col-span-8">
-              <div className="bg-white rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm grid grid-cols-1 md:grid-cols-2 h-full">
-                <div className="h-64 md:h-full min-h-[320px] relative">
-                  <Image
-                    key={recipes[activeRecipe].bg}
-                    src={recipes[activeRecipe].bg}
-                    alt={recipes[activeRecipe].title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/15 to-transparent z-10"></div>
-                </div>
-                <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
-                  <span className="text-xs text-secondary uppercase font-label-sm tracking-widest">{recipes[activeRecipe].quote}</span>
-                  <h3 className="font-display-lg text-primary text-2xl font-bold">{recipes[activeRecipe].title}</h3>
-                  <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
-                    {recipes[activeRecipe].description}
-                  </p>
-                  <div className="pt-4 border-t border-outline-variant/10 text-xs text-on-surface-variant italic">
-                    <strong>Püf Noktası:</strong> {recipes[activeRecipe].tips}
+              {(() => {
+                const currentRecipe = recipes[activeRecipe] || recipes.tahini;
+                return (
+                  <div className="bg-white rounded-2xl overflow-hidden border border-outline-variant/20 shadow-sm grid grid-cols-1 md:grid-cols-2 h-full">
+                    <div className="h-64 md:h-full min-h-[320px] relative">
+                      <Image
+                        key={currentRecipe.bg}
+                        src={currentRecipe.bg}
+                        alt={currentRecipe.title}
+                        fill
+                        unoptimized
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/15 to-transparent z-10"></div>
+                    </div>
+                    <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
+                      <span className="text-xs text-secondary uppercase font-label-sm tracking-widest">{currentRecipe.quote}</span>
+                      <h3 className="font-display-lg text-primary text-2xl font-bold">{currentRecipe.title}</h3>
+                      <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
+                        {currentRecipe.description}
+                      </p>
+                      <div className="pt-4 border-t border-outline-variant/10 text-xs text-on-surface-variant italic">
+                        <strong>Püf Noktası:</strong> {currentRecipe.tips}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readLocalOrders } from "@/lib/jsonOrderDb";
+import { readLocalAccounts, saveLocalAccount } from "@/lib/jsonCurrentAccountsDb";
 
 export const dynamic = 'force-dynamic';
 
@@ -38,10 +39,26 @@ export async function GET(request: Request) {
         orderBy: { name: "asc" }
       });
     } catch (dbErr) {
-      console.warn("[CURRENT ACCOUNTS DB WARN] Database query failed, falling back to dynamic order-based current accounts:", dbErr);
+      console.warn("[CURRENT ACCOUNTS DB WARN] Database query failed, falling back to dynamic accounts:", dbErr);
     }
 
-    // Fail-Safe / Auto-Seed: If database has no accounts or query failed, extract accounts from actual orders & seed defaults
+    // Merge persistent local accounts if any
+    const localSavedAccounts = readLocalAccounts();
+    const existingIds = new Set(accounts.map(a => a.id));
+    const existingCodes = new Set(accounts.map(a => a.cariKod).filter(Boolean));
+
+    localSavedAccounts.forEach(la => {
+      if (!existingIds.has(la.id) && (!la.cariKod || !existingCodes.has(la.cariKod))) {
+        if (!la.isDeleted) {
+          if (type === "ALL" || la.type === type) {
+            accounts.push(la);
+            existingIds.add(la.id);
+          }
+        }
+      }
+    });
+
+    // Fail-Safe / Auto-Seed: If database and local store have no accounts, extract accounts from actual orders & seed defaults
     if (!accounts || accounts.length === 0) {
       const localOrders = readLocalOrders();
       const extractedAccountsMap = new Map<string, any>();
@@ -98,9 +115,10 @@ export async function GET(request: Request) {
 
       accounts = Array.from(extractedAccountsMap.values());
 
-      // Attempt to save extracted accounts to database for permanent consistency
-      try {
-        for (const acc of accounts) {
+      // Attempt to save extracted accounts to database and local store
+      for (const acc of accounts) {
+        saveLocalAccount(acc);
+        try {
           await prisma.currentAccount.upsert({
             where: { id: acc.id },
             update: {},
@@ -118,8 +136,8 @@ export async function GET(request: Request) {
               openingBalance: 0
             }
           }).catch(() => null);
-        }
-      } catch {}
+        } catch {}
+      }
     }
 
     // Filter by search term if search query is provided
@@ -129,7 +147,9 @@ export async function GET(request: Request) {
         String(a.name || "").toLowerCase().includes(q) ||
         String(a.email || "").toLowerCase().includes(q) ||
         String(a.phone || "").toLowerCase().includes(q) ||
-        String(a.cariKod || "").toLowerCase().includes(q)
+        String(a.cariKod || "").toLowerCase().includes(q) ||
+        String(a.taxNo || "").toLowerCase().includes(q) ||
+        String(a.tckn || "").toLowerCase().includes(q)
       );
     }
 
@@ -145,36 +165,84 @@ export async function POST(request: Request) {
     const data = await request.json();
     
     const count = await prisma.currentAccount.count().catch(() => 0);
-    const generatedCariKod = data.cariKod || `PEKEFE-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+    const generatedCariKod = data.cariKod?.trim() || `PEKEFE-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
 
-    const newAccountData = {
-      id: `CARI-${Date.now()}`,
+    // Clean tanimlar and include kategori
+    const tanimlarObj = typeof data.tanimlar === "object" && data.tanimlar !== null ? { ...data.tanimlar } : {};
+    if (data.kategori) {
+      tanimlarObj.kategori = data.kategori;
+    }
+
+    // Ensure email & tckn are null if empty string to avoid unique constraint violations
+    const cleanEmail = data.email && typeof data.email === "string" && data.email.trim() ? data.email.trim() : null;
+    const cleanTckn = data.tckn && typeof data.tckn === "string" && data.tckn.trim() ? data.tckn.trim() : null;
+
+    let parsedDogumTarihi: Date | null = null;
+    if (data.dogumTarihi) {
+      const d = new Date(data.dogumTarihi);
+      if (!isNaN(d.getTime())) {
+        parsedDogumTarihi = d;
+      }
+    }
+
+    const newAccountId = data.id || `CARI-${Date.now()}`;
+    const newAccountData: any = {
+      id: newAccountId,
       cariKod: generatedCariKod,
-      name: data.name,
+      name: data.name?.trim() || (data.ad && data.soyad ? `${data.ad} ${data.soyad}`.trim() : "Yeni Cari"),
       type: data.type || "MUSTERI",
       cariTipi: data.cariTipi || "CORPORATE",
-      ad: data.ad || null,
-      soyad: data.soyad || null,
-      tckn: data.tckn || null,
-      taxNo: data.taxNo || null,
-      taxOffice: data.taxOffice || null,
-      phone: data.phone || null,
-      email: data.email || null,
-      address: data.address || null,
+      ad: data.ad?.trim() || null,
+      soyad: data.soyad?.trim() || null,
+      tckn: cleanTckn,
+      dogumTarihi: parsedDogumTarihi,
+      taxNo: data.taxNo?.trim() || null,
+      taxId: data.taxId?.trim() || data.taxNo?.trim() || null,
+      taxOffice: data.taxOffice?.trim() || null,
+      mersisNo: data.mersisNo?.trim() || null,
+      yetkiliKisi: data.yetkiliKisi?.trim() || null,
+      webSitesi: data.webSitesi?.trim() || null,
+      phone: data.phone?.trim() || null,
+      email: cleanEmail,
+      address: data.address?.trim() || null,
       currency: data.currency || "TRY",
       openingBalance: Number(data.openingBalance) || 0,
-      balance: Number(data.openingBalance) || 0,
+      balance: Number(data.balance) || Number(data.openingBalance) || 0,
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+      isDeleted: false,
+      discountRate: data.discountRate !== undefined && data.discountRate !== null ? Number(data.discountRate) : null,
+      creditLimit: data.creditLimit !== undefined && data.creditLimit !== null ? Number(data.creditLimit) : null,
+      riskLimit: data.riskLimit !== undefined && data.riskLimit !== null ? Number(data.riskLimit) : null,
+      vadeGun: data.vadeGun !== undefined && data.vadeGun !== null ? parseInt(data.vadeGun) : null,
+      b2bMinQty: data.b2bMinQty !== undefined && data.b2bMinQty !== null ? Number(data.b2bMinQty) : 1,
+      b2bPaymentTerms: data.b2bPaymentTerms || "Nakit",
+      b2bCode: data.b2bCode?.trim() || null,
+      loyaltyPoints: Number(data.loyaltyPoints) || 0,
       dealerGroup: data.dealerGroup || "Standart",
       priceGroup: data.priceGroup || "Liste",
+      priceFormula: data.priceFormula?.trim() || null,
+      parentDealerId: data.parentDealerId || null,
       kaynakPlatform: data.kaynakPlatform || "PEKEFE_B2B",
-      isActive: true,
-      createdAt: new Date().toISOString()
+      eFaturaDurumu: Boolean(data.eFaturaDurumu),
+      blokeDurumu: Boolean(data.blokeDurumu),
+      adresler: Array.isArray(data.adresler) ? data.adresler : [],
+      entegrasyonHaritalama: typeof data.entegrasyonHaritalama === "object" && data.entegrasyonHaritalama !== null ? data.entegrasyonHaritalama : {},
+      auditLogs: Array.isArray(data.auditLogs) ? data.auditLogs : [],
+      dosyalar: Array.isArray(data.dosyalar) ? data.dosyalar : [],
+      bankalar: Array.isArray(data.bankalar) ? data.bankalar : [],
+      kvkk: typeof data.kvkk === "object" && data.kvkk !== null ? data.kvkk : { izni: "Onay Verildi", aciklama: "" },
+      yetkililer: Array.isArray(data.yetkililer) ? data.yetkililer : [],
+      tanimlar: tanimlarObj
     };
+
+    // Save to local fallback store
+    saveLocalAccount(newAccountData);
 
     try {
       const account = await prisma.currentAccount.create({ data: newAccountData });
       return NextResponse.json(account);
-    } catch {
+    } catch (dbErr) {
+      console.warn("[POST CURRENT ACCOUNT DB WARN] Database create failed, using local store:", dbErr);
       return NextResponse.json(newAccountData);
     }
   } catch (error: any) {

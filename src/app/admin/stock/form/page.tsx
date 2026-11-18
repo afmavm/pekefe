@@ -6089,19 +6089,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK EBAT/BOYUT YÖNETİCİSİ MODAL (SIZE MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isSizeManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
-          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
+          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Settings2 className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Settings2 className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Gramaj & Ambalaj Seçeneklerini Yönet</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Gramaj & Ambalaj Seçenekleri
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                    Varyant gramaj ve paketleme tanımları
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsSizeManagerOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6116,21 +6124,21 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   value={newSizeName}
                   onChange={e => setNewSizeName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addSizeOption(); }}
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="flex-1 px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all placeholder:text-stone-400"
                 />
                 <button
                   type="button"
                   onClick={addSizeOption}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition cursor-pointer border-none"
+                  className="px-4 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white font-semibold rounded-xl text-xs transition shadow-xs cursor-pointer border-none active:scale-[0.99]"
                 >
                   Ekle
                 </button>
               </div>
 
               {/* Sizes list */}
-              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-stone-200/70 rounded-xl divide-y divide-stone-100 p-1">
                 {sizes.map(size => (
-                  <div key={size} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                  <div key={size} className="flex justify-between items-center p-2.5 hover:bg-stone-50/70 rounded-lg transition gap-2">
                     {editingSizeName === size ? (
                       <div className="flex items-center gap-1.5 flex-1">
                         <input
@@ -6141,13 +6149,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             if (e.key === "Enter") saveSizeEdit(size);
                             if (e.key === "Escape") setEditingSizeName(null);
                           }}
-                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          className="flex-1 px-3 py-1.5 bg-white border border-[#6b1d2f] rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-[#6b1d2f]/10"
                           autoFocus
                         />
                         <button
                           type="button"
                           onClick={() => saveSizeEdit(size)}
-                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition border-none cursor-pointer"
                           title="Kaydet"
                         >
                           <Check className="w-4 h-4" />
@@ -6155,7 +6163,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <button
                           type="button"
                           onClick={() => setEditingSizeName(null)}
-                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition border-none cursor-pointer"
                           title="Vazgeç"
                         >
                           <X className="w-4 h-4" />
@@ -6163,7 +6171,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     ) : (
                       <>
-                        <span className="text-sm font-semibold text-slate-700">{size}</span>
+                        <span className="text-sm font-medium text-stone-800">{size}</span>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -6171,7 +6179,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               setEditingSizeName(size);
                               setEditingSizeNewValue(size);
                             }}
-                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-[#6b1d2f]/10 text-stone-400 hover:text-[#6b1d2f] rounded-lg transition border-none cursor-pointer"
                             title="İsmi Düzenle"
                           >
                             <Edit className="w-4 h-4" />
@@ -6179,7 +6187,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           <button
                             type="button"
                             onClick={() => removeSizeOption(size)}
-                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 rounded-lg transition border-none cursor-pointer"
                             title="Seçeneği Sil"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -6192,10 +6200,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex justify-end">
               <button
                 onClick={() => setIsSizeManagerOpen(false)}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -6209,19 +6217,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK DERİ TİPİ/RENK YÖNETİCİSİ MODAL (COLOR MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isColorManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
-          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-[999999] animate-in fade-in duration-200">
+          <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Settings2 className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Settings2 className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Ürün Çeşitleri & Tipleri Yönetimi</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Ürün Çeşitleri & Tipleri
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                    Varyant çeşit, lezzet ve tip tanımları
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsColorManagerOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6236,21 +6252,21 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   value={newColorName}
                   onChange={e => setNewColorName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addColorOption(); }}
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="flex-1 px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all placeholder:text-stone-400"
                 />
                 <button
                   type="button"
                   onClick={addColorOption}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition cursor-pointer border-none"
+                  className="px-4 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white font-semibold rounded-xl text-xs transition shadow-xs cursor-pointer border-none active:scale-[0.99]"
                 >
                   Ekle
                 </button>
               </div>
 
               {/* Colors list */}
-              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-stone-200/70 rounded-xl divide-y divide-stone-100 p-1">
                 {colors.map(color => (
-                  <div key={color} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                  <div key={color} className="flex justify-between items-center p-2.5 hover:bg-stone-50/70 rounded-lg transition gap-2">
                     {editingColorName === color ? (
                       <div className="flex items-center gap-1.5 flex-1">
                         <input
@@ -6261,13 +6277,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             if (e.key === "Enter") saveColorEdit(color);
                             if (e.key === "Escape") setEditingColorName(null);
                           }}
-                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          className="flex-1 px-3 py-1.5 bg-white border border-[#6b1d2f] rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-[#6b1d2f]/10"
                           autoFocus
                         />
                         <button
                           type="button"
                           onClick={() => saveColorEdit(color)}
-                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition border-none cursor-pointer"
                           title="Kaydet"
                         >
                           <Check className="w-4 h-4" />
@@ -6275,7 +6291,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <button
                           type="button"
                           onClick={() => setEditingColorName(null)}
-                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition border-none cursor-pointer"
                           title="Vazgeç"
                         >
                           <X className="w-4 h-4" />
@@ -6283,7 +6299,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     ) : (
                       <>
-                        <span className="text-sm font-semibold text-slate-700">{color}</span>
+                        <span className="text-sm font-medium text-stone-800">{color}</span>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -6291,7 +6307,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               setEditingColorName(color);
                               setEditingColorNewValue(color);
                             }}
-                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-[#6b1d2f]/10 text-stone-400 hover:text-[#6b1d2f] rounded-lg transition border-none cursor-pointer"
                             title="İsmi Düzenle"
                           >
                             <Edit className="w-4 h-4" />
@@ -6299,7 +6315,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           <button
                             type="button"
                             onClick={() => removeColorOption(color)}
-                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 rounded-lg transition border-none cursor-pointer"
                             title="Seçeneği Sil"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -6312,10 +6328,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex justify-end">
               <button
                 onClick={() => setIsColorManagerOpen(false)}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -6329,19 +6345,27 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK KATEGORİ YÖNETİCİSİ MODAL (CATEGORY MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isCategoryManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Settings2 className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Settings2 className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Kategorileri Yönet</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Kategorileri Yönet
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                    Hızlı kategori ekleme ve düzenleme
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsCategoryManagerOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6356,21 +6380,21 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   value={newCategoryName}
                   onChange={e => setNewCategoryName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addCategory(); }}
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="flex-1 px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all placeholder:text-stone-400"
                 />
                 <button
                   type="button"
                   onClick={() => addCategory()}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition cursor-pointer border-none"
+                  className="px-4 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white font-semibold rounded-xl text-xs transition shadow-xs cursor-pointer border-none active:scale-[0.99]"
                 >
                   Ekle
                 </button>
               </div>
 
               {/* Categories list */}
-              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-stone-200/70 rounded-xl divide-y divide-stone-100 p-1">
                 {categories.map(cat => (
-                  <div key={cat} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                  <div key={cat} className="flex justify-between items-center p-2.5 hover:bg-stone-50/70 rounded-lg transition gap-2">
                     {editingCategoryName === cat ? (
                       <div className="flex items-center gap-1.5 flex-1">
                         <input
@@ -6381,13 +6405,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             if (e.key === "Enter") saveCategoryEdit(cat);
                             if (e.key === "Escape") setEditingCategoryName(null);
                           }}
-                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          className="flex-1 px-3 py-1.5 bg-white border border-[#6b1d2f] rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-[#6b1d2f]/10"
                           autoFocus
                         />
                         <button
                           type="button"
                           onClick={() => saveCategoryEdit(cat)}
-                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition border-none cursor-pointer"
                           title="Kaydet"
                         >
                           <Check className="w-4 h-4" />
@@ -6395,7 +6419,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <button
                           type="button"
                           onClick={() => setEditingCategoryName(null)}
-                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition border-none cursor-pointer"
                           title="Vazgeç"
                         >
                           <X className="w-4 h-4" />
@@ -6403,7 +6427,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     ) : (
                       <>
-                        <span className="text-sm font-semibold text-slate-700">{cat}</span>
+                        <span className="text-sm font-medium text-stone-800">{cat}</span>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -6411,7 +6435,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               setEditingCategoryName(cat);
                               setEditingCategoryNewValue(cat);
                             }}
-                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-[#6b1d2f]/10 text-stone-400 hover:text-[#6b1d2f] rounded-lg transition border-none cursor-pointer"
                             title="İsmi Düzenle"
                           >
                             <Edit className="w-4 h-4" />
@@ -6419,7 +6443,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           <button
                             type="button"
                             onClick={() => removeCategory(cat)}
-                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 rounded-lg transition border-none cursor-pointer"
                             title="Kategoriyi Sil"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -6432,10 +6456,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex justify-end">
               <button
                 onClick={() => setIsCategoryManagerOpen(false)}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -6449,20 +6473,28 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK BİRİM YÖNETİCİSİ MODAL (UNIT MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isUnitManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Tag className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Tag className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Birimleri Yönet</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Birimleri Yönet
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                    Stok ve satış birim seçenekleri
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsUnitManagerOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6477,21 +6509,21 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   value={newUnitName}
                   onChange={e => setNewUnitName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") addUnit(); }}
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="flex-1 px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all placeholder:text-stone-400"
                 />
                 <button
                   type="button"
                   onClick={addUnit}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition cursor-pointer border-none"
+                  className="px-4 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white font-semibold rounded-xl text-xs transition shadow-xs cursor-pointer border-none active:scale-[0.99]"
                 >
                   Ekle
                 </button>
               </div>
 
               {/* Units list */}
-              <div className="max-h-[260px] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100 p-1">
+              <div className="max-h-[260px] overflow-y-auto border border-stone-200/70 rounded-xl divide-y divide-stone-100 p-1">
                 {units.map(u => (
-                  <div key={u} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-lg transition gap-2">
+                  <div key={u} className="flex justify-between items-center p-2.5 hover:bg-stone-50/70 rounded-lg transition gap-2">
                     {editingUnitName === u ? (
                       <div className="flex items-center gap-1.5 flex-1">
                         <input
@@ -6502,13 +6534,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                             if (e.key === "Enter") saveUnitEdit(u);
                             if (e.key === "Escape") setEditingUnitName(null);
                           }}
-                          className="flex-1 px-3 py-1.5 bg-white border border-orange-400 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-100"
+                          className="flex-1 px-3 py-1.5 bg-white border border-[#6b1d2f] rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-[#6b1d2f]/10"
                           autoFocus
                         />
                         <button
                           type="button"
                           onClick={() => saveUnitEdit(u)}
-                          className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition border-none cursor-pointer"
                           title="Kaydet"
                         >
                           <Check className="w-4 h-4" />
@@ -6516,7 +6548,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         <button
                           type="button"
                           onClick={() => setEditingUnitName(null)}
-                          className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition border-none cursor-pointer"
                           title="Vazgeç"
                         >
                           <X className="w-4 h-4" />
@@ -6524,7 +6556,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
                     ) : (
                       <>
-                        <span className="text-sm font-semibold text-slate-700">{u}</span>
+                        <span className="text-sm font-medium text-stone-800">{u}</span>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -6532,7 +6564,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               setEditingUnitName(u);
                               setEditingUnitNewValue(u);
                             }}
-                            className="p-1.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-[#6b1d2f]/10 text-stone-400 hover:text-[#6b1d2f] rounded-lg transition border-none cursor-pointer"
                             title="İsmi Düzenle"
                           >
                             <Edit className="w-4 h-4" />
@@ -6540,7 +6572,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           <button
                             type="button"
                             onClick={() => removeUnit(u)}
-                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                            className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 rounded-lg transition border-none cursor-pointer"
                             title="Birimi Sil"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -6553,11 +6585,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsUnitManagerOpen(false)}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -6571,20 +6603,24 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK DEPO YÖNETİCİSİ MODAL (WAREHOUSE MANAGER)
          ──────────────────────────────────────────────────────── */}
       {isWarehouseManagerOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[500px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Settings2 className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Settings2 className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Depoları Yönet</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">Depo Yönetimi</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">Merkez ve şube depolarını tanımlayın, düzenleyin</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsWarehouseManagerOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6592,44 +6628,44 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
             <div className="p-6 space-y-4">
               {/* Add New Warehouse Inline Form */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 shadow-inner">
-                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  {editingWarehouseId ? "Depoyu Düzenle" : "Yeni Kurumsal Depo Ekle"}
+              <div className="bg-stone-50/60 border border-stone-200/80 rounded-xl p-4 space-y-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  {editingWarehouseId ? "Depoyu Düzenle" : "Yeni Depo Tanımla"}
                 </span>
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="text"
-                    placeholder="Depo Adı (Örn: Ege Şubesi)..."
+                    placeholder="Depo Adı (Örn: Merkez Depo)..."
                     value={newWarehouse.name}
                     onChange={e => setNewWarehouse({ ...newWarehouse, name: e.target.value })}
-                    className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none col-span-2"
+                    className="px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition col-span-2"
                   />
                   <input
                     type="text"
-                    placeholder="Depo Kodu (Örn: WH-EGE)..."
+                    placeholder="Depo Kodu (Örn: WH-MRK)..."
                     value={newWarehouse.code}
                     onChange={e => setNewWarehouse({ ...newWarehouse, code: e.target.value })}
-                    className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none"
+                    className="px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                   />
                   <input
                     type="text"
                     placeholder="Konum / Şehir..."
                     value={newWarehouse.location}
                     onChange={e => setNewWarehouse({ ...newWarehouse, location: e.target.value })}
-                    className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none"
+                    className="px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                   />
                   <select
                     value={newWarehouse.branchId}
                     onChange={e => setNewWarehouse({ ...newWarehouse, branchId: e.target.value })}
-                    className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-500 outline-none col-span-2"
+                    className="px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition col-span-2 cursor-pointer"
                   >
-                    <option value="">-- Şube Seçin --</option>
+                    <option value="">-- Bağlı Şube Seçin --</option>
                     {branches.map(b => (
                       <option key={b.id} value={b.id}>{b.name} ({b.code})</option>
                     ))}
                   </select>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 pt-1">
                   {editingWarehouseId && (
                     <button
                       type="button"
@@ -6637,7 +6673,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         setEditingWarehouseId(null);
                         setNewWarehouse({ name: "", code: "", location: "", stockCount: 0, branchId: "" });
                       }}
-                      className="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border-none shadow-sm animate-in fade-in"
+                      className="flex-1 py-2 bg-white hover:bg-stone-100 text-stone-600 border border-stone-200/90 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
                     >
                       Vazgeç
                     </button>
@@ -6645,7 +6681,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   <button
                     type="button"
                     onClick={addWarehouse}
-                    className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border-none shadow-sm"
+                    className="flex-1 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer border-none shadow-xs"
                   >
                     {editingWarehouseId ? (
                       <>
@@ -6661,17 +6697,17 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
 
               {/* Warehouse list */}
-              <div className="max-h-[180px] overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 shadow-sm bg-white p-1">
+              <div className="max-h-[200px] overflow-y-auto border border-stone-200/80 rounded-xl divide-y divide-stone-100 bg-white">
                 {warehouses.map(wh => {
                   const branchName = branches.find(b => b.id === wh.branchId)?.name || 'Bilinmeyen Şube';
                   return (
-                    <div key={wh.id} className="flex justify-between items-center p-3 hover:bg-slate-50 transition rounded-lg">
+                    <div key={wh.id} className="flex justify-between items-center p-3 hover:bg-stone-50/70 transition">
                       <div>
-                        <span className="text-xs font-bold text-slate-800">{wh.name}</span>
-                        <span className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider">{wh.code} · {wh.location} ({branchName})</span>
+                        <span className="text-xs font-semibold text-stone-800">{wh.name}</span>
+                        <span className="block text-[10px] text-stone-400 font-medium">{wh.code} · {wh.location} ({branchName})</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[9px] font-bold border border-slate-200 shrink-0">{wh.stockCount} Adet</span>
+                        <span className="px-2 py-0.5 bg-stone-100 text-stone-600 rounded-md text-[10px] font-medium border border-stone-200/60 shrink-0">{wh.stockCount} Adet</span>
                         
                         {/* Edit Button */}
                         <button
@@ -6686,19 +6722,19 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                               branchId: wh.branchId || ""
                             });
                           }}
-                          className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-orange-500 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 hover:bg-[#6b1d2f]/10 text-stone-400 hover:text-[#6b1d2f] rounded-lg transition border-none cursor-pointer"
                           title="Depoyu Düzenle"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5" />
                         </button>
 
                         <button
                           type="button"
                           onClick={() => removeWarehouse(wh.id)}
-                          className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition border-none cursor-pointer"
+                          className="p-1.5 hover:bg-red-50 text-stone-400 hover:text-red-600 rounded-lg transition border-none cursor-pointer"
                           title="Depoyu Sil"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -6707,11 +6743,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsWarehouseManagerOpen(false)}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -6725,26 +6761,26 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK PAZARYERİ KANALI MODAL (MARKETPLACE CREATOR & EDITOR)
          ──────────────────────────────────────────────────────── */}
       {isMarketplaceModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Header */}
-            <div className="p-5 bg-white border-b border-slate-100 flex justify-between items-center">
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-50 text-orange-500 border border-orange-200/50 rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
-                  <Globe className="w-5 h-5" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 text-[#6b1d2f] border border-[#6b1d2f]/15 rounded-xl flex items-center justify-center shrink-0">
+                  <Globe className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
                     {editingMarketplaceId ? "Pazaryeri Kanalını Düzenle" : "Yeni Entegrasyon Kanalı Ekle"}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Mağaza adı, logo rengi ve senkronizasyon ayarları</p>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">Mağaza adı, logo rengi ve senkronizasyon ayarları</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsMarketplaceModalOpen(false)}
-                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6753,39 +6789,39 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             {/* Body */}
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">Kanal / Mağaza Adı *</label>
+                <label className="block text-xs font-semibold text-stone-700">Kanal / Mağaza Adı *</label>
                 <input
                   type="text"
                   placeholder="Örn: Çiçeksepeti API veya WooCommerce"
                   value={newMarketplace.name}
                   onChange={e => setNewMarketplace({ ...newMarketplace, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 outline-none transition"
+                  className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700">Kanal Marka Rengi</label>
+                  <label className="block text-xs font-semibold text-stone-700">Kanal Marka Rengi</label>
                   <select
                     value={newMarketplace.logoColor}
                     onChange={e => setNewMarketplace({ ...newMarketplace, logoColor: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 cursor-pointer outline-none transition"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] cursor-pointer outline-none transition"
                   >
                     <option value="bg-orange-500">Turuncu (Trendyol / Hepsiburada)</option>
                     <option value="bg-violet-600">Mor (N11)</option>
                     <option value="bg-emerald-600">Yeşil (Çiçeksepeti)</option>
                     <option value="bg-blue-600">Mavi (WooCommerce)</option>
                     <option value="bg-violet-500">Eflatun (Shopify)</option>
-                    <option value="bg-slate-600">Gri (Diğer)</option>
+                    <option value="bg-stone-600">Gri (Diğer)</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700">Stok Senkronu</label>
+                  <label className="block text-xs font-semibold text-stone-700">Stok Senkronu</label>
                   <select
                     value={newMarketplace.syncEnabled ? "true" : "false"}
                     onChange={e => setNewMarketplace({ ...newMarketplace, syncEnabled: e.target.value === "true" })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 cursor-pointer outline-none transition"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] cursor-pointer outline-none transition"
                   >
                     <option value="true">Aktif (Senkronize)</option>
                     <option value="false">Durdurulmuş (Pasif)</option>
@@ -6795,26 +6831,26 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-50/70 border-t border-slate-100 flex gap-3 justify-end">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setIsMarketplaceModalOpen(false)}
-                className="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
               >
                 İptal
               </button>
               <button
                 type="button"
                 onClick={saveMarketplace}
-                className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-orange-500/20 cursor-pointer border-none"
+                className="px-5 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-xs cursor-pointer border-none"
               >
                 {editingMarketplaceId ? (
                   <>
-                    <Save className="w-4 h-4" /> Değişiklikleri Kaydet
+                    <Save className="w-3.5 h-3.5" /> Değişiklikleri Kaydet
                   </>
                 ) : (
                   <>
-                    <Plus className="w-4 h-4" /> Entegrasyonu Oluştur
+                    <Plus className="w-3.5 h-3.5" /> Entegrasyonu Oluştur
                   </>
                 )}
               </button>
@@ -6828,19 +6864,23 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            PAZARYERİ API AYARLARI MODAL (CREDENTIAL CONFIG)
          ──────────────────────────────────────────────────────── */}
       {configuringMarketplace && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <Key className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Key className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">{configuringMarketplace.name} API Ayarları</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">{configuringMarketplace.name} API Ayarları</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">Entegrasyon anahtarlarını doğrulayın ve kaydedin</p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setConfiguringMarketplace(null)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6848,47 +6888,47 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">API Key / Merchant ID *</label>
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">API Key / Merchant ID *</label>
                 <input
                   type="text"
                   placeholder="Kanal API kimlik anahtarı..."
                   value={apiCredentials.apiKey}
                   onChange={e => setApiCredentials({ ...apiCredentials, apiKey: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="w-full px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">API Secret / Şifre *</label>
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">API Secret / Şifre *</label>
                 <input
                   type="password"
                   placeholder="Kanal API gizli anahtarı..."
                   value={apiCredentials.apiSecret}
                   onChange={e => setApiCredentials({ ...apiCredentials, apiSecret: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-orange-500 outline-none"
+                  className="w-full px-3.5 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                 />
               </div>
 
-              <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 flex gap-2 text-[10px] text-slate-500 font-semibold leading-relaxed">
-                <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+              <div className="bg-amber-50/60 border border-amber-200/70 rounded-xl p-3.5 flex gap-2.5 text-xs text-amber-800 leading-relaxed">
+                <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <span>API bağlantısı test edildiğinde kuyruktaki stok miktarları otomatik senkronize edilecektir.</span>
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex gap-3">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex gap-3">
               <button
                 type="button"
                 onClick={testApiConnection}
                 disabled={isTestingConnection}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-1.5 border-none cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all flex justify-center items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
               >
                 {isTestingConnection ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-orange-500" /> Bağlanıyor...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#6b1d2f]" /> Bağlanıyor...
                   </>
                 ) : (
                   <>
-                    <RefreshCw className="w-4 h-4 text-orange-500" /> Bağlantıyı Test Et
+                    <RefreshCw className="w-3.5 h-3.5 text-stone-500" /> Bağlantıyı Test Et
                   </>
                 )}
               </button>
@@ -6899,7 +6939,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   toast.success("Entegrasyon ayarları kaydedildi.");
                   setConfiguringMarketplace(null);
                 }}
-                className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer border-none shadow-sm"
+                className="flex-1 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition-all cursor-pointer border-none shadow-xs"
               >
                 Değişiklikleri Kaydet
               </button>
@@ -6913,19 +6953,23 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK XML HEDEF EKLEME MODAL (XML CREATOR)
          ──────────────────────────────────────────────────────── */}
       {isXmlModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <FileText className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <FileText className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Yeni XML Fiyat Kuralı Tanımla</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">XML Fiyat Kuralı Tanımla</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">Feed kaynağı ve kar marjı kurallarını belirleyin</p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsXmlModalOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -6933,23 +6977,23 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">XML Çıktı / Feed Adı *</label>
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">XML Çıktı / Feed Adı *</label>
                 <input
                   type="text"
                   placeholder="Örn: Google Alışveriş veya Bayi_XML_Özel..."
                   value={newXmlFeed.name}
                   onChange={e => setNewXmlFeed({ ...newXmlFeed, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white outline-none"
+                  className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Referans Fiyat Kaynağı</label>
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Referans Fiyat Kaynağı</label>
                   <select
                     value={newXmlFeed.priceSource}
                     onChange={e => setNewXmlFeed({ ...newXmlFeed, priceSource: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white cursor-pointer outline-none"
+                    className="w-full px-3 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] cursor-pointer outline-none transition"
                   >
                     <option value="B2B Satış Fiyatı">B2B Satış Fiyatı</option>
                     <option value="Perakende Satış Fiyatı">Perakende Fiyatı</option>
@@ -6959,32 +7003,34 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Fiyat Artış Oranı (%)</label>
-                  <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-orange-500 transition-all bg-slate-50">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Fiyat Artış Oranı (%)</label>
+                  <div className="flex rounded-xl overflow-hidden border border-stone-200 focus-within:border-[#6b1d2f] focus-within:ring-2 focus-within:ring-[#6b1d2f]/10 transition-all bg-stone-50/60">
                     <input
                       type="number"
                       value={newXmlFeed.markupPercent || ""}
                       onChange={e => setNewXmlFeed({ ...newXmlFeed, markupPercent: parseInt(e.target.value) || 0 })}
-                      className="flex-1 px-3 py-2 bg-transparent text-sm font-bold outline-none border-none text-center"
+                      className="flex-1 px-3 py-2 bg-transparent text-xs font-semibold outline-none border-none text-center text-stone-800"
                     />
-                    <div className="px-3.5 bg-slate-100 border-l border-slate-200 text-xs font-black text-slate-500 flex items-center justify-center">%</div>
+                    <div className="px-3 bg-stone-100 border-l border-stone-200 text-xs font-bold text-stone-500 flex items-center justify-center">%</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 flex gap-3">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex gap-3">
               <button
+                type="button"
                 onClick={() => setIsXmlModalOpen(false)}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-all cursor-pointer border-none"
+                className="flex-1 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
               >
                 İptal
               </button>
               <button
+                type="button"
                 onClick={addXmlFeed}
-                className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer border-none"
+                className="flex-1 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition-all flex justify-center items-center gap-1.5 shadow-xs cursor-pointer border-none"
               >
-                <Plus className="w-4 h-4" /> Kuralı XML'e Ekle
+                <Plus className="w-3.5 h-3.5" /> Kuralı XML'e Ekle
               </button>
             </div>
 
@@ -6996,28 +7042,28 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK BARKOD YAZDIRMA MODALI (BARCODE PRINTER)
          ──────────────────────────────────────────────────────── */}
       {isPrintModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col md:flex-row text-left">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col md:flex-row text-left">
             
             {/* Left side: Form Settings */}
             <div className="flex-1 p-6 space-y-4">
-              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                <div className="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center border border-orange-100">
-                  <Printer className="w-5 h-5 text-orange-500" />
+              <div className="flex items-center gap-3 pb-3 border-b border-stone-200/70">
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <Printer className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">Barkod Yazdır</h3>
-                  <p className="text-[10px] text-slate-400 font-semibold">Termal rulo etiket ayarları</p>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">Barkod Yazdır</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Termal rulo etiket formatı ve adet ayarları</p>
                 </div>
               </div>
 
               <form onSubmit={handlePrintBarcode} className="space-y-3.5">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Etiket Boyutu</label>
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Etiket Boyutu</label>
                   <select
                     value={printForm.labelSize}
                     onChange={e => setPrintForm({ ...printForm, labelSize: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white outline-none cursor-pointer text-slate-800"
+                    className="w-full px-3 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#6b1d2f] outline-none cursor-pointer text-stone-800 transition"
                   >
                     <option value="50mm x 30mm">50mm x 30mm (Standart)</option>
                     <option value="80mm x 40mm">80mm x 40mm (Geniş)</option>
@@ -7026,12 +7072,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Etiket Adedi</label>
-                  <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-orange-500 transition-all bg-slate-50">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Etiket Adedi</label>
+                  <div className="flex rounded-xl overflow-hidden border border-stone-200 focus-within:border-[#6b1d2f] focus-within:ring-2 focus-within:ring-[#6b1d2f]/10 transition-all bg-stone-50/60">
                     <button
                       type="button"
                       onClick={() => setPrintForm(prev => ({ ...prev, qty: Math.max(1, prev.qty - 1) }))}
-                      className="px-3 bg-slate-100 hover:bg-slate-250 border-r border-slate-200 text-slate-500 font-bold select-none cursor-pointer border-none"
+                      className="px-3 bg-stone-100 hover:bg-stone-200 border-r border-stone-200 text-stone-600 font-semibold select-none cursor-pointer border-none transition"
                     >
                       -
                     </button>
@@ -7039,12 +7085,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       type="number"
                       value={printForm.qty}
                       onChange={e => setPrintForm({ ...printForm, qty: Math.max(1, parseInt(e.target.value) || 1) })}
-                      className="flex-1 px-2 py-1.5 bg-transparent text-xs font-bold outline-none border-none text-center text-slate-800"
+                      className="flex-1 px-2 py-1.5 bg-transparent text-xs font-semibold outline-none border-none text-center text-stone-800"
                     />
                     <button
                       type="button"
                       onClick={() => setPrintForm(prev => ({ ...prev, qty: prev.qty + 1 }))}
-                      className="px-3 bg-slate-100 hover:bg-slate-250 border-l border-slate-200 text-slate-500 font-bold select-none cursor-pointer border-none"
+                      className="px-3 bg-stone-100 hover:bg-stone-200 border-l border-stone-200 text-stone-600 font-semibold select-none cursor-pointer border-none transition"
                     >
                       +
                     </button>
@@ -7052,11 +7098,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Fiyat Gösterimi</label>
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Fiyat Gösterimi</label>
                   <select
                     value={printForm.priceType}
                     onChange={e => setPrintForm({ ...printForm, priceType: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white outline-none cursor-pointer text-slate-800"
+                    className="w-full px-3 py-2 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#6b1d2f] outline-none cursor-pointer text-stone-800 transition"
                   >
                     <option value="salePrice">B2B Satış Fiyatı (₺{form.salePrice})</option>
                     <option value="retailPrice">Perakende Fiyatı (₺{form.retailPrice})</option>
@@ -7067,12 +7113,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
 
                 {isPrinting ? (
                   <div className="space-y-2 pt-2 animate-in fade-in">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                    <div className="flex justify-between items-center text-[10px] font-semibold text-stone-500">
                       <span>Yazıcıya gönderiliyor...</span>
                       <span>%{printProgress}</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500 rounded-full transition-all duration-150" style={{ width: `${printProgress}%` }}></div>
+                    <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#6b1d2f] rounded-full transition-all duration-150" style={{ width: `${printProgress}%` }}></div>
                     </div>
                   </div>
                 ) : (
@@ -7080,15 +7126,15 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     <button
                       type="button"
                       onClick={() => setIsPrintModalOpen(false)}
-                      className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer border-none"
+                      className="flex-1 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                     >
                       İptal
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all flex justify-center items-center gap-1.5 shadow-lg shadow-orange-500/10 cursor-pointer border-none"
+                      className="flex-1 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition-all flex justify-center items-center gap-1.5 shadow-xs cursor-pointer border-none"
                     >
-                      <Printer className="w-4 h-4" /> Yazdır
+                      <Printer className="w-3.5 h-3.5" /> Yazdır
                     </button>
                   </div>
                 )}
@@ -7096,17 +7142,17 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             </div>
 
             {/* Right side: Realtime HTML Thermal Label Preview */}
-            <div className="w-full md:w-64 bg-slate-100 p-6 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-slate-200/60 shadow-inner">
-              <span className="block text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-3.5">Etiket Önizleme</span>
+            <div className="w-full md:w-64 bg-[#faf8f5] p-6 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-stone-200/80">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3.5">Etiket Önizleme</span>
               
-              <div className="w-48 bg-white border border-slate-300 rounded shadow-md p-3.5 flex flex-col justify-between aspect-[5/3] overflow-hidden select-none relative animate-in fade-in duration-200 text-left">
+              <div className="w-48 bg-white border border-stone-300 rounded shadow-xs p-3.5 flex flex-col justify-between aspect-[5/3] overflow-hidden select-none relative animate-in fade-in duration-200 text-left">
                 {/* Dotted border indicator for label outline */}
-                <div className="absolute inset-1 border border-dashed border-slate-200 rounded pointer-events-none"></div>
+                <div className="absolute inset-1 border border-dashed border-stone-200 rounded pointer-events-none"></div>
                 
                 <div className="space-y-1 relative z-10 text-left">
-                  <span className="block text-[8px] font-black uppercase text-slate-400 tracking-wider">Pekefe Geleneksel ERP</span>
-                  <span className="block text-[10px] font-extrabold text-slate-800 leading-tight line-clamp-2 uppercase">{form.name}</span>
-                  <span className="block text-[8px] font-mono text-slate-500 font-bold mt-0.5">SKU: {form.sku}</span>
+                  <span className="block text-[8px] font-bold uppercase text-stone-400 tracking-wider">PEKEFE Gastronomi</span>
+                  <span className="block text-[10px] font-bold text-stone-800 leading-tight line-clamp-2">{form.name}</span>
+                  <span className="block text-[8px] font-mono text-stone-500 font-semibold mt-0.5">SKU: {form.sku}</span>
                 </div>
 
                 <div className="flex justify-between items-end relative z-10">
@@ -7114,18 +7160,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   <div className="flex flex-col items-center gap-0.5">
                     <div className="flex items-end h-7 gap-[1px]">
                       {[2,1,3,1,2,1,4,1,2,1,3,1,2,2,1,3,1,2].map((w, idx) => (
-                        <div key={idx} className="bg-slate-900 h-full" style={{ width: `${w}px` }}></div>
+                        <div key={idx} className="bg-stone-900 h-full" style={{ width: `${w}px` }}></div>
                       ))}
                     </div>
-                    <span className="text-[7px] font-mono font-bold tracking-widest text-slate-700">{form.barcode}</span>
+                    <span className="text-[7px] font-mono font-semibold tracking-widest text-stone-700">{form.barcode}</span>
                   </div>
 
                   {printForm.priceType !== "none" && (
                     <div className="text-right">
-                      <span className="block text-[6px] font-extrabold text-slate-400 uppercase tracking-widest">
+                      <span className="block text-[6px] font-bold text-stone-400 uppercase tracking-widest">
                         {printForm.priceType === "salePrice" ? "B2B" : printForm.priceType === "retailPrice" ? "PERAKENDE" : "WEB"}
                       </span>
-                      <span className="block text-xs font-black text-slate-900">
+                      <span className="block text-xs font-bold text-stone-900 font-serif">
                         ₺{printForm.priceType === "salePrice" ? form.salePrice : printForm.priceType === "retailPrice" ? form.retailPrice : form.webPrice}
                       </span>
                     </div>
@@ -7142,23 +7188,23 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            DİNAMİK STOK HAREKET RAPORU MODALI (STOCK MOVEMENTS)
          ──────────────────────────────────────────────────────── */}
       {isReportModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[760px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] h-[640px] text-left">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[760px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] h-[640px] text-left">
             
             {/* Header */}
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center shrink-0">
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <BarChart3 className="w-5 h-5 text-orange-500" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <BarChart3 className="w-4.5 h-4.5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-extrabold uppercase tracking-wider">Stok Kartı Hareket Raporu</h3>
-                  <p className="text-[10px] text-slate-400 font-semibold">{form.name} ({form.sku})</p>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">Stok Kartı Hareket Raporu</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">{form.name} ({form.sku})</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsReportModalOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -7169,21 +7215,21 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               
               {/* Dynamic summary KPI blocks */}
               <div className="grid grid-cols-3 gap-4 shrink-0">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 shadow-sm text-left">
-                  <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wide">Toplam Girişler</span>
-                  <span className="text-lg font-black text-emerald-600 mt-1 block">
+                <div className="bg-stone-50/70 border border-stone-200/80 rounded-xl p-3.5 shadow-2xs text-left">
+                  <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Toplam Girişler</span>
+                  <span className="text-lg font-bold text-emerald-700 mt-1 block font-serif">
                     +{movements.filter(m => m.qty > 0).reduce((sum, m) => sum + m.qty, 0)} {form.unit}
                   </span>
                 </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 shadow-sm text-left">
-                  <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wide">Toplam Çıkışlar</span>
-                  <span className="text-lg font-black text-rose-500 mt-1 block">
+                <div className="bg-stone-50/70 border border-stone-200/80 rounded-xl p-3.5 shadow-2xs text-left">
+                  <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Toplam Çıkışlar</span>
+                  <span className="text-lg font-bold text-rose-600 mt-1 block font-serif">
                     {movements.filter(m => m.qty < 0).reduce((sum, m) => sum + m.qty, 0)} {form.unit}
                   </span>
                 </div>
-                <div className="bg-orange-50 border border-orange-100 rounded-xl p-3.5 shadow-sm text-left">
-                  <span className="block text-[9px] font-bold text-orange-500 uppercase tracking-wide">Net Değişim</span>
-                  <span className="text-lg font-black text-slate-800 mt-1 block">
+                <div className="bg-[#6b1d2f]/5 border border-[#6b1d2f]/15 rounded-xl p-3.5 shadow-2xs text-left">
+                  <span className="block text-[10px] font-bold text-[#6b1d2f] uppercase tracking-wider">Net Değişim</span>
+                  <span className="text-lg font-bold text-stone-900 mt-1 block font-serif">
                     {movements.reduce((sum, m) => sum + m.qty, 0) >= 0 ? "+" : ""}
                     {movements.reduce((sum, m) => sum + m.qty, 0)} {form.unit}
                   </span>
@@ -7191,14 +7237,14 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
 
               {/* Dynamic Add Movement form in report */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3.5 shadow-inner">
-                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 text-left">Yeni Stok Hareketi Kaydet</span>
+              <div className="bg-stone-50/60 border border-stone-200/80 rounded-xl p-4 space-y-3.5">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-500 text-left">Yeni Stok Hareketi Kaydet</span>
                 <form onSubmit={handleAddMovement} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <select
                       value={newMovement.type}
                       onChange={e => setNewMovement({ ...newMovement, type: e.target.value })}
-                      className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none cursor-pointer text-slate-800"
+                      className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium outline-none cursor-pointer text-stone-800 focus:border-[#6b1d2f]"
                     >
                       <option value="Giriş (Mal Kabul)">Giriş (Mal Kabul)</option>
                       <option value="Çıkış (Sipariş/Sevk)">Çıkış (Sipariş/Sevk)</option>
@@ -7208,7 +7254,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                     <select
                       value={newMovement.warehouse}
                       onChange={e => setNewMovement({ ...newMovement, warehouse: e.target.value })}
-                      className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none cursor-pointer text-slate-800"
+                      className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium outline-none cursor-pointer text-stone-800 focus:border-[#6b1d2f]"
                     >
                       {warehouses.map(w => (
                         <option key={w.id} value={w.name}>{w.name}</option>
@@ -7221,13 +7267,13 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       placeholder="Miktar..."
                       value={newMovement.qty || ""}
                       onChange={e => setNewMovement({ ...newMovement, qty: parseInt(e.target.value) || 0 })}
-                      className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none text-center font-black"
+                      className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-semibold outline-none text-center text-stone-800 focus:border-[#6b1d2f]"
                     />
                   </div>
                   <div>
                     <button
                       type="submit"
-                      className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer border-none shadow-sm"
+                      className="w-full py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer border-none shadow-xs"
                     >
                       <Plus className="w-3.5 h-3.5 text-white" /> Hareket İşle
                     </button>
@@ -7236,40 +7282,40 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
 
               {/* Movements Table */}
-              <div className="overflow-x-auto overflow-y-auto max-h-[220px] border border-slate-200 rounded-xl shadow-sm bg-white">
+              <div className="overflow-x-auto overflow-y-auto max-h-[220px] border border-stone-200/80 rounded-xl shadow-2xs bg-white">
                 {isLoadingMovements ? (
                   <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
-                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-xs font-semibold text-slate-500">Stok hareketleri yükleniyor...</span>
+                    <div className="w-6 h-6 border-2 border-[#6b1d2f] border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs font-medium text-stone-500">Stok hareketleri yükleniyor...</span>
                   </div>
                 ) : movements.length === 0 ? (
-                  <div className="p-8 text-center text-xs font-semibold text-slate-400">
+                  <div className="p-8 text-center text-xs font-medium text-stone-400">
                     Bu ürüne ait stok hareket kaydı bulunamadı.
                   </div>
                 ) : (
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-[9px] font-extrabold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
-                        <th className="p-3 bg-slate-50">Tarih / Zaman</th>
-                        <th className="p-3 bg-slate-50">İşlem Detayı</th>
-                        <th className="p-3 bg-slate-50">Konum/Depo</th>
-                        <th className="p-3 bg-slate-50 text-center">Değişim</th>
-                        <th className="p-3 bg-slate-50">Sorumlu</th>
-                        <th className="p-3 bg-slate-50 text-center">Durum</th>
+                      <tr className="bg-[#faf8f5] border-b border-stone-200/80 text-[10px] font-bold text-stone-500 uppercase tracking-wider sticky top-0 z-10">
+                        <th className="p-3 bg-[#faf8f5]">Tarih / Zaman</th>
+                        <th className="p-3 bg-[#faf8f5]">İşlem Detayı</th>
+                        <th className="p-3 bg-[#faf8f5]">Konum/Depo</th>
+                        <th className="p-3 bg-[#faf8f5] text-center">Değişim</th>
+                        <th className="p-3 bg-[#faf8f5]">Sorumlu</th>
+                        <th className="p-3 bg-[#faf8f5] text-center">Durum</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-stone-100">
                       {movements.map(m => (
-                        <tr key={m.id} className="hover:bg-slate-50/50 transition">
-                          <td className="p-3 text-xs font-semibold text-slate-400">{m.date}</td>
-                          <td className="p-3 text-xs font-bold text-slate-800">{m.type}</td>
-                          <td className="p-3 text-xs font-semibold text-slate-500">{m.warehouse}</td>
-                          <td className={`p-3 text-xs font-black text-center ${m.qty > 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                        <tr key={m.id} className="hover:bg-stone-50/60 transition">
+                          <td className="p-3 text-xs font-medium text-stone-400">{m.date}</td>
+                          <td className="p-3 text-xs font-semibold text-stone-800">{m.type}</td>
+                          <td className="p-3 text-xs font-medium text-stone-500">{m.warehouse}</td>
+                          <td className={`p-3 text-xs font-bold text-center ${m.qty > 0 ? "text-emerald-700" : "text-rose-600"}`}>
                             {m.qty > 0 ? "+" : ""}{m.qty} {form.unit}
                           </td>
-                          <td className="p-3 text-xs font-semibold text-slate-500">{m.user}</td>
+                          <td className="p-3 text-xs font-medium text-stone-500">{m.user}</td>
                           <td className="p-3 text-center">
-                            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[9px] font-black uppercase">
+                            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 rounded-md text-[10px] font-semibold uppercase">
                               {m.status}
                             </span>
                           </td>
@@ -7283,14 +7329,14 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             </div>
 
             {/* Footer actions */}
-            <div className="p-5 border-t border-slate-150 bg-slate-50/50 flex justify-between items-center shrink-0">
+            <div className="px-6 py-4 border-t border-stone-200/80 bg-[#faf8f5] flex justify-between items-center shrink-0">
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     toast.success("Excel Stok Hareket Raporu başarıyla indirildi.");
                   }}
-                  className="px-3.5 py-2 border border-slate-200 hover:border-slate-350 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition bg-white cursor-pointer"
+                  className="px-3.5 py-2 border border-stone-200/90 hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-semibold transition bg-white cursor-pointer shadow-2xs"
                 >
                   Excel'e Aktar
                 </button>
@@ -7299,7 +7345,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   onClick={() => {
                     toast.success("PDF Raporu hazırlanıp yeni sekmede açıldı.");
                   }}
-                  className="px-3.5 py-2 border border-slate-200 hover:border-slate-350 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition bg-white cursor-pointer"
+                  className="px-3.5 py-2 border border-stone-200/90 hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-semibold transition bg-white cursor-pointer shadow-2xs"
                 >
                   PDF Olarak İndir
                 </button>
@@ -7307,7 +7353,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               <button
                 type="button"
                 onClick={() => setIsReportModalOpen(false)}
-                className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer border-none"
+                className="px-5 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
               >
                 Kapat
               </button>
@@ -7321,31 +7367,31 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
            CANCEL / EXIT CONFIRMATION MODAL
          ──────────────────────────────────────────────────────── */}
       {isCancelModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 text-center space-y-4">
-              <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-500">
+              <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto text-amber-600 border border-amber-200/60">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900">Kaydedilmemiş Değişiklikler</h3>
-                <p className="text-xs text-slate-500">
-                  Sayfada yaptığınız değişiklikler kaydedilmedi. Ayrılmak istediğinize emin misiniz?
+                <h3 className="font-serif text-base font-semibold text-stone-900">Kaydedilmemiş Değişiklikler</h3>
+                <p className="text-xs text-stone-500 font-medium">
+                  Sayfada yaptığınız değişiklikler henüz kaydedilmedi. Ayrılmak istediğinize emin misiniz?
                 </p>
               </div>
             </div>
-            <div className="bg-slate-50 px-6 py-4 flex gap-3 border-t border-slate-100">
+            <div className="bg-[#faf8f5] px-6 py-4 flex gap-3 border-t border-stone-200/80">
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(false)}
-                className="flex-1 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-750 rounded-xl text-xs font-bold transition cursor-pointer active:scale-98"
+                className="flex-1 py-2.5 bg-white hover:bg-stone-100 border border-stone-200/90 text-stone-700 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
               >
                 Hayır, Düzenlemeye Devam Et
               </button>
               <button
                 type="button"
                 onClick={confirmCancel}
-                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition cursor-pointer active:scale-98 shadow-md shadow-red-500/10 border-none"
+                className="flex-1 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition cursor-pointer border-none shadow-xs"
               >
                 Evet, Kaydetmeden Çık
               </button>

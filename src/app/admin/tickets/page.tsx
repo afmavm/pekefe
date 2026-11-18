@@ -410,7 +410,7 @@ export default function TicketsAndCRMPage() {
             </div>
             <button
               onClick={() => setIsAddCrmModalOpen(true)}
-              className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 transition-all duration-300 shadow-md shadow-amber-500/10 hover:shadow-lg active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer border-none"
             >
               <Plus className="w-4 h-4" /> Yeni Etkinlik &amp; Görev Ekle
             </button>
@@ -817,23 +817,23 @@ export default function TicketsAndCRMPage() {
 
       {/* CRM TASK CREATION MODAL */}
       {isAddCrmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-200">
-          <div className="bg-white relative z-10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white relative z-10 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col border border-stone-200/80 animate-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-orange-100 text-orange-500 rounded-lg">
-                  <Sparkles className="w-4 h-4" />
+            <div className="px-6 py-4.5 border-b border-stone-200/80 bg-[#faf8f5] flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 text-[#6b1d2f] border border-[#6b1d2f]/15 rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-slate-800">Yeni CRM Görüşme / Görev Kartı</h3>
-                  <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Müşteri İlişkileri Takip Girişi</p>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">Yeni CRM Görüşme & Görev Kartı</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">Müşteri ve cari takip notu girişi</p>
                 </div>
               </div>
               <button 
                 onClick={() => setIsAddCrmModalOpen(false)}
-                className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full cursor-pointer transition"
+                className="w-8 h-8 flex items-center justify-center bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 rounded-xl border border-stone-200/60 cursor-pointer transition shadow-2xs"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -842,25 +842,25 @@ export default function TicketsAndCRMPage() {
             {/* Modal Form */}
             <form onSubmit={handleAddCrmTask} className="p-6 space-y-4">
               
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">İlişkili Cari Unvanı *</label>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">İlişkili Cari Unvanı *</label>
                 <input 
                   type="text" 
                   required
                   placeholder="Örn: Zeta Dağıtım A.Ş. veya Ahmet Yılmaz" 
                   value={newCrm.cariName}
                   onChange={(e) => setNewCrm({...newCrm, cariName: e.target.value})}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-orange-400 transition"
+                  className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 outline-none focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">İletişim Kanalı</label>
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">İletişim Kanalı</label>
                   <select 
                     value={newCrm.type}
                     onChange={(e) => setNewCrm({...newCrm, type: e.target.value as any})}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-orange-400 transition cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 outline-none focus:bg-white focus:border-[#6b1d2f] transition cursor-pointer"
                   >
                     <option value="TELEFON">Telefon Görüşmesi</option>
                     <option value="EPOSTA">E-Posta Gönderimi</option>
@@ -868,38 +868,38 @@ export default function TicketsAndCRMPage() {
                   </select>
                 </div>
                 
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Görüşmeyi Yapan Personel</label>
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Görüşmeyi Yapan Personel</label>
                   <input 
                     type="text" 
                     placeholder="Örn: Ahmet Şahin" 
                     value={newCrm.personnel}
                     onChange={(e) => setNewCrm({...newCrm, personnel: e.target.value})}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-orange-400 transition"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 outline-none focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Görüşme Notu / Detay *</label>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Görüşme Notu / Detay *</label>
                 <textarea 
                   rows={4}
                   required
                   placeholder="Görüşme detayları, alınan kararlar veya planlanan aksiyon notları..." 
                   value={newCrm.content}
                   onChange={(e) => setNewCrm({...newCrm, content: e.target.value})}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-orange-400 transition resize-none"
+                  className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-xs font-medium text-stone-800 outline-none focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 transition resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 items-center bg-slate-50 p-4 rounded-xl border border-slate-200/50">
+              <div className="grid grid-cols-2 gap-4 items-center bg-stone-50/70 p-4 rounded-xl border border-stone-200/80">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Hatırlatma Vadesi</label>
+                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider">Hatırlatma Vadesi</label>
                   <input 
                     type="datetime-local" 
                     value={newCrm.reminderDate}
                     onChange={(e) => setNewCrm({...newCrm, reminderDate: e.target.value})}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:border-orange-400 outline-none"
+                    className="w-full px-2.5 py-1.5 bg-white border border-stone-200 rounded-lg text-xs font-medium text-stone-800 focus:border-[#6b1d2f] outline-none"
                   />
                 </div>
                 
@@ -909,26 +909,26 @@ export default function TicketsAndCRMPage() {
                     id="modalAlarmToggle"
                     checked={newCrm.alarm}
                     onChange={(e) => setNewCrm({...newCrm, alarm: e.target.checked})}
-                    className="w-4 h-4 text-orange-500 focus:ring-orange-500 border-slate-300 rounded cursor-pointer"
+                    className="w-4 h-4 text-[#6b1d2f] focus:ring-[#6b1d2f] border-stone-300 rounded cursor-pointer accent-[#6b1d2f]"
                   />
-                  <label htmlFor="modalAlarmToggle" className="text-xs text-slate-600 font-bold cursor-pointer select-none flex items-center gap-1">
-                    <Bell className="w-3.5 h-3.5 text-orange-500" /> Hatırlatma Alarmı
+                  <label htmlFor="modalAlarmToggle" className="text-xs text-stone-700 font-semibold cursor-pointer select-none flex items-center gap-1.5">
+                    <Bell className="w-3.5 h-3.5 text-[#6b1d2f]" /> Hatırlatma Alarmı
                   </label>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="border-t border-slate-100 pt-4 flex justify-end gap-2">
+              <div className="border-t border-stone-200/80 pt-4 flex justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsAddCrmModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition"
+                  className="px-4 py-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition"
+                  className="px-5 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer border-none shadow-xs"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> Görevi Kaydet
                 </button>

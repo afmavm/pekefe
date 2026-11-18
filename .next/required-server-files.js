@@ -75,7 +75,8 @@ self.__SERVER_FILES_MANIFEST={
         }
       ],
       "qualities": [
-        75
+        75,
+        100
       ],
       "unoptimized": true,
       "customCacheHandler": false
@@ -350,6 +351,36 @@ self.__SERVER_FILES_MANIFEST={
       {
         "source": "/admin/products/form",
         "destination": "/admin/stock/form",
+        "permanent": true
+      },
+      {
+        "source": "/gizlilik-politikasi",
+        "destination": "/gizlilik",
+        "permanent": true
+      },
+      {
+        "source": "/kvkk",
+        "destination": "/gizlilik",
+        "permanent": true
+      },
+      {
+        "source": "/kullanim-sartlari",
+        "destination": "/sozlesme",
+        "permanent": true
+      },
+      {
+        "source": "/mesafeli-satis-sozlesmesi",
+        "destination": "/sozlesme",
+        "permanent": true
+      },
+      {
+        "source": "/iptal-iade-kosullari",
+        "destination": "/teslimat",
+        "permanent": true
+      },
+      {
+        "source": "/hesabim",
+        "destination": "/hesap",
         "permanent": true
       }
     ]

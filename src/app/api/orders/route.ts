@@ -61,7 +61,17 @@ export const GET = withAuth<any>(
         if (idKey) map.set(idKey, o);
       });
 
+      const isAdmin = isAdminRole(session?.user?.role) && !isPersonal;
+      const userEmail = (session?.user?.email || "").toLowerCase().trim();
+
       localOrders.forEach(lo => {
+        // Eğer admin değilse YALNIZCA bu kullanıcıya ait yerel siparişleri ekle
+        if (!isAdmin) {
+          const loEmail = (lo.email || "").toLowerCase().trim();
+          if (!userEmail || loEmail !== userEmail) {
+            return;
+          }
+        }
         const idKey = lo.id || lo.orderNumber;
         if (idKey) {
           const existing = map.get(idKey);

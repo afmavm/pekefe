@@ -505,13 +505,13 @@ export default function CycleCountClient({
               placeholder="Sayım kodu, depo veya sorumlu ara..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-805 placeholder:text-slate-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100 transition"
+              className="h-10 w-full rounded-xl border border-stone-200 bg-stone-50/50 pl-9 pr-4 text-sm text-stone-800 placeholder:text-stone-400 focus:bg-white focus:border-[#6b1d2f] focus:outline-none focus:ring-2 focus:ring-[#6b1d2f]/10 transition"
             />
           </div>
 
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold text-sm transition cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl font-semibold text-xs transition cursor-pointer shadow-xs border-none"
           >
             <Plus className="w-4 h-4" />
             Yeni Sayım Kartı Aç
@@ -520,35 +520,35 @@ export default function CycleCountClient({
       </div>
 
       {/* Main Cycle Counts Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-stone-200/80 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
+          <table className="min-w-full divide-y divide-stone-200/80 text-sm">
             <thead>
-              <tr className="bg-slate-50">
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+              <tr className="bg-[#faf8f5]">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   #
                 </th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   Sayım Kodu &amp; Tarih
                 </th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   Depo &amp; Şube
                 </th>
-                <th className="px-5 py-3.5 text-center text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-center text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   Ürün Sayısı
                 </th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   Tür
                 </th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-200/80">
                   Durum
                 </th>
-                <th className="px-5 py-3.5 text-right text-xs font-bold text-slate-400 tracking-wider border-b border-slate-100">
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-stone-500 tracking-wider border-b border-stone-200/80">
                   İşlem
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-stone-100">
               {filteredCounts.length > 0 ? (
                 filteredCounts.map((cc, index) => {
                   const dateStr = new Date(cc.createdAt).toLocaleDateString("tr-TR", {
@@ -559,29 +559,29 @@ export default function CycleCountClient({
                   return (
                     <tr
                       key={cc.id}
-                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      className="hover:bg-stone-50/70 transition-colors group cursor-pointer"
                       onClick={() => router.push(`?id=${cc.id}`)}
                     >
-                      <td className="px-5 py-4 font-medium text-slate-400">
+                      <td className="px-5 py-4 font-medium text-stone-400">
                         {index + 1}
                       </td>
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-slate-800 text-sm group-hover:text-orange-600 transition-colors">
+                        <div className="font-semibold text-stone-800 text-sm group-hover:text-[#6b1d2f] transition-colors">
                           {cc.code}
                         </div>
-                        <div className="text-xs text-slate-400 mt-0.5">{dateStr}</div>
+                        <div className="text-xs text-stone-400 mt-0.5">{dateStr}</div>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="font-medium text-slate-700">{cc.warehouse.name}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="font-medium text-stone-700">{cc.warehouse.name}</div>
+                        <div className="text-xs text-stone-400 mt-0.5">
                           {cc.warehouse.branch.name} ({cc.warehouse.code})
                         </div>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="font-semibold text-slate-800">{cc._count.items}</span>
+                        <span className="font-semibold text-stone-800">{cc._count.items}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                        <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60">
                           {cc.type}
                         </span>
                       </td>
@@ -589,20 +589,20 @@ export default function CycleCountClient({
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                             cc.status === "TASLAK"
-                              ? "bg-slate-100 text-slate-700"
+                              ? "bg-stone-100 text-stone-700"
                               : cc.status === "DEVAM_EDIYOR"
-                              ? "bg-amber-50 text-amber-700 border border-amber-100"
+                              ? "bg-amber-50 text-amber-700 border border-amber-200/60"
                               : cc.status === "TAMAMLANDI"
-                              ? "bg-green-50 text-green-700 border border-green-150"
-                              : "bg-red-50 text-red-700 border border-red-150"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                              : "bg-red-50 text-red-700 border border-red-200/60"
                           }`}
                         >
                           {cc.status}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="inline-flex items-center gap-1 text-slate-400 group-hover:text-orange-600 transition-colors">
-                          <span className="text-xs font-semibold hidden sm:inline">Detay &amp; Sayım Sayfası</span>
+                        <div className="inline-flex items-center gap-1 text-stone-400 group-hover:text-[#6b1d2f] transition-colors">
+                          <span className="text-xs font-medium hidden sm:inline">Detay &amp; Sayım Sayfası</span>
                           <ChevronRight className="w-4 h-4" />
                         </div>
                       </td>
@@ -611,7 +611,7 @@ export default function CycleCountClient({
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                  <td colSpan={7} className="text-center py-12 text-stone-400">
                     Henüz oluşturulmuş bir sayım işlemi yok.
                   </td>
                 </tr>
@@ -623,37 +623,41 @@ export default function CycleCountClient({
 
       {/* Creation Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-stone-200/80 shadow-xl overflow-hidden animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base flex items-center gap-2">
-                  <ClipboardCheck className="w-4 h-4 text-orange-400" />
-                  Yeni Sayım Başlat
-                </h3>
-                <p className="text-[10px] text-slate-400 font-medium uppercase mt-0.5 tracking-wider">
-                  ERP Stok Doğrulama
-                </p>
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <ClipboardCheck className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Yeni Sayım Başlat
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">
+                    Depo stok mutabakatı ve sayım kaydı
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="text-slate-400 hover:text-white transition cursor-pointer"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
               >
-                <XCircle className="w-5 h-5" />
+                <XCircle className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                <label className="text-[11px] text-stone-600 font-bold uppercase tracking-wider block mb-1">
                   Sayım Yapılacak Depo
                 </label>
                 <select
                   value={warehouseId}
                   onChange={(e) => setWarehouseId(e.target.value)}
-                  className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100 transition"
+                  className="h-10 w-full rounded-xl border border-stone-200 bg-stone-50/60 px-3 text-xs font-medium text-stone-700 focus:bg-white focus:border-[#6b1d2f] focus:outline-none focus:ring-2 focus:ring-[#6b1d2f]/10 transition cursor-pointer"
                 >
                   <option value="">Depo Seçin...</option>
                   {warehouses.map((w) => (
@@ -665,7 +669,7 @@ export default function CycleCountClient({
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                <label className="text-[11px] text-stone-600 font-bold uppercase tracking-wider block mb-1">
                   Sayım Türü
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -674,10 +678,10 @@ export default function CycleCountClient({
                       key={t}
                       type="button"
                       onClick={() => setType(t)}
-                      className={`py-2 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                      className={`py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
                         type === t
-                          ? "border-orange-500 bg-orange-50 text-orange-700 shadow-sm"
-                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "border-[#6b1d2f] bg-[#6b1d2f]/10 text-[#6b1d2f] shadow-2xs"
+                          : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50"
                       }`}
                     >
                       {t}
@@ -687,33 +691,33 @@ export default function CycleCountClient({
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                <label className="text-[11px] text-stone-600 font-bold uppercase tracking-wider block mb-1">
                   Özel Notlar
                 </label>
                 <textarea
                   placeholder="Sayım ile ilgili notlar..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full min-h-[80px] rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-800 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100 transition"
+                  className="w-full min-h-[80px] rounded-xl border border-stone-200 bg-stone-50/60 p-3 text-xs font-medium text-stone-800 focus:bg-white focus:border-[#6b1d2f] focus:outline-none focus:ring-2 focus:ring-[#6b1d2f]/10 transition"
                 />
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center gap-2 justify-end">
+            <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex items-center gap-2.5 justify-end">
               <button
                 onClick={() => setIsCreateOpen(false)}
                 disabled={isPending}
-                className="px-4 py-2 border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50 font-semibold text-xs transition cursor-pointer disabled:opacity-55"
+                className="px-4 py-2 border border-stone-200/90 bg-white text-stone-700 rounded-xl hover:bg-stone-100 font-semibold text-xs transition cursor-pointer shadow-2xs disabled:opacity-55"
               >
                 İptal
               </button>
               <button
                 onClick={handleCreate}
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold text-xs transition cursor-pointer disabled:opacity-55"
+                className="inline-flex items-center gap-1.5 px-5 py-2 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl font-semibold text-xs transition cursor-pointer border-none shadow-xs disabled:opacity-55"
               >
-                {isPending && <Loader2 className="w-3 h-3 animate-spin" />}
+                {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Sayım Kartı Oluştur
               </button>
             </div>

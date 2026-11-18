@@ -13,7 +13,8 @@ export const dynamic = "force-dynamic";
 async function getInitialDashboardData() {
   try {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
-    const { getLocalOrders } = await import("@/lib/jsonOrderDb");
+    const { readLocalOrders } = await import("@/lib/jsonOrderDb");
+    const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -87,7 +88,8 @@ async function getInitialDashboardData() {
 
     // Merge with Local JSON DB for offline/local resilience
     const localProducts = readLocalProducts();
-    const localOrders = getLocalOrders ? getLocalOrders() : [];
+    const localOrders = readLocalOrders();
+    const localAccounts = readLocalAccounts();
 
     const existingProductIds = new Set((dbProducts || []).map(p => String(p.id)));
     const finalProducts = [
@@ -104,29 +106,58 @@ async function getInitialDashboardData() {
       }))
     ];
 
-    const existingOrderIds = new Set((dbOrders || []).map(o => String(o.id)));
+    const localOrderMap = new Map((localOrders || []).map(o => [String(o.id || o.orderNumber), o]));
     const finalOrders = [
-      ...(dbOrders || []),
-      ...localOrders.filter(o => o && !existingOrderIds.has(String(o.id))).map(o => ({
-        id: o.id,
+      ...(dbOrders || []).map(o => {
+        const local = localOrderMap.get(String(o.id));
+        if (local) {
+          return {
+            ...o,
+            status: local.status || o.status,
+            total: { toNumber: () => Number(local.total || local.amount || (typeof o.total?.toNumber === 'function' ? o.total.toNumber() : o.total)) }
+          };
+        }
+        return o;
+      }),
+      ...localOrders.filter(o => o && !(dbOrders || []).some(dbo => String(dbo.id) === String(o.id))).map(o => ({
+        id: o.id || o.orderNumber,
         orderNumber: o.orderNumber || o.id,
         total: { toNumber: () => Number(o.amount || o.total || 0) },
-        status: o.status || "Tamamlandı",
+        status: o.status || "Yeni",
         type: o.type || "B2C",
         date: o.date ? new Date(o.date) : new Date(o.createdAt || Date.now()),
-        currentAccount: o.customerName ? { name: o.customerName } : null,
-        summary: o.summary || ""
+        currentAccount: o.customerName ? { name: o.customerName } : (o.client ? { name: o.client } : null),
+        summary: o.summary || "",
+        items: o.items || []
       }))
     ];
 
-    const monthOrders = finalOrders.filter(o => {
+    const isOrderCancelledOrReturned = (status?: string) => {
+      if (!status) return false;
+      const s = String(status);
+      const trLower = s.toLocaleLowerCase('tr-TR');
+      return (
+        trLower.includes('iptal') ||
+        s.includes('İptal') ||
+        s.includes('Iptal') ||
+        s.toLowerCase().includes('cancel') ||
+        trLower.includes('iade') ||
+        s.includes('İade') ||
+        s.includes('Iade') ||
+        s.toLowerCase().includes('refund')
+      );
+    };
+
+    const activeOrders = finalOrders.filter(o => !isOrderCancelledOrReturned(o.status));
+
+    const monthOrders = activeOrders.filter(o => {
       const d = o.date instanceof Date ? o.date : new Date(o.date);
       return d >= startOfMonth;
     });
 
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-    const lastMonthOrders = finalOrders.filter(o => {
+    const lastMonthOrders = activeOrders.filter(o => {
       const d = o.date instanceof Date ? o.date : new Date(o.date);
       return d >= lastMonthStart && d <= lastMonthEnd;
     });
@@ -135,17 +166,25 @@ async function getInitialDashboardData() {
     const lastMonthOrdersCount = lastMonthOrders.length;
 
     // Financial calculations
-    const totalAR = arSum._sum.balance ? arSum._sum.balance.toNumber() : 0;
-    const totalAP = apSum._sum.balance ? apSum._sum.balance.toNumber() : 0;
+    const localAR = localAccounts
+      .filter((a: any) => (a.type?.includes('MUSTERI') || a.type?.includes('BAYI') || a.type?.includes('customer')) && Number(a.balance || 0) > 0)
+      .reduce((sum: number, a: any) => sum + Number(a.balance || 0), 0);
+
+    const localAP = localAccounts
+      .filter((a: any) => (a.type?.includes('TEDARIKCI') || a.type?.includes('supplier')) && Number(a.balance || 0) > 0)
+      .reduce((sum: number, a: any) => sum + Number(a.balance || 0), 0);
+
+    const totalAR = arSum._sum.balance ? arSum._sum.balance.toNumber() : localAR;
+    const totalAP = apSum._sum.balance ? apSum._sum.balance.toNumber() : localAP;
 
     const criticalStockCount = finalProducts.filter(p => Number(p.stock) <= Number(p.criticalLimit || 5)).length;
 
-    const totalRevenue = finalOrders.reduce((sum, o: any) => {
+    const totalRevenue = activeOrders.reduce((sum, o: any) => {
       const val = typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
       return sum + val;
     }, 0);
 
-    const averageOrderValue = finalOrders.length > 0 ? Math.round(totalRevenue / finalOrders.length) : 0;
+    const averageOrderValue = activeOrders.length > 0 ? Math.round(totalRevenue / activeOrders.length) : 0;
     const activeVisitors = 42;
     const activeCarts = 3;
     const totalCost = finalProducts.reduce((sum, p) => sum + (Number(p.cost || 0) * Number(p.stock || 0)), 0);
@@ -214,19 +253,28 @@ async function getInitialDashboardData() {
       description: 'İlk Stok Tanımı'
     }));
 
-    // Top Selling Products compilation from real products
-    let topSellingProducts = finalProducts.slice(0, 5).map(p => ({
-      name: p.name,
-      quantity: Math.max(1, Math.floor(Number(p.stock || 0) * 0.4)),
-      revenue: Math.max(Number(p.price || 0), Math.floor(Number(p.price || 0) * Math.max(1, Math.floor(Number(p.stock || 0) * 0.4))))
-    }));
+    // Top Selling Products compilation from active orders
+    const salesMap: Record<string, { name: string; quantity: number; revenue: number }> = {};
+    for (const order of activeOrders) {
+      if (Array.isArray(order.items)) {
+        for (const item of order.items) {
+          const name = item.name || item.productName || 'Ürün';
+          const qty = Number(item.quantity || 1);
+          const rev = Number(item.price || item.total || 0) * qty;
+          if (!salesMap[name]) salesMap[name] = { name, quantity: 0, revenue: 0 };
+          salesMap[name].quantity += qty;
+          salesMap[name].revenue += rev;
+        }
+      }
+    }
+    const topSellingProducts = Object.values(salesMap).sort((a, b) => b.quantity - a.quantity).slice(0, 5);
 
-    // Dynamic B2B / B2C channel splits
-    const b2bOrderCount = finalOrders.filter(o => o.type === 'B2B').length;
-    const b2cOrderCount = finalOrders.filter(o => o.type === 'B2C' || !o.type).length;
-    const otherOrderCount = Math.max(0, finalOrders.length - (b2bOrderCount + b2cOrderCount));
+    // Dynamic B2B / B2C channel splits from active orders
+    const b2bOrderCount = activeOrders.filter(o => o.type === 'B2B').length;
+    const b2cOrderCount = activeOrders.filter(o => o.type === 'B2C' || !o.type).length;
+    const otherOrderCount = Math.max(0, activeOrders.length - (b2bOrderCount + b2cOrderCount));
 
-    // Calculate 6-month trend
+    // Calculate 6-month trend from active orders
     const trendList: Array<{ year: number; month: number; count: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
@@ -237,30 +285,36 @@ async function getInitialDashboardData() {
         count: 0
       });
     }
-    finalOrders.forEach(o => {
+    activeOrders.forEach(o => {
       const oDate = o.date instanceof Date ? o.date : new Date(o.date);
       const match = trendList.find(t => t.year === oDate.getFullYear() && t.month === oDate.getMonth());
       if (match) {
         match.count++;
       }
     });
-    const monthlyOrdersTrend = trendList.map(t => Math.max(t.count, 1));
+    const monthlyOrdersTrend = trendList.map(t => t.count);
 
-    let fastestDepletingProducts = finalProducts.slice(0, 5).map(p => ({
-      name: p.name,
-      sku: p.sku,
-      quantity: Math.max(1, Math.floor(Number(p.stock || 0) * 0.2))
-    }));
+    const fastestDepletingProducts = finalProducts
+      .filter(p => Number(p.stock) <= Number(p.criticalLimit || 5))
+      .map(p => ({
+        name: p.name,
+        sku: p.sku,
+        quantity: Number(p.stock)
+      }))
+      .slice(0, 5);
 
     const recentOrdersMapped = finalOrders.slice(0, 8).map((o: any) => ({
       id: o.id,
       orderNumber: o.orderNumber || o.id,
       total: typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0),
-      status: o.status || "Tamamlandı",
+      status: o.status || "Yeni",
       type: o.type || "B2C",
       date: o.date instanceof Date ? o.date.toISOString() : (o.date || new Date().toISOString()),
       currentAccount: o.currentAccount ? { name: o.currentAccount.name } : { name: "Doğrudan Sipariş" }
     }));
+
+    const cancelledOrderCount = finalOrders.filter(o => isOrderCancelledOrReturned(o.status)).length;
+    const activeDealerCount = localAccounts.filter((a: any) => a.type?.includes("MUSTERI") || a.type?.includes("BAYI") || a.type?.includes("customer")).length || 1;
 
     return {
       recentOrders: recentOrdersMapped,
@@ -275,19 +329,20 @@ async function getInitialDashboardData() {
       },
       kpis: {
         totalRevenue,
-        orderCount: finalOrders.length,
+        orderCount: activeOrders.length,
+        cancelledOrderCount,
         averageOrderValue,
         activeVisitors,
         activeCarts,
-        activeDealerCount: finalProducts.length,
+        activeDealerCount,
         criticalStockCount,
         activeIntegrationCount: 3,
-        profitMargin,
+        profitMargin: totalRevenue > 0 ? profitMargin : 0,
         totalProfit: Math.round(totalProfit),
         totalAR,
         totalAP,
         pendingIncomingInvoices: 0,
-        pendingShippingOrders: finalOrders.filter(o => o.status === 'Hazırlanıyor' || o.status === 'Yeni').length,
+        pendingShippingOrders: activeOrders.filter(o => o.status === 'Hazırlanıyor' || o.status === 'Yeni' || o.status === 'Ödeme Bekliyor').length,
         pendingCargoQueue: 0,
         pendingDespatchAdvices: 0,
         b2bOrderCount,
@@ -314,7 +369,8 @@ export default async function AdminDashboardPage() {
   let productCount = 0, todayOrders = 0, dealerCount = 0, pageCount = 0, cmsData: any = null;
   try {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
-    const { getLocalOrders } = await import("@/lib/jsonOrderDb");
+    const { readLocalOrders } = await import("@/lib/jsonOrderDb");
+    const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
 
     [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([
       prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),
@@ -325,13 +381,33 @@ export default async function AdminDashboardPage() {
     ]);
 
     const localProducts = readLocalProducts();
-    const localOrders = getLocalOrders ? getLocalOrders() : [];
+    const localOrders = readLocalOrders();
+    const localAccounts = readLocalAccounts();
 
     if (productCount === 0 && localProducts.length > 0) {
       productCount = localProducts.length;
     }
-    if (todayOrders === 0 && localOrders.length > 0) {
-      todayOrders = localOrders.length;
+    if (dealerCount === 0 && localAccounts.length > 0) {
+      dealerCount = localAccounts.filter((a: any) => a.type?.includes("MUSTERI") || a.type?.includes("BAYI")).length || localAccounts.length;
+    }
+
+    const isCancelled = (status?: string) => {
+      if (!status) return false;
+      const s = String(status);
+      const trLower = s.toLocaleLowerCase('tr-TR');
+      return trLower.includes('iptal') || s.includes('İptal') || s.includes('Iptal') || s.toLowerCase().includes('cancel');
+    };
+    const activeLocalOrders = localOrders.filter(o => !isCancelled(o.status));
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayActiveOrders = activeLocalOrders.filter(o => {
+      const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+      return d && d >= todayStart;
+    });
+
+    if (todayOrders === 0) {
+      todayOrders = todayActiveOrders.length;
     }
   } catch (e) {
     console.error("AdminDashboardPage error:", e);

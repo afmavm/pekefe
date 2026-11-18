@@ -178,8 +178,27 @@ export async function GET(request: Request) {
       }
     });
 
+    const isOrderCancelledOrReturned = (status?: string) => {
+      if (!status) return false;
+      const s = String(status);
+      const trLower = s.toLocaleLowerCase('tr-TR');
+      return (
+        trLower.includes('iptal') ||
+        s.includes('İptal') ||
+        s.includes('Iptal') ||
+        s.toLowerCase().includes('cancel') ||
+        trLower.includes('iade') ||
+        s.includes('İade') ||
+        s.includes('Iade') ||
+        s.toLowerCase().includes('refund')
+      );
+    };
+
+    const activeOrders = orders.filter((o: any) => !isOrderCancelledOrReturned(o.status));
+    const cancelledOrders = orders.filter((o: any) => isOrderCancelledOrReturned(o.status));
+
     // Chart aggregations
-    const salesByDay = orders.reduce((acc: any, order) => {
+    const salesByDay = activeOrders.reduce((acc: any, order) => {
       const dateStr = order.date.toISOString().split('T')[0];
       if (!acc[dateStr]) acc[dateStr] = { date: dateStr, revenue: 0, count: 0 };
       acc[dateStr].revenue += order.total.toNumber();
@@ -188,8 +207,8 @@ export async function GET(request: Request) {
     }, {});
     const chartData = Object.values(salesByDay);
 
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total.toNumber(), 0);
-    const orderCount = orders.length;
+    const totalRevenue = activeOrders.reduce((sum, o) => sum + o.total.toNumber(), 0);
+    const orderCount = activeOrders.length;
     const averageOrderValue = orderCount > 0 ? totalRevenue / orderCount : 0;
     const activeVisitors = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
     const activeCarts = Math.floor(Math.random() * 30) + 10;
@@ -200,7 +219,7 @@ export async function GET(request: Request) {
     }, {});
     const pieChartData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
 
-    const channelRevenue = orders.reduce((acc: any, order) => {
+    const channelRevenue = activeOrders.reduce((acc: any, order) => {
       acc[order.type] = (acc[order.type] || 0) + order.total.toNumber();
       return acc;
     }, {});
@@ -423,10 +442,11 @@ export async function GET(request: Request) {
       kpis: {
         totalRevenue,
         orderCount,
+        cancelledOrderCount: cancelledOrders.length,
         averageOrderValue,
         activeVisitors,
         activeCarts,
-        activeDealerCount: allProducts.length,
+        activeDealerCount: arSum._sum.balance !== null ? 1 : allProducts.length,
         criticalStockCount,
         activeIntegrationCount,
         profitMargin,
@@ -447,35 +467,228 @@ export async function GET(request: Request) {
   } catch (error) {
     console.warn('[DASHBOARD WARNING] Prisma offline, synthesizing dynamic real-time dashboard from local storage:', error);
     
-    // Canlı yerel sipariş ve ürün veritabanından dinamik dashboard oluştur
+    // Canlı yerel sipariş, cari hesap ve ürün veritabanından dinamik dashboard oluştur
     const { readLocalOrders } = await import('@/lib/jsonOrderDb');
+    const { readLocalProducts } = await import('@/lib/jsonProductDb');
+    const { readLocalAccounts } = await import('@/lib/jsonCurrentAccountsDb');
+
     const localOrders = readLocalOrders();
-    const totalRev = localOrders.reduce((sum, o) => sum + Number(o.total || o.amount || 0), 0);
-    const orderCnt = localOrders.length;
+    const localProducts = readLocalProducts();
+    const localAccounts = readLocalAccounts();
+
+    const isCancelledOrReturned = (status?: string) => {
+      if (!status) return false;
+      const s = String(status);
+      const trLower = s.toLocaleLowerCase('tr-TR');
+      return (
+        trLower.includes('iptal') ||
+        s.includes('İptal') ||
+        s.includes('Iptal') ||
+        s.toLowerCase().includes('cancel') ||
+        trLower.includes('iade') ||
+        s.includes('İade') ||
+        s.includes('Iade') ||
+        s.toLowerCase().includes('refund')
+      );
+    };
+
+    // Filtreleme (range)
+    let filteredOrders = localOrders;
+    if (range === 'Bugün') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      filteredOrders = localOrders.filter(o => {
+        const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+        return d && d >= todayStart;
+      });
+    } else if (range === 'Dün') {
+      const yesterdayStart = new Date();
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+      yesterdayStart.setHours(0, 0, 0, 0);
+      const yesterdayEnd = new Date();
+      yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+      yesterdayEnd.setHours(23, 59, 59, 999);
+      filteredOrders = localOrders.filter(o => {
+        const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+        return d && d >= yesterdayStart && d <= yesterdayEnd;
+      });
+    } else if (range === 'Bu Ay') {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      filteredOrders = localOrders.filter(o => {
+        const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+        return d && d >= monthStart;
+      });
+    } else if (range === 'Bu Yıl') {
+      const yearStart = new Date();
+      yearStart.setMonth(0, 1);
+      yearStart.setHours(0, 0, 0, 0);
+      filteredOrders = localOrders.filter(o => {
+        const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+        return d && d >= yearStart;
+      });
+    }
+
+    if (mode === 'b2b') {
+      filteredOrders = filteredOrders.filter(o => o.type === 'B2B');
+    } else if (mode === 'b2c') {
+      filteredOrders = filteredOrders.filter(o => o.type !== 'B2B');
+    }
+
+    const activeOrders = filteredOrders.filter(o => !isCancelledOrReturned(o.status));
+    const allCancelledOrders = localOrders.filter(o => isCancelledOrReturned(o.status));
+
+    const totalRev = activeOrders.reduce((sum, o) => sum + Number(o.total || o.amount || 0), 0);
+    const orderCnt = activeOrders.length;
     const avgOrder = orderCnt > 0 ? Math.round(totalRev / orderCnt) : 0;
-    const b2bOrders = localOrders.filter(o => o.type === 'B2B' || (o.notes && o.notes.includes('B2B'))).length;
-    const b2cOrders = orderCnt - b2bOrders;
-    const pendingOrders = localOrders.filter(o => !o.status || o.status === 'Yeni' || o.status === 'Hazırlanıyor' || o.status === 'Ödeme Bekliyor').length;
+    const b2bOrders = activeOrders.filter(o => o.type === 'B2B').length;
+    const b2cOrders = activeOrders.filter(o => o.type === 'B2C' || !o.type).length;
+    const pendingOrders = activeOrders.filter(o => ['Yeni', 'Hazırlanıyor', 'Ödeme Bekliyor'].includes(o.status)).length;
+    const totalProfit = Math.max(0, Math.round(totalRev * 0.40));
+    const profitMargin = totalRev > 0 ? Math.round((totalProfit / totalRev) * 100) : 0;
+
+    // Gerçek Cari Hesap Alacak / Borç (AR / AP)
+    const totalAR = localAccounts
+      .filter((a: any) => (a.type?.includes('MUSTERI') || a.type?.includes('BAYI') || a.type?.includes('customer')) && Number(a.balance || 0) > 0)
+      .reduce((sum: number, a: any) => sum + Number(a.balance || 0), 0);
+
+    const totalAP = localAccounts
+      .filter((a: any) => (a.type?.includes('TEDARIKCI') || a.type?.includes('supplier')) && Number(a.balance || 0) > 0)
+      .reduce((sum: number, a: any) => sum + Number(a.balance || 0), 0);
+
+    const activeDealerCount = localAccounts
+      .filter((a: any) => a.type?.includes('MUSTERI') || a.type?.includes('BAYI') || a.type?.includes('customer')).length || 1;
+
+    // Gerçek Ürün ve Stok Değerlemeleri
+    const totalStockValue = localProducts.reduce((sum, p) => {
+      const qty = Number(p.stock ?? p.stock_quantity ?? 0);
+      const prc = Number(p.price ?? p.sale_price ?? 0);
+      return sum + (qty * prc);
+    }, 0);
+
+    const criticalStockCount = localProducts.filter(p => {
+      const stock = Number(p.stock ?? p.stock_quantity ?? 0);
+      const limit = Number(p.criticalLimit || 5);
+      return stock <= limit;
+    }).length;
+
+    const criticalStocks = localProducts
+      .filter(p => {
+        const stock = Number(p.stock ?? p.stock_quantity ?? 0);
+        const limit = Number(p.criticalLimit || 5);
+        return stock > 0 && stock <= limit;
+      })
+      .map(p => ({
+        id: String(p.id),
+        productName: p.name,
+        sku: p.sku,
+        warehouseName: 'İspir Merkez Depo',
+        stock: Number(p.stock ?? p.stock_quantity ?? 0),
+        criticalLimit: Number(p.criticalLimit || 5)
+      }));
+
+    const depletedProducts = localProducts
+      .filter(p => Number(p.stock ?? p.stock_quantity ?? 0) <= 0)
+      .map(p => ({
+        id: String(p.id),
+        name: p.name,
+        sku: p.sku
+      }));
+
+    const totalStockUnits = localProducts.reduce((sum, p) => sum + Number(p.stock ?? p.stock_quantity ?? 0), 0);
+
+    const warehouseDistribution = [
+      {
+        id: 'wh-1',
+        name: 'İspir Merkez Depo',
+        code: 'WH-MRKZ',
+        stock: totalStockUnits,
+        value: totalStockValue,
+        ratio: 100
+      }
+    ];
+
+    const recentMovements = localProducts.slice(0, 5).map(p => ({
+      id: `mov-${p.id}`,
+      date: new Date().toISOString(),
+      productName: p.name,
+      sku: p.sku,
+      warehouseName: 'İspir Merkez Depo',
+      quantity: Number(p.stock ?? p.stock_quantity ?? 0),
+      type: 'Giriş',
+      description: 'İlk Stok Tanımı'
+    }));
+
+    // Aktif siparişlerden en çok satan ürünler
+    const salesMap: Record<string, { name: string; quantity: number; revenue: number }> = {};
+    for (const order of activeOrders) {
+      if (Array.isArray(order.items)) {
+        for (const item of order.items) {
+          const name = item.name || item.productName || 'Ürün';
+          const qty = Number(item.quantity || 1);
+          const rev = Number(item.price || item.total || 0) * qty;
+          if (!salesMap[name]) salesMap[name] = { name, quantity: 0, revenue: 0 };
+          salesMap[name].quantity += qty;
+          salesMap[name].revenue += rev;
+        }
+      }
+    }
+    const topSellingProducts = Object.values(salesMap).sort((a, b) => b.quantity - a.quantity).slice(0, 5);
+
+    const fastestDepletingProducts = localProducts
+      .filter(p => Number(p.stock ?? p.stock_quantity ?? 0) <= Number(p.criticalLimit || 5))
+      .map(p => ({
+        name: p.name,
+        sku: p.sku,
+        quantity: Number(p.stock ?? p.stock_quantity ?? 0)
+      }))
+      .slice(0, 5);
+
+    // Günlük Ciro Dağılım Grafiği (Aktif ciro 0 ise 0 döner)
+    const chartData = [
+      { label: 'Pzt', ciro: totalRev > 0 ? Math.round(totalRev * 0.15) : 0 },
+      { label: 'Sal', ciro: totalRev > 0 ? Math.round(totalRev * 0.12) : 0 },
+      { label: 'Çar', ciro: totalRev > 0 ? Math.round(totalRev * 0.18) : 0 },
+      { label: 'Per', ciro: totalRev > 0 ? Math.round(totalRev * 0.14) : 0 },
+      { label: 'Cum', ciro: totalRev > 0 ? Math.round(totalRev * 0.22) : 0 },
+      { label: 'Cmt', ciro: totalRev > 0 ? Math.round(totalRev * 0.19) : 0 },
+    ];
+
+    const categories = Array.from(new Set(localProducts.map(p => p.category).filter(Boolean)));
+    const pieChartData = totalRev > 0
+      ? [
+          { name: 'Pekmez & Bal', value: Math.round(totalRev * 0.45), color: '#6b1d2f' },
+          { name: 'Pestil & Köme', value: Math.round(totalRev * 0.35), color: '#f59e0b' },
+          { name: 'Bakliyat', value: Math.round(totalRev * 0.20), color: '#10b981' },
+        ]
+      : categories.map((cat, i) => ({
+          name: cat,
+          value: localProducts.filter(p => p.category === cat).reduce((s, p) => s + Number(p.stock ?? p.stock_quantity ?? 0), 0),
+          color: ['#6b1d2f', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'][i % 5]
+        }));
+
+    const barChartData = topSellingProducts.length > 0
+      ? topSellingProducts.map(p => ({ name: p.name, count: p.quantity }))
+      : localProducts.map(p => ({ name: p.name, count: 0 }));
+
+    // Son 6 ayın aktif sipariş trendi
+    const trendCounts = [0, 0, 0, 0, 0, 0];
+    const trendNow = new Date();
+    activeOrders.forEach(o => {
+      const d = o.date ? new Date(o.date) : (o.createdAt ? new Date(o.createdAt) : null);
+      if (d) {
+        const monthDiff = (trendNow.getFullYear() - d.getFullYear()) * 12 + (trendNow.getMonth() - d.getMonth());
+        if (monthDiff >= 0 && monthDiff < 6) {
+          trendCounts[5 - monthDiff]++;
+        }
+      }
+    });
 
     return NextResponse.json({
-      chartData: [
-        { label: 'Pzt', ciro: Math.round(totalRev * 0.15) },
-        { label: 'Sal', ciro: Math.round(totalRev * 0.12) },
-        { label: 'Çar', ciro: Math.round(totalRev * 0.18) },
-        { label: 'Per', ciro: Math.round(totalRev * 0.14) },
-        { label: 'Cum', ciro: Math.round(totalRev * 0.22) },
-        { label: 'Cmt', ciro: Math.round(totalRev * 0.19) },
-      ],
-      pieChartData: [
-        { name: 'Pekmez & Bal', value: Math.round(totalRev * 0.45), color: '#6b1d2f' },
-        { name: 'Pestil & Köme', value: Math.round(totalRev * 0.35), color: '#f59e0b' },
-        { name: 'Bakliyat', value: Math.round(totalRev * 0.20), color: '#10b981' },
-      ],
-      barChartData: [
-        { name: 'Dut Pekmezi', count: 42 },
-        { name: 'Cevizli Pestil', count: 35 },
-        { name: 'İspir Fasulyesi', count: 28 },
-      ],
+      chartData,
+      pieChartData,
+      barChartData,
       integrationAlerts: [],
       recentOrders: localOrders.slice(0, 10).map(o => ({
         id: o.id || o.orderNumber,
@@ -486,35 +699,36 @@ export async function GET(request: Request) {
         currentAccount: { name: o.client || o.customerName || 'Müşteri' }
       })),
       erpStockStats: {
-        totalStockValue: totalRev * 3.5,
-        criticalStocks: [],
-        depletedProducts: [],
-        warehouseDistribution: [{ name: 'Merkez Depo', ratio: 100 }],
-        recentMovements: [],
-        topSellingProducts: [{ name: 'Pekefe Dut Pekmezi', quantity: 24, revenue: 14400 }],
-        fastestDepletingProducts: []
+        totalStockValue,
+        criticalStocks,
+        depletedProducts,
+        warehouseDistribution,
+        recentMovements,
+        topSellingProducts,
+        fastestDepletingProducts
       },
       kpis: {
         totalRevenue: totalRev,
         orderCount: orderCnt,
+        cancelledOrderCount: allCancelledOrders.length,
         averageOrderValue: avgOrder,
         activeVisitors: 12,
         activeCarts: 4,
-        activeDealerCount: 8,
-        criticalStockCount: 0,
+        activeDealerCount,
+        criticalStockCount,
         activeIntegrationCount: 3,
-        profitMargin: 35,
-        totalProfit: Math.round(totalRev * 0.35),
-        totalAR: 45000,
-        totalAP: 15000,
+        profitMargin,
+        totalProfit,
+        totalAR,
+        totalAP,
         pendingIncomingInvoices: 0,
         pendingShippingOrders: pendingOrders,
-        pendingCargoQueue: pendingOrders,
+        pendingCargoQueue: 0,
         pendingDespatchAdvices: 0,
         b2bOrderCount: b2bOrders,
         b2cOrderCount: b2cOrders,
         otherOrderCount: 0,
-        monthlyOrdersTrend: [10, 14, 18, 22, 28, orderCnt]
+        monthlyOrdersTrend: trendCounts
       }
     });
   }

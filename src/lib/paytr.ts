@@ -56,7 +56,7 @@ export function getPayTRCredentials() {
   let merchantId = (process.env.PAYTR_MERCHANT_ID || '735518').trim();
   let merchantKey = (process.env.PAYTR_MERCHANT_KEY || 'wQkmEkdf5NDCEnWg').trim();
   let merchantSalt = (process.env.PAYTR_MERCHANT_SALT || 'AuK7HXRb7NrbyZzw').trim();
-  let testMode = (process.env.PAYTR_TEST_MODE || '0').trim();
+  let testMode = (process.env.PAYTR_TEST_MODE || '0').trim() === '1' ? '1' : '0';
 
   // Dynamically read from admin panel settings (cms_settings_fallback.json) if available
   try {
@@ -70,12 +70,17 @@ export function getPayTRCredentials() {
         if (cfg.merchantKey) merchantKey = String(cfg.merchantKey).trim();
         if (cfg.merchantSalt) merchantSalt = String(cfg.merchantSalt).trim();
         if (cfg.testMode !== undefined) {
-          testMode = (cfg.testMode === true || cfg.testMode === '1' || cfg.testMode === 1) ? '1' : '0';
+          testMode = (cfg.testMode === true || cfg.testMode === '1' || cfg.testMode === 1 || cfg.testMode === 'true') ? '1' : '0';
         }
       }
     }
   } catch (e) {
     // Keep environment variable fallback
+  }
+
+  // If PAYTR_TEST_MODE is explicitly set to "0" in .env, ensure live mode ("0") is used
+  if (process.env.PAYTR_TEST_MODE === '0') {
+    testMode = '0';
   }
 
   return { merchantId, merchantKey, merchantSalt, testMode };
@@ -128,7 +133,7 @@ export async function createPayTRToken(params: PayTROrderParams): Promise<PayTRT
     const noInstallment = '0'; // 0 = taksit seçenekleri gösterilsin, 1 = sadece tek çekim
     const maxInstallment = '0'; // 0 = varsayılan taksit sınırı yok
     const currency = 'TL';
-    const debugOn = '1'; // Enable PayTR on-screen diagnostic reporting
+    const debugOn = testMode === '1' ? '1' : '0';
 
     // Official PayTR iFrame Hash String Calculation:
     // merchant_id + user_ip + merchant_oid + email + payment_amount + user_basket + no_installment + max_installment + currency + test_mode

@@ -290,7 +290,7 @@ export default function RecipesClient({ initialData }: RecipesClientProps) {
                     </div>
                   </div>
 
-                  <div className="p-0">
+                  <div className="p-0 overflow-x-auto">
                     {!hasRecipe ? (
                       <div className="p-6 text-center text-xs text-slate-400">
                         Bu ürüne ait reçete (BOM) bulunmamaktadır. Sol taraftan malzeme ekleyebilirsiniz.

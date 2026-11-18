@@ -147,11 +147,11 @@ export default function ButcePage() {
       ) : (
         <div className="space-y-4">
           {Object.entries(byMonth).sort(([a], [b]) => Number(a) - Number(b)).map(([month, monthItems]) => (
-            <div key={month} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div key={month} className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto">
               <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
                 <h3 className="font-medium text-gray-700 text-sm">{MONTHS[Number(month) - 1]} {filterYear}</h3>
               </div>
-              <table className="w-full text-sm">
+              <table className="w-full text-sm min-w-[550px]">
                 <thead>
                   <tr className="border-b border-gray-100">
                     <th className="text-left px-4 py-2 text-xs text-gray-500 font-medium">Kategori</th>

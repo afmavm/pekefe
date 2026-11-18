@@ -41,7 +41,9 @@ export async function GET() {
              (o.client && o.client.toLowerCase() === userName.toLowerCase()) ||
              (o.customerName && o.customerName.toLowerCase() === userName.toLowerCase())
     );
-    const totalSpent = userOrders.reduce((sum, o) => sum + Number(o.total || o.amount || 0), 0);
+    const isCancelledOrReturned = (s?: string) => s && (s.toLowerCase().includes("iptal") || s.toLowerCase().includes("cancel") || s.toLowerCase().includes("iade") || s.toLowerCase().includes("refund"));
+    const activeUserOrders = userOrders.filter(o => !isCancelledOrReturned(o.status));
+    const totalSpent = activeUserOrders.reduce((sum, o) => sum + Number(o.total || o.amount || 0), 0);
 
     if (!account) {
       return NextResponse.json({

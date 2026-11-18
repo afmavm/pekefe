@@ -881,6 +881,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           if (item.subItems) {
                             toggleItemExpand(item.name);
                           } else if (item.href) {
+                            setSidebarOpen(false);
                             router.push(item.href);
                           }
                         }}
@@ -930,6 +931,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                   key={sub.name + '-' + sub.href}
                                   href={sub.href}
                                   prefetch={false}
+                                  onClick={() => setSidebarOpen(false)}
                                   className={[
                                     "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all",
                                     subActive

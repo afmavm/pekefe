@@ -1,0 +1,54 @@
+[
+  {
+    "id": "PKF-KAT-001",
+    "name": "Pestil",
+    "parentId": null,
+    "attributes": [],
+    "variants": [],
+    "createdAt": "2026-09-17T21:20:54.726Z",
+    "updatedAt": "2026-09-17T21:20:54.726Z"
+  },
+  {
+    "id": "PKF-KAT-002",
+    "name": "Geleneksel Pekmezler",
+    "parentId": null,
+    "attributes": [],
+    "variants": []
+  },
+  {
+    "id": "PKF-KAT-003",
+    "name": "Yöresel Peynirler",
+    "parentId": null,
+    "attributes": [],
+    "variants": [],
+    "createdAt": "2026-09-17T21:21:37.881Z",
+    "updatedAt": "2026-09-17T21:21:37.881Z"
+  },
+  {
+    "id": "PKF-KAT-004",
+    "name": "Köme",
+    "parentId": null,
+    "attributes": [],
+    "variants": [],
+    "createdAt": "2026-09-17T21:21:12.404Z",
+    "updatedAt": "2026-09-17T21:21:12.404Z"
+  },
+  {
+    "id": "PKF-KAT-005",
+    "name": "Yöresel Ballar",
+    "parentId": null,
+    "attributes": [],
+    "variants": [],
+    "createdAt": "2026-09-17T21:21:53.230Z",
+    "updatedAt": "2026-09-17T21:21:53.230Z"
+  },
+  {
+    "id": "PKF-KAT-006",
+    "name": "Yöresel Tereyağları",
+    "parentId": null,
+    "attributes": [],
+    "variants": [],
+    "createdAt": "2026-09-17T21:22:48.185Z",
+    "updatedAt": "2026-09-17T21:22:48.185Z"
+  }
+]

@@ -31,8 +31,62 @@ function GirisForm() {
   const [success, setSuccess] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
 
+  // Parola Sıfırlama / Güncelleme Modal State
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCurrentPassword, setResetCurrentPassword] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
   const showNotification = (message, type = "info") => {
     setToast({ isOpen: true, message, type });
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      showNotification("Lütfen e-posta adresinizi giriniz.", "error");
+      return;
+    }
+    if (!resetNewPassword || resetNewPassword.length < 6) {
+      showNotification("Yeni şifre en az 6 karakter olmalıdır.", "error");
+      return;
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      showNotification("Yeni şifreleriniz birbiriyle eşleşmiyor.", "error");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: resetEmail.trim(),
+          currentPassword: resetCurrentPassword || undefined,
+          newPassword: resetNewPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(data.message || "Parolanız güncellendi ve veritabanına kaydedildi.", "success");
+        setEmail(resetEmail.trim());
+        setPassword(resetNewPassword);
+        setIsResetModalOpen(false);
+        setResetCurrentPassword("");
+        setResetNewPassword("");
+        setResetConfirmPassword("");
+      } else {
+        showNotification(data.error || "Parola güncellenemedi.", "error");
+      }
+    } catch {
+      showNotification("Sunucu bağlantı hatası oluştu.", "error");
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   // URL'den hata parametresini yakala
@@ -79,8 +133,13 @@ function GirisForm() {
               const { getSession } = await import("next-auth/react");
               const session = await getSession();
               const role = session?.user?.role;
-              if (role === "admin" || role === "ADMIN" || role === "SUPER_ADMIN" || role === "ORDER_MANAGER") {
-                router.push("/admin/dashboard");
+              const adminRoles = [
+                "admin", "ADMIN", "SUPER_ADMIN", "ORDER_MANAGER", "STOCK_MANAGER",
+                "ACCOUNTANT", "PRODUCTION_MANAGER", "CONTENT_EDITOR", "SUPPORT_AGENT",
+                "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"
+              ];
+              if (adminRoles.includes(role)) {
+                router.push("/admin");
               } else if (role === "DEALER") {
                 router.push("/b2b");
               } else {
@@ -237,16 +296,16 @@ function GirisForm() {
                 <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#6b1d2f] focus:ring-[#6b1d2f]" />
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 group-hover:text-slate-900">Beni Hatırla</span>
               </label>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  showNotification("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", "success");
+              <button
+                type="button"
+                onClick={() => {
+                  setResetEmail(email || "");
+                  setIsResetModalOpen(true);
                 }}
-                className="text-xs text-[#6b1d2f] dark:text-rose-400 hover:underline font-bold"
+                className="text-xs text-[#6b1d2f] dark:text-rose-400 hover:underline font-bold cursor-pointer bg-transparent border-none"
               >
-                Şifremi Unuttum
-              </a>
+                Şifremi Unuttum / Parola Güncelle
+              </button>
             </div>
 
             {/* Giriş Butonu */}
@@ -296,6 +355,110 @@ function GirisForm() {
           </div>
         </footer>
       </section>
+
+      {/* Parola Sıfırlama / Güncelleme Modalı */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#6b1d2f]/10 text-[#6b1d2f] flex items-center justify-center">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Parola Güncelleme</h3>
+                  <p className="text-xs text-slate-500">Hesap parolanızı yenileyin ve veritabanına kaydedin</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsResetModalOpen(false)}
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer border-none"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Kayıtlı E-posta Adresiniz *</label>
+                <input
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="adiniz@eposta.com"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#6b1d2f] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Mevcut Şifre (Biliyorsanız)</label>
+                <input
+                  type={showResetPassword ? "text" : "password"}
+                  value={resetCurrentPassword}
+                  onChange={(e) => setResetCurrentPassword(e.target.value)}
+                  placeholder="Opsiyonel doğrulama"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#6b1d2f] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Yeni Şifre * (En az 6 karakter)</label>
+                <div className="relative">
+                  <input
+                    type={showResetPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={resetNewPassword}
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 pr-11 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#6b1d2f] outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(!showResetPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#6b1d2f] cursor-pointer bg-transparent border-none"
+                  >
+                    {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Yeni Şifre Tekrar *</label>
+                <input
+                  type={showResetPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#6b1d2f] outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsResetModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer border-none"
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="px-5 py-2.5 rounded-xl bg-[#6b1d2f] hover:bg-[#831843] text-white text-xs font-bold cursor-pointer border-none shadow-md flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  <span>{resetLoading ? "Kaydediliyor..." : "Yeni Parolayı Kaydet"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Toast
         isOpen={toast.isOpen}

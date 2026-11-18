@@ -141,8 +141,8 @@ export default function GiderlerPage() {
         </select>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto">
+        <table className="w-full text-sm min-w-[700px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {["Tarih", "Kategori", "Açıklama", "Tedarikçi", "Fiş No", "Ödeme", "Tutar", "KDV", "Durum", ""].map((h) => (

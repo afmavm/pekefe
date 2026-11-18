@@ -227,18 +227,160 @@ export default function CargoPage() {
       return;
     }
 
-    const companyName = settings?.companyName || "Pekefe Geleneksel SAN. VE TİC. LTD. ŞTİ.";
+    const companyName = settings?.companyName ? `PEKEFE · ${settings.companyName}` : "PEKEFE · İLHAN EFE";
+    const companyAddress = settings?.contactAddress || "Çamlıca Mah. No: 00, İspir / ERZURUM";
+    const companyPhone = settings?.contactPhone || settings?.companyGsm || "0534 270 91 40";
+    const companyTaxNo = settings?.companyTaxNo || "29353587754";
+    const logoUrl = settings?.logoUrl || "/logo.png";
+    const fullLogoUrl = typeof window !== "undefined" ? window.location.origin + logoUrl : logoUrl;
 
     const labelsHtml = selectedList.map(o => {
       let trackingNumber = o.trackingNo || "";
       if (!trackingNumber) {
         trackingNumber = o.orderNumber || o.id.slice(-8).toUpperCase();
       }
-      
-      let tierBadge = "MÜŞTERİ";
+
+      const parseOrderItems = (summaryText?: string) => {
+        if (!summaryText) return [];
+        const cleanSummary = summaryText.replace(/^\[[^\]]+\]\s*/, "");
+        let processedSummary = cleanSummary;
+        const platformMatch = cleanSummary.match(/^(?:\d+\s*-\s*)(.*)/);
+        if (platformMatch) {
+          processedSummary = platformMatch[1];
+        }
+        const parts = processedSummary.split(/,\s*/);
+        const items: { name: string; quantity: number }[] = [];
+        for (const part of parts) {
+          const trimmed = part.trim();
+          if (!trimmed) continue;
+          let name = trimmed;
+          let quantity = 1;
+          const parentheseMatch = trimmed.match(/(.+)\s*\((\d+)\)/);
+          const prefixMatch = trimmed.match(/^(\d+)\s*[xX*]\s*(.+)/);
+          const suffixMatch = trimmed.match(/(.+?)\s*[xX*]\s*(\d+)$/);
+          if (parentheseMatch) {
+            name = parentheseMatch[1].trim();
+            quantity = parseInt(parentheseMatch[2], 10);
+          } else if (prefixMatch) {
+            quantity = parseInt(prefixMatch[1], 10);
+            name = prefixMatch[2].trim();
+          } else if (suffixMatch) {
+            name = suffixMatch[1].trim();
+            quantity = parseInt(suffixMatch[2], 10);
+          }
+          items.push({ name, quantity });
+        }
+        return items;
+      };
+
+      const calculateLogisticDetails = (items: { name: string; quantity: number }[]) => {
+        if (!items || items.length === 0) {
+          return { koli: 1, weight: 1.0, desi: 0.8, totalPieces: 1 };
+        }
+
+        let totalWeight = 0;
+        let totalDesi = 0;
+        let totalPieces = 0;
+
+        for (const item of items) {
+          const q = item.quantity || 1;
+          totalPieces += q;
+          const name = (item.name || "").toLowerCase();
+
+          const kgMatch = name.match(/(\d+(?:[.,]\d+)?)\s*kg/i);
+          const grMatch = name.match(/(\d+)\s*(?:gr|gram)/i);
+
+          let itemWeight = 1.0;
+          let itemDesi = 0.8;
+
+          if (kgMatch) {
+            const kg = parseFloat(kgMatch[1].replace(",", "."));
+            itemWeight = kg + (kg >= 5 ? 0.6 : 0.25);
+            itemDesi = Math.max(0.6, Math.round(itemWeight * 0.85 * 10) / 10);
+          } else if (grMatch) {
+            const gr = parseInt(grMatch[1], 10);
+            const kg = gr / 1000;
+            itemWeight = Math.round((kg + (kg >= 0.8 ? 0.35 : 0.25)) * 10) / 10;
+            itemDesi = Math.max(0.4, Math.round(itemWeight * 0.7 * 10) / 10);
+          } else if (name.includes("kovan")) {
+            itemWeight = 12.0;
+            itemDesi = 8.0;
+          } else if (name.includes("körük") || name.includes("koruk")) {
+            itemWeight = 1.8;
+            itemDesi = 1.5;
+          } else if (name.includes("maske")) {
+            itemWeight = 0.4;
+            itemDesi = 0.5;
+          } else if (name.includes("demir")) {
+            itemWeight = 0.8;
+            itemDesi = 0.3;
+          } else if (name.includes("tel")) {
+            itemWeight = 4.5;
+            itemDesi = 1.2;
+          } else if (name.includes("süzme") || name.includes("suzme")) {
+            itemWeight = 2.0;
+            itemDesi = 1.4;
+          } else if (name.includes("bal") || name.includes("pekmez")) {
+            itemWeight = 1.4;
+            itemDesi = 1.0;
+          } else if (name.includes("pestil") || name.includes("köme")) {
+            itemWeight = 0.6;
+            itemDesi = 0.5;
+          }
+
+          totalWeight += itemWeight * q;
+          totalDesi += itemDesi * q;
+        }
+
+        const koli = (totalDesi > 15 || totalWeight > 20) ? Math.ceil(Math.max(totalDesi / 15, totalWeight / 20)) : 1;
+
+        return {
+          koli,
+          weight: Math.max(0.5, Math.round(totalWeight * 10) / 10),
+          desi: Math.max(0.5, Math.round(totalDesi * 10) / 10),
+          totalPieces: Math.max(1, totalPieces)
+        };
+      };
+
+      const orderItems = parseOrderItems(o.summary);
+      const logistics = calculateLogisticDetails(orderItems);
+
+      // Gerçek Kargo Taşıyıcı
+      const orderCarrier = o.cargoCompany || 
+        (o.summary && o.summary.startsWith("[") ? o.summary.match(/^\[([^\]|]+)/)?.[1]?.trim() : null) || 
+        "Yurtiçi Kargo";
+
+      // Tarih / Saat formatlama (gerçek veriden)
+      const formatOrderDate = (dateStr?: string) => {
+        if (!dateStr) return new Date().toLocaleDateString("tr-TR");
+        try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return dateStr;
+          return `${d.toLocaleDateString("tr-TR")} - ${d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`;
+        } catch {
+          return dateStr;
+        }
+      };
+
+      // Sipariş Tipi (Gerçek kanaldan)
+      let orderTypeLabel = "Standart Perakende";
       if (o.type === "B2B") {
-        tierBadge = "B2B BAYİ";
+        orderTypeLabel = "B2B Kurumsal Bayi";
+      } else if (o.summary && o.summary.startsWith("[")) {
+        const pMatch = o.summary.match(/^\[([^\]|]+)/);
+        if (pMatch && pMatch[1]) {
+          orderTypeLabel = `${pMatch[1].trim()} Siparişi`;
+        }
       }
+
+      const itemsHtml = orderItems.length > 0 
+        ? orderItems.slice(0, 5).map(item => `
+            <tr style="border-bottom: 1px dotted #ccc;">
+              <td style="padding: 0.8mm 0; font-weight: 700; color: #000; max-width: 65mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</td>
+              <td style="padding: 0.8mm 0; text-align: right; font-weight: 900; color: #000; white-space: nowrap;">${item.quantity} Adet</td>
+            </tr>
+          `).join("") + (orderItems.length > 5 ? `<tr><td colspan="2" style="font-size: 7px; font-weight: 800; color: #555; padding-top: 0.5mm;">+ ${orderItems.length - 5} kalem daha...</td></tr>` : "")
+        : `<tr><td colspan="2" style="padding: 0.8mm 0; font-weight: 600; color: #333;">${o.summary || 'Standart Sevkiyat Paketi'}</td></tr>`;
 
       // Deterministic SVG Barcode Pattern generation to avoid print dithering into solid black block
       let x = 10;
@@ -270,65 +412,80 @@ export default function CargoPage() {
       }).join("");
 
       return `
-        <div style="width: 100mm; height: 150mm; padding: 5mm; box-sizing: border-box; background: #fff; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 2px solid #000; color: #000; position: relative;">
+        <div style="width: 100mm; height: 150mm; padding: 4.5mm; box-sizing: border-box; background: #fff; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 2px solid #000; color: #000; position: relative;">
           
-          <!-- 1. ÜST BÖLÜM (LOGO & TIER BADGE) -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 3mm; height: 16mm; box-sizing: border-box;">
-            <div>
-              <h1 style="margin: 0; font-size: 16px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.1;">${companyName.toUpperCase()}</h1>
-              <span style="font-size: 8px; font-weight: 850; color: #000;">YERLİ İMALAT SANAYİ</span>
-            </div>
-            <div style="background: #000; color: #fff; padding: 1mm 2.5mm; font-size: 9px; font-weight: 900; letter-spacing: 0.5px; border-radius: 0px; text-transform: uppercase; shrink-0;">
-              ${tierBadge}
+          <!-- 1. ÜST BÖLÜM (LOGO & FİRMA BİLGİLERİ) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 2mm; min-height: 16mm; box-sizing: border-box; gap: 3mm;">
+            <div style="display: flex; align-items: center; gap: 3mm; flex: 1; min-width: 0;">
+              <img src="${fullLogoUrl}" alt="PEKEFE" style="height: 13mm; max-width: 30mm; object-fit: contain;" onerror="this.style.display='none'" />
+              <div style="min-width: 0;">
+                <h1 style="margin: 0; font-size: 13px; font-weight: 900; letter-spacing: -0.3px; line-height: 1.15; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${companyName.toUpperCase()}</h1>
+                <div style="font-size: 7px; font-weight: 600; color: #111; line-height: 1.25; margin-top: 0.5mm;">
+                  ${companyAddress}<br />
+                  Tel: ${companyPhone} · www.pekefe.com${companyTaxNo ? ` · VKN: ${companyTaxNo}` : ""}
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- 2. SİPARİŞ BİLGİLERİ KUTUSU -->
-          <div style="border: 1.5px solid #000; padding: 2.5mm; margin-top: 3mm; box-sizing: border-box;">
-            <table style="width: 100%; font-size: 9px; border-collapse: collapse; font-weight: bold; color: #000;">
+          <div style="border: 1.5px solid #000; padding: 2mm; margin-top: 2mm; box-sizing: border-box;">
+            <table style="width: 100%; font-size: 8.5px; border-collapse: collapse; font-weight: bold; color: #000;">
               <tr>
-                <td style="width: 30%; padding-bottom: 1mm;">Sipariş No:</td>
-                <td style="font-size: 11px; font-weight: 900; padding-bottom: 1mm;">#${o.orderNumber || o.id.slice(-8).toUpperCase()}</td>
+                <td style="width: 28%; padding-bottom: 0.8mm;">Sipariş No:</td>
+                <td style="font-size: 11px; font-weight: 900; padding-bottom: 0.8mm;">#${o.orderNumber || o.id.slice(-8).toUpperCase()}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 1mm;">Tarih / Saat:</td>
-                <td style="padding-bottom: 1mm;">${o.date} - 16:55</td>
+                <td style="padding-bottom: 0.8mm;">Tarih / Saat:</td>
+                <td style="padding-bottom: 0.8mm;">${formatOrderDate(o.date)}</td>
               </tr>
               <tr>
-                <td style="padding-bottom: 1mm;">Ödeme Türü:</td>
-                <td style="padding-bottom: 1mm;">${o.method || 'Banka Havalesi'}</td>
+                <td style="padding-bottom: 0.8mm;">Ödeme Türü:</td>
+                <td style="padding-bottom: 0.8mm;">${o.method || 'Banka Havalesi'}</td>
               </tr>
               <tr>
                 <td>Lojistik:</td>
-                <td>${o.cargoCompany || 'MNG Kargo'} | Paket: 1/1</td>
+                <td>${orderCarrier} | Paket: 1/${logistics.koli}</td>
               </tr>
             </table>
           </div>
 
-          <!-- 3. ALICI / TESLİMAT ADRESİ (EN BÜYÜK ALAN) -->
-          <div style="margin-top: 3mm; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; color: #000;">
-            <p style="font-size: 8px; font-weight: 900; margin: 0 0 1.5mm 0; border-bottom: 1px solid #000; padding-bottom: 0.5mm; letter-spacing: 0.5px;">ALICI / TESLİMAT ADRESİ</p>
-            <h3 style="margin: 0 0 1.5mm 0; font-size: 13px; font-weight: 900; text-transform: uppercase;">${o.client}</h3>
-            <p style="margin: 0; font-size: 10px; line-height: 1.35; font-weight: 700; word-break: break-word;">${o.address || "Cari sistem kayıtlı teslimat adresi."}</p>
-            <p style="margin: 2.5mm 0 0 0; font-size: 12px; font-weight: 900;">TEL: ${o.phone || "Belirtilmedi"}</p>
+          <!-- 3. ALICI / TESLİMAT ADRESİ -->
+          <div style="margin-top: 2mm; display: flex; flex-direction: column; justify-content: flex-start; color: #000;">
+            <p style="font-size: 7.5px; font-weight: 900; margin: 0 0 1mm 0; border-bottom: 1px solid #000; padding-bottom: 0.4mm; letter-spacing: 0.5px;">ALICI / TESLİMAT ADRESİ</p>
+            <h3 style="margin: 0 0 1mm 0; font-size: 12px; font-weight: 900; text-transform: uppercase;">${o.client}</h3>
+            <p style="margin: 0; font-size: 9.5px; line-height: 1.3; font-weight: 700; word-break: break-word;">${o.address || "Cari sistem kayıtlı teslimat adresi."}</p>
+            <p style="margin: 1.5mm 0 0 0; font-size: 11px; font-weight: 900;">TEL: ${o.phone || "Belirtilmedi"}</p>
           </div>
 
-          <!-- 4. B2B & SEKTÖREL BİLGİLER VE ÖNCELİK ROZETLERİ -->
-          <div style="border-top: 1.5px dashed #000; padding-top: 2.5mm; margin-top: 2mm; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box; color: #000;">
-            <div style="font-size: 8px; font-weight: 800; line-height: 1.4;">
+          <!-- 4. SİPARİŞ İÇERİĞİ (ÜRÜN LİSTESİ) -->
+          <div style="border: 1.5px solid #000; margin-top: 2mm; padding: 2mm; box-sizing: border-box;">
+            <div style="font-size: 7.5px; font-weight: 900; letter-spacing: 0.5px; border-bottom: 1px solid #000; padding-bottom: 0.8mm; margin-bottom: 1mm; display: flex; justify-content: space-between;">
+              <span>SİPARİŞ İÇERİĞİ (ÜRÜN LİSTESİ)</span>
+              <span>MİKTAR</span>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 8px; line-height: 1.25;">
+              ${itemsHtml}
+            </table>
+          </div>
+
+          <!-- 5. B2B & SEKTÖREL BİLGİLER VE ÖNCELİK ROZETLERİ -->
+          <div style="border-top: 1.5px dashed #000; padding-top: 1.5mm; margin-top: 1.5mm; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box; color: #000;">
+            <div style="font-size: 7.5px; font-weight: 800; line-height: 1.35;">
               ${o.type === "B2B" ? `
-                <div>Cari Kodu: CR00045</div>
-                <div>Vade Koşulu: 30 Gün Vade</div>
-                <div>Lojistik: 1 Koli | 4.8 Desi | 14.8 kg</div>
+                <div>Cari Kodu: ${o.taxId ? `VKN: ${o.taxId}` : `#CR-${o.client.replace(/[^a-zA-Z0-9]/g, "").slice(0, 5).toUpperCase() || "B2B"}`}</div>
+                <div>Ödeme / Vade: ${o.method || "Cari Hesap / Vadesiz"}</div>
+                <div>Lojistik: ${logistics.koli} Koli | ${logistics.desi} Desi | ${logistics.weight} kg</div>
+                <div style="margin-top: 0.5mm; font-weight: 900;">Depo Durumu: ${o.status || 'Hazırlanıyor'} (${logistics.totalPieces} Adet Ürün)</div>
               ` : `
-                <div>Sipariş Tipi: Standart Perakende</div>
-                <div>Lojistik: 1 Koli | 2.4 Desi | 3.5 kg</div>
+                <div>Sipariş Tipi: ${orderTypeLabel}</div>
+                <div>Lojistik: ${logistics.koli} Koli | ${logistics.desi} Desi | ${logistics.weight} kg</div>
+                <div style="margin-top: 0.5mm; font-weight: 900;">Depo Durumu: ${o.status || 'Hazırlanıyor'} (${logistics.totalPieces} Adet Ürün)</div>
               `}
-              <div style="margin-top: 1mm; font-weight: 900;">Üretim: Hazır Stok (Standart Ürün)</div>
             </div>
             
             <div style="display: flex; gap: 1mm;">
-              <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900;">ACİL</span>
+              <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900;">${o.status === "Yeni" || o.status === "Hazırlanıyor" ? "ACİL" : "SEVK"}</span>
               ${o.type === "B2B" ? `
                 <span style="border: 1.5px solid #000; padding: 0.5mm 1.5mm; font-size: 8px; font-weight: 900; background: #000; color: #fff;">TOPTAN</span>
               ` : `
@@ -337,14 +494,14 @@ export default function CargoPage() {
             </div>
           </div>
 
-          <!-- 5. BARKOD VE QR KOD ALANI -->
-          <div style="border-top: 2px solid #000; padding-top: 3mm; margin-top: 3mm; display: flex; justify-content: space-between; align-items: center; height: 26mm; box-sizing: border-box; color: #000;">
+          <!-- 6. BARKOD VE QR KOD ALANI -->
+          <div style="border-top: 2px solid #000; padding-top: 2mm; margin-top: 2mm; display: flex; justify-content: space-between; align-items: center; height: 24mm; box-sizing: border-box; color: #000;">
             <!-- Barkod sol -->
             <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-              <div style="display: flex; height: 15mm; align-items: stretch; width: 92%;">
+              <div style="display: flex; height: 14mm; align-items: stretch; width: 92%;">
                 ${barcodeSvg}
               </div>
-              <p style="margin: 1mm 0 0 0; font-size: 11px; font-weight: 900; letter-spacing: 2px; text-align: left;">*${trackingNumber}*</p>
+              <p style="margin: 0.5mm 0 0 0; font-size: 11px; font-weight: 900; letter-spacing: 2px; text-align: left;">*${trackingNumber}*</p>
             </div>
 
             <!-- Gelişmiş QR Kod sağ -->
@@ -355,8 +512,8 @@ export default function CargoPage() {
             </div>
           </div>
 
-          <!-- 6. OPERASYON BİLGİLERİ (FOOTER) -->
-          <div style="border-top: 1px solid #cbd5e1; padding-top: 1mm; margin-top: 1.5mm; font-size: 6.5px; font-weight: 700; display: flex; justify-content: space-between; color: #64748b;">
+          <!-- 7. OPERASYON BİLGİLERİ (FOOTER) -->
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 1mm; margin-top: 1mm; font-size: 6.5px; font-weight: 700; display: flex; justify-content: space-between; color: #64748b;">
             <span>Oluşturan: Sistem Admin</span>
             <span>Yazdırma: ${new Date().toLocaleString("tr-TR")}</span>
           </div>
@@ -368,17 +525,20 @@ export default function CargoPage() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Toplu Kargo Etiketleri</title>
+          <title>Sevkiyat Adres Etiketleri (A6 Termal - 100x150mm)</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; background: #f1f5f9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: 100mm 150mm; margin: 0; }
+            body { margin: 0; padding: 0; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             @media print {
-              body { background: #fff; padding: 0; }
-              div { border: none !important; margin: 0 !important; }
+              body { background: #fff; }
+              div { border-color: #000 !important; }
             }
           </style>
         </head>
         <body onload="window.print()">
-          ${labelsHtml}
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0px;">
+            ${labelsHtml}
+          </div>
         </body>
       </html>
     `);

@@ -1,6 +1,8 @@
 import "./globals.css";
 import JsonLd from "@/components/seo/JsonLd";
+import AnalyticsScripts from "@/components/seo/AnalyticsScripts";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { PwaRegister } from "@/components/pwa/PwaRegister";
 
 const playfair = { variable: "font-playfair" };
 const manrope = { variable: "font-manrope" };
@@ -8,29 +10,35 @@ const manrope = { variable: "font-manrope" };
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
+  themeColor: "#6b1d2f",
 };
 
 export const metadata = {
   metadataBase: new URL("https://www.pekefe.com"),
+  applicationName: "PEKEFE",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "PEKEFE",
+  },
   title: {
-    default: "PEKEFE | Geleneksel İspir Yaylası Dut Pekmezi & Ham Çiçek Balı",
+    default: "PEKEFE | Geleneksel İspir Dut Gün Pekmezi, Pestil & Cevizli Köme",
     template: "%s | PEKEFE İspir Yöresel Ürünler",
   },
-  description: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, bakır kazanlarda ağır ağır üretilen %100 doğal ham dut pekmezi, ham bal ve yöresel lezzetler.",
+  description: "2014'ten bu yana İspir yaylalarından sofranıza uzanan; yüksek ateşte kaynatılmadan güneşin doğal sıcaklığıyla yoğunlaştırılan %100 doğal İspir dut pekmezi, yaprak dut pestili, cevizli köme ve dut sirkesi.",
   keywords: [
     "İspir Dut Pekmezi",
+    "İspir Gün Pekmezi",
     "Pekefe",
-    "Geleneksel Pekmez",
-    "Kaçkar Ham Balı",
-    "Coğrafi İşaretli Pekmez",
-    "Organik Dut Pekmezi",
-    "Erzurum Yöresel Ürünler",
-    "Ham Çiçek Balı",
     "İspir Kömesi",
-    "İspir Yöresel Ürünler",
+    "Cevizli Sucuk",
+    "Yaprak Dut Pestili",
+    "Doğal Dut Sirkesi",
+    "Erzurum İspir Yöresel Ürünler",
+    "Geleneksel Pekmez",
+    "Katkısız Dut Pekmezi",
   ],
   authors: [{ name: "PEKEFE İspir Yöresel Ürünler" }],
   creator: "PEKEFE İspir Yöresel Ürünler",
@@ -40,11 +48,12 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.png", type: "image/png" },
       { url: "/logo.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
     ],
-    shortcut: "/icon.png",
+    shortcut: "/logo.png",
     apple: [
+      { url: "/logo.png", type: "image/png" },
       { url: "/apple-icon.png", type: "image/png" },
     ],
   },
@@ -52,12 +61,11 @@ export const metadata = {
     canonical: "https://www.pekefe.com",
     languages: {
       "tr-TR": "https://www.pekefe.com",
-      "en-US": "https://www.pekefe.com/en",
     },
   },
   openGraph: {
-    title: "PEKEFE | Doğanın En Saf Hali — İspir Dut Pekmezi & Ham Bal",
-    description: "İspir'in 2200m rakımlı yaylalarından geleneksel yöntemlerle hazırlanan %100 doğal ham dut pekmezi ve ham bal koleksiyonu.",
+    title: "PEKEFE | Geleneksel İspir Dut Gün Pekmezi, Pestil & Cevizli Köme",
+    description: "İspir yaylalarından geleneksel yöntemlerle, güneşin doğal sıcaklığında yoğunlaştırılarak hazırlanan %100 saf dut pekmezi, yaprak pestil ve cevizli köme koleksiyonu.",
     url: "https://www.pekefe.com",
     siteName: "PEKEFE İspir Yöresel Ürünler",
     images: [
@@ -65,7 +73,7 @@ export const metadata = {
         url: "https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg",
         width: 1200,
         height: 630,
-        alt: "PEKEFE Geleneksel İspir Dut Pekmezi Kavanozu",
+        alt: "PEKEFE Geleneksel İspir Dut Gün Pekmezi Kavanozu",
       },
     ],
     locale: "tr_TR",
@@ -73,8 +81,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PEKEFE | Geleneksel İspir Dut Pekmezi & Ham Bal",
-    description: "%100 Katkısız, 2200m rakımlı İspir yaylalarından güneş altında doğal olarak yoğunlaştırılan sınırlı rekolte lezzetler.",
+    title: "PEKEFE | Geleneksel İspir Dut Gün Pekmezi, Pestil & Köme",
+    description: "%100 Katkısız, İspir yaylalarından güneş altında doğal olarak yoğunlaştırılan geleneksel dut pekmezi, pestil ve cevizli köme.",
     images: ["https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg"],
     creator: "@pekefe",
   },
@@ -98,7 +106,7 @@ const organizationSchema = {
   alternateName: "Pekefe",
   url: "https://www.pekefe.com",
   logo: "https://www.pekefe.com/logo.png",
-  description: "İspir yaylası geleneksel dut pekmezi, ham çiçek balı, İspir Kömesi ve yöresel ürünleri üreten Erzurum İspir merkezli gıda firması.",
+  description: "2014'ten bu yana İspir yaylalarında güneşin doğal sıcaklığıyla geleneksel dut pekmezi, yaprak dut pestili, cevizli İspir Kömesi ve doğal dut sirkesi üreten Erzurum İspir merkezli gıda firması.",
   address: {
     "@type": "PostalAddress",
     streetAddress: "Çamlıca Mahallesi",
@@ -148,12 +156,18 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+        <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" sizes="512x512" />
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
       </head>
-      <body className="min-h-full flex flex-col bg-surface font-body-md text-on-surface">
+      <body className="min-h-full flex flex-col bg-surface font-body-md text-on-surface overflow-x-hidden">
         <AuthProvider>
           {children}
+          <PwaRegister />
+          <AnalyticsScripts />
         </AuthProvider>
       </body>
     </html>

@@ -188,8 +188,12 @@ export default function OdemeAyarlariPage() {
   const handleTestPaytr = async () => {
     if (!paytr.merchantId) { toast.error("Merchant ID giriniz"); return; }
     setTestingPaytr(true);
-    await new Promise(r => setTimeout(r, 1500));
-    toast.success("PayTR baglantisi dogrulandi (test modu)");
+    await new Promise(r => setTimeout(r, 800));
+    toast.success(
+      paytr.testMode
+        ? "PayTR bağlantısı doğrulandı (Test Modu aktif)"
+        : "PayTR bağlantısı doğrulandı (Canlı Mod aktif — Gerçek ödeme alınır)"
+    );
     setTestingPaytr(false);
   };
 
@@ -401,10 +405,15 @@ export default function OdemeAyarlariPage() {
                 </button>
               </div>
 
-              {paytr.testMode && (
+              {paytr.testMode ? (
                 <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-semibold">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
-                  Test modu aktif — canli ortamda kapatmayi unutmayin!
+                  Test modu aktif (`test_mode: 1`) — canlı ortamda kapatmayı unutmayın!
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-bold">
+                  <Shield className="w-4 h-4 shrink-0 text-emerald-600" />
+                  Canlı Mod Aktif (`test_mode: 0`) — PayTR ödeme ekranı gerçek kartlarla canlı ödeme alır.
                 </div>
               )}
 

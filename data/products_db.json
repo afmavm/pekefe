@@ -6,8 +6,8 @@
     "brand": "PEKEFE",
     "model": "Gün Pekmezi",
     "category": "Dut Pekmezi",
-    "stock": 150,
-    "stock_quantity": 150,
+    "stock": 1000,
+    "stock_quantity": 1000,
     "price": 450,
     "oldPrice": 520,
     "list_price": 520,
@@ -54,7 +54,7 @@
         "stock": 100
       }
     ],
-    "createdAt": "2026-09-03T22:22:16.984Z",
+    "createdAt": "2026-09-17T21:23:19.271Z",
     "videoUrl": "",
     "discount_start_date": null,
     "discount_end_date": null,
@@ -65,69 +65,14 @@
     "isPublished": true
   },
   {
-    "id": "PKF-DUT-SIRKESI",
-    "name": "PEKEFE Doğal Fermantasyon İspir Dut Sirkesi",
-    "sku": "PKF-SIRKE-001",
-    "brand": "PEKEFE",
-    "model": "Doğal Sirke",
-    "category": "Dut Sirkesi",
-    "stock": 80,
-    "stock_quantity": 80,
-    "price": 280,
-    "oldPrice": 340,
-    "list_price": 340,
-    "sale_price": 280,
-    "cost": 110,
-    "image": "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-    "images": [
-      "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
-      "/uploads/ispir-dut-sirkesi-fermantasyon.jpg"
-    ],
-    "desc": "İlhan Efe tesisinde üretimine başlanan, İspir beyaz dutlarının doğal sirke anası ile meşe fıçılarda aylarca fermente edilmesiyle üretilen filtresiz ve pastörize edilmemiş canlı dut sirkesi.",
-    "shortDesc": "Doğal sirke anasıyla aylarca dinlendirilmiş, probiyotik zengini yumuşak içimli hakiki dut sirkesi.",
-    "seoTitle": "PEKEFE Doğal Fermantasyon İspir Dut Sirkesi | Canlı Probiyotik",
-    "seoDesc": "İspir beyaz dutlarından doğal fermantasyon ve sirke anasıyla üretilen filtresiz canlı dut sirkesi.",
-    "seoKeywords": "dut sirkesi, ispir dut sirkesi, doğal sirke, sirke anası, pekefe",
-    "isCampaignActive": false,
-    "attributes": {
-      "harvestStory": "Geleneksel fermantasyon yöntemiyle üretilir. Hiçbir asit veya kimyasal hızlandırıcı içermez.",
-      "ingredients": "%100 Doğal İspir Dut Sirkesi ve Sirke Anası.",
-      "ritual": "Sabahları ılık bir bardak suya 1 tatlı kaşığı dut sirkesi ve 1 çay kaşığı ham bal ekleyerek tüketebilirsiniz.",
-      "nutrients": "Canlı probiyotik enzimler, potasyum ve doğal meyve asitleri.",
-      "sizes": [
-        "500ml Cam Şişe"
-      ],
-      "isActive": true,
-      "isPublished": true
-    },
-    "variants": [
-      {
-        "id": "var-sirke-500ml",
-        "name": "500ml Cam Şişe",
-        "size": "500ml Cam Şişe",
-        "price": 280,
-        "stock": 80
-      }
-    ],
-    "createdAt": "2026-09-03T22:25:58.993Z",
-    "active": true,
-    "isPublished": true,
-    "videoUrl": "",
-    "discount_start_date": null,
-    "discount_end_date": null,
-    "warehouses": [],
-    "locations": [],
-    "isDeleted": false
-  },
-  {
     "id": "PKF-ISPIR-KOME",
     "name": "PEKEFE Geleneksel İspir Cevizli Köme (Cevizli Sucuk)",
     "sku": "PKF-KOME-001",
     "brand": "PEKEFE",
     "model": "Cevizli Köme",
     "category": "Pestil - Köme",
-    "stock": 120,
-    "stock_quantity": 120,
+    "stock": 1000,
+    "stock_quantity": 1000,
     "price": 380,
     "oldPrice": 440,
     "list_price": 440,
@@ -152,7 +97,9 @@
       "sizes": [
         "500g Vakumlu Paket",
         "1000g Vakumlu Paket"
-      ]
+      ],
+      "isActive": true,
+      "isPublished": true
     },
     "variants": [
       {
@@ -170,22 +117,30 @@
         "stock": 60
       }
     ],
-    "createdAt": "2026-09-03T20:58:10.170Z"
+    "createdAt": "2026-09-17T21:23:41.406Z",
+    "active": true,
+    "isPublished": true,
+    "videoUrl": "",
+    "discount_start_date": null,
+    "discount_end_date": null,
+    "warehouses": [],
+    "locations": [],
+    "isDeleted": false
   },
   {
     "id": "PKF-DUT-PESTILI",
-    "name": "PEKEFE Hakiki Yaprak Dut Pestili",
+    "name": "PEKEFE İspir Sade Dut Pestili",
     "sku": "PKF-PST-001",
     "brand": "PEKEFE",
     "model": "Yaprak Pestil",
-    "category": "Pestil - Köme",
-    "stock": 95,
-    "stock_quantity": 95,
-    "price": 320,
-    "oldPrice": 380,
-    "list_price": 380,
-    "sale_price": 320,
-    "cost": 130,
+    "category": "Pestil",
+    "stock": 1000,
+    "stock_quantity": 1000,
+    "price": 400,
+    "oldPrice": 480,
+    "list_price": 480,
+    "sale_price": 400,
+    "cost": 320,
     "image": "/ispir-vakum-sade-pestil-beyaz.png",
     "images": [
       "/ispir-vakum-sade-pestil-beyaz.png",
@@ -198,31 +153,223 @@
     "seoKeywords": "dut pestili, yaprak pestil, ispir pestili, pekefe",
     "isCampaignActive": false,
     "attributes": {
+      "isActive": true,
+      "isPublished": true,
+      "shortDesc": "Keten sergilerde dağ güneşiyle kurutulmuş, sıfır rafine şeker içeren ipeksi yaprak dut pestili.",
+      "sizes": [
+        "400g Cam Kavanoz",
+        "800g Cam Kavanoz",
+        "1 kg Vakum",
+        "5 kg Teneke",
+        "500ml Cam Şişe",
+        "500g Vakumlu Paket",
+        "1000g Vakumlu Paket"
+      ],
+      "colors": [
+        "Sade",
+        "Cevizli",
+        "Fındıklı",
+        "Antep Fıstıklı"
+      ],
+      "barcode": "8696106806207",
+      "unit": "Kg",
+      "manufacturerCode": "",
+      "stockType": "Ticari Mal",
+      "warehouse": "Merkez Depo",
+      "purchaseCurrency": "TRY",
+      "purchaseVat": "1",
+      "purchaseVatIncluded": true,
+      "saleCurrency": "TRY",
+      "saleVat": "1",
+      "saleVatIncluded": true,
+      "retailPrice": 450,
+      "retailCurrency": "TRY",
+      "retailVat": "1",
+      "retailVatIncluded": true,
+      "webPrice": 450,
+      "webCurrency": "TRY",
+      "webVat": "1",
+      "webVatIncluded": true,
+      "marketCurrency": "TRY",
+      "marketVat": "1",
+      "marketVatIncluded": true,
+      "b2bActive": true,
+      "b2bPreOrderable": false,
+      "marketplaces": [
+        {
+          "id": "1",
+          "name": "Trendyol API",
+          "syncEnabled": true,
+          "apiConnected": true,
+          "apiKey": "ty-api-90234892",
+          "apiSecret": "••••••••",
+          "logoColor": "bg-orange-500"
+        },
+        {
+          "id": "2",
+          "name": "Hepsiburada API",
+          "syncEnabled": true,
+          "apiConnected": true,
+          "apiKey": "hb-api-11029384",
+          "apiSecret": "••••••••",
+          "logoColor": "bg-red-600"
+        },
+        {
+          "id": "3",
+          "name": "Amazon Turkey API",
+          "syncEnabled": false,
+          "apiConnected": false,
+          "logoColor": "bg-slate-500"
+        }
+      ],
+      "warehouses": [
+        {
+          "id": "1",
+          "name": "Merkez Depo",
+          "code": "WH-MRKZ",
+          "location": "Erzurum OSB, 3. Cadde",
+          "stockCount": 1000,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
+        },
+        {
+          "id": "2",
+          "name": "Şube Depo",
+          "code": "WH-SUBE",
+          "location": "İstanbul Anadolu Yakası",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "sube-branch"
+        },
+        {
+          "id": "3",
+          "name": "Üretim Bandı",
+          "code": "WH-URT",
+          "location": "Yakutiye Fabrika Alanı",
+          "stockCount": 0,
+          "reserved": 0,
+          "minStock": 0,
+          "criticalLimit": 0,
+          "branchId": "default-branch"
+        }
+      ],
+      "recipeDetails": "",
+      "altitude": "",
+      "harvestSeason": "",
       "harvestStory": "Geleneksel keten bez sergilerinde kurutulup tek tek rulo yapılarak vakumlanır.",
       "ingredients": "%100 Saf İspir Dut Şırası, Doğal Buğday Nişastası, Süt.",
       "ritual": "Ceviz veya fındık sarılarak çay yanında leziz bir geleneksel tatlı olarak sunulur.",
-      "nutrients": "Yüksek demir, lif ve doğal fruktoz.",
-      "sizes": [
-        "500g Vakumlu Paket",
-        "1000g Vakumlu Paket"
-      ]
+      "nutrients": {
+        "energy": "",
+        "carb": "",
+        "protein": "",
+        "calcium": "",
+        "iron": ""
+      },
+      "hmfLevel": "",
+      "unitCoefficients": [],
+      "branchPrices": {},
+      "specsMaterial": "",
+      "specsWeight": "",
+      "specsDimensions": "",
+      "specsBellows": "",
+      "usageGuide": "",
+      "warrantyInfo": "",
+      "warrantyBadgeLabel": "",
+      "warrantyYears": "",
+      "warrantyBadgeDesc": "",
+      "quickOverview1_title": "",
+      "quickOverview1_desc": "",
+      "quickOverview2_title": "",
+      "quickOverview2_desc": "",
+      "quickOverview3_title": "",
+      "quickOverview3_desc": "",
+      "quickOverview1": "",
+      "quickOverview2": "",
+      "quickOverview3": "",
+      "longDescExtra": "",
+      "badgeText1": "",
+      "badgeText2": "",
+      "warehousePrices": {}
     },
     "variants": [
       {
         "id": "var-pst-500g",
+        "sku": "",
+        "barcode": "",
         "name": "500g Vakumlu Paket",
         "size": "500g Vakumlu Paket",
+        "color": "",
+        "stock": 50,
         "price": 320,
-        "stock": 50
+        "purchasePrice": 0,
+        "cost": 0,
+        "b2bPrice": 320,
+        "vatRate": 1,
+        "vatIncluded": true
       },
       {
         "id": "var-pst-1000g",
+        "sku": "",
+        "barcode": "",
         "name": "1000g Vakumlu Paket",
         "size": "1000g Vakumlu Paket",
+        "color": "",
+        "stock": 45,
         "price": 600,
-        "stock": 45
+        "purchasePrice": 0,
+        "cost": 0,
+        "b2bPrice": 600,
+        "vatRate": 1,
+        "vatIncluded": true
       }
     ],
-    "createdAt": "2026-09-03T20:58:10.170Z"
+    "createdAt": "2026-09-17T21:29:06.861Z",
+    "active": true,
+    "isPublished": true,
+    "videoUrl": "",
+    "discount_start_date": null,
+    "discount_end_date": null,
+    "warehouses": [
+      {
+        "id": "1",
+        "name": "Merkez Depo",
+        "code": "WH-MRKZ",
+        "location": "Erzurum OSB, 3. Cadde",
+        "stockCount": 1000,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "default-branch"
+      },
+      {
+        "id": "2",
+        "name": "Şube Depo",
+        "code": "WH-SUBE",
+        "location": "İstanbul Anadolu Yakası",
+        "stockCount": 0,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "sube-branch"
+      },
+      {
+        "id": "3",
+        "name": "Üretim Bandı",
+        "code": "WH-URT",
+        "location": "Yakutiye Fabrika Alanı",
+        "stockCount": 0,
+        "reserved": 0,
+        "minStock": 0,
+        "criticalLimit": 0,
+        "branchId": "default-branch"
+      }
+    ],
+    "locations": [],
+    "isDeleted": false
   }
 ]

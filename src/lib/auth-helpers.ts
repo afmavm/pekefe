@@ -127,7 +127,11 @@ export const requireApproved = requireApprovedUser;
  *  SUPER_ADMIN, ADMIN, BRANCH_MANAGER, WAREHOUSE_SUPERVISOR, SALES_STAFF
  */
 export function isAdminRole(role: string): boolean {
-  return ["SUPER_ADMIN", "ADMIN", "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"].includes(role);
+  return [
+    "SUPER_ADMIN", "ADMIN", "STOCK_MANAGER", "ORDER_MANAGER",
+    "ACCOUNTANT", "PRODUCTION_MANAGER", "CONTENT_EDITOR", "SUPPORT_AGENT",
+    "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"
+  ].includes(role);
 }
 
 
@@ -164,8 +168,7 @@ export async function requireERPRole(req?: Request | NextRequest): Promise<AuthR
   const auth = await requireApprovedUser(req);
   if (!auth.ok) return auth;
 
-  const erpRoles = ["SUPER_ADMIN", "ADMIN", "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"];
-  if (!erpRoles.includes(auth.session.user.role)) {
+  if (!isAdminRole(auth.session.user.role)) {
     if (req) await logAuthFailure("ERP yetkisi eksik.", req, auth.session.user.id);
     return {
       ok: false,
@@ -204,7 +207,11 @@ export async function requireOwnership(
   const auth = await requireApprovedUser(actualReq);
   if (!auth.ok) return auth;
 
-  if (auth.session.user.role !== "ADMIN" && auth.session.user.id !== actualResourceId) {
+  if (
+    auth.session.user.role !== "ADMIN" &&
+    auth.session.user.role !== "SUPER_ADMIN" &&
+    auth.session.user.id !== actualResourceId
+  ) {
     if (actualReq) {
       await logAuthFailure(
         `Yetkisiz kaynak erişim denemesi (Beklenen Sahip: ${actualResourceId}, İsteyen: ${auth.session.user.id})`,

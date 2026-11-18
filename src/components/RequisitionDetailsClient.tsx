@@ -366,8 +366,8 @@ export function RequisitionDetailsClient() {
               <Package className="w-4 h-4 text-indigo-500" /> Talep Edilen Kalemler
             </h3>
 
-            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-              <table className="w-full text-xs text-left">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden overflow-x-auto">
+              <table className="w-full text-xs text-left min-w-[500px]">
                 <thead className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase">
                   <tr>
                     <th className="px-4 py-3">Ürün (SKU)</th>

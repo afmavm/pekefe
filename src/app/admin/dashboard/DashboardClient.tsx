@@ -94,7 +94,8 @@ function DonutChart({
 }: {
   segments: { value: number; color: string; label: string }[];
 }) {
-  const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
+  const realTotal = segments.reduce((s, seg) => s + seg.value, 0);
+  const total = realTotal || 1;
   const r = 52;
   const cx = 70;
   const cy = 70;
@@ -130,7 +131,7 @@ function DonutChart({
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f1f5f9" strokeWidth="12" />
       {paths}
       <text x={cx} y={cy - 6} textAnchor="middle" className="text-xl font-black fill-slate-800 font-sans" fontSize="20" fontWeight="900">
-        {total.toLocaleString("tr-TR")}
+        {realTotal.toLocaleString("tr-TR")}
       </text>
       <text x={cx} y={cy + 12} textAnchor="middle" className="fill-slate-400 font-sans font-bold" fontSize="8">
         SİPARİŞ
@@ -565,7 +566,9 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
           <p className="text-2xl font-extrabold text-slate-900">
             ₺{(kpis.totalRevenue || 0).toLocaleString("tr-TR", { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[10px] text-slate-400 mt-1 font-semibold">Bu ay toplam satış</p>
+          <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+            {kpis.cancelledOrderCount > 0 ? `${kpis.cancelledOrderCount} iptal hariç aktif ciro` : "Bu ay toplam satış"}
+          </p>
         </div>
 
         {/* Net Profit */}
@@ -695,7 +698,9 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
           </div>
           <div className="mt-4">
             <span className="text-3xl font-black text-slate-900">{kpis.orderCount || 0} Sipariş</span>
-            <p className="text-xs text-slate-400 mt-1">Son 30 günde tamamlanan satış</p>
+            <p className="text-xs text-slate-400 mt-1">
+              {kpis.cancelledOrderCount > 0 ? `${kpis.cancelledOrderCount} iptal sipariş hariç` : "Son 30 günde tamamlanan satış"}
+            </p>
           </div>
           <div className="h-[70px] mt-4">
             <MiniLineChart data={monthlyOrdersTrend} color="#f97316" />

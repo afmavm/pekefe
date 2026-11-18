@@ -37,8 +37,12 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Error fetching production data:', error);
-    return NextResponse.json({ error: 'Veritabanı hatası' }, { status: 500 });
+    console.warn('[API PRODUCTION] Veritabanı erişimi yok, boş üretim verisi döndürülüyor:', error);
+    return NextResponse.json({
+      finishedGoods: [],
+      rawMaterials: [],
+      productionHistory: []
+    });
   }
 }
 

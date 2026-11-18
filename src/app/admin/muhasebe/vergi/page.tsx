@@ -138,8 +138,8 @@ export default function VergiPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {["Dönem", "Vergi Türü", "Matrah", "Oran", "Tutar", "Son Ödeme", "Ödeme Tarihi", "Durum", ""].map((h) => (

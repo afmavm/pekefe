@@ -161,7 +161,10 @@ if (typeof window === 'undefined' && !isBuildPhase) {
 
 export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 800, fallbackValue: T): Promise<T> {
   return Promise.race([
-    promise,
+    promise.catch((err) => {
+      console.warn("[Prisma Offline Fallback]", err?.message || err);
+      return fallbackValue;
+    }),
     new Promise<T>((resolve) => setTimeout(() => resolve(fallbackValue), timeoutMs))
   ]);
 }

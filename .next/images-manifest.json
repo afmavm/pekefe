@@ -55,7 +55,8 @@
       }
     ],
     "qualities": [
-      75
+      75,
+      100
     ],
     "unoptimized": true,
     "customCacheHandler": false,

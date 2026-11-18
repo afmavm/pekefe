@@ -1,6 +1,6 @@
 import React from "react";
 import AdminProviders from "./AdminProviders";
-import { prisma } from "@/lib/prisma";
+import { prisma, withTimeout } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +12,19 @@ export default async function RootAdminLayout({
   let initialCMSData = null;
   let initialPages: any[] = [];
   try {
-    const data = await prisma.cMSData.findUnique({ where: { id: "singleton" } });
+    const data = await withTimeout(
+      prisma.cMSData.findUnique({ where: { id: "singleton" } }),
+      800,
+      null
+    );
     if (data) {
       initialCMSData = JSON.parse(JSON.stringify(data));
     }
-    const pagesRaw = await prisma.cMSPage.findMany();
+    const pagesRaw = await withTimeout(
+      prisma.cMSPage.findMany(),
+      800,
+      []
+    );
     initialPages = pagesRaw.map(page => {
       let sections = [];
       try {

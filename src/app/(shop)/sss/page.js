@@ -64,13 +64,13 @@ const faqData = [
       },
       { 
         id: "urun-2", 
-        q: "Ham dut pekmezi nedir, kaynatılmış pekmezden farkı nedir?", 
-        a: "Ham dut pekmezi; İspir yaylalarından toplanan taze beyaz dut şırasının yüksek ateşte yakılmadan, modern vakumlu kazanlarda 60-65°C'yi aşmayan düşük sıcaklıklarda yoğunlaştırılmasıyla üretilir. Bu sayede dutun doğal enzimleri, vitaminleri ve polifenolleri korunur; sağlığa zararlı HMF (kanserojen yanık bileşiği) oluşumu engellenir." 
+        q: "İspir Dut Gün Pekmezi nedir, geleneksel kaynatılmış pekmezden farkı nedir?", 
+        a: "Pekmez şırasının yüksek sıcaklıklarda uzun süre kaynatılmaması ve güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılması, PEKEFE'nin geleneksel üretim anlayışının temelini oluşturur. Bu sayede İspir beyaz dutunun kendine has aroması, açık kehribar rengi ve doğal besin değerleri korunarak sofranıza ulaşır." 
       },
       { 
         id: "urun-3", 
-        q: "HMF değeri neden bu kadar önemlidir?", 
-        a: "HMF (Hidroksimetilfurfural), gıdaların yüksek ısıda aşırı kaynatılması sonucu oluşan ve sağlığı tehdit eden bir bileşiktir. T.C. Tarım ve Orman Bakanlığı ve Türk Gıda Kodeksi bal tebliğinde HMF üst sınırını 40 mg/kg olarak belirlemiştir. PEKEFE ham dut pekmezi ve ham bal ürünlerinde HMF değeri 10 mg/kg'ın dahi altındadır ve her üretim partisinin akredite laboratuvar analiz raporu mevcuttur." 
+        q: "Pekmez üretiminde ısıl işlem ve HMF konusunda yaklaşımınız nedir?", 
+        a: "HMF (Hidroksimetilfurfural), gıdalarda uygulanan ısıl işlem süresine, sıcaklığa ve depolama koşullarına bağlı olarak değişen ve laboratuvar analizleriyle ölçülen bir kalite parametresidir. Pekmez şırasının yüksek sıcaklıklarda uzun süre kaynatılmaması ve güneşin doğal sıcaklığından yararlanılarak yoğunlaştırılması, PEKEFE'nin geleneksel üretim anlayışının temelini oluşturur." 
       },
       { 
         id: "urun-4", 

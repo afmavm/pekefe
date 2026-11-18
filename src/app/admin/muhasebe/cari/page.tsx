@@ -15,7 +15,8 @@ import {
   AlertTriangle, Upload, Globe, CreditCard, UserCheck, 
   Trash, MessageCircle, Mail, Sparkles, X, Download, ShieldCheck,
   Building, ChevronRight, RefreshCw, Paperclip, Lock, Unlock,
-  FileSearch, ShieldAlert, BadgeCheck, Loader2, Zap, Printer
+  FileSearch, ShieldAlert, BadgeCheck, Loader2, Zap, Printer,
+  Phone, User
 } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
@@ -188,7 +189,7 @@ export default function CariPage() {
   
   // Active Detail Account
   const [activeAccount, setActiveAccount] = useState<CurrentAccount | null>(null);
-  const [activeTab, setActiveTab] = useState<"general" | "commercial" | "ledger" | "orders" | "marketplace" | "files" | "audit">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "commercial" | "ledger" | "orders" | "files" | "audit">("general");
 
   const view = searchParams ? searchParams.get("view") : null;
 
@@ -1034,6 +1035,10 @@ export default function CariPage() {
 
     const payload = {
       ...formData,
+      tanimlar: {
+        ...formData.tanimlar,
+        kategori: formData.kategori
+      },
       entegrasyonHaritalama: {
         ...formData.entegrasyonHaritalama,
         b2bAdSoyad: b2bUserForm.adSoyad,
@@ -1267,6 +1272,32 @@ export default function CariPage() {
       } catch (e) { tanimlarParsed = {}; }
     }
 
+    let adreslerParsed: Address[] = [];
+    if (activeAccount.adresler) {
+      try {
+        adreslerParsed = typeof activeAccount.adresler === "string" ? JSON.parse(activeAccount.adresler) : activeAccount.adresler;
+        if (!Array.isArray(adreslerParsed)) adreslerParsed = [];
+      } catch (e) { adreslerParsed = []; }
+    }
+
+    let entegrasyonParsed: any = {};
+    if (activeAccount.entegrasyonHaritalama) {
+      try {
+        entegrasyonParsed = typeof activeAccount.entegrasyonHaritalama === "string" ? JSON.parse(activeAccount.entegrasyonHaritalama) : activeAccount.entegrasyonHaritalama;
+        if (typeof entegrasyonParsed !== "object" || entegrasyonParsed === null) entegrasyonParsed = {};
+      } catch (e) { entegrasyonParsed = {}; }
+    }
+
+    let dosyalarParsed: any[] = [];
+    if (activeAccount.dosyalar) {
+      try {
+        dosyalarParsed = typeof activeAccount.dosyalar === "string" ? JSON.parse(activeAccount.dosyalar) : activeAccount.dosyalar;
+        if (!Array.isArray(dosyalarParsed)) dosyalarParsed = [];
+      } catch (e) { dosyalarParsed = []; }
+    }
+
+    const kategoriVal = tanimlarParsed.kategori || activeAccount.dealerGroup || "";
+
     const tanimlarVal = {
       grup1: tanimlarParsed.grup1 || "",
       grup2: tanimlarParsed.grup2 || "",
@@ -1283,14 +1314,15 @@ export default function CariPage() {
       plasiyer: tanimlarParsed.plasiyer || "",
       digerBirimFiyatGruplari: tanimlarParsed.digerBirimFiyatGruplari || "",
       varsayilanSube: tanimlarParsed.varsayilanSube || "",
+      kategori: kategoriVal,
       finansalBilgiler: {
         teminatYerelTutar: tanimlarParsed.finansalBilgiler?.teminatYerelTutar ?? 0,
-        acikHesapYerelLimit: tanimlarParsed.finansalBilgiler?.acikHesapYerelLimit ?? 0,
+        acikHesapYerelLimit: tanimlarParsed.finansalBilgiler?.acikHesapYerelLimit ?? activeAccount.creditLimit ?? 0,
         hesapKesimGunu: tanimlarParsed.finansalBilgiler?.hesapKesimGunu ?? 0,
-        calisilacakVadeGun: tanimlarParsed.finansalBilgiler?.calisilacakVadeGun ?? 0,
+        calisilacakVadeGun: tanimlarParsed.finansalBilgiler?.calisilacakVadeGun ?? activeAccount.vadeGun ?? 0,
         gecikmeLimitGunu: tanimlarParsed.finansalBilgiler?.gecikmeLimitGunu ?? 0,
         varsayilanAlisIskontosu: tanimlarParsed.finansalBilgiler?.varsayilanAlisIskontosu ?? 0,
-        varsayilanSatisIskontosu: tanimlarParsed.finansalBilgiler?.varsayilanSatisIskontosu ?? 0,
+        varsayilanSatisIskontosu: tanimlarParsed.finansalBilgiler?.varsayilanSatisIskontosu ?? activeAccount.discountRate ?? 0,
         ekstreGonder: tanimlarParsed.finansalBilgiler?.ekstreGonder ?? false,
         limitKontrolu: tanimlarParsed.finansalBilgiler?.limitKontrolu ?? false,
         veresiyeOlacakMi: tanimlarParsed.finansalBilgiler?.veresiyeOlacakMi ?? true,
@@ -1299,9 +1331,9 @@ export default function CariPage() {
     };
 
     setFormData({
-      name: activeAccount.name,
-      type: activeAccount.type,
-      cariTipi: activeAccount.cariTipi,
+      name: activeAccount.name || "",
+      type: activeAccount.type || "MUSTERI",
+      cariTipi: activeAccount.cariTipi || "CORPORATE",
       ad: activeAccount.ad || "",
       soyad: activeAccount.soyad || "",
       tckn: activeAccount.tckn || "",
@@ -1315,31 +1347,31 @@ export default function CariPage() {
       phone: activeAccount.phone || "",
       email: activeAccount.email || "",
       address: activeAccount.address || "",
-      currency: activeAccount.currency,
-      openingBalance: activeAccount.openingBalance,
-      balance: activeAccount.balance,
+      currency: activeAccount.currency || "TRY",
+      openingBalance: Number(activeAccount.openingBalance) || 0,
+      balance: Number(activeAccount.balance) || 0,
       discountRate: activeAccount.discountRate || 0,
       creditLimit: activeAccount.creditLimit || 0,
       riskLimit: activeAccount.riskLimit || 0,
       vadeGun: activeAccount.vadeGun || 0,
-      dealerGroup: activeAccount.dealerGroup,
-      priceGroup: activeAccount.priceGroup,
+      dealerGroup: activeAccount.dealerGroup || "Standart",
+      priceGroup: activeAccount.priceGroup || "Liste",
       priceFormula: activeAccount.priceFormula || "",
-      kaynakPlatform: activeAccount.kaynakPlatform,
-      eFaturaDurumu: activeAccount.eFaturaDurumu,
-      blokeDurumu: activeAccount.blokeDurumu,
-      adresler: activeAccount.adresler || [],
-      entegrasyonHaritalama: activeAccount.entegrasyonHaritalama || {},
-      dosyalar: activeAccount.dosyalar || [],
+      kaynakPlatform: activeAccount.kaynakPlatform || "PEKEFE_B2B",
+      eFaturaDurumu: Boolean(activeAccount.eFaturaDurumu),
+      blokeDurumu: Boolean(activeAccount.blokeDurumu),
+      adresler: adreslerParsed,
+      entegrasyonHaritalama: entegrasyonParsed,
+      dosyalar: dosyalarParsed,
       auditLogs: activeAccount.auditLogs || [],
       cariKod: activeAccount.cariKod || "",
-      kategori: "",
+      kategori: kategoriVal,
       kurum: activeAccount.cariTipi === "CORPORATE" ? "Firma" : "Şahıs",
       bankalar: bankalarParsed,
       yetkililer: yetkililerParsed,
       kvkk: kvkkParsed,
       tanimlar: tanimlarVal,
-      isActive: activeAccount.isActive
+      isActive: activeAccount.isActive !== false
     });
 
     const ent = activeAccount.entegrasyonHaritalama || {};
@@ -2228,7 +2260,6 @@ export default function CariPage() {
                   { id: "commercial", label: "Ticari & Risk" },
                   { id: "ledger", label: "Hareketler" },
                   { id: "orders", label: "Siparişler" },
-                  { id: "marketplace", label: "Pazaryeri" },
                   { id: "files", label: "Dosyalar" },
                   { id: "audit", label: "Günlük (Audit)" }
                 ].map(t => (
@@ -2273,6 +2304,31 @@ export default function CariPage() {
                         <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">Telefon Numarası</span>
                         <span className="text-sm font-extrabold text-slate-800">{activeAccount.phone || "-"}</span>
                       </div>
+                      {activeAccount.yetkiliKisi && (
+                        <div>
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">Yetkili Kişi</span>
+                          <span className="text-sm font-extrabold text-slate-800">{activeAccount.yetkiliKisi}</span>
+                        </div>
+                      )}
+                      {activeAccount.mersisNo && (
+                        <div>
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">MERSİS No</span>
+                          <span className="text-sm font-extrabold text-slate-800">{activeAccount.mersisNo}</span>
+                        </div>
+                      )}
+                      {activeAccount.webSitesi && (
+                        <div>
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">Web Sitesi</span>
+                          <a 
+                            href={activeAccount.webSitesi.startsWith('http') ? activeAccount.webSitesi : `https://${activeAccount.webSitesi}`} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-sm font-extrabold text-blue-600 hover:underline"
+                          >
+                            {activeAccount.webSitesi}
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     <div className="border-t border-slate-100 pt-5">
@@ -2644,52 +2700,6 @@ export default function CariPage() {
                   </div>
                 )}
 
-                {/* 5. TAB: MARKETPLACE MAPPING */}
-                {activeTab === "marketplace" && (
-                  <div className="space-y-4">
-                    <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-                      Trendyol, Hepsiburada veya Shopify gibi harici platformlardan gelen mükerrer siparişlerin bu cari karta yazılabilmesi için ilgili entegrasyon anahtarlarını haritalayın.
-                    </p>
-                    
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                      <table className="w-full text-xs text-left">
-                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
-                          <tr>
-                            <th className="px-4 py-3">Platform</th>
-                            <th className="px-4 py-3">Harici Cari ID / Kimlik Kodu</th>
-                            <th className="px-4 py-3 text-center">Eşleşme Durumu</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {[
-                            { name: "Trendyol Entegrasyonu", key: "trendyolId", icon: "🍊" },
-                            { name: "Hepsiburada Entegrasyonu", key: "hepsiburadaId", icon: "🧡" },
-                            { name: "Shopify Connector", key: "shopifyId", icon: "💚" },
-                            { name: "N11 API Link", key: "n11Id", icon: "❤️" }
-                          ].map(platform => {
-                            const val = activeAccount.entegrasyonHaritalama?.[platform.key] || "";
-                            return (
-                              <tr key={platform.key} className="hover:bg-slate-50/20">
-                                <td className="px-4 py-3 font-bold text-slate-800 flex items-center gap-2">
-                                  <span className="text-base">{platform.icon}</span>
-                                  {platform.name}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <span className="font-mono text-slate-700 font-bold">{val || "— (Eşlenmemiş)"}</span>
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                  <span className={`inline-flex items-center gap-1 text-xs font-bold ${val ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                    <CheckCircle className="w-3.5 h-3.5" /> {val ? 'Eşleşti' : 'Aktif Değil'}
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
 
                 {/* 6. TAB: FILE ATTACHMENTS */}
                 {activeTab === "files" && (
@@ -3177,43 +3187,239 @@ export default function CariPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* İletişim Bilgileri (Telefon & E-Posta) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200">
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-800 block text-xs flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Telefon Numarası</span>
+                      </label>
+                      <input 
+                        type="tel" 
+                        placeholder="05XX XXX XX XX"
+                        value={formData.phone} 
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 bg-white rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-800 block text-xs flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-slate-500" />
+                        <span>E-Posta Adresi</span>
+                      </label>
+                      <input 
+                        type="email" 
+                        placeholder="musteri@firma.com"
+                        value={formData.email} 
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 bg-white rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Kurumsal Ek Alanlar (Yetkili Kişi, MERSİS, Web) */}
+                  {formData.cariTipi === "CORPORATE" && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-slate-800 block text-xs flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Yetkili Kişi</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          placeholder="Ad Soyad"
+                          value={formData.yetkiliKisi} 
+                          onChange={e => setFormData({...formData, yetkiliKisi: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-300 bg-white rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold text-slate-800 block text-xs flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-slate-500" />
+                          <span>MERSİS No</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          placeholder="16 Haneli No"
+                          maxLength={16}
+                          value={formData.mersisNo} 
+                          onChange={e => setFormData({...formData, mersisNo: e.target.value.replace(/\D/g, "")})}
+                          className="w-full px-3 py-2 border border-slate-300 bg-white rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold text-slate-800 block text-xs flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Web Sitesi</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          placeholder="https://..."
+                          value={formData.webSitesi} 
+                          onChange={e => setFormData({...formData, webSitesi: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-300 bg-white rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Sağ Avatar Kutusu */}
-                <div className="md:col-span-4 flex flex-col items-center justify-center border border-slate-100 rounded-3xl p-4 bg-slate-50/20">
-                  <input 
-                    type="file" 
-                    ref={avatarInputRef} 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={handleAvatarChange} 
-                  />
-                  <div 
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 bg-white shadow-sm flex items-center justify-center cursor-pointer group"
-                  >
-                    <Image 
-                      src={formData.entegrasyonHaritalama?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"} 
-                      alt="Avatar" 
-                      fill
-                      sizes="128px"
-                      className="object-cover group-hover:scale-105 transition duration-300" 
+                {/* Sağ Kolon: Profil ve Hızlı Ayarlar Kartları */}
+                <div className="md:col-span-4 space-y-4 self-start">
+                  
+                  {/* Profil Kartı */}
+                  <div className="border border-slate-200/80 rounded-3xl p-5 bg-gradient-to-b from-slate-50/70 via-white to-white shadow-xs flex flex-col items-center text-center">
+                    <input 
+                      type="file" 
+                      ref={avatarInputRef} 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleAvatarChange} 
                     />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">Değiştir</span>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        avatarInputRef.current?.click();
-                      }}
-                      className="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow border-2 border-white transition"
+                    
+                    <div 
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-slate-100 flex items-center justify-center cursor-pointer group transition-all hover:scale-105 hover:shadow-lg ring-2 ring-slate-200/80"
+                      title={formData.entegrasyonHaritalama?.avatar ? "Fotoğrafı Değiştir" : "Profil Fotoğrafı Yükle"}
                     >
-                      +
-                    </button>
+                      {formData.entegrasyonHaritalama?.avatar ? (
+                        <Image 
+                          src={formData.entegrasyonHaritalama.avatar} 
+                          alt="Cari Profil Resmi" 
+                          fill
+                          sizes="112px"
+                          className="object-cover transition duration-300" 
+                        />
+                      ) : (
+                        /* Yüzü belli olmayan nötr / anonim profil ikonu */
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 group-hover:text-slate-400 transition-colors">
+                          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M12 2a5 5 0 100 10 5 5 0 000-10zm-7 18a7 7 0 0114 0H5z" />
+                          </svg>
+                        </div>
+                      )}
+                      
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                        <span className="text-white text-[11px] font-extrabold bg-black/60 px-2.5 py-1 rounded-full">
+                          {formData.entegrasyonHaritalama?.avatar ? "Değiştir" : "Fotoğraf Ekle"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fotoğraf Butonları */}
+                    <div className="flex items-center gap-2 mt-3">
+                      <button 
+                        type="button" 
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition flex items-center gap-1"
+                      >
+                        <Upload className="w-3 h-3 text-slate-500" />
+                        {formData.entegrasyonHaritalama?.avatar ? "Görseli Değiştir" : "Fotoğraf Yükle"}
+                      </button>
+                      {formData.entegrasyonHaritalama?.avatar && (
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              entegrasyonHaritalama: { ...prev.entegrasyonHaritalama, avatar: "" }
+                            }));
+                            toast.info("Profil fotoğrafı kaldırıldı.");
+                          }}
+                          className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                          title="Fotoğrafı Kaldır"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="mt-3.5 pt-3.5 border-t border-slate-100 w-full space-y-1">
+                      <p className="font-extrabold text-sm text-slate-800 truncate" title={formData.name || "Cari Ünvanı"}>
+                        {formData.name || "Cari Kart"}
+                      </p>
+                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                          {formData.cariKod || "KODSUZ"}
+                        </span>
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                          formData.cariTipi === "INDIVIDUAL" 
+                            ? "bg-purple-50 text-purple-700 border border-purple-200" 
+                            : "bg-blue-50 text-blue-700 border border-blue-200"
+                        }`}>
+                          {formData.cariTipi === "INDIVIDUAL" ? "Şahıs (B2C)" : "Firma (B2B)"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-3">Cari Kart Profil</span>
+
+                  {/* Hızlı Parametreler & Durum Kartı */}
+                  <div className="border border-slate-200/80 rounded-3xl p-4 bg-white shadow-xs space-y-3">
+                    <h5 className="font-extrabold text-slate-700 text-xs uppercase tracking-wider flex items-center justify-between">
+                      <span>Cari Durumu</span>
+                      <span className={`w-2 h-2 rounded-full ${formData.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    </h5>
+
+                    {/* e-Fatura Toggle */}
+                    <div className="flex items-center justify-between py-1.5 border-t border-slate-100">
+                      <div>
+                        <p className="font-bold text-slate-800 text-xs">e-Fatura Mükellefi</p>
+                        <p className="text-[11px] text-slate-400">GİB e-Fatura entegrasyonu</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, eFaturaDurumu: !formData.eFaturaDurumu })}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                          formData.eFaturaDurumu ? "bg-orange-500" : "bg-slate-200"
+                        }`}
+                      >
+                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          formData.eFaturaDurumu ? "translate-x-4" : "translate-x-0"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Hesap Bloke Toggle */}
+                    <div className="flex items-center justify-between py-1.5 border-t border-slate-100">
+                      <div>
+                        <p className="font-bold text-slate-800 text-xs">Hesap Blokesi</p>
+                        <p className="text-[11px] text-slate-400">Sipariş & sevkiyat durdurulur</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, blokeDurumu: !formData.blokeDurumu })}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                          formData.blokeDurumu ? "bg-red-500" : "bg-slate-200"
+                        }`}
+                      >
+                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          formData.blokeDurumu ? "translate-x-4" : "translate-x-0"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Aktiflik Toggle */}
+                    <div className="flex items-center justify-between py-1.5 border-t border-slate-100">
+                      <div>
+                        <p className="font-bold text-slate-800 text-xs">Cari Kart Aktif</p>
+                        <p className="text-[11px] text-slate-400">Muhasebede aktif kullanım</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                          formData.isActive ? "bg-emerald-500" : "bg-slate-200"
+                        }`}
+                      >
+                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          formData.isActive ? "translate-x-4" : "translate-x-0"
+                        }`} />
+                      </button>
+                    </div>
+
+                  </div>
                 </div>
               </div>
 
@@ -3736,7 +3942,7 @@ export default function CariPage() {
               <div className="bg-slate-50/50 p-4 border border-slate-200 rounded-2xl space-y-4">
                 <h4 className="font-black text-slate-800 text-sm">Finansal Bilgiler</h4>
                 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Döviz Türü</label>
                     <select
@@ -3748,6 +3954,20 @@ export default function CariPage() {
                       <option value="USD">USD ($)</option>
                       <option value="EUR">EUR (€)</option>
                     </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-extrabold text-slate-800 block">Açılış Bakiyesi</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={formData.openingBalance}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData({ ...formData, openingBalance: val, balance: val });
+                      }}
+                      placeholder="0.00"
+                      className="w-full px-2.5 py-1.5 border border-slate-200 bg-white rounded-xl outline-none font-bold text-slate-900"
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Teminat Yerel Tutar</label>
@@ -3770,13 +3990,17 @@ export default function CariPage() {
                     <input 
                       type="number" 
                       value={formData.tanimlar.finansalBilgiler.acikHesapYerelLimit}
-                      onChange={e => setFormData({
-                        ...formData,
-                        tanimlar: {
-                          ...formData.tanimlar,
-                          finansalBilgiler: { ...formData.tanimlar.finansalBilgiler, acikHesapYerelLimit: parseFloat(e.target.value) || 0 }
-                        }
-                      })}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData({
+                          ...formData,
+                          creditLimit: val,
+                          tanimlar: {
+                            ...formData.tanimlar,
+                            finansalBilgiler: { ...formData.tanimlar.finansalBilgiler, acikHesapYerelLimit: val }
+                          }
+                        });
+                      }}
                       placeholder="0"
                       className="w-full px-2.5 py-1.5 border border-slate-200 bg-white rounded-xl outline-none font-bold"
                     />
@@ -3804,13 +4028,17 @@ export default function CariPage() {
                     <input 
                       type="number" 
                       value={formData.tanimlar.finansalBilgiler.calisilacakVadeGun}
-                      onChange={e => setFormData({
-                        ...formData,
-                        tanimlar: {
-                          ...formData.tanimlar,
-                          finansalBilgiler: { ...formData.tanimlar.finansalBilgiler, calisilacakVadeGun: parseInt(e.target.value) || 0 }
-                        }
-                      })}
+                      onChange={e => {
+                        const val = parseInt(e.target.value) || 0;
+                        setFormData({
+                          ...formData,
+                          vadeGun: val,
+                          tanimlar: {
+                            ...formData.tanimlar,
+                            finansalBilgiler: { ...formData.tanimlar.finansalBilgiler, calisilacakVadeGun: val }
+                          }
+                        });
+                      }}
                       className="w-full px-2.5 py-1.5 border border-slate-200 bg-white rounded-xl outline-none font-bold"
                     />
                   </div>
@@ -4034,7 +4262,6 @@ export default function CariPage() {
                           <input 
                             type="text" 
                             placeholder="TR00..." 
-                            required
                             value={bank.iban}
                             onChange={e => {
                               const updated = [...formData.bankalar];
@@ -4048,7 +4275,6 @@ export default function CariPage() {
                           <input 
                             type="text" 
                             placeholder="Banka Adı" 
-                            required
                             value={bank.bankaAdi}
                             onChange={e => {
                               const updated = [...formData.bankalar];

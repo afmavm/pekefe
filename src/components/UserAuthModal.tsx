@@ -33,6 +33,9 @@ export default function UserAuthModal({ isOpen, onClose, defaultTab = "login" }:
   const [regPhone, setRegPhone] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Show/Hide password states
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -141,13 +144,42 @@ export default function UserAuthModal({ isOpen, onClose, defaultTab = "login" }:
     }
   };
 
-  const handleForgot = (e: React.FormEvent) => {
+  const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!forgotEmail) return;
+    if (!forgotEmail.trim()) return;
+    if (!forgotNewPassword || forgotNewPassword.length < 6) {
+      toast.error("Yeni şifre en az 6 karakter olmalıdır.");
+      return;
+    }
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      toast.error("Yeni şifreleriniz birbiriyle eşleşmiyor.");
+      return;
+    }
 
-    toast.success(`Şifre sıfırlama talimatları ${forgotEmail} adresine gönderildi.`);
-    setAuthTab("login");
-    setForgotEmail("");
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: forgotEmail.trim(),
+          newPassword: forgotNewPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "Şifreniz başarıyla güncellenerek veritabanına kaydedildi.");
+        setLoginEmail(forgotEmail.trim());
+        setLoginPassword(forgotNewPassword);
+        setAuthTab("login");
+        setForgotEmail("");
+        setForgotNewPassword("");
+        setForgotConfirmPassword("");
+      } else {
+        toast.error(data.error || "Şifre güncellenemedi.");
+      }
+    } catch {
+      toast.error("Sunucu bağlantı hatası oluştu.");
+    }
   };
 
   return (
@@ -392,7 +424,7 @@ export default function UserAuthModal({ isOpen, onClose, defaultTab = "login" }:
               <span className="ml-auto text-sm font-extrabold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{t("auth_forgot_title")}</span>
             </div>
 
-            <form onSubmit={handleForgot} className="space-y-5">
+            <form onSubmit={handleForgot} className="space-y-4">
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wide select-none" htmlFor="forgot-email">
                   E-posta Adresi <span className="text-[#F4B400]">*</span>
@@ -410,12 +442,56 @@ export default function UserAuthModal({ isOpen, onClose, defaultTab = "login" }:
                   />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wide select-none">
+                  Yeni Şifre <span className="text-[#F4B400]">*</span>
+                </label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-zinc-550 group-focus-within:text-[#F4B400] transition-colors pointer-events-none" />
+                  <input
+                    type={showForgotPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={forgotNewPassword}
+                    onChange={(e) => setForgotNewPassword(e.target.value)}
+                    placeholder="En az 6 karakter"
+                    className="w-full h-14 bg-slate-50 dark:bg-[#242428] border border-slate-200 dark:border-zinc-700 rounded-xl pl-12 pr-14 text-[15px] font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:border-[#F4B400] focus:ring-1 focus:ring-[#F4B400]/20 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(!showForgotPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-[#F4B400] transition-all cursor-pointer"
+                  >
+                    {showForgotPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wide select-none">
+                  Yeni Şifre Tekrar <span className="text-[#F4B400]">*</span>
+                </label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-zinc-550 group-focus-within:text-[#F4B400] transition-colors pointer-events-none" />
+                  <input
+                    type={showForgotPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={forgotConfirmPassword}
+                    onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                    placeholder="Yeni şifrenizi tekrar girin"
+                    className="w-full h-14 bg-slate-50 dark:bg-[#242428] border border-slate-200 dark:border-zinc-700 rounded-xl pl-12 pr-4 text-[15px] font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:border-[#F4B400] focus:ring-1 focus:ring-[#F4B400]/20 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
                 className="w-full h-14 bg-[#F4B400] hover:bg-[#E0A500] text-[#0C0E12] font-extrabold text-[15px] rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-lg shadow-[#F4B400]/20 uppercase tracking-wider"
               >
-                <Mail className="w-5 h-5" />
-                <span>{t("auth_reset_send")}</span>
+                <Lock className="w-5 h-5" />
+                <span>Şifreyi Güncelle & Kaydet</span>
               </button>
             </form>
           </div>

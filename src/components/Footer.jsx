@@ -188,13 +188,22 @@ export default function Footer() {
             </li>
             <li>
               <Link className="text-on-surface-variant hover:text-secondary hover:translate-x-1 transition-all inline-block" href="/gizlilik">
-                Gizlilik Politikası
+                Gizlilik ve KVKK Politikası
               </Link>
             </li>
             <li>
               <Link className="text-on-surface-variant hover:text-secondary hover:translate-x-1 transition-all inline-block" href="/sss">
                 Sıkça Sorulan Sorular
               </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => typeof window !== "undefined" && window.dispatchEvent(new Event("pekefe_open_cookie_settings"))}
+                className="text-on-surface-variant hover:text-secondary hover:translate-x-1 transition-all inline-block cursor-pointer bg-transparent border-none p-0 text-left"
+              >
+                Çerez Tercihlerini Yönet
+              </button>
             </li>
           </ul>
         </nav>

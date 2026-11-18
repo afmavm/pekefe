@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
+import { findLocalUser } from '@/lib/jsonUserDb';
 import { emailService } from '@/lib/email-service';
 import { withRateLimit } from '@/lib/rate-limit';
 
@@ -14,34 +15,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "E-posta adresi gereklidir." }, { status: 400 });
     }
 
-    // 1. Check if user exists (to retrieve name)
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    const cleanEmail = email.trim().toLowerCase();
+    const localUser = findLocalUser({ email: cleanEmail });
+    const dbUser = await withTimeout(
+      prisma.user.findUnique({ where: { email: cleanEmail } }),
+      1500,
+      null
+    );
 
-    const name = user?.name || email.split('@')[0];
+    const name = localUser?.name || dbUser?.name || cleanEmail.split('@')[0];
     const resetCode = Math.floor(100000 + Math.random() * 900000);
-    const resetLink = `${req.nextUrl.origin}/reset-password?code=${resetCode}&email=${encodeURIComponent(email)}`;
+    const resetLink = `${req.nextUrl.origin}/giris?email=${encodeURIComponent(cleanEmail)}`;
 
-    // 2. Send via Email Service using the "forgot_password" template
-    await emailService.sendEmail({
-      eventType: "forgot_password",
-      recipient: email,
-      variables: {
-        kullanici_adi: name,
-        sifirlama_linki: resetLink,
-        sifirlama_kodu: String(resetCode)
-      }
-    });
+    try {
+      await emailService.sendEmail({
+        eventType: "forgot_password",
+        recipient: cleanEmail,
+        variables: {
+          kullanici_adi: name,
+          sifirlama_linki: resetLink,
+          sifirlama_kodu: String(resetCode)
+        }
+      });
+    } catch (mailErr) {
+      console.warn("[FORGOT PASSWORD EMAIL WARN]:", mailErr);
+    }
 
-    // Determine if developer/mock mode is active (using SMTP_USER check)
     const smtpUser = process.env.SMTP_USER;
     const isMock = !smtpUser || smtpUser === 'test@example.com';
     
     return NextResponse.json({ 
       success: true, 
       message: "Şifre sıfırlama yönergeleri e-posta adresinize gönderildi.",
-      // In dev mode, we can output a message or mock response info
       previewUrl: isMock ? `https://ethereal.email` : null
     });
     

@@ -635,7 +635,7 @@ export default function ReportsClient({
           </div>
 
           {/* Dynamic Table based on reportType */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden overflow-x-auto">
             {reportType === "stock_status" && reportData.locations && (
               <table className="min-w-full divide-y divide-slate-200 text-xs">
                 <thead className="bg-slate-50">

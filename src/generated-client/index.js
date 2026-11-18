@@ -1833,7 +1833,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ETicaret\\Desktop\\PEKEFE\\webtasarim\\pekefe-app\\src\\generated-client",
+      "value": "C:\\Users\\ETicaret-2\\Desktop\\PEKEFE\\webtasarim\\pekefe-app\\src\\generated-client",
       "fromEnvVar": null
     },
     "config": {
@@ -1863,7 +1863,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ETicaret\\Desktop\\PEKEFE\\webtasarim\\pekefe-app\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\ETicaret-2\\Desktop\\PEKEFE\\webtasarim\\pekefe-app\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

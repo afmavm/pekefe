@@ -157,8 +157,8 @@ export default function RaporlarPage() {
             {/* Summary Table */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h2 className="font-medium text-gray-800 mb-4">Aylık Özet Tablosu</h2>
-              <div className="overflow-y-auto max-h-56">
-                <table className="w-full text-sm">
+              <div className="overflow-auto max-h-56">
+                <table className="w-full text-sm min-w-[360px]">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-gray-100">
                       <th className="text-left py-1.5 text-xs text-gray-500 font-medium">Ay</th>

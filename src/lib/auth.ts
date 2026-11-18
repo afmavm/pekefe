@@ -1,4 +1,5 @@
-﻿export * from "./authOptions";
+﻿import { authOptions } from "./authOptions";
+export * from "./authOptions";
 export * from "./auth-helpers";
-export { authOptions } from "./authOptions";
+export { authOptions };
 export default authOptions;

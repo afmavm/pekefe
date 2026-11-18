@@ -166,8 +166,8 @@ export default function YevmiyePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto">
+        <table className="w-full text-sm min-w-[650px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {["Fiş No", "Tarih", "Tür", "Açıklama", "Toplam Tutar", "Durum", ""].map((h) => (

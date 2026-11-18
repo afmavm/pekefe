@@ -56,7 +56,10 @@ export default function Header() {
   const sessionResult = useSession() || {};
   const session = sessionResult.data;
   const isLoggedIn = !!session?.user;
-  const isAdmin = session?.user?.role === "admin" || session?.user?.role === "ADMIN";
+  const isAdmin = [
+    "admin", "ADMIN", "SUPER_ADMIN", "STOCK_MANAGER", "ORDER_MANAGER",
+    "ACCOUNTANT", "PRODUCTION_MANAGER", "CONTENT_EDITOR", "SUPPORT_AGENT"
+  ].includes(session?.user?.role);
   const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "Hesabım";
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -199,7 +202,7 @@ export default function Header() {
                           {session?.user?.role === "DEALER" && session?.user?.isApproved !== false ? "B2B Bayi Portalı" : "B2B Bayilik Başvurusu"}
                         </Link>
                         {isAdmin && (
-                          <Link href="/admin/dashboard" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-secondary hover:bg-secondary/5 transition-colors border-t border-outline-variant/10">
+                          <Link href="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-secondary hover:bg-secondary/5 transition-colors border-t border-outline-variant/10">
                             <span className="material-symbols-outlined text-[18px] text-secondary">admin_panel_settings</span>
                             Yönetim Paneli
                           </Link>
@@ -316,6 +319,7 @@ export default function Header() {
                 <Link
                   key={href}
                   href={href}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     (href === "/" ? pathname === "/" : pathname.startsWith(href))
                       ? "bg-primary/10 text-primary font-bold shadow-sm"

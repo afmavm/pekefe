@@ -136,8 +136,8 @@ export default function PagesAdminPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden overflow-x-auto">
+        <table className="w-full text-left min-w-[600px]">
           <thead className="bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
             <tr>
               <th className="px-5 py-3">Sayfa Adı</th>

@@ -1012,12 +1012,12 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
 
               {/* Taksit Planı Tablosu */}
               {showInstallments && installmentPlan.length > 0 && (
-                <div className="border border-slate-200  rounded-xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                  <div className="bg-slate-50  px-3 py-2 border-b border-slate-200  flex items-center gap-1.5 font-bold text-xs text-slate-700 ">
+                <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto animate-in slide-in-from-top-2 duration-200">
+                  <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center gap-1.5 font-bold text-xs text-slate-700">
                     <ListChecks className="w-3.5 h-3.5 text-orange-500" />
                     TAKSİT PLANI — {watchTaksitSayisi} Taksit
                   </div>
-                  <table className="w-full text-[11px]">
+                  <table className="w-full text-[11px] min-w-[280px]">
                     <thead className="bg-slate-50  border-b border-slate-200 ">
                       <tr>
                         <th className="p-2 text-left font-extrabold text-slate-500">No</th>
@@ -1193,9 +1193,9 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
                   Cariye ait açık fatura bulunmamaktadır.
                 </div>
               ) : (
-                <div className="border border-slate-200  rounded-xl overflow-hidden">
-                  <div className="max-h-52 overflow-y-auto">
-                    <table className="w-full text-[11px] text-left">
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="max-h-52 overflow-auto">
+                    <table className="w-full text-[11px] text-left min-w-[380px]">
                       <thead className="bg-slate-50  border-b border-slate-200  text-slate-500  font-extrabold sticky top-0">
                         <tr>
                           <th className="p-2 w-8 text-center">Seç</th>
@@ -1356,14 +1356,14 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
                       Tutar girildiğinde yevmiye kaydı önizlenecek.
                     </div>
                   ) : (
-                    <div className="border border-slate-200  rounded-xl overflow-hidden">
-                      <div className="bg-indigo-50  px-3 py-2 border-b border-indigo-200  flex items-center gap-1.5">
+                    <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
+                      <div className="bg-indigo-50 px-3 py-2 border-b border-indigo-200 flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />
-                        <span className="font-bold text-xs text-indigo-700 ">
+                        <span className="font-bold text-xs text-indigo-700">
                           {new Date(watchTarih).toLocaleDateString("tr-TR")} — {watch("belgeNo")} Tahsilat Fişi
                         </span>
                       </div>
-                      <table className="w-full text-[11px]">
+                      <table className="w-full text-[11px] min-w-[340px]">
                         <thead className="bg-slate-50  border-b border-slate-200 ">
                           <tr>
                             <th className="p-2 text-left font-extrabold text-slate-500">Hesap No</th>

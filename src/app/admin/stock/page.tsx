@@ -33,6 +33,7 @@ import { getProducts, resolveProductPrice, STORAGE_KEY, saveProducts } from "@/u
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import BulkProductImportModal from "./components/BulkProductImportModal";
 
 interface Ingredient {
   id: string;
@@ -133,6 +134,9 @@ export default function StockProductionPage() {
   const [quickStockProduct, setQuickStockProduct] = useState<Product | null>(null);
   const [quickStockQty, setQuickStockQty] = useState<string | number>(0);
   const [isSavingQuickStock, setIsSavingQuickStock] = useState(false);
+
+  // Bulk Product Import Modal State
+  const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -657,7 +661,9 @@ export default function StockProductionPage() {
       if (res.ok) {
         toast.success(editingCategory ? "Kategori başarıyla güncellendi." : "Kategori başarıyla oluşturuldu.");
         setIsCategoryModalOpen(false);
-        await refreshCategories();
+        if (typeof refreshCategories === "function") {
+          await refreshCategories();
+        }
         router.refresh();
         await loadData();
       } else {
@@ -678,7 +684,10 @@ export default function StockProductionPage() {
 
       if (res.ok) {
         toast.success("Kategori başarıyla silindi.");
-        await refreshCategories();
+        setCategories(prev => prev.filter(c => c.id !== id && c.parentId !== id));
+        if (typeof refreshCategories === "function") {
+          await refreshCategories();
+        }
         router.refresh();
         await loadData();
       } else {
@@ -707,7 +716,7 @@ export default function StockProductionPage() {
             {categories.map(cat => (
               <div key={cat.id} className="flex justify-between items-center bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow transition-all">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  <div className="w-2 h-2 bg-[#6b1d2f] rounded-full" />
                   <span className="font-bold text-slate-800 text-xs sm:text-sm">{cat.name}</span>
                   <span className="text-[9px] font-mono bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded border border-slate-100">
                     ID: {cat.id}
@@ -757,7 +766,7 @@ export default function StockProductionPage() {
                     </button>
                   ) : (
                     <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                      <div className="w-2 h-2 bg-[#6b1d2f] rounded-full" />
                     </div>
                   )}
                   <span className="font-bold text-slate-800 text-xs sm:text-sm">{cat.name}</span>
@@ -797,7 +806,7 @@ export default function StockProductionPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-3">
-            <PackageSearch className="w-6 h-6 text-[#b45309]" /> Ürün Kataloğu & Kategori Yönetimi
+            <PackageSearch className="w-6 h-6 text-[#6b1d2f]" /> Ürün Kataloğu & Kategori Yönetimi
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
             Tüm imalat mamullerini ve hammadde envanterlerini tanımlayın, ürün hiyerarşisini ve kategorileri yönetin.
@@ -811,15 +820,15 @@ export default function StockProductionPage() {
         <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "URUNLER", label: "ÜRÜN KARTLARI", icon: Package, count: products.length },
-              { id: "KATEGORILER", label: "KATEGORİLER", icon: Settings2, count: categories.length }
+              { id: "URUNLER", label: "Ürün Kartları", icon: Package, count: products.length },
+              { id: "KATEGORILER", label: "Kategoriler", icon: Settings2, count: categories.length }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer ${
                   activeTab === tab.id 
-                    ? "bg-[#b45309] text-white border-[#b45309] shadow-md shadow-[#b45309]/10" 
+                    ? "bg-[#6b1d2f] text-white border-[#6b1d2f] shadow-xs" 
                     : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                 }`}
               >
@@ -1017,6 +1026,15 @@ export default function StockProductionPage() {
                         Sadece Perakende
                       </button>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsBulkImportModalOpen(true)}
+                      className="px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-[#b45309] border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      title="Excel veya CSV ile toplu ürün yükleyin"
+                    >
+                      <UploadCloud className="w-4 h-4 text-[#b45309]" /> TOPLU ÜRÜN EKLE
+                    </button>
 
                     <button
                       onClick={openAddProductModal}
@@ -1324,9 +1342,9 @@ export default function StockProductionPage() {
                   </div>
                   <button
                     onClick={openAddCategoryModal}
-                    className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow shadow-orange-500/10"
+                    className="px-4 py-2.5 rounded-xl bg-[#6b1d2f] hover:bg-[#541624] active:scale-[0.99] text-white text-xs font-semibold tracking-wide transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
-                    <Plus className="w-4 h-4" /> YENİ KATEGORİ EKLE
+                    <Plus className="w-4 h-4" /> Yeni Kategori Ekle
                   </button>
                 </div>
                 
@@ -1355,19 +1373,24 @@ export default function StockProductionPage() {
             <form onSubmit={handleSaveProduct} className="flex flex-col h-full overflow-hidden">
               
               {/* Modal Header */}
-              <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center shrink-0">
+              <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
-                    <Package className="w-5 h-5 text-orange-500" />
+                  <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                    <Package className="w-4.5 h-4.5" />
                   </div>
-                  <h3 className="text-base font-extrabold uppercase tracking-wider text-left">
-                    {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
-                  </h3>
+                  <div>
+                    <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                      {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
+                    </h3>
+                    <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                      Ürün kartı, stok miktarı ve SEO ayarları
+                    </p>
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
-                  className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1715,19 +1738,19 @@ export default function StockProductionPage() {
               </div>
 
               {/* 📥 STICKY ACTIONS BAR (Sabit Buton Footer'ı) */}
-              <div className="absolute bottom-0 left-0 right-0 px-6 py-4 bg-slate-50/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-between shrink-0 z-10">
+              <div className="absolute bottom-0 left-0 right-0 px-6 py-4 bg-[#faf8f5]/95 backdrop-blur-md border-t border-stone-200/80 flex items-center justify-between shrink-0 z-10">
                 <button
                   type="button"
                   onClick={() => setIsProductModalOpen(false)}
-                  className="px-5 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                  className="px-4 py-2.5 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-orange-500/20"
+                  className="px-5 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] active:scale-[0.99] text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-xs cursor-pointer"
                 >
-                  <Save className="w-4 h-4" /> KAYDET VE YAYINLA
+                  <Save className="w-3.5 h-3.5" /> Kaydet ve Yayınla
                 </button>
               </div>
 
@@ -1738,67 +1761,86 @@ export default function StockProductionPage() {
 
       {/* Category Modal Overlay */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[460px] bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             <form onSubmit={handleSaveCategory}>
-              <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+              {/* Quiet Luxury Header */}
+              <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                    <Settings2 className="w-5 h-5 text-orange-500" />
+                  <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                    <Settings2 className="w-4.5 h-4.5" />
                   </div>
-                  <h3 className="text-base font-extrabold uppercase tracking-wider text-left">
-                    {editingCategory ? "Kategoriyi Düzenle" : "Yeni Kategori Ekle"}
-                  </h3>
+                  <div>
+                    <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                      {editingCategory ? "Kategoriyi Düzenle" : "Yeni Kategori Ekle"}
+                    </h3>
+                    <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                      Katalog hiyerarşisi ve ürün sınıflandırması
+                    </p>
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsCategoryModalOpen(false)}
-                  className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-5">
+              {/* Form Body */}
+              <div className="p-6 space-y-4.5 bg-white">
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori Adı *</label>
+                  <label className="block text-xs font-medium text-stone-700">
+                    Kategori Adı <span className="text-[#6b1d2f] font-bold">*</span>
+                  </label>
                   <input
                     type="text"
                     required
+                    placeholder="Örn: Geleneksel Pekmezler"
                     value={categoryForm.name}
                     onChange={e => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-sm focus:bg-white focus:border-orange-400 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-stone-800 text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all placeholder:text-stone-400"
                   />
+                  <p className="text-[11px] text-stone-400 font-normal">
+                    Ürünlerin vitrin ve katalogda görüntüleneceği başlık.
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Üst Kategori (Opsiyonel)</label>
+                  <label className="block text-xs font-medium text-stone-700">
+                    Üst Kategori <span className="text-stone-400 font-normal">(Opsiyonel)</span>
+                  </label>
                   <select
                     value={categoryForm.parentId}
                     onChange={e => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-sm focus:bg-white focus:border-orange-400 outline-none cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-stone-800 text-sm font-medium focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10 outline-none transition-all cursor-pointer"
                   >
-                    <option value="">(Yok)</option>
+                    <option value="">(Yok - Ana Kategori)</option>
                     {categories.filter(c => c.id !== editingCategory?.id).map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
+                  <p className="text-[11px] text-stone-400 font-normal">
+                    Bu kategori bir alt dal ise bağlı olduğu ana kategoriyi seçiniz.
+                  </p>
                 </div>
               </div>
 
-              <div className="p-5 border-t border-slate-100 flex gap-3">
+              {/* Quiet Luxury Footer */}
+              <div className="px-6 py-4 bg-[#faf8f5] border-t border-stone-200/80 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsCategoryModalOpen(false)}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                  className="px-4 py-2.5 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer"
+                  className="px-5 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] active:scale-[0.99] text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                 >
-                  <Save className="w-4 h-4" /> KAYDET
+                  <Save className="w-3.5 h-3.5" /> Kaydet
                 </button>
               </div>
             </form>
@@ -1808,37 +1850,45 @@ export default function StockProductionPage() {
 
       {/* Quick Stock Update Modal Overlay */}
       {quickStockProduct && (
-        <div key={`quick-stock-modal-${quickStockProduct.id || quickStockProduct.sku}`} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div key={`quick-stock-modal-${quickStockProduct.id || quickStockProduct.sku}`} className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-xl border border-stone-200/90 overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="p-5 text-center bg-slate-900 text-white flex justify-between items-center">
+            {/* Header */}
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                  <RefreshCw className="w-5 h-5 text-orange-500 animate-spin-slow" />
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 rounded-xl flex items-center justify-center border border-[#6b1d2f]/15 text-[#6b1d2f]">
+                  <RefreshCw className="w-4 h-4 animate-spin-slow" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider text-left">Hızlı Stok Güncelle</h3>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">
+                    Hızlı Stok Güncelle
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal mt-0.5">
+                    Anlık envanter miktarı düzenleme
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setQuickStockProduct(null)}
-                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer border-none"
+                className="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 flex items-center justify-center transition-colors cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs text-slate-700">
-                <p className="font-bold text-slate-800">{quickStockProduct.name}</p>
-                <p className="text-[10px] text-slate-500 font-mono mt-0.5">SKU: {quickStockProduct.sku}</p>
+            <div className="p-6 space-y-4.5 bg-white">
+              <div className="bg-stone-50/80 border border-stone-200/80 rounded-xl p-3.5 text-xs text-stone-700">
+                <p className="font-semibold text-stone-900">{quickStockProduct.name}</p>
+                <p className="text-[10px] text-stone-500 font-mono mt-0.5">SKU: {quickStockProduct.sku}</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mevcut Stok Miktarı</label>
-                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:border-orange-400 focus-within:bg-white transition-all overflow-hidden shadow-inner">
+                <label className="block text-xs font-medium text-stone-700">Mevcut Stok Miktarı</label>
+                <div className="flex items-center bg-stone-50/50 border border-stone-200 rounded-xl focus-within:border-[#6b1d2f] focus-within:ring-2 focus-within:ring-[#6b1d2f]/10 focus-within:bg-white transition-all overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuickStockQty(prev => Math.max(0, (Number(prev) || 0) - 1))}
-                    className="px-4 py-3 text-slate-500 hover:text-orange-500 hover:bg-slate-100 border-r border-slate-200 transition font-black text-lg select-none shrink-0"
+                    className="px-4 py-2.5 text-stone-500 hover:text-[#6b1d2f] hover:bg-stone-100 border-r border-stone-200 transition font-bold text-base select-none shrink-0 cursor-pointer"
                   >
                     -
                   </button>
@@ -1856,23 +1906,24 @@ export default function StockProductionPage() {
                         setQuickStockQty(isNaN(parsed) ? 0 : Math.max(0, parsed));
                       }
                     }}
-                    className="flex-1 bg-transparent py-3 text-lg font-bold text-slate-900 outline-none border-none text-center"
+                    className="flex-1 bg-transparent py-2.5 text-base font-bold text-stone-900 outline-none border-none text-center"
                   />
                   <button
                     type="button"
                     onClick={() => setQuickStockQty(prev => (Number(prev) || 0) + 1)}
-                    className="px-4 py-3 text-slate-500 hover:text-orange-500 hover:bg-slate-100 border-l border-slate-200 transition font-black text-lg select-none shrink-0"
+                    className="px-4 py-2.5 text-stone-500 hover:text-[#6b1d2f] hover:bg-stone-100 border-l border-stone-200 transition font-bold text-base select-none shrink-0 cursor-pointer"
                   >
                     +
                   </button>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              {/* Footer Buttons */}
+              <div className="flex gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setQuickStockProduct(null)}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border-none"
+                  className="flex-1 py-2.5 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                 >
                   İptal
                 </button>
@@ -1880,15 +1931,15 @@ export default function StockProductionPage() {
                   type="button"
                   onClick={handleSaveQuickStock}
                   disabled={isSavingQuickStock}
-                  className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex justify-center items-center gap-2 shadow-lg shadow-orange-500/10 cursor-pointer border-none disabled:opacity-50"
+                  className="flex-1 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold transition-all flex justify-center items-center gap-2 shadow-xs cursor-pointer border-none disabled:opacity-50"
                 >
                   {isSavingQuickStock ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Güncelleniyor...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Güncelleniyor...
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" /> GÜNCELLE
+                      <Save className="w-3.5 h-3.5" /> Stok Güncelle
                     </>
                   )}
                 </button>
@@ -1897,6 +1948,17 @@ export default function StockProductionPage() {
           </div>
         </div>
       )}
+
+      {/* Bulk Product Import Modal */}
+      <BulkProductImportModal
+        isOpen={isBulkImportModalOpen}
+        onClose={() => setIsBulkImportModalOpen(false)}
+        onSuccess={() => {
+          loadData();
+          refreshProducts();
+        }}
+        existingSkus={new Set(products.map(p => String(p.sku || "").trim().toLowerCase()))}
+      />
 
     </div>
   );

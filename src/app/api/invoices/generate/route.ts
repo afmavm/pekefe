@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { generateUBLXML, InvoiceData } from '@/modules/accounting/server/ubl-generator';
 import { v4 as uuidv4 } from 'uuid';
 import { requireAdmin } from '@/lib/auth-helpers';
+import { readLocalOrders } from '@/lib/jsonOrderDb';
 
 export async function POST(request: Request) {
   const auth = await requireAdmin();
@@ -13,21 +14,62 @@ export async function POST(request: Request) {
     const docType = type || "e-Fatura";
 
     // 1. Fetch Order with Relations
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        currentAccount: true
+    let order: any = null;
+    try {
+      order = await withTimeout(
+        prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            currentAccount: true
+          }
+        }),
+        2500,
+        null
+      );
+    } catch (_) {}
+
+    if (!order) {
+      const localOrders = readLocalOrders();
+      const match = localOrders.find(o => o.id === orderId || o.orderNumber === orderId);
+      if (match) {
+        order = {
+          id: match.id,
+          date: match.date,
+          total: { toNumber: () => Number(match.amount || match.total || 0) },
+          summary: match.summary,
+          type: match.type || "B2C",
+          currentAccount: {
+            name: match.client,
+            taxNo: match.taxId,
+            taxOffice: match.taxOffice,
+            address: match.address,
+            email: match.email,
+            phone: match.phone
+          }
+        };
       }
-    });
+    }
 
     if (!order) {
       return NextResponse.json({ error: 'Sipariş bulunamadı.' }, { status: 404 });
     }
 
     // Fetch all orders to determine chronological index for the sequential order number
-    const allOrders = await prisma.order.findMany({
-      orderBy: { date: 'asc' }
-    });
+    let allOrders: any[] = [];
+    try {
+      allOrders = await withTimeout(
+        prisma.order.findMany({
+          orderBy: { date: 'asc' }
+        }),
+        2000,
+        []
+      );
+    } catch (_) {}
+
+    if (!allOrders.length) {
+      allOrders = readLocalOrders();
+    }
+
     const orderYear = order.date ? new Date(order.date).getFullYear() : new Date().getFullYear();
     const chronologicalIndex = allOrders.findIndex(o => o.id === order.id) + 1;
     const sequenceStr = String(chronologicalIndex).padStart(4, '0');

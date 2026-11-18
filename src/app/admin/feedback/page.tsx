@@ -468,43 +468,52 @@ export default function AdminFeedbackPage() {
 
       {/* Reply Modal / Overlay Drawer */}
       {replyingTo && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="w-full max-w-[500px] bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="w-full max-w-[500px] bg-white rounded-2xl shadow-xl border border-stone-200/80 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
             
             {/* Header */}
-            <div className="p-6 text-center bg-slate-900 text-white relative">
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mb-3">
-                  <Reply className="w-5 h-5 text-amber-400" />
+            <div className="px-6 py-4.5 bg-[#faf8f5] border-b border-stone-200/80 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#6b1d2f]/10 border border-[#6b1d2f]/15 rounded-xl flex items-center justify-center text-[#6b1d2f]">
+                  <Reply className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-base font-extrabold uppercase tracking-wider">Müşteriye Yanıt Yazın</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  ALICI: {replyingTo.name.toUpperCase()}
-                </p>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-stone-900 tracking-tight leading-tight">Müşteri Yorumunu Yanıtla</h3>
+                  <p className="text-[11px] text-stone-500 font-medium mt-0.5">
+                    Alıcı: <span className="font-semibold text-stone-700">{replyingTo.name}</span> ({replyingTo.email})
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setReplyingTo(null)}
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 text-stone-400 hover:text-stone-600 border border-stone-200/60 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Form */}
             <form onSubmit={handleReplySubmit} className="p-6 space-y-4">
               
               {/* Original Review Card Preview */}
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Müşteri Yorumu</p>
-                <p className="text-slate-600 text-xs italic font-medium leading-relaxed">
+              <div className="p-3.5 bg-stone-50/70 border border-stone-200/80 rounded-xl space-y-1">
+                <p className="text-[10px] font-bold uppercase text-stone-400 tracking-wider">Müşteri Değerlendirmesi</p>
+                <p className="text-stone-700 text-xs italic font-medium leading-relaxed">
                   "{replyingTo.message}"
                 </p>
               </div>
 
               {/* Text Input */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700 uppercase">Kurumsal Yanıtınız</label>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">Kurumsal Yanıtınız</label>
                 <textarea
                   required
                   rows={4}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Müşteriye iletilecek nazik ve profesyonel yanıtınızı yazın..."
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-semibold text-xs text-slate-800 transition focus:bg-white focus:border-[#b45309]"
+                  placeholder="Müşteriye iletilecek nazik ve profesyonel kurumsal yanıtınızı yazın..."
+                  className="w-full p-3.5 bg-stone-50/60 border border-stone-200 rounded-xl outline-none font-medium text-xs text-stone-800 transition focus:bg-white focus:border-[#6b1d2f] focus:ring-2 focus:ring-[#6b1d2f]/10"
                 />
               </div>
 
@@ -513,19 +522,19 @@ export default function AdminFeedbackPage() {
                 <button
                   type="button"
                   onClick={() => setReplyingTo(null)}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="flex-1 py-2.5 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/90 rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   disabled={submittingReply}
-                  className="flex-1 py-3 bg-[#b45309] hover:bg-amber-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-md disabled:opacity-50"
+                  className="flex-1 py-2.5 bg-[#6b1d2f] hover:bg-[#541624] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs border-none disabled:opacity-50"
                 >
                   {submittingReply ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <>Gönder & Onayla <Send className="w-4 h-4" /></>
+                    <>Gönder & Onayla <Send className="w-3.5 h-3.5" /></>
                   )}
                 </button>
               </div>

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack -p 3000",
     "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && npx -y cross-env NEXT_CPU_COUNT=1 UV_THREADPOOL_SIZE=1 next build --webpack && node scripts/postbuild.js",
     "start": "next start",
     "lint": "eslint"

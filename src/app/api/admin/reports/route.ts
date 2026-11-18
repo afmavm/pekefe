@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withTimeout } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
+import { readLocalOrders } from '@/lib/jsonOrderDb';
 
 export async function GET(request: Request) {
   const auth = await requireAdmin();
@@ -15,59 +16,114 @@ export async function GET(request: Request) {
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
 
-    // 1. All orders in range with channel info
-    const orders = await prisma.order.findMany({
-      where: { date: { gte: startDate } },
-      include: { currentAccount: true },
-      orderBy: { date: 'desc' }
-    });
+    let orders: any[] = [];
+    let salesTx: any[] = [];
+    let dealers: any[] = [];
+    let unpaidInvoices: any[] = [];
+    let collectionsList: any[] = [];
 
-    // 2. Stock transactions for sold qty
-    const salesTx = await prisma.stockTransaction.findMany({
-      where: { type: 'OUT', date: { gte: startDate } },
-      include: { product: true }
-    });
+    try {
+      orders = await withTimeout(
+        prisma.order.findMany({
+          where: { date: { gte: startDate } },
+          include: { currentAccount: true },
+          orderBy: { date: 'desc' }
+        }),
+        2500,
+        []
+      );
 
-    // 3. All current accounts (dealers)
-    const dealers = await prisma.currentAccount.findMany({
-      include: { orders: { where: { date: { gte: startDate } } } }
-    });
+      salesTx = await withTimeout(
+        prisma.stockTransaction.findMany({
+          where: { type: 'OUT', date: { gte: startDate } },
+          include: { product: true }
+        }),
+        2000,
+        []
+      );
 
-    // 4. Unpaid invoices for aging analysis
-    const unpaidInvoices = await prisma.invoice.findMany({
-      where: {
-        status: { notIn: ['ODENDI', 'PAID'] },
-        isDeleted: false
+      dealers = await withTimeout(
+        prisma.currentAccount.findMany({
+          include: { orders: { where: { date: { gte: startDate } } } }
+        }),
+        2000,
+        []
+      );
+
+      unpaidInvoices = await withTimeout(
+        prisma.invoice.findMany({
+          where: {
+            status: { notIn: ['ODENDI', 'PAID'] },
+            isDeleted: false
+          }
+        }),
+        2000,
+        []
+      );
+
+      collectionsList = await withTimeout(
+        prisma.transaction.findMany({
+          where: {
+            date: { gte: startDate },
+            type: { in: ['COLLECTION', 'Tahsilat', 'payment', 'PAYMENT', 'Ödeme'] }
+          }
+        }),
+        2000,
+        []
+      );
+    } catch (dbErr) {
+      console.warn("[REPORTS API WARNING] DB offline, fallback to local disk DB:", dbErr);
+    }
+
+    // Disk DB fallback if orders empty
+    if (!orders || orders.length === 0) {
+      const localOrders = readLocalOrders();
+      orders = localOrders
+        .filter(lo => new Date(lo.date || Date.now()) >= startDate)
+        .map(lo => ({
+          ...lo,
+          total: { toNumber: () => Number(lo.amount || lo.total || 0) },
+          currentAccount: { name: lo.client || "Müşteri" }
+        }));
+    }
+
+    const getOrderTotal = (o: any) => typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
+    const getOrderDateStr = (o: any) => {
+      try {
+        return new Date(o.date).toISOString().split('T')[0];
+      } catch (_) {
+        return new Date().toISOString().split('T')[0];
       }
-    });
+    };
 
-    // 5. Payments/Collections in range
-    const collectionsList = await prisma.transaction.findMany({
-      where: {
-        date: { gte: startDate },
-        type: { in: ['COLLECTION', 'Tahsilat', 'payment', 'PAYMENT', 'Ödeme'] }
-      }
-    });
+    const isOrderCancelledOrReturned = (status?: string) => {
+      if (!status) return false;
+      const s = String(status).toLowerCase();
+      return s.includes("iptal") || s.includes("cancel") || s.includes("iade") || s.includes("refund");
+    };
+    const activeOrders = orders.filter(o => !isOrderCancelledOrReturned(o.status));
 
     // --- Revenue by Channel (B2B vs B2C) ---
-    const revenueByChannel = orders.reduce((acc: Record<string, number>, o) => {
-      acc[o.type] = (acc[o.type] || 0) + o.total.toNumber();
+    const revenueByChannel = activeOrders.reduce((acc: Record<string, number>, o) => {
+      const amount = getOrderTotal(o);
+      acc[o.type] = (acc[o.type] || 0) + amount;
       return acc;
     }, {});
 
     // --- Revenue by Marketplace ---
-    const revenueByMarketplace = orders.reduce((acc: Record<string, number>, o) => {
+    const revenueByMarketplace = activeOrders.reduce((acc: Record<string, number>, o) => {
       const channel = o.method || (o.type === 'B2B' ? 'Direkt B2B' : 'Web Mağaza');
-      acc[channel] = (acc[channel] || 0) + o.total.toNumber();
+      acc[channel] = (acc[channel] || 0) + getOrderTotal(o);
       return acc;
     }, {});
 
     // --- Revenue by Day (Line Chart) ---
-    const revenueByDay = orders.reduce((acc: Record<string, { date: string; b2b: number; b2c: number }>, o) => {
-      const d = o.date.toISOString().split('T')[0];
+    const revenueByDay = activeOrders.reduce((acc: Record<string, { date: string; b2b: number; b2c: number }>, o) => {
+      const d = getOrderDateStr(o);
+      const amount = getOrderTotal(o);
       if (!acc[d]) acc[d] = { date: d, b2b: 0, b2c: 0 };
-      if (o.type === 'B2B') acc[d].b2b += o.total.toNumber();
-      else acc[d].b2c += o.total.toNumber();
+      if (o.type === 'B2B') acc[d].b2b += amount;
+      else acc[d].b2c += amount;
       return acc;
     }, {});
     const revenueByDayArr = Object.values(revenueByDay).sort((a, b) => a.date.localeCompare(b.date));
@@ -78,8 +134,10 @@ export async function GET(request: Request) {
     for (const tx of salesTx) {
       const p = tx.product;
       if (!p) continue;
-      const revenue = tx.quantity * p.price.toNumber();
-      const costTotal = tx.quantity * p.cost.toNumber();
+      const pPrice = typeof p.price?.toNumber === 'function' ? p.price.toNumber() : Number(p.price || 0);
+      const pCost = typeof p.cost?.toNumber === 'function' ? p.cost.toNumber() : Number(p.cost || 0);
+      const revenue = tx.quantity * pPrice;
+      const costTotal = tx.quantity * pCost;
       const profit = revenue - costTotal;
       if (!productProfitMap[p.id]) {
         productProfitMap[p.id] = { name: p.name, sku: p.sku, category: p.category, soldQty: 0, revenue: 0, cost: 0, profit: 0, margin: 0 };
@@ -100,21 +158,25 @@ export async function GET(request: Request) {
       id: d.id,
       name: d.name,
       dealerGroup: d.dealerGroup,
-      orderCount: d.orders.length,
-      revenue: d.orders.reduce((sum, o) => sum + o.total.toNumber(), 0),
+      orderCount: d.orders?.length || 0,
+      revenue: (d.orders || []).reduce((sum: number, o: any) => sum + getOrderTotal(o), 0),
     })).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
     // --- Category Revenue ---
     const categoryRevenue = salesTx.reduce((acc: Record<string, number>, tx) => {
       const cat = tx.product?.category || 'Diğer';
-      acc[cat] = (acc[cat] || 0) + (tx.quantity * (tx.product?.price ? tx.product.price.toNumber() : 0));
+      const pPrice = typeof tx.product?.price?.toNumber === 'function' ? tx.product.price.toNumber() : Number(tx.product?.price || 0);
+      acc[cat] = (acc[cat] || 0) + (tx.quantity * pPrice);
       return acc;
     }, {});
     const categoryRevenueArr = Object.entries(categoryRevenue).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 
     // --- KPIs ---
-    const totalRevenue = orders.reduce((s, o) => s + o.total.toNumber(), 0);
-    const totalCost = salesTx.reduce((s, tx) => s + tx.quantity * (tx.product?.cost ? tx.product.cost.toNumber() : 0), 0);
+    const totalRevenue = activeOrders.reduce((s, o) => s + getOrderTotal(o), 0);
+    const totalCost = salesTx.reduce((s, tx) => {
+      const pCost = typeof tx.product?.cost?.toNumber === 'function' ? tx.product.cost.toNumber() : Number(tx.product?.cost || 0);
+      return s + tx.quantity * pCost;
+    }, 0);
     const totalProfit = totalRevenue - totalCost;
     const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
 

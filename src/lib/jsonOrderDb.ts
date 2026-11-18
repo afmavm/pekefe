@@ -22,6 +22,8 @@ export interface LocalOrder {
   type?: string;
   method?: string;
   summary?: string;
+  taxId?: string;
+  taxOffice?: string;
   items?: any[];
   createdAt?: string;
 }

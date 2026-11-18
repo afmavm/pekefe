@@ -179,10 +179,14 @@ export default function CariPage() {
   const cities = Object.keys(turkeyLocations).sort((a, b) => a.localeCompare(b, 'tr'));
   const [loading, setLoading] = useState(true);
   
+  const view = searchParams ? searchParams.get("view") : null;
+
   // Search & Filters
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
-  const [platformFilter, setPlatformFilter] = useState("ALL");
+  const [platformFilter, setPlatformFilter] = useState(
+    view === "b2b" || view === "risk" ? "PEKEFE_B2B" : "ALL"
+  );
 
   // Selection
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -190,8 +194,6 @@ export default function CariPage() {
   // Active Detail Account
   const [activeAccount, setActiveAccount] = useState<CurrentAccount | null>(null);
   const [activeTab, setActiveTab] = useState<"general" | "commercial" | "ledger" | "orders" | "files" | "audit">("general");
-
-  const view = searchParams ? searchParams.get("view") : null;
 
   // Muhasebe modu: /muhasebe/cari (view parametresi yok)
   // CRM modu: /admin/dealers?view=general veya ?view=b2b
@@ -909,6 +911,7 @@ export default function CariPage() {
     if (search) params.append("search", search);
     if (typeFilter !== "ALL") params.append("type", typeFilter);
     if (platformFilter !== "ALL") params.append("kaynakPlatform", platformFilter);
+    if (view === "b2b") params.append("dealersOnly", "true");
 
     fetch("/api/accounting/current-accounts?" + params.toString(), { cache: "no-store" })
       .then(res => res.ok ? res.json() : [])
@@ -918,11 +921,14 @@ export default function CariPage() {
         if (list.length > 0) {
           setActiveAccount(list[0]);
           fetchActiveDetails(list[0].id, list[0]);
+        } else {
+          setActiveAccount(null);
         }
       })
       .catch(err => {
         console.error(err);
         setAccounts([]);
+        setActiveAccount(null);
       })
       .finally(() => setLoading(false));
   };
@@ -947,7 +953,7 @@ export default function CariPage() {
   // Run search automatically
   useEffect(() => {
     fetchAccounts();
-  }, [search, typeFilter, platformFilter]);
+  }, [search, typeFilter, platformFilter, view]);
 
   // Ledger tab açıldığında ekstre verilerini yükle
   useEffect(() => {

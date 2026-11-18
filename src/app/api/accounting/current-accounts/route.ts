@@ -15,6 +15,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search") || "";
   const type = searchParams.get("type") || "ALL";
+  const kaynakPlatform = searchParams.get("kaynakPlatform") || "ALL";
+  const dealersOnly = searchParams.get("dealersOnly") === "true";
 
   try {
     let accounts: any[] = [];
@@ -138,6 +140,28 @@ export async function GET(request: Request) {
           }).catch(() => null);
         } catch {}
       }
+    }
+
+    // Filter by kaynakPlatform if specified
+    if (kaynakPlatform && kaynakPlatform !== "ALL") {
+      accounts = accounts.filter(
+        (a) => String(a.kaynakPlatform || "").toUpperCase() === kaynakPlatform.toUpperCase()
+      );
+    }
+
+    // In Bayi (B2B) Yönetimi mode, exclude B2C retail customers (INDIVIDUAL / Web B2C / non-dealer MUSTERI)
+    if (dealersOnly) {
+      accounts = accounts.filter((a) => {
+        const accType = String(a.type || "").toUpperCase();
+        const cariTipi = String(a.cariTipi || "").toUpperCase();
+        const platform = String(a.kaynakPlatform || "").toUpperCase();
+        if (accType === "TEDARIKCI") return false;
+        if (accType === "BAYI") return true;
+        if (cariTipi === "CORPORATE" && platform === "PEKEFE_B2B") return true;
+        if (platform === "PEKEFE_B2C" || platform === "WEB_B2C") return false;
+        if (accType === "MUSTERI" && cariTipi === "INDIVIDUAL") return false;
+        return cariTipi === "CORPORATE";
+      });
     }
 
     // Filter by search term if search query is provided

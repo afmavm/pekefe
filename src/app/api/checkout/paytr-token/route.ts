@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
       userIp = (clientIp || '').trim() || '88.255.12.34';
     }
 
-    // Generate Unique Order ID (e.g. PKF-2026-0001 -> PKF20260001)
-    const rawOrderId = await generateNextOrderId();
+    // Generate Unique Order ID (e.g. PKF-2026-000001 -> PKF2026000001)
+    const rawOrderId = await generateNextOrderId("B2C");
     const customOrderId = rawOrderId.replace(/[^a-zA-Z0-9]/g, '');
     const grandTotal = Number(cartTotal);
     const customerEmail = email || `${phone.replace(/\D/g, '')}@pekefe.com`;

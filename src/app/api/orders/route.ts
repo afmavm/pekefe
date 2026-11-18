@@ -86,7 +86,15 @@ export const GET = withAuth<any>(
             summary: lo.summary || existing?.summary || '',
             type: lo.type || existing?.type || 'B2C',
             method: lo.method || existing?.method || 'Belirtilmedi',
-            date: existing?.date || lo.date || lo.createdAt || new Date().toISOString(),
+            date: (() => {
+              const exTs = existing?.date ? new Date(existing.date).getTime() : 0;
+              const loRaw = lo.date || lo.createdAt;
+              const loTs = loRaw ? new Date(loRaw).getTime() : 0;
+              if (exTs && loTs && Math.abs(loTs - exTs) > 86400000) {
+                return loTs > exTs ? loRaw : existing.date;
+              }
+              return existing?.date || loRaw || new Date().toISOString();
+            })(),
             currentAccount: existing?.currentAccount || {
               name: lo.client || lo.customerName || 'Müşteri',
               address: lo.address || '',

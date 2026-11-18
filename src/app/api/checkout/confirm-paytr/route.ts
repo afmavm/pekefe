@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
               data: {
                 id: finalOrderId,
                 currentAccountId: account.id,
+                date: new Date(),
                 total: orderTotal,
                 shippingFee,
                 status: 'Yeni',

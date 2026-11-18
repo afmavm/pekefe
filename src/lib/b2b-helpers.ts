@@ -1,4 +1,5 @@
-import { prisma } from "./prisma";
+import { prisma, withTimeout } from "./prisma";
+import { readLocalOrders } from "./jsonOrderDb";
 
 /**
  * Oturum açmış kullanıcının e-posta adresinden parent Cari Hesap (CurrentAccount) bilgisini döner.
@@ -66,29 +67,79 @@ export async function generateNextOrderId(typeOrTx?: any, tx?: any): Promise<str
 
   const currentYear = new Date().getFullYear();
   const prefix = type === "B2B" ? "B2B" : "PKF";
+  const normalizeKey = (val: string) => String(val || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+
+  // Collect all existing normalized keys & max sequence from local JSON DB
+  const localOrders = readLocalOrders();
+  const usedKeys = new Set<string>();
+  let maxSeq = 0;
+
+  for (const lo of localOrders) {
+    for (const raw of [lo.id, lo.orderNumber]) {
+      if (!raw) continue;
+      const norm = normalizeKey(raw);
+      usedKeys.add(norm);
+      const m = String(raw).match(/(\d{4})-?(\d+)$/);
+      if (m && Number(m[2]) < 900000) {
+        maxSeq = Math.max(maxSeq, Number(m[2]));
+      }
+    }
+  }
 
   try {
     const db = activeTx || prisma;
-    const count = await db.order.count({
-      where: { type: type }
-    });
-    
-    let nextSeq = count + 1;
-    let customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
-    
-    let isIdUnique = false;
-    while (!isIdUnique) {
-      const existing = await db.order.findUnique({ where: { id: customOrderId } });
-      if (!existing) {
-        isIdUnique = true;
-      } else {
-        nextSeq++;
-        customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, '0')}`;
+    const [count, recentOrders] = await Promise.all([
+      withTimeout(db.order.count({ where: { type: type } }), 1500, 0),
+      withTimeout(db.order.findMany({ select: { id: true }, orderBy: { date: "desc" }, take: 200 }), 1500, []),
+    ]);
+
+    for (const o of recentOrders || []) {
+      if (!o?.id) continue;
+      const norm = normalizeKey(o.id);
+      usedKeys.add(norm);
+      const m = String(o.id).match(/(\d{4})-?(\d+)$/);
+      if (m && Number(m[2]) < 900000) {
+        maxSeq = Math.max(maxSeq, Number(m[2]));
       }
     }
-    return customOrderId;
+
+    let nextSeq = Math.max(count + 1, maxSeq + 1);
+    let customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, "0")}`;
+
+    let attempts = 0;
+    while (attempts < 50) {
+      attempts++;
+      const dashed = customOrderId;
+      const dashless = normalizeKey(customOrderId);
+
+      if (usedKeys.has(dashless)) {
+        nextSeq++;
+        customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, "0")}`;
+        continue;
+      }
+
+      const [existingDashed, existingDashless] = await Promise.all([
+        withTimeout(db.order.findUnique({ where: { id: dashed }, select: { id: true } }), 1000, null),
+        withTimeout(db.order.findUnique({ where: { id: dashless }, select: { id: true } }), 1000, null),
+      ]);
+
+      if (!existingDashed && !existingDashless) {
+        return customOrderId;
+      }
+
+      usedKeys.add(dashless);
+      nextSeq++;
+      customOrderId = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, "0")}`;
+    }
+
+    return `${prefix}-${currentYear}-${Date.now().toString().slice(-6)}`;
   } catch (err) {
     console.warn("[GENERATE ORDER ID WARNING] DB erişilemedi, fallback sipariş kodu üretiliyor:", err);
-    return `${prefix}-${currentYear}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const nextSeq = maxSeq + 1;
+    let candidate = `${prefix}-${currentYear}-${String(nextSeq).padStart(6, "0")}`;
+    if (usedKeys.has(normalizeKey(candidate))) {
+      candidate = `${prefix}-${currentYear}-${Date.now().toString().slice(-6)}`;
+    }
+    return candidate;
   }
 }

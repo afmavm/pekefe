@@ -251,7 +251,7 @@ export async function GET(request: Request) {
           }),
           prisma.order.findMany({
             where: { currentAccountId: { in: accountIds }, isDeleted: false },
-            select: { id: true, currentAccountId: true, orderNumber: true, total: true, date: true },
+            select: { id: true, currentAccountId: true, total: true, date: true },
           }),
           prisma.invoice.findMany({
             where: { currentAccountId: { in: accountIds }, isDeleted: false },
@@ -319,7 +319,7 @@ export async function GET(request: Request) {
           }
 
           for (const o of accOrds) {
-            const ordKey = normalizeOrdKey(o.orderNumber || o.id);
+            const ordKey = normalizeOrdKey(o.id);
             if (processedOrderIds.has(ordKey)) continue;
             totalDebit += Number(o.total || 0);
           }

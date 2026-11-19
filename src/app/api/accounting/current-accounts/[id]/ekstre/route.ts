@@ -250,11 +250,15 @@ export async function GET(
       }));
     }
 
-    // 5) Çift kaydı engellemek için Transaction'larda işlenmiş sipariş ID'lerini tespit et
+    // 5) Çift kaydı engellemek için Transaction'larda borç olarak işlenmiş sipariş ID'lerini tespit et
+    const normalizeOrdKey = (val: string) => String(val || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const creditKeywords = ["TAHSILAT", "TAHSİLAT", "ALIS", "ALIŞ", "IADE", "İADE", "IPTAL", "İPTAL", "ALACAK_DEVIR", "ALACAK"];
     const processedOrderIds = new Set<string>();
     dbTransactions.forEach(tx => {
-      const match = tx.description?.match(/(PKF-[A-Z0-9-]+|B2B\d+|ORD-[A-Z0-9-]+)/i);
-      if (match) processedOrderIds.add(match[1].toUpperCase());
+      const txTypeUpper = String(tx.type || "").toUpperCase();
+      if (creditKeywords.some(k => txTypeUpper.includes(k))) return;
+      const match = tx.description?.match(/(PKF-?[A-Z0-9-]+|B2B-?[A-Z0-9-]+|ORD-?[A-Z0-9-]+)/i);
+      if (match) processedOrderIds.add(normalizeOrdKey(match[1]));
     });
 
     const allRows: any[] = [];
@@ -266,7 +270,7 @@ export async function GET(
       let credit = 0;
       const amt = Math.abs(Number(tx.amount || 0));
 
-      if (["TAHSILAT", "ALIS", "IADE", "ALACAK_DEVIR", "ALACAK"].some(k => txTypeUpper.includes(k))) {
+      if (creditKeywords.some(k => txTypeUpper.includes(k))) {
         credit = amt;
       } else {
         debit = amt;
@@ -311,9 +315,9 @@ export async function GET(
 
     // Sipariş kayıtlarını ekle (Transaction'a veya faturaya konu olmamış olanlar)
     dbOrders.forEach(o => {
-      const ordKey = String(o.orderNumber || o.id).toUpperCase();
+      const ordKey = normalizeOrdKey(o.orderNumber || o.id);
       if (processedOrderIds.has(ordKey)) {
-        return; // Zaten Transaction olarak işlendiği için mükerrer gösterme
+        return; // Zaten borç Transaction'ı olarak işlendiği için mükerrer gösterme
       }
 
       const totalAmt = Number(o.total || o.amount || 0);
@@ -343,19 +347,27 @@ export async function GET(
 
     const totalDebit = allRows.reduce((acc, r) => acc + (r.debit || 0), 0);
     const totalCredit = allRows.reduce((acc, r) => acc + (r.credit || 0), 0);
-    const netBalance = Number(account.openingBalance || 0) + totalDebit - totalCredit;
+    const netBalance = Number((Number(account.openingBalance || 0) + totalDebit - totalCredit).toFixed(2));
+
+    // Veritabanındaki cari bakiye ile hesaplanan net bakiye farklıysa senkronize et
+    if (isMySQL && account?.id && Math.abs(Number(account.balance ?? 0) - netBalance) > 0.005) {
+      prisma.currentAccount.update({
+        where: { id: account.id },
+        data: { balance: netBalance },
+      }).catch(() => {});
+    }
 
     // Sayfalama (pagination)
     const startIndex = (page - 1) * limit;
     const paginatedRows = displayRows.slice(startIndex, startIndex + limit);
 
     return NextResponse.json({
-      account,
+      account: { ...account, balance: netBalance },
       summary: {
         totalDebit,
         totalCredit,
         netBalance,
-        currentBalance: Number(account.balance ?? netBalance),
+        currentBalance: netBalance,
         openingBalance: Number(account.openingBalance || 0),
         rowCount: allRows.length,
       },

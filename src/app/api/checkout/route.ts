@@ -428,7 +428,7 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        // Kredi kartı ile gelen siparişlerde tahsilat işlemini otomatik cariye işle
+        // Kredi kartı ile gelen siparişlerde tahsilat işlemini otomatik cariye işle; diğer ödeme yöntemlerinde cari borcu artır
         if (paymentMethod === "creditCard" && verifiedTotal > 0) {
           await tx.transaction.create({
             data: {
@@ -439,6 +439,11 @@ export async function POST(request: NextRequest) {
               paymentMethod: "Kredi Kartı",
               date: new Date(),
             }
+          });
+        } else if (verifiedTotal > 0) {
+          await tx.currentAccount.update({
+            where: { id: account.id },
+            data: { balance: { increment: verifiedTotal } },
           });
         }
 

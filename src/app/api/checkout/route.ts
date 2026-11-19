@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        if (customerAccount) {
+        if (customerAccount && (customerAccount.cariTipi === "CORPORATE" || customerAccount.type === "BAYI")) {
           isB2BUser = true;
           if (b2bGroupDiscountRate === 0) {
             b2bGroupDiscountRate = customerAccount.discountRate || 0;

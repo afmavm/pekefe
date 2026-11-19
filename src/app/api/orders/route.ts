@@ -152,9 +152,9 @@ export const GET = withAuth<any>(
           email: order.currentAccount?.email || "Belirtilmedi",
           taxId: order.currentAccount?.taxId || "Bireysel / 11111111111",
           taxOffice: order.currentAccount?.taxOffice || "Belirtilmedi",
-          type: (order.type === "B2B" || order.type === "B2C"
-            ? order.type
-            : (order.currentAccount?.cariTipi === "CORPORATE" ? "B2B" : "B2C")) as "B2B" | "B2C",
+          type: (order.currentAccount?.type === "BAYI" || order.currentAccount?.cariTipi === "CORPORATE"
+            ? "B2B"
+            : (order.type === "B2B" || order.type === "B2C" ? order.type : "B2C")) as "B2B" | "B2C",
           summary: order.summary || "",
           total: Number(order.total),
           totalAmount: Number(order.total),

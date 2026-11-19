@@ -1579,6 +1579,12 @@
       "namedRegex": "^/api/orders/cancel(?:/)?$"
     },
     {
+      "page": "/api/orders/confirm-payment",
+      "regex": "^/api/orders/confirm\\-payment(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/orders/confirm\\-payment(?:/)?$"
+    },
+    {
       "page": "/api/payment/callback",
       "regex": "^/api/payment/callback(?:/)?$",
       "routeKeys": {},

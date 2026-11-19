@@ -493,6 +493,32 @@ export default function OrderCommandCenter() {
     }
   };
 
+  // Bank Transfer Payment Confirmation & Financial Collection
+  const handleConfirmPaymentAndCollection = async (orderId: string, nextStatus: Order["status"] = "Ödeme Onaylandı") => {
+    setIsActionPending(true);
+    try {
+      const res = await fetch("/api/orders/confirm-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, nextStatus }),
+      });
+      const result = await res.json();
+      if (res.ok && result.success) {
+        toast.success("Ödeme onaylandı ve tahsilat işlemi veritabanına kaydedildi.");
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(prev => prev ? { ...prev, status: nextStatus } : null);
+        }
+        await refreshOrders();
+      } else {
+        toast.error(result.error || "Ödeme onayı işlenemedi.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Ödeme onayı sırasında hata oluştu.");
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
   // Cancellation Handlers
   const handleOpenCancelModal = (orderId: string, orderNumber: string) => {
     setCancelModal({
@@ -2051,6 +2077,19 @@ export default function OrderCommandCenter() {
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </button>
+                              {(order.status === "Ödeme Bekliyor" || order.status === "Ödeme Bekleniyor") && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleConfirmPaymentAndCollection(order.id, "Ödeme Onaylandı");
+                                  }}
+                                  disabled={isActionPending}
+                                  className="p-1.5 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 text-emerald-700 transition cursor-pointer shadow-xs inline-flex items-center justify-center"
+                                  title="Ödemeyi Onayla & Tahsilat İşle"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                               {order.status !== "İptal Edildi" ? (
                                 <button
                                   onClick={(e) => {
@@ -2269,7 +2308,7 @@ export default function OrderCommandCenter() {
                       <div className="flex justify-between items-center text-slate-600">
                         <span>Kargo Gönderimi</span>
                         <span className="font-semibold text-slate-800">
-                          {selectedOrder.cargoCompany || "Yurtiçi Kargo"}
+                          {selectedOrder.cargoCompany || "Belirtilmedi"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pt-2 border-t border-slate-200/60">
@@ -2289,8 +2328,25 @@ export default function OrderCommandCenter() {
                         </span>
                       )}
                     </div>
+                    {(selectedOrder.status === "Ödeme Bekliyor" || selectedOrder.status === "Ödeme Bekleniyor") && (
+                      <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-xs font-bold text-emerald-900">Havale / EFT Ödeme Onayı</p>
+                          <p className="text-[10px] text-emerald-700 font-medium">Ödeme hesabınıza ulaştıysa onaylayıp cari tahsilatını işleyin.</p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isActionPending}
+                          onClick={() => handleConfirmPaymentAndCollection(selectedOrder.id, "Ödeme Onaylandı")}
+                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Ödemeyi Onayla &amp; Tahsilat İşle
+                        </button>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2 pt-1">
-                      {["Yeni", "Hazırlanıyor", "Kargolandı", "Teslim Edildi"].map(st => (
+                      {["Yeni", "Ödeme Onaylandı", "Hazırlanıyor", "Kargolandı", "Teslim Edildi"].map(st => (
                         <button
                           key={st}
                           disabled={isActionPending || selectedOrder.status === st}

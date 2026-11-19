@@ -153,6 +153,7 @@
   "/api/invoices/[id]/ubl/route": "/api/invoices/[id]/ubl",
   "/api/invoices/route": "/api/invoices",
   "/api/orders/cancel/route": "/api/orders/cancel",
+  "/api/orders/confirm-payment/route": "/api/orders/confirm-payment",
   "/api/orders/route": "/api/orders",
   "/api/production/route": "/api/production",
   "/api/products/[id]/movements/route": "/api/products/[id]/movements",

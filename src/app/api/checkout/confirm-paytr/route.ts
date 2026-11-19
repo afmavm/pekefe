@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
           );
         }
         if (account?.id) {
+          const resolvedOrderType =
+            account.type === 'BAYI' || account.cariTipi === 'CORPORATE' ? 'B2B' : 'B2C';
           await withTimeout(
             prisma.order.create({
               data: {
@@ -161,13 +163,44 @@ export async function POST(request: NextRequest) {
                 shippingFee,
                 status: 'Yeni',
                 summary: orderSummary,
-                type: 'B2C',
+                type: resolvedOrderType,
                 method: 'PayTR Kredi Kartı (3D Secure)',
               },
             }),
             2000,
             null
           );
+
+          // Kredi kartı tahsilatını cari hareketine otomatik işle (mükerrer korumalı)
+          if (orderTotal > 0) {
+            const existingTx = await withTimeout(
+              prisma.transaction.findFirst({
+                where: {
+                  currentAccountId: account.id,
+                  type: 'TAHSILAT',
+                  description: { contains: finalOrderId },
+                },
+              }),
+              1500,
+              null
+            );
+            if (!existingTx) {
+              await withTimeout(
+                prisma.transaction.create({
+                  data: {
+                    currentAccountId: account.id,
+                    type: 'TAHSILAT',
+                    amount: orderTotal,
+                    description: `PayTR Kredi Kartı Tahsilatı (#${finalOrderId})`,
+                    paymentMethod: 'PayTR Kredi Kartı',
+                    date: new Date(),
+                  },
+                }),
+                1500,
+                null
+              );
+            }
+          }
         }
       }
     } catch {}

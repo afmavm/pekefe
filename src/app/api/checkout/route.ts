@@ -428,6 +428,20 @@ export async function POST(request: NextRequest) {
           }
         });
 
+        // Kredi kartı ile gelen siparişlerde tahsilat işlemini otomatik cariye işle
+        if (paymentMethod === "creditCard" && verifiedTotal > 0) {
+          await tx.transaction.create({
+            data: {
+              currentAccountId: account.id,
+              type: "TAHSILAT",
+              amount: verifiedTotal,
+              description: `Kredi Kartı Tahsilatı (#${order.id})`,
+              paymentMethod: "Kredi Kartı",
+              date: new Date(),
+            }
+          });
+        }
+
         return order;
       }, { maxWait: 4000, timeout: 8000 });
 

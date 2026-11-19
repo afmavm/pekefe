@@ -1182,23 +1182,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-slate-50">
         {/* Top Header */}
         <header className="h-[60px] bg-white border-b border-slate-200 flex items-center px-4 md:px-6 justify-between shrink-0 z-30 no-print">
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
             {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition"
+              className="md:hidden p-2 shrink-0 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             {/* Page title - desktop */}
-            <div className="hidden md:flex items-center gap-2">
-              <h1 className="text-sm font-bold text-slate-700">{getPageTitle()}</h1>
+            <div className="hidden md:flex items-center gap-2 min-w-0">
+              <h1 className="text-sm font-bold text-slate-700 truncate">{getPageTitle()}</h1>
             </div>
 
             {/* Page title - mobile */}
-            <div className="md:hidden">
-              <h1 className="text-sm font-bold text-slate-800">{getPageTitle()}</h1>
+            <div className="md:hidden min-w-0">
+              <h1 className="text-sm font-bold text-slate-800 truncate">{getPageTitle()}</h1>
             </div>
           </div>
 

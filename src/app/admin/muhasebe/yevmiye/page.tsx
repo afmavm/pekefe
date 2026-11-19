@@ -205,8 +205,9 @@ export default function YevmiyePage() {
                 </tr>
                 {expanded === entry.id && (
                   <tr key={`${entry.id}-detail`}>
-                    <td colSpan={7} className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                      <table className="w-full text-xs">
+                    <td colSpan={7} className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-100">
+                      <div className="overflow-x-auto">
+                      <table className="w-full text-xs min-w-[460px]">
                         <thead>
                           <tr className="text-gray-500 border-b border-gray-200">
                             <th className="text-left py-1.5 font-medium">Borç Hesabı</th>
@@ -226,6 +227,7 @@ export default function YevmiyePage() {
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -237,7 +239,7 @@ export default function YevmiyePage() {
 
       {/* Add Journal Entry Modal */}
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Yeni Yevmiye Fişi" size="lg">
-        <div className="grid grid-cols-3 gap-4 mb-4 text-xs font-bold text-slate-700 dark:text-slate-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-xs font-bold text-slate-700 dark:text-slate-200">
           <div className="space-y-1">
             <label className="text-slate-500 dark:text-slate-400 block mb-1">Tarih</label>
             <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 rounded-xl outline-none focus:border-orange-500 dark:focus:border-orange-500" />

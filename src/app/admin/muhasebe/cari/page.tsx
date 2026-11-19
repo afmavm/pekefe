@@ -1896,7 +1896,7 @@ export default function CariPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* SOL PANEL - LISTING */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[750px]">
+        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[420px] sm:h-[520px] lg:h-[750px]">
           {/* Filters Area */}
           <div className="p-4 bg-slate-50/50 border-b border-slate-200 space-y-3">
             <div className="relative">
@@ -2562,7 +2562,7 @@ export default function CariPage() {
 
                     {/* Özet Satırı */}
                     {ekstreData?.summary && (
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-center">
                           <div className="text-xs font-bold text-red-500 uppercase">Toplam Borç</div>
                           <div className="text-sm font-black text-red-600">{formatCurrency(ekstreData.summary.totalDebit, "TRY")}</div>
@@ -2579,13 +2579,13 @@ export default function CariPage() {
                     )}
 
                     {/* Ekstre Tablosu */}
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
                       {ekstreLoading ? (
                         <div className="flex items-center justify-center py-12 text-slate-400">
                           <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
                         </div>
                       ) : (
-                        <table className="w-full text-xs text-left">
+                        <table className="w-full text-xs text-left min-w-[580px]">
                           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase">
                             <tr>
                               <th className="px-4 py-3">Tarih</th>
@@ -2670,8 +2670,8 @@ export default function CariPage() {
                 {/* 4. TAB: ORDERS HISTORY */}
                 {activeTab === "orders" && (
                   <div className="space-y-4">
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                      <table className="w-full text-xs text-left">
+                    <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
+                      <table className="w-full text-xs text-left min-w-[580px]">
                         <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
                           <tr>
                             <th className="px-4 py-3">Sipariş Kodu</th>
@@ -2764,8 +2764,8 @@ export default function CariPage() {
                 {/* 7. TAB: AUDIT TRAIL LOGS */}
                 {activeTab === "audit" && (
                   <div className="space-y-4">
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                      <table className="w-full text-xs text-left">
+                    <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
+                      <table className="w-full text-xs text-left min-w-[560px]">
                         <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
                           <tr>
                             <th className="px-4 py-3">Tarih</th>
@@ -3484,7 +3484,7 @@ export default function CariPage() {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1">
                           <label className="font-bold text-slate-600 block">Adres Adı</label>
                           <input 
@@ -3531,7 +3531,7 @@ export default function CariPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div className="space-y-1">
                           <label className="font-bold text-slate-600 block">Şehir</label>
                           <select
@@ -3612,7 +3612,7 @@ export default function CariPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1">
                           <label className="font-extrabold text-slate-800 block">Telefon</label>
                           <Input 
@@ -3657,7 +3657,7 @@ export default function CariPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1">
                           <label className="font-extrabold text-slate-800 block">Telefon 2</label>
                           <Input 
@@ -3714,7 +3714,7 @@ export default function CariPage() {
               <div className="bg-slate-50/50 p-4 border border-slate-200 rounded-2xl space-y-4">
                 <h4 className="font-black text-slate-800 text-sm">Grup Tanımları & Nitelikler</h4>
                 
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">E-Ticaret (Grup 1)</label>
                     <input 
@@ -3812,7 +3812,7 @@ export default function CariPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Fiyat Grubu Seçin</label>
                     <select
@@ -3854,7 +3854,7 @@ export default function CariPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Doğum Tarihi</label>
                     <input 
@@ -3908,7 +3908,7 @@ export default function CariPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Plasiyer</label>
                     <select
@@ -3957,7 +3957,7 @@ export default function CariPage() {
               <div className="bg-slate-50/50 p-4 border border-slate-200 rounded-2xl space-y-4">
                 <h4 className="font-black text-slate-800 text-sm">Finansal Bilgiler</h4>
                 
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Döviz Türü</label>
                     <select
@@ -4022,7 +4022,7 @@ export default function CariPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="font-extrabold text-slate-800 block">Hesap Kesim Günü</label>
                     <input 
@@ -4245,8 +4245,8 @@ export default function CariPage() {
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-xs text-left">
+              <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
+                <table className="w-full text-xs text-left min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase">
                     <tr>
                       <th className="px-3 py-2 w-12 text-center">Sil</th>
@@ -4435,8 +4435,8 @@ export default function CariPage() {
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-xs text-left">
+              <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
+                <table className="w-full text-xs text-left min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase">
                     <tr>
                       <th className="px-3 py-2 w-12 text-center">Sil</th>
@@ -5255,7 +5255,7 @@ export default function CariPage() {
 
           {/* KDV oranı - Alış/Satış belgeleri için */}
           {(actionModal.type === "alis" || actionModal.type === "satis" || actionModal.type === "isAlma") && (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <label className="font-extrabold text-slate-700  block">KDV Oranı (%)</label>
                 <select name="kdvOrani" defaultValue="20" className="w-full px-3.5 py-2.5 bg-white  border border-slate-200  rounded-xl outline-none font-bold text-slate-800  focus:border-indigo-500 transition-all shadow-sm">
@@ -5369,8 +5369,8 @@ export default function CariPage() {
                 {/* Items breakdown table */}
                 <div className="space-y-2">
                   <h4 className="font-bold text-slate-800 text-xs">Fatura Satırları</h4>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-xs text-left">
+                  <div className="border border-slate-200 rounded-xl overflow-x-auto">
+                    <table className="w-full text-xs text-left min-w-[480px]">
                       <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
                         <tr>
                           <th className="px-3 py-2.5">Ürün / Hizmet</th>

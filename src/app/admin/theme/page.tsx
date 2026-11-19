@@ -415,7 +415,7 @@ export default function ThemeAdminPage() {
 
               <div>
                 <label className={labelClass}>Logo Metin Ağırlığı (Font Weight)</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { label: "Normal (Medium)", val: "font-medium" },
                     { label: "Kalın (Bold)", val: "font-bold" },
@@ -469,7 +469,7 @@ export default function ThemeAdminPage() {
 
               <div>
                 <label className={labelClass}>Buton Tasarım Şekli</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { label: "Yuvarlatılmış", val: "rounded" },
                     { label: "Tam Oval (Pill)", val: "pill" },

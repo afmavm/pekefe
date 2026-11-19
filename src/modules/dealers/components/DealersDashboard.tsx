@@ -981,8 +981,8 @@ export default function DealersDashboard({ initialData }: DealersDashboardProps)
                       </button>
                     </div>
 
-                    <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-                      <table className="w-full text-left text-xs">
+                    <div className="border border-slate-100 rounded-xl overflow-x-auto shadow-sm">
+                      <table className="w-full text-left text-xs min-w-[520px]">
                         <thead className="bg-slate-50 text-[9px] font-black uppercase text-slate-400">
                           <tr>
                             <th className="px-4 py-3">Tarih</th>

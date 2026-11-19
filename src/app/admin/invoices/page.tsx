@@ -1044,7 +1044,7 @@ export default function InvoicesPage() {
               </div>
 
               {/* Row 2: Ödeme Yöntemi + Para Birimi + Döviz Kuru */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Ödeme Yöntemi</label>
                   <select 
@@ -1105,7 +1105,7 @@ export default function InvoicesPage() {
               </div>
 
               {/* Row 3: Dates & Invoice Number override */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Fatura Tarihi</label>
                   <input type="date" value={newInvoice.date} onChange={e => setNewInvoice(p => ({ ...p, date: e.target.value }))}
@@ -1619,8 +1619,8 @@ export default function InvoicesPage() {
                 {selectedInvoice.invoiceItems && selectedInvoice.invoiceItems.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Fatura Kalemleri ({selectedInvoice.invoiceItems.length})</p>
-                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                      <table className="w-full text-sm">
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
+                      <table className="w-full text-sm min-w-[360px]">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>
                             <th className="px-3 py-2 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Kalem</th>

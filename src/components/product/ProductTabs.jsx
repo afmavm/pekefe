@@ -222,7 +222,7 @@ export function ProductTabs({
             />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Nutrients Table */}
-              <div className="lg:col-span-6 bg-surface-container-low/80 p-7 rounded-3xl border border-outline-variant/25 shadow-sm">
+              <div className="lg:col-span-6 bg-surface-container-low/80 p-4 sm:p-7 rounded-3xl border border-outline-variant/25 shadow-sm overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b-2 border-primary/20">

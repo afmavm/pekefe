@@ -744,8 +744,8 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
                 {isOdeme ? "Ödeme Tutarı & Yöntemi" : "Tahsilat Tutarı & Yöntemi"}
               </h3>
               
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2 space-y-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 space-y-1.5">
                   <label className="font-extrabold text-slate-700  block">{isOdeme ? "Ödeme Tutarı *" : "Tahsilat Tutarı *"}</label>
                   <Input 
                     type="currency" 
@@ -904,7 +904,7 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div className="space-y-1">
                       <label className="font-bold text-slate-700  block">Şube</label>
                       <input 
@@ -959,7 +959,7 @@ export function TahsilatForm({ isOpen, onClose, activeAccount, onSaveSuccess, is
               {/* Senet */}
               {watchOdemeYontemi === "Senet" && (
                 <div className="p-3 bg-slate-50  border border-slate-200  rounded-xl space-y-3 animate-in slide-in-from-top-2 duration-300">
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div className="space-y-1">
                       <label className="font-bold text-slate-700  block">Senet No</label>
                       <input 

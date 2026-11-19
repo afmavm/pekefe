@@ -1946,7 +1946,7 @@ export default function CargoPage() {
                   <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                     {carrierForm.tiers.map((tier, idx) => (
                       <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold">
-                        <div className="flex-1 grid grid-cols-3 gap-3">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div>
                             <span className="block text-[9px] text-gray-400 font-semibold mb-1">MİN {carrierForm.billingMethod === "price" ? "TUTAR (₺)" : "DESİ"}</span>
                             <input

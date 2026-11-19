@@ -5134,7 +5134,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
               </div>
 
               {/* Upload Grid */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {mediaList.map((media, index) => (
                   <div
                     key={media.id}
@@ -7214,7 +7214,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
               {/* Dynamic summary KPI blocks */}
-              <div className="grid grid-cols-3 gap-4 shrink-0">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-stone-50/70 border border-stone-200/80 rounded-xl p-3.5 shadow-2xs text-left">
                   <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Toplam Girişler</span>
                   <span className="text-lg font-bold text-emerald-700 mt-1 block font-serif">

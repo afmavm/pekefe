@@ -903,7 +903,7 @@ export default function BelgelerPage() {
               </div>
 
               {/* KDV + İSKONTO + DÖVİZ */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 mb-1.5">KDV Oranı</label>
                   <select value={kdvOrani} onChange={e => setKdvOrani(parseInt(e.target.value))}
@@ -1053,8 +1053,8 @@ export default function BelgelerPage() {
                     <Layers className="w-3.5 h-3.5 text-violet-500" />
                     <p className="text-xs font-bold text-slate-700">FIFO Fatura Kapatma Dağılımı</p>
                   </div>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-xs">
+                  <div className="border border-slate-200 rounded-xl overflow-x-auto">
+                    <table className="w-full text-xs min-w-[360px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-100">
                           <th className="px-3 py-2 text-left text-[10px] text-slate-400 font-bold">Fatura No</th>
@@ -1177,8 +1177,8 @@ export default function BelgelerPage() {
               {selectedBelge.kalemler.length > 0 && (
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide mb-2">Kalemler</p>
-                  <div className="border border-slate-100 rounded-xl overflow-hidden">
-                    <table className="w-full text-xs">
+                  <div className="border border-slate-100 rounded-xl overflow-x-auto">
+                    <table className="w-full text-xs min-w-[380px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-100">
                           <th className="px-3 py-2 text-left font-bold text-slate-500">Tanım</th>

@@ -391,7 +391,8 @@ export default function FaturalarPage() {
                </div>
                <span className="px-3 py-1 rounded-md text-sm font-bold bg-gray-100 text-gray-700">{selectedInvoice.status}</span>
              </div>
-             <table className="w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden">
+             <div className="overflow-x-auto border border-gray-200 rounded-lg">
+             <table className="w-full text-sm text-left min-w-[480px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3">Açıklama</th>
@@ -413,8 +414,9 @@ export default function FaturalarPage() {
                   ))}
                 </tbody>
              </table>
+             </div>
              <div className="flex justify-end">
-               <div className="w-64 space-y-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-200">
+               <div className="w-full sm:w-64 space-y-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <div className="flex justify-between text-gray-600"><span>KDV Toplamı:</span> <span className="font-medium">{formatCurrency(selectedInvoice.taxAmount)}</span></div>
                   <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
                     <span>Genel Toplam:</span> <span>{formatCurrency(selectedInvoice.totalAmount)}</span>

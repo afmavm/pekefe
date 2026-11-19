@@ -829,8 +829,8 @@ export default function CampaignsPage() {
                     <p className="text-xs font-bold">Tanımlı kademeli indirim kuralı bulunmamaktadır.</p>
                   </div>
                 ) : (
-                  <div className="overflow-hidden border border-slate-200 rounded-2xl">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto border border-slate-200 rounded-2xl">
+                    <table className="w-full text-left border-collapse min-w-[440px]">
                       <thead>
                         <tr className="bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-wider border-b border-slate-200">
                           <th className="px-5 py-3">Kural Eşiği</th>

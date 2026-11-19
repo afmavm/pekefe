@@ -63,7 +63,17 @@ export default function Kategoriler() {
         catData.forEach(c => { if (c?.name) catMap[trNormalize(c.name)] = c.name.trim(); });
       }
       if (Array.isArray(prodData)) {
-        setProducts(prodData.map(p => ({
+        const publishedOnly = prodData.filter(
+          (p) =>
+            p &&
+            p.active !== false &&
+            p.isPublished !== false &&
+            p.isDeleted !== true &&
+            p.isRawMaterial !== true &&
+            p.attributes?.isActive !== false &&
+            p.attributes?.isPublished !== false
+        );
+        setProducts(publishedOnly.map(p => ({
           ...p,
           price: parseNumericPrice(p.price),
           categoryDisplay: catMap[trNormalize(p.categoryDisplay || p.category)] || p.categoryDisplay || p.category

@@ -167,11 +167,16 @@ export async function GET(request: NextRequest) {
     });
     const newArrivals = rawNewArrivals.map(transform);
 
+    const isPublished = (p: any) => {
+      const attrs = p?.attributes || {};
+      return attrs.isActive !== false && attrs.active !== false && attrs.isPublished !== false;
+    };
+
     return NextResponse.json({
       dealSectionActive,
-      deals: dealProducts,
-      bestsellers,
-      newArrivals,
+      deals: dealProducts.filter(isPublished),
+      bestsellers: bestsellers.filter(isPublished),
+      newArrivals: newArrivals.filter(isPublished),
     });
   } catch (error) {
     console.error('[/api/products/featured] Error:', error);

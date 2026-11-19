@@ -224,9 +224,14 @@ export async function GET(request: Request) {
           {
             id: `addr-${acc.id}`,
             title: "Kayıtlı Adres",
+            firstName: acc.name || "",
+            lastName: "",
+            phone: acc.phone || "",
+            fullAddress: acc.address,
             address: acc.address,
             city: "",
             district: "",
+            type: "shipping",
             isDefault: true,
           },
         ];
@@ -284,12 +289,9 @@ export async function GET(request: Request) {
         }
 
         for (const acc of accounts) {
-          const createdAtMs = acc.createdAt ? new Date(acc.createdAt).getTime() : 0;
-          const minRegMs = createdAtMs > 0 ? createdAtMs - 5 * 60 * 1000 : 0;
-
-          const accTxs = (txByAcc.get(acc.id) || []).filter(tx => !minRegMs || !tx.date || new Date(tx.date).getTime() >= minRegMs);
-          const accOrds = (ordByAcc.get(acc.id) || []).filter(o => !minRegMs || !o.date || new Date(o.date).getTime() >= minRegMs);
-          const accInvs = (invByAcc.get(acc.id) || []).filter(inv => !minRegMs || !inv.date || new Date(inv.date).getTime() >= minRegMs);
+          const accTxs = txByAcc.get(acc.id) || [];
+          const accOrds = ordByAcc.get(acc.id) || [];
+          const accInvs = invByAcc.get(acc.id) || [];
 
           const processedOrderIds = new Set<string>();
           let totalDebit = 0;

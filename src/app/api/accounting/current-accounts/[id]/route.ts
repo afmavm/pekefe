@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             subAccounts: true
           }
         }),
-        1500,
+        6000,
         null
       );
     } catch (dbErr) {
@@ -190,12 +190,68 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           {
             id: `addr-${account.id}`,
             title: "Kayıtlı Adres",
+            firstName: account.name || "",
+            lastName: "",
+            phone: account.phone || "",
+            fullAddress: account.address,
             address: account.address,
             city: "",
             district: "",
+            type: "shipping",
             isDefault: true,
           },
         ];
+      }
+
+      // Günlük (Audit) kayıtlarını SystemAuditLog + cari hareket geçmişinden zenginleştir
+      try {
+        const existingAudit = Array.isArray(account.auditLogs) ? account.auditLogs : [];
+        const sysLogs = await withTimeout(
+          prisma.systemAuditLog.findMany({
+            where: { recordId: account.id },
+            orderBy: { createdAt: "desc" },
+            take: 30,
+          }),
+          2500,
+          []
+        );
+
+        const mappedSysLogs = (sysLogs || []).map((sl: any) => ({
+          id: sl.id,
+          date: sl.createdAt,
+          field: `${sl.tableName} (${sl.action})`,
+          oldValue: sl.oldData ? JSON.stringify(sl.oldData).slice(0, 80) : "-",
+          newValue: sl.newData ? JSON.stringify(sl.newData).slice(0, 80) : "-",
+          user: sl.userId || "Sistem",
+        }));
+
+        const ledgerLogs =
+          existingAudit.length === 0 && mappedSysLogs.length === 0
+            ? [
+                ...(account.transactions || []).slice(0, 15).map((tx: any) => ({
+                  id: `tx-${tx.id}`,
+                  date: tx.date,
+                  field: `Cari Hareket (${tx.type})`,
+                  oldValue: "-",
+                  newValue: `${tx.description || tx.type} — ₺${Math.abs(Number(tx.amount || 0)).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`,
+                  user: tx.paymentMethod || "Sistem",
+                })),
+                ...(account.orders || []).slice(0, 15).map((o: any) => ({
+                  id: `ord-${o.id}`,
+                  date: o.date,
+                  field: `Sipariş #${o.id}`,
+                  oldValue: "-",
+                  newValue: `${o.status} — ₺${Number(o.total || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`,
+                  user: o.method || "Mağaza",
+                })),
+              ]
+            : [];
+
+        account.auditLogs = [...existingAudit, ...mappedSysLogs, ...ledgerLogs]
+          .sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+          .slice(0, 50);
+      } catch (auditErr) {
+        console.warn("[GET CURRENT ACCOUNT AUDIT WARN]:", auditErr);
       }
 
       if (Object.keys(patchData).length > 0) {

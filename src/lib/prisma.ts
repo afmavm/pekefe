@@ -22,10 +22,10 @@ const createPrismaClient = () => {
   } else if (dbUrl.startsWith("mysql:")) {
     if (!dbUrl.includes("connect_timeout")) {
       const separator = dbUrl.includes("?") ? "&" : "?";
-      dbUrl = `${dbUrl}${separator}connection_limit=5&connect_timeout=2&pool_timeout=2`;
+      dbUrl = `${dbUrl}${separator}connection_limit=20&connect_timeout=10&pool_timeout=15`;
     } else if (!dbUrl.includes("connection_limit")) {
       const separator = dbUrl.includes("?") ? "&" : "?";
-      dbUrl = `${dbUrl}${separator}connection_limit=5`;
+      dbUrl = `${dbUrl}${separator}connection_limit=20`;
     }
   }
 

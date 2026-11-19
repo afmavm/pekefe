@@ -135,78 +135,77 @@ export async function GET(
       }
     }
 
-    // 2) Tarih sınırlandırması: Müşterinin kayıt tarihinden ÖNCEKİ hiçbir kayıt ekstrede yer alamaz!
-    const accountCreatedAt = account.createdAt ? new Date(account.createdAt) : new Date();
-    // Kayıt anında oluşturulan eşzamanlı siparişler için 5 dakikalık tolerans payı
-    const minRegistrationTime = new Date(accountCreatedAt.getTime() - 5 * 60 * 1000);
-
-    let effectiveFrom = minRegistrationTime;
+    // 2) Tarih filtresi: Yalnızca kullanıcı açıkça başlangıç/bitiş tarihi seçtiyse uygula
+    let effectiveFrom: Date | null = null;
     if (from) {
       const fromDate = new Date(from);
-      if (fromDate > effectiveFrom) {
+      if (!isNaN(fromDate.getTime())) {
         effectiveFrom = fromDate;
       }
     }
 
     let effectiveTo: Date | null = null;
     if (to) {
-      effectiveTo = new Date(to);
-      effectiveTo.setHours(23, 59, 59, 999);
+      const toDate = new Date(to);
+      if (!isNaN(toDate.getTime())) {
+        toDate.setHours(23, 59, 59, 999);
+        effectiveTo = toDate;
+      }
     }
 
-    const dateFilter: any = { gte: effectiveFrom };
-    if (effectiveTo) {
-      dateFilter.lte = effectiveTo;
-    }
+    const dateFilter: any = {};
+    if (effectiveFrom) dateFilter.gte = effectiveFrom;
+    if (effectiveTo) dateFilter.lte = effectiveTo;
+    const hasDateFilter = Object.keys(dateFilter).length > 0;
 
-    // 3) Cari hesaba ait hareketleri (Transaction), siparişleri (Order) ve faturaları (Invoice) çek
+    // 3) Cari hesaba ait hareketleri (Transaction), siparişleri (Order) ve faturaları (Invoice) PARALEL çek
     let dbTransactions: any[] = [];
     let dbOrders: any[] = [];
     let dbInvoices: any[] = [];
+    let dbQueryOk = false;
 
     try {
-      if (type === "ALL" || type === "TX") {
-        dbTransactions = await withTimeout(
-          prisma.transaction.findMany({
-            where: {
-              currentAccountId: account.id,
-              date: dateFilter,
-            },
-            orderBy: { date: "asc" }
-          }),
-          2000,
-          []
-        );
-      }
+      const [txRes, ordRes, invRes] = await withTimeout(
+        Promise.all([
+          (type === "ALL" || type === "TX")
+            ? prisma.transaction.findMany({
+                where: {
+                  currentAccountId: account.id,
+                  ...(hasDateFilter ? { date: dateFilter } : {}),
+                },
+                orderBy: { date: "asc" },
+              })
+            : Promise.resolve([]),
+          (type === "ALL" || type === "ORDER")
+            ? prisma.order.findMany({
+                where: {
+                  currentAccountId: account.id,
+                  isDeleted: false,
+                  ...(hasDateFilter ? { date: dateFilter } : {}),
+                },
+                orderBy: { date: "asc" },
+              })
+            : Promise.resolve([]),
+          (type === "ALL" || type === "INVOICE")
+            ? prisma.invoice.findMany({
+                where: {
+                  currentAccountId: account.id,
+                  isDeleted: false,
+                  ...(hasDateFilter ? { date: dateFilter } : {}),
+                },
+                orderBy: { date: "asc" },
+              })
+            : Promise.resolve([]),
+        ]),
+        6000,
+        null as any
+      );
 
-      if (type === "ALL" || type === "ORDER") {
-        dbOrders = await withTimeout(
-          prisma.order.findMany({
-            where: {
-              currentAccountId: account.id,
-              isDeleted: false,
-              date: dateFilter,
-            },
-            orderBy: { date: "asc" }
-          }),
-          2000,
-          []
-        );
-      }
-
-      if (type === "ALL" || type === "INVOICE") {
-        dbInvoices = await withTimeout(
-          prisma.invoice.findMany({
-            where: {
-              currentAccountId: account.id,
-              isDeleted: false,
-              date: dateFilter,
-            },
-            orderBy: { date: "asc" }
-          }),
-          2000,
-          []
-        );
+      if (Array.isArray(txRes) && Array.isArray(ordRes) && Array.isArray(invRes)) {
+        dbTransactions = txRes;
+        dbOrders = ordRes;
+        dbInvoices = invRes;
+        dbQueryOk = true;
       }
     } catch (dbErr) {
       console.warn("[EKSTRE DB WARN] Database rows query skipped:", dbErr);
@@ -227,11 +226,8 @@ export async function GET(
         
         if (!matchesId && !matchesEmail && !matchesPhone) return false;
 
-        // Kayıt tarihinden önceki kayıtlar KESİNLİKLE elenir
         const orderDate = new Date(lo.date || lo.createdAt || Date.now());
-        if (orderDate < minRegistrationTime) return false;
-
-        if (from && orderDate < new Date(from)) return false;
+        if (effectiveFrom && orderDate < effectiveFrom) return false;
         if (effectiveTo && orderDate > effectiveTo) return false;
 
         return true;
@@ -349,8 +345,8 @@ export async function GET(
     const totalCredit = allRows.reduce((acc, r) => acc + (r.credit || 0), 0);
     const netBalance = Number((Number(account.openingBalance || 0) + totalDebit - totalCredit).toFixed(2));
 
-    // Veritabanındaki cari bakiye ile hesaplanan net bakiye farklıysa senkronize et
-    if (isMySQL && account?.id && Math.abs(Number(account.balance ?? 0) - netBalance) > 0.005) {
+    // Veritabanındaki cari bakiye ile hesaplanan net bakiye farklıysa (ve sorgu hatasız tamamlandıysa + filtresizse) senkronize et
+    if (isMySQL && dbQueryOk && type === "ALL" && !hasDateFilter && account?.id && Math.abs(Number(account.balance ?? 0) - netBalance) > 0.005) {
       prisma.currentAccount.update({
         where: { id: account.id },
         data: { balance: netBalance },

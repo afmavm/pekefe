@@ -2441,9 +2441,15 @@ export default function CariPage() {
                                   {addr.type === "billing" ? "Fatura" : "Sevk"}
                                 </span>
                               </div>
-                              <p className="font-bold text-slate-600 mt-1">{addr.firstName} {addr.lastName} - {addr.phone}</p>
-                              <p className="text-slate-500 mt-0.5">{addr.fullAddress}</p>
-                              <p className="text-slate-500 mt-1 font-bold">{addr.district} / {addr.city}</p>
+                              {(addr.firstName || addr.lastName || addr.phone) && (
+                                <p className="font-bold text-slate-600 mt-1">
+                                  {[ [addr.firstName, addr.lastName].filter(Boolean).join(" "), addr.phone ].filter(Boolean).join(" — ")}
+                                </p>
+                              )}
+                              <p className="text-slate-500 mt-0.5">{addr.fullAddress || (addr as any).address || "-"}</p>
+                              {(addr.district || addr.city) && (
+                                <p className="text-slate-500 mt-1 font-bold">{[addr.district, addr.city].filter(Boolean).join(" / ")}</p>
+                              )}
                             </div>
                           ))
                         ) : (
@@ -2686,17 +2692,20 @@ export default function CariPage() {
                           {activeAccount.orders && activeAccount.orders.length > 0 ? (
                             activeAccount.orders.map(order => (
                               <tr key={order.id} className="hover:bg-slate-50/20">
-                                <td className="px-4 py-3 font-bold text-slate-800">{order.id.slice(-8).toUpperCase()}</td>
-                                <td className="px-4 py-3 text-slate-500">{new Date(order.date).toLocaleDateString("tr-TR")}</td>
-                                <td className="px-4 py-3 truncate max-w-[200px] font-bold text-slate-700" title={order.summary}>{order.summary}</td>
+                                <td className="px-4 py-3 font-bold text-slate-800 whitespace-nowrap">#{String((order as any).orderNumber || order.id).toUpperCase()}</td>
+                                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{new Date(order.date).toLocaleDateString("tr-TR")}</td>
+                                <td className="px-4 py-3 truncate max-w-[220px] font-bold text-slate-700" title={order.summary}>{order.summary}</td>
                                 <td className="px-4 py-3 text-slate-600">{order.method || "Kredi Kartı"}</td>
-                                <td className="px-4 py-3 text-right font-black text-slate-800">{formatCurrency(order.total, activeAccount.currency)}</td>
+                                <td className="px-4 py-3 text-right font-black text-slate-800 whitespace-nowrap">{formatCurrency(order.total, activeAccount.currency)}</td>
                                 <td className="px-4 py-3 text-center">
-                                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
+                                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold uppercase whitespace-nowrap ${
                                     order.status === "Yeni" ? "bg-blue-50 text-blue-700" :
+                                    order.status === "Ödeme Onaylandı" ? "bg-emerald-50 text-emerald-700" :
+                                    order.status === "Ödeme Bekliyor" || order.status === "Ödeme Bekleniyor" ? "bg-amber-50 text-amber-700" :
                                     order.status === "Hazırlanıyor" ? "bg-amber-50 text-amber-700" :
                                     order.status === "Kargolandı" ? "bg-purple-50 text-purple-700" :
                                     order.status === "Tamamlandı" ? "bg-emerald-50 text-emerald-700" :
+                                    order.status === "İptal Edildi" || order.status === "İptal" ? "bg-rose-50 text-rose-700" :
                                     "bg-slate-100 text-slate-500"
                                   }`}>
                                     {order.status}

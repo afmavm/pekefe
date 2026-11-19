@@ -349,7 +349,16 @@ export default function CariPage() {
     if (to)   params.append("to", to);
     fetch(`/api/accounting/current-accounts/${id}/ekstre?${params}`, { cache: "no-store" })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && !d.error) setEkstreData(d); })
+      .then(d => {
+        if (d && !d.error) {
+          setEkstreData(d);
+          if (type === "ALL" && !from && !to && typeof d.summary?.netBalance === "number") {
+            const syncedBal = d.summary.netBalance;
+            setAccounts(prev => prev.map(a => a.id === id ? { ...a, balance: syncedBal } : a));
+            setActiveAccount(prev => prev && prev.id === id ? { ...prev, balance: syncedBal } : prev);
+          }
+        }
+      })
       .catch(() => {})
       .finally(() => setEkstreLoading(false));
   };

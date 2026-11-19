@@ -240,6 +240,105 @@ export async function GET(request: Request) {
       }
     }
 
+    // Sync each account's balance with actual ekstre ledger (transactions + invoices + deduplicated orders)
+    try {
+      const accountIds = accounts.map(a => a.id).filter(Boolean);
+      if (accountIds.length > 0) {
+        const [allTxs, allDbOrders, allDbInvoices] = await Promise.all([
+          prisma.transaction.findMany({
+            where: { currentAccountId: { in: accountIds } },
+            select: { currentAccountId: true, type: true, amount: true, description: true, date: true },
+          }),
+          prisma.order.findMany({
+            where: { currentAccountId: { in: accountIds }, isDeleted: false },
+            select: { id: true, currentAccountId: true, orderNumber: true, total: true, date: true },
+          }),
+          prisma.invoice.findMany({
+            where: { currentAccountId: { in: accountIds }, isDeleted: false },
+            select: { id: true, currentAccountId: true, type: true, totalAmount: true, date: true },
+          }),
+        ]);
+
+        const normalizeOrdKey = (val: string) => String(val || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const creditKeywords = ["TAHSILAT", "TAHSİLAT", "ALIS", "ALIŞ", "IADE", "İADE", "IPTAL", "İPTAL", "ALACAK_DEVIR", "ALACAK"];
+
+        const txByAcc = new Map<string, typeof allTxs>();
+        for (const tx of allTxs) {
+          const list = txByAcc.get(tx.currentAccountId) || [];
+          list.push(tx);
+          txByAcc.set(tx.currentAccountId, list);
+        }
+        const ordByAcc = new Map<string, typeof allDbOrders>();
+        for (const o of allDbOrders) {
+          if (!o.currentAccountId) continue;
+          const list = ordByAcc.get(o.currentAccountId) || [];
+          list.push(o);
+          ordByAcc.set(o.currentAccountId, list);
+        }
+        const invByAcc = new Map<string, typeof allDbInvoices>();
+        for (const inv of allDbInvoices) {
+          if (!inv.currentAccountId) continue;
+          const list = invByAcc.get(inv.currentAccountId) || [];
+          list.push(inv);
+          invByAcc.set(inv.currentAccountId, list);
+        }
+
+        for (const acc of accounts) {
+          const createdAtMs = acc.createdAt ? new Date(acc.createdAt).getTime() : 0;
+          const minRegMs = createdAtMs > 0 ? createdAtMs - 5 * 60 * 1000 : 0;
+
+          const accTxs = (txByAcc.get(acc.id) || []).filter(tx => !minRegMs || !tx.date || new Date(tx.date).getTime() >= minRegMs);
+          const accOrds = (ordByAcc.get(acc.id) || []).filter(o => !minRegMs || !o.date || new Date(o.date).getTime() >= minRegMs);
+          const accInvs = (invByAcc.get(acc.id) || []).filter(inv => !minRegMs || !inv.date || new Date(inv.date).getTime() >= minRegMs);
+
+          const processedOrderIds = new Set<string>();
+          let totalDebit = 0;
+          let totalCredit = 0;
+
+          for (const tx of accTxs) {
+            const txTypeUpper = String(tx.type || "").toUpperCase();
+            const isCredit = creditKeywords.some(k => txTypeUpper.includes(k));
+            const amt = Math.abs(Number(tx.amount || 0));
+            if (isCredit) {
+              totalCredit += amt;
+            } else {
+              totalDebit += amt;
+              const match = tx.description?.match(/(PKF-?[A-Z0-9-]+|B2B-?[A-Z0-9-]+|ORD-?[A-Z0-9-]+)/i);
+              if (match) processedOrderIds.add(normalizeOrdKey(match[1]));
+            }
+          }
+
+          for (const inv of accInvs) {
+            const invTypeUpper = String(inv.type || "").toUpperCase();
+            const amt = Math.abs(Number(inv.totalAmount || 0));
+            if (invTypeUpper.includes("ALIS")) {
+              totalCredit += amt;
+            } else {
+              totalDebit += amt;
+            }
+          }
+
+          for (const o of accOrds) {
+            const ordKey = normalizeOrdKey(o.orderNumber || o.id);
+            if (processedOrderIds.has(ordKey)) continue;
+            totalDebit += Number(o.total || 0);
+          }
+
+          const netBalance = Number((Number(acc.openingBalance || 0) + totalDebit - totalCredit).toFixed(2));
+          if (Math.abs(Number(acc.balance ?? 0) - netBalance) > 0.005) {
+            acc.balance = netBalance;
+            prisma.currentAccount
+              .update({ where: { id: acc.id }, data: { balance: netBalance } })
+              .catch(() => null);
+          } else {
+            acc.balance = netBalance;
+          }
+        }
+      }
+    } catch (syncErr) {
+      console.warn("[CURRENT ACCOUNTS SYNC WARN] Balance sync skipped:", syncErr);
+    }
+
     return NextResponse.json(accounts, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("Failed to fetch accounts:", error);

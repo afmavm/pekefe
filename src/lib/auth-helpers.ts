@@ -127,11 +127,12 @@ export const requireApproved = requireApprovedUser;
  *  SUPER_ADMIN, ADMIN, BRANCH_MANAGER, WAREHOUSE_SUPERVISOR, SALES_STAFF
  */
 export function isAdminRole(role: string): boolean {
+  const norm = String(role || "").trim().toUpperCase();
   return [
     "SUPER_ADMIN", "ADMIN", "STOCK_MANAGER", "ORDER_MANAGER",
     "ACCOUNTANT", "PRODUCTION_MANAGER", "CONTENT_EDITOR", "SUPPORT_AGENT",
     "BRANCH_MANAGER", "WAREHOUSE_SUPERVISOR", "SALES_STAFF"
-  ].includes(role);
+  ].includes(norm);
 }
 
 

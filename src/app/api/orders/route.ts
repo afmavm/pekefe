@@ -466,53 +466,30 @@ export const PATCH = withAuth<any>(
 
     try {
       const body = await req.json();
-      const { orderId, status } = body;
+      const { orderId, status, reason = "" } = body;
 
-      // Mevcut siparişi getir (bakiye iadesi için)
+      if (status === "İptal" || status === "İade" || status === "Iptal" || status === "İptal Edildi" || status === "İade Edildi") {
+        const { cancelOrderWithSideEffects } = await import('@/lib/orderCancellation');
+        const cancelResult = await cancelOrderWithSideEffects({
+          rawId: String(orderId),
+          targetStatus: status === "Iptal" ? "İptal Edildi" : status,
+          reason: String(reason || ""),
+          userId: session?.user?.id || null,
+          userEmail: session?.user?.email || null,
+        });
+        return NextResponse.json(cancelResult);
+      }
+
+      // Mevcut siparişi getir
       const existingOrder = await prisma.order.findUnique({
         where: { id: orderId },
         include: { currentAccount: true }
       });
 
-      const updatedOrder = await prisma.$transaction(async (tx) => {
-        const order = await tx.order.update({
-          where: { id: orderId },
-          data: { status }
-        });
-
-        // ─── İptal / İade durumunda cari bakiyeyi geri al ───────────
-        if (
-          existingOrder &&
-          (status === "İptal" || status === "İade" || status === "Iptal" || status === "İptal Edildi") &&
-          existingOrder.status !== "İptal" &&
-          existingOrder.status !== "İade" &&
-          existingOrder.status !== "İptal Edildi"
-        ) {
-          const reverseAmount = Number(existingOrder.total);
-
-          if (existingOrder.currentAccountId) {
-            // Ters Transaction kaydı
-            await tx.transaction.create({
-              data: {
-                currentAccountId: existingOrder.currentAccountId,
-                type: status === "İade" ? "IADE" : "IPTAL",
-                amount: -reverseAmount,
-                description: `Sipariş ${status}: #${orderId}`,
-                paymentMethod: existingOrder.method || "Belirtilmedi",
-                date: new Date(),
-              }
-            });
-
-            // Bakiyeyi düşür
-            await tx.currentAccount.update({
-              where: { id: existingOrder.currentAccountId },
-              data: { balance: { decrement: reverseAmount } }
-            });
-          }
-        }
-
-        return order;
-      }, { maxWait: 10000, timeout: 30000 });
+      const updatedOrder = await prisma.order.update({
+        where: { id: existingOrder?.id || orderId },
+        data: { status }
+      });
 
       // Always update local disk DB as well
       const { updateLocalOrderStatus } = await import('@/lib/jsonOrderDb');

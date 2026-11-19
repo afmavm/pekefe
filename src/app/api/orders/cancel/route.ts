@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { isAdminRole } from "@/lib/auth-helpers";
-import { prisma, withTimeout } from "@/lib/prisma";
-import { updateLocalOrderStatus } from "@/lib/jsonOrderDb";
-import { emailNotificationService } from "@/lib/email-notification-service";
+import { cancelOrderWithSideEffects } from "@/lib/orderCancellation";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +11,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const isDev = process.env.NODE_ENV === "development";
     const role = (session?.user as any)?.role || "";
-    const authorized = isDev || (session?.user && (isAdminRole(role) || role === "DEALER"));
+    const authorized = isDev || (session?.user && (isAdminRole(role) || role.toUpperCase() === "DEALER"));
 
     if (!authorized) {
       return NextResponse.json({ success: false, error: "Yetkisiz erişim." }, { status: 401 });
@@ -31,107 +29,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Sipariş ID belirtilmedi." }, { status: 400 });
     }
 
-    const results: any[] = [];
-
+    const results = [];
     for (const rawId of targetIds) {
-      let updatedOrder: any = null;
-      const dashless = String(rawId).replace(/[^a-zA-Z0-9]/g, "");
+      const res = await cancelOrderWithSideEffects({
+        rawId: String(rawId),
+        targetStatus: "İptal Edildi",
+        reason: String(reason || ""),
+        userId: (session?.user as any)?.id || null,
+        userEmail: session?.user?.email || null,
+      });
+      results.push(res);
+    }
 
-      try {
-        let existingOrder = await withTimeout(
-          prisma.order.findUnique({
-            where: { id: rawId },
-            include: { currentAccount: true },
-          }),
-          2000,
-          null
-        );
-
-        if (!existingOrder && dashless && dashless !== rawId) {
-          existingOrder = await withTimeout(
-            prisma.order.findUnique({
-              where: { id: dashless },
-              include: { currentAccount: true },
-            }),
-            2000,
-            null
-          );
-        }
-
-        if (existingOrder) {
-          const dbId = existingOrder.id;
-          updatedOrder = await withTimeout(
-            prisma.$transaction(async (tx) => {
-              const order = await tx.order.update({
-                where: { id: dbId },
-                data: { status: "İptal Edildi" },
-              });
-
-              const normPrev = String(existingOrder!.status || "").toLowerCase();
-              if (!normPrev.includes("iptal") && !normPrev.includes("iade")) {
-                const reverseAmount = Number(existingOrder!.total || 0);
-                if (existingOrder!.currentAccountId && reverseAmount > 0) {
-                  await tx.transaction.create({
-                    data: {
-                      currentAccountId: existingOrder!.currentAccountId,
-                      type: "IPTAL",
-                      amount: -reverseAmount,
-                      description: `Sipariş İptali: #${dbId}${reason ? ` (${reason})` : ""}`,
-                      paymentMethod: existingOrder!.method || "Belirtilmedi",
-                      date: new Date(),
-                    },
-                  });
-                  await tx.currentAccount.update({
-                    where: { id: existingOrder!.currentAccountId },
-                    data: { balance: { decrement: reverseAmount } },
-                  });
-                }
-              }
-
-              return order;
-            }),
-            3500,
-            null
-          );
-
-          // Fallback direct update if transaction timed out
-          if (!updatedOrder) {
-            updatedOrder = await withTimeout(
-              prisma.order.update({
-                where: { id: dbId },
-                data: { status: "İptal Edildi" },
-              }),
-              2000,
-              null
-            );
-          }
-        }
-      } catch (dbErr) {
-        console.warn("[API ORDERS CANCEL DB WARN]:", dbErr);
-      }
-
-      // Always update local JSON DB using normalized ID matching
-      const localUpdated = updateLocalOrderStatus(rawId, { status: "İptal Edildi" });
-
-      const customerEmail = updatedOrder?.currentAccount?.email || localUpdated?.email;
-      if (customerEmail && customerEmail !== "guest@nexab2b.com") {
-        emailNotificationService
-          .queueEmail(customerEmail, "order_status_updated", {
-            kullanici_adi: updatedOrder?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
-            siparis_no: rawId,
-            siparis_durumu: "İptal Edildi",
-            siparis_tutari: Number(updatedOrder?.total || localUpdated?.amount || 0).toLocaleString("tr-TR", {
-              minimumFractionDigits: 2,
-            }),
-            kargo_sirketi: "—",
-            takip_no: "—",
-            tarih: new Date().toLocaleDateString("tr-TR"),
-            detay_linki: `${process.env.NEXTAUTH_URL || "https://pekefe.com"}/hesap`,
-          })
-          .catch(() => {});
-      }
-
-      results.push({ id: rawId, success: Boolean(updatedOrder || localUpdated) });
+    const anySucceeded = results.some(r => r.success);
+    if (!anySucceeded) {
+      return NextResponse.json(
+        { success: false, error: "Belirtilen sipariş bulunamadı veya iptal edilemedi.", results },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({

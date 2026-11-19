@@ -167,7 +167,7 @@ export function saveLocalProduct(product: Partial<LocalProduct> & { [key: string
   return newProduct;
 }
 
-export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
+function adjustLocalProductStock(itemInfo: any, quantity: number = 1, mode: "deduct" | "restore"): boolean {
   try {
     const products = readLocalProducts();
     const targetIdStr = String(typeof itemInfo === 'object' ? (itemInfo.id || itemInfo.productId || itemInfo.sku || '') : itemInfo).trim();
@@ -200,12 +200,12 @@ export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
 
     if (idx >= 0) {
       const currentStock = Number(products[idx].stock ?? products[idx].stock_quantity ?? 0);
-      const deductQty = Number(quantity || 1);
-      const newStock = Math.max(0, currentStock - deductQty);
+      const qty = Math.max(0, Number(quantity || 1));
+      const newStock = mode === "restore" ? currentStock + qty : Math.max(0, currentStock - qty);
       products[idx].stock = newStock;
       products[idx].stock_quantity = newStock;
 
-      // 1. Varyant Stoğunu Düşür
+      // Varyant stoğunu güncelle
       if (Array.isArray(products[idx].variants) && products[idx].variants.length > 0) {
         const targetVariantSku = typeof itemInfo === 'object' ? (itemInfo.variantSku || itemInfo.sku || '') : '';
         const targetGramaj = typeof itemInfo === 'object' ? (itemInfo.weight || itemInfo.gramaj || itemInfo.variant || '') : '';
@@ -219,8 +219,7 @@ export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
           
           if (isMatch) {
             const vCurrent = Number(v.stock ?? v.stock_quantity ?? 1000);
-            const vNew = Math.max(0, vCurrent - deductQty);
-            console.log(`[VARIANT STOCK SUCCESS] Deducted ${deductQty} from variant "${v.sku || v.name}". Old: ${vCurrent} -> New: ${vNew}`);
+            const vNew = mode === "restore" ? vCurrent + qty : Math.max(0, vCurrent - qty);
             return { ...v, stock: vNew, stock_quantity: vNew };
           }
           return v;
@@ -228,16 +227,24 @@ export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
       }
 
       saveLocalProduct(products[idx], true);
-      console.log(`[JSON DB STOCK SUCCESS] Deducted ${deductQty} from "${products[idx].name}". Old Stock: ${currentStock} -> New Stock: ${newStock}`);
+      console.log(`[JSON DB STOCK SUCCESS] ${mode === "restore" ? "Restored" : "Deducted"} ${qty} for "${products[idx].name}". Old Stock: ${currentStock} -> New Stock: ${newStock}`);
       return true;
     } else {
-      console.warn(`[JSON DB STOCK WARNING] Product not resolved for stock deduction:`, itemInfo);
+      console.warn(`[JSON DB STOCK WARNING] Product not resolved for stock ${mode}:`, itemInfo);
       return false;
     }
   } catch (err) {
-    console.error('Error deducting local product stock:', err);
+    console.error(`Error ${mode}ing local product stock:`, err);
     return false;
   }
+}
+
+export function deductLocalProductStock(itemInfo: any, quantity: number = 1) {
+  return adjustLocalProductStock(itemInfo, quantity, "deduct");
+}
+
+export function restoreLocalProductStock(itemInfo: any, quantity: number = 1) {
+  return adjustLocalProductStock(itemInfo, quantity, "restore");
 }
 
 export function deleteLocalProduct(targetId: string): boolean {

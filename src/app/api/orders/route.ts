@@ -56,11 +56,19 @@ export const GET = withAuth<any>(
       // Merge local orders from JSON disk DB
       const localOrders = readLocalOrders();
       const map = new Map<string, any>();
+      const aliasToKey = new Map<string, string>();
 
       (orders || []).forEach(o => {
         const rawKey = o.id || o.orderNumber || '';
         const normKey = String(rawKey).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        if (normKey) map.set(normKey, o);
+        if (normKey) {
+          map.set(normKey, o);
+          aliasToKey.set(normKey, normKey);
+          const year = o.date ? new Date(o.date).getFullYear() : new Date().getFullYear();
+          const suffix = normKey.length > 6 ? normKey.slice(-6) : normKey.padStart(6, '0');
+          aliasToKey.set(`PKF${year}${suffix}`, normKey);
+          aliasToKey.set(`B2B${year}${suffix}`, normKey);
+        }
       });
 
       const isAdmin = isAdminRole(session?.user?.role) && !isPersonal;
@@ -75,7 +83,8 @@ export const GET = withAuth<any>(
           }
         }
         const rawKey = lo.id || lo.orderNumber || '';
-        const normKey = String(rawKey).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        const rawNorm = String(rawKey).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        const normKey = aliasToKey.get(rawNorm) || rawNorm;
         if (normKey) {
           const existing = map.get(normKey);
           map.set(normKey, {

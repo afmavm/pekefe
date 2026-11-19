@@ -18,21 +18,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { orderIds, orderId, reason = "" } = body || {};
-    const targetIds: string[] = Array.isArray(orderIds)
-      ? orderIds.filter(Boolean)
-      : orderId
-      ? [String(orderId)]
-      : [];
+    const { orderItems, orderIds, orderId, orderNumber, reason = "" } = body || {};
 
-    if (targetIds.length === 0) {
+    const targets: Array<{ id: string; orderNumber?: string }> = [];
+    if (Array.isArray(orderItems) && orderItems.length > 0) {
+      for (const item of orderItems) {
+        if (item?.id) targets.push({ id: String(item.id), orderNumber: item.orderNumber ? String(item.orderNumber) : undefined });
+      }
+    } else if (Array.isArray(orderIds) && orderIds.length > 0) {
+      for (const id of orderIds) {
+        if (id) targets.push({ id: String(id) });
+      }
+    } else if (orderId) {
+      targets.push({ id: String(orderId), orderNumber: orderNumber ? String(orderNumber) : undefined });
+    }
+
+    if (targets.length === 0) {
       return NextResponse.json({ success: false, error: "Sipariş ID belirtilmedi." }, { status: 400 });
     }
 
     const results = [];
-    for (const rawId of targetIds) {
+    for (const target of targets) {
       const res = await cancelOrderWithSideEffects({
-        rawId: String(rawId),
+        rawId: target.id,
+        orderNumber: target.orderNumber,
         targetStatus: "İptal Edildi",
         reason: String(reason || ""),
         userId: (session?.user as any)?.id || null,
@@ -41,16 +50,29 @@ export async function POST(request: NextRequest) {
       results.push(res);
     }
 
-    const anySucceeded = results.some(r => r.success);
-    if (!anySucceeded) {
+    const succeeded = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+
+    if (succeeded.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Belirtilen sipariş bulunamadı veya iptal edilemedi.", results },
+        {
+          success: false,
+          error: failed[0]?.error || "Belirtilen sipariş bulunamadı veya iptal edilemedi.",
+          succeededCount: 0,
+          failedCount: failed.length,
+          failed,
+          results,
+        },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
-      success: true,
+      success: failed.length === 0,
+      partial: failed.length > 0,
+      succeededCount: succeeded.length,
+      failedCount: failed.length,
+      failed,
       results,
     });
   } catch (error: any) {

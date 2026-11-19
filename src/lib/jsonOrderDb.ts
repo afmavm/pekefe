@@ -100,16 +100,35 @@ export function updateLocalOrderStatus(id: string, updates: Partial<LocalOrder>)
   try {
     const orders = readLocalOrders();
     const targetNorm = normalizeOrderKey(id);
-    const idx = orders.findIndex(
-      (o) =>
+    const suffixMatch = String(id || '').match(/^(?:PKF|B2B|B2C|ORD)-?\d{4}-?([A-Z0-9]+)$/i);
+    const targetSuffix = suffixMatch ? suffixMatch[1].toUpperCase() : null;
+    const targetUnpadded = targetSuffix ? targetSuffix.replace(/^0+/, '') : null;
+
+    let lastMatched: LocalOrder | null = null;
+    let changed = false;
+
+    for (let i = 0; i < orders.length; i++) {
+      const o = orders[i];
+      const oNorm = normalizeOrderKey(o.id);
+      const oNumNorm = normalizeOrderKey(o.orderNumber);
+      const paddedId = oNorm.length > 6 ? oNorm.slice(-6) : oNorm.padStart(6, '0');
+
+      const isMatch =
         o.id === id ||
         o.orderNumber === id ||
-        (targetNorm && (normalizeOrderKey(o.id) === targetNorm || normalizeOrderKey(o.orderNumber) === targetNorm))
-    );
-    if (idx >= 0) {
-      orders[idx] = { ...orders[idx], ...updates };
+        (targetNorm && (oNorm === targetNorm || oNumNorm === targetNorm)) ||
+        (targetSuffix && (paddedId === targetSuffix || (targetUnpadded && oNorm === targetUnpadded)));
+
+      if (isMatch) {
+        orders[i] = { ...o, ...updates };
+        lastMatched = orders[i];
+        changed = true;
+      }
+    }
+
+    if (changed) {
       fs.writeFileSync(LOCAL_ORDERS_PATH, JSON.stringify(orders, null, 2), 'utf-8');
-      return orders[idx];
+      return lastMatched;
     }
   } catch (err) {
     console.error('Error updating local order status:', err);

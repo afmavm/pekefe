@@ -5,6 +5,7 @@ import { emailNotificationService } from "@/lib/email-notification-service";
 
 export interface CancelOrderParams {
   rawId: string;
+  orderNumber?: string;
   targetStatus?: string;
   reason?: string;
   userId?: string | null;
@@ -48,15 +49,21 @@ function parseSummaryItems(summaryText: string): Array<{ name: string; quantity:
 
 export async function cancelOrderWithSideEffects({
   rawId,
+  orderNumber,
   targetStatus = "İptal Edildi",
   reason = "",
   userId = null,
   userEmail = null,
 }: CancelOrderParams): Promise<CancelOrderResult> {
+  const displayOrderNo = orderNumber || rawId;
   const dashless = normalizeKey(rawId);
+  const displayNorm = normalizeKey(displayOrderNo);
   const localOrders = readLocalOrders();
   const matchedLocal = localOrders.find(
-    o => normalizeKey(o.id) === dashless || (o.orderNumber && normalizeKey(o.orderNumber) === dashless)
+    o =>
+      normalizeKey(o.id) === dashless ||
+      normalizeKey(o.id) === displayNorm ||
+      (o.orderNumber && (normalizeKey(o.orderNumber) === dashless || normalizeKey(o.orderNumber) === displayNorm))
   );
 
   let existingOrder: any = null;
@@ -267,9 +274,10 @@ export async function cancelOrderWithSideEffects({
     }
   }
 
-  // 3) Yerel JSON sipariş kaydını daima güncelle
+  // 3) Yerel JSON sipariş kaydını daima güncelle (hem rawId, hem displayOrderNo, hem dbId ile)
   const localUpdated =
     updateLocalOrderStatus(rawId, { status: targetStatus }) ||
+    (displayOrderNo !== rawId ? updateLocalOrderStatus(displayOrderNo, { status: targetStatus }) : null) ||
     (existingOrder?.id && existingOrder.id !== rawId
       ? updateLocalOrderStatus(existingOrder.id, { status: targetStatus })
       : null);
@@ -348,21 +356,28 @@ export async function cancelOrderWithSideEffects({
     }
   }
 
-  // 5) Müşteri bilgilendirme e-postası
-  const customerEmail = updatedOrder?.currentAccount?.email || existingOrder?.currentAccount?.email || localUpdated?.email;
+  // 5) Müşteri bilgilendirme e-postası (İptal nedeni ile birlikte profesyonel e-posta)
+  const customerEmail = updatedOrder?.currentAccount?.email || existingOrder?.currentAccount?.email || localUpdated?.email || matchedLocal?.email;
   if (!wasAlreadyCancelled && (updatedOrder || localUpdated) && customerEmail && customerEmail !== "guest@nexab2b.com") {
+    const cleanSummary = String(existingOrder?.summary || localUpdated?.summary || matchedLocal?.summary || "Sipariş kalemleri")
+      .replace(/^\[[^\]]+\]\s*/, "")
+      .trim();
+    const cancelReasonText = reason && reason.trim().length > 0
+      ? reason.trim()
+      : "Siparişiniz müşteri talebi veya operasyonel değerlendirme doğrultusunda iptal edilmiştir.";
+
     emailNotificationService
-      .queueEmail(customerEmail, "order_status_updated", {
-        kullanici_adi: existingOrder?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
-        siparis_no: rawId,
-        siparis_durumu: targetStatus,
-        siparis_tutari: Number(existingOrder?.total || localUpdated?.amount || 0).toLocaleString("tr-TR", {
+      .queueEmail(customerEmail, "order_cancelled", {
+        kullanici_adi: existingOrder?.currentAccount?.name || localUpdated?.client || matchedLocal?.client || "Değerli Müşterimiz",
+        siparis_no: displayOrderNo,
+        iptal_nedeni: cancelReasonText,
+        siparis_ozeti: cleanSummary || "Sipariş kalemleri",
+        siparis_tutari: Number(existingOrder?.total || localUpdated?.amount || matchedLocal?.amount || 0).toLocaleString("tr-TR", {
           minimumFractionDigits: 2,
         }),
-        kargo_sirketi: "—",
-        takip_no: "—",
-        tarih: new Date().toLocaleDateString("tr-TR"),
-        detay_linki: `${process.env.NEXTAUTH_URL || "https://pekefe.com"}/hesap`,
+        odeme_yontemi: existingOrder?.method || localUpdated?.method || matchedLocal?.method || "Belirtilmedi",
+        tarih: new Date().toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+        detay_linki: `${process.env.NEXTAUTH_URL || "https://www.pekefe.com"}/hesap`,
       })
       .catch(() => {});
   }

@@ -302,6 +302,79 @@ export class EmailNotificationService {
           </div>
         `
       },
+      order_cancelled: {
+        name: "Sipariş İptal Bilgilendirmesi",
+        subject: "Siparişiniz İptal Edildi — Sipariş No: #{{siparis_no}}",
+        variables: "kullanici_adi,siparis_no,iptal_nedeni,siparis_ozeti,siparis_tutari,odeme_yontemi,tarih,detay_linki",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); background-color: #ffffff;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 0.05em;">PEKEFE</h2>
+              <p style="color: #fecdd3; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.2em;">Sipariş İptal Bilgilendirmesi</p>
+            </div>
+            <!-- Body -->
+            <div style="padding: 36px 32px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <span style="display: inline-block; background-color: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;">Sipariş İptal Edildi</span>
+              </div>
+              <p style="color: #1e293b; font-size: 15px; line-height: 1.6; margin-top: 0;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7;"><strong>#{{siparis_no}}</strong> numaralı siparişinizin iptal işlemi gerçekleştirilmiştir. İptal detayları ve gerekçesi aşağıda bilgilerinize sunulmuştur:</p>
+
+              <!-- Cancellation Reason Box -->
+              <div style="background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 12px; padding: 18px 20px; margin: 22px 0;">
+                <p style="margin: 0 0 6px 0; color: #9f1239; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">İptal Nedeni</p>
+                <p style="margin: 0; color: #881337; font-size: 14px; font-weight: 600; line-height: 1.6;">{{iptal_nedeni}}</p>
+              </div>
+
+              <!-- Order Summary Table -->
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; margin: 22px 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Sipariş Numarası</td>
+                    <td style="padding: 6px 0; color: #0f172a; font-weight: 700; text-align: right;">#{{siparis_no}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">İptal Tarihi</td>
+                    <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">{{tarih}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Sipariş İçeriği</td>
+                    <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">{{siparis_ozeti}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: #64748b;">Ödeme Yöntemi</td>
+                    <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">{{odeme_yontemi}}</td>
+                  </tr>
+                  <tr style="border-top: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 0 4px 0; color: #0f172a; font-weight: 700;">Toplam Tutar</td>
+                    <td style="padding: 10px 0 4px 0; color: #6b1d2f; font-weight: 800; font-size: 15px; text-align: right;">₺{{siparis_tutari}}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Refund Info -->
+              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin: 20px 0;">
+                <p style="margin: 0; color: #166534; font-size: 12.5px; line-height: 1.6;">
+                  <strong>Ödeme &amp; İade Bilgilendirmesi:</strong> Kredi kartı veya banka havalesi ile ödeme gerçekleştirdiyseniz, iade tutarınız ödeme yönteminize bağlı olarak <strong>1–7 iş günü</strong> içerisinde hesabınıza/kartınıza yansıtılacaktır. Ödeme yapılmadıysa tarafınızdan herhangi bir tahsilat yapılmayacaktır.
+                </p>
+              </div>
+
+              <div style="text-align: center; margin: 28px 0 20px 0;">
+                <a href="{{detay_linki}}" style="display: inline-block; background-color: #6b1d2f; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 13px; padding: 12px 28px; border-radius: 999px;">Siparişlerimi Görüntüle</a>
+              </div>
+
+              <p style="color: #64748b; font-size: 12.5px; line-height: 1.6; text-align: center; margin-bottom: 0;">
+                Herhangi bir sorunuz veya yeni sipariş desteğiniz için <a href="mailto:info@pekefe.com" style="color: #6b1d2f; font-weight: 700;">info@pekefe.com</a> adresinden veya <strong>+90 534 270 91 40</strong> numaralı WhatsApp hattımızdan bize ulaşabilirsiniz.
+              </p>
+            </div>
+            <!-- Footer -->
+            <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler. Tüm hakları saklıdır.</p>
+            </div>
+          </div>
+        `
+      },
       newsletter_welcome: {
         name: "Bülten Aboneliği Hoş Geldiniz",
         subject: "Pekefe Bülten Kulübüne Hoş Geldiniz! 🌿",

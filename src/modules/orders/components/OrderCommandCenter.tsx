@@ -546,14 +546,22 @@ export default function OrderCommandCenter() {
     try {
       if (cancelModal.isBulk) {
         const ids = Array.from(selectedRows);
+        const orderItems = ids.map(id => {
+          const found = orders.find(o => o.id === id);
+          return { id, orderNumber: found?.orderNumber || id };
+        });
         const res = await fetch("/api/orders/cancel", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderIds: ids, reason: cancelModal.reason }),
+          body: JSON.stringify({ orderItems, orderIds: ids, reason: cancelModal.reason }),
         });
         const result = await res.json();
         if (res.ok && result.success) {
-          toast.success(`${ids.length} adet sipariş başarıyla iptal edildi.`);
+          toast.success(`${result.succeededCount ?? ids.length} adet sipariş iptal edildi ve müşterilere bilgilendirme e-postası gönderildi.`);
+          setSelectedRows(new Set());
+          await refreshOrders();
+        } else if (res.ok && result.partial) {
+          toast.warning(`${result.succeededCount} sipariş iptal edildi, ${result.failedCount} sipariş iptal edilemedi (${result.failed?.[0]?.error || result.failed?.[0]?.id || "hata"}).`);
           setSelectedRows(new Set());
           await refreshOrders();
         } else {
@@ -563,11 +571,15 @@ export default function OrderCommandCenter() {
         const res = await fetch("/api/orders/cancel", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId: cancelModal.orderId, reason: cancelModal.reason }),
+          body: JSON.stringify({
+            orderId: cancelModal.orderId,
+            orderNumber: cancelModal.orderNumber || cancelModal.orderId,
+            reason: cancelModal.reason,
+          }),
         });
         const result = await res.json();
         if (res.ok && result.success) {
-          toast.success("Sipariş başarıyla iptal edildi.");
+          toast.success("Sipariş iptal edildi, stok/cari güncellendi ve müşteriye bilgilendirme e-postası gönderildi.");
           if (selectedOrder?.id === cancelModal.orderId) {
             setSelectedOrder(prev => prev ? { ...prev, status: "İptal Edildi" } : null);
           }

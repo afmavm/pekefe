@@ -25,27 +25,28 @@ export const GET = withAuth<any>(
       try {
         if (isAdminRole(session?.user?.role) && !isPersonal) {
           const remotePromise = prisma.order.findMany({
+            where: { isDeleted: false },
             include: {
               currentAccount: true
             },
             orderBy: { date: 'desc' }
           });
-          orders = await withTimeout(remotePromise, 2500, []);
+          orders = await withTimeout(remotePromise, 6000, []);
         } else {
           const accountPromise = prisma.currentAccount.findFirst({
             where: { email: session?.user?.email || "" }
           });
-          const account = await withTimeout(accountPromise, 2500, null);
+          const account = await withTimeout(accountPromise, 6000, null);
 
           if (account) {
             const remotePromise = prisma.order.findMany({
-              where: { currentAccountId: account.id },
+              where: { currentAccountId: account.id, isDeleted: false },
               include: {
                 currentAccount: true
               },
               orderBy: { date: 'desc' }
             });
-            orders = await withTimeout(remotePromise, 2500, []);
+            orders = await withTimeout(remotePromise, 6000, []);
           }
         }
       } catch (dbErr) {

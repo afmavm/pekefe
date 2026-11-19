@@ -15,9 +15,12 @@ export interface CancelOrderResult {
   id: string;
   dbId: string | null;
   success: boolean;
+  dbUpdated: boolean;
+  localUpdated: boolean;
   alreadyCancelled: boolean;
   stockRestoredCount: number;
   ledgerReversed: boolean;
+  error?: string;
 }
 
 function normalizeKey(val: string): string {
@@ -58,6 +61,7 @@ export async function cancelOrderWithSideEffects({
 
   let existingOrder: any = null;
   let updatedOrder: any = null;
+  let dbReachable = false;
 
   try {
     existingOrder = await withTimeout(
@@ -65,56 +69,64 @@ export async function cancelOrderWithSideEffects({
         where: { id: rawId },
         include: { currentAccount: true },
       }),
-      2000,
-      null
+      6000,
+      undefined as any
     );
+    if (existingOrder !== undefined) dbReachable = true;
+    if (existingOrder === undefined) existingOrder = null;
 
     if (!existingOrder && dashless && dashless !== rawId) {
-      existingOrder = await withTimeout(
+      const byDashless = await withTimeout(
         prisma.order.findUnique({
           where: { id: dashless },
           include: { currentAccount: true },
         }),
-        2000,
-        null
+        6000,
+        undefined as any
       );
+      if (byDashless !== undefined) dbReachable = true;
+      if (byDashless) existingOrder = byDashless;
     }
 
     // Eski formatlı ID'ler için (ör: DB id "4" -> UI orderNumber "PKF-2026-000004") esnek eşleştirme
     if (!existingOrder) {
       const suffixMatch = String(rawId).match(/^(?:PKF|B2B|B2C|ORD)-?\d{4}-?([A-Z0-9]+)$/i);
       const targetSuffix = suffixMatch ? suffixMatch[1].toUpperCase() : null;
+      const targetUnpadded = targetSuffix ? targetSuffix.replace(/^0+/, "") : null;
 
       const candidates = await withTimeout(
         prisma.order.findMany({
-          where: { isDeleted: false },
           select: { id: true },
           orderBy: { date: "desc" },
-          take: 250,
+          take: 500,
         }),
-        2000,
-        []
+        6000,
+        null as any
       );
 
-      const foundCandidate = candidates.find(c => {
-        const clean = normalizeKey(c.id);
-        if (clean === dashless) return true;
-        if (targetSuffix) {
-          const padded = clean.length > 6 ? clean.slice(-6) : clean.padStart(6, "0");
-          return padded === targetSuffix;
-        }
-        return false;
-      });
+      if (Array.isArray(candidates)) {
+        dbReachable = true;
+        const foundCandidate = candidates.find(c => {
+          const clean = normalizeKey(c.id);
+          if (clean === dashless) return true;
+          if (targetSuffix) {
+            const padded = clean.length > 6 ? clean.slice(-6) : clean.padStart(6, "0");
+            if (padded === targetSuffix) return true;
+            if (targetUnpadded && clean === targetUnpadded) return true;
+          }
+          return false;
+        });
 
-      if (foundCandidate) {
-        existingOrder = await withTimeout(
-          prisma.order.findUnique({
-            where: { id: foundCandidate.id },
-            include: { currentAccount: true },
-          }),
-          2000,
-          null
-        );
+        if (foundCandidate) {
+          existingOrder = await withTimeout(
+            prisma.order.findUnique({
+              where: { id: foundCandidate.id },
+              include: { currentAccount: true },
+            }),
+            6000,
+            null
+          );
+        }
       }
     }
   } catch (findErr) {
@@ -123,90 +135,147 @@ export async function cancelOrderWithSideEffects({
 
   const wasAlreadyCancelled =
     /iptal|iade/i.test(String(existingOrder?.status || "")) ||
-    /iptal|iade/i.test(String(matchedLocal?.status || ""));
+    (!existingOrder && /iptal|iade/i.test(String(matchedLocal?.status || "")));
 
   let ledgerReversed = false;
   let stockRestoredCount = 0;
+  let dbErrorMsg: string | undefined;
 
+  // 1) MySQL Sipariş Durumunu Güncelle (doğrudan ve güvenilir şekilde)
   if (existingOrder) {
     const dbId = existingOrder.id;
+    try {
+      updatedOrder = await withTimeout(
+        prisma.order.update({
+          where: { id: dbId },
+          data: { status: targetStatus },
+          include: { currentAccount: true },
+        }),
+        8000,
+        null
+      );
+    } catch (updErr: any) {
+      dbErrorMsg = updErr?.message || "Veritabanı sipariş durumu güncellenemedi.";
+      console.error("[ORDER CANCEL DB UPDATE ERROR]:", updErr);
+    }
+
+    // 2) Cari Hesap Ters Kayıt (IPTAL / IADE) — İdempotent ve güvenli
     const txType = /iade/i.test(targetStatus) ? "IADE" : "IPTAL";
     const reverseAmount = Number(existingOrder.total || matchedLocal?.amount || 0);
 
-    try {
-      updatedOrder = await withTimeout(
-        prisma.$transaction(async (tx) => {
-          const order = await tx.order.update({
-            where: { id: dbId },
-            data: { status: targetStatus },
-          });
-
-          if (!wasAlreadyCancelled && existingOrder.currentAccountId && reverseAmount > 0) {
-            const existingTx = await tx.transaction.findFirst({
-              where: {
-                currentAccountId: existingOrder.currentAccountId,
-                type: { in: ["IPTAL", "IADE"] },
-                OR: [
-                  { description: { contains: dbId } },
-                  { description: { contains: rawId } },
-                ],
-              },
-            });
-
-            if (!existingTx) {
-              await tx.transaction.create({
-                data: {
-                  currentAccountId: existingOrder.currentAccountId,
-                  type: txType,
-                  amount: -reverseAmount,
-                  description: `Sipariş İptali: #${rawId}${reason ? ` (${reason})` : ""}`,
-                  paymentMethod: existingOrder.method || "Belirtilmedi",
-                  date: new Date(),
-                },
-              });
-
-              await tx.currentAccount.update({
-                where: { id: existingOrder.currentAccountId },
-                data: { balance: { decrement: reverseAmount } },
-              });
-              ledgerReversed = true;
-            }
-          }
-
-          return order;
-        }),
-        4500,
-        null
-      );
-    } catch (txErr) {
-      console.warn("[ORDER CANCEL TX WARN]:", txErr);
-    }
-
-    if (!updatedOrder) {
+    if (updatedOrder && !wasAlreadyCancelled && existingOrder.currentAccountId && reverseAmount > 0) {
       try {
-        updatedOrder = await withTimeout(
-          prisma.order.update({
-            where: { id: dbId },
-            data: { status: targetStatus },
+        const descConditions: any[] = [{ description: { contains: `#${rawId}` } }];
+        if (dbId && dbId !== rawId) {
+          descConditions.push({ description: { contains: `#${dbId}` } });
+        }
+
+        const existingTx = await withTimeout(
+          prisma.transaction.findFirst({
+            where: {
+              currentAccountId: existingOrder.currentAccountId,
+              type: { in: ["IPTAL", "IADE"] },
+              OR: descConditions,
+            },
           }),
-          2000,
+          4000,
           null
         );
-      } catch (fallbackErr) {
-        console.warn("[ORDER CANCEL FALLBACK UPDATE WARN]:", fallbackErr);
+
+        if (!existingTx) {
+          await withTimeout(
+            prisma.transaction.create({
+              data: {
+                currentAccountId: existingOrder.currentAccountId,
+                type: txType,
+                amount: -reverseAmount,
+                description: `Sipariş İptali: #${rawId}${reason ? ` (${reason})` : ""}`,
+                paymentMethod: existingOrder.method || "Belirtilmedi",
+                date: new Date(),
+              },
+            }),
+            5000,
+            null
+          );
+
+          await withTimeout(
+            prisma.currentAccount.update({
+              where: { id: existingOrder.currentAccountId },
+              data: { balance: { decrement: reverseAmount } },
+            }),
+            5000,
+            null
+          );
+          ledgerReversed = true;
+        }
+      } catch (ledgerErr) {
+        console.error("[ORDER CANCEL LEDGER ERROR]:", ledgerErr);
       }
+    }
+  } else if (matchedLocal && dbReachable && !wasAlreadyCancelled) {
+    // Sipariş yalnızca JSON'daysa bile cari hesabı bulup IPTAL hareketi işle
+    try {
+      const reverseAmount = Number(matchedLocal.amount || matchedLocal.total || 0);
+      if (reverseAmount > 0) {
+        let acc = matchedLocal.currentAccountId
+          ? await withTimeout(prisma.currentAccount.findUnique({ where: { id: matchedLocal.currentAccountId } }), 4000, null)
+          : null;
+        if (!acc && matchedLocal.email) {
+          acc = await withTimeout(prisma.currentAccount.findFirst({ where: { email: matchedLocal.email } }), 4000, null);
+        }
+        if (acc) {
+          const existingTx = await withTimeout(
+            prisma.transaction.findFirst({
+              where: {
+                currentAccountId: acc.id,
+                type: { in: ["IPTAL", "IADE"] },
+                description: { contains: `#${rawId}` },
+              },
+            }),
+            4000,
+            null
+          );
+          if (!existingTx) {
+            await withTimeout(
+              prisma.transaction.create({
+                data: {
+                  currentAccountId: acc.id,
+                  type: /iade/i.test(targetStatus) ? "IADE" : "IPTAL",
+                  amount: -reverseAmount,
+                  description: `Sipariş İptali: #${rawId}${reason ? ` (${reason})` : ""}`,
+                  paymentMethod: matchedLocal.method || "Belirtilmedi",
+                  date: new Date(),
+                },
+              }),
+              5000,
+              null
+            );
+            await withTimeout(
+              prisma.currentAccount.update({
+                where: { id: acc.id },
+                data: { balance: { decrement: reverseAmount } },
+              }),
+              5000,
+              null
+            );
+            ledgerReversed = true;
+          }
+        }
+      }
+    } catch (jsonLedgerErr) {
+      console.warn("[ORDER CANCEL JSON LEDGER WARN]:", jsonLedgerErr);
     }
   }
 
-  // Yerel JSON sipariş kaydını daima güncelle
+  // 3) Yerel JSON sipariş kaydını daima güncelle
   const localUpdated =
     updateLocalOrderStatus(rawId, { status: targetStatus }) ||
     (existingOrder?.id && existingOrder.id !== rawId
       ? updateLocalOrderStatus(existingOrder.id, { status: targetStatus })
       : null);
 
-  // Stok iadesi & StockTransaction hareketi (yalnızca ilk iptal anında)
-  if (!wasAlreadyCancelled) {
+  // 4) Stok iadesi & StockTransaction hareketi (yalnızca ilk iptal anında)
+  if (!wasAlreadyCancelled && (updatedOrder || localUpdated)) {
     const itemsToRestore: Array<any> =
       Array.isArray(matchedLocal?.items) && matchedLocal.items.length > 0
         ? matchedLocal.items
@@ -227,21 +296,21 @@ export async function cancelOrderWithSideEffects({
         if (targetId) {
           dbProduct = await withTimeout(
             prisma.product.findFirst({ where: { OR: [{ id: targetId }, { sku: targetId }] } }),
-            1500,
+            3000,
             null
           );
         }
         if (!dbProduct && targetSku) {
           dbProduct = await withTimeout(
             prisma.product.findFirst({ where: { sku: targetSku } }),
-            1500,
+            3000,
             null
           );
         }
         if (!dbProduct && targetName) {
           dbProduct = await withTimeout(
             prisma.product.findFirst({ where: { name: { contains: targetName } } }),
-            1500,
+            3000,
             null
           );
         }
@@ -252,7 +321,7 @@ export async function cancelOrderWithSideEffects({
               where: { id: dbProduct.id },
               data: { stock: { increment: qty } },
             }),
-            1500,
+            3000,
             null
           );
 
@@ -269,7 +338,7 @@ export async function cancelOrderWithSideEffects({
                 userEmail: userEmail || undefined,
               },
             }),
-            1500,
+            3000,
             null
           );
         }
@@ -279,9 +348,9 @@ export async function cancelOrderWithSideEffects({
     }
   }
 
-  // Müşteri bilgilendirme e-postası
+  // 5) Müşteri bilgilendirme e-postası
   const customerEmail = updatedOrder?.currentAccount?.email || existingOrder?.currentAccount?.email || localUpdated?.email;
-  if (!wasAlreadyCancelled && customerEmail && customerEmail !== "guest@nexab2b.com") {
+  if (!wasAlreadyCancelled && (updatedOrder || localUpdated) && customerEmail && customerEmail !== "guest@nexab2b.com") {
     emailNotificationService
       .queueEmail(customerEmail, "order_status_updated", {
         kullanici_adi: existingOrder?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
@@ -298,12 +367,18 @@ export async function cancelOrderWithSideEffects({
       .catch(() => {});
   }
 
+  // Eğer sipariş MySQL'de mevcutsa, MySQL güncellemesi başarısız olduğunda sahte "başarılı" döndürme!
+  const success = existingOrder ? Boolean(updatedOrder) : Boolean(localUpdated);
+
   return {
     id: rawId,
     dbId: existingOrder?.id || null,
-    success: Boolean(updatedOrder || localUpdated),
+    success,
+    dbUpdated: Boolean(updatedOrder),
+    localUpdated: Boolean(localUpdated),
     alreadyCancelled: wasAlreadyCancelled,
     stockRestoredCount,
     ledgerReversed,
+    error: !success ? (dbErrorMsg || "Sipariş veritabanında güncellenemedi.") : undefined,
   };
 }

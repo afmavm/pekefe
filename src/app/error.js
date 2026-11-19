@@ -6,9 +6,28 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export default function Error({ error, reset }) {
+  const isChunkError =
+    typeof error?.message === "string" &&
+    (error.message.includes("Loading chunk") ||
+      error.message.includes("ChunkLoadError") ||
+      error.message.includes("Failed to fetch dynamically imported module") ||
+      error.name === "ChunkLoadError");
+
   useEffect(() => {
     console.error("Platform Error caught:", error);
-  }, [error]);
+
+    if (isChunkError && typeof window !== "undefined") {
+      try {
+        const lastReload = Number(sessionStorage.getItem("pekefe_chunk_reload") || 0);
+        if (Date.now() - lastReload > 15000) {
+          sessionStorage.setItem("pekefe_chunk_reload", String(Date.now()));
+          window.location.reload();
+        }
+      } catch {
+        window.location.reload();
+      }
+    }
+  }, [error, isChunkError]);
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
@@ -37,7 +56,13 @@ export default function Error({ error, reset }) {
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <button
-              onClick={() => reset()}
+              onClick={() => {
+                if (isChunkError && typeof window !== "undefined") {
+                  window.location.reload();
+                } else {
+                  reset();
+                }
+              }}
               className="bg-primary text-white px-8 py-4 rounded-xl font-label-md uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md cursor-pointer active:scale-95 flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-sm">refresh</span>

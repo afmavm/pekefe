@@ -381,7 +381,9 @@ export async function PUT(
       body.unit !== undefined ||
       body.manufacturerCode !== undefined ||
       body.brand !== undefined ||
-      body.model !== undefined
+      body.model !== undefined ||
+      body.active !== undefined ||
+      body.isPublished !== undefined
     ) {
       let currentAttrs: any = {};
       try {
@@ -396,6 +398,8 @@ export async function PUT(
       data.attributes = {
         ...currentAttrs,
         ...(body.attributes || {}),
+        ...(body.active !== undefined ? { isActive: Boolean(body.active), active: Boolean(body.active) } : {}),
+        ...(body.isPublished !== undefined ? { isPublished: Boolean(body.isPublished) } : body.active !== undefined ? { isPublished: Boolean(body.active) } : {}),
         ...(body.shortDesc !== undefined ? { shortDesc: body.shortDesc } : {}),
         ...(body.barcode !== undefined ? { barcode: body.barcode } : {}),
         ...(body.unit !== undefined ? { unit: body.unit } : {}),
@@ -702,29 +706,45 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
     const { active, isPublished, isDeleted } = body;
+    const resolvedActive = active !== undefined ? Boolean(active) : (isPublished !== undefined ? Boolean(isPublished) : undefined);
+    const resolvedPublished = isPublished !== undefined ? Boolean(isPublished) : resolvedActive;
 
     let targetId = id;
+    let targetSku = id;
     try {
-      const target = await prisma.product.findFirst({
-        where: { OR: [{ id }, { sku: id }] },
-        select: { id: true, attributes: true }
-      });
+      const target = await Promise.race([
+        prisma.product.findFirst({
+          where: { OR: [{ id }, { sku: id }] },
+          select: { id: true, sku: true, attributes: true }
+        }),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000))
+      ]);
       if (target) {
         targetId = target.id;
+        targetSku = target.sku || id;
         let attrs: any = target.attributes || {};
         if (typeof attrs === "string") {
-          try { attrs = JSON.parse(attrs); } catch {}
+          try { attrs = JSON.parse(attrs); } catch { attrs = {}; }
         }
-        if (active !== undefined) attrs.isActive = Boolean(active);
-        if (isPublished !== undefined) attrs.isPublished = Boolean(isPublished);
+        if (!attrs || typeof attrs !== "object") attrs = {};
+        if (resolvedActive !== undefined) {
+          attrs.isActive = resolvedActive;
+          attrs.active = resolvedActive;
+        }
+        if (resolvedPublished !== undefined) {
+          attrs.isPublished = resolvedPublished;
+        }
 
-        await prisma.product.update({
-          where: { id: target.id },
-          data: {
-            attributes: attrs,
-            ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
-          }
-        });
+        await Promise.race([
+          prisma.product.update({
+            where: { id: target.id },
+            data: {
+              attributes: attrs,
+              ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
+            }
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500))
+        ]);
       }
     } catch (dbErr) {
       console.warn("[API PATCH PRODUCT NOTICE] Prisma update fallback:", dbErr);
@@ -732,22 +752,37 @@ export async function PATCH(
 
     // Always update local disk DB & in-memory products
     const localProducts = readLocalProducts();
-    const localItem = localProducts.find((p: any) => p.id === id || p.sku === id || decodeURIComponent(id) === p.sku);
-    if (localItem) {
-      const updatedLocal = saveLocalProduct({
-        ...localItem,
-        ...(active !== undefined ? { active: Boolean(active) } : {}),
-        ...(isPublished !== undefined ? { isPublished: Boolean(isPublished) } : {}),
-        ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
-      }, true);
-      revalidatePath('/', 'layout');
-      revalidatePath('/admin/stock');
-      return NextResponse.json(updatedLocal);
-    }
+    const localItem = localProducts.find(
+      (p: any) => p.id === id || p.sku === id || p.id === targetId || p.sku === targetSku || decodeURIComponent(id) === p.sku
+    );
+    const existingLocalAttrs =
+      localItem && typeof localItem.attributes === "object" && localItem.attributes !== null
+        ? localItem.attributes
+        : {};
+    const mergedLocal = {
+      ...(localItem || { id: targetId, sku: targetSku }),
+      ...(resolvedActive !== undefined ? { active: resolvedActive } : {}),
+      ...(resolvedPublished !== undefined ? { isPublished: resolvedPublished } : {}),
+      ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {}),
+      attributes: {
+        ...existingLocalAttrs,
+        ...(resolvedActive !== undefined ? { isActive: resolvedActive, active: resolvedActive } : {}),
+        ...(resolvedPublished !== undefined ? { isPublished: resolvedPublished } : {}),
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    const updatedLocal = saveLocalProduct(mergedLocal, true);
 
     revalidatePath('/', 'layout');
+    revalidatePath('/kategoriler');
     revalidatePath('/admin/stock');
-    return NextResponse.json({ success: true, active });
+    revalidatePath('/api/products');
+    return NextResponse.json(updatedLocal, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+      },
+    });
   } catch (error: any) {
     console.error("Error in PATCH product status:", error);
     return NextResponse.json({ error: error.message || "Durum güncellenemedi" }, { status: 500 });

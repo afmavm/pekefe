@@ -1920,8 +1920,111 @@ export default function OrderCommandCenter() {
             </div>
           </div>
 
-            {/* High-Performance Datagrid Table */}
-            <div className="overflow-x-auto w-full">
+            {/* Mobile Cards View */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => {
+                  const isSelected = selectedRows.has(order.id);
+                  const clientAcc = findClientAccount(order.client);
+                  const cariCode = order.cariKod || clientAcc?.cariKod;
+                  const formattedDate = (() => {
+                    if (!order.date) return "—";
+                    if (typeof order.date === "string" && /^\d{2}\.\d{2}\.\d{4}/.test(order.date)) return order.date;
+                    try {
+                      const d = new Date(order.date);
+                      return isNaN(d.getTime())
+                        ? String(order.date)
+                        : d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                    } catch {
+                      return String(order.date);
+                    }
+                  })();
+
+                  return (
+                    <div
+                      key={`mob-${order.id}`}
+                      className={`p-3.5 space-y-2.5 transition-colors ${isSelected ? "bg-orange-500/5" : ""}`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelectRow(order.id)}
+                            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-orange-500 focus:ring-0 cursor-pointer shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 text-sm whitespace-nowrap">#{order.orderNumber}</p>
+                            <p className="text-[11px] text-slate-400 font-semibold">{formattedDate}</p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${getStatusBadge(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
+
+                      <div className="pl-6 space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="font-bold text-slate-800 text-xs">{order.client}</p>
+                          <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-slate-100 text-slate-600 border border-slate-200">
+                            {order.type === "B2B" ? "B2B Bayi" : "B2C Perakende"}
+                          </span>
+                          {cariCode && (
+                            <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-amber-50 text-amber-700 border border-amber-200 font-mono font-bold">
+                              {cariCode}
+                            </span>
+                          )}
+                        </div>
+                        {order.summary && (
+                          <p className="text-[11px] text-slate-500 line-clamp-2">{order.summary}</p>
+                        )}
+                      </div>
+
+                      <div className="pl-6 flex items-center justify-between gap-2 pt-1">
+                        <span className="font-black text-slate-900 text-sm">
+                          ₺{Number(order.amount || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setActiveDrawerTab("general");
+                            }}
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-[11px] font-bold inline-flex items-center gap-1"
+                          >
+                            <Eye className="w-3.5 h-3.5" /> Detay
+                          </button>
+                          {(order.status === "Ödeme Bekliyor" || order.status === "Ödeme Bekleniyor") && (
+                            <button
+                              onClick={() => handleConfirmPaymentAndCollection(order.id, "Ödeme Onaylandı")}
+                              disabled={isActionPending}
+                              className="p-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 inline-flex items-center justify-center"
+                              title="Ödemeyi Onayla & Tahsilat İşle"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          {order.status !== "İptal Edildi" && (
+                            <button
+                              onClick={() => handleOpenCancelModal(order.id, order.orderNumber)}
+                              className="p-1.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 inline-flex items-center justify-center"
+                              title="Siparişi İptal Et"
+                            >
+                              <Ban className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-8 text-center text-xs text-slate-400">Sipariş bulunamadı.</div>
+              )}
+            </div>
+
+            {/* High-Performance Datagrid Table (Tablet & Desktop) */}
+            <div className="hidden md:block overflow-x-auto w-full">
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider bg-slate-50/20">
@@ -2198,37 +2301,45 @@ export default function OrderCommandCenter() {
 
       {/* 4. FLOATING BULK ACTIONS ACTION BAR */}
       {selectedRows.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center px-6 py-3.5 z-40 gap-4 animate-in slide-in-from-bottom-5 duration-300 border border-slate-800">
+        <div className="fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 w-[calc(100vw-1rem)] sm:w-auto max-w-[calc(100vw-1rem)] bg-slate-900 text-white rounded-2xl shadow-2xl flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-start px-3.5 sm:px-6 py-3 sm:py-3.5 z-50 gap-2.5 sm:gap-4 animate-in slide-in-from-bottom-5 duration-300 border border-slate-800">
           <div className="flex items-center gap-2 shrink-0">
-            <CheckCircle2 className="w-5 h-5 text-orange-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-100">{selectedRows.size} Sipariş Seçildi</span>
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-100 whitespace-nowrap">{selectedRows.size} Sipariş Seçildi</span>
           </div>
-          
-          <div className="h-5 w-px bg-slate-800" />
 
-          <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setSelectedRows(new Set())}
+            className="sm:hidden p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition cursor-pointer shrink-0"
+            aria-label="Seçimi Temizle"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          
+          <div className="hidden sm:block h-5 w-px bg-slate-800" />
+
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 w-full sm:w-auto">
             <button 
               onClick={handleBulkGenerateInvoices}
               disabled={isGenerating}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer whitespace-nowrap"
             >
               <FileText className="w-3.5 h-3.5" /> Fatura Yazdır
             </button>
             <button 
               onClick={handleBulkPrintKargoLabels}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer whitespace-nowrap"
             >
               <Truck className="w-3.5 h-3.5" /> Kargo Etiketi Al
             </button>
             <button 
               onClick={handleBulkPrintPickLists}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer whitespace-nowrap"
             >
               <Layers className="w-3.5 h-3.5" /> Çeki Listesi Al
             </button>
             <button 
               onClick={handleOpenBulkCancelModal}
-              className="flex items-center gap-1 px-3 py-2 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded-xl text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer whitespace-nowrap"
             >
               <Ban className="w-3.5 h-3.5" /> Seçilenleri İptal Et
             </button>
@@ -2236,7 +2347,7 @@ export default function OrderCommandCenter() {
 
           <button 
             onClick={() => setSelectedRows(new Set())}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+            className="hidden sm:inline-flex p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>

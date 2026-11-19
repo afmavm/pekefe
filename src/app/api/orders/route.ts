@@ -144,6 +144,8 @@ export const GET = withAuth<any>(
           id: order.id,
           orderNo: orderNumber,
           orderNumber,
+          currentAccountId: order.currentAccountId || order.currentAccount?.id || '',
+          cariKod: order.currentAccount?.cariKod || '',
           client: order.currentAccount?.name || "Bilinmeyen",
           address: order.currentAccount?.address || "Açık adres bulunmamaktadır",
           phone: order.currentAccount?.phone || "Belirtilmedi",

@@ -177,6 +177,69 @@ export async function GET(request: Request) {
       );
     }
 
+    // Auto-assign persistent cariKod & enrich missing phone/address from orders
+    const allOrders = readLocalOrders();
+    let maxCariNum = 1000;
+    for (const a of accounts) {
+      const m = String(a.cariKod || "").match(/(\d+)$/);
+      if (m) maxCariNum = Math.max(maxCariNum, Number(m[1]));
+    }
+
+    for (let i = 0; i < accounts.length; i++) {
+      const acc = accounts[i];
+      let dirty = false;
+      const patchData: any = {};
+
+      if (!acc.cariKod || String(acc.cariKod).trim() === "") {
+        maxCariNum++;
+        const nextKod = `PKF-CARI-${String(maxCariNum).padStart(4, "0")}`;
+        acc.cariKod = nextKod;
+        patchData.cariKod = nextKod;
+        dirty = true;
+      }
+
+      if (!acc.phone || !acc.address) {
+        const accEmail = String(acc.email || "").trim().toLowerCase();
+        const matchedOrder = allOrders.find(
+          (o) =>
+            o.currentAccountId === acc.id ||
+            (accEmail && String(o.email || "").trim().toLowerCase() === accEmail)
+        );
+        if (matchedOrder) {
+          if (!acc.phone && matchedOrder.phone) {
+            acc.phone = matchedOrder.phone;
+            patchData.phone = matchedOrder.phone;
+            dirty = true;
+          }
+          if (!acc.address && matchedOrder.address) {
+            acc.address = matchedOrder.address;
+            patchData.address = matchedOrder.address;
+            dirty = true;
+          }
+        }
+      }
+
+      if (acc.address && (!Array.isArray(acc.adresler) || acc.adresler.length === 0)) {
+        acc.adresler = [
+          {
+            id: `addr-${acc.id}`,
+            title: "Kayıtlı Adres",
+            address: acc.address,
+            city: "",
+            district: "",
+            isDefault: true,
+          },
+        ];
+      }
+
+      if (dirty) {
+        saveLocalAccount(acc);
+        prisma.currentAccount
+          .update({ where: { id: acc.id }, data: patchData })
+          .catch(() => null);
+      }
+    }
+
     return NextResponse.json(accounts, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("Failed to fetch accounts:", error);

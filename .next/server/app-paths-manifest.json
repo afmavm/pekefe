@@ -152,6 +152,7 @@
   "/api/integrations/route": "app/api/integrations/route.js",
   "/api/invoices/[id]/ubl/route": "app/api/invoices/[id]/ubl/route.js",
   "/api/invoices/route": "app/api/invoices/route.js",
+  "/api/orders/cancel/route": "app/api/orders/cancel/route.js",
   "/api/orders/route": "app/api/orders/route.js",
   "/api/production/route": "app/api/production/route.js",
   "/api/products/[id]/movements/route": "app/api/products/[id]/movements/route.js",

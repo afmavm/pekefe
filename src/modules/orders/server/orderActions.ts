@@ -3,6 +3,7 @@
 import { prisma, withTimeout } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { isAdminRole } from "@/lib/auth-helpers";
 import { emailNotificationService } from "@/lib/email-notification-service";
 import { readLocalOrders, saveLocalOrder, updateLocalOrderStatus } from "@/lib/jsonOrderDb";
 
@@ -17,7 +18,7 @@ async function assertAuth() {
   }
   
   const role = (session.user as any).role || "USER";
-  if (role !== "ADMIN" && role !== "DEALER" && role !== "SUPER_ADMIN") {
+  if (!isAdminRole(role) && role !== "DEALER") {
     throw new Error("Yetkisiz işlem. Bu alan sadece yetkili bayilere veya yöneticilere açıktır.");
   }
   

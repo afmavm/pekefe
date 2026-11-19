@@ -127,7 +127,11 @@ export async function GET() {
       return NextResponse.json(defaultFallback);
     }
 
-    const merged = { ...dbRow, ...diskData };
+    // MySQL (dbRow) is the primary source of truth; diskData fills in missing fields
+    const merged = { ...(diskData || {}), ...(dbRow || {}) };
+    if (dbRow?.shippingCarriers !== undefined && dbRow?.shippingCarriers !== null && dbRow?.shippingCarriers !== '') {
+      merged.shippingCarriers = dbRow.shippingCarriers;
+    }
 
     if (diskData && diskData.announcementActive !== undefined) {
       merged.announcementActive = diskData.announcementActive === true || diskData.announcementActive === "true" || diskData.announcementActive === 1;
@@ -242,25 +246,34 @@ export async function PUT(req: Request) {
       const cPhoneEn = data.contactPhoneEnabled ? 1 : 0;
       const sWaEn = data.socialWhatsappEnabled ? 1 : 0;
 
-      await withTimeout(
+      const shippingCarriersJsonStr =
+        typeof data.shippingCarriers === 'string'
+          ? data.shippingCarriers
+          : JSON.stringify(data.shippingCarriers || []);
+
+      const updatedRows = await withTimeout(
         prisma.$executeRawUnsafe(
-          `INSERT INTO CMSData (id, announcementActive, announcement1Enabled, announcement2Enabled, contactPhoneEnabled, socialWhatsappEnabled, announcement, announcement2, contactPhone, socialWhatsapp, topBarItems, paytrConfig, paymentMethodsConfig, installmentsConfig, shippingCarriers) 
-           VALUES ('singleton', ${annAct}, ${ann1En}, ${ann2En}, ${cPhoneEn}, ${sWaEn}, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE 
-           announcementActive = VALUES(announcementActive),
-           announcement1Enabled = VALUES(announcement1Enabled),
-           announcement2Enabled = VALUES(announcement2Enabled),
-           contactPhoneEnabled = VALUES(contactPhoneEnabled),
-           socialWhatsappEnabled = VALUES(socialWhatsappEnabled),
-           announcement = VALUES(announcement),
-           announcement2 = VALUES(announcement2),
-           contactPhone = VALUES(contactPhone),
-           socialWhatsapp = VALUES(socialWhatsapp),
-           topBarItems = VALUES(topBarItems),
-           paytrConfig = VALUES(paytrConfig),
-           paymentMethodsConfig = VALUES(paymentMethodsConfig),
-           installmentsConfig = VALUES(installmentsConfig),
-           shippingCarriers = VALUES(shippingCarriers)`,
+          `UPDATE CMSData SET
+           announcementActive = ?,
+           announcement1Enabled = ?,
+           announcement2Enabled = ?,
+           contactPhoneEnabled = ?,
+           socialWhatsappEnabled = ?,
+           announcement = ?,
+           announcement2 = ?,
+           contactPhone = ?,
+           socialWhatsapp = ?,
+           topBarItems = ?,
+           paytrConfig = ?,
+           paymentMethodsConfig = ?,
+           installmentsConfig = ?,
+           shippingCarriers = ?
+           WHERE id = 'singleton'`,
+          annAct,
+          ann1En,
+          ann2En,
+          cPhoneEn,
+          sWaEn,
           data.announcement || '',
           data.announcement2 || '',
           data.contactPhone || '',
@@ -269,11 +282,51 @@ export async function PUT(req: Request) {
           typeof data.paytrConfig === 'string' ? data.paytrConfig : JSON.stringify(data.paytrConfig || {}),
           typeof data.paymentMethodsConfig === 'string' ? data.paymentMethodsConfig : JSON.stringify(data.paymentMethodsConfig || []),
           typeof data.installmentsConfig === 'string' ? data.installmentsConfig : JSON.stringify(data.installmentsConfig || []),
-          typeof data.shippingCarriers === 'string' ? data.shippingCarriers : JSON.stringify(data.shippingCarriers || [])
+          shippingCarriersJsonStr
         ),
-        2500,
-        null as any
+        3000,
+        0 as any
       );
+
+      if (!updatedRows) {
+        let parsedCarriers: any = [];
+        try {
+          parsedCarriers = JSON.parse(shippingCarriersJsonStr);
+        } catch {
+          parsedCarriers = [];
+        }
+        await withTimeout(
+          prisma.cMSData.upsert({
+            where: { id: 'singleton' },
+            update: {
+              shippingCarriers: parsedCarriers,
+              announcement: data.announcement || '',
+              announcement2: data.announcement2 || '',
+              contactPhone: data.contactPhone || '',
+              socialWhatsapp: data.socialWhatsapp || '',
+            },
+            create: {
+              id: 'singleton',
+              heroTitle: 'PEKEFE Geleneksel & Doğal Lezzetler',
+              heroSubtitle: 'İspir’in bereketli topraklarından doğal lezzetler',
+              buttonText: 'Ürünleri Keşfet',
+              announcement: data.announcement || '',
+              announcement2: data.announcement2 || '',
+              contactPhone: data.contactPhone || '',
+              socialWhatsapp: data.socialWhatsapp || '',
+              pricingRules: {},
+              shippingCarriers: parsedCarriers,
+              themeTemplates: {},
+              contentAnywhereRules: {},
+              savedSectionTemplates: [],
+              popupConfig: {},
+              faqData: [],
+            },
+          }),
+          3000,
+          null as any
+        );
+      }
     } catch (dbErr) {
       console.warn('[API SETTINGS WARNING] Raw SQL save failed, but disk data was saved:', dbErr);
     }

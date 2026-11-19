@@ -520,22 +520,32 @@ export default function OrderCommandCenter() {
     try {
       if (cancelModal.isBulk) {
         const ids = Array.from(selectedRows);
-        const result = await bulkCancelOrdersAction(ids, cancelModal.reason);
-        if (result.success) {
+        const res = await fetch("/api/orders/cancel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderIds: ids, reason: cancelModal.reason }),
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
           toast.success(`${ids.length} adet sipariş başarıyla iptal edildi.`);
           setSelectedRows(new Set());
-          refreshOrders();
+          await refreshOrders();
         } else {
           toast.error(result.error || "Toplu iptal işlemi başarısız oldu.");
         }
       } else if (cancelModal.orderId) {
-        const result = await cancelOrderAction(cancelModal.orderId, cancelModal.reason);
-        if (result.success) {
+        const res = await fetch("/api/orders/cancel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: cancelModal.orderId, reason: cancelModal.reason }),
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
           toast.success("Sipariş başarıyla iptal edildi.");
           if (selectedOrder?.id === cancelModal.orderId) {
             setSelectedOrder(prev => prev ? { ...prev, status: "İptal Edildi" } : null);
           }
-          refreshOrders();
+          await refreshOrders();
         } else {
           toast.error(result.error || "İptal işlemi başarısız oldu.");
         }
@@ -1987,9 +1997,16 @@ export default function OrderCommandCenter() {
                           {visibleColumns.client && (
                             <td className="p-4">
                               <p className="font-bold text-slate-800 text-sm">{order.client}</p>
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] border inline-block mt-1 ${tierColor}`}>
-                                {tierBadge}
-                              </span>
+                              <div className="flex flex-wrap items-center gap-1 mt-1">
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] border inline-block ${tierColor}`}>
+                                  {tierBadge}
+                                </span>
+                                {(order.cariKod || clientAcc?.cariKod) && (
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200 inline-block">
+                                    {order.cariKod || clientAcc?.cariKod}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                           )}
                           {visibleColumns.summary && (
@@ -2001,7 +2018,7 @@ export default function OrderCommandCenter() {
                             <td className="p-4">
                               <div className="flex flex-col text-[10px] text-slate-500 font-semibold space-y-0.5">
                                 <span className="flex items-center gap-1 text-slate-700">
-                                  <Truck className="w-3 h-3 text-slate-400" /> {order.cargoCompany || (order.summary && order.summary.startsWith("[") ? order.summary.match(/^\[([^\]|]+)/)?.[1]?.trim() : null) || "Yurtiçi Kargo"}
+                                  <Truck className="w-3 h-3 text-slate-400" /> {order.cargoCompany || (order.summary && order.summary.startsWith("[") ? order.summary.match(/^\[([^\]|]+)/)?.[1]?.trim() : null) || "Belirtilmedi"}
                                 </span>
                                 {(() => {
                                   const logDetails = calculateLogisticDetails(order.summary);

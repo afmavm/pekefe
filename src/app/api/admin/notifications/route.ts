@@ -125,13 +125,12 @@ export async function GET(request: NextRequest) {
     } catch {}
 
     const localOrders = readLocalOrders();
-    const combinedOrders: any[] = [];
+    const orderMap = new Map<string, any>();
 
     for (const o of dbOrders || []) {
       const key = normalizeOrderKey(o.id);
-      if (key && !seenOrderKeys.has(key)) {
-        seenOrderKeys.add(key);
-        combinedOrders.push({
+      if (key) {
+        orderMap.set(key, {
           id: o.id,
           client: o.currentAccount?.name || "Müşteri",
           total: Number(o.total || 0),
@@ -146,23 +145,43 @@ export async function GET(request: NextRequest) {
     for (const lo of localOrders || []) {
       const rawId = lo.id || lo.orderNumber || "";
       const key = normalizeOrderKey(rawId);
-      if (key && !seenOrderKeys.has(key)) {
-        seenOrderKeys.add(key);
-        combinedOrders.push({
-          id: rawId,
-          client: lo.client || lo.customerName || "Müşteri",
-          total: Number(lo.total ?? lo.amount ?? 0),
-          method: lo.method || "Kredi Kartı",
-          type: lo.type || "B2C",
-          status: lo.status || "Yeni",
-          date: lo.date || lo.createdAt || new Date().toISOString(),
-        });
-      }
+      if (!key) continue;
+      const existing = orderMap.get(key);
+      const exTs = existing?.date ? new Date(existing.date).getTime() : 0;
+      const loRawDate = lo.date || lo.createdAt;
+      const loTs = loRawDate ? new Date(loRawDate).getTime() : 0;
+      const resolvedDate =
+        exTs && loTs && Math.abs(loTs - exTs) > 86400000
+          ? loTs > exTs
+            ? loRawDate
+            : existing.date
+          : existing?.date || loRawDate || new Date().toISOString();
+
+      orderMap.set(key, {
+        id: existing?.id || rawId,
+        client: lo.client || lo.customerName || existing?.client || "Müşteri",
+        total: Number(lo.amount ?? lo.total ?? existing?.total ?? 0),
+        method: lo.method || existing?.method || "Kredi Kartı",
+        type: lo.type || existing?.type || "B2C",
+        status: lo.status || existing?.status || "Yeni",
+        date: resolvedDate,
+      });
     }
+
+    const combinedOrders = Array.from(orderMap.values());
 
     combinedOrders.forEach((o) => {
       const rawId = String(o.id);
       const normKey = normalizeOrderKey(rawId);
+      let displayOrderNo = rawId;
+      if (/^(PKF|B2B|B2C|ORD)-/i.test(rawId)) {
+        displayOrderNo = rawId.toUpperCase();
+      } else {
+        const year = o.date ? new Date(o.date).getFullYear() : new Date().getFullYear();
+        const suffix = normKey.length > 6 ? normKey.slice(-6) : normKey.padStart(6, "0");
+        const prefix = o.type === "B2B" ? "B2B" : "PKF";
+        displayOrderNo = `${prefix}-${year}-${suffix}`;
+      }
       const id = `notif-order-${rawId}`;
       const createdTime = o.date ? new Date(o.date).getTime() : Date.now();
       const isRead =
@@ -181,7 +200,7 @@ export async function GET(request: NextRequest) {
         id,
         orderId: rawId,
         type: isB2B ? "B2B_ORDER" : "ORDER",
-        title: isB2B ? `Yeni Toptan B2B Siparişi: #${rawId}` : `Yeni Sipariş: #${rawId}`,
+        title: isB2B ? `Yeni Toptan B2B Siparişi: #${displayOrderNo}` : `Yeni Sipariş: #${displayOrderNo}`,
         message: `${clientName} tarafından ₺${totalAmount} tutarında (${paymentMethod}) sipariş oluşturuldu.`,
         isRead: isRead ? 1 : 0,
         createdAt: o.date ? new Date(o.date).toISOString() : new Date().toISOString(),

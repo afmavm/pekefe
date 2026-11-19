@@ -158,6 +158,56 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       };
     }
 
+    // Enrich missing cariKod / phone / address / adresler
+    if (account) {
+      const patchData: any = {};
+      if (!account.cariKod || String(account.cariKod).trim() === "") {
+        const suffix = String(account.id || "").replace(/\D/g, "").slice(-4) || String(Math.floor(1000 + Math.random() * 9000));
+        account.cariKod = `PKF-CARI-${suffix.padStart(4, "0")}`;
+        patchData.cariKod = account.cariKod;
+      }
+
+      const localOrders = readLocalOrders();
+      const accEmail = String(account.email || "").trim().toLowerCase();
+      const matchedOrder = localOrders.find(
+        (o) =>
+          o.currentAccountId === account.id ||
+          (accEmail && String(o.email || "").trim().toLowerCase() === accEmail)
+      );
+      if (matchedOrder) {
+        if (!account.phone && matchedOrder.phone) {
+          account.phone = matchedOrder.phone;
+          patchData.phone = matchedOrder.phone;
+        }
+        if (!account.address && matchedOrder.address) {
+          account.address = matchedOrder.address;
+          patchData.address = matchedOrder.address;
+        }
+      }
+
+      if (account.address && (!Array.isArray(account.adresler) || account.adresler.length === 0)) {
+        account.adresler = [
+          {
+            id: `addr-${account.id}`,
+            title: "Kayıtlı Adres",
+            address: account.address,
+            city: "",
+            district: "",
+            isDefault: true,
+          },
+        ];
+      }
+
+      if (Object.keys(patchData).length > 0) {
+        updateLocalAccount(account.id, patchData);
+        withTimeout(
+          prisma.currentAccount.update({ where: { id: account.id }, data: patchData }),
+          1500,
+          null as any
+        ).catch(() => null);
+      }
+    }
+
     return NextResponse.json(account, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     console.error("GET Current Account error:", error);

@@ -19,7 +19,7 @@ export default function Odeme() {
   // Selected Options
   const [shippingMethod, setShippingMethod] = useState("standard"); // standard, express
   const [paymentMethod, setPaymentMethod] = useState("creditCard"); // creditCard, bankTransfer, openAccount
-  const [selectedCarrier, setSelectedCarrier] = useState("Yurtiçi Kargo");
+  const [selectedCarrier, setSelectedCarrier] = useState("");
 
   // Form Inputs
   const [formData, setFormData] = useState({
@@ -73,7 +73,7 @@ export default function Odeme() {
 
   // Fetch Bank Accounts and CMS Settings from management backend
   useEffect(() => {
-    fetch("/api/settings")
+    fetch(`/api/settings?t=${Date.now()}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setSiteSettings(data);
@@ -308,13 +308,16 @@ export default function Odeme() {
 
   const activeCarriers = parsedShippingCarriers;
 
-  // Auto select first active carrier if current selection is not in active list
+  // Auto select first active carrier if current selection is empty or not in active list
   useEffect(() => {
     if (activeCarriers.length > 0) {
-      const exists = activeCarriers.some(
-        c => c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr')) ||
-             selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
-      );
+      const exists =
+        selectedCarrier &&
+        activeCarriers.some(
+          (c) =>
+            c.name.toLocaleLowerCase("tr").includes(selectedCarrier.toLocaleLowerCase("tr")) ||
+            selectedCarrier.toLocaleLowerCase("tr").includes(c.name.toLocaleLowerCase("tr"))
+        );
       if (!exists) {
         setSelectedCarrier(activeCarriers[0].name);
       }

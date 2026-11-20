@@ -19,78 +19,84 @@ export const emailService = {
    */
   async sendTestEmail(eventType: string, recipient: string): Promise<string> {
     const siteUrl = emailNotificationService.getSiteUrl();
-    const dummyVariables: Record<string, Record<string, string>> = {
-      welcome: {
-        kullanici_adi: "Test Kullanıcı",
-        aktivasyon_linki: `${siteUrl}/giris`
-      },
-      forgot_password: {
-        kullanici_adi: "Test Kullanıcı",
-        sifirlama_linki: `${siteUrl}/giris?reset=token`,
-        sifirlama_kodu: "482910"
-      },
-      password_changed: {
-        kullanici_adi: "Test Kullanıcı",
-        tarih: new Date().toLocaleString("tr-TR")
-      },
-      order_received: {
-        kullanici_adi: "Test Kullanıcı",
-        siparis_no: "PKF-2026-998877",
-        siparis_tutari: "1.250,00",
-        siparis_icerik: "• İspir Dut Pekmezi × 2 adet",
-        odeme_yontemi: "Kredi Kartı",
-        kargo_adresi: "İspir / Erzurum",
-        kargo_sirketi: "Yurtiçi Kargo",
-        tarih: new Date().toLocaleString("tr-TR"),
-        detay_linki: `${siteUrl}/hesap`
-      },
-      order_cancelled: {
-        kullanici_adi: "Test Kullanıcı",
-        siparis_no: "PKF-2026-998877",
-        iptal_nedeni: "Müşteri talebi doğrultusunda iptal edilmiştir.",
-        siparis_ozeti: "İspir Dut Pekmezi (2)",
-        siparis_tutari: "1.250,00",
-        odeme_yontemi: "Kredi Kartı",
-        tarih: new Date().toLocaleString("tr-TR"),
-        detay_linki: `${siteUrl}/hesap`
-      },
-      order_status_updated: {
-        kullanici_adi: "Test Kullanıcı",
-        siparis_no: "PKF-2026-998877",
-        siparis_durumu: "Hazırlanıyor",
-        siparis_tutari: "1.250,00",
-        kargo_sirketi: "Yurtiçi Kargo",
-        takip_no: "YK1234567890",
-        tarih: new Date().toLocaleDateString("tr-TR"),
-        detay_linki: `${siteUrl}/hesap`
-      },
-      order_completed: {
-        kullanici_adi: "Test Kullanıcı",
-        siparis_no: "PKF-2026-998877"
-      },
-      cargo_shipped: {
-        kullanici_adi: "Test Kullanıcı",
-        siparis_no: "PKF-2026-998877",
-        kargo_sirketi: "Yurtiçi Kargo",
-        kargo_firmasi: "Yurtiçi Kargo",
-        takip_no: "YK1234567890",
-        tarih: new Date().toLocaleDateString("tr-TR"),
-        detay_linki: `${siteUrl}/hesap`,
-        takip_linki: "https://www.yurticikargo.com/"
-      },
-      reconciliation_request: {
-        cari_unvan: "Pekefe Geleneksel Gıda Ürünleri Ltd. Şti.",
-        bakiye: "45.670,00 ₺ (Alacaklı)",
-        vade_tarihi: "30.06.2026",
-        onay_linki: `${siteUrl}/b2b`
-      }
+    const todayStr = new Date().toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const nowStr = new Date().toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+    // Hem Türkçe hem İngilizce değişkenleri eksiksiz doldur (tüm DB ve varsayılan şablonlarla %100 uyumlu)
+    const baseTestVars: Record<string, string> = {
+      kullanici_adi: "Ahmet Yılmaz",
+      userName: "Ahmet Yılmaz",
+      name: "Ahmet Yılmaz",
+      userEmail: recipient,
+      recipientEmail: recipient,
+      email: recipient,
+      cari_unvan: "Pekefe Geleneksel Gıda Ltd. Şti.",
+      cariUnvan: "Pekefe Geleneksel Gıda Ltd. Şti.",
+      companyName: "Pekefe Geleneksel Gıda Ltd. Şti.",
+      cari_kod: "PKF-CARI-1001",
+      cariKod: "PKF-CARI-1001",
+      siparis_no: "PKF-2026-998877",
+      orderNo: "PKF-2026-998877",
+      siparis_tutari: "1.250,00 ₺",
+      orderTotal: "1.250,00 ₺",
+      paymentAmount: "1.250,00 ₺",
+      refundAmount: "1.250,00 ₺",
+      siparis_icerik: "• İspir Dut Gün Pekmezi 700g × 2 adet",
+      siparis_ozeti: "İspir Dut Gün Pekmezi 700g (2)",
+      siparis_durumu: "Hazırlanıyor",
+      odeme_yontemi: "Kredi Kartı (PayTR 3D Secure)",
+      paymentMethod: "Kredi Kartı (PayTR 3D Secure)",
+      refundMethod: "Kredi Kartına İade",
+      kargo_sirketi: "Yurtiçi Kargo",
+      kargo_firmasi: "Yurtiçi Kargo",
+      cargoCompany: "Yurtiçi Kargo",
+      kargo_adresi: "Çamlıca Mah. No:12 İspir / Erzurum",
+      shippingAddress: "Çamlıca Mah. No:12 İspir / Erzurum",
+      takip_no: "YK1234567890TR",
+      trackingNo: "YK1234567890TR",
+      takip_linki: `${siteUrl}/hesap`,
+      trackingUrl: `${siteUrl}/hesap`,
+      detay_linki: `${siteUrl}/hesap`,
+      orderDetailUrl: `${siteUrl}/hesap`,
+      loginUrl: `${siteUrl}/giris`,
+      aktivasyon_linki: `${siteUrl}/giris`,
+      verifyUrl: `${siteUrl}/giris?verify=test`,
+      resetUrl: `${siteUrl}/giris?reset=test`,
+      sifirlama_linki: `${siteUrl}/giris?reset=test`,
+      sifirlama_kodu: "482910",
+      portalUrl: `${siteUrl}/b2b`,
+      onay_linki: `${siteUrl}/b2b`,
+      shopUrl: `${siteUrl}/kategoriler`,
+      catalogUrl: `${siteUrl}/kategoriler`,
+      contactUrl: `${siteUrl}/iletisim`,
+      feedbackUrl: `${siteUrl}/hesap`,
+      invoiceUrl: `${siteUrl}/hesap`,
+      adminPanelUrl: `${siteUrl}/admin`,
+      tarih: todayStr,
+      orderDate: nowStr,
+      paymentDate: nowStr,
+      deliveredAt: nowStr,
+      expiresIn: "24 saat",
+      estimatedDelivery: "1–3 iş günü",
+      refundDays: "1–7 iş günü",
+      iptal_nedeni: "Müşteri talebi doğrultusunda iptal edilmiştir.",
+      cancelReason: "Müşteri talebi doğrultusunda iptal edilmiştir.",
+      rejectReason: "Eksik evrak nedeniyle başvurunuz şu an onaylanamamıştır.",
+      bakiye: "45.670,00 ₺ (Alacaklı)",
+      vade_tarihi: todayStr,
+      b2bGroup: "Gold Bayi",
+      discountRate: "20",
+      productName: "İspir Dut Gün Pekmezi (700g)",
+      sku: "PKF-PEKMEZ-700",
+      currentStock: "4",
+      criticalLimit: "10",
+      warehouseName: "Erzurum İspir Ana Depo",
     };
 
-    const vars = dummyVariables[eventType] || { kullanici_adi: "Test Kullanıcı" };
     return await this.sendEmail({
       eventType,
       recipient,
-      variables: vars
+      variables: baseTestVars
     });
   },
 

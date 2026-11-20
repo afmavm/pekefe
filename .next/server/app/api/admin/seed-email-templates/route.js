@@ -3,43 +3,60 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pekefe Geleneksel Lezzetler</title>
+<title>PEKEFE İspir Y\xf6resel \xdcr\xfcnler</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #333; }
-  .wrapper { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
-  .header { background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 40px; text-align: center; }
-  .header h1 { color: #fff; font-size: 24px; font-weight: 800; letter-spacing: 1px; }
-  .header p { color: #fef3c7; font-size: 12px; margin-top: 6px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
-  .body { padding: 36px 40px; }
-  .body h2 { font-size: 20px; color: #1a0a10; margin-bottom: 16px; font-weight: 700; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; background: #f6f1ee; color: #334155; }
+  .wrapper { max-width: 620px; margin: 24px auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 36px rgba(92,17,34,0.08); border: 1px solid #ece3de; }
+  .header { background: linear-gradient(135deg, #6b1d2f 0%, #3a0a16 100%); padding: 30px 28px 26px; text-align: center; border-bottom: 3px solid #d4a359; }
+  .header img { display: block; margin: 0 auto 12px; width: 68px; height: 68px; border-radius: 14px; background: #ffffff; padding: 4px; border: 2px solid #d4a359; object-fit: contain; }
+  .header h1 { color: #ffffff; font-size: 24px; font-weight: 900; letter-spacing: 0.14em; margin: 0; }
+  .header p { color: #f5d598; font-size: 10.5px; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; }
+  .body { padding: 32px 28px; }
+  .body h2 { font-size: 20px; color: #1a0a10; margin-bottom: 16px; font-weight: 800; }
   .body p { font-size: 14px; color: #475569; line-height: 1.7; margin-bottom: 14px; }
-  .btn { display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #fff !important; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 14px; margin: 12px 0 18px; box-shadow: 0 4px 14px rgba(107,29,47,0.25); }
-  .info-box { background: #fffbf5; border-left: 4px solid #d97706; border: 1px solid #fde68a; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
-  .info-box p { color: #78350f; margin: 0; font-size: 13px; margin-bottom: 6px; }
+  .btn { display: inline-block; padding: 13px 32px; background: linear-gradient(135deg, #6b1d2f, #8b263c); color: #ffffff !important; text-decoration: none; border-radius: 999px; font-weight: 700; font-size: 14px; margin: 14px 0 18px; box-shadow: 0 4px 14px rgba(107,29,47,0.28); }
+  .info-box { background: #fffbf5; border-left: 4px solid #d4a359; border: 1px solid #fde68a; border-radius: 12px; padding: 16px 20px; margin: 20px 0; }
+  .info-box p { color: #78350f; margin: 0 0 6px; font-size: 13px; }
   .order-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
-  .order-table th { background: #fcf8f6; padding: 10px 14px; text-align: left; font-weight: 600; color: #6b1d2f; border-bottom: 2px solid #e2e8f0; }
-  .order-table td { padding: 10px 14px; border-bottom: 1px solid #eee; color: #444; }
-  .order-table .total td { font-weight: 700; color: #6b1d2f; border-top: 2px solid #e2e8f0; background: #fffbf5; }
-  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .order-table th { background: #fcf8f6; padding: 10px 14px; text-align: left; font-weight: 700; color: #6b1d2f; border-bottom: 2px solid #e2e8f0; }
+  .order-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .order-table .total td { font-weight: 800; color: #6b1d2f; border-top: 2px solid #e2e8f0; background: #fffbf5; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; }
   .badge-warning { background: #fef3c7; color: #92400e; }
-  .divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
-  .footer { background: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 24px 40px; text-align: center; }
-  .footer p { color: #94a3b8; font-size: 11px; line-height: 1.8; }
-  .footer a { color: #6b1d2f; text-decoration: none; font-weight: 600; }
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 22px 0; }
+  .trust-bar { background: #fdf9f6; border-top: 1px solid #f1e8e3; border-bottom: 1px solid #f1e8e3; padding: 12px 20px; text-align: center; font-size: 11px; font-weight: 700; color: #6b1d2f; }
+  .footer { background: #260811; color: #e2d5d8; padding: 26px 28px; text-align: center; font-size: 12px; line-height: 1.7; }
+  .footer p { color: #d6c3c7; font-size: 11.5px; margin: 4px 0; }
+  .footer a { color: #f5d598; text-decoration: none; font-weight: 700; }
 </style>
 </head>
 <body>
 <div class="wrapper">
   <div class="header">
-    <h1>🌿 PEKEFE</h1>
-    <p>Geleneksel &amp; Doğal Lezzetler \xb7 İspir</p>
+    <a href="https://www.pekefe.com" target="_blank" style="text-decoration:none;display:inline-block;">
+      <img src="https://www.pekefe.com/logo.png" alt="PEKEFE İspir Y\xf6resel \xdcr\xfcnler" width="68" height="68" />
+    </a>
+    <h1>PEKEFE</h1>
+    <p>İspir Y\xf6resel \xdcr\xfcnler &middot; 2014'ten Beri</p>
   </div>
   <div class="body">${a}</div>
+  <div class="trust-bar">%100 Doğal İspir Mahsul\xfc &nbsp;&middot;&nbsp; 256-Bit SSL G\xfcvenli \xd6deme &nbsp;&middot;&nbsp; \xd6zenli &amp; Sigortalı Kargo</div>
   <div class="footer">
-    <p>&copy; 2026 Pekefe Geleneksel Lezzetler. T\xfcm Hakları Saklıdır.</p>
-    <p>Bu e-posta {{recipientEmail}} adresine g\xf6nderilmiştir.</p>
-    <p><a href="mailto:info@pekefe.com">info@pekefe.com</a> | <a href="http://localhost:3000">www.pekefe.com</a></p>
+    <p style="color:#ffffff;font-weight:800;font-size:13px;letter-spacing:0.06em;">PEKEFE İSPİR Y\xd6RESEL \xdcR\xdcNLER</p>
+    <p>\xc7amlıca Mahallesi, 25900 İspir / Erzurum, T\xfcrkiye</p>
+    <p>
+      <a href="tel:+905342709140">+90 534 270 91 40</a> &nbsp;&bull;&nbsp;
+      <a href="https://wa.me/905342709140" target="_blank" style="color:#86efac;">WhatsApp Destek</a> &nbsp;&bull;&nbsp;
+      <a href="mailto:info@pekefe.com">info@pekefe.com</a>
+    </p>
+    <p style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);">
+      <a href="https://www.pekefe.com/kategoriler" style="color:#ffffff;margin:0 8px;">Mağaza</a>
+      <a href="https://www.pekefe.com/hesap" style="color:#ffffff;margin:0 8px;">Hesabım</a>
+      <a href="https://www.pekefe.com/teslimat" style="color:#ffffff;margin:0 8px;">Teslimat &amp; İade</a>
+      <a href="https://www.pekefe.com/iletisim" style="color:#ffffff;margin:0 8px;">İletişim</a>
+    </p>
+    <p style="color:#a89096;font-size:10.5px;margin-top:8px;">Bu e-posta {{recipientEmail}} adresine g\xf6nderilmiştir. &copy; ${new Date().getFullYear()} PEKEFE. <a href="https://www.pekefe.com">www.pekefe.com</a></p>
   </div>
 </div>
 </body>

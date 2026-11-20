@@ -466,7 +466,7 @@ export class EmailNotificationService {
                         </tr>
                       </table>
                       <div style="text-align:center;margin:32px 0;">
-                        <a href="http://localhost:3000/b2b" style="background:linear-gradient(135deg,#6b1d2f,#8b2d3f);color:#ffffff;padding:14px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(107,29,47,0.25);">🔐 Bayi Portalına Giriş Yap</a>
+                        <a href="{{portalUrl}}" style="background:linear-gradient(135deg,#6b1d2f,#8b2d3f);color:#ffffff;padding:14px 36px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(107,29,47,0.25);">🔐 Bayi Portalına Giriş Yap</a>
                       </div>
                     </td>
                   </tr>
@@ -697,15 +697,147 @@ export class EmailNotificationService {
   }
 
   /**
-   * Replace template variables
+   * Replace template variables with full Turkish/English aliasing, production URLs, and corporate branding upgrade
    */
-  private compileTemplate(templateStr: string, placeholders: Record<string, any>): string {
+  private compileTemplate(templateStr: string, placeholders: Record<string, any>, recipient: string = ""): string {
+    const siteUrl = this.getSiteUrl();
+    const p = placeholders || {};
+    const nowDateStr = new Date().toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+    const resolvedName =
+      p.kullanici_adi || p.userName || p.name || p.customerName || p.cari_unvan || p.cariUnvan || p.companyName || "Değerli Müşterimiz";
+    const resolvedOrderNo = p.siparis_no || p.orderNo || p.orderNumber || "";
+    const resolvedTotal = p.siparis_tutari || p.orderTotal || p.paymentAmount || p.refundAmount || "";
+    const resolvedCarrier = p.kargo_sirketi || p.kargo_firmasi || p.cargoCompany || p.carrier || "Anlaşmalı Kargo";
+    const resolvedTrackingNo = p.takip_no || p.trackingNo || "Hazırlanıyor";
+    const resolvedDetailUrl = p.detay_linki || p.orderDetailUrl || `${siteUrl}/hesap`;
+    const resolvedTrackingUrl = p.takip_linki || p.trackingUrl || `${siteUrl}/hesap`;
+    const resolvedLoginUrl = p.loginUrl || p.aktivasyon_linki || `${siteUrl}/giris`;
+    const resolvedPortalUrl = p.portalUrl || p.onay_linki || `${siteUrl}/b2b`;
+    const resolvedShopUrl = p.shopUrl || p.catalogUrl || `${siteUrl}/kategoriler`;
+    const resolvedVerifyUrl = p.verifyUrl || p.aktivasyon_linki || `${siteUrl}/giris`;
+    const resolvedResetUrl = p.resetUrl || p.sifirlama_linki || `${siteUrl}/giris`;
+    const resolvedEmail = p.userEmail || p.recipientEmail || p.email || p.eposta || recipient || "";
+    const resolvedDate = p.tarih || p.orderDate || p.paymentDate || p.deliveredAt || nowDateStr;
+    const resolvedReason = p.iptal_nedeni || p.cancelReason || p.rejectReason || "Operasyonel değerlendirme / müşteri talebi doğrultusunda işlem yapılmıştır.";
+    const resolvedCariKod = p.cari_kod || p.cariKod || "PKF-CARI";
+
+    const enriched: Record<string, any> = {
+      // Base aliases (both TR & EN)
+      kullanici_adi: resolvedName,
+      userName: resolvedName,
+      name: resolvedName,
+      customerName: resolvedName,
+      yetkili: p.yetkili || resolvedName,
+      cari_unvan: p.cari_unvan || p.cariUnvan || resolvedName,
+      cariUnvan: p.cariUnvan || p.cari_unvan || resolvedName,
+      companyName: p.companyName || p.cari_unvan || resolvedName,
+      cari_kod: resolvedCariKod,
+      cariKod: resolvedCariKod,
+      userEmail: resolvedEmail,
+      recipientEmail: resolvedEmail,
+      email: resolvedEmail,
+      eposta: resolvedEmail,
+      siparis_no: resolvedOrderNo,
+      orderNo: resolvedOrderNo,
+      orderNumber: resolvedOrderNo,
+      siparis_tutari: resolvedTotal,
+      orderTotal: resolvedTotal,
+      paymentAmount: resolvedTotal,
+      refundAmount: resolvedTotal,
+      odeme_yontemi: p.odeme_yontemi || p.paymentMethod || p.refundMethod || "Online Ödeme / Havale",
+      paymentMethod: p.paymentMethod || p.odeme_yontemi || "Online Ödeme / Havale",
+      refundMethod: p.refundMethod || p.odeme_yontemi || "Ödeme Yönteminize İade",
+      kargo_sirketi: resolvedCarrier,
+      kargo_firmasi: resolvedCarrier,
+      cargoCompany: resolvedCarrier,
+      carrier: resolvedCarrier,
+      kargo_adresi: p.kargo_adresi || p.shippingAddress || "Kayıtlı Teslimat Adresiniz",
+      shippingAddress: p.shippingAddress || p.kargo_adresi || "Kayıtlı Teslimat Adresiniz",
+      takip_no: resolvedTrackingNo,
+      trackingNo: resolvedTrackingNo,
+      takip_linki: resolvedTrackingUrl,
+      trackingUrl: resolvedTrackingUrl,
+      detay_linki: resolvedDetailUrl,
+      orderDetailUrl: resolvedDetailUrl,
+      loginUrl: resolvedLoginUrl,
+      portalUrl: resolvedPortalUrl,
+      onay_linki: resolvedPortalUrl,
+      shopUrl: resolvedShopUrl,
+      catalogUrl: resolvedShopUrl,
+      verifyUrl: resolvedVerifyUrl,
+      aktivasyon_linki: resolvedVerifyUrl,
+      resetUrl: resolvedResetUrl,
+      sifirlama_linki: resolvedResetUrl,
+      contactUrl: p.contactUrl || `${siteUrl}/iletisim`,
+      feedbackUrl: p.feedbackUrl || `${siteUrl}/hesap`,
+      invoiceUrl: p.invoiceUrl || `${siteUrl}/hesap`,
+      adminPanelUrl: p.adminPanelUrl || `${siteUrl}/admin`,
+      expiresIn: p.expiresIn || "24 saat",
+      estimatedDelivery: p.estimatedDelivery || "1–3 iş günü",
+      refundDays: p.refundDays || "1–7 iş günü",
+      tarih: resolvedDate,
+      orderDate: resolvedDate,
+      paymentDate: resolvedDate,
+      deliveredAt: resolvedDate,
+      iptal_nedeni: resolvedReason,
+      cancelReason: resolvedReason,
+      rejectReason: resolvedReason,
+      bakiye: p.bakiye || "0,00 ₺",
+      vade_tarihi: p.vade_tarihi || resolvedDate,
+      b2bGroup: p.b2bGroup || "Standart Bayi",
+      discountRate: p.discountRate || "15",
+      // Explicit caller values always take top precedence
+      ...p,
+    };
+
     let result = templateStr || "";
-    Object.entries(placeholders || {}).forEach(([key, val]) => {
+    Object.entries(enriched).forEach(([key, val]) => {
       const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
       result = result.replace(regex, val !== undefined && val !== null ? String(val) : "");
     });
     result = result.replace(/{{\s*\w+\s*}}/g, "");
+
+    // Rewrite any legacy localhost URLs to live domain
+    result = result.replace(/https?:\/\/localhost:\d+/gi, siteUrl);
+
+    // Upgrade any template missing official PEKEFE logo in header (legacy DB templates or mutabakat/inline templates)
+    if (result.includes("<h1>🌿 PEKEFE</h1>") && !result.includes("/logo.png")) {
+      result = result.replace(
+        "<h1>🌿 PEKEFE</h1>",
+        `<a href="${siteUrl}" target="_blank" style="text-decoration:none;display:inline-block;"><img src="${siteUrl}/logo.png" alt="PEKEFE İspir Yöresel Ürünler" width="68" height="68" style="display:block;margin:0 auto 12px;border-radius:14px;background:#ffffff;padding:4px;border:2px solid #d4a359;object-fit:contain;" /></a><h1 style="color:#ffffff;font-size:24px;font-weight:900;letter-spacing:0.14em;margin:0;">PEKEFE</h1>`
+      );
+    } else if (!result.includes("/logo.png") && /<h[12][^>]*>(PEKEFE|MUTABAKAT MEKTUBU)/i.test(result)) {
+      result = result.replace(
+        /(<h[12][^>]*>(?:PEKEFE|MUTABAKAT MEKTUBU))/i,
+        `<a href="${siteUrl}" target="_blank" style="text-decoration:none;display:inline-block;"><img src="${siteUrl}/logo.png" alt="PEKEFE İspir Yöresel Ürünler" width="68" height="68" style="display:block;margin:0 auto 12px;border-radius:14px;background:#ffffff;padding:4px;border:2px solid #d4a359;object-fit:contain;" /></a>$1`
+      );
+    }
+
+    // Upgrade legacy footer if corporate address/WhatsApp is missing
+    if (result.includes("<div class=\"footer\">") && !result.includes("Çamlıca Mahallesi")) {
+      result = result.replace(
+        /<div class="footer">[\s\S]*?<\/div>/i,
+        `<div style="background:#fdf9f6;border-top:1px solid #f1e8e3;border-bottom:1px solid #f1e8e3;padding:12px 20px;text-align:center;font-size:11px;font-weight:700;color:#6b1d2f;">%100 Doğal İspir Mahsulü &nbsp;&middot;&nbsp; 256-Bit SSL Güvenli Ödeme &nbsp;&middot;&nbsp; Özenli &amp; Sigortalı Kargo</div>
+        <div class="footer" style="background:#260811;color:#e2d5d8;padding:24px 28px;text-align:center;font-size:12px;line-height:1.7;">
+          <p style="color:#ffffff;font-weight:800;font-size:13px;letter-spacing:0.06em;margin:0 0 4px;">PEKEFE İSPİR YÖRESEL ÜRÜNLER</p>
+          <p style="color:#d6c3c7;font-size:11.5px;margin:0 0 6px;">Çamlıca Mahallesi, 25900 İspir / Erzurum, Türkiye</p>
+          <p style="margin:0 0 10px;">
+            <a href="tel:+905342709140" style="color:#f5d598;text-decoration:none;font-weight:700;">+90 534 270 91 40</a> &nbsp;&bull;&nbsp;
+            <a href="https://wa.me/905342709140" target="_blank" style="color:#86efac;text-decoration:none;font-weight:700;">WhatsApp Destek</a> &nbsp;&bull;&nbsp;
+            <a href="mailto:info@pekefe.com" style="color:#f5d598;text-decoration:none;font-weight:700;">info@pekefe.com</a>
+          </p>
+          <p style="margin:10px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;">
+            <a href="${siteUrl}/kategoriler" style="color:#ffffff;text-decoration:none;margin:0 8px;">Mağaza</a>
+            <a href="${siteUrl}/hesap" style="color:#ffffff;text-decoration:none;margin:0 8px;">Hesabım</a>
+            <a href="${siteUrl}/teslimat" style="color:#ffffff;text-decoration:none;margin:0 8px;">Teslimat &amp; İade</a>
+            <a href="${siteUrl}/iletisim" style="color:#ffffff;text-decoration:none;margin:0 8px;">İletişim</a>
+          </p>
+          <p style="color:#a89096;font-size:10.5px;margin:6px 0 0;">&copy; ${new Date().getFullYear()} PEKEFE İspir Yöresel Ürünler. Tüm hakları saklıdır. &nbsp;|&nbsp; <a href="${siteUrl}" style="color:#f5d598;text-decoration:none;">www.pekefe.com</a></p>
+        </div>`
+      );
+    }
+
     return result;
   }
 
@@ -727,13 +859,22 @@ export class EmailNotificationService {
     let subject = "";
     let bodyHtml = "";
 
-    // 1. Try resolving template from DB with timeout
+    // 1. Try resolving template from DB with timeout (match both lowercase & uppercase eventType)
     try {
-      const templatePromise = prisma.emailTemplate.findUnique({
-        where: { eventType: cleanEventType },
-      });
-      const dbTemplate = await withTimeout(templatePromise, 1500, null as any);
-      if (dbTemplate && dbTemplate.status === "ACTIVE") {
+      const dbTemplate = await withTimeout(
+        prisma.emailTemplate.findFirst({
+          where: {
+            OR: [
+              { eventType: cleanEventType },
+              { eventType: cleanEventType.toUpperCase() },
+            ],
+            status: "ACTIVE",
+          },
+        }),
+        2000,
+        null as any
+      );
+      if (dbTemplate) {
         subject = dbTemplate.subject;
         bodyHtml = dbTemplate.bodyHtml;
       }
@@ -751,12 +892,12 @@ export class EmailNotificationService {
     }
 
     if (!subject || !bodyHtml) {
-      subject = `Pekefe Bilgilendirme - ${cleanEventType.toUpperCase()}`;
+      subject = `PEKEFE Bilgilendirme — ${cleanEventType.toUpperCase()}`;
       bodyHtml = `<p>Merhaba {{kullanici_adi}}, işleminiz başarıyla tamamlanmıştır.</p>`;
     }
 
-    const compiledSubject = this.compileTemplate(subject, placeholders);
-    const compiledBody = this.compileTemplate(bodyHtml, placeholders);
+    const compiledSubject = this.compileTemplate(subject, placeholders, recipient);
+    const compiledBody = this.compileTemplate(bodyHtml, placeholders, recipient);
 
     // 3. DIRECT INSTANT SEND (with 1 automatic retry on transient SMTP glitch)
     const attemptSend = async () => {

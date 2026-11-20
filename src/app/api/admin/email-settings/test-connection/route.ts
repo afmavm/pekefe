@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth-helpers";
 import { withRateLimit } from "@/lib/rate-limit";
+import { getLiveEnv } from "@/lib/env-helper";
 import nodemailer from "nodemailer";
 
 export const dynamic = "force-dynamic";
@@ -24,11 +25,11 @@ export const POST = withAuth<any>(
       const host = smtpHost;
       const port = Number(smtpPort);
       
-      // If password is empty in the test request, use the one stored in environment variables
-      const pass = smtpPass !== undefined && smtpPass !== "" ? smtpPass : process.env.SMTP_PASS;
+      // If password is empty in the test request, read the live saved password from .env / process.env
+      const pass = smtpPass !== undefined && smtpPass !== "" ? smtpPass : getLiveEnv("SMTP_PASS", "");
 
-      const fromName = smtpFromName || "PEKEFE Geleneksel & Doğal Lezzetler B2B Test";
-      const isSecure = smtpSecure === undefined ? (port === 465) : smtpSecure;
+      const fromName = smtpFromName || getLiveEnv("SMTP_FROM_NAME", "PEKEFE Geleneksel & Doğal Lezzetler B2B Test");
+      const isSecure = port === 465 ? true : port === 587 ? false : (smtpSecure === undefined ? false : smtpSecure);
 
       console.log(`[SMTP_TEST] Initiating connection test to ${host}:${port} (Secure: ${isSecure}) for user ${smtpUser}`);
 

@@ -243,6 +243,7 @@ export default function CariPage() {
   const [isCariModalOpen, setIsCariModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState<any | null>(null);
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -2691,8 +2692,13 @@ export default function CariPage() {
                         <tbody className="divide-y divide-slate-100">
                           {activeAccount.orders && activeAccount.orders.length > 0 ? (
                             activeAccount.orders.map(order => (
-                              <tr key={order.id} className="hover:bg-slate-50/20">
-                                <td className="px-4 py-3 font-bold text-slate-800 whitespace-nowrap">#{String((order as any).orderNumber || order.id).toUpperCase()}</td>
+                              <tr
+                                key={order.id}
+                                onClick={() => setSelectedOrderDetail(order)}
+                                className="hover:bg-orange-50/40 transition-colors cursor-pointer group"
+                                title="Sipariş detayını görüntülemek için tıklayın"
+                              >
+                                <td className="px-4 py-3 font-bold text-slate-800 group-hover:text-orange-600 whitespace-nowrap">#{String((order as any).orderNumber || order.id).toUpperCase()}</td>
                                 <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{new Date(order.date).toLocaleDateString("tr-TR")}</td>
                                 <td className="px-4 py-3 truncate max-w-[220px] font-bold text-slate-700" title={order.summary}>{order.summary}</td>
                                 <td className="px-4 py-3 text-slate-600">{order.method || "Kredi Kartı"}</td>
@@ -5447,6 +5453,150 @@ export default function CariPage() {
           </div>
         </div>
       )}
+
+      {/* SİPARİŞ DETAYI MODALI */}
+      {selectedOrderDetail && (() => {
+        const ord = selectedOrderDetail;
+        const rawSummary = String(ord.summary || "");
+        const carrierMatch = rawSummary.match(/^\[([^\]|]+)(?:\s*\|\s*([^\]]+))?\]/);
+        const cargoName = carrierMatch ? carrierMatch[1].trim() : "Standart Kargo";
+        const trackingCode = carrierMatch && carrierMatch[2] ? carrierMatch[2].trim() : "—";
+        const cleanSummary = rawSummary.replace(/^\[[^\]]+\]\s*/, "").trim();
+        const parsedItems = cleanSummary
+          ? cleanSummary.split(",").map(s => s.trim()).filter(Boolean).map(part => {
+              const m = part.match(/^(.+?)\s*\((\d+)\)\s*$/);
+              return m ? { name: m[1].trim(), qty: Number(m[2]) } : { name: part, qty: 1 };
+            })
+          : [];
+        const ordNo = String(ord.orderNumber || ord.id || "").toUpperCase();
+        const ordDateStr = ord.date
+          ? new Date(ord.date).toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+          : "—";
+
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+            onClick={() => setSelectedOrderDetail(null)}
+          >
+            <div
+              className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-widest text-orange-300 font-bold">Sipariş Detayı</p>
+                  <h3 className="text-base font-black truncate">#{ordNo}</h3>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
+                    ord.status === "Yeni" ? "bg-blue-500/20 text-blue-200 border border-blue-400/30" :
+                    ord.status === "Ödeme Onaylandı" || ord.status === "Tamamlandı" ? "bg-emerald-500/20 text-emerald-200 border border-emerald-400/30" :
+                    ord.status === "İptal Edildi" || ord.status === "İptal" ? "bg-rose-500/20 text-rose-200 border border-rose-400/30" :
+                    "bg-amber-500/20 text-amber-200 border border-amber-400/30"
+                  }`}>
+                    {ord.status}
+                  </span>
+                  <button
+                    onClick={() => setSelectedOrderDetail(null)}
+                    className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 overflow-y-auto space-y-5 text-xs">
+                {/* Info grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Müşteri / Cari</p>
+                    <p className="font-extrabold text-slate-800 text-sm">{activeAccount?.name || "—"}</p>
+                    {activeAccount?.cariKod && (
+                      <p className="text-[11px] font-mono font-bold text-orange-600">{activeAccount.cariKod}</p>
+                    )}
+                    {activeAccount?.phone && <p className="text-slate-500">{activeAccount.phone}</p>}
+                    {activeAccount?.email && <p className="text-slate-500 truncate">{activeAccount.email}</p>}
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Sipariş &amp; Lojistik</p>
+                    <div className="flex justify-between"><span className="text-slate-500">Tarih:</span><span className="font-bold text-slate-800">{ordDateStr}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Ödeme:</span><span className="font-bold text-slate-800">{ord.method || "Belirtilmedi"}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Kanal:</span><span className="font-bold text-slate-800">{ord.type || "B2C"}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Kargo:</span><span className="font-bold text-slate-800">{cargoName}</span></div>
+                    {trackingCode !== "—" && (
+                      <div className="flex justify-between"><span className="text-slate-500">Takip No:</span><span className="font-mono font-bold text-orange-600">{trackingCode}</span></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Items */}
+                <div className="space-y-2">
+                  <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Sipariş Kalemleri</h4>
+                  <div className="border border-slate-200 rounded-2xl overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
+                        <tr>
+                          <th className="px-4 py-2.5">Ürün / Açıklama</th>
+                          <th className="px-4 py-2.5 text-center w-24">Adet</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {parsedItems.length > 0 ? (
+                          parsedItems.map((it, idx) => (
+                            <tr key={idx}>
+                              <td className="px-4 py-2.5 font-bold text-slate-800">{it.name}</td>
+                              <td className="px-4 py-2.5 text-center font-black text-slate-700">{it.qty}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={2} className="px-4 py-3 text-slate-500">{rawSummary || "Sipariş içeriği belirtilmemiş."}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Totals */}
+                <div className="flex justify-end">
+                  <div className="w-full sm:w-64 p-4 bg-orange-50/70 border border-orange-200/80 rounded-2xl space-y-1.5">
+                    {Number(ord.shippingFee || 0) > 0 && (
+                      <div className="flex justify-between text-slate-600">
+                        <span>Kargo Ücreti:</span>
+                        <span className="font-bold">{formatCurrency(Number(ord.shippingFee), activeAccount?.currency || "TRY")}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-sm font-black text-slate-900">
+                      <span>Genel Toplam:</span>
+                      <span className="text-orange-600">{formatCurrency(Number(ord.total || 0), activeAccount?.currency || "TRY")}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-2">
+                <a
+                  href="/admin/orders"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition shadow-xs"
+                >
+                  Sipariş Yönetiminde Aç
+                </a>
+                <button
+                  onClick={() => setSelectedOrderDetail(null)}
+                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

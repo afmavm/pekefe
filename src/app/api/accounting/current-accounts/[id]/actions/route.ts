@@ -116,6 +116,13 @@ export async function POST(
           const balance = Number(account.balance);
           const isBorc = balance > 0;
           const formattedBalance = Math.abs(balance).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const isB2B =
+            account.type === "BAYI" ||
+            account.cariTipi === "CORPORATE" ||
+            account.cariTipi === "BAYI";
+          const siteUrl = emailNotificationService.getSiteUrl();
+          const portalUrl = isB2B ? `${siteUrl}/b2b` : `${siteUrl}/hesap`;
+          const portalLabel = isB2B ? "Bayi Portalına Giriş Yap" : "Hesabım & Ekstre Görüntüle";
 
           await emailNotificationService.queueEmail(
             account.email,
@@ -132,6 +139,8 @@ export async function POST(
               telefon: account.phone || "-",
               vade_gun: account.vadeGun ? `${account.vadeGun} Gün` : "-",
               adres: account.address || "-",
+              portalUrl,
+              portalLabel,
             }
           );
         } catch (emailErr: any) {

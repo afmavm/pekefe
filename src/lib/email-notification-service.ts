@@ -2,6 +2,7 @@ import { prisma, withTimeout } from "./prisma";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 import { getLiveEnv } from "./env-helper";
+import { wrapPekefeEmail } from "./email-brand-layout";
 
 // Email Queue Item Interface
 interface QueueItem {
@@ -434,92 +435,80 @@ export class EmailNotificationService {
       },
       mutabakat: {
         name: "Cari Hesap Mutabakat Mektubu",
-        subject: "Cari Hesap Mutabakat Talebi — {{tarih}} | Pekefe",
-        variables: "kullanici_adi,cari_kod,bakiye,bakiye_durumu,bakiye_rengi,bakiye_etiketi,tarih,yetkili,telefon,vade_gun,adres",
-        bodyHtml: `
-          <!DOCTYPE html>
-          <html lang="tr">
-          <head><meta charset="UTF-8"><title>Mutabakat Mektubu</title></head>
-          <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;">
-              <tr><td align="center">
-                <table width="620" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.06);">
-                  <tr>
-                    <td style="background:linear-gradient(135deg,#6b1d2f 0%,#3b0a18 100%);padding:36px 40px;text-align:center;">
-                      <p style="margin:0 0 4px 0;font-size:11px;color:#fef3c7;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;">PEKEFE GERÇEK HASAT</p>
-                      <h1 style="margin:0 0 4px 0;font-size:26px;color:#ffffff;font-weight:900;">MUTABAKAT MEKTUBU</h1>
-                      <p style="margin:0;font-size:11px;color:#fef3c7;letter-spacing:0.1em;text-transform:uppercase;">Cari Hesap Bakiye Bilgilendirmesi</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:36px 40px;">
-                      <p style="font-size:15px;color:#334155;line-height:1.8;">Sayın <strong style="color:#1e293b;">{{yetkili}}</strong>,</p>
-                      <p style="font-size:15px;color:#475569;line-height:1.8;">Firmamız kayıtlarına göre <strong>{{tarih}}</strong> tarihi itibarıyla cari hesap mutabakat bilgilerinizi sunuyoruz.</p>
-                      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin:24px 0;">
-                        <tr style="background-color:#f8fafc;">
-                          <td style="padding:12px 20px;font-size:13px;color:#64748b;font-weight:600;">Cari Hesap Adı</td>
-                          <td style="padding:12px 20px;font-size:13px;color:#1e293b;font-weight:700;">{{kullanici_adi}}</td>
-                        </tr>
-                        <tr>
-                          <td style="padding:12px 20px;font-size:13px;color:#64748b;font-weight:600;">Cari Kod</td>
-                          <td style="padding:12px 20px;font-size:13px;color:#1e293b;font-weight:700;font-family:monospace;">{{cari_kod}}</td>
-                        </tr>
-                      </table>
-                      <div style="text-align:center;margin:32px 0;">
-                        <a href="{{portalUrl}}" style="background:linear-gradient(135deg,#6b1d2f,#8b2d3f);color:#ffffff;padding:14px 36px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(107,29,47,0.25);">🔐 Bayi Portalına Giriş Yap</a>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="background-color:#fcf8f6;padding:16px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
-                    </td>
-                  </tr>
-                </table>
-              </td></tr>
+        subject: "Cari Hesap Mutabakat Talebi — {{tarih}} | PEKEFE",
+        variables: "kullanici_adi,cari_kod,bakiye,bakiye_durumu,bakiye_rengi,bakiye_etiketi,tarih,yetkili,telefon,vade_gun,adres,portalUrl,portalLabel",
+        bodyHtml: wrapPekefeEmail({
+          subtitle: "CARİ HESAP MUTABAKAT MEKTUBU",
+          badge: "Cari Hesap Bakiye Bilgilendirmesi",
+          title: "Mutabakat Mektubu",
+          bodyHtml: `
+            <p style="margin:0 0 12px 0;font-size:15px;color:#1e293b;">Sayın <strong>{{yetkili}}</strong>,</p>
+            <p style="margin:0 0 20px 0;font-size:14px;color:#475569;line-height:1.7;">Firmamız kayıtlarına göre <strong>{{tarih}}</strong> tarihi itibarıyla cari hesabınıza ait mutabakat ve güncel bakiye bilgilerinizi bilginize sunarız.</p>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;margin:0 0 20px 0;border-collapse:separate;">
+              <tr style="background-color:#f8fafc;">
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;width:42%;">Cari Hesap Adı</td>
+                <td style="padding:12px 16px;font-size:13px;color:#0f172a;font-weight:700;border-bottom:1px solid #e2e8f0;text-align:right;">{{kullanici_adi}}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Cari Kod</td>
+                <td style="padding:12px 16px;font-size:13px;color:#0f172a;font-weight:700;font-family:monospace;border-bottom:1px solid #e2e8f0;text-align:right;">{{cari_kod}}</td>
+              </tr>
+              <tr style="background-color:#f8fafc;">
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Mutabakat Tarihi</td>
+                <td style="padding:12px 16px;font-size:13px;color:#0f172a;font-weight:600;border-bottom:1px solid #e2e8f0;text-align:right;">{{tarih}}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;">Bakiye Durumu</td>
+                <td style="padding:12px 16px;font-size:13px;color:{{bakiye_rengi}};font-weight:800;text-align:right;">{{bakiye_durumu}}</td>
+              </tr>
             </table>
-          </body>
-          </html>
-        `
+            <div style="background-color:#fdf9f6;border:1.5px solid #ece3de;border-radius:14px;padding:18px 20px;text-align:center;margin:0 0 20px 0;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Güncel Net Bakiye</div>
+              <div style="font-size:22px;font-weight:900;color:{{bakiye_rengi}};letter-spacing:-0.01em;">{{bakiye_etiketi}}</div>
+            </div>
+            <p style="margin:0;font-size:12.5px;color:#64748b;line-height:1.65;">
+              Kayıtlarımızla ilgili herhangi bir farklılık tespit etmeniz halinde 7 iş günü içerisinde
+              <a href="mailto:info@pekefe.com" style="color:#6b1d2f;font-weight:700;text-decoration:none;">info@pekefe.com</a>
+              adresinden veya WhatsApp destek hattımızdan muhasebe birimimizle iletişime geçebilirsiniz.
+            </p>
+          `,
+          ctaText: "{{portalLabel}}",
+          ctaUrl: "{{portalUrl}}",
+        })
       },
       ekstre: {
         name: "Cari Hesap Ekstre Gönderimi",
-        subject: "Cari Hesap Ekstresi — {{tarih}} | Pekefe",
-        variables: "kullanici_adi,cari_kod,bakiye,bakiye_durumu,bakiye_rengi,bakiye_etiketi,tarih,yetkili,telefon,vade_gun,adres",
-        bodyHtml: `
-          <!DOCTYPE html>
-          <html lang="tr">
-          <head><meta charset="UTF-8"><title>Ekstre Bilgilendirmesi</title></head>
-          <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;">
-              <tr><td align="center">
-                <table width="620" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.06);">
-                  <tr>
-                    <td style="background:linear-gradient(135deg,#6b1d2f 0%,#3b0a18 100%);padding:36px 40px;text-align:center;">
-                      <p style="margin:0 0 4px 0;font-size:11px;color:#fef3c7;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;">PEKEFE GERÇEK HASAT</p>
-                      <h1 style="margin:0 0 4px 0;font-size:26px;color:#ffffff;font-weight:900;">CARİ HESAP EKSTRESİ</h1>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:36px 40px;">
-                      <p style="font-size:15px;color:#334155;line-height:1.8;">Sayın <strong style="color:#1e293b;">{{yetkili}}</strong>,</p>
-                      <p style="font-size:15px;color:#475569;line-height:1.8;"><strong>{{tarih}}</strong> tarihi itibarıyla cari hesabınıza ait bakiye bilgileri aşağıda yer almaktadır.</p>
-                      <div style="text-align:center;margin:32px 0;">
-                        <a href="http://localhost:3000/b2b" style="background:linear-gradient(135deg,#6b1d2f,#8b2d3f);color:#ffffff;padding:14px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;box-shadow:0 4px 12px rgba(107,29,47,0.25);">📋 Hesap Hareketlerimi Görüntüle</a>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="background-color:#fcf8f6;padding:16px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-                      <p style="margin:0;font-size:11px;color:#94a3b8;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
-                    </td>
-                  </tr>
-                </table>
-              </td></tr>
+        subject: "Cari Hesap Ekstresi — {{tarih}} | PEKEFE",
+        variables: "kullanici_adi,cari_kod,bakiye,bakiye_durumu,bakiye_rengi,bakiye_etiketi,tarih,yetkili,telefon,vade_gun,adres,portalUrl,portalLabel",
+        bodyHtml: wrapPekefeEmail({
+          subtitle: "CARİ HESAP EKSTRE BİLDİRİMİ",
+          badge: "Hesap Özeti",
+          title: "Cari Hesap Ekstresi",
+          bodyHtml: `
+            <p style="margin:0 0 12px 0;font-size:15px;color:#1e293b;">Sayın <strong>{{yetkili}}</strong>,</p>
+            <p style="margin:0 0 20px 0;font-size:14px;color:#475569;line-height:1.7;"><strong>{{tarih}}</strong> tarihi itibarıyla cari hesabınıza ait güncel bakiye özeti aşağıda yer almaktadır.</p>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;margin:0 0 20px 0;border-collapse:separate;">
+              <tr style="background-color:#f8fafc;">
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;width:42%;">Cari Hesap Adı</td>
+                <td style="padding:12px 16px;font-size:13px;color:#0f172a;font-weight:700;border-bottom:1px solid #e2e8f0;text-align:right;">{{kullanici_adi}}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;">Cari Kod</td>
+                <td style="padding:12px 16px;font-size:13px;color:#0f172a;font-weight:700;font-family:monospace;border-bottom:1px solid #e2e8f0;text-align:right;">{{cari_kod}}</td>
+              </tr>
+              <tr style="background-color:#f8fafc;">
+                <td style="padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;">Bakiye Durumu</td>
+                <td style="padding:12px 16px;font-size:13px;color:{{bakiye_rengi}};font-weight:800;text-align:right;">{{bakiye_durumu}}</td>
+              </tr>
             </table>
-          </body>
-          </html>
-        `
+            <div style="background-color:#fdf9f6;border:1.5px solid #ece3de;border-radius:14px;padding:18px 20px;text-align:center;margin:0 0 12px 0;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Güncel Net Bakiye</div>
+              <div style="font-size:22px;font-weight:900;color:{{bakiye_rengi}};">{{bakiye_etiketi}}</div>
+            </div>
+          `,
+          ctaText: "{{portalLabel}}",
+          ctaUrl: "{{portalUrl}}",
+        })
       },
       admin_new_order: {
         name: "Yeni Sipariş Bildirimi (Yönetici)",
@@ -762,6 +751,7 @@ export class EmailNotificationService {
       orderDetailUrl: resolvedDetailUrl,
       loginUrl: resolvedLoginUrl,
       portalUrl: resolvedPortalUrl,
+      portalLabel: p.portalLabel || "Hesabım & Ekstre Görüntüle",
       onay_linki: resolvedPortalUrl,
       shopUrl: resolvedShopUrl,
       catalogUrl: resolvedShopUrl,
@@ -784,6 +774,9 @@ export class EmailNotificationService {
       cancelReason: resolvedReason,
       rejectReason: resolvedReason,
       bakiye: p.bakiye || "0,00 ₺",
+      bakiye_durumu: p.bakiye_durumu || "MUTABIK",
+      bakiye_rengi: p.bakiye_rengi || "#475569",
+      bakiye_etiketi: p.bakiye_etiketi || `Bakiye: ${p.bakiye || "0,00"} TRY`,
       vade_tarihi: p.vade_tarihi || resolvedDate,
       b2bGroup: p.b2bGroup || "Standart Bayi",
       discountRate: p.discountRate || "15",
@@ -875,8 +868,14 @@ export class EmailNotificationService {
         null as any
       );
       if (dbTemplate) {
-        subject = dbTemplate.subject;
-        bodyHtml = dbTemplate.bodyHtml;
+        const isLegacyMutabakatOrEkstre =
+          (cleanEventType === "mutabakat" || cleanEventType === "ekstre") &&
+          (!dbTemplate.bodyHtml.includes("Çamlıca Mahallesi") ||
+            !dbTemplate.bodyHtml.includes("{{bakiye_etiketi}}"));
+        if (!isLegacyMutabakatOrEkstre) {
+          subject = dbTemplate.subject;
+          bodyHtml = dbTemplate.bodyHtml;
+        }
       }
     } catch {}
 

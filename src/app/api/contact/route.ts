@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { emailNotificationService } from '@/lib/email-notification-service';
 import { z } from 'zod';
 
 const ContactSchema = z.object({
@@ -45,6 +46,30 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    // Müşteriye alındı bilgisi ve yöneticiye iletişim bildirimi gönder
+    const nowStr = new Date().toLocaleString("tr-TR");
+    emailNotificationService
+      .queueEmail(email, "contact_received", {
+        kullanici_adi: name,
+        konu: mappedSubject,
+        tarih: nowStr,
+      })
+      .catch(() => {});
+
+    const adminEmail = emailNotificationService.getAdminEmail();
+    if (adminEmail) {
+      emailNotificationService
+        .queueEmail(adminEmail, "admin_contact_message", {
+          kullanici_adi: name,
+          eposta: email,
+          telefon: phone || "Belirtilmedi",
+          konu: mappedSubject,
+          mesaj: message,
+          tarih: nowStr,
+        })
+        .catch(() => {});
+    }
 
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {

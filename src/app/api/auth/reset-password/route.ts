@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, withTimeout } from "@/lib/prisma";
 import { findLocalUser, upsertLocalUser } from "@/lib/jsonUserDb";
 import { readLocalAccounts, updateLocalAccount } from "@/lib/jsonCurrentAccountsDb";
+import { emailNotificationService } from "@/lib/email-notification-service";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
@@ -132,6 +133,14 @@ export async function POST(req: NextRequest) {
         }
       });
     }
+
+    // Şifre değişikliği güvenlik e-postası gönder
+    emailNotificationService
+      .queueEmail(cleanEmail, "password_changed", {
+        kullanici_adi: resolvedName,
+        tarih: new Date().toLocaleString("tr-TR"),
+      })
+      .catch(() => {});
 
     return NextResponse.json({
       success: true,

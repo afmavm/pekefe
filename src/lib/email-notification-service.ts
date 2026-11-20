@@ -14,56 +14,57 @@ interface QueueItem {
 }
 
 export class EmailNotificationService {
-  private transporter: nodemailer.Transporter | null = null;
   private isProcessing = false;
-  private lastConfig = "";
 
   constructor() {}
 
   /**
-   * Dynamically build transporter based on current process.env
+   * Dynamically build a fresh, reliable SMTP transporter from live .env / process.env
    */
-  private getTransporter(): nodemailer.Transporter {
-    const host = getLiveEnv("SMTP_HOST", "smtp.turkticaret.net");
-    const portStr = getLiveEnv("SMTP_PORT", "587");
-    const port = Number(portStr) || 587;
-    const user = getLiveEnv("SMTP_USER", "");
+  private getTransporter(): { transporter: nodemailer.Transporter; fromEmail: string; fromName: string } {
+    const host = getLiveEnv("SMTP_HOST", "smtp.turkticaret.net").trim();
+    const portStr = getLiveEnv("SMTP_PORT", "465").trim();
+    const port = Number(portStr) || 465;
+    const user = getLiveEnv("SMTP_USER", "").trim();
     const pass = getLiveEnv("SMTP_PASS", "");
-    const secureStr = getLiveEnv("SMTP_SECURE", "false");
-    const secure = secureStr === "true";
+    const secureStr = getLiveEnv("SMTP_SECURE", "").trim().toLowerCase();
+    // Port 465 daima implicit SSL/TLS (secure: true), Port 587 daima STARTTLS (secure: false)
+    const secure = port === 465 ? true : port === 587 ? false : secureStr === "true";
+    const fromEmail = user || "info@pekefe.com";
+    const fromName = getLiveEnv("SMTP_FROM_NAME", "PEKEFE İSPİR YÖRESEL").trim() || "PEKEFE İSPİR YÖRESEL";
 
-    const currentConfig = `${host}-${port}-${user}-${pass}-${secure}`;
-    if (!this.transporter || this.lastConfig !== currentConfig) {
-      if (this.transporter) {
-        try {
-          this.transporter.close();
-        } catch (err) {
-          console.error("[EmailNotificationService] Error closing old transporter:", err);
-        }
-      }
-      this.transporter = nodemailer.createTransport({
-        pool: true,
-        host: host,
-        port: port,
-        secure: secure,
-        auth: {
-          user: user,
-          pass: pass,
-        },
-        connectionTimeout: 15000,
-        greetingTimeout: 15000,
-        socketTimeout: 20000,
-        maxConnections: 5,
-        maxMessages: 100,
-        rateLimit: 10,
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
-      this.lastConfig = currentConfig;
-      console.log("[EmailNotificationService] Nodemailer transporter initialized dynamically.");
-    }
-    return this.transporter;
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        user,
+        pass,
+      },
+      connectionTimeout: 12000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    return { transporter, fromEmail, fromName };
+  }
+
+  public getSiteUrl(): string {
+    const raw = getLiveEnv("NEXTAUTH_URL_INTERNAL", "") || getLiveEnv("NEXTAUTH_URL", "") || "https://www.pekefe.com";
+    return raw.includes("localhost") && process.env.NODE_ENV === "production"
+      ? "https://www.pekefe.com"
+      : raw.replace(/\/$/, "");
+  }
+
+  public getAdminEmail(): string {
+    const adminEmail = getLiveEnv("ADMIN_NOTIFICATION_EMAIL", "").trim();
+    if (adminEmail && adminEmail.includes("@")) return adminEmail;
+    const smtpUser = getLiveEnv("SMTP_USER", "").trim();
+    if (smtpUser && smtpUser.includes("@")) return smtpUser;
+    return "info@pekefe.com";
   }
 
   /**
@@ -86,7 +87,7 @@ export class EmailNotificationService {
               <p style="color: #475569; font-size: 15px; line-height: 1.7;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
               <p style="color: #475569; font-size: 15px; line-height: 1.7;">Pekefe ailesine katıldığınız için teşekkür ederiz. Anadolu'nun bereketli yaylalarından süzülen %100 doğal lezzetlerimizi inceleyebilir ve siparişinizi oluşturabilirsiniz.</p>
               <div style="text-align: center; margin: 32px 0;">
-                <a href="http://localhost:3000/magaza" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 14px 36px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.25);">Ürünleri Keşfet</a>
+                <a href="https://www.pekefe.com/kategoriler" style="background: linear-gradient(135deg, #6b1d2f, #8b2d3f); color: #ffffff; padding: 14px 36px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(107, 29, 47, 0.25);">Ürünleri Keşfet</a>
               </div>
               <p style="color: #64748b; font-size: 13px; line-height: 1.5;">Sorularınız için bu e-postaya yanıt verebilir veya info@pekefe.com adresimizden bize ulaşabilirsiniz.</p>
             </div>
@@ -559,15 +560,121 @@ export class EmailNotificationService {
             </div>
           </div>
         `
+      },
+      cargo_shipped: {
+        name: "Siparişiniz Kargoya Verildi",
+        subject: "Siparişiniz Kargoya Verildi — Sipariş No: #{{siparis_no}} 🚚",
+        variables: "kullanici_adi,siparis_no,kargo_sirketi,takip_no,tarih,detay_linki",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 36px 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 0.05em;">PEKEFE</h2>
+              <p style="color: #fef3c7; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.2em;">Kargo Bilgilendirmesi</p>
+            </div>
+            <div style="padding: 36px 32px;">
+              <p style="color: #1e293b; font-size: 15px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7;"><strong>#{{siparis_no}}</strong> numaralı siparişiniz özenle paketlenerek kargoya teslim edilmiştir.</p>
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; margin: 22px 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <tr><td style="padding: 6px 0; color: #64748b;">Kargo Firması</td><td style="padding: 6px 0; color: #0f172a; font-weight: 700; text-align: right;">{{kargo_sirketi}}</td></tr>
+                  <tr><td style="padding: 6px 0; color: #64748b;">Takip Numarası</td><td style="padding: 6px 0; color: #6b1d2f; font-weight: 800; font-family: monospace; text-align: right;">{{takip_no}}</td></tr>
+                  <tr><td style="padding: 6px 0; color: #64748b;">Tarih</td><td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">{{tarih}}</td></tr>
+                </table>
+              </div>
+              <div style="text-align: center; margin: 26px 0 12px 0;">
+                <a href="{{detay_linki}}" style="display: inline-block; background-color: #6b1d2f; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 13px; padding: 12px 28px; border-radius: 999px;">Siparişimi Takip Et</a>
+              </div>
+            </div>
+            <div style="background-color: #fcf8f6; border-top: 1px solid #f1f5f9; padding: 20px 32px; text-align: center;">
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Pekefe Geleneksel Lezzetler.</p>
+            </div>
+          </div>
+        `
+      },
+      forgot_password: {
+        name: "Şifre Sıfırlama Talebi",
+        subject: "PEKEFE — Şifre Sıfırlama Talebiniz",
+        variables: "kullanici_adi,sifirlama_linki,sifirlama_kodu",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900;">PEKEFE</h2>
+              <p style="color: #fef3c7; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.2em;">Hesap Güvenliği</p>
+            </div>
+            <div style="padding: 32px;">
+              <p style="color: #1e293b; font-size: 15px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7;">Hesabınız için şifre sıfırlama talebinde bulundunuz. Aşağıdaki doğrulama kodunu veya bağlantıyı kullanarak yeni şifrenizi belirleyebilirsiniz:</p>
+              <div style="background-color: #fffbf5; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; text-align: center; margin: 20px 0;">
+                <span style="font-size: 24px; font-weight: 900; letter-spacing: 0.2em; color: #6b1d2f; font-family: monospace;">{{sifirlama_kodu}}</span>
+              </div>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="{{sifirlama_linki}}" style="display: inline-block; background-color: #6b1d2f; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 999px;">Şifremi Sıfırla</a>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      password_changed: {
+        name: "Şifreniz Güncellendi",
+        subject: "PEKEFE — Hesap Şifreniz Güncellendi",
+        variables: "kullanici_adi,tarih",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900;">PEKEFE</h2>
+            </div>
+            <div style="padding: 32px;">
+              <p style="color: #1e293b; font-size: 15px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7;">Hesabınızın şifresi <strong>{{tarih}}</strong> tarihinde başarıyla güncellenmiştir. Bu işlemi siz gerçekleştirmediyseniz lütfen derhal <a href="mailto:info@pekefe.com" style="color:#6b1d2f;">info@pekefe.com</a> adresinden bizimle iletişime geçiniz.</p>
+            </div>
+          </div>
+        `
+      },
+      contact_received: {
+        name: "İletişim Mesajınız Alındı",
+        subject: "Mesajınız Bize Ulaştı — PEKEFE",
+        variables: "kullanici_adi,konu,tarih",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 32px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900;">PEKEFE</h2>
+            </div>
+            <div style="padding: 32px;">
+              <p style="color: #1e293b; font-size: 15px;">Merhaba <strong>{{kullanici_adi}}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7;"><strong>{{konu}}</strong> konulu mesajınız {{tarih}} tarihinde ekibimize ulaşmıştır. En kısa sürede size dönüş yapılacaktır.</p>
+            </div>
+          </div>
+        `
+      },
+      admin_contact_message: {
+        name: "Yeni İletişim Formu Mesajı",
+        subject: "Yeni İletişim Mesajı: {{konu}} — {{kullanici_adi}}",
+        variables: "kullanici_adi,eposta,telefon,konu,mesaj,tarih",
+        bodyHtml: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #6b1d2f 0%, #3b0a18 100%); padding: 28px; text-align: center;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">PEKEFE YÖNETİM</h2>
+              <p style="color: #fef3c7; font-size: 11px; margin: 4px 0 0 0;">Yeni İletişim Formu Bildirimi</p>
+            </div>
+            <div style="padding: 28px; font-size: 14px; color: #334155;">
+              <p><strong>Gönderen:</strong> {{kullanici_adi}} ({{eposta}})</p>
+              <p><strong>Telefon:</strong> {{telefon}}</p>
+              <p><strong>Konu:</strong> {{konu}}</p>
+              <p><strong>Tarih:</strong> {{tarih}}</p>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-top: 12px; white-space: pre-wrap;">{{mesaj}}</div>
+            </div>
+          </div>
+        `
       }
     };
 
     const def = defaultTemplates[eventType.toLowerCase().trim()];
     if (!def) {
-      throw new Error(`Default template not found for event: ${eventType}`);
+      return null;
     }
 
-    const created = await prisma.emailTemplate.upsert({
+    // DB'ye arka planda kaydet ama DB hatası/zaman aşımı olursa in-memory şablonu doğrudan döndür!
+    prisma.emailTemplate.upsert({
       where: { eventType: eventType.toLowerCase().trim() },
       update: {
         name: def.name,
@@ -584,10 +691,9 @@ export class EmailNotificationService {
         variables: def.variables,
         status: "ACTIVE"
       }
-    });
+    }).catch(() => {});
 
-    console.log(`[EmailNotificationService] Upserted default template for eventType: ${eventType}`);
-    return created;
+    return def;
   }
 
   /**
@@ -652,20 +758,32 @@ export class EmailNotificationService {
     const compiledSubject = this.compileTemplate(subject, placeholders);
     const compiledBody = this.compileTemplate(bodyHtml, placeholders);
 
-    // 3. DIRECT INSTANT SEND (No DB dependency blockage)
+    // 3. DIRECT INSTANT SEND (with 1 automatic retry on transient SMTP glitch)
+    const attemptSend = async () => {
+      const { transporter, fromEmail, fromName } = this.getTransporter();
+      try {
+        return await transporter.sendMail({
+          from: `"${fromName}" <${fromEmail}>`,
+          to: recipient,
+          subject: compiledSubject,
+          html: compiledBody,
+        });
+      } finally {
+        try { transporter.close(); } catch {}
+      }
+    };
+
     try {
-      const transporter = this.getTransporter();
-      const fromEmail = getLiveEnv("SMTP_USER", "info@pekefe.com");
-      const fromName = getLiveEnv("SMTP_FROM_NAME", "PEKEFE İSPİR YÖRESEL");
+      let info: any;
+      try {
+        info = await attemptSend();
+      } catch (firstErr: any) {
+        console.warn(`[EmailNotificationService] First send attempt failed for ${recipient}, retrying once:`, firstErr?.message || firstErr);
+        await new Promise(r => setTimeout(r, 1200));
+        info = await attemptSend();
+      }
 
-      const info = await transporter.sendMail({
-        from: `"${fromName}" <${fromEmail}>`,
-        to: recipient,
-        subject: compiledSubject,
-        html: compiledBody,
-      });
-
-      console.log(`[EmailNotificationService] ✅ EMAIL DIRECTLY SENT to ${recipient} (MessageID: ${info.messageId})`);
+      console.log(`[EmailNotificationService] ✅ EMAIL SENT to ${recipient} [${cleanEventType}] (MessageID: ${info.messageId})`);
 
       // Async non-blocking log
       prisma.emailLog.create({
@@ -681,7 +799,7 @@ export class EmailNotificationService {
 
       return info.messageId || "sent_ok";
     } catch (sendErr: any) {
-      console.error(`[EmailNotificationService] ❌ Direct email send failed to ${recipient}:`, sendErr);
+      console.error(`[EmailNotificationService] ❌ Email send failed to ${recipient} [${cleanEventType}]:`, sendErr?.message || sendErr);
 
       try {
         const log = await prisma.emailLog.create({
@@ -690,8 +808,8 @@ export class EmailNotificationService {
             subject: compiledSubject,
             bodyHtml: compiledBody,
             eventType: cleanEventType,
-            status: "PENDING",
-            retryCount: 0,
+            status: "FAILED",
+            retryCount: 1,
             errorMessage: sendErr?.message || "Direct send error"
           },
         });
@@ -718,16 +836,17 @@ export class EmailNotificationService {
 
       for (const email of pendingEmails) {
         try {
-          const transporter = this.getTransporter();
-          const fromEmail = getLiveEnv("SMTP_USER", "info@pekefe.com");
-          const fromName = getLiveEnv("SMTP_FROM_NAME", "Pekefe");
-
-          await transporter.sendMail({
-            from: `"${fromName}" <${fromEmail}>`,
-            to: email.recipient,
-            subject: email.subject,
-            html: email.bodyHtml,
-          });
+          const { transporter, fromEmail, fromName } = this.getTransporter();
+          try {
+            await transporter.sendMail({
+              from: `"${fromName}" <${fromEmail}>`,
+              to: email.recipient,
+              subject: email.subject,
+              html: email.bodyHtml,
+            });
+          } finally {
+            try { transporter.close(); } catch {}
+          }
 
           await prisma.emailLog.update({
             where: { id: email.id },

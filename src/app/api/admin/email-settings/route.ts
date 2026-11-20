@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth-helpers";
 import { withRateLimit } from "@/lib/rate-limit";
+import { getLiveEnv } from "@/lib/env-helper";
 import fs from "fs";
 import path from "path";
 
@@ -42,28 +43,28 @@ export const GET = withAuth<any>(
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-      const smtpPort = process.env.SMTP_PORT || "587";
-      const smtpSecureVal = process.env.SMTP_SECURE;
+      const smtpPort = getLiveEnv("SMTP_PORT", "465");
+      const smtpSecureVal = getLiveEnv("SMTP_SECURE", "");
       const smtpSecure = smtpSecureVal ? smtpSecureVal === "true" : (smtpPort === "465");
       
       return NextResponse.json({
-        smtpHost: process.env.SMTP_HOST || "smtp.gmail.com",
+        smtpHost: getLiveEnv("SMTP_HOST", "smtp.turkticaret.net"),
         smtpPort,
-        smtpUser: process.env.SMTP_USER || "",
-        smtpPass: process.env.SMTP_PASS || "",
-        smtpFromName: process.env.SMTP_FROM_NAME || "PEKEFE Geleneksel & Doğal Lezzetler B2B",
+        smtpUser: getLiveEnv("SMTP_USER", ""),
+        smtpPass: getLiveEnv("SMTP_PASS", ""),
+        smtpFromName: getLiveEnv("SMTP_FROM_NAME", "PEKEFE Geleneksel & Doğal Lezzetler B2B"),
         smtpSecure,
-        smtpMaxRetries: Number(process.env.SMTP_MAX_RETRIES) || 3,
-        smtpRetryDelay: Number(process.env.SMTP_RETRY_DELAY) || 5,
-        adminNotificationEmail: process.env.ADMIN_NOTIFICATION_EMAIL || "",
+        smtpMaxRetries: Number(getLiveEnv("SMTP_MAX_RETRIES", "3")) || 3,
+        smtpRetryDelay: Number(getLiveEnv("SMTP_RETRY_DELAY", "5")) || 5,
+        adminNotificationEmail: getLiveEnv("ADMIN_NOTIFICATION_EMAIL", ""),
         // WhatsApp settings
-        whatsappProvider: process.env.WHATSAPP_PROVIDER || "wame",
-        twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || "",
-        twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || "",
-        twilioWhatsappFrom: process.env.TWILIO_WHATSAPP_FROM || "",
-        metaWhatsappToken: process.env.META_WHATSAPP_TOKEN || "",
-        metaPhoneNumberId: process.env.META_PHONE_NUMBER_ID || "",
-        adminNotificationWhatsapp: process.env.ADMIN_NOTIFICATION_WHATSAPP || ""
+        whatsappProvider: getLiveEnv("WHATSAPP_PROVIDER", "wame"),
+        twilioAccountSid: getLiveEnv("TWILIO_ACCOUNT_SID", ""),
+        twilioAuthToken: getLiveEnv("TWILIO_AUTH_TOKEN", ""),
+        twilioWhatsappFrom: getLiveEnv("TWILIO_WHATSAPP_FROM", ""),
+        metaWhatsappToken: getLiveEnv("META_WHATSAPP_TOKEN", ""),
+        metaPhoneNumberId: getLiveEnv("META_PHONE_NUMBER_ID", ""),
+        adminNotificationWhatsapp: getLiveEnv("ADMIN_NOTIFICATION_WHATSAPP", "")
       });
     } catch (error) {
       console.error("Error reading integration settings:", error);

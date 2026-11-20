@@ -274,7 +274,23 @@ export async function POST(request: NextRequest) {
             kargo_adresi: customerAddress,
             kargo_sirketi: pendingOrder?.cargoCompany || 'Kargo',
             tarih: orderDateStr,
-            detay_linki: 'https://www.pekefe.com/hesap',
+            detay_linki: `${emailNotificationService.getSiteUrl()}/hesap`,
+          })
+          .catch(() => {});
+      }
+
+      const adminEmail = emailNotificationService.getAdminEmail();
+      if (adminEmail) {
+        emailNotificationService
+          .queueEmail(adminEmail, 'admin_new_order', {
+            kullanici_adi: customerName,
+            siparis_no: finalOrderId,
+            siparis_tutari: orderTotal.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+            tarih: new Date().toLocaleString('tr-TR'),
+            detay_linki: `${emailNotificationService.getSiteUrl()}/admin/orders`,
           })
           .catch(() => {});
       }

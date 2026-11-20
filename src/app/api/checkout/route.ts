@@ -535,6 +535,18 @@ export async function POST(request: NextRequest) {
             detay_linki: `${hostUrl}/hesap`
           });
         }
+
+        // Yöneticiye yeni sipariş bildirimi gönder
+        const adminEmail = emailNotificationService.getAdminEmail();
+        if (adminEmail) {
+          await emailNotificationService.queueEmail(adminEmail, "admin_new_order", {
+            kullanici_adi: name,
+            siparis_no: finalOrderId,
+            siparis_tutari: verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            tarih: new Date().toLocaleString("tr-TR"),
+            detay_linki: `${emailNotificationService.getSiteUrl()}/admin/orders`
+          });
+        }
       } catch (asyncErr) {
         console.error("[ASYNC CHECKOUT NOTIFICATIONS ERROR]:", asyncErr);
       }

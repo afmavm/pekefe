@@ -503,7 +503,30 @@ export const PATCH = withAuth<any>(
 
       // Always update local disk DB as well
       const { updateLocalOrderStatus } = await import('@/lib/jsonOrderDb');
-      updateLocalOrderStatus(orderId, { status });
+      const localUpdated = updateLocalOrderStatus(orderId, { status });
+
+      // Durum değişikliğinde müşteriye otomatik bilgilendirme e-postası gönder
+      const customerEmail = existingOrder?.currentAccount?.email || localUpdated?.email;
+      if (customerEmail && customerEmail !== "guest@nexab2b.com") {
+        const siteUrl = emailNotificationService.getSiteUrl();
+        const carrierMatch = String(existingOrder?.summary || localUpdated?.summary || "").match(/^\[([^\]|]+)(?:\s*\|\s*([^\]]+))?\]/);
+        const cargoName = carrierMatch ? carrierMatch[1].trim() : (localUpdated?.cargoCompany || "Standart Kargo");
+        const trackingCode = carrierMatch && carrierMatch[2] ? carrierMatch[2].trim() : (localUpdated?.trackingNo || "—");
+        const isShipped = /kargoland|kargo/i.test(String(status || ""));
+
+        emailNotificationService
+          .queueEmail(customerEmail, isShipped ? "cargo_shipped" : "order_status_updated", {
+            kullanici_adi: existingOrder?.currentAccount?.name || localUpdated?.client || "Değerli Müşterimiz",
+            siparis_no: existingOrder?.id || orderId,
+            siparis_durumu: status,
+            siparis_tutari: Number(existingOrder?.total || localUpdated?.amount || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 }),
+            kargo_sirketi: cargoName,
+            takip_no: trackingCode,
+            tarih: new Date().toLocaleDateString("tr-TR"),
+            detay_linki: `${siteUrl}/hesap`,
+          })
+          .catch(() => {});
+      }
 
       return NextResponse.json(updatedOrder);
     } catch (error) {

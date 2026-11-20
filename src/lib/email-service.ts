@@ -1,5 +1,4 @@
-import { prisma } from './prisma';
-import { emailQueue } from './email-queue';
+import { emailNotificationService } from './email-notification-service';
 
 interface SendEmailParams {
   eventType: string;
@@ -9,77 +8,81 @@ interface SendEmailParams {
 
 export const emailService = {
   /**
-   * Sends an email using a database-driven or fallback template.
+   * Sends an email using the unified EmailNotificationService (live .env SMTP + DB/in-memory templates).
    */
   async sendEmail({ eventType, recipient, variables }: SendEmailParams): Promise<string> {
-    try {
-      const template = await prisma.emailTemplate.findUnique({
-        where: { eventType }
-      });
-
-      if (!template || template.status !== 'ACTIVE') {
-        console.warn(`[EMAIL SERVICE] Active template not found for event: ${eventType}. Using fallback.`);
-        const fallback = this.getFallbackTemplate(eventType, variables);
-        return await emailQueue.addToQueue(recipient, fallback.subject, fallback.bodyHtml, eventType);
-      }
-
-      let subject = template.subject;
-      let bodyHtml = template.bodyHtml;
-
-      Object.entries(variables).forEach(([key, val]) => {
-        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-        subject = subject.replace(regex, val);
-        bodyHtml = bodyHtml.replace(regex, val);
-      });
-
-      subject = subject.replace(/{{\s*\w+\s*}}/g, '');
-      bodyHtml = bodyHtml.replace(/{{\s*\w+\s*}}/g, '');
-
-      return await emailQueue.addToQueue(recipient, subject, bodyHtml, eventType);
-    } catch (error) {
-      console.error(`[EMAIL SERVICE] Failed to send email for event ${eventType}:`, error);
-      throw error;
-    }
+    return await emailNotificationService.queueEmail(recipient, eventType, variables);
   },
 
   /**
-   * Helper to trigger a mock test email for a given template using default variables.
+   * Helper to trigger a test email for a given template using default variables.
    */
   async sendTestEmail(eventType: string, recipient: string): Promise<string> {
+    const siteUrl = emailNotificationService.getSiteUrl();
     const dummyVariables: Record<string, Record<string, string>> = {
       welcome: {
         kullanici_adi: "Test Kullanıcı",
-        aktivasyon_linki: "http://localhost:3000/giris"
+        aktivasyon_linki: `${siteUrl}/giris`
       },
       forgot_password: {
         kullanici_adi: "Test Kullanıcı",
-        sifirlama_linki: "http://localhost:3000/giris?reset=token"
+        sifirlama_linki: `${siteUrl}/giris?reset=token`,
+        sifirlama_kodu: "482910"
       },
       password_changed: {
-        kullanici_adi: "Test Kullanıcı"
+        kullanici_adi: "Test Kullanıcı",
+        tarih: new Date().toLocaleString("tr-TR")
       },
       order_received: {
         kullanici_adi: "Test Kullanıcı",
-        siparis_no: "SP-998877",
-        siparis_tutari: "12,500.00 ₺",
-        detay_linki: "http://localhost:3000/hesap"
+        siparis_no: "PKF-2026-998877",
+        siparis_tutari: "1.250,00",
+        siparis_icerik: "• İspir Dut Pekmezi × 2 adet",
+        odeme_yontemi: "Kredi Kartı",
+        kargo_adresi: "İspir / Erzurum",
+        kargo_sirketi: "Yurtiçi Kargo",
+        tarih: new Date().toLocaleString("tr-TR"),
+        detay_linki: `${siteUrl}/hesap`
+      },
+      order_cancelled: {
+        kullanici_adi: "Test Kullanıcı",
+        siparis_no: "PKF-2026-998877",
+        iptal_nedeni: "Müşteri talebi doğrultusunda iptal edilmiştir.",
+        siparis_ozeti: "İspir Dut Pekmezi (2)",
+        siparis_tutari: "1.250,00",
+        odeme_yontemi: "Kredi Kartı",
+        tarih: new Date().toLocaleString("tr-TR"),
+        detay_linki: `${siteUrl}/hesap`
+      },
+      order_status_updated: {
+        kullanici_adi: "Test Kullanıcı",
+        siparis_no: "PKF-2026-998877",
+        siparis_durumu: "Hazırlanıyor",
+        siparis_tutari: "1.250,00",
+        kargo_sirketi: "Yurtiçi Kargo",
+        takip_no: "YK1234567890",
+        tarih: new Date().toLocaleDateString("tr-TR"),
+        detay_linki: `${siteUrl}/hesap`
       },
       order_completed: {
         kullanici_adi: "Test Kullanıcı",
-        siparis_no: "SP-998877"
+        siparis_no: "PKF-2026-998877"
       },
       cargo_shipped: {
         kullanici_adi: "Test Kullanıcı",
-        siparis_no: "SP-998877",
+        siparis_no: "PKF-2026-998877",
+        kargo_sirketi: "Yurtiçi Kargo",
         kargo_firmasi: "Yurtiçi Kargo",
         takip_no: "YK1234567890",
-        takip_linki: "https://yurticikargo.com/query?no=YK1234567890"
+        tarih: new Date().toLocaleDateString("tr-TR"),
+        detay_linki: `${siteUrl}/hesap`,
+        takip_linki: "https://www.yurticikargo.com/"
       },
       reconciliation_request: {
         cari_unvan: "Pekefe Geleneksel Gıda Ürünleri Ltd. Şti.",
-        bakiye: "45,670.00 ₺ (Alacaklı)",
+        bakiye: "45.670,00 ₺ (Alacaklı)",
         vade_tarihi: "30.06.2026",
-        onay_linki: "http://localhost:3000/b2b"
+        onay_linki: `${siteUrl}/b2b`
       }
     };
 

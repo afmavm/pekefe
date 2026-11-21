@@ -602,8 +602,8 @@ model CMSData {
   companyCheckCurrentVkn         Boolean @default(true)
 
   // E-Fatura Ayarları
-  companyInvoiceFooter String  @default("")
-  footerText           String  @default("© 2026 PEKEFE Geleneksel & Doğal Lezzetler. Tüm Hakları Saklıdır.")
+  companyInvoiceFooter String? @db.LongText
+  footerText           String? @db.Text
   mapCoordinates       String  @default("")
   // Fırsat Ürünleri Bölümü
   dealSectionActive    Boolean @default(false)

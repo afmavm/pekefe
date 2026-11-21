@@ -31225,8 +31225,8 @@ export namespace Prisma {
     companyAutoDeductInstallments: boolean
     companyUseRowRateInPurchase: boolean
     companyCheckCurrentVkn: boolean
-    companyInvoiceFooter: string
-    footerText: string
+    companyInvoiceFooter: string | null
+    footerText: string | null
     mapCoordinates: string
     dealSectionActive: boolean
     dealProductIds: string
@@ -31578,8 +31578,8 @@ export namespace Prisma {
       companyAutoDeductInstallments: boolean
       companyUseRowRateInPurchase: boolean
       companyCheckCurrentVkn: boolean
-      companyInvoiceFooter: string
-      footerText: string
+      companyInvoiceFooter: string | null
+      footerText: string | null
       mapCoordinates: string
       dealSectionActive: boolean
       dealProductIds: string
@@ -83062,8 +83062,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFilter<"CMSData"> | boolean
     companyUseRowRateInPurchase?: BoolFilter<"CMSData"> | boolean
     companyCheckCurrentVkn?: BoolFilter<"CMSData"> | boolean
-    companyInvoiceFooter?: StringFilter<"CMSData"> | string
-    footerText?: StringFilter<"CMSData"> | string
+    companyInvoiceFooter?: StringNullableFilter<"CMSData"> | string | null
+    footerText?: StringNullableFilter<"CMSData"> | string | null
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
@@ -83171,8 +83171,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: SortOrder
     companyUseRowRateInPurchase?: SortOrder
     companyCheckCurrentVkn?: SortOrder
-    companyInvoiceFooter?: SortOrder
-    footerText?: SortOrder
+    companyInvoiceFooter?: SortOrderInput | SortOrder
+    footerText?: SortOrderInput | SortOrder
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
@@ -83284,8 +83284,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFilter<"CMSData"> | boolean
     companyUseRowRateInPurchase?: BoolFilter<"CMSData"> | boolean
     companyCheckCurrentVkn?: BoolFilter<"CMSData"> | boolean
-    companyInvoiceFooter?: StringFilter<"CMSData"> | string
-    footerText?: StringFilter<"CMSData"> | string
+    companyInvoiceFooter?: StringNullableFilter<"CMSData"> | string | null
+    footerText?: StringNullableFilter<"CMSData"> | string | null
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
@@ -83393,8 +83393,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: SortOrder
     companyUseRowRateInPurchase?: SortOrder
     companyCheckCurrentVkn?: SortOrder
-    companyInvoiceFooter?: SortOrder
-    footerText?: SortOrder
+    companyInvoiceFooter?: SortOrderInput | SortOrder
+    footerText?: SortOrderInput | SortOrder
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
@@ -83510,8 +83510,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolWithAggregatesFilter<"CMSData"> | boolean
     companyUseRowRateInPurchase?: BoolWithAggregatesFilter<"CMSData"> | boolean
     companyCheckCurrentVkn?: BoolWithAggregatesFilter<"CMSData"> | boolean
-    companyInvoiceFooter?: StringWithAggregatesFilter<"CMSData"> | string
-    footerText?: StringWithAggregatesFilter<"CMSData"> | string
+    companyInvoiceFooter?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
+    footerText?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
     mapCoordinates?: StringWithAggregatesFilter<"CMSData"> | string
     dealSectionActive?: BoolWithAggregatesFilter<"CMSData"> | boolean
     dealProductIds?: StringWithAggregatesFilter<"CMSData"> | string
@@ -89547,8 +89547,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: boolean
     companyUseRowRateInPurchase?: boolean
     companyCheckCurrentVkn?: boolean
-    companyInvoiceFooter?: string
-    footerText?: string
+    companyInvoiceFooter?: string | null
+    footerText?: string | null
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
@@ -89656,8 +89656,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: boolean
     companyUseRowRateInPurchase?: boolean
     companyCheckCurrentVkn?: boolean
-    companyInvoiceFooter?: string
-    footerText?: string
+    companyInvoiceFooter?: string | null
+    footerText?: string | null
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
@@ -89765,8 +89765,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFieldUpdateOperationsInput | boolean
     companyUseRowRateInPurchase?: BoolFieldUpdateOperationsInput | boolean
     companyCheckCurrentVkn?: BoolFieldUpdateOperationsInput | boolean
-    companyInvoiceFooter?: StringFieldUpdateOperationsInput | string
-    footerText?: StringFieldUpdateOperationsInput | string
+    companyInvoiceFooter?: NullableStringFieldUpdateOperationsInput | string | null
+    footerText?: NullableStringFieldUpdateOperationsInput | string | null
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
@@ -89874,8 +89874,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFieldUpdateOperationsInput | boolean
     companyUseRowRateInPurchase?: BoolFieldUpdateOperationsInput | boolean
     companyCheckCurrentVkn?: BoolFieldUpdateOperationsInput | boolean
-    companyInvoiceFooter?: StringFieldUpdateOperationsInput | string
-    footerText?: StringFieldUpdateOperationsInput | string
+    companyInvoiceFooter?: NullableStringFieldUpdateOperationsInput | string | null
+    footerText?: NullableStringFieldUpdateOperationsInput | string | null
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
@@ -89983,8 +89983,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: boolean
     companyUseRowRateInPurchase?: boolean
     companyCheckCurrentVkn?: boolean
-    companyInvoiceFooter?: string
-    footerText?: string
+    companyInvoiceFooter?: string | null
+    footerText?: string | null
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
@@ -90092,8 +90092,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFieldUpdateOperationsInput | boolean
     companyUseRowRateInPurchase?: BoolFieldUpdateOperationsInput | boolean
     companyCheckCurrentVkn?: BoolFieldUpdateOperationsInput | boolean
-    companyInvoiceFooter?: StringFieldUpdateOperationsInput | string
-    footerText?: StringFieldUpdateOperationsInput | string
+    companyInvoiceFooter?: NullableStringFieldUpdateOperationsInput | string | null
+    footerText?: NullableStringFieldUpdateOperationsInput | string | null
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
@@ -90201,8 +90201,8 @@ export namespace Prisma {
     companyAutoDeductInstallments?: BoolFieldUpdateOperationsInput | boolean
     companyUseRowRateInPurchase?: BoolFieldUpdateOperationsInput | boolean
     companyCheckCurrentVkn?: BoolFieldUpdateOperationsInput | boolean
-    companyInvoiceFooter?: StringFieldUpdateOperationsInput | string
-    footerText?: StringFieldUpdateOperationsInput | string
+    companyInvoiceFooter?: NullableStringFieldUpdateOperationsInput | string | null
+    footerText?: NullableStringFieldUpdateOperationsInput | string | null
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string

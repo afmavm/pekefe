@@ -201,7 +201,13 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData ADD COLUMN announcement2Enabled TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN contactPhoneEnabled TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN socialWhatsappEnabled TINYINT(1) NOT NULL DEFAULT 1",
-    "ALTER TABLE CMSData ADD COLUMN shippingCarriers LONGTEXT NULL"
+    "ALTER TABLE CMSData ADD COLUMN shippingCarriers LONGTEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN companyInvoiceFooter LONGTEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN contactAddress TEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN siteDescription TEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN footerText TEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN announcement TEXT NULL",
+    "ALTER TABLE CMSData MODIFY COLUMN announcement2 TEXT NULL"
   ];
 
   try {

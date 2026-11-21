@@ -782,17 +782,24 @@ export default function SystemOperationsView({ section = 'backup' }: { section?:
   };
 
   useEffect(() => {
-    if (section === 'backup') {
-      fetchData();
-    } else if (section === 'deployment') {
-      fetchDeployData(false);
-    } else if (section === 'settings') {
-      fetchRules();
-      fetchBanks();
-    } else if (section === 'company') {
-      fetchRules();
-      fetchBanks();
-    }
+    let active = true;
+    const loadSection = async () => {
+      try {
+        if (section === 'backup') {
+          await fetchData();
+        } else if (section === 'deployment') {
+          await fetchDeployData(false);
+        } else if (section === 'settings') {
+          await Promise.all([fetchRules(), fetchBanks()]);
+        } else if (section === 'company') {
+          await Promise.all([fetchRules(), fetchBanks()]);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    loadSection();
+    return () => { active = false; };
   }, [section]);
 
   // Poll deployment status if it's currently running

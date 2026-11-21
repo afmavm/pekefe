@@ -505,6 +505,14 @@ export default function CariPage() {
     const accTax   = (activeAccount.taxOffice && activeAccount.taxNo)
       ? `${activeAccount.taxOffice} - ${activeAccount.taxNo}`
       : (activeAccount.taxNo || activeAccount.tckn || "-");
+    const accPhone = activeAccount.phone || "-";
+    const accEmail = activeAccount.email || "-";
+    const accTypeLabel = activeAccount.cariTipi === "CORPORATE" ? "Kurumsal (B2B)" : "Bireysel (B2C)";
+    const accYetkili = activeAccount.yetkiliKisi || ([activeAccount.ad, activeAccount.soyad].filter(Boolean).join(" ").trim() || "");
+    const firstSavedAddr = Array.isArray(activeAccount.adresler) && activeAccount.adresler.length > 0
+      ? [activeAccount.adresler[0].fullAddress, activeAccount.adresler[0].district, activeAccount.adresler[0].city].filter(Boolean).join(" / ")
+      : "";
+    const accAddress = activeAccount.address || firstSavedAddr || "-";
     const dateRange = [ekstreFrom, ekstreTo].filter(Boolean).join(" / ") || "Tüm Zamanlar";
     const printDate = new Date().toLocaleString("tr-TR");
 
@@ -575,12 +583,20 @@ export default function CariPage() {
         <span class="badge">${docBadge}</span>
       </div>
       <div class="ig">
-        <div class="ic"><div class="il">Cari Unvan</div><div class="iv">${accName}</div></div>
+        <div class="ic">
+          <div class="il">Cari Unvan · ${accTypeLabel}</div>
+          <div class="iv">${accName}</div>
+          ${accYetkili && accYetkili.toLowerCase() !== accName.toLowerCase() ? `<div style="font-size:10px;color:#64748b;margin-top:2px">Yetkili: ${accYetkili}</div>` : ""}
+        </div>
         <div class="ic"><div class="il">Cari Kod</div><div class="iv">${accKod}</div></div>
-        <div class="ic"><div class="il">VKN / TCKN</div><div class="iv">${accTax}</div></div>
-        <div class="ic"><div class="il">Tarih Aralığı</div><div class="iv">${dateRange}</div></div>
-        <div class="ic"><div class="il">Gösterilen Hareket</div><div class="iv">${rows.length} kayıt</div></div>
-        <div class="ic"><div class="il">Oluşturulma</div><div class="iv">${printDate}</div></div>
+        <div class="ic"><div class="il">Vergi Dairesi / VKN / TCKN</div><div class="iv">${accTax}</div></div>
+        <div class="ic"><div class="il">Telefon</div><div class="iv">${accPhone}</div></div>
+        <div class="ic"><div class="il">E-Posta</div><div class="iv" style="word-break:break-all">${accEmail}</div></div>
+        <div class="ic"><div class="il">Tarih Aralığı · ${rows.length} Hareket</div><div class="iv">${dateRange}</div></div>
+        <div class="ic" style="grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <div><div class="il">Adres</div><div class="iv" style="font-weight:700">${accAddress}</div></div>
+          <div style="text-align:right;white-space:nowrap"><div class="il">Oluşturulma</div><div class="iv" style="font-size:11px">${printDate}</div></div>
+        </div>
       </div>
       <div class="sg">
         <div class="sc" style="background:#fef2f2;border:1px solid #fecaca"><div class="sl" style="color:#ef4444">${onlySelected ? "Seçili Borç Toplamı" : "Toplam Borç"}</div><div class="sv" style="color:#dc2626">${totalDebit} ₺</div></div>

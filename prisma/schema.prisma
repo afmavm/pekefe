@@ -190,7 +190,6 @@ model Product {
   @@index([category])
   @@index([createdAt])
   @@index([isDeleted])
-  @@index([sku])
   @@index([companyId])
   @@index([isDeal])
   @@index([salesCount])
@@ -226,7 +225,6 @@ model ProductVariant {
   wasteLogs        WasteLog[]
 
   @@index([productId])
-  @@index([sku])
 }
 
 model StockLocation {
@@ -406,6 +404,7 @@ model CurrentAccount {
   @@index([type])
   @@index([isActive])
   @@index([isDeleted])
+  @@index([isDeleted, updatedAt])
   @@index([parentDealerId])
   @@index([companyId])
   @@map("cariler")
@@ -502,6 +501,7 @@ model Order {
   @@index([date])
   @@index([currentAccountId])
   @@index([isDeleted])
+  @@index([isDeleted, date])
   @@index([companyId])
 }
 
@@ -610,13 +610,21 @@ model CMSData {
   dealProductIds           String  @default("[]")
 
   // Ödeme Yöntemi Ayarları
-  paymentMethodsConfig     String  @default("[]")
-  paytrConfig              String  @default("{}")
-  installmentsConfig       String  @default("[]")
+  paymentMethodsConfig     String? @default("[]") @db.LongText
+  paytrConfig              String? @default("{}") @db.LongText
+  installmentsConfig       String? @default("[]") @db.LongText
   cashOnDeliveryFee        Float   @default(25)
   cashOnDeliveryEnabled    Boolean @default(false)
   minOrderAmountForOpenAccount Float @default(500)
   openAccountDaysLimit     Int     @default(30)
+
+  // Stok & Üst Bar Görünürlük Ayarları
+  preventZeroStockSale      Boolean @default(true)
+  defaultCriticalStockLimit Int     @default(5)
+  announcement1Enabled      Boolean @default(true)
+  announcement2Enabled      Boolean @default(true)
+  contactPhoneEnabled       Boolean @default(true)
+  socialWhatsappEnabled     Boolean @default(true)
 }
 
 model CMSPage {
@@ -627,8 +635,6 @@ model CMSPage {
   sections  Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([slug])
 }
 
 model Integration {
@@ -765,8 +771,6 @@ model Coupon {
   isActive      Boolean   @default(true)
   expiresAt     DateTime?
   createdAt     DateTime  @default(now())
-
-  @@index([code])
 }
 
 model Ticket {
@@ -810,8 +814,6 @@ model Campaign {
   description String   @default("") 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  @@index([code])
 }
 
 model Feedback {
@@ -839,8 +841,6 @@ model BlogPost {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([slug])
 }
 
 model AccountingAccount {
@@ -853,8 +853,6 @@ model AccountingAccount {
   createdAt   DateTime      @default(now())
   debitLines  JournalLine[] @relation("DebitAccount")
   creditLines JournalLine[] @relation("CreditAccount")
-
-  @@index([code])
 }
 
 model JournalEntry {
@@ -874,7 +872,6 @@ model JournalEntry {
 
   @@index([status])
   @@index([date])
-  @@index([number])
   @@index([companyId])
 }
 

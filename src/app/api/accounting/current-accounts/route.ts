@@ -327,7 +327,7 @@ export async function GET(request: Request) {
           }
 
           const netBalance = Number((Number(acc.openingBalance || 0) + totalDebit - totalCredit).toFixed(2));
-          if (Math.abs(Number(acc.balance ?? 0) - netBalance) > 0.005) {
+          if (Math.abs(Number(acc.balance ?? 0) - netBalance) > 0.00001) {
             acc.balance = netBalance;
             prisma.currentAccount
               .update({ where: { id: acc.id }, data: { balance: netBalance } })

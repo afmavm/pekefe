@@ -535,7 +535,13 @@ exports.Prisma.CMSDataScalarFieldEnum = {
   cashOnDeliveryFee: 'cashOnDeliveryFee',
   cashOnDeliveryEnabled: 'cashOnDeliveryEnabled',
   minOrderAmountForOpenAccount: 'minOrderAmountForOpenAccount',
-  openAccountDaysLimit: 'openAccountDaysLimit'
+  openAccountDaysLimit: 'openAccountDaysLimit',
+  preventZeroStockSale: 'preventZeroStockSale',
+  defaultCriticalStockLimit: 'defaultCriticalStockLimit',
+  announcement1Enabled: 'announcement1Enabled',
+  announcement2Enabled: 'announcement2Enabled',
+  contactPhoneEnabled: 'contactPhoneEnabled',
+  socialWhatsappEnabled: 'socialWhatsappEnabled'
 };
 
 exports.Prisma.CMSPageScalarFieldEnum = {

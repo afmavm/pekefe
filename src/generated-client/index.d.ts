@@ -30364,6 +30364,7 @@ export namespace Prisma {
     cashOnDeliveryFee: number | null
     minOrderAmountForOpenAccount: number | null
     openAccountDaysLimit: number | null
+    defaultCriticalStockLimit: number | null
   }
 
   export type CMSDataSumAggregateOutputType = {
@@ -30381,6 +30382,7 @@ export namespace Prisma {
     cashOnDeliveryFee: number | null
     minOrderAmountForOpenAccount: number | null
     openAccountDaysLimit: number | null
+    defaultCriticalStockLimit: number | null
   }
 
   export type CMSDataMinAggregateOutputType = {
@@ -30477,6 +30479,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled: boolean | null
     minOrderAmountForOpenAccount: number | null
     openAccountDaysLimit: number | null
+    preventZeroStockSale: boolean | null
+    defaultCriticalStockLimit: number | null
+    announcement1Enabled: boolean | null
+    announcement2Enabled: boolean | null
+    contactPhoneEnabled: boolean | null
+    socialWhatsappEnabled: boolean | null
   }
 
   export type CMSDataMaxAggregateOutputType = {
@@ -30573,6 +30581,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled: boolean | null
     minOrderAmountForOpenAccount: number | null
     openAccountDaysLimit: number | null
+    preventZeroStockSale: boolean | null
+    defaultCriticalStockLimit: number | null
+    announcement1Enabled: boolean | null
+    announcement2Enabled: boolean | null
+    contactPhoneEnabled: boolean | null
+    socialWhatsappEnabled: boolean | null
   }
 
   export type CMSDataCountAggregateOutputType = {
@@ -30676,6 +30690,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled: number
     minOrderAmountForOpenAccount: number
     openAccountDaysLimit: number
+    preventZeroStockSale: number
+    defaultCriticalStockLimit: number
+    announcement1Enabled: number
+    announcement2Enabled: number
+    contactPhoneEnabled: number
+    socialWhatsappEnabled: number
     _all: number
   }
 
@@ -30695,6 +30715,7 @@ export namespace Prisma {
     cashOnDeliveryFee?: true
     minOrderAmountForOpenAccount?: true
     openAccountDaysLimit?: true
+    defaultCriticalStockLimit?: true
   }
 
   export type CMSDataSumAggregateInputType = {
@@ -30712,6 +30733,7 @@ export namespace Prisma {
     cashOnDeliveryFee?: true
     minOrderAmountForOpenAccount?: true
     openAccountDaysLimit?: true
+    defaultCriticalStockLimit?: true
   }
 
   export type CMSDataMinAggregateInputType = {
@@ -30808,6 +30830,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: true
     minOrderAmountForOpenAccount?: true
     openAccountDaysLimit?: true
+    preventZeroStockSale?: true
+    defaultCriticalStockLimit?: true
+    announcement1Enabled?: true
+    announcement2Enabled?: true
+    contactPhoneEnabled?: true
+    socialWhatsappEnabled?: true
   }
 
   export type CMSDataMaxAggregateInputType = {
@@ -30904,6 +30932,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: true
     minOrderAmountForOpenAccount?: true
     openAccountDaysLimit?: true
+    preventZeroStockSale?: true
+    defaultCriticalStockLimit?: true
+    announcement1Enabled?: true
+    announcement2Enabled?: true
+    contactPhoneEnabled?: true
+    socialWhatsappEnabled?: true
   }
 
   export type CMSDataCountAggregateInputType = {
@@ -31007,6 +31041,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: true
     minOrderAmountForOpenAccount?: true
     openAccountDaysLimit?: true
+    preventZeroStockSale?: true
+    defaultCriticalStockLimit?: true
+    announcement1Enabled?: true
+    announcement2Enabled?: true
+    contactPhoneEnabled?: true
+    socialWhatsappEnabled?: true
     _all?: true
   }
 
@@ -31190,13 +31230,19 @@ export namespace Prisma {
     mapCoordinates: string
     dealSectionActive: boolean
     dealProductIds: string
-    paymentMethodsConfig: string
-    paytrConfig: string
-    installmentsConfig: string
+    paymentMethodsConfig: string | null
+    paytrConfig: string | null
+    installmentsConfig: string | null
     cashOnDeliveryFee: number
     cashOnDeliveryEnabled: boolean
     minOrderAmountForOpenAccount: number
     openAccountDaysLimit: number
+    preventZeroStockSale: boolean
+    defaultCriticalStockLimit: number
+    announcement1Enabled: boolean
+    announcement2Enabled: boolean
+    contactPhoneEnabled: boolean
+    socialWhatsappEnabled: boolean
     _count: CMSDataCountAggregateOutputType | null
     _avg: CMSDataAvgAggregateOutputType | null
     _sum: CMSDataSumAggregateOutputType | null
@@ -31319,6 +31365,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: boolean
     minOrderAmountForOpenAccount?: boolean
     openAccountDaysLimit?: boolean
+    preventZeroStockSale?: boolean
+    defaultCriticalStockLimit?: boolean
+    announcement1Enabled?: boolean
+    announcement2Enabled?: boolean
+    contactPhoneEnabled?: boolean
+    socialWhatsappEnabled?: boolean
   }, ExtArgs["result"]["cMSData"]>
 
 
@@ -31424,9 +31476,15 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: boolean
     minOrderAmountForOpenAccount?: boolean
     openAccountDaysLimit?: boolean
+    preventZeroStockSale?: boolean
+    defaultCriticalStockLimit?: boolean
+    announcement1Enabled?: boolean
+    announcement2Enabled?: boolean
+    contactPhoneEnabled?: boolean
+    socialWhatsappEnabled?: boolean
   }
 
-  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "topBarItems" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds" | "paymentMethodsConfig" | "paytrConfig" | "installmentsConfig" | "cashOnDeliveryFee" | "cashOnDeliveryEnabled" | "minOrderAmountForOpenAccount" | "openAccountDaysLimit", ExtArgs["result"]["cMSData"]>
+  export type CMSDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "heroTitle" | "heroSubtitle" | "buttonText" | "announcement" | "announcement2" | "maintenanceMode" | "siteName" | "primaryColor" | "secondaryColor" | "siteDescription" | "categoryTitle" | "categorySubtitle" | "appTitle" | "appSubtitle" | "contactPhone" | "contactEmail" | "contactAddress" | "socialInstagram" | "socialWhatsapp" | "socialFacebook" | "socialYoutube" | "logoFont" | "logoUrl" | "logoSize" | "logoWeight" | "footerSlogan" | "borderRadius" | "announcementActive" | "announcementSpeed" | "layoutWidth" | "heroAlignment" | "pricingRules" | "shippingThreshold" | "shippingFee" | "shippingCarriers" | "themeTemplates" | "contentAnywhereRules" | "savedSectionTemplates" | "popupConfig" | "topBarText1" | "topBarText2" | "topBarItems" | "faqData" | "cartDiscountType" | "cartDiscountValue" | "cartDiscountMinAmount" | "bankTransferDiscountRate" | "companyName" | "bankName" | "bankIban" | "efaturaPrefix" | "earsivPrefix" | "companyStampUrl" | "companyOwnerName" | "companyOwnerSurname" | "companyTaxNo" | "companyTaxOffice" | "companyFax" | "companyGsm" | "companyKepAddress" | "companyMersisNo" | "companySicilNo" | "companyRegion" | "companyCountry" | "companyCity" | "companyDistrict" | "companyBuildingName" | "companyBuildingNo" | "companyStreet" | "companyPostalCode" | "companyWebsite" | "companyDefaultKdv" | "companyDefaultUnit" | "companyDefaultReturnDays" | "companySalesKdvIncluded" | "companyPurchaseKdvIncluded" | "companyDefaultLanguages" | "companyExcludedChars" | "companyDefaultTevkifatCode" | "companyListStartDay" | "companyAutoSendEarsivMail" | "companyUsePaymentPlan" | "companyAutoUpdatePriceByMargin" | "companyUseCurrencyInPurchase" | "companyAutoDeductInstallments" | "companyUseRowRateInPurchase" | "companyCheckCurrentVkn" | "companyInvoiceFooter" | "footerText" | "mapCoordinates" | "dealSectionActive" | "dealProductIds" | "paymentMethodsConfig" | "paytrConfig" | "installmentsConfig" | "cashOnDeliveryFee" | "cashOnDeliveryEnabled" | "minOrderAmountForOpenAccount" | "openAccountDaysLimit" | "preventZeroStockSale" | "defaultCriticalStockLimit" | "announcement1Enabled" | "announcement2Enabled" | "contactPhoneEnabled" | "socialWhatsappEnabled", ExtArgs["result"]["cMSData"]>
 
   export type $CMSDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CMSData"
@@ -31525,13 +31583,19 @@ export namespace Prisma {
       mapCoordinates: string
       dealSectionActive: boolean
       dealProductIds: string
-      paymentMethodsConfig: string
-      paytrConfig: string
-      installmentsConfig: string
+      paymentMethodsConfig: string | null
+      paytrConfig: string | null
+      installmentsConfig: string | null
       cashOnDeliveryFee: number
       cashOnDeliveryEnabled: boolean
       minOrderAmountForOpenAccount: number
       openAccountDaysLimit: number
+      preventZeroStockSale: boolean
+      defaultCriticalStockLimit: number
+      announcement1Enabled: boolean
+      announcement2Enabled: boolean
+      contactPhoneEnabled: boolean
+      socialWhatsappEnabled: boolean
     }, ExtArgs["result"]["cMSData"]>
     composites: {}
   }
@@ -32001,6 +32065,12 @@ export namespace Prisma {
     readonly cashOnDeliveryEnabled: FieldRef<"CMSData", 'Boolean'>
     readonly minOrderAmountForOpenAccount: FieldRef<"CMSData", 'Float'>
     readonly openAccountDaysLimit: FieldRef<"CMSData", 'Int'>
+    readonly preventZeroStockSale: FieldRef<"CMSData", 'Boolean'>
+    readonly defaultCriticalStockLimit: FieldRef<"CMSData", 'Int'>
+    readonly announcement1Enabled: FieldRef<"CMSData", 'Boolean'>
+    readonly announcement2Enabled: FieldRef<"CMSData", 'Boolean'>
+    readonly contactPhoneEnabled: FieldRef<"CMSData", 'Boolean'>
+    readonly socialWhatsappEnabled: FieldRef<"CMSData", 'Boolean'>
   }
     
 
@@ -79087,7 +79157,13 @@ export namespace Prisma {
     cashOnDeliveryFee: 'cashOnDeliveryFee',
     cashOnDeliveryEnabled: 'cashOnDeliveryEnabled',
     minOrderAmountForOpenAccount: 'minOrderAmountForOpenAccount',
-    openAccountDaysLimit: 'openAccountDaysLimit'
+    openAccountDaysLimit: 'openAccountDaysLimit',
+    preventZeroStockSale: 'preventZeroStockSale',
+    defaultCriticalStockLimit: 'defaultCriticalStockLimit',
+    announcement1Enabled: 'announcement1Enabled',
+    announcement2Enabled: 'announcement2Enabled',
+    contactPhoneEnabled: 'contactPhoneEnabled',
+    socialWhatsappEnabled: 'socialWhatsappEnabled'
   };
 
   export type CMSDataScalarFieldEnum = (typeof CMSDataScalarFieldEnum)[keyof typeof CMSDataScalarFieldEnum]
@@ -82991,13 +83067,19 @@ export namespace Prisma {
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
-    paymentMethodsConfig?: StringFilter<"CMSData"> | string
-    paytrConfig?: StringFilter<"CMSData"> | string
-    installmentsConfig?: StringFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringNullableFilter<"CMSData"> | string | null
+    paytrConfig?: StringNullableFilter<"CMSData"> | string | null
+    installmentsConfig?: StringNullableFilter<"CMSData"> | string | null
     cashOnDeliveryFee?: FloatFilter<"CMSData"> | number
     cashOnDeliveryEnabled?: BoolFilter<"CMSData"> | boolean
     minOrderAmountForOpenAccount?: FloatFilter<"CMSData"> | number
     openAccountDaysLimit?: IntFilter<"CMSData"> | number
+    preventZeroStockSale?: BoolFilter<"CMSData"> | boolean
+    defaultCriticalStockLimit?: IntFilter<"CMSData"> | number
+    announcement1Enabled?: BoolFilter<"CMSData"> | boolean
+    announcement2Enabled?: BoolFilter<"CMSData"> | boolean
+    contactPhoneEnabled?: BoolFilter<"CMSData"> | boolean
+    socialWhatsappEnabled?: BoolFilter<"CMSData"> | boolean
   }
 
   export type CMSDataOrderByWithRelationInput = {
@@ -83094,13 +83176,19 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
-    paymentMethodsConfig?: SortOrder
-    paytrConfig?: SortOrder
-    installmentsConfig?: SortOrder
+    paymentMethodsConfig?: SortOrderInput | SortOrder
+    paytrConfig?: SortOrderInput | SortOrder
+    installmentsConfig?: SortOrderInput | SortOrder
     cashOnDeliveryFee?: SortOrder
     cashOnDeliveryEnabled?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    preventZeroStockSale?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
+    announcement1Enabled?: SortOrder
+    announcement2Enabled?: SortOrder
+    contactPhoneEnabled?: SortOrder
+    socialWhatsappEnabled?: SortOrder
     _relevance?: CMSDataOrderByRelevanceInput
   }
 
@@ -83201,13 +83289,19 @@ export namespace Prisma {
     mapCoordinates?: StringFilter<"CMSData"> | string
     dealSectionActive?: BoolFilter<"CMSData"> | boolean
     dealProductIds?: StringFilter<"CMSData"> | string
-    paymentMethodsConfig?: StringFilter<"CMSData"> | string
-    paytrConfig?: StringFilter<"CMSData"> | string
-    installmentsConfig?: StringFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringNullableFilter<"CMSData"> | string | null
+    paytrConfig?: StringNullableFilter<"CMSData"> | string | null
+    installmentsConfig?: StringNullableFilter<"CMSData"> | string | null
     cashOnDeliveryFee?: FloatFilter<"CMSData"> | number
     cashOnDeliveryEnabled?: BoolFilter<"CMSData"> | boolean
     minOrderAmountForOpenAccount?: FloatFilter<"CMSData"> | number
     openAccountDaysLimit?: IntFilter<"CMSData"> | number
+    preventZeroStockSale?: BoolFilter<"CMSData"> | boolean
+    defaultCriticalStockLimit?: IntFilter<"CMSData"> | number
+    announcement1Enabled?: BoolFilter<"CMSData"> | boolean
+    announcement2Enabled?: BoolFilter<"CMSData"> | boolean
+    contactPhoneEnabled?: BoolFilter<"CMSData"> | boolean
+    socialWhatsappEnabled?: BoolFilter<"CMSData"> | boolean
   }, "id">
 
   export type CMSDataOrderByWithAggregationInput = {
@@ -83304,13 +83398,19 @@ export namespace Prisma {
     mapCoordinates?: SortOrder
     dealSectionActive?: SortOrder
     dealProductIds?: SortOrder
-    paymentMethodsConfig?: SortOrder
-    paytrConfig?: SortOrder
-    installmentsConfig?: SortOrder
+    paymentMethodsConfig?: SortOrderInput | SortOrder
+    paytrConfig?: SortOrderInput | SortOrder
+    installmentsConfig?: SortOrderInput | SortOrder
     cashOnDeliveryFee?: SortOrder
     cashOnDeliveryEnabled?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    preventZeroStockSale?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
+    announcement1Enabled?: SortOrder
+    announcement2Enabled?: SortOrder
+    contactPhoneEnabled?: SortOrder
+    socialWhatsappEnabled?: SortOrder
     _count?: CMSDataCountOrderByAggregateInput
     _avg?: CMSDataAvgOrderByAggregateInput
     _max?: CMSDataMaxOrderByAggregateInput
@@ -83415,13 +83515,19 @@ export namespace Prisma {
     mapCoordinates?: StringWithAggregatesFilter<"CMSData"> | string
     dealSectionActive?: BoolWithAggregatesFilter<"CMSData"> | boolean
     dealProductIds?: StringWithAggregatesFilter<"CMSData"> | string
-    paymentMethodsConfig?: StringWithAggregatesFilter<"CMSData"> | string
-    paytrConfig?: StringWithAggregatesFilter<"CMSData"> | string
-    installmentsConfig?: StringWithAggregatesFilter<"CMSData"> | string
+    paymentMethodsConfig?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
+    paytrConfig?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
+    installmentsConfig?: StringNullableWithAggregatesFilter<"CMSData"> | string | null
     cashOnDeliveryFee?: FloatWithAggregatesFilter<"CMSData"> | number
     cashOnDeliveryEnabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
     minOrderAmountForOpenAccount?: FloatWithAggregatesFilter<"CMSData"> | number
     openAccountDaysLimit?: IntWithAggregatesFilter<"CMSData"> | number
+    preventZeroStockSale?: BoolWithAggregatesFilter<"CMSData"> | boolean
+    defaultCriticalStockLimit?: IntWithAggregatesFilter<"CMSData"> | number
+    announcement1Enabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
+    announcement2Enabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
+    contactPhoneEnabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
+    socialWhatsappEnabled?: BoolWithAggregatesFilter<"CMSData"> | boolean
   }
 
   export type CMSPageWhereInput = {
@@ -89446,13 +89552,19 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
-    paymentMethodsConfig?: string
-    paytrConfig?: string
-    installmentsConfig?: string
+    paymentMethodsConfig?: string | null
+    paytrConfig?: string | null
+    installmentsConfig?: string | null
     cashOnDeliveryFee?: number
     cashOnDeliveryEnabled?: boolean
     minOrderAmountForOpenAccount?: number
     openAccountDaysLimit?: number
+    preventZeroStockSale?: boolean
+    defaultCriticalStockLimit?: number
+    announcement1Enabled?: boolean
+    announcement2Enabled?: boolean
+    contactPhoneEnabled?: boolean
+    socialWhatsappEnabled?: boolean
   }
 
   export type CMSDataUncheckedCreateInput = {
@@ -89549,13 +89661,19 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
-    paymentMethodsConfig?: string
-    paytrConfig?: string
-    installmentsConfig?: string
+    paymentMethodsConfig?: string | null
+    paytrConfig?: string | null
+    installmentsConfig?: string | null
     cashOnDeliveryFee?: number
     cashOnDeliveryEnabled?: boolean
     minOrderAmountForOpenAccount?: number
     openAccountDaysLimit?: number
+    preventZeroStockSale?: boolean
+    defaultCriticalStockLimit?: number
+    announcement1Enabled?: boolean
+    announcement2Enabled?: boolean
+    contactPhoneEnabled?: boolean
+    socialWhatsappEnabled?: boolean
   }
 
   export type CMSDataUpdateInput = {
@@ -89652,13 +89770,19 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
-    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
-    paytrConfig?: StringFieldUpdateOperationsInput | string
-    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    paytrConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    installmentsConfig?: NullableStringFieldUpdateOperationsInput | string | null
     cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
     cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
     minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
     openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
+    preventZeroStockSale?: BoolFieldUpdateOperationsInput | boolean
+    defaultCriticalStockLimit?: IntFieldUpdateOperationsInput | number
+    announcement1Enabled?: BoolFieldUpdateOperationsInput | boolean
+    announcement2Enabled?: BoolFieldUpdateOperationsInput | boolean
+    contactPhoneEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialWhatsappEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CMSDataUncheckedUpdateInput = {
@@ -89755,13 +89879,19 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
-    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
-    paytrConfig?: StringFieldUpdateOperationsInput | string
-    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    paytrConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    installmentsConfig?: NullableStringFieldUpdateOperationsInput | string | null
     cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
     cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
     minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
     openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
+    preventZeroStockSale?: BoolFieldUpdateOperationsInput | boolean
+    defaultCriticalStockLimit?: IntFieldUpdateOperationsInput | number
+    announcement1Enabled?: BoolFieldUpdateOperationsInput | boolean
+    announcement2Enabled?: BoolFieldUpdateOperationsInput | boolean
+    contactPhoneEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialWhatsappEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CMSDataCreateManyInput = {
@@ -89858,13 +89988,19 @@ export namespace Prisma {
     mapCoordinates?: string
     dealSectionActive?: boolean
     dealProductIds?: string
-    paymentMethodsConfig?: string
-    paytrConfig?: string
-    installmentsConfig?: string
+    paymentMethodsConfig?: string | null
+    paytrConfig?: string | null
+    installmentsConfig?: string | null
     cashOnDeliveryFee?: number
     cashOnDeliveryEnabled?: boolean
     minOrderAmountForOpenAccount?: number
     openAccountDaysLimit?: number
+    preventZeroStockSale?: boolean
+    defaultCriticalStockLimit?: number
+    announcement1Enabled?: boolean
+    announcement2Enabled?: boolean
+    contactPhoneEnabled?: boolean
+    socialWhatsappEnabled?: boolean
   }
 
   export type CMSDataUpdateManyMutationInput = {
@@ -89961,13 +90097,19 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
-    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
-    paytrConfig?: StringFieldUpdateOperationsInput | string
-    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    paytrConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    installmentsConfig?: NullableStringFieldUpdateOperationsInput | string | null
     cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
     cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
     minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
     openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
+    preventZeroStockSale?: BoolFieldUpdateOperationsInput | boolean
+    defaultCriticalStockLimit?: IntFieldUpdateOperationsInput | number
+    announcement1Enabled?: BoolFieldUpdateOperationsInput | boolean
+    announcement2Enabled?: BoolFieldUpdateOperationsInput | boolean
+    contactPhoneEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialWhatsappEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CMSDataUncheckedUpdateManyInput = {
@@ -90064,13 +90206,19 @@ export namespace Prisma {
     mapCoordinates?: StringFieldUpdateOperationsInput | string
     dealSectionActive?: BoolFieldUpdateOperationsInput | boolean
     dealProductIds?: StringFieldUpdateOperationsInput | string
-    paymentMethodsConfig?: StringFieldUpdateOperationsInput | string
-    paytrConfig?: StringFieldUpdateOperationsInput | string
-    installmentsConfig?: StringFieldUpdateOperationsInput | string
+    paymentMethodsConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    paytrConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    installmentsConfig?: NullableStringFieldUpdateOperationsInput | string | null
     cashOnDeliveryFee?: FloatFieldUpdateOperationsInput | number
     cashOnDeliveryEnabled?: BoolFieldUpdateOperationsInput | boolean
     minOrderAmountForOpenAccount?: FloatFieldUpdateOperationsInput | number
     openAccountDaysLimit?: IntFieldUpdateOperationsInput | number
+    preventZeroStockSale?: BoolFieldUpdateOperationsInput | boolean
+    defaultCriticalStockLimit?: IntFieldUpdateOperationsInput | number
+    announcement1Enabled?: BoolFieldUpdateOperationsInput | boolean
+    announcement2Enabled?: BoolFieldUpdateOperationsInput | boolean
+    contactPhoneEnabled?: BoolFieldUpdateOperationsInput | boolean
+    socialWhatsappEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CMSPageCreateInput = {
@@ -95935,6 +96083,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    preventZeroStockSale?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
+    announcement1Enabled?: SortOrder
+    announcement2Enabled?: SortOrder
+    contactPhoneEnabled?: SortOrder
+    socialWhatsappEnabled?: SortOrder
   }
 
   export type CMSDataAvgOrderByAggregateInput = {
@@ -95952,6 +96106,7 @@ export namespace Prisma {
     cashOnDeliveryFee?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
   }
 
   export type CMSDataMaxOrderByAggregateInput = {
@@ -96048,6 +96203,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    preventZeroStockSale?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
+    announcement1Enabled?: SortOrder
+    announcement2Enabled?: SortOrder
+    contactPhoneEnabled?: SortOrder
+    socialWhatsappEnabled?: SortOrder
   }
 
   export type CMSDataMinOrderByAggregateInput = {
@@ -96144,6 +96305,12 @@ export namespace Prisma {
     cashOnDeliveryEnabled?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    preventZeroStockSale?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
+    announcement1Enabled?: SortOrder
+    announcement2Enabled?: SortOrder
+    contactPhoneEnabled?: SortOrder
+    socialWhatsappEnabled?: SortOrder
   }
 
   export type CMSDataSumOrderByAggregateInput = {
@@ -96161,6 +96328,7 @@ export namespace Prisma {
     cashOnDeliveryFee?: SortOrder
     minOrderAmountForOpenAccount?: SortOrder
     openAccountDaysLimit?: SortOrder
+    defaultCriticalStockLimit?: SortOrder
   }
 
   export type CMSPageOrderByRelevanceInput = {

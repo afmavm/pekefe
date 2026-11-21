@@ -348,7 +348,38 @@ export default function CariPage() {
   const [ekstreType, setEkstreType] = useState<"ALL"|"TX"|"ORDER"|"INVOICE">("ALL");
   const [ekstreFrom, setEkstreFrom] = useState("");
   const [ekstreTo, setEkstreTo] = useState("");
+  const [ekstreSortField, setEkstreSortField] = useState<"date"|"type"|"description"|"debit"|"credit"|"runningBalance">("date");
+  const [ekstreSortDir, setEkstreSortDir] = useState<"asc"|"desc">("desc");
   const [selectedEkstreIds, setSelectedEkstreIds] = useState<string[]>([]);
+
+  const toggleEkstreSort = (field: "date"|"type"|"description"|"debit"|"credit"|"runningBalance") => {
+    if (ekstreSortField === field) {
+      setEkstreSortDir(prev => (prev === "desc" ? "asc" : "desc"));
+    } else {
+      setEkstreSortField(field);
+      setEkstreSortDir("desc");
+    }
+  };
+
+  const getSortedEkstreRows = (rawRows: any[] = []) => {
+    const dir = ekstreSortDir === "asc" ? 1 : -1;
+    return [...rawRows].sort((a, b) => {
+      if (ekstreSortField === "date") {
+        const ta = new Date(a.date || 0).getTime();
+        const tb = new Date(b.date || 0).getTime();
+        return (ta - tb) * dir;
+      }
+      if (ekstreSortField === "type") {
+        return String(a.type || "").localeCompare(String(b.type || ""), "tr") * dir;
+      }
+      if (ekstreSortField === "description") {
+        return String(a.description || "").localeCompare(String(b.description || ""), "tr") * dir;
+      }
+      const na = Number(a[ekstreSortField] || 0);
+      const nb = Number(b[ekstreSortField] || 0);
+      return (na - nb) * dir;
+    });
+  };
   const [companyPrintInfo, setCompanyPrintInfo] = useState<any>(null);
   const [editingTx, setEditingTx] = useState<{
     id: string;
@@ -489,7 +520,7 @@ export default function CariPage() {
       toast.error("Ekstre verisi henüz yüklenmedi. Lütfen bekleyin.");
       return;
     }
-    const allRows: any[] = ekstreData.rows || [];
+    const allRows: any[] = getSortedEkstreRows(ekstreData.rows || []);
     const rows: any[] = onlySelected
       ? allRows.filter(r => selectedEkstreIds.includes(r.id))
       : allRows;
@@ -532,7 +563,8 @@ export default function CariPage() {
       : (s.currentBalance ?? activeAccount.balance ?? 0);
 
     const rowsHtml = rows.map(row => {
-      const d      = new Date(row.date).toLocaleDateString("tr-TR");
+      const dt     = new Date(row.date);
+      const d      = `${dt.toLocaleDateString("tr-TR")} <span style="font-size:9px;color:#94a3b8">${dt.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</span>`;
       const debit  = row.debit  > 0 ? Number(row.debit).toLocaleString("tr-TR",  { minimumFractionDigits: 2 }) + " ₺" : "—";
       const credit = row.credit > 0 ? Number(row.credit).toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺" : "—";
       const bal    = Number(row.runningBalance || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
@@ -2745,83 +2777,137 @@ export default function CariPage() {
                 {/* 3. TAB: LEDGER TRANSACTIONS */}
                 {activeTab === "ledger" && (
                   <div className="space-y-4">
-                    {/* Ekstre Filtreler */}
-                    <div className="flex flex-wrap gap-2 items-center bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                      <span className="text-xs text-slate-500 font-bold shrink-0">Filtrele:</span>
-                      {(["ALL","TX","ORDER","INVOICE"] as const).map(t => (
-                        <button key={t}
-                          onClick={() => { setEkstreType(t); if(activeAccount) fetchEkstre(activeAccount.id, t); }}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg transition border ${
-                            ekstreType === t ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                          }`}
-                        >{t === "ALL" ? "Tümü" : t === "TX" ? "İşlemler" : t === "ORDER" ? "Siparişler" : "Faturalar"}</button>
-                      ))}
-                      <div className="flex items-center gap-1 ml-auto">
-                        <input type="date" value={ekstreFrom} onChange={e => setEkstreFrom(e.target.value)}
-                          className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-                          placeholder="Başlangıç"
-                        />
-                        <span className="text-slate-400 text-xs">—</span>
-                        <input type="date" value={ekstreTo} onChange={e => setEkstreTo(e.target.value)}
-                          className="text-xs px-2 py-1 border border-slate-200 rounded-lg outline-none"
-                        />
-                        <button
-                          onClick={() => activeAccount && fetchEkstre(activeAccount.id)}
-                          className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-lg hover:bg-orange-600 transition"
-                        >Getir</button>
+                    {/* Ekstre Filtre & İşlem Çubuğu (2 Dengeli Satır) */}
+                    <div className="bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/90 space-y-2.5 shadow-xs">
+                      {/* Satır 1: Tür Filtresi (Sol) + Yazdır & Excel Aksiyonları (Sağ) */}
+                      <div className="flex flex-wrap items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider shrink-0">Tür:</span>
+                          <div className="inline-flex items-center p-1 bg-white rounded-xl border border-slate-200 shadow-2xs gap-0.5">
+                            {(["ALL","TX","ORDER","INVOICE"] as const).map(t => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => {
+                                  setEkstreType(t);
+                                  if (activeAccount) fetchEkstre(activeAccount.id, t, ekstreFrom, ekstreTo);
+                                }}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                                  ekstreType === t
+                                    ? "bg-orange-500 text-white shadow-xs"
+                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                }`}
+                              >
+                                {t === "ALL" ? "Tümü" : t === "TX" ? "İşlemler" : t === "ORDER" ? "Siparişler" : "Faturalar"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          {selectedEkstreIds.length > 0 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleEkstrePrint(true)}
+                                className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                title="Yalnızca seçili hareketleri yazdır"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                Seçilenleri Yazdır ({selectedEkstreIds.length})
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedEkstreIds([])}
+                                className="h-8 px-2.5 bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
+                                title="Seçimi temizle"
+                              >
+                                Temizle
+                              </button>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleEkstrePrint(false)}
+                            className="h-8 px-3.5 bg-[#b45309] hover:bg-amber-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            title="Tüm Cari Hesap Ekstresini Yazdır"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            Cari Ekstre Yazdır
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleEkstreExcel}
+                            className="h-8 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                            title="Excel / CSV İndir"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            Excel
+                          </button>
+                        </div>
                       </div>
-                      {/* Yazdır & Dışa Aktar Araçları */}
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {selectedEkstreIds.length > 0 && (
-                          <>
+
+                      {/* Satır 2: Tarih Aralığı + Getir / Sıfırla (Sol) + Para Birimi (Sağ) */}
+                      <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-slate-200/70">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider shrink-0 mr-0.5">Tarih:</span>
+                          <input
+                            type="date"
+                            value={ekstreFrom}
+                            onChange={e => setEkstreFrom(e.target.value)}
+                            className="h-8 text-xs px-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-orange-400 font-medium text-slate-700"
+                            title="Başlangıç Tarihi"
+                          />
+                          <span className="text-slate-400 text-xs font-bold">—</span>
+                          <input
+                            type="date"
+                            value={ekstreTo}
+                            onChange={e => setEkstreTo(e.target.value)}
+                            className="h-8 text-xs px-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-orange-400 font-medium text-slate-700"
+                            title="Bitiş Tarihi"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => activeAccount && fetchEkstre(activeAccount.id, ekstreType, ekstreFrom, ekstreTo)}
+                            className="h-8 px-3.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+                          >
+                            Getir
+                          </button>
+                          {(ekstreType !== "ALL" || ekstreFrom || ekstreTo) && (
                             <button
                               type="button"
-                              onClick={() => handleEkstrePrint(true)}
-                              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                              title="Yalnızca seçili hareketleri yazdır"
+                              onClick={() => {
+                                setEkstreType("ALL");
+                                setEkstreFrom("");
+                                setEkstreTo("");
+                                if (activeAccount) fetchEkstre(activeAccount.id, "ALL", "", "");
+                              }}
+                              className="h-8 px-3 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 text-xs font-bold rounded-xl transition flex items-center gap-1 cursor-pointer"
+                              title="Tüm filtreleri sıfırla"
                             >
-                              <Printer className="w-3.5 h-3.5" />
-                              Seçilenleri Yazdır ({selectedEkstreIds.length})
+                              <X className="w-3.5 h-3.5" />
+                              Sıfırla
                             </button>
+                          )}
+                        </div>
+
+                        {/* Döviz görünümü */}
+                        <div className="inline-flex items-center p-1 bg-white rounded-xl border border-slate-200 shadow-2xs gap-0.5">
+                          {(["TRY", "USD", "EUR"] as const).map(curr => (
                             <button
+                              key={curr}
                               type="button"
-                              onClick={() => setSelectedEkstreIds([])}
-                              className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 text-xs font-bold rounded-lg transition"
-                              title="Seçimi temizle"
+                              onClick={() => setActiveCurrencyView(curr)}
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                                activeCurrencyView === curr
+                                  ? "bg-orange-500 text-white shadow-xs"
+                                  : "text-slate-600 hover:bg-slate-100"
+                              }`}
                             >
-                              Temizle
+                              {curr}
                             </button>
-                          </>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleEkstrePrint(false)}
-                          className="px-3 py-1 bg-[#b45309] hover:bg-amber-800 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                          title="Tüm Cari Hesap Ekstresini Yazdır"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          Cari Ekstre Yazdır
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleEkstreExcel}
-                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg transition flex items-center gap-1"
-                          title="Excel / CSV İndir"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Excel
-                        </button>
-                      </div>
-                      {/* Döviz görünümü */}
-                      <div className="flex gap-1">
-                        {(["TRY", "USD", "EUR"] as const).map(curr => (
-                          <button key={curr}
-                            onClick={() => setActiveCurrencyView(curr)}
-                            className={`px-2.5 py-1 text-xs font-bold rounded-lg transition border ${
-                              activeCurrencyView === curr ? "bg-orange-500 text-white border-orange-500" : "bg-white hover:bg-slate-100 text-slate-600 border-slate-200"
-                            }`}
-                          >{curr}</button>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -2872,29 +2958,100 @@ export default function CariPage() {
                                   }}
                                 />
                               </th>
-                              <th className="px-4 py-3">Tarih</th>
-                              <th className="px-4 py-3">Tür / Belge</th>
-                              <th className="px-4 py-3">Açıklama</th>
-                              <th className="px-4 py-3 text-right">Borç ↑</th>
-                              <th className="px-4 py-3 text-right">Alacak ↓</th>
-                              <th className="px-4 py-3 text-right">Bakiye</th>
+                              <th className="px-4 py-3">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("date")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase"
+                                >
+                                  <span>Tarih / Saat</span>
+                                  <span className={ekstreSortField === "date" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "date" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
+                              <th className="px-4 py-3">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("type")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase"
+                                >
+                                  <span>Tür / Belge</span>
+                                  <span className={ekstreSortField === "type" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "type" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
+                              <th className="px-4 py-3">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("description")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase"
+                                >
+                                  <span>Açıklama</span>
+                                  <span className={ekstreSortField === "description" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "description" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
+                              <th className="px-4 py-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("debit")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase ml-auto"
+                                >
+                                  <span>Borç</span>
+                                  <span className={ekstreSortField === "debit" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "debit" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
+                              <th className="px-4 py-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("credit")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase ml-auto"
+                                >
+                                  <span>Alacak</span>
+                                  <span className={ekstreSortField === "credit" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "credit" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
+                              <th className="px-4 py-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleEkstreSort("runningBalance")}
+                                  className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer uppercase ml-auto"
+                                >
+                                  <span>Bakiye</span>
+                                  <span className={ekstreSortField === "runningBalance" ? "text-orange-500" : "text-slate-300"}>
+                                    {ekstreSortField === "runningBalance" ? (ekstreSortDir === "desc" ? "▼" : "▲") : "⇅"}
+                                  </span>
+                                </button>
+                              </th>
                               <th className="px-3 py-3 text-center">İşlem</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {/* Açılış bakiyesi */}
-                            <tr className="bg-slate-50/60">
-                              <td className="px-3 py-2.5 text-center text-slate-300">—</td>
-                              <td className="px-4 py-2.5 text-slate-400">{new Date(activeAccount.createdAt).toLocaleDateString("tr-TR")}</td>
-                              <td className="px-4 py-2.5"><span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-600">AÇILIŞ</span></td>
-                              <td className="px-4 py-2.5 font-bold text-slate-600">Açılış Bakiyesi</td>
-                              <td className="px-4 py-2.5 text-right">—</td>
-                              <td className="px-4 py-2.5 text-right">—</td>
-                              <td className="px-4 py-2.5 text-right font-black text-slate-800">{formatCurrency(convertLedgerAmount(activeAccount.openingBalance, activeAccount.currency), activeCurrencyView)}</td>
-                              <td className="px-3 py-2.5 text-center text-slate-300">—</td>
-                            </tr>
+                            {/* Açılış bakiyesi (yalnızca filtresiz genel görünümde göster) */}
+                            {ekstreType === "ALL" && !ekstreFrom && !ekstreTo && (
+                              <tr className="bg-slate-50/60">
+                                <td className="px-3 py-2.5 text-center text-slate-300">—</td>
+                                <td className="px-4 py-2.5 text-slate-400 whitespace-nowrap">
+                                  <div className="font-medium">{new Date(activeAccount.createdAt).toLocaleDateString("tr-TR")}</div>
+                                  <div className="text-[10px] text-slate-400">{new Date(activeAccount.createdAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</div>
+                                </td>
+                                <td className="px-4 py-2.5"><span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-600">AÇILIŞ</span></td>
+                                <td className="px-4 py-2.5 font-bold text-slate-600">Açılış Bakiyesi</td>
+                                <td className="px-4 py-2.5 text-right">—</td>
+                                <td className="px-4 py-2.5 text-right">—</td>
+                                <td className="px-4 py-2.5 text-right font-black text-slate-800">{formatCurrency(convertLedgerAmount(activeAccount.openingBalance, activeAccount.currency), activeCurrencyView)}</td>
+                                <td className="px-3 py-2.5 text-center text-slate-300">—</td>
+                              </tr>
+                            )}
 
-                            {ekstreData?.rows?.map((row: any) => {
+                            {getSortedEkstreRows(ekstreData?.rows || []).map((row: any) => {
                               const typeColors: Record<string, string> = {
                                 SATIS: "bg-blue-100 text-blue-700",
                                 TAHSILAT: "bg-emerald-100 text-emerald-700",
@@ -2913,6 +3070,7 @@ export default function CariPage() {
                               };
                               const isSelected = selectedEkstreIds.includes(row.id);
                               const isEditableTx = row.source === "TX";
+                              const rowDateObj = new Date(row.date);
                               return (
                                 <tr key={row.id} className={`transition ${isSelected ? "bg-orange-50/60" : "hover:bg-slate-50/40"}`}>
                                   <td className="px-3 py-2.5 text-center">
@@ -2929,7 +3087,12 @@ export default function CariPage() {
                                       }}
                                     />
                                   </td>
-                                  <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap">{new Date(row.date).toLocaleDateString("tr-TR")}</td>
+                                  <td className="px-4 py-2.5 text-slate-600 whitespace-nowrap">
+                                    <div className="font-semibold">{rowDateObj.toLocaleDateString("tr-TR")}</div>
+                                    <div className="text-[10px] text-slate-400 font-mono">
+                                      {rowDateObj.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                                    </div>
+                                  </td>
                                   <td className="px-4 py-2.5">
                                     <div className="flex flex-col gap-0.5">
                                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold w-fit ${typeColors[row.type] || "bg-slate-100 text-slate-600"}`}>{row.type}</span>

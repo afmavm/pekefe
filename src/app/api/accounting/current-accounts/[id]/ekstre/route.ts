@@ -135,10 +135,12 @@ export async function GET(
       }
     }
 
-    // 2) Tarih filtresi: Yalnızca kullanıcı açıkça başlangıç/bitiş tarihi seçtiyse uygula
+    // 2) Tarih filtresi: Türkiye saat dilimine (+03:00) göre tam gün başlangıcı ve sonu uygula
     let effectiveFrom: Date | null = null;
     if (from) {
-      const fromDate = new Date(from);
+      const fromDate = /^\d{4}-\d{2}-\d{2}$/.test(from)
+        ? new Date(`${from}T00:00:00.000+03:00`)
+        : new Date(from);
       if (!isNaN(fromDate.getTime())) {
         effectiveFrom = fromDate;
       }
@@ -146,9 +148,13 @@ export async function GET(
 
     let effectiveTo: Date | null = null;
     if (to) {
-      const toDate = new Date(to);
+      const toDate = /^\d{4}-\d{2}-\d{2}$/.test(to)
+        ? new Date(`${to}T23:59:59.999+03:00`)
+        : new Date(to);
       if (!isNaN(toDate.getTime())) {
-        toDate.setHours(23, 59, 59, 999);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+          toDate.setHours(23, 59, 59, 999);
+        }
         effectiveTo = toDate;
       }
     }

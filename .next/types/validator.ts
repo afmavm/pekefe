@@ -929,6 +929,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/accounting/current-accounts/[id]/transactions/[txId]/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/accounting/current-accounts/[id]/transactions/[txId]">> = Specific
+  const handler = {} as typeof import("../../src/app/api/accounting/current-accounts/[id]/transactions/[txId]/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/accounting/current-accounts/mapping/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/accounting/current-accounts/mapping">> = Specific

@@ -237,6 +237,15 @@
       "namedRegex": "^/api/accounting/current\\-accounts/(?<nxtPid>[^/]+?)/ekstre(?:/)?$"
     },
     {
+      "page": "/api/accounting/current-accounts/[id]/transactions/[txId]",
+      "regex": "^/api/accounting/current\\-accounts/([^/]+?)/transactions/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid",
+        "nxtPtxId": "nxtPtxId"
+      },
+      "namedRegex": "^/api/accounting/current\\-accounts/(?<nxtPid>[^/]+?)/transactions/(?<nxtPtxId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/api/accounting/expenses/[id]",
       "regex": "^/api/accounting/expenses/([^/]+?)(?:/)?$",
       "routeKeys": {

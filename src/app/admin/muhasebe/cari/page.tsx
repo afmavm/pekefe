@@ -342,9 +342,29 @@ export default function CariPage() {
   const [ekstreType, setEkstreType] = useState<"ALL"|"TX"|"ORDER"|"INVOICE">("ALL");
   const [ekstreFrom, setEkstreFrom] = useState("");
   const [ekstreTo, setEkstreTo] = useState("");
+  const [selectedEkstreIds, setSelectedEkstreIds] = useState<string[]>([]);
+  const [companyPrintInfo, setCompanyPrintInfo] = useState<any>(null);
+  const [editingTx, setEditingTx] = useState<{
+    id: string;
+    type: string;
+    amount: string;
+    description: string;
+    date: string;
+    paymentMethod: string;
+  } | null>(null);
+  const [txSaving, setTxSaving] = useState(false);
+  const [txDeletingId, setTxDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings", { cache: "no-store" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d) setCompanyPrintInfo(d); })
+      .catch(() => {});
+  }, []);
 
   const fetchEkstre = (id: string, type = ekstreType, from = ekstreFrom, to = ekstreTo) => {
     setEkstreLoading(true);
+    setSelectedEkstreIds([]);
     const params = new URLSearchParams({ type, limit: "100" });
     if (from) params.append("from", from);
     if (to)   params.append("to", to);
@@ -364,89 +384,206 @@ export default function CariPage() {
       .finally(() => setEkstreLoading(false));
   };
 
+  const openEditTxModal = (row: any) => {
+    const rawAmt = row.debit > 0 ? row.debit : row.credit > 0 ? row.credit : 0;
+    const dt = row.date ? new Date(row.date) : new Date();
+    const dateStr = !isNaN(dt.getTime()) ? dt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    setEditingTx({
+      id: row.id,
+      type: row.type || "TAHSILAT",
+      amount: String(Number(rawAmt).toFixed(2)),
+      description: row.description || "",
+      date: dateStr,
+      paymentMethod: row.paymentMethod || "",
+    });
+  };
+
+  const handleUpdateTx = async () => {
+    if (!activeAccount || !editingTx) return;
+    const parsedAmt = parseFloat(String(editingTx.amount).replace(",", "."));
+    if (!Number.isFinite(parsedAmt) || parsedAmt <= 0) {
+      toast.error("Lütfen sıfırdan büyük geçerli bir tutar girin.");
+      return;
+    }
+    setTxSaving(true);
+    try {
+      const res = await fetch(
+        `/api/accounting/current-accounts/${activeAccount.id}/transactions/${editingTx.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: editingTx.type,
+            amount: parsedAmt,
+            description: editingTx.description,
+            date: editingTx.date,
+            paymentMethod: editingTx.paymentMethod,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Hareket güncellenemedi.");
+        return;
+      }
+      toast.success("Hareket kaydı güncellendi ve bakiye yeniden hesaplandı.");
+      setEditingTx(null);
+      if (typeof data.newBalance === "number") {
+        setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: data.newBalance } : a));
+        setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: data.newBalance } : prev);
+      }
+      fetchEkstre(activeAccount.id);
+    } catch {
+      toast.error("Bağlantı hatası: Hareket güncellenemedi.");
+    } finally {
+      setTxSaving(false);
+    }
+  };
+
+  const handleDeleteTx = async (row: any) => {
+    if (!activeAccount) return;
+    if (!confirm(`"${row.description || row.type}" hareket kaydını silmek istediğinize emin misiniz?\nCari bakiye otomatik olarak yeniden hesaplanacaktır.`)) {
+      return;
+    }
+    setTxDeletingId(row.id);
+    try {
+      const res = await fetch(
+        `/api/accounting/current-accounts/${activeAccount.id}/transactions/${row.id}`,
+        { method: "DELETE" }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Hareket silinemedi.");
+        return;
+      }
+      toast.success("Hareket kaydı silindi ve bakiye güncellendi.");
+      setSelectedEkstreIds(prev => prev.filter(id => id !== row.id));
+      if (typeof data.newBalance === "number") {
+        setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: data.newBalance } : a));
+        setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: data.newBalance } : prev);
+      }
+      fetchEkstre(activeAccount.id);
+    } catch {
+      toast.error("Bağlantı hatası: Hareket silinemedi.");
+    } finally {
+      setTxDeletingId(null);
+    }
+  };
+
   /* -------- EKSTRE CIKTI: PDF / EXCEL -------- */
 
-  const handleEkstrePrint = () => {
-    if (!ekstreData || !activeAccount) return;
-    const rows: any[] = ekstreData.rows || [];
+  const handleEkstrePrint = (onlySelected = false) => {
+    if (!ekstreData || !activeAccount) {
+      toast.error("Ekstre verisi henüz yüklenmedi. Lütfen bekleyin.");
+      return;
+    }
+    const allRows: any[] = ekstreData.rows || [];
+    const rows: any[] = onlySelected
+      ? allRows.filter(r => selectedEkstreIds.includes(r.id))
+      : allRows;
+
+    if (onlySelected && rows.length === 0) {
+      toast.error("Yazdırmak için listeden en az bir kayıt seçin.");
+      return;
+    }
+
     const s = ekstreData.summary || {};
     const accName  = activeAccount.name    || "-";
     const accKod   = activeAccount.cariKod || "-";
     const accTax   = (activeAccount.taxOffice && activeAccount.taxNo)
       ? `${activeAccount.taxOffice} - ${activeAccount.taxNo}`
       : (activeAccount.taxNo || activeAccount.tckn || "-");
-    const dateRange = [ekstreFrom, ekstreTo].filter(Boolean).join(" / ") || "T\u00fcm Zamanlar";
+    const dateRange = [ekstreFrom, ekstreTo].filter(Boolean).join(" / ") || "Tüm Zamanlar";
     const printDate = new Date().toLocaleString("tr-TR");
+
+    const coName = companyPrintInfo?.companyName || companyPrintInfo?.siteName || "PEKEFE İSPİR YÖRESEL ÜRÜNLER";
+    const coAddress = companyPrintInfo?.contactAddress || "Çamlıca Mah. İspir / Erzurum";
+    const coTax = [companyPrintInfo?.companyTaxOffice, companyPrintInfo?.companyTaxNo].filter(Boolean).join(" - ");
+    const coContact = [companyPrintInfo?.contactPhone, companyPrintInfo?.contactEmail].filter(Boolean).join(" · ");
+
+    const sumDebit = onlySelected
+      ? rows.reduce((acc, r) => acc + (Number(r.debit) || 0), 0)
+      : (s.totalDebit || 0);
+    const sumCredit = onlySelected
+      ? rows.reduce((acc, r) => acc + (Number(r.credit) || 0), 0)
+      : (s.totalCredit || 0);
+    const sumNet = onlySelected
+      ? Number((sumDebit - sumCredit).toFixed(2))
+      : (s.currentBalance ?? activeAccount.balance ?? 0);
 
     const rowsHtml = rows.map(row => {
       const d      = new Date(row.date).toLocaleDateString("tr-TR");
-      const debit  = row.debit  > 0 ? row.debit.toLocaleString("tr-TR",  { minimumFractionDigits: 2 }) : "-";
-      const credit = row.credit > 0 ? row.credit.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) : "-";
-      const bal    = row.runningBalance.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+      const debit  = row.debit  > 0 ? Number(row.debit).toLocaleString("tr-TR",  { minimumFractionDigits: 2 }) + " ₺" : "—";
+      const credit = row.credit > 0 ? Number(row.credit).toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺" : "—";
+      const bal    = Number(row.runningBalance || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
       return `<tr style="border-bottom:1px solid #f1f5f9">
-        <td style="padding:6px 10px;color:#64748b">${d}</td>
-        <td style="padding:6px 10px;font-weight:700">${row.type}</td>
-        <td style="padding:6px 10px;color:#475569">${row.description || "-"}</td>
-        <td style="padding:6px 10px;text-align:right;color:#ef4444;font-weight:700">${debit}</td>
-        <td style="padding:6px 10px;text-align:right;color:#10b981;font-weight:700">${credit}</td>
-        <td style="padding:6px 10px;text-align:right;font-weight:800;color:#0f172a">${bal}</td>
+        <td style="padding:7px 10px;color:#64748b;white-space:nowrap">${d}</td>
+        <td style="padding:7px 10px;font-weight:700;white-space:nowrap">${row.type} <span style="font-size:9px;color:#94a3b8;font-weight:600">(${row.source})</span></td>
+        <td style="padding:7px 10px;color:#334155">${row.description || "-"}</td>
+        <td style="padding:7px 10px;text-align:right;color:#dc2626;font-weight:700;white-space:nowrap">${debit}</td>
+        <td style="padding:7px 10px;text-align:right;color:#059669;font-weight:700;white-space:nowrap">${credit}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:800;color:#0f172a;white-space:nowrap">${bal}</td>
       </tr>`;
     }).join("");
 
-    const totalDebit  = (s.totalDebit     || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-    const totalCredit = (s.totalCredit    || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-    const netBal      = (s.currentBalance || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+    const totalDebit  = Number(sumDebit).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+    const totalCredit = Number(sumCredit).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+    const netBal      = Number(sumNet).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+    const docBadge    = onlySelected ? `SEÇİLİ HAREKETLER (${rows.length} KAYIT)` : "CARİ HESAP EKSTRESİ";
 
     const html = `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
-      <title>Cari Ekstre \u2014 ${accName}</title>
+      <title>${docBadge} — ${accName}</title>
       <style>
-        body{font-family:'Segoe UI',sans-serif;color:#1e293b;margin:0;padding:30px;font-size:12px}
-        .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #f97316;padding-bottom:16px;margin-bottom:20px}
-        .co-name{font-size:15px;font-weight:800;color:#0f172a;margin:0 0 4px}
-        .co-sub{font-size:10px;color:#64748b;margin:0}
-        .badge{background:#fff7ed;color:#f97316;border:1px solid #fed7aa;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:800}
-        .ig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
-        .ic{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px}
-        .il{font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-        .iv{font-size:13px;font-weight:800;color:#0f172a;margin-top:2px}
-        .sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
-        .sc{border-radius:8px;padding:10px 14px;text-align:center}
+        body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;margin:0;padding:28px;font-size:12px}
+        .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #b45309;padding-bottom:14px;margin-bottom:18px}
+        .co-name{font-size:16px;font-weight:900;color:#0f172a;margin:0 0 4px}
+        .co-sub{font-size:10px;color:#64748b;margin:2px 0}
+        .badge{background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:800;white-space:nowrap}
+        .ig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+        .ic{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px 12px}
+        .il{font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+        .iv{font-size:12px;font-weight:800;color:#0f172a;margin-top:2px}
+        .sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+        .sc{border-radius:10px;padding:10px 14px;text-align:center}
         .sl{font-size:10px;font-weight:700;text-transform:uppercase}
-        .sv{font-size:14px;font-weight:900;margin-top:2px}
+        .sv{font-size:15px;font-weight:900;margin-top:3px}
         table{width:100%;border-collapse:collapse}
         thead{background:#f8fafc}
-        th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;border-bottom:2px solid #e2e8f0}
+        th{padding:8px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;color:#64748b;border-bottom:2px solid #e2e8f0}
         th.r{text-align:right}
-        .ft{margin-top:20px;font-size:10px;color:#94a3b8;text-align:right}
+        .ft{margin-top:20px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between}
         @media print{body{padding:10px}}
       </style></head><body>
       <div class="hdr">
-        <div><p class="co-name">Pekefe Geleneksel GIDA TARIM HAYVANCILIK SAN. VE TIC. LTD. STI.</p>
-          <p class="co-sub">Kayseri OSB 1. Cadde No: 5 &nbsp;|&nbsp; VD: Kayseri - 1234567890</p></div>
-        <span class="badge">CARI EKSTRE</span>
+        <div>
+          <p class="co-name">${coName}</p>
+          <p class="co-sub">${coAddress}${coTax ? ` &nbsp;|&nbsp; VD / VKN: ${coTax}` : ""}</p>
+          ${coContact ? `<p class="co-sub">${coContact}</p>` : ""}
+        </div>
+        <span class="badge">${docBadge}</span>
       </div>
       <div class="ig">
         <div class="ic"><div class="il">Cari Unvan</div><div class="iv">${accName}</div></div>
         <div class="ic"><div class="il">Cari Kod</div><div class="iv">${accKod}</div></div>
         <div class="ic"><div class="il">VKN / TCKN</div><div class="iv">${accTax}</div></div>
-        <div class="ic"><div class="il">Tarih Araligi</div><div class="iv">${dateRange}</div></div>
-        <div class="ic"><div class="il">Toplam Hareket</div><div class="iv">${rows.length}</div></div>
-        <div class="ic"><div class="il">Olusturulma</div><div class="iv">${printDate}</div></div>
+        <div class="ic"><div class="il">Tarih Aralığı</div><div class="iv">${dateRange}</div></div>
+        <div class="ic"><div class="il">Gösterilen Hareket</div><div class="iv">${rows.length} kayıt</div></div>
+        <div class="ic"><div class="il">Oluşturulma</div><div class="iv">${printDate}</div></div>
       </div>
       <div class="sg">
-        <div class="sc" style="background:#fef2f2;border:1px solid #fecaca"><div class="sl" style="color:#ef4444">Toplam Borc</div><div class="sv" style="color:#dc2626">${totalDebit} TL</div></div>
-        <div class="sc" style="background:#f0fdf4;border:1px solid #bbf7d0"><div class="sl" style="color:#10b981">Toplam Alacak</div><div class="sv" style="color:#059669">${totalCredit} TL</div></div>
-        <div class="sc" style="background:#fff7ed;border:1px solid #fed7aa"><div class="sl" style="color:#f97316">Net Bakiye</div><div class="sv" style="color:#ea580c">${netBal} TL</div></div>
+        <div class="sc" style="background:#fef2f2;border:1px solid #fecaca"><div class="sl" style="color:#ef4444">${onlySelected ? "Seçili Borç Toplamı" : "Toplam Borç"}</div><div class="sv" style="color:#dc2626">${totalDebit} ₺</div></div>
+        <div class="sc" style="background:#f0fdf4;border:1px solid #bbf7d0"><div class="sl" style="color:#10b981">${onlySelected ? "Seçili Alacak Toplamı" : "Toplam Alacak"}</div><div class="sv" style="color:#059669">${totalCredit} ₺</div></div>
+        <div class="sc" style="background:#fff7ed;border:1px solid #fed7aa"><div class="sl" style="color:#ea580c">${onlySelected ? "Seçili Net Fark" : "Net Bakiye"}</div><div class="sv" style="color:#ea580c">${netBal} ₺</div></div>
       </div>
       <table><thead><tr>
-        <th>Tarih</th><th>Tur</th><th>Aciklama</th>
-        <th class="r">Borc</th><th class="r">Alacak</th><th class="r">Bakiye</th>
-      </tr></thead><tbody>${rowsHtml}</tbody></table>
-      <div class="ft">Ekstre ${printDate} tarihinde olusturulmustur.</div>
+        <th>Tarih</th><th>Tür / Kaynak</th><th>Açıklama</th>
+        <th class="r">Borç</th><th class="r">Alacak</th><th class="r">Bakiye</th>
+      </tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="padding:18px;text-align:center;color:#94a3b8">Hareket kaydı bulunmamaktadır.</td></tr>'}</tbody></table>
+      <div class="ft"><span>${coName}</span><span>Belge ${printDate} tarihinde oluşturuldu.</span></div>
     </body></html>`;
 
     const w = window.open("", "_blank");
-    if (!w) { toast.error("Pop-up engellendi. Taray\u0131c\u0131 izni verin."); return; }
+    if (!w) { toast.error("Pop-up engellendi. Tarayıcı izni verin."); return; }
     w.document.write(html);
     w.document.close();
     w.focus();
@@ -2165,6 +2302,13 @@ export default function CariPage() {
                       >
                         <Mail className="w-3.5 h-3.5 text-slate-500" /> Mutabakat
                       </button>
+                      <button
+                        onClick={() => handleEkstrePrint(false)}
+                        className="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#b45309] rounded-lg transition text-xs font-bold flex items-center gap-1 shadow-sm"
+                        title="Cari Hesap Ekstresi Yazdır"
+                      >
+                        <Printer className="w-3.5 h-3.5" /> Ekstre Yazdır
+                      </button>
                       <button 
                         onClick={openEditModal} 
                         className="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg transition text-xs font-bold flex items-center gap-1 shadow-sm"
@@ -2585,6 +2729,48 @@ export default function CariPage() {
                           className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-lg hover:bg-orange-600 transition"
                         >Getir</button>
                       </div>
+                      {/* Yazdır & Dışa Aktar Araçları */}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {selectedEkstreIds.length > 0 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEkstrePrint(true)}
+                              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                              title="Yalnızca seçili hareketleri yazdır"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              Seçilenleri Yazdır ({selectedEkstreIds.length})
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedEkstreIds([])}
+                              className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 text-xs font-bold rounded-lg transition"
+                              title="Seçimi temizle"
+                            >
+                              Temizle
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleEkstrePrint(false)}
+                          className="px-3 py-1 bg-[#b45309] hover:bg-amber-800 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                          title="Tüm Cari Hesap Ekstresini Yazdır"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Cari Ekstre Yazdır
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleEkstreExcel}
+                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg transition flex items-center gap-1"
+                          title="Excel / CSV İndir"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Excel
+                        </button>
+                      </div>
                       {/* Döviz görünümü */}
                       <div className="flex gap-1">
                         {(["TRY", "USD", "EUR"] as const).map(curr => (
@@ -2623,26 +2809,48 @@ export default function CariPage() {
                           <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
                         </div>
                       ) : (
-                        <table className="w-full text-xs text-left min-w-[580px]">
+                        <table className="w-full text-xs text-left min-w-[680px]">
                           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase">
                             <tr>
+                              <th className="px-3 py-3 w-9 text-center">
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-slate-300 text-orange-500 focus:ring-orange-500 cursor-pointer"
+                                  title="Tümünü Seç / Kaldır"
+                                  checked={
+                                    Array.isArray(ekstreData?.rows) &&
+                                    ekstreData.rows.length > 0 &&
+                                    ekstreData.rows.every((r: any) => selectedEkstreIds.includes(r.id))
+                                  }
+                                  onChange={(e) => {
+                                    if (e.target.checked && Array.isArray(ekstreData?.rows)) {
+                                      setSelectedEkstreIds(ekstreData.rows.map((r: any) => r.id));
+                                    } else {
+                                      setSelectedEkstreIds([]);
+                                    }
+                                  }}
+                                />
+                              </th>
                               <th className="px-4 py-3">Tarih</th>
                               <th className="px-4 py-3">Tür / Belge</th>
                               <th className="px-4 py-3">Açıklama</th>
                               <th className="px-4 py-3 text-right">Borç ↑</th>
                               <th className="px-4 py-3 text-right">Alacak ↓</th>
                               <th className="px-4 py-3 text-right">Bakiye</th>
+                              <th className="px-3 py-3 text-center">İşlem</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {/* Açılış bakiyesi */}
                             <tr className="bg-slate-50/60">
+                              <td className="px-3 py-2.5 text-center text-slate-300">—</td>
                               <td className="px-4 py-2.5 text-slate-400">{new Date(activeAccount.createdAt).toLocaleDateString("tr-TR")}</td>
                               <td className="px-4 py-2.5"><span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-600">AÇILIŞ</span></td>
                               <td className="px-4 py-2.5 font-bold text-slate-600">Açılış Bakiyesi</td>
                               <td className="px-4 py-2.5 text-right">—</td>
                               <td className="px-4 py-2.5 text-right">—</td>
                               <td className="px-4 py-2.5 text-right font-black text-slate-800">{formatCurrency(convertLedgerAmount(activeAccount.openingBalance, activeAccount.currency), activeCurrencyView)}</td>
+                              <td className="px-3 py-2.5 text-center text-slate-300">—</td>
                             </tr>
 
                             {ekstreData?.rows?.map((row: any) => {
@@ -2662,27 +2870,77 @@ export default function CariPage() {
                                 ORDER: "bg-blue-50 text-blue-600",
                                 INVOICE: "bg-orange-50 text-orange-600",
                               };
+                              const isSelected = selectedEkstreIds.includes(row.id);
+                              const isEditableTx = row.source === "TX";
                               return (
-                                <tr key={row.id} className="hover:bg-slate-50/40 transition">
-                                  <td className="px-4 py-2.5 text-slate-500">{new Date(row.date).toLocaleDateString("tr-TR")}</td>
+                                <tr key={row.id} className={`transition ${isSelected ? "bg-orange-50/60" : "hover:bg-slate-50/40"}`}>
+                                  <td className="px-3 py-2.5 text-center">
+                                    <input
+                                      type="checkbox"
+                                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500 cursor-pointer"
+                                      checked={isSelected}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedEkstreIds(prev => [...prev, row.id]);
+                                        } else {
+                                          setSelectedEkstreIds(prev => prev.filter(x => x !== row.id));
+                                        }
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap">{new Date(row.date).toLocaleDateString("tr-TR")}</td>
                                   <td className="px-4 py-2.5">
                                     <div className="flex flex-col gap-0.5">
                                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold w-fit ${typeColors[row.type] || "bg-slate-100 text-slate-600"}`}>{row.type}</span>
                                       <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold w-fit ${srcColors[row.source] || ""}`}>{row.source}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2.5 text-slate-700 max-w-[200px] truncate" title={row.description}>{row.description}</td>
-                                  <td className="px-4 py-2.5 text-right font-bold text-red-600">{row.debit > 0 ? formatCurrency(convertLedgerAmount(row.debit, activeAccount.currency), activeCurrencyView) : "—"}</td>
-                                  <td className="px-4 py-2.5 text-right font-bold text-emerald-600">{row.credit > 0 ? formatCurrency(convertLedgerAmount(row.credit, activeAccount.currency), activeCurrencyView) : "—"}</td>
-                                  <td className={`px-4 py-2.5 text-right font-black ${ row.runningBalance >= 0 ? "text-slate-800" : "text-emerald-600"}`}>
+                                  <td className="px-4 py-2.5 text-slate-700 max-w-[220px] truncate" title={row.description}>{row.description}</td>
+                                  <td className="px-4 py-2.5 text-right font-bold text-red-600 whitespace-nowrap">{row.debit > 0 ? formatCurrency(convertLedgerAmount(row.debit, activeAccount.currency), activeCurrencyView) : "—"}</td>
+                                  <td className="px-4 py-2.5 text-right font-bold text-emerald-600 whitespace-nowrap">{row.credit > 0 ? formatCurrency(convertLedgerAmount(row.credit, activeAccount.currency), activeCurrencyView) : "—"}</td>
+                                  <td className={`px-4 py-2.5 text-right font-black whitespace-nowrap ${ row.runningBalance >= 0 ? "text-slate-800" : "text-emerald-600"}`}>
                                     {formatCurrency(convertLedgerAmount(row.runningBalance, activeAccount.currency), activeCurrencyView)}
+                                  </td>
+                                  <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                                    {isEditableTx ? (
+                                      <div className="inline-flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => openEditTxModal(row)}
+                                          className="p-1.5 rounded-lg text-slate-500 hover:text-amber-700 hover:bg-amber-50 border border-transparent hover:border-amber-200 transition"
+                                          title="Hareketi Düzenle"
+                                        >
+                                          <Edit2 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteTx(row)}
+                                          disabled={txDeletingId === row.id}
+                                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition disabled:opacity-40"
+                                          title="Hareketi Sil"
+                                        >
+                                          {txDeletingId === row.id ? (
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                          ) : (
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          )}
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <span
+                                        className="text-[10px] font-semibold text-slate-400"
+                                        title="Sipariş ve fatura kayıtları ilgili modülden düzenlenir"
+                                      >
+                                        Belge
+                                      </span>
+                                    )}
                                   </td>
                                 </tr>
                               );
                             })}
 
                             {(!ekstreData?.rows || ekstreData.rows.length === 0) && (
-                              <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                              <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">
                                 <div className="flex flex-col items-center gap-2">
                                   <FileText className="w-8 h-8 text-slate-300" />
                                   <span>Hareket kaydı bulunamadı.</span>
@@ -2695,6 +2953,97 @@ export default function CariPage() {
                         </table>
                       )}
                     </div>
+
+                    {/* Hareket Kaydı Düzenleme Modalı */}
+                    {editingTx && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+                        <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+                          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
+                            <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+                              <Edit2 className="w-4 h-4 text-[#b45309]" />
+                              Hareket Kaydını Düzenle
+                            </h3>
+                            <button
+                              type="button"
+                              onClick={() => setEditingTx(null)}
+                              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="p-5 space-y-3.5 text-xs">
+                            <div>
+                              <label className="block font-bold text-slate-600 mb-1">İşlem Türü</label>
+                              <select
+                                value={editingTx.type}
+                                onChange={(e) => setEditingTx({ ...editingTx, type: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-semibold text-slate-800"
+                              >
+                                <option value="TAHSILAT">TAHSILAT (Alacak / Tahsilat)</option>
+                                <option value="ODEME">ODEME (Borç / Ödeme)</option>
+                                <option value="SATIS">SATIS (Borç / Satış)</option>
+                                <option value="ALIS">ALIS (Alacak / Alış)</option>
+                                <option value="BORC_DEVIR">BORC_DEVIR (Borç Devri)</option>
+                                <option value="ALACAK_DEVIR">ALACAK_DEVIR (Alacak Devri)</option>
+                                <option value="IADE">IADE (Alacak / İade)</option>
+                                <option value="IPTAL">IPTAL (Alacak / İptal)</option>
+                                <option value="Satış Faturası">Satış Faturası (Borç)</option>
+                              </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block font-bold text-slate-600 mb-1">Tutar (₺)</label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0.01"
+                                  value={editingTx.amount}
+                                  onChange={(e) => setEditingTx({ ...editingTx, amount: e.target.value })}
+                                  className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-bold text-slate-900"
+                                />
+                              </div>
+                              <div>
+                                <label className="block font-bold text-slate-600 mb-1">Tarih</label>
+                                <input
+                                  type="date"
+                                  value={editingTx.date}
+                                  onChange={(e) => setEditingTx({ ...editingTx, date: e.target.value })}
+                                  className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:border-amber-500 font-semibold text-slate-800"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block font-bold text-slate-600 mb-1">Açıklama</label>
+                              <input
+                                type="text"
+                                value={editingTx.description}
+                                onChange={(e) => setEditingTx({ ...editingTx, description: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:border-amber-500 text-slate-800"
+                                placeholder="İşlem açıklaması"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+                            <button
+                              type="button"
+                              onClick={() => setEditingTx(null)}
+                              className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold"
+                            >
+                              Vazgeç
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleUpdateTx}
+                              disabled={txSaving}
+                              className="px-4 py-2 rounded-xl bg-[#b45309] hover:bg-amber-800 text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+                            >
+                              {txSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                              Değişiklikleri Kaydet
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Sayfalama bilgisi */}
                     {ekstreData?.pagination && (

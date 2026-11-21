@@ -112,6 +112,7 @@
   "/api/accounting/banks/transfer/route": "app/api/accounting/banks/transfer/route.js",
   "/api/accounting/current-accounts/[id]/ekstre/route": "app/api/accounting/current-accounts/[id]/ekstre/route.js",
   "/api/accounting/current-accounts/[id]/route": "app/api/accounting/current-accounts/[id]/route.js",
+  "/api/accounting/current-accounts/[id]/transactions/[txId]/route": "app/api/accounting/current-accounts/[id]/transactions/[txId]/route.js",
   "/api/accounting/current-accounts/route": "app/api/accounting/current-accounts/route.js",
   "/api/accounting/payments/route": "app/api/accounting/payments/route.js",
   "/api/accounting/summary/route": "app/api/accounting/summary/route.js",

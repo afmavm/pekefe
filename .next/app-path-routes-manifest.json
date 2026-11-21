@@ -112,6 +112,7 @@
   "/api/accounting/banks/transfer/route": "/api/accounting/banks/transfer",
   "/api/accounting/current-accounts/[id]/ekstre/route": "/api/accounting/current-accounts/[id]/ekstre",
   "/api/accounting/current-accounts/[id]/route": "/api/accounting/current-accounts/[id]",
+  "/api/accounting/current-accounts/[id]/transactions/[txId]/route": "/api/accounting/current-accounts/[id]/transactions/[txId]",
   "/api/accounting/current-accounts/route": "/api/accounting/current-accounts",
   "/api/accounting/payments/route": "/api/accounting/payments",
   "/api/accounting/summary/route": "/api/accounting/summary",

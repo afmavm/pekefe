@@ -474,8 +474,10 @@ export default function CariPage() {
       if (typeof data.newBalance === "number") {
         setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: data.newBalance } : a));
         setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: data.newBalance } : prev);
+        setOverallSummary(prev => prev && prev.accountId === activeAccount.id ? { ...prev, currentBalance: data.newBalance } : prev);
       }
-      fetchEkstre(activeAccount.id);
+      fetchEkstre(activeAccount.id, "ALL", "", "");
+      fetchAccounts();
     } catch {
       toast.error("Bağlantı hatası: Hareket güncellenemedi.");
     } finally {
@@ -504,8 +506,10 @@ export default function CariPage() {
       if (typeof data.newBalance === "number") {
         setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: data.newBalance } : a));
         setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: data.newBalance } : prev);
+        setOverallSummary(prev => prev && prev.accountId === activeAccount.id ? { ...prev, currentBalance: data.newBalance } : prev);
       }
-      fetchEkstre(activeAccount.id);
+      fetchEkstre(activeAccount.id, "ALL", "", "");
+      fetchAccounts();
     } catch {
       toast.error("Bağlantı hatası: Hareket silinemedi.");
     } finally {
@@ -1724,7 +1728,17 @@ export default function CariPage() {
       setActionModal({ open: false, type: null });
       setActionForm({ amount: "", description: "", paymentMethod: "Banka Havalesi", bankId: "BNK-01" });
 
-      // Cari detaylarını yenile
+      // Sol kart ve özet bakiyeyi anında (0ms) yansıt, ardından ekstre & listeyi senkronize et
+      if (typeof data.newBalance === "number" && Number.isFinite(data.newBalance)) {
+        const nextBal = Number(data.newBalance.toFixed(2));
+        setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: nextBal } : a));
+        setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: nextBal } : prev);
+        setOverallSummary(prev => prev && prev.accountId === activeAccount.id ? { ...prev, currentBalance: nextBal } : prev);
+      }
+      setEkstreType("ALL");
+      setEkstreFrom("");
+      setEkstreTo("");
+      fetchEkstre(activeAccount.id, "ALL", "", "");
       fetchActiveDetails(activeAccount.id);
       fetchAccounts();
 
@@ -2367,7 +2381,7 @@ export default function CariPage() {
                       </button>
                       <button
                         onClick={() => handleEkstrePrint(false)}
-                        className="p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#b45309] rounded-lg transition text-xs font-bold flex items-center gap-1 shadow-sm"
+                        className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-900 text-white rounded-lg transition text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer"
                         title="Cari Hesap Ekstresi Yazdır"
                       >
                         <Printer className="w-3.5 h-3.5" /> Ekstre Yazdır
@@ -2810,7 +2824,7 @@ export default function CariPage() {
                               <button
                                 type="button"
                                 onClick={() => handleEkstrePrint(true)}
-                                className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                className="h-8 px-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
                                 title="Yalnızca seçili hareketleri yazdır"
                               >
                                 <Printer className="w-3.5 h-3.5" />
@@ -2819,7 +2833,7 @@ export default function CariPage() {
                               <button
                                 type="button"
                                 onClick={() => setSelectedEkstreIds([])}
-                                className="h-8 px-2.5 bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
+                                className="h-8 px-2.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
                                 title="Seçimi temizle"
                               >
                                 Temizle
@@ -2829,7 +2843,7 @@ export default function CariPage() {
                           <button
                             type="button"
                             onClick={() => handleEkstrePrint(false)}
-                            className="h-8 px-3.5 bg-[#b45309] hover:bg-amber-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            className="h-8 px-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
                             title="Tüm Cari Hesap Ekstresini Yazdır"
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -2838,10 +2852,10 @@ export default function CariPage() {
                           <button
                             type="button"
                             onClick={handleEkstreExcel}
-                            className="h-8 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                            className="h-8 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                             title="Excel / CSV İndir"
                           >
-                            <Download className="w-3.5 h-3.5" />
+                            <Download className="w-3.5 h-3.5 text-emerald-600" />
                             Excel
                           </button>
                         </div>
@@ -5611,6 +5625,16 @@ export default function CariPage() {
           onSaveSuccess={(result) => {
             const isOd = actionModal.type === "ödeme";
             setActionModal({ open: false, type: null });
+            if (typeof result.newBalance === "number" && Number.isFinite(result.newBalance)) {
+              const nextBal = Number(result.newBalance.toFixed(2));
+              setAccounts(prev => prev.map(a => a.id === activeAccount.id ? { ...a, balance: nextBal } : a));
+              setActiveAccount(prev => prev && prev.id === activeAccount.id ? { ...prev, balance: nextBal } : prev);
+              setOverallSummary(prev => prev && prev.accountId === activeAccount.id ? { ...prev, currentBalance: nextBal } : prev);
+            }
+            setEkstreType("ALL");
+            setEkstreFrom("");
+            setEkstreTo("");
+            fetchEkstre(activeAccount.id, "ALL", "", "");
             fetchActiveDetails(activeAccount.id);
             fetchAccounts();
             setSuccessModalData({

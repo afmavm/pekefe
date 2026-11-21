@@ -2269,6 +2269,37 @@ export default function CariPage() {
 
               </div>
 
+              {/* Cari Özet Finansal Kartları: Toplam Borç / Toplam Alacak / Net Bakiye */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-red-50/70 border border-red-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                  <div className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Toplam Borç</div>
+                  <div className="text-lg font-black text-red-600 mt-0.5">
+                    {ekstreLoading && ekstreData?.account?.id !== activeAccount.id
+                      ? "..."
+                      : formatCurrency(ekstreData?.account?.id === activeAccount.id ? (ekstreData.summary?.totalDebit ?? 0) : 0, activeAccount.currency)}
+                  </div>
+                </div>
+                <div className="bg-emerald-50/70 border border-emerald-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                  <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Toplam Alacak</div>
+                  <div className="text-lg font-black text-emerald-600 mt-0.5">
+                    {ekstreLoading && ekstreData?.account?.id !== activeAccount.id
+                      ? "..."
+                      : formatCurrency(ekstreData?.account?.id === activeAccount.id ? (ekstreData.summary?.totalCredit ?? 0) : 0, activeAccount.currency)}
+                  </div>
+                </div>
+                <div className="bg-orange-50/70 border border-orange-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                  <div className="text-[11px] font-bold text-orange-600 uppercase tracking-wider">Net Bakiye</div>
+                  <div className="text-lg font-black text-orange-600 mt-0.5">
+                    {formatCurrency(
+                      ekstreData?.account?.id === activeAccount.id
+                        ? (ekstreData.summary?.currentBalance ?? activeAccount.balance ?? 0)
+                        : (activeAccount.balance ?? 0),
+                      activeAccount.currency
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Detail Sekmeleri Kontrol Barı */}
               <div className="bg-white border border-slate-200 rounded-3xl p-2 shadow-sm flex flex-wrap gap-1">
                 {[

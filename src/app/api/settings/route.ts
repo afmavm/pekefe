@@ -57,7 +57,132 @@ function writeLocalSettingsFallback(data: any) {
   }
 }
 
+let CMS_COLUMNS_ENSURED = false;
+
+const CMS_BOOL_FIELDS = new Set([
+  'maintenanceMode',
+  'announcementActive',
+  'announcement1Enabled',
+  'announcement2Enabled',
+  'contactPhoneEnabled',
+  'socialWhatsappEnabled',
+  'companySalesKdvIncluded',
+  'companyPurchaseKdvIncluded',
+  'companyAutoSendEarsivMail',
+  'companyUsePaymentPlan',
+  'companyAutoUpdatePriceByMargin',
+  'companyUseCurrencyInPurchase',
+  'companyAutoDeductInstallments',
+  'companyUseRowRateInPurchase',
+  'companyCheckCurrentVkn',
+  'dealSectionActive',
+  'cashOnDeliveryEnabled',
+  'preventZeroStockSale',
+]);
+
+const CMS_NUM_FIELDS = new Set([
+  'logoSize',
+  'borderRadius',
+  'announcementSpeed',
+  'shippingThreshold',
+  'shippingFee',
+  'cartDiscountValue',
+  'cartDiscountMinAmount',
+  'bankTransferDiscountRate',
+  'companyDefaultKdv',
+  'companyDefaultReturnDays',
+  'companyListStartDay',
+  'cashOnDeliveryFee',
+  'minOrderAmountForOpenAccount',
+  'openAccountDaysLimit',
+  'defaultCriticalStockLimit',
+]);
+
+const CMS_JSON_FIELDS = new Set([
+  'pricingRules',
+  'shippingCarriers',
+  'themeTemplates',
+  'contentAnywhereRules',
+  'savedSectionTemplates',
+  'popupConfig',
+  'topBarItems',
+  'faqData',
+  'dealProductIds',
+  'paymentMethodsConfig',
+  'paytrConfig',
+  'installmentsConfig',
+]);
+
+const CMS_STRING_FIELDS = new Set([
+  'heroTitle',
+  'heroSubtitle',
+  'buttonText',
+  'announcement',
+  'announcement2',
+  'siteName',
+  'primaryColor',
+  'secondaryColor',
+  'siteDescription',
+  'categoryTitle',
+  'categorySubtitle',
+  'appTitle',
+  'appSubtitle',
+  'contactPhone',
+  'contactEmail',
+  'contactAddress',
+  'socialInstagram',
+  'socialWhatsapp',
+  'socialFacebook',
+  'socialYoutube',
+  'logoFont',
+  'logoUrl',
+  'logoWeight',
+  'footerSlogan',
+  'layoutWidth',
+  'heroAlignment',
+  'topBarText1',
+  'topBarText2',
+  'cartDiscountType',
+  'companyName',
+  'bankName',
+  'bankIban',
+  'efaturaPrefix',
+  'earsivPrefix',
+  'companyStampUrl',
+  'companyOwnerName',
+  'companyOwnerSurname',
+  'companyTaxNo',
+  'companyTaxOffice',
+  'companyFax',
+  'companyGsm',
+  'companyKepAddress',
+  'companyMersisNo',
+  'companySicilNo',
+  'companyRegion',
+  'companyCountry',
+  'companyCity',
+  'companyDistrict',
+  'companyBuildingName',
+  'companyBuildingNo',
+  'companyStreet',
+  'companyPostalCode',
+  'companyWebsite',
+  'companyDefaultUnit',
+  'companyDefaultLanguages',
+  'companyExcludedChars',
+  'companyDefaultTevkifatCode',
+  'companyInvoiceFooter',
+  'footerText',
+  'mapCoordinates',
+]);
+
+function toBool(val: any, fallback = false): boolean {
+  if (val === undefined || val === null) return fallback;
+  return val === true || val === 'true' || val === 1 || val === '1';
+}
+
 async function ensureCMSDataColumnsExist() {
+  if (CMS_COLUMNS_ENSURED) return;
   const alterQueries = [
     "ALTER TABLE CMSData ADD COLUMN announcementActive TINYINT(1) NOT NULL DEFAULT 1",
     "ALTER TABLE CMSData ADD COLUMN paymentMethodsConfig LONGTEXT NULL",
@@ -84,6 +209,7 @@ async function ensureCMSDataColumnsExist() {
       for (const q of alterQueries) {
         try { await prisma.$executeRawUnsafe(q); } catch (e) {}
       }
+      CMS_COLUMNS_ENSURED = true;
     })();
     await withTimeout(alterPromise, 1500, null as any);
   } catch (e) {}
@@ -128,39 +254,20 @@ export async function GET() {
     }
 
     // MySQL (dbRow) is the primary source of truth; diskData fills in missing fields
-    const merged = { ...(diskData || {}), ...(dbRow || {}) };
+    const merged: any = { ...(diskData || {}), ...(dbRow || {}) };
     if (dbRow?.shippingCarriers !== undefined && dbRow?.shippingCarriers !== null && dbRow?.shippingCarriers !== '') {
       merged.shippingCarriers = dbRow.shippingCarriers;
     }
 
-    if (diskData && diskData.announcementActive !== undefined) {
-      merged.announcementActive = diskData.announcementActive === true || diskData.announcementActive === "true" || diskData.announcementActive === 1;
-    } else {
-      merged.announcementActive = merged.announcementActive === true || merged.announcementActive === "true" || merged.announcementActive === 1;
+    // Normalize all MySQL TINYINT(1) boolean columns to JS booleans
+    for (const bf of CMS_BOOL_FIELDS) {
+      if (merged[bf] !== undefined && merged[bf] !== null) {
+        merged[bf] = toBool(merged[bf], false);
+      }
     }
 
-    if (diskData && diskData.announcement1Enabled !== undefined) {
-      merged.announcement1Enabled = diskData.announcement1Enabled === true || diskData.announcement1Enabled === "true" || diskData.announcement1Enabled === 1;
-    } else {
-      merged.announcement1Enabled = merged.announcement1Enabled !== false && merged.announcement1Enabled !== "false" && merged.announcement1Enabled !== 0;
-    }
-
-    if (diskData && diskData.announcement2Enabled !== undefined) {
-      merged.announcement2Enabled = diskData.announcement2Enabled === true || diskData.announcement2Enabled === "true" || diskData.announcement2Enabled === 1;
-    } else {
-      merged.announcement2Enabled = merged.announcement2Enabled !== false && merged.announcement2Enabled !== "false" && merged.announcement2Enabled !== 0;
-    }
-
-    if (diskData && diskData.contactPhoneEnabled !== undefined) {
-      merged.contactPhoneEnabled = diskData.contactPhoneEnabled === true || diskData.contactPhoneEnabled === "true" || diskData.contactPhoneEnabled === 1;
-    } else {
-      merged.contactPhoneEnabled = merged.contactPhoneEnabled !== false && merged.contactPhoneEnabled !== "false" && merged.contactPhoneEnabled !== 0;
-    }
-
-    if (diskData && diskData.socialWhatsappEnabled !== undefined) {
-      merged.socialWhatsappEnabled = diskData.socialWhatsappEnabled === true || diskData.socialWhatsappEnabled === "true" || diskData.socialWhatsappEnabled === 1;
-    } else {
-      merged.socialWhatsappEnabled = merged.socialWhatsappEnabled !== false && merged.socialWhatsappEnabled !== "false" && merged.socialWhatsappEnabled !== 0;
+    if (diskData && diskData.announcementActive !== undefined && dbRow?.announcementActive === undefined) {
+      merged.announcementActive = toBool(diskData.announcementActive, true);
     }
 
     merged.shippingCarriers = cleanMockCarriers(merged.shippingCarriers);
@@ -214,108 +321,83 @@ export async function PUT(req: Request) {
     };
 
     // Explicitly process boolean toggles
-    data.announcementActive = body.announcementActive !== undefined 
-      ? (body.announcementActive === true || body.announcementActive === "true" || body.announcementActive === 1) 
-      : (existing.announcementActive === true || existing.announcementActive === "true" || existing.announcementActive === 1);
-
-    data.announcement1Enabled = body.announcement1Enabled !== undefined 
-      ? (body.announcement1Enabled === true || body.announcement1Enabled === "true" || body.announcement1Enabled === 1) 
-      : (existing.announcement1Enabled !== false);
-
-    data.announcement2Enabled = body.announcement2Enabled !== undefined 
-      ? (body.announcement2Enabled === true || body.announcement2Enabled === "true" || body.announcement2Enabled === 1) 
-      : (existing.announcement2Enabled !== false);
-
-    data.contactPhoneEnabled = body.contactPhoneEnabled !== undefined 
-      ? (body.contactPhoneEnabled === true || body.contactPhoneEnabled === "true" || body.contactPhoneEnabled !== 0) 
-      : (existing.contactPhoneEnabled !== false);
-
-    data.socialWhatsappEnabled = body.socialWhatsappEnabled !== undefined 
-      ? (body.socialWhatsappEnabled === true || body.socialWhatsappEnabled === "true" || body.socialWhatsappEnabled !== 0) 
-      : (existing.socialWhatsappEnabled !== false);
+    data.announcementActive = body.announcementActive !== undefined
+      ? toBool(body.announcementActive, true)
+      : toBool(existing.announcementActive, true);
+    data.announcement1Enabled = body.announcement1Enabled !== undefined
+      ? toBool(body.announcement1Enabled, true)
+      : toBool(existing.announcement1Enabled, true);
+    data.announcement2Enabled = body.announcement2Enabled !== undefined
+      ? toBool(body.announcement2Enabled, true)
+      : toBool(existing.announcement2Enabled, true);
+    data.contactPhoneEnabled = body.contactPhoneEnabled !== undefined
+      ? toBool(body.contactPhoneEnabled, true)
+      : toBool(existing.contactPhoneEnabled, true);
+    data.socialWhatsappEnabled = body.socialWhatsappEnabled !== undefined
+      ? toBool(body.socialWhatsappEnabled, true)
+      : toBool(existing.socialWhatsappEnabled, true);
 
     // Save to memory and disk fallback FIRST!
     MEMORY_SETTINGS = data;
     writeLocalSettingsFallback(data);
 
-    // Persist to DB safely via Raw SQL
+    // Persist ALL whitelisted CMSData columns to MySQL safely via parameterized Raw SQL
     try {
-      const annAct = data.announcementActive ? 1 : 0;
-      const ann1En = data.announcement1Enabled ? 1 : 0;
-      const ann2En = data.announcement2Enabled ? 1 : 0;
-      const cPhoneEn = data.contactPhoneEnabled ? 1 : 0;
-      const sWaEn = data.socialWhatsappEnabled ? 1 : 0;
+      const setClauses: string[] = [];
+      const params: any[] = [];
 
-      const shippingCarriersJsonStr =
-        typeof data.shippingCarriers === 'string'
-          ? data.shippingCarriers
-          : JSON.stringify(data.shippingCarriers || []);
+      const keysToPersist = new Set<string>(Object.keys(body || {}));
+      // Always include normalized announcement/topbar toggles
+      for (const k of ['announcementActive', 'announcement1Enabled', 'announcement2Enabled', 'contactPhoneEnabled', 'socialWhatsappEnabled']) {
+        if (body[k] !== undefined) keysToPersist.add(k);
+      }
 
-      const updatedRows = await withTimeout(
-        prisma.$executeRawUnsafe(
-          `UPDATE CMSData SET
-           announcementActive = ?,
-           announcement1Enabled = ?,
-           announcement2Enabled = ?,
-           contactPhoneEnabled = ?,
-           socialWhatsappEnabled = ?,
-           announcement = ?,
-           announcement2 = ?,
-           contactPhone = ?,
-           socialWhatsapp = ?,
-           topBarItems = ?,
-           paytrConfig = ?,
-           paymentMethodsConfig = ?,
-           installmentsConfig = ?,
-           shippingCarriers = ?
-           WHERE id = 'singleton'`,
-          annAct,
-          ann1En,
-          ann2En,
-          cPhoneEn,
-          sWaEn,
-          data.announcement || '',
-          data.announcement2 || '',
-          data.contactPhone || '',
-          data.socialWhatsapp || '',
-          typeof data.topBarItems === 'string' ? data.topBarItems : JSON.stringify(data.topBarItems || []),
-          typeof data.paytrConfig === 'string' ? data.paytrConfig : JSON.stringify(data.paytrConfig || {}),
-          typeof data.paymentMethodsConfig === 'string' ? data.paymentMethodsConfig : JSON.stringify(data.paymentMethodsConfig || []),
-          typeof data.installmentsConfig === 'string' ? data.installmentsConfig : JSON.stringify(data.installmentsConfig || []),
-          shippingCarriersJsonStr
-        ),
-        3000,
-        0 as any
+      for (const key of keysToPersist) {
+        if (key === 'id') continue;
+        const val = data[key];
+        if (val === undefined) continue;
+
+        if (CMS_BOOL_FIELDS.has(key)) {
+          setClauses.push(`\`${key}\` = ?`);
+          params.push(toBool(val, false) ? 1 : 0);
+        } else if (CMS_NUM_FIELDS.has(key)) {
+          const num = Number(val);
+          if (Number.isFinite(num)) {
+            setClauses.push(`\`${key}\` = ?`);
+            params.push(num);
+          }
+        } else if (CMS_JSON_FIELDS.has(key)) {
+          setClauses.push(`\`${key}\` = ?`);
+          params.push(typeof val === 'string' ? val : JSON.stringify(val ?? (key === 'paytrConfig' || key === 'pricingRules' || key === 'themeTemplates' || key === 'contentAnywhereRules' || key === 'popupConfig' ? {} : [])));
+        } else if (CMS_STRING_FIELDS.has(key)) {
+          setClauses.push(`\`${key}\` = ?`);
+          params.push(val === null ? '' : String(val));
+        }
+      }
+
+      // Ensure singleton row exists
+      const existingCheck: any[] = await withTimeout(
+        prisma.$queryRawUnsafe(`SELECT id FROM CMSData WHERE id = 'singleton' LIMIT 1`),
+        2000,
+        [] as any[]
       );
 
-      if (!updatedRows) {
-        let parsedCarriers: any = [];
-        try {
-          parsedCarriers = JSON.parse(shippingCarriersJsonStr);
-        } catch {
-          parsedCarriers = [];
-        }
+      if (!existingCheck || existingCheck.length === 0) {
         await withTimeout(
           prisma.cMSData.upsert({
             where: { id: 'singleton' },
-            update: {
-              shippingCarriers: parsedCarriers,
-              announcement: data.announcement || '',
-              announcement2: data.announcement2 || '',
-              contactPhone: data.contactPhone || '',
-              socialWhatsapp: data.socialWhatsapp || '',
-            },
+            update: {},
             create: {
               id: 'singleton',
-              heroTitle: 'PEKEFE Geleneksel & Doğal Lezzetler',
-              heroSubtitle: 'İspir’in bereketli topraklarından doğal lezzetler',
-              buttonText: 'Ürünleri Keşfet',
+              heroTitle: data.heroTitle || 'PEKEFE Geleneksel & Doğal Lezzetler',
+              heroSubtitle: data.heroSubtitle || 'İspir’in bereketli topraklarından doğal lezzetler',
+              buttonText: data.buttonText || 'Ürünleri Keşfet',
               announcement: data.announcement || '',
               announcement2: data.announcement2 || '',
               contactPhone: data.contactPhone || '',
               socialWhatsapp: data.socialWhatsapp || '',
               pricingRules: {},
-              shippingCarriers: parsedCarriers,
+              shippingCarriers: [],
               themeTemplates: {},
               contentAnywhereRules: {},
               savedSectionTemplates: [],
@@ -327,8 +409,20 @@ export async function PUT(req: Request) {
           null as any
         );
       }
+
+      if (setClauses.length > 0) {
+        await withTimeout(
+          prisma.$executeRawUnsafe(
+            `UPDATE CMSData SET ${setClauses.join(', ')} WHERE id = 'singleton'`,
+            ...params
+          ),
+          4000,
+          0 as any
+        );
+      }
     } catch (dbErr) {
-      console.warn('[API SETTINGS WARNING] Raw SQL save failed, but disk data was saved:', dbErr);
+      console.error('[API SETTINGS ERROR] MySQL save failed:', dbErr);
+      return NextResponse.json({ error: 'Veritabanına kayıt sırasında hata oluştu.' }, { status: 500 });
     }
 
     try {

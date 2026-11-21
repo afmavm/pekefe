@@ -346,7 +346,7 @@ export async function GET(
     const netBalance = Number((Number(account.openingBalance || 0) + totalDebit - totalCredit).toFixed(2));
 
     // Veritabanındaki cari bakiye ile hesaplanan net bakiye farklıysa (ve sorgu hatasız tamamlandıysa + filtresizse) senkronize et
-    if (isMySQL && dbQueryOk && type === "ALL" && !hasDateFilter && account?.id && Math.abs(Number(account.balance ?? 0) - netBalance) > 0.005) {
+    if (dbQueryOk && type === "ALL" && !hasDateFilter && account?.id && Math.abs(Number(account.balance ?? 0) - netBalance) > 0.00001) {
       prisma.currentAccount.update({
         where: { id: account.id },
         data: { balance: netBalance },
@@ -358,12 +358,13 @@ export async function GET(
     const paginatedRows = displayRows.slice(startIndex, startIndex + limit);
 
     return NextResponse.json({
-      account: { ...account, balance: netBalance },
+      synced: dbQueryOk,
+      account: { ...account, balance: dbQueryOk ? netBalance : Number(account.balance || 0) },
       summary: {
         totalDebit,
         totalCredit,
-        netBalance,
-        currentBalance: netBalance,
+        netBalance: dbQueryOk ? netBalance : Number(account.balance || 0),
+        currentBalance: dbQueryOk ? netBalance : Number(account.balance || 0),
         openingBalance: Number(account.openingBalance || 0),
         rowCount: allRows.length,
       },
@@ -378,10 +379,12 @@ export async function GET(
   } catch (error: any) {
     console.error("Ekstre API error:", error);
     return NextResponse.json({
+      error: error?.message || "Ekstre yüklenemedi",
+      synced: false,
       account: null,
       summary: { totalDebit: 0, totalCredit: 0, netBalance: 0, currentBalance: 0, openingBalance: 0, rowCount: 0 },
       pagination: { page: 1, limit: 50, total: 0, totalPages: 1 },
       rows: []
-    }, { headers: NO_CACHE_HEADERS });
+    }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 }

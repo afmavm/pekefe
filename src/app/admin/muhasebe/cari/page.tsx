@@ -353,7 +353,7 @@ export default function CariPage() {
       .then(d => {
         if (d && !d.error) {
           setEkstreData(d);
-          if (type === "ALL" && !from && !to && typeof d.summary?.netBalance === "number") {
+          if (d.account && d.synced !== false && type === "ALL" && !from && !to && typeof d.summary?.netBalance === "number") {
             const syncedBal = d.summary.netBalance;
             setAccounts(prev => prev.map(a => a.id === id ? { ...a, balance: syncedBal } : a));
             setActiveAccount(prev => prev && prev.id === id ? { ...prev, balance: syncedBal } : prev);

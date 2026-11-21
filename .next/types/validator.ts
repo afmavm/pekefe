@@ -110,6 +110,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/admin/auto-deploy/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/auto-deploy">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/auto-deploy/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/admin/backup/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/backup">> = Specific
@@ -182,6 +191,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/admin/efatura-banka/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/efatura-banka">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/efatura-banka/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/admin/email-history/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/email-history">> = Specific
@@ -222,6 +240,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/finance">> = Specific
   const handler = {} as typeof import("../../src/app/admin/finance/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/firma-ayarlari/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/firma-ayarlari">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/firma-ayarlari/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -75,6 +75,7 @@ import {
   ShoppingBag,
   Mail,
   History,
+  Building,
 } from "lucide-react";
 
 type SubItem = {
@@ -262,6 +263,9 @@ const navGroups: NavGroup[] = [
           { name: "Sistem Raporları", href: "/admin/reports", icon: BarChart3 },
           { name: "Bayi Geri Bildirimleri", href: "/admin/feedback", icon: MessageSquare },
           { name: "Veritabanı Yedekleme", href: "/admin/backup", icon: Database },
+          { name: "Otomatik Güncelleme & Canlı Dağıtım", href: "/admin/auto-deploy", icon: Terminal },
+          { name: "E-Fatura & Banka Ayarları", href: "/admin/efatura-banka", icon: Sliders },
+          { name: "Firma Ayarları", href: "/admin/firma-ayarlari", icon: Building },
           { name: "Pazaryeri Bağlantı", href: "/admin/integrations", icon: Puzzle },
           { name: "E-posta Şablonları", href: "/admin/email-templates", icon: Mail },
           { name: "E-posta Geçmişi", href: "/admin/email-history", icon: History },
@@ -339,6 +343,9 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/feedback": "Bayi Geri Bildirimleri",
   "/admin/tickets": "Destek Talepleri",
   "/admin/backup": "Veritabanı Yedekleme ve Geri Yükleme",
+  "/admin/auto-deploy": "Otomatik Güncelleme & Canlı Dağıtım",
+  "/admin/efatura-banka": "E-Fatura & Banka Ayarları",
+  "/admin/firma-ayarlari": "Firma Ayarları",
   "/admin/super-admin": "Süper Yönetici (SaaS)",
 };
 

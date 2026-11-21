@@ -577,6 +577,12 @@
       "namedRegex": "^/admin/applications(?:/)?$"
     },
     {
+      "page": "/admin/auto-deploy",
+      "regex": "^/admin/auto\\-deploy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/auto\\-deploy(?:/)?$"
+    },
+    {
       "page": "/admin/backup",
       "regex": "^/admin/backup(?:/)?$",
       "routeKeys": {},
@@ -625,6 +631,12 @@
       "namedRegex": "^/admin/despatch(?:/)?$"
     },
     {
+      "page": "/admin/efatura-banka",
+      "regex": "^/admin/efatura\\-banka(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/efatura\\-banka(?:/)?$"
+    },
+    {
       "page": "/admin/email-history",
       "regex": "^/admin/email\\-history(?:/)?$",
       "routeKeys": {},
@@ -653,6 +665,12 @@
       "regex": "^/admin/finance(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/finance(?:/)?$"
+    },
+    {
+      "page": "/admin/firma-ayarlari",
+      "regex": "^/admin/firma\\-ayarlari(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/firma\\-ayarlari(?:/)?$"
     },
     {
       "page": "/admin/footer",

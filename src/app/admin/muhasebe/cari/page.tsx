@@ -338,6 +338,12 @@ export default function CariPage() {
 
   // ── Ekstre (Hesap Hareketi) State ─────────────────────────────
   const [ekstreData, setEkstreData] = useState<any>(null);
+  const [overallSummary, setOverallSummary] = useState<{
+    accountId: string;
+    totalDebit: number;
+    totalCredit: number;
+    currentBalance: number;
+  } | null>(null);
   const [ekstreLoading, setEkstreLoading] = useState(false);
   const [ekstreType, setEkstreType] = useState<"ALL"|"TX"|"ORDER"|"INVOICE">("ALL");
   const [ekstreFrom, setEkstreFrom] = useState("");
@@ -375,6 +381,12 @@ export default function CariPage() {
           setEkstreData(d);
           if (d.account && d.synced !== false && type === "ALL" && !from && !to && typeof d.summary?.netBalance === "number") {
             const syncedBal = d.summary.netBalance;
+            setOverallSummary({
+              accountId: id,
+              totalDebit: Number(d.summary.totalDebit || 0),
+              totalCredit: Number(d.summary.totalCredit || 0),
+              currentBalance: syncedBal,
+            });
             setAccounts(prev => prev.map(a => a.id === id ? { ...a, balance: syncedBal } : a));
             setActiveAccount(prev => prev && prev.id === id ? { ...prev, balance: syncedBal } : prev);
           }
@@ -1102,12 +1114,15 @@ export default function CariPage() {
     fetchAccounts();
   }, [search, typeFilter, platformFilter, view]);
 
-  // Ledger tab açıldığında ekstre verilerini yükle
+  // Cari değiştiğinde filtreleri sıfırla ve genel ekstre özetini her zaman taze yükle
   useEffect(() => {
-    if (activeTab === "ledger" && activeAccount?.id) {
-      fetchEkstre(activeAccount.id);
+    if (activeAccount?.id) {
+      setEkstreType("ALL");
+      setEkstreFrom("");
+      setEkstreTo("");
+      fetchEkstre(activeAccount.id, "ALL", "", "");
     }
-  }, [activeTab, activeAccount?.id]);
+  }, [activeAccount?.id]);
 
 
   // Kart gövdesine tıklayınca anında detayı aç
@@ -2413,36 +2428,46 @@ export default function CariPage() {
 
               </div>
 
-              {/* Cari Özet Finansal Kartları: Toplam Borç / Toplam Alacak / Net Bakiye */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-red-50/70 border border-red-100 rounded-3xl px-5 py-4 text-center shadow-sm">
-                  <div className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Toplam Borç</div>
-                  <div className="text-lg font-black text-red-600 mt-0.5">
-                    {ekstreLoading && ekstreData?.account?.id !== activeAccount.id
-                      ? "..."
-                      : formatCurrency(ekstreData?.account?.id === activeAccount.id ? (ekstreData.summary?.totalDebit ?? 0) : 0, activeAccount.currency)}
+              {/* Cari Özet Finansal Kartları: Her Zaman Filtresiz Genel Toplam Borç / Toplam Alacak / Net Bakiye */}
+              {(() => {
+                const hasOverall = overallSummary && overallSummary.accountId === activeAccount.id;
+                const displayDebit = hasOverall ? overallSummary.totalDebit : 0;
+                const displayCredit = hasOverall ? overallSummary.totalCredit : 0;
+                const displayNet = hasOverall ? overallSummary.currentBalance : Number(activeAccount.balance ?? 0);
+                const netStatusLabel =
+                  displayNet > 0.005
+                    ? "Müşteri Borçlu"
+                    : displayNet < -0.005
+                    ? "Müşteri Alacaklı"
+                    : "Hesap Kapalı";
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-red-50/70 border border-red-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                      <div className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Toplam Borç</div>
+                      <div className="text-lg font-black text-red-600 mt-0.5">
+                        {ekstreLoading && !hasOverall
+                          ? "..."
+                          : formatCurrency(displayDebit, activeAccount.currency)}
+                      </div>
+                    </div>
+                    <div className="bg-emerald-50/70 border border-emerald-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                      <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Toplam Alacak</div>
+                      <div className="text-lg font-black text-emerald-600 mt-0.5">
+                        {ekstreLoading && !hasOverall
+                          ? "..."
+                          : formatCurrency(displayCredit, activeAccount.currency)}
+                      </div>
+                    </div>
+                    <div className="bg-orange-50/70 border border-orange-100 rounded-3xl px-5 py-4 text-center shadow-sm">
+                      <div className="text-[11px] font-bold text-orange-600 uppercase tracking-wider">Net Bakiye</div>
+                      <div className={`text-lg font-black mt-0.5 ${displayNet > 0.005 ? "text-red-600" : displayNet < -0.005 ? "text-emerald-600" : "text-slate-700"}`}>
+                        {formatCurrency(displayNet, activeAccount.currency)}
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-500 mt-0.5">{netStatusLabel}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="bg-emerald-50/70 border border-emerald-100 rounded-3xl px-5 py-4 text-center shadow-sm">
-                  <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Toplam Alacak</div>
-                  <div className="text-lg font-black text-emerald-600 mt-0.5">
-                    {ekstreLoading && ekstreData?.account?.id !== activeAccount.id
-                      ? "..."
-                      : formatCurrency(ekstreData?.account?.id === activeAccount.id ? (ekstreData.summary?.totalCredit ?? 0) : 0, activeAccount.currency)}
-                  </div>
-                </div>
-                <div className="bg-orange-50/70 border border-orange-100 rounded-3xl px-5 py-4 text-center shadow-sm">
-                  <div className="text-[11px] font-bold text-orange-600 uppercase tracking-wider">Net Bakiye</div>
-                  <div className="text-lg font-black text-orange-600 mt-0.5">
-                    {formatCurrency(
-                      ekstreData?.account?.id === activeAccount.id
-                        ? (ekstreData.summary?.currentBalance ?? activeAccount.balance ?? 0)
-                        : (activeAccount.balance ?? 0),
-                      activeAccount.currency
-                    )}
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Detail Sekmeleri Kontrol Barı */}
               <div className="bg-white border border-slate-200 rounded-3xl p-2 shadow-sm flex flex-wrap gap-1">
@@ -2784,20 +2809,20 @@ export default function CariPage() {
                       </div>
                     </div>
 
-                    {/* Özet Satırı */}
-                    {ekstreData?.summary && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-center">
-                          <div className="text-xs font-bold text-red-500 uppercase">Toplam Borç</div>
+                    {/* Filtre Aktifse Seçili Filtre Özeti (Genel bakiye üst kartlarda sabit kalır) */}
+                    {ekstreData?.summary && (ekstreType !== "ALL" || ekstreFrom || ekstreTo) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-2.5">
+                        <div className="bg-white border border-red-100 rounded-xl p-2.5 text-center">
+                          <div className="text-[10px] font-bold text-red-500 uppercase">Filtre Borç Toplamı</div>
                           <div className="text-sm font-black text-red-600">{formatCurrency(ekstreData.summary.totalDebit, "TRY")}</div>
                         </div>
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
-                          <div className="text-xs font-bold text-emerald-600 uppercase">Toplam Alacak</div>
+                        <div className="bg-white border border-emerald-100 rounded-xl p-2.5 text-center">
+                          <div className="text-[10px] font-bold text-emerald-600 uppercase">Filtre Alacak Toplamı</div>
                           <div className="text-sm font-black text-emerald-600">{formatCurrency(ekstreData.summary.totalCredit, "TRY")}</div>
                         </div>
-                        <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 text-center">
-                          <div className="text-xs font-bold text-orange-600 uppercase">Net Bakiye</div>
-                          <div className="text-sm font-black text-orange-600">{formatCurrency(ekstreData.summary.currentBalance, "TRY")}</div>
+                        <div className="bg-white border border-orange-100 rounded-xl p-2.5 text-center">
+                          <div className="text-[10px] font-bold text-orange-600 uppercase">Filtre Farkı</div>
+                          <div className="text-sm font-black text-orange-600">{formatCurrency(ekstreData.summary.totalDebit - ekstreData.summary.totalCredit, "TRY")}</div>
                         </div>
                       </div>
                     )}

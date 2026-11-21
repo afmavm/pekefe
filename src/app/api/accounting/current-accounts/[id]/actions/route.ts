@@ -27,8 +27,8 @@ const ACTION_CONFIG: Record<string, { label: string; balanceMultiplier: number; 
   satis:          { label: "Satış",           balanceMultiplier: +1, type: "SATIS" },
   alis:           { label: "Alış",            balanceMultiplier: -1, type: "ALIS" },
   isAlma:         { label: "İş Alma",         balanceMultiplier: +1, type: "IS_ALMA" },
-  "Alacak Devri": { label: "Alacak Devri",    balanceMultiplier: +1, type: "ALACAK_DEVIR" },
-  "Borç Devri":   { label: "Borç Devri",      balanceMultiplier: -1, type: "BORC_DEVIR" },
+  "Alacak Devri": { label: "Alacak Devri",    balanceMultiplier: -1, type: "ALACAK_DEVIR" },
+  "Borç Devri":   { label: "Borç Devri",      balanceMultiplier: +1, type: "BORC_DEVIR" },
 };
 
 export async function POST(

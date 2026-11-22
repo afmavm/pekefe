@@ -187,7 +187,6 @@
   "/(shop)/hikayemiz/page": "app/(shop)/hikayemiz/page.js",
   "/(shop)/iletisim/page": "app/(shop)/iletisim/page.js",
   "/(shop)/kampanyalar/page": "app/(shop)/kampanyalar/page.js",
-  "/(shop)/kategoriler/page": "app/(shop)/kategoriler/page.js",
   "/(shop)/sepet/odeme/page": "app/(shop)/sepet/odeme/page.js",
   "/(shop)/sepet/onay/page": "app/(shop)/sepet/onay/page.js",
   "/(shop)/sepet/page": "app/(shop)/sepet/page.js",
@@ -278,5 +277,6 @@
   "/admin/site-editor/page": "app/admin/site-editor/page.js",
   "/admin/stock/form/page": "app/admin/stock/form/page.js",
   "/giris/page": "app/giris/page.js",
-  "/kayit/page": "app/kayit/page.js"
+  "/kayit/page": "app/kayit/page.js",
+  "/(shop)/kategoriler/page": "app/(shop)/kategoriler/page.js"
 }

@@ -187,7 +187,6 @@
   "/(shop)/hikayemiz/page": "/hikayemiz",
   "/(shop)/iletisim/page": "/iletisim",
   "/(shop)/kampanyalar/page": "/kampanyalar",
-  "/(shop)/kategoriler/page": "/kategoriler",
   "/(shop)/sepet/odeme/page": "/sepet/odeme",
   "/(shop)/sepet/onay/page": "/sepet/onay",
   "/(shop)/sepet/page": "/sepet",
@@ -278,5 +277,6 @@
   "/admin/site-editor/page": "/admin/site-editor",
   "/admin/stock/form/page": "/admin/stock/form",
   "/giris/page": "/giris",
-  "/kayit/page": "/kayit"
+  "/kayit/page": "/kayit",
+  "/(shop)/kategoriler/page": "/kategoriler"
 }

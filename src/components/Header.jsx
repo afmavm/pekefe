@@ -16,29 +16,49 @@ const NAV_SHORT_LABELS = {
   "yoresel-urunler": "Yöresel Ürünler",
 };
 
-// Her ana kategori için mega menüde kullanılan gerçek İspir üretim görselleri
-const MEGA_MENU_PRODUCTION_IMAGES = {
-  "pestil-cesitleri": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
-  "pekmez-cesitleri": "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
-  "kome-cesitleri": "/ispir-kome-gercek-hasat.jpg",
-  "yoresel-urunler": "/uploads/ispir-saf-beyaz-dut-toplama.webp",
-  "hediyelik-lezzetler": "/ispir-pestil-kome-kompozisyon.png",
+// Her ana kategori için mega menüde kullanılan gerçek İspir üretim görselleri ve kadraj odakları
+const MEGA_MENU_PRODUCTION_MEDIA = {
+  "pestil-cesitleri": {
+    src: "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+    imgClass: "object-cover object-[center_74%] scale-[1.12] group-hover:scale-[1.17]",
+    badge: "Güneşte Kurutma",
+  },
+  "pekmez-cesitleri": {
+    src: "/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    imgClass: "object-cover object-center group-hover:scale-105",
+    badge: "Güneşte Olgunlaşan",
+  },
+  "kome-cesitleri": {
+    src: "/ispir-kome-sira-dizim.jpg",
+    imgClass: "object-cover object-center group-hover:scale-105",
+    badge: "İpe Dizili Yerli Ceviz",
+  },
+  "yoresel-urunler": {
+    src: "/uploads/ispir-saf-beyaz-dut-toplama.webp",
+    imgClass: "object-cover object-center group-hover:scale-105",
+    badge: "Doğal İspir Hasadı",
+  },
+  "hediyelik-lezzetler": {
+    src: "/ispir-pestil-kome-kompozisyon.png",
+    imgClass: "object-cover object-center group-hover:scale-105",
+    badge: "Özenli Sunum",
+  },
 };
 
-// Alt kategoriler için kesilmeden okunan, kısa ve tamamlanmış tek cümlelik açıklamalar
+// Alt kategoriler için tek satıra sığan, kesilmemiş kısa ve vurucu cümleler
 const MEGA_MENU_SUB_DESCRIPTIONS = {
-  "sade-dut-pestili": "Katkısız İspir dutundan ince tabakalar halinde kurutulan saf lezzet.",
-  "cevizli-dut-pestili": "Doğal dut pestili ile yerli İspir cevizinin besleyici uyumu.",
-  "geleneksel-dut-pestili": "El emeği muska ve sarma formunda geleneksel pestil tatlıları.",
-  "dut-pekmezi": "Şeker ilavesiz, yoğun kıvamlı hakiki İspir beyaz dut pekmezi.",
-  "karadut-pekmezi": "Seçkin karadutlardan elde edilen yoğun aromalı doğal pekmez.",
-  "dut-gun-pekmezi": "Güneşin doğal ısısıyla kıvamlanan sınırlı hasat gün pekmezi.",
-  "cevizli-kome": "Bütün yerli cevizlerin dut şırasıyla buluştuğu geleneksel köme.",
-  "geleneksel-kome": "Asırlık İspir tarifine sadık kalınarak hazırlanan doğal köme.",
-  "kuru-dut": "İspir güneşinde doğal olarak kurutulmuş taze mahsul kuru dut.",
-  "diger-ispir-lezzetleri": "Bölgenin mevsimlik hasat edilen seçkin doğal yöresel ürünleri.",
-  "pekefe-hediye-setleri": "Sevdikleriniz için özenle hazırlanan doğal PEKEFE hediye setleri.",
-  "yoresel-lezzet-kutulari": "Özel günler ve kurumsal ikramlar için yöresel lezzet kutuları.",
+  "sade-dut-pestili": "Katkısız, ince tabaka saf İspir dutu.",
+  "cevizli-dut-pestili": "Yerli İspir cevizli, besleyici dut pestili.",
+  "geleneksel-dut-pestili": "El emeği muska ve sarma pestil tatlıları.",
+  "dut-pekmezi": "Şeker ilavesiz, yoğun kıvamlı beyaz dut pekmezi.",
+  "karadut-pekmezi": "Yoğun aromalı, katkısız doğal karadut pekmezi.",
+  "dut-gun-pekmezi": "Güneş ışığında olgunlaşan sınırlı hasat pekmez.",
+  "cevizli-kome": "İpe dizili yerli ceviz ve saf dut şırası.",
+  "geleneksel-kome": "Asırlık İspir tarifiyle hazırlanan doğal köme.",
+  "kuru-dut": "İspir güneşinde doğal kurutulmuş taze dut.",
+  "diger-ispir-lezzetleri": "Mevsiminde hasat edilen seçkin yöresel ürünler.",
+  "pekefe-hediye-setleri": "Özel günler için doğal PEKEFE hediye setleri.",
+  "yoresel-lezzet-kutulari": "Kurumsal ve özel ikramlara yöresel kutular.",
 };
 
 const stripHtml = (str) => {
@@ -93,7 +113,7 @@ export default function Header() {
   const handleDropdownLeave = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setOpenDropdownSlug(null);
-    }, 140);
+    }, 170);
   };
 
   useEffect(() => {
@@ -186,12 +206,21 @@ export default function Header() {
   const subtotal = safeItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
   const cartCount = safeItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const getLinkClass = (path) => {
-    const base = "whitespace-nowrap transition-colors pb-1 text-xs lg:text-xs xl:text-sm font-medium";
+  const getLinkClass = (path, isMenuOpen = false) => {
+    const base = "whitespace-nowrap transition-colors duration-150 pb-1 text-xs lg:text-xs xl:text-sm font-medium border-b-2";
     const isActive = path === "/" ? pathname === "/" : pathname.startsWith(path);
-    return isActive
-      ? `${base} text-primary border-b-2 border-primary font-bold`
-      : `${base} text-on-surface hover:text-primary`;
+    const hasAnotherMenuOpen = Boolean(openDropdownSlug) && !isMenuOpen;
+
+    if (isMenuOpen) {
+      return `${base} text-[#6b1d2f] dark:text-amber-400 border-[#6b1d2f] dark:border-amber-400 font-bold`;
+    }
+    if (isActive && !hasAnotherMenuOpen) {
+      return `${base} text-[#6b1d2f] dark:text-amber-400 border-[#6b1d2f] dark:border-amber-400 font-bold`;
+    }
+    if (isActive && hasAnotherMenuOpen) {
+      return `${base} text-on-surface/75 border-transparent hover:text-[#6b1d2f]`;
+    }
+    return `${base} text-on-surface border-transparent hover:text-[#6b1d2f] dark:hover:text-amber-400`;
   };
 
   const handleSignOut = async () => {
@@ -202,11 +231,11 @@ export default function Header() {
   return (
     <>
       <nav className="bg-surface/95 backdrop-blur-md sticky top-0 z-50 transition-all premium-shadow border-b border-outline-variant/10" aria-label="Ana Navigasyon">
-        <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16 md:h-20 gap-2 sm:gap-4">
+        <div className="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-container-max mx-auto h-16 md:h-20 gap-2 sm:gap-4">
 
           {/* Brand Logo */}
-          <div className="flex items-center shrink-0 z-10">
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
+          <div className="flex items-center shrink-0 z-10 py-1.5">
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
               <Image
                 src={logoSrc}
                 onError={() => setLogoSrc("/logo.png")}
@@ -214,16 +243,16 @@ export default function Header() {
                 width={52}
                 height={52}
                 priority
-                className="h-8 sm:h-10 md:h-12 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform"
+                className="h-8 sm:h-9 md:h-11 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform"
               />
-              <span className="font-bold text-lg sm:text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">
+              <span className="font-bold text-lg sm:text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400 leading-none">
                 {cmsData?.siteName ? cmsData.siteName.split(" ")[0] : "Pekefe"}
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div ref={navRef} className="hidden lg:flex items-center gap-2.5 lg:gap-3.5 xl:gap-5 min-w-0" role="menubar" aria-label="Birincil Menü">
+          <div ref={navRef} className="hidden lg:flex items-center gap-2.5 lg:gap-3.5 xl:gap-5 min-w-0 pr-1" role="menubar" aria-label="Birincil Menü">
             <Link href="/" className={getLinkClass("/")}>Ana Sayfa</Link>
             <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Tüm Ürünler</Link>
 
@@ -238,10 +267,11 @@ export default function Header() {
                   : idx === 2
                   ? "left-1/2 -translate-x-1/2"
                   : "right-0";
-              const megaImage =
-                MEGA_MENU_PRODUCTION_IMAGES[cat.slug] ||
-                cat.image ||
-                "/ispir-manzara-hero.png";
+              const mediaConfig = MEGA_MENU_PRODUCTION_MEDIA[cat.slug] || {
+                src: cat.image || "/ispir-manzara-hero.png",
+                imgClass: "object-cover object-center group-hover:scale-105",
+                badge: "Erzurum İspir",
+              };
 
               if (subs.length === 0) {
                 return (
@@ -262,7 +292,7 @@ export default function Header() {
                     <Link
                       href={catHref}
                       onClick={() => setOpenDropdownSlug(null)}
-                      className={getLinkClass(catHref)}
+                      className={getLinkClass(catHref, isDropdownOpen)}
                       onFocus={() => handleDropdownEnter(cat.slug)}
                     >
                       {label}
@@ -277,10 +307,14 @@ export default function Header() {
                       aria-label={`${label} alt kategorilerini aç`}
                       aria-haspopup="true"
                       aria-expanded={isDropdownOpen}
-                      className="p-0.5 text-on-surface/60 hover:text-primary transition-colors cursor-pointer"
+                      className={`p-0.5 transition-colors cursor-pointer ${
+                        isDropdownOpen
+                          ? "text-[#6b1d2f] dark:text-amber-400"
+                          : "text-on-surface/55 hover:text-[#6b1d2f]"
+                      }`}
                     >
                       <svg
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? "rotate-180 text-primary" : ""}`}
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${isDropdownOpen ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -290,16 +324,16 @@ export default function Header() {
                     </button>
                   </div>
 
-                  {/* Premium 2-Kolon (%43 / %57) Animasyonlu Mega Menü */}
+                  {/* Görünmez Hover Bridge + Premium 2-Kolon (%43 / %57) Animasyonlu Mega Menü */}
                   <div
                     role="menu"
                     aria-hidden={!isDropdownOpen}
                     onMouseEnter={() => handleDropdownEnter(cat.slug)}
                     onMouseLeave={handleDropdownLeave}
-                    className={`absolute top-full pt-3 w-[540px] xl:w-[580px] z-50 transition-all duration-200 ease-out ${panelAlignClass} ${
+                    className={`absolute top-full -mt-1 pt-4 w-[560px] xl:w-[600px] z-50 transition-all duration-200 ease-out ${panelAlignClass} ${
                       isDropdownOpen
                         ? "opacity-100 translate-y-0 pointer-events-auto"
-                        : "opacity-0 translate-y-2 pointer-events-none"
+                        : "opacity-0 -translate-y-1.5 pointer-events-none"
                     }`}
                   >
                     <div className="bg-[#FAF8F5] dark:bg-stone-900 rounded-2xl shadow-2xl border border-stone-200/90 dark:border-stone-800 overflow-hidden grid grid-cols-[43%_57%]">
@@ -308,19 +342,19 @@ export default function Header() {
                         href={catHref}
                         onClick={() => setOpenDropdownSlug(null)}
                         tabIndex={isDropdownOpen ? 0 : -1}
-                        className="relative group overflow-hidden bg-stone-900 min-h-[250px] flex flex-col justify-end p-5"
+                        className="relative group overflow-hidden bg-stone-900 min-h-[255px] flex flex-col justify-end p-5"
                       >
                         <Image
-                          src={megaImage}
+                          src={mediaConfig.src}
                           alt={`${cat.name} — İspir Geleneksel Üretim`}
                           fill
                           sizes="260px"
-                          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                          className={`${mediaConfig.imgClass} transition-transform duration-700 ease-out`}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#1E080C]/92 via-[#2A0D12]/50 to-black/15" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1B070B]/92 via-[#2A0D12]/48 to-transparent" />
                         <div className="relative z-10">
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300/95 mb-1.5">
-                            Erzurum İspir
+                            {mediaConfig.badge}
                           </p>
                           <p className="font-serif text-lg font-bold text-white leading-snug">
                             {cat.name}
@@ -333,7 +367,7 @@ export default function Header() {
                         </div>
                       </Link>
 
-                      {/* Sağ %57 — Alt Kategoriler (Kesilmemiş Tam Cümleler) */}
+                      {/* Sağ %57 — Alt Kategoriler (Tek Satır Kısa ve Tam Cümleler) */}
                       <div className="p-5 flex flex-col justify-between bg-white dark:bg-stone-900">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8B5E3C] px-2.5 mb-2.5">
@@ -354,8 +388,8 @@ export default function Header() {
                                   role="menuitem"
                                   className={`group/sub flex items-start justify-between gap-2.5 px-3 py-2.5 rounded-xl transition-colors ${
                                     pathname === `/${cat.slug}/${sub.slug}`
-                                      ? "bg-[#5D1924]/10 text-[#5D1924]"
-                                      : "text-stone-800 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#5D1924]"
+                                      ? "bg-[#6b1d2f]/10 text-[#6b1d2f]"
+                                      : "text-stone-800 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#6b1d2f]"
                                   }`}
                                 >
                                   <div className="min-w-0 flex-1">
@@ -363,14 +397,14 @@ export default function Header() {
                                       {sub.name}
                                     </span>
                                     {subDesc && (
-                                      <span className="block text-xs text-stone-500 dark:text-stone-400 leading-snug mt-0.5 whitespace-normal">
+                                      <span className="block text-[12px] text-stone-500 dark:text-stone-400 leading-snug mt-0.5 whitespace-normal">
                                         {subDesc}
                                       </span>
                                     )}
                                   </div>
                                   <span
                                     aria-hidden="true"
-                                    className="text-xs text-stone-400 group-hover/sub:text-[#5D1924] group-hover/sub:translate-x-0.5 transition-all shrink-0 mt-0.5"
+                                    className="text-xs text-stone-400 group-hover/sub:text-[#6b1d2f] group-hover/sub:translate-x-0.5 transition-all shrink-0 mt-0.5"
                                   >
                                     →
                                   </span>
@@ -385,7 +419,7 @@ export default function Header() {
                             href={catHref}
                             onClick={() => setOpenDropdownSlug(null)}
                             tabIndex={isDropdownOpen ? 0 : -1}
-                            className="text-xs font-bold text-[#5D1924] hover:underline inline-flex items-center gap-1"
+                            className="text-xs font-bold text-[#6b1d2f] hover:underline inline-flex items-center gap-1"
                           >
                             Tüm {cat.name} Sayfasına Git →
                           </Link>

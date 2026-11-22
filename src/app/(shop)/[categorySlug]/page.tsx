@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import {
   getAllCategoriesServer,
   getCategoryBySlugServer,
-  getProductsForCategoryServer,
+  getPublishedProductsServer,
 } from "@/lib/category-server";
+import { productMatchesCategory } from "@/lib/category-utils";
 import CategoryPageView from "@/components/category/CategoryPageView";
 
 export const dynamic = "force-dynamic";
@@ -96,7 +97,16 @@ export default async function MainCategoryPage({ params }: PageProps) {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .slice(0, 4);
 
-  const products = await getProductsForCategoryServer(mainCategory, allCategories);
+  const allProducts = await getPublishedProductsServer();
+  const products = allProducts.filter((p) =>
+    productMatchesCategory(p, mainCategory, allCategories)
+  );
+  const subCategoryCounts: Record<string, number> = {};
+  for (const sub of subCategories) {
+    subCategoryCounts[sub.id] = allProducts.filter((p) =>
+      productMatchesCategory(p, sub, allCategories)
+    ).length;
+  }
 
   return (
     <CategoryPageView
@@ -105,6 +115,8 @@ export default async function MainCategoryPage({ params }: PageProps) {
       subCategories={subCategories}
       relatedCategories={relatedCategories}
       products={products}
+      subCategoryCounts={subCategoryCounts}
+      mainCategoryTotalCount={products.length}
     />
   );
 }

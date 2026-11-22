@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronRight, ArrowRight, ShieldCheck, Leaf, Package } from "lucide-react";
 import type { CategoryRecord } from "@/lib/category-utils";
 import CategoryCatalogClient from "./CategoryCatalogClient";
 
@@ -11,6 +11,8 @@ interface CategoryPageViewProps {
   subCategories: CategoryRecord[];
   relatedCategories: CategoryRecord[];
   products: any[];
+  subCategoryCounts?: Record<string, number>;
+  mainCategoryTotalCount?: number;
 }
 
 export default function CategoryPageView({
@@ -19,6 +21,8 @@ export default function CategoryPageView({
   subCategories,
   relatedCategories,
   products,
+  subCategoryCounts = {},
+  mainCategoryTotalCount,
 }: CategoryPageViewProps) {
   const displayCategory = activeSubCategory || mainCategory;
   const heroImage = displayCategory.image || mainCategory.image || "/ispir-manzara-hero.png";
@@ -132,24 +136,35 @@ export default function CategoryPageView({
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-50"
+            className="object-cover object-center opacity-55"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2A0D12]/90 via-[#2A0D12]/65 to-[#2A0D12]/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2A0D12]/92 via-[#2A0D12]/68 to-[#2A0D12]/25" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-300/90 mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300/90 mb-3">
               Erzurum İspir · PEKEFE Geleneksel Ürünler
             </p>
-            <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white tracking-tight leading-tight mb-4">
+            <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.12] mb-4">
               {displayCategory.name}
             </h1>
+            <div className="w-14 h-0.5 bg-amber-400/80 mb-5" />
             {displayCategory.shortDesc && (
               <p className="text-stone-200 text-base sm:text-lg leading-relaxed font-normal">
                 {displayCategory.shortDesc}
               </p>
             )}
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-semibold text-amber-100/90">
+              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                {products.length > 0 ? `${products.length} Seçkin Ürün` : "Mevsimlik Hazırlık"}
+              </span>
+              {subCategories.length > 0 && (
+                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                  {subCategories.length} Alt Kategori
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -161,29 +176,72 @@ export default function CategoryPageView({
           mainCategory={mainCategory}
           subCategories={subCategories}
           activeSubCategory={activeSubCategory}
+          subCategoryCounts={subCategoryCounts}
+          mainCategoryTotalCount={mainCategoryTotalCount}
         />
 
-        {/* Özgün Kategori SEO İçerik Alanı */}
+        {/* Minimalist İspir Menşei & Güven Şeridi */}
+        <section
+          aria-label="PEKEFE Kalite Güvencesi"
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 border-y border-stone-200 dark:border-stone-800 py-8"
+        >
+          <div className="flex items-start gap-3.5 px-2">
+            <Leaf className="w-5 h-5 text-[#5D1924] shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                Erzurum İspir Menşei
+              </h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                Yüksek rakımlı İspir bahçelerinin mevsiminde hasat edilen doğal dut ve yerli cevizleriyle hazırlanır.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3.5 px-2">
+            <ShieldCheck className="w-5 h-5 text-[#5D1924] shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                Katkısız &amp; Şeker İlavesiz
+              </h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                Koruyucu, glikoz şurubu ve yapay aroma içermez; geleneksel Anadolu üretim kültürüne sadıktır.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3.5 px-2">
+            <Package className="w-5 h-5 text-[#5D1924] shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                Taze Paketleme &amp; Güvenli Kargo
+              </h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                Tazeliğini koruyan vakumlu ve cam ambalajlarla özenle paketlenerek Türkiye geneline ulaştırılır.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Özgün Kategori SEO İçerik Alanı (Editoryal 2 Sütun) */}
         {seoParagraphs.length > 0 && (
           <section
             aria-labelledby="category-seo-heading"
-            className="mt-16 pt-12 border-t border-stone-200 dark:border-stone-800"
+            className="mt-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
           >
-            <div className="max-w-4xl">
+            <div className="lg:col-span-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8B5E3C] mb-2">
                 İspir&apos;in Doğallığı, Gelenekten Gelen Lezzet
               </p>
               <h2
                 id="category-seo-heading"
-                className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 mb-5"
+                className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 leading-snug"
               >
                 {displayCategory.name} Hakkında
               </h2>
-              <div className="space-y-4 text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed">
-                {seoParagraphs.map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
+              <div className="w-12 h-0.5 bg-[#5D1924] mt-4" />
+            </div>
+            <div className="lg:col-span-8 space-y-4 text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed">
+              {seoParagraphs.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
             </div>
           </section>
         )}

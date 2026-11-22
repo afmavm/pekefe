@@ -54,6 +54,22 @@ export default function Header() {
   const [openDropdownSlug, setOpenDropdownSlug] = useState(null);
   const [expandedMobileSlug, setExpandedMobileSlug] = useState(null);
   const profileRef = useRef(null);
+  const navRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
+
+  const handleDropdownEnter = (slug) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpenDropdownSlug(slug);
+  };
+
+  const handleDropdownLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpenDropdownSlug(null);
+    }, 140);
+  };
 
   useEffect(() => {
     let active = true;
@@ -106,21 +122,36 @@ export default function Header() {
     return () => window.removeEventListener("pekefe_cart_changed", handleCartChange);
   }, []);
 
-  // Close profile dropdown on outside click
+  // Close profile and category dropdowns on outside click or Escape
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
       }
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setOpenDropdownSlug(null);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setOpenDropdownSlug(null);
+        setProfileOpen(false);
+        setMobileMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu and dropdowns on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setProfileOpen(false);
+    setOpenDropdownSlug(null);
   }, [pathname]);
 
   const updateQty = (id, delta) => updateCartQty(id, delta);
@@ -167,15 +198,16 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-3.5 xl:gap-5" role="menubar" aria-label="Birincil Menü">
+          <div ref={navRef} className="hidden lg:flex items-center gap-3.5 xl:gap-5" role="menubar" aria-label="Birincil Menü">
             <Link href="/" className={getLinkClass("/")}>Ana Sayfa</Link>
             <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Tüm Ürünler</Link>
 
-            {mainCategories.map((cat) => {
+            {mainCategories.map((cat, idx) => {
               const subs = getSubCategories(cat.id);
               const catHref = `/${cat.slug}`;
               const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
               const isDropdownOpen = openDropdownSlug === cat.slug;
+              const alignRight = idx >= mainCategories.length - 2;
 
               if (subs.length === 0) {
                 return (
@@ -188,59 +220,123 @@ export default function Header() {
               return (
                 <div
                   key={cat.id}
-                  className="relative py-2"
-                  onMouseEnter={() => setOpenDropdownSlug(cat.slug)}
-                  onMouseLeave={() => setOpenDropdownSlug(null)}
+                  className="relative py-2 flex items-center"
+                  onMouseEnter={() => handleDropdownEnter(cat.slug)}
+                  onMouseLeave={handleDropdownLeave}
                 >
-                  <Link
-                    href={catHref}
-                    className={`${getLinkClass(catHref)} inline-flex items-center gap-1`}
-                    aria-haspopup="true"
-                    aria-expanded={isDropdownOpen}
-                    onFocus={() => setOpenDropdownSlug(cat.slug)}
-                  >
-                    <span>{label}</span>
-                    <svg
-                      className={`w-3 h-3 opacity-60 transition-transform duration-150 ${isDropdownOpen ? "rotate-180 opacity-100" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div className="inline-flex items-center gap-0.5">
+                    <Link
+                      href={catHref}
+                      onClick={() => setOpenDropdownSlug(null)}
+                      className={getLinkClass(catHref)}
+                      onFocus={() => handleDropdownEnter(cat.slug)}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </Link>
+                      {label}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setOpenDropdownSlug(isDropdownOpen ? null : cat.slug);
+                      }}
+                      aria-label={`${label} alt kategorilerini aç`}
+                      aria-haspopup="true"
+                      aria-expanded={isDropdownOpen}
+                      className="p-0.5 text-on-surface/60 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      <svg
+                        className={`w-3.5 h-3.5 transition-transform duration-150 ${isDropdownOpen ? "rotate-180 text-primary" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
 
                   {isDropdownOpen && (
                     <div
                       role="menu"
-                      className="absolute left-0 top-full pt-1 w-60 z-50"
+                      onMouseEnter={() => handleDropdownEnter(cat.slug)}
+                      onMouseLeave={handleDropdownLeave}
+                      className={`absolute top-full pt-2.5 w-[440px] z-50 ${alignRight ? "right-0" : "left-0"}`}
                     >
-                      <div className="bg-surface-container-lowest dark:bg-stone-900 rounded-2xl shadow-lg border border-outline-variant/20 overflow-hidden py-2">
-                        <div className="px-4 py-2 border-b border-outline-variant/10">
-                          <Link
-                            href={catHref}
-                            onClick={() => setOpenDropdownSlug(null)}
-                            className="text-xs font-bold uppercase tracking-wider text-primary hover:underline"
-                          >
-                            Tüm {cat.name}
-                          </Link>
-                        </div>
-                        <div className="py-1">
-                          {subs.map((sub) => (
+                      <div className="bg-[#FAF8F5] dark:bg-stone-900 rounded-2xl shadow-xl border border-stone-200/90 dark:border-stone-800 overflow-hidden grid grid-cols-12">
+                        {/* Sol Editoryal Kategori Kartı */}
+                        <Link
+                          href={catHref}
+                          onClick={() => setOpenDropdownSlug(null)}
+                          className="col-span-5 relative group overflow-hidden bg-stone-900 min-h-[210px] flex flex-col justify-end p-4"
+                        >
+                          <Image
+                            src={cat.image || "/ispir-manzara-hero.png"}
+                            alt={cat.name}
+                            fill
+                            sizes="200px"
+                            className="object-cover object-center opacity-75 group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#2A0D12]/95 via-[#2A0D12]/45 to-transparent" />
+                          <div className="relative z-10">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300/90 mb-1">
+                              İspir Koleksiyonu
+                            </p>
+                            <p className="font-serif text-base font-bold text-white leading-snug">
+                              {cat.name}
+                            </p>
+                            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-200 group-hover:translate-x-0.5 transition-transform">
+                              Tümünü Gör →
+                            </span>
+                          </div>
+                        </Link>
+
+                        {/* Sağ Alt Kategori Listesi */}
+                        <div className="col-span-7 p-4 flex flex-col justify-between bg-white dark:bg-stone-900">
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8B5E3C] px-2.5 mb-2">
+                              Alt Kategoriler
+                            </p>
+                            <div className="space-y-1">
+                              {subs.map((sub) => (
+                                <Link
+                                  key={sub.id}
+                                  href={`/${cat.slug}/${sub.slug}`}
+                                  onClick={() => setOpenDropdownSlug(null)}
+                                  role="menuitem"
+                                  className={`group/sub flex items-center justify-between px-2.5 py-2.5 rounded-xl transition-colors ${
+                                    pathname === `/${cat.slug}/${sub.slug}`
+                                      ? "bg-[#5D1924]/10 text-[#5D1924] font-semibold"
+                                      : "text-stone-700 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#5D1924]"
+                                  }`}
+                                >
+                                  <div className="min-w-0 pr-2">
+                                    <span className="block text-sm font-semibold leading-tight">
+                                      {sub.name}
+                                    </span>
+                                    {sub.shortDesc && (
+                                      <span className="block text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                                        {sub.shortDesc}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-stone-400 group-hover/sub:text-[#5D1924] group-hover/sub:translate-x-0.5 transition-all shrink-0">
+                                    →
+                                  </span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-stone-100 dark:border-stone-800 px-2.5">
                             <Link
-                              key={sub.id}
-                              href={`/${cat.slug}/${sub.slug}`}
+                              href={catHref}
                               onClick={() => setOpenDropdownSlug(null)}
-                              role="menuitem"
-                              className={`block px-4 py-2.5 text-sm transition-colors ${
-                                pathname === `/${cat.slug}/${sub.slug}`
-                                  ? "bg-primary/10 text-primary font-semibold"
-                                  : "text-on-surface hover:bg-surface-container-low hover:text-primary"
-                              }`}
+                              className="text-xs font-bold text-[#5D1924] hover:underline inline-flex items-center gap-1"
                             >
-                              {sub.name}
+                              Tüm {cat.name} Sayfasına Git →
                             </Link>
-                          ))}
+                          </div>
                         </div>
                       </div>
                     </div>

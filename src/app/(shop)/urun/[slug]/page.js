@@ -10,6 +10,7 @@ import { HmfInfoSection } from "@/components/product/HmfInfoSection";
 import { ProductModals } from "@/components/product/ProductModals";
 import { ProductRecommendations } from "@/components/product/ProductRecommendations";
 import { useProductDetailState, getVariantLabel } from "@/components/product/useProductDetailState";
+import { PEKEFE_DEFAULT_CATEGORIES, resolveProductCategories } from "@/lib/category-utils";
 
 export default function UrunDetay({ params }) {
   const state = useProductDetailState(params);
@@ -59,15 +60,34 @@ export default function UrunDetay({ params }) {
 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-base relative z-10">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 py-8 text-on-surface-variant font-label-sm text-[10px] uppercase tracking-widest">
-          <Link className="hover:text-primary transition-colors" href="/">Mağaza</Link>
-          <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
-          <Link className="hover:text-primary transition-colors" href="/kategoriler">
-            {state.product?.categoryDisplay || state.product?.category || "Gıda"}
-          </Link>
-          <span className="material-symbols-outlined text-[10px] text-outline">chevron_right</span>
-          <span className="text-primary font-bold">{state.product?.name}</span>
-        </nav>
+        {(() => {
+          const resolved = resolveProductCategories(state.product, PEKEFE_DEFAULT_CATEGORIES);
+          return (
+            <nav aria-label="Sayfa konumu" className="flex items-center flex-wrap gap-2 py-8 text-on-surface-variant font-label-sm text-[11px] uppercase tracking-widest">
+              <Link className="hover:text-primary transition-colors" href="/">Ana Sayfa</Link>
+              <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
+              {resolved.main ? (
+                <Link className="hover:text-primary transition-colors" href={`/${resolved.main.slug}`}>
+                  {resolved.main.name}
+                </Link>
+              ) : (
+                <Link className="hover:text-primary transition-colors" href="/kategoriler">
+                  {state.product?.categoryDisplay || state.product?.category || "Ürünler"}
+                </Link>
+              )}
+              {resolved.main && resolved.sub && (
+                <>
+                  <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
+                  <Link className="hover:text-primary transition-colors" href={`/${resolved.main.slug}/${resolved.sub.slug}`}>
+                    {resolved.sub.name}
+                  </Link>
+                </>
+              )}
+              <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
+              <span className="text-primary font-bold">{state.product?.name}</span>
+            </nav>
+          );
+        })()}
 
         {/* ── Showcase Grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-24">

@@ -27,16 +27,14 @@ if (!rawDbUrl.toLowerCase().includes("pekefe")) {
   process.exit(1);
 }
 
-// connection_limit=1 ekle (cPanel paylaşımlı MySQL güvenliği)
+// connection_limit=1 ekle (cPanel paylaşımlı MySQL güvenliği; pool_timeout CloudLinux tokio timer panic'ini önlemek için kullanılmaz)
 const sep = rawDbUrl.includes("?") ? "&" : "?";
 const safeDbUrl = rawDbUrl.includes("connection_limit=")
   ? rawDbUrl
-  : `${rawDbUrl}${sep}connection_limit=1&pool_timeout=20`;
+  : `${rawDbUrl}${sep}connection_limit=1&connect_timeout=10`;
 
-process.env.DATABASE_URL = safeDbUrl;
-
-const { PrismaClient } = require("../src/generated-client");
-const prisma = new PrismaClient();
+const { PrismaClient } = require(path.join(process.cwd(), "src", "generated-client"));
+const prisma = new PrismaClient({ datasources: { db: { url: safeDbUrl } }, log: [] });
 
 const CATEGORIES = [
   {

@@ -78,6 +78,8 @@ const CMS_BOOL_FIELDS = new Set([
   'dealSectionActive',
   'cashOnDeliveryEnabled',
   'preventZeroStockSale',
+  'gtmEnabled',
+  'gtmRequireConsent',
 ]);
 
 const CMS_NUM_FIELDS = new Set([
@@ -174,6 +176,8 @@ const CMS_STRING_FIELDS = new Set([
   'companyInvoiceFooter',
   'footerText',
   'mapCoordinates',
+  'gtmId',
+  'gaMeasurementId',
 ]);
 
 function toBool(val: any, fallback = false): boolean {
@@ -207,7 +211,11 @@ async function ensureCMSDataColumnsExist() {
     "ALTER TABLE CMSData MODIFY COLUMN siteDescription TEXT NULL",
     "ALTER TABLE CMSData MODIFY COLUMN footerText TEXT NULL",
     "ALTER TABLE CMSData MODIFY COLUMN announcement TEXT NULL",
-    "ALTER TABLE CMSData MODIFY COLUMN announcement2 TEXT NULL"
+    "ALTER TABLE CMSData MODIFY COLUMN announcement2 TEXT NULL",
+    "ALTER TABLE CMSData ADD COLUMN gtmId VARCHAR(64) NOT NULL DEFAULT 'GTM-5G6JF6TV'",
+    "ALTER TABLE CMSData ADD COLUMN gaMeasurementId VARCHAR(64) NOT NULL DEFAULT ''",
+    "ALTER TABLE CMSData ADD COLUMN gtmEnabled TINYINT(1) NOT NULL DEFAULT 1",
+    "ALTER TABLE CMSData ADD COLUMN gtmRequireConsent TINYINT(1) NOT NULL DEFAULT 0"
   ];
 
   try {

@@ -54,6 +54,11 @@ interface SeoState {
   companyTaxOffice: string;
   companyMersis: string;
   mapCoordinates: string;
+
+  gtmId: string;
+  gaMeasurementId: string;
+  gtmEnabled: boolean;
+  gtmRequireConsent: boolean;
 }
 
 const defaults: SeoState = {
@@ -76,6 +81,10 @@ const defaults: SeoState = {
   companyTaxOffice: "",
   companyMersis: "",
   mapCoordinates: "",
+  gtmId: "GTM-5G6JF6TV",
+  gaMeasurementId: "",
+  gtmEnabled: true,
+  gtmRequireConsent: false,
 };
 
 export default function SeoAdminPage() {
@@ -83,7 +92,7 @@ export default function SeoAdminPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<"meta" | "social" | "audit" | "corporate" | "indexing">("meta");
+  const [activeTab, setActiveTab] = useState<"meta" | "social" | "audit" | "corporate" | "indexing" | "analytics">("meta");
 
   useEffect(() => {
     fetch("/api/settings", { cache: "no-store" })
@@ -110,6 +119,10 @@ export default function SeoAdminPage() {
             companyTaxOffice: data.companyTaxOffice || "",
             companyMersis: data.companyMersisNo || "",
             mapCoordinates: data.mapCoordinates || "",
+            gtmId: data.gtmId !== undefined && data.gtmId !== null ? String(data.gtmId) : defaults.gtmId,
+            gaMeasurementId: data.gaMeasurementId || "",
+            gtmEnabled: data.gtmEnabled !== undefined ? Boolean(data.gtmEnabled === true || data.gtmEnabled === 1 || data.gtmEnabled === "true") : true,
+            gtmRequireConsent: data.gtmRequireConsent !== undefined ? Boolean(data.gtmRequireConsent === true || data.gtmRequireConsent === 1 || data.gtmRequireConsent === "true") : false,
           });
         }
       })
@@ -140,6 +153,10 @@ export default function SeoAdminPage() {
         companyTaxOffice: seo.companyTaxOffice,
         companyMersisNo: seo.companyMersis,
         mapCoordinates: seo.mapCoordinates,
+        gtmId: seo.gtmId.trim().toUpperCase(),
+        gaMeasurementId: seo.gaMeasurementId.trim().toUpperCase(),
+        gtmEnabled: seo.gtmEnabled,
+        gtmRequireConsent: seo.gtmRequireConsent,
       };
 
       const res = await fetch("/api/settings", {
@@ -257,6 +274,18 @@ export default function SeoAdminPage() {
         >
           <Code className="w-4 h-4" />
           Google Console & Robots.txt
+        </button>
+
+        <button
+          onClick={() => setActiveTab("analytics")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
+            activeTab === "analytics"
+              ? "bg-[#b45309] text-white shadow-sm"
+              : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+          }`}
+        >
+          <FileCode className="w-4 h-4" />
+          Google Tag Manager & Analitik
         </button>
 
         <button
@@ -575,6 +604,113 @@ export default function SeoAdminPage() {
                 Sitemap'i Görüntüle ↗
               </a>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: GOOGLE TAG MANAGER & ANALYTICS */}
+      {activeTab === "analytics" && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                <FileCode className="w-4 h-4 text-[#b45309]" />
+                Google Tag Manager (GTM) &amp; Google Analytics 4 Yönetimi
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Takip kodlarını kod değişikliği yapmadan doğrudan buradan güncelleyebilir veya pasife alabilirsiniz. Yönetim paneli trafiği otomatik olarak hariç tutulur.
+              </p>
+            </div>
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+                seo.gtmEnabled && seo.gtmId
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${seo.gtmEnabled && seo.gtmId ? "bg-emerald-500" : "bg-gray-400"}`} />
+              {seo.gtmEnabled && seo.gtmId ? "Aktif" : "Pasif"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className={labelClass}>Google Tag Manager Container ID (GTM)</label>
+              <input
+                type="text"
+                value={seo.gtmId}
+                onChange={(e) => update("gtmId", e.target.value.toUpperCase())}
+                className={inputClass + " font-mono"}
+                placeholder="GTM-5G6JF6TV"
+              />
+              <p className="text-[11px] text-gray-400 mt-1">
+                Örnek format: <code className="font-mono text-gray-600">GTM-5G6JF6TV</code>. Boş bırakılırsa GTM kodu yüklenmez.
+              </p>
+            </div>
+
+            <div>
+              <label className={labelClass}>Google Analytics 4 (GA4) Ölçüm Kimliği (Opsiyonel)</label>
+              <input
+                type="text"
+                value={seo.gaMeasurementId}
+                onChange={(e) => update("gaMeasurementId", e.target.value.toUpperCase())}
+                className={inputClass + " font-mono"}
+                placeholder="G-XXXXXXXXXX"
+              />
+              <p className="text-[11px] text-gray-400 mt-1">
+                GA4&apos;ü GTM üzerinden yönetiyorsanız bu alanı boş bırakabilirsiniz.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50/70 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={seo.gtmEnabled}
+                onChange={(e) => update("gtmEnabled", e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-[#b45309]"
+              />
+              <div>
+                <span className="block text-sm font-bold text-gray-900">Takip Kodlarını Aktif Et</span>
+                <span className="block text-xs text-gray-500 mt-0.5">
+                  Kapalı olduğunda sitede hiçbir GTM veya GA4 betiği çalıştırılmaz.
+                </span>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50/70 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={seo.gtmRequireConsent}
+                onChange={(e) => update("gtmRequireConsent", e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-[#b45309]"
+              />
+              <div>
+                <span className="block text-sm font-bold text-gray-900">Çerez Onayı Bekle (KVKK Modu)</span>
+                <span className="block text-xs text-gray-500 mt-0.5">
+                  Aktif edilirse yalnızca çerez onayını kabul eden ziyaretçilerde yüklenir.
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Canlı Script Önizlemesi */}
+          <div className="rounded-xl bg-slate-900 text-slate-100 p-4 space-y-2">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+              <span>Canlı Siteye Enjekte Edilecek Script Önizlemesi</span>
+              <span className="text-emerald-400 font-mono">{seo.gtmId || "Devre Dışı"}</span>
+            </div>
+            <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+{seo.gtmEnabled && seo.gtmId
+  ? `<script async src="https://www.googletagmanager.com/gtm.js?id=${seo.gtmId.trim()}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>`
+  : "<!-- Google Tag Manager şu an pasif veya ID girilmemiş -->"}
+            </pre>
           </div>
         </div>
       )}

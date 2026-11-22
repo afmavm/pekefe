@@ -736,7 +736,7 @@ export default function SeoAdminPage() {
                 Kapsayıcı
               </span>
             </div>
-            <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+              <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
 {(() => {
   const validIds = seo.gtmId
     .split(/[\s,;]+/)
@@ -756,6 +756,64 @@ export default function SeoAdminPage() {
 </script>`;
 })()}
             </pre>
+          </div>
+
+          {/* Google Merchant Center Ürün Feed'i */}
+          <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-blue-600" />
+                  Google Merchant Center — Canlı Ürün Feed&apos;i (XML &amp; TSV)
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Yayındaki tüm PEKEFE ürünleri fiyat, indirim, stok, kategori, görsel galerisi, kargo ve GTIN/identifier_exists alanlarıyla Google Merchant Center standardında otomatik sunulur.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold shrink-0">
+                <Check className="w-3.5 h-3.5" />
+                RSS 2.0 / TRY / TR
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <input
+                type="text"
+                readOnly
+                value="https://www.pekefe.com/google-merchant.xml"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-blue-200 font-mono text-xs text-slate-800 select-all"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText("https://www.pekefe.com/google-merchant.xml");
+                  toast.success("Google Merchant Center XML adresi kopyalandı.");
+                }}
+                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer shrink-0"
+              >
+                URL Kopyala
+              </button>
+              <a
+                href="/google-merchant.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold text-center transition shrink-0"
+              >
+                XML Önizle ↗
+              </a>
+              <a
+                href="/google-merchant.xml?format=tsv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold text-center transition shrink-0"
+              >
+                TSV İndir
+              </a>
+            </div>
+
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              <strong>Kurulum:</strong> Google Merchant Center → <em>Ürünler</em> → <em>Ürün kaynağı ekle</em> → <em>Dosyadan ürün ekle</em> → <em>Bağlantı girin</em> adımına yukarıdaki XML adresini yapıştırıp günlük otomatik çekim (Scheduled Fetch) planlayın.
+            </p>
           </div>
         </div>
       )}

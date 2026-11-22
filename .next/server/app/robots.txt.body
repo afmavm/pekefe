@@ -1,6 +1,8 @@
 User-Agent: *
 Allow: /
 Allow: /llms.txt
+Allow: /google-merchant.xml
+Allow: /api/feeds/google-merchant
 Allow: /rekolte-kulubu
 Allow: /mensei-dogrulama
 Allow: /akademi

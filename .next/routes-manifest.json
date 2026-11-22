@@ -1491,6 +1491,12 @@
       "namedRegex": "^/api/feedback(?:/)?$"
     },
     {
+      "page": "/api/feeds/google-merchant",
+      "regex": "^/api/feeds/google\\-merchant(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/feeds/google\\-merchant(?:/)?$"
+    },
+    {
       "page": "/api/finance",
       "regex": "^/api/finance(?:/)?$",
       "routeKeys": {},
@@ -1819,6 +1825,12 @@
       "regex": "^/gizlilik(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/gizlilik(?:/)?$"
+    },
+    {
+      "page": "/google-merchant.xml",
+      "regex": "^/google\\-merchant\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/google\\-merchant\\.xml(?:/)?$"
     },
     {
       "page": "/hesap",

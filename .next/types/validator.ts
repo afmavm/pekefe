@@ -1694,6 +1694,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/feeds/google-merchant/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/feeds/google-merchant">> = Specific
+  const handler = {} as typeof import("../../src/app/api/feeds/google-merchant/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/finance/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/finance">> = Specific
@@ -2283,6 +2292,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/callback.php">> = Specific
   const handler = {} as typeof import("../../src/app/callback.php/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/google-merchant.xml/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/google-merchant.xml">> = Specific
+  const handler = {} as typeof import("../../src/app/google-merchant.xml/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -28,6 +28,8 @@ export default function robots() {
         allow: [
           '/',
           '/llms.txt',
+          '/google-merchant.xml',
+          '/api/feeds/google-merchant',
           '/rekolte-kulubu',
           '/mensei-dogrulama',
           '/akademi',

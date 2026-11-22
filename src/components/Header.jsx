@@ -16,6 +16,31 @@ const NAV_SHORT_LABELS = {
   "yoresel-urunler": "Yöresel Ürünler",
 };
 
+// Her ana kategori için mega menüde kullanılan gerçek İspir üretim görselleri
+const MEGA_MENU_PRODUCTION_IMAGES = {
+  "pestil-cesitleri": "/uploads/ispir-keten-bezde-pestil-serimi.webp",
+  "pekmez-cesitleri": "/uploads/ispir-bakir-kazan-ahsap-cendere.webp",
+  "kome-cesitleri": "/ispir-kome-gercek-hasat.jpg",
+  "yoresel-urunler": "/uploads/ispir-saf-beyaz-dut-toplama.webp",
+  "hediyelik-lezzetler": "/ispir-pestil-kome-kompozisyon.png",
+};
+
+// Alt kategoriler için kesilmeden okunan, kısa ve tamamlanmış tek cümlelik açıklamalar
+const MEGA_MENU_SUB_DESCRIPTIONS = {
+  "sade-dut-pestili": "Katkısız İspir dutundan ince tabakalar halinde kurutulan saf lezzet.",
+  "cevizli-dut-pestili": "Doğal dut pestili ile yerli İspir cevizinin besleyici uyumu.",
+  "geleneksel-dut-pestili": "El emeği muska ve sarma formunda geleneksel pestil tatlıları.",
+  "dut-pekmezi": "Şeker ilavesiz, yoğun kıvamlı hakiki İspir beyaz dut pekmezi.",
+  "karadut-pekmezi": "Seçkin karadutlardan elde edilen yoğun aromalı doğal pekmez.",
+  "dut-gun-pekmezi": "Güneşin doğal ısısıyla kıvamlanan sınırlı hasat gün pekmezi.",
+  "cevizli-kome": "Bütün yerli cevizlerin dut şırasıyla buluştuğu geleneksel köme.",
+  "geleneksel-kome": "Asırlık İspir tarifine sadık kalınarak hazırlanan doğal köme.",
+  "kuru-dut": "İspir güneşinde doğal olarak kurutulmuş taze mahsul kuru dut.",
+  "diger-ispir-lezzetleri": "Bölgenin mevsimlik hasat edilen seçkin doğal yöresel ürünleri.",
+  "pekefe-hediye-setleri": "Sevdikleriniz için özenle hazırlanan doğal PEKEFE hediye setleri.",
+  "yoresel-lezzet-kutulari": "Özel günler ve kurumsal ikramlar için yöresel lezzet kutuları.",
+};
+
 const stripHtml = (str) => {
   if (!str || typeof str !== "string") return "";
   return str
@@ -181,7 +206,7 @@ export default function Header() {
 
           {/* Brand Logo */}
           <div className="flex items-center shrink-0 z-10">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
               <Image
                 src={logoSrc}
                 onError={() => setLogoSrc("/logo.png")}
@@ -189,16 +214,16 @@ export default function Header() {
                 width={52}
                 height={52}
                 priority
-                className="h-10 md:h-13 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform"
+                className="h-8 sm:h-10 md:h-12 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform"
               />
-              <span className="font-bold text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">
+              <span className="font-bold text-lg sm:text-xl md:text-2xl tracking-tight text-[#6b1d2f] dark:text-amber-400">
                 {cmsData?.siteName ? cmsData.siteName.split(" ")[0] : "Pekefe"}
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div ref={navRef} className="hidden lg:flex items-center gap-3.5 xl:gap-5" role="menubar" aria-label="Birincil Menü">
+          <div ref={navRef} className="hidden lg:flex items-center gap-2.5 lg:gap-3.5 xl:gap-5 min-w-0" role="menubar" aria-label="Birincil Menü">
             <Link href="/" className={getLinkClass("/")}>Ana Sayfa</Link>
             <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Tüm Ürünler</Link>
 
@@ -207,7 +232,16 @@ export default function Header() {
               const catHref = `/${cat.slug}`;
               const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
               const isDropdownOpen = openDropdownSlug === cat.slug;
-              const alignRight = idx >= mainCategories.length - 2;
+              const panelAlignClass =
+                idx <= 1
+                  ? "left-0"
+                  : idx === 2
+                  ? "left-1/2 -translate-x-1/2"
+                  : "right-0";
+              const megaImage =
+                MEGA_MENU_PRODUCTION_IMAGES[cat.slug] ||
+                cat.image ||
+                "/ispir-manzara-hero.png";
 
               if (subs.length === 0) {
                 return (
@@ -246,7 +280,7 @@ export default function Header() {
                       className="p-0.5 text-on-surface/60 hover:text-primary transition-colors cursor-pointer"
                     >
                       <svg
-                        className={`w-3.5 h-3.5 transition-transform duration-150 ${isDropdownOpen ? "rotate-180 text-primary" : ""}`}
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? "rotate-180 text-primary" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -256,91 +290,109 @@ export default function Header() {
                     </button>
                   </div>
 
-                  {isDropdownOpen && (
-                    <div
-                      role="menu"
-                      onMouseEnter={() => handleDropdownEnter(cat.slug)}
-                      onMouseLeave={handleDropdownLeave}
-                      className={`absolute top-full pt-2.5 w-[440px] z-50 ${alignRight ? "right-0" : "left-0"}`}
-                    >
-                      <div className="bg-[#FAF8F5] dark:bg-stone-900 rounded-2xl shadow-xl border border-stone-200/90 dark:border-stone-800 overflow-hidden grid grid-cols-12">
-                        {/* Sol Editoryal Kategori Kartı */}
-                        <Link
-                          href={catHref}
-                          onClick={() => setOpenDropdownSlug(null)}
-                          className="col-span-5 relative group overflow-hidden bg-stone-900 min-h-[210px] flex flex-col justify-end p-4"
-                        >
-                          <Image
-                            src={cat.image || "/ispir-manzara-hero.png"}
-                            alt={cat.name}
-                            fill
-                            sizes="200px"
-                            className="object-cover object-center opacity-75 group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#2A0D12]/95 via-[#2A0D12]/45 to-transparent" />
-                          <div className="relative z-10">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300/90 mb-1">
-                              İspir Koleksiyonu
-                            </p>
-                            <p className="font-serif text-base font-bold text-white leading-snug">
-                              {cat.name}
-                            </p>
-                            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-200 group-hover:translate-x-0.5 transition-transform">
-                              Tümünü Gör →
-                            </span>
-                          </div>
-                        </Link>
+                  {/* Premium 2-Kolon (%43 / %57) Animasyonlu Mega Menü */}
+                  <div
+                    role="menu"
+                    aria-hidden={!isDropdownOpen}
+                    onMouseEnter={() => handleDropdownEnter(cat.slug)}
+                    onMouseLeave={handleDropdownLeave}
+                    className={`absolute top-full pt-3 w-[540px] xl:w-[580px] z-50 transition-all duration-200 ease-out ${panelAlignClass} ${
+                      isDropdownOpen
+                        ? "opacity-100 translate-y-0 pointer-events-auto"
+                        : "opacity-0 translate-y-2 pointer-events-none"
+                    }`}
+                  >
+                    <div className="bg-[#FAF8F5] dark:bg-stone-900 rounded-2xl shadow-2xl border border-stone-200/90 dark:border-stone-800 overflow-hidden grid grid-cols-[43%_57%]">
+                      {/* Sol %43 — Gerçek İspir Üretim Fotoğrafı */}
+                      <Link
+                        href={catHref}
+                        onClick={() => setOpenDropdownSlug(null)}
+                        tabIndex={isDropdownOpen ? 0 : -1}
+                        className="relative group overflow-hidden bg-stone-900 min-h-[250px] flex flex-col justify-end p-5"
+                      >
+                        <Image
+                          src={megaImage}
+                          alt={`${cat.name} — İspir Geleneksel Üretim`}
+                          fill
+                          sizes="260px"
+                          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1E080C]/92 via-[#2A0D12]/50 to-black/15" />
+                        <div className="relative z-10">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300/95 mb-1.5">
+                            Erzurum İspir
+                          </p>
+                          <p className="font-serif text-lg font-bold text-white leading-snug">
+                            {cat.name}
+                          </p>
+                          <div className="w-8 h-0.5 bg-amber-400/80 my-2.5" />
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-100 group-hover:text-white group-hover:translate-x-1 transition-all">
+                            Tümünü Keşfet
+                            <span aria-hidden="true">→</span>
+                          </span>
+                        </div>
+                      </Link>
 
-                        {/* Sağ Alt Kategori Listesi */}
-                        <div className="col-span-7 p-4 flex flex-col justify-between bg-white dark:bg-stone-900">
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8B5E3C] px-2.5 mb-2">
-                              Alt Kategoriler
-                            </p>
-                            <div className="space-y-1">
-                              {subs.map((sub) => (
+                      {/* Sağ %57 — Alt Kategoriler (Kesilmemiş Tam Cümleler) */}
+                      <div className="p-5 flex flex-col justify-between bg-white dark:bg-stone-900">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8B5E3C] px-2.5 mb-2.5">
+                            Alt Kategoriler
+                          </p>
+                          <div className="space-y-1.5">
+                            {subs.map((sub) => {
+                              const subDesc =
+                                MEGA_MENU_SUB_DESCRIPTIONS[sub.slug] ||
+                                sub.shortDesc ||
+                                "";
+                              return (
                                 <Link
                                   key={sub.id}
                                   href={`/${cat.slug}/${sub.slug}`}
                                   onClick={() => setOpenDropdownSlug(null)}
+                                  tabIndex={isDropdownOpen ? 0 : -1}
                                   role="menuitem"
-                                  className={`group/sub flex items-center justify-between px-2.5 py-2.5 rounded-xl transition-colors ${
+                                  className={`group/sub flex items-start justify-between gap-2.5 px-3 py-2.5 rounded-xl transition-colors ${
                                     pathname === `/${cat.slug}/${sub.slug}`
-                                      ? "bg-[#5D1924]/10 text-[#5D1924] font-semibold"
-                                      : "text-stone-700 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#5D1924]"
+                                      ? "bg-[#5D1924]/10 text-[#5D1924]"
+                                      : "text-stone-800 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#5D1924]"
                                   }`}
                                 >
-                                  <div className="min-w-0 pr-2">
-                                    <span className="block text-sm font-semibold leading-tight">
+                                  <div className="min-w-0 flex-1">
+                                    <span className="block text-sm font-bold leading-snug">
                                       {sub.name}
                                     </span>
-                                    {sub.shortDesc && (
-                                      <span className="block text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
-                                        {sub.shortDesc}
+                                    {subDesc && (
+                                      <span className="block text-xs text-stone-500 dark:text-stone-400 leading-snug mt-0.5 whitespace-normal">
+                                        {subDesc}
                                       </span>
                                     )}
                                   </div>
-                                  <span className="text-xs text-stone-400 group-hover/sub:text-[#5D1924] group-hover/sub:translate-x-0.5 transition-all shrink-0">
+                                  <span
+                                    aria-hidden="true"
+                                    className="text-xs text-stone-400 group-hover/sub:text-[#5D1924] group-hover/sub:translate-x-0.5 transition-all shrink-0 mt-0.5"
+                                  >
                                     →
                                   </span>
                                 </Link>
-                              ))}
-                            </div>
+                              );
+                            })}
                           </div>
+                        </div>
 
-                          <div className="mt-3 pt-2.5 border-t border-stone-100 dark:border-stone-800 px-2.5">
-                            <Link
-                              href={catHref}
-                              onClick={() => setOpenDropdownSlug(null)}
-                              className="text-xs font-bold text-[#5D1924] hover:underline inline-flex items-center gap-1"
-                            >
-                              Tüm {cat.name} Sayfasına Git →
-                            </Link>
-                          </div>
+                        <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 px-3">
+                          <Link
+                            href={catHref}
+                            onClick={() => setOpenDropdownSlug(null)}
+                            tabIndex={isDropdownOpen ? 0 : -1}
+                            className="text-xs font-bold text-[#5D1924] hover:underline inline-flex items-center gap-1"
+                          >
+                            Tüm {cat.name} Sayfasına Git →
+                          </Link>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}

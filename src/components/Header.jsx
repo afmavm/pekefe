@@ -207,7 +207,7 @@ export default function Header() {
   const cartCount = safeItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   const getLinkClass = (path, isMenuOpen = false) => {
-    const base = "whitespace-nowrap transition-colors duration-150 pb-1 text-xs lg:text-xs xl:text-sm font-medium border-b-2";
+    const base = "whitespace-nowrap shrink-0 transition-colors duration-150 pb-1 text-[13px] xl:text-sm font-medium border-b-2";
     const isActive = path === "/" ? pathname === "/" : pathname.startsWith(path);
     const hasAnotherMenuOpen = Boolean(openDropdownSlug) && !isMenuOpen;
 
@@ -228,14 +228,19 @@ export default function Header() {
     await signOut({ callbackUrl: "/" });
   };
 
+  // Masaüstü üst çubuğunda ferahlık için "Hediyelik Lezzetler"i "Yöresel Ürünler" mega menüsü altında grupla
+  const desktopNavCategories = mainCategories.filter(
+    (c) => c.slug !== "hediyelik-lezzetler"
+  );
+
   return (
     <>
       <nav className="bg-surface/95 backdrop-blur-md sticky top-0 z-50 transition-all premium-shadow border-b border-outline-variant/10" aria-label="Ana Navigasyon">
-        <div className="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-container-max mx-auto h-16 md:h-20 gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-4 w-full">
 
           {/* Brand Logo */}
           <div className="flex items-center shrink-0 z-10 py-1.5">
-            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity">
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 font-display-lg text-headline-md tracking-tight text-primary hover:opacity-90 transition-opacity whitespace-nowrap">
               <Image
                 src={logoSrc}
                 onError={() => setLogoSrc("/logo.png")}
@@ -252,26 +257,26 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div ref={navRef} className="hidden lg:flex items-center gap-2.5 lg:gap-3.5 xl:gap-5 min-w-0 pr-1" role="menubar" aria-label="Birincil Menü">
+          <div ref={navRef} className="hidden lg:flex items-center justify-center gap-4 xl:gap-6 flex-1 min-w-0" role="menubar" aria-label="Birincil Menü">
             <Link href="/" className={getLinkClass("/")}>Ana Sayfa</Link>
-            <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Tüm Ürünler</Link>
 
-            {mainCategories.map((cat, idx) => {
+            {desktopNavCategories.map((cat, idx) => {
               const subs = getSubCategories(cat.id);
               const catHref = `/${cat.slug}`;
               const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
               const isDropdownOpen = openDropdownSlug === cat.slug;
               const panelAlignClass =
-                idx <= 1
+                idx === 0
                   ? "left-0"
-                  : idx === 2
-                  ? "left-1/2 -translate-x-1/2"
-                  : "right-0";
+                  : idx >= desktopNavCategories.length - 1
+                  ? "right-0"
+                  : "left-1/2 -translate-x-1/2";
               const mediaConfig = MEGA_MENU_PRODUCTION_MEDIA[cat.slug] || {
                 src: cat.image || "/ispir-manzara-hero.png",
                 imgClass: "object-cover object-center group-hover:scale-105",
                 badge: "Erzurum İspir",
               };
+              const isYoresel = cat.slug === "yoresel-urunler";
 
               if (subs.length === 0) {
                 return (
@@ -284,11 +289,11 @@ export default function Header() {
               return (
                 <div
                   key={cat.id}
-                  className="relative py-2 flex items-center"
+                  className="relative py-2 flex items-center shrink-0"
                   onMouseEnter={() => handleDropdownEnter(cat.slug)}
                   onMouseLeave={handleDropdownLeave}
                 >
-                  <div className="inline-flex items-center gap-0.5">
+                  <div className="inline-flex items-center gap-0.5 whitespace-nowrap">
                     <Link
                       href={catHref}
                       onClick={() => setOpenDropdownSlug(null)}
@@ -307,7 +312,7 @@ export default function Header() {
                       aria-label={`${label} alt kategorilerini aç`}
                       aria-haspopup="true"
                       aria-expanded={isDropdownOpen}
-                      className={`p-0.5 transition-colors cursor-pointer ${
+                      className={`p-0.5 transition-colors cursor-pointer shrink-0 ${
                         isDropdownOpen
                           ? "text-[#6b1d2f] dark:text-amber-400"
                           : "text-on-surface/55 hover:text-[#6b1d2f]"
@@ -411,17 +416,54 @@ export default function Header() {
                                 </Link>
                               );
                             })}
+
+                            {isYoresel && (
+                              <Link
+                                href="/hediyelik-lezzetler"
+                                onClick={() => setOpenDropdownSlug(null)}
+                                tabIndex={isDropdownOpen ? 0 : -1}
+                                role="menuitem"
+                                className={`group/sub flex items-start justify-between gap-2.5 px-3 py-2.5 rounded-xl transition-colors ${
+                                  pathname.startsWith("/hediyelik-lezzetler")
+                                    ? "bg-[#6b1d2f]/10 text-[#6b1d2f]"
+                                    : "text-stone-800 dark:text-stone-200 hover:bg-[#FAF8F5] dark:hover:bg-stone-800 hover:text-[#6b1d2f]"
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="block text-sm font-bold leading-snug">
+                                    Hediyelik Lezzetler
+                                  </span>
+                                  <span className="block text-[12px] text-stone-500 dark:text-stone-400 leading-snug mt-0.5 whitespace-normal">
+                                    Özel günler ve kurumsal ikramlar için hediye setleri.
+                                  </span>
+                                </div>
+                                <span
+                                  aria-hidden="true"
+                                  className="text-xs text-stone-400 group-hover/sub:text-[#6b1d2f] group-hover/sub:translate-x-0.5 transition-all shrink-0 mt-0.5"
+                                >
+                                  →
+                                </span>
+                              </Link>
+                            )}
                           </div>
                         </div>
 
-                        <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 px-3">
+                        <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 px-3 flex items-center justify-between gap-2">
                           <Link
                             href={catHref}
                             onClick={() => setOpenDropdownSlug(null)}
                             tabIndex={isDropdownOpen ? 0 : -1}
                             className="text-xs font-bold text-[#6b1d2f] hover:underline inline-flex items-center gap-1"
                           >
-                            Tüm {cat.name} Sayfasına Git →
+                            Tüm {cat.name} →
+                          </Link>
+                          <Link
+                            href="/kategoriler"
+                            onClick={() => setOpenDropdownSlug(null)}
+                            tabIndex={isDropdownOpen ? 0 : -1}
+                            className="text-[11px] font-semibold text-stone-500 hover:text-[#6b1d2f] transition-colors"
+                          >
+                            Tüm Ürünler
                           </Link>
                         </div>
                       </div>
@@ -435,7 +477,7 @@ export default function Header() {
           </div>
 
           {/* Trailing Actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
 
             {/* User Profile Button */}
             <div className="relative" ref={profileRef}>
@@ -545,22 +587,20 @@ export default function Header() {
               )}
             </div>
 
-            {/* Global Advanced Search Trigger Button */}
+            {/* Compact Search Icon Button (opens ⌘K modal) */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-1 px-2 py-1.5 md:px-3 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low hover:border-primary/40 transition-all cursor-pointer text-primary"
-              aria-label="Gelişmiş Arama Motoru"
-              title="Gelişmiş Arama Motoru"
+              className="p-2 rounded-full border border-outline-variant/25 hover:bg-surface-container-low hover:border-primary/40 transition-all cursor-pointer text-primary flex items-center justify-center shrink-0 active:scale-95"
+              aria-label="Ürün Ara"
+              title="Ürün Ara (⌘K)"
             >
-              <span className="material-symbols-outlined text-primary text-xl">search</span>
-              <span className="hidden lg:inline text-xs font-semibold text-on-surface-variant">Arama Yap...</span>
-              <kbd className="hidden xl:inline-block px-1.5 py-0.5 bg-surface-container-high border border-outline-variant/20 rounded text-[9px] font-mono text-on-surface-variant font-bold">⌘K</kbd>
+              <span className="material-symbols-outlined text-primary text-xl md:text-[22px]">search</span>
             </button>
 
             {/* Cart Button */}
             <button
               onClick={() => setCartOpen(true)}
-              className="p-2 rounded-full hover:bg-surface-container-low transition-all relative cursor-pointer active:scale-95"
+              className="p-2 rounded-full hover:bg-surface-container-low transition-all relative cursor-pointer active:scale-95 shrink-0"
               aria-label="Sepet Çekmecesini Aç"
             >
               <span className="material-symbols-outlined text-primary text-xl md:text-2xl">shopping_bag</span>

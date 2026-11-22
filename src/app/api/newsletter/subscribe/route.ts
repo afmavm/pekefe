@@ -48,7 +48,8 @@ export async function POST(request: Request) {
 
     // Hoş geldin e-postası gönder
     try {
-      const hostUrl = process.env.NEXTAUTH_URL || "https://pekefe.com";
+      const envUrl = process.env.NEXTAUTH_URL_INTERNAL || process.env.NEXTAUTH_URL || "https://www.pekefe.com";
+      const hostUrl = envUrl.includes("localhost") ? "https://www.pekefe.com" : envUrl;
       await emailNotificationService.queueEmail(
         email,
         "newsletter_welcome",

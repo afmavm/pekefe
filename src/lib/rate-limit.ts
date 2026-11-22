@@ -31,10 +31,21 @@ export function checkRateLimit(ip: string, limit: number = 10, windowMs: number 
   return { success: true, remaining: limit - store[ip].count };
 }
 
-export async function withRateLimit(request: Request, _limitType?: string, limit: number = 60, windowMs: number = 60000): Promise<NextResponse | null> {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-  const rateCheck = checkRateLimit(ip, limit, windowMs);
-  
+export async function withRateLimit(
+  request: Request,
+  limitType: string = 'global',
+  limit: number = 60,
+  windowMs: number = 60000
+): Promise<NextResponse | null> {
+  const rawIp =
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    '127.0.0.1';
+  const ip = rawIp.trim() || '127.0.0.1';
+  const bucketKey = `${limitType || 'global'}:${ip}`;
+  const rateCheck = checkRateLimit(bucketKey, limit, windowMs);
+
   if (!rateCheck.success) {
     return NextResponse.json({
       error: "Aşırı istek gönderildi. Lütfen bir süre sonra tekrar deneyiniz."

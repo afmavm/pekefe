@@ -114,15 +114,13 @@ else
   echo "[BİLGİ] Hazır .next üretim derlemesi mevcut (BUILD_ID: $(cat .next/BUILD_ID)). Sunucu CPU/RAM korundu."
 fi
 
-# 5. YALNIZCA 'pekefe-app' PM2 sürecini Port 4000 üzerinde yeniden başlat (Diğer PM2 süreçlerine DOKUNMA!)
-echo "[4/4] Yalnızca 'pekefe-app' (Port 4000) PM2 süreci yeniden başlatılıyor..."
+# 5. YALNIZCA 'pekefe-app' PM2 sürecini Port 4000 üzerinde temiz CWD ile yeniden başlat (Diğer PM2 süreçlerine DOKUNMA!)
+echo "[4/4] Yalnızca 'pekefe-app' (Port 4000) PM2 süreci '$CURRENT_DIR' dizininden temiz başlatılıyor..."
 if command -v pm2 &> /dev/null; then
   if pm2 describe pekefe-app > /dev/null 2>&1; then
-    PORT=4000 pm2 reload ecosystem.config.js --only pekefe-app --update-env 2>/dev/null || \
-    PORT=4000 pm2 restart pekefe-app --update-env 2>/dev/null || true
-  else
-    PORT=4000 pm2 start ecosystem.config.js --only pekefe-app --update-env 2>/dev/null || true
+    pm2 delete pekefe-app 2>/dev/null || true
   fi
+  PORT=4000 pm2 start "$CURRENT_DIR/ecosystem.config.js" --only pekefe-app --update-env 2>/dev/null || true
   pm2 save --force 2>/dev/null || true
 fi
 
@@ -136,10 +134,12 @@ if [ -d "$PUBLIC_TARGET" ] && [ "$CURRENT_DIR" != "$PUBLIC_TARGET" ]; then
   touch "$PUBLIC_TARGET/tmp/restart.txt" 2>/dev/null || true
 fi
 
-# 6. Yerel PayTR Callback sağlık kontrolü
-sleep 1
+# 6. Yerel PayTR Callback ve Kategori Sağlık Kontrolü
+sleep 2
 CALLBACK_TEST="$(curl -s -X POST http://127.0.0.1:4000/paytr_callback.php 2>/dev/null || true)"
+CAT_STATUS="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4000/pestil-cesitleri 2>/dev/null || true)"
 echo "[TEST] PayTR Callback (http://127.0.0.1:4000/paytr_callback.php) yanıtı: ${CALLBACK_TEST:-OK}"
+echo "[TEST] Kategori Sayfası (http://127.0.0.1:4000/pestil-cesitleri) HTTP durumu: ${CAT_STATUS:-ERR}"
 
 echo "============================================================"
 echo " BAŞARILI: PEKEFE (Port 4000) diğer projeye dokunulmadan güncellendi!"

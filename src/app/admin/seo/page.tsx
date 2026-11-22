@@ -81,7 +81,7 @@ const defaults: SeoState = {
   companyTaxOffice: "",
   companyMersis: "",
   mapCoordinates: "",
-  gtmId: "GTM-5G6JF6TV",
+  gtmId: "GTM-MVFDVLJL, GTM-5G6JF6TV",
   gaMeasurementId: "",
   gtmEnabled: true,
   gtmRequireConsent: false,
@@ -635,17 +635,47 @@ export default function SeoAdminPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className={labelClass}>Google Tag Manager Container ID (GTM)</label>
+              <label className={labelClass}>Google Tag Manager Container ID&apos;leri (Çoklu Destek)</label>
               <input
                 type="text"
                 value={seo.gtmId}
                 onChange={(e) => update("gtmId", e.target.value.toUpperCase())}
                 className={inputClass + " font-mono"}
-                placeholder="GTM-5G6JF6TV"
+                placeholder="GTM-MVFDVLJL, GTM-5G6JF6TV"
               />
               <p className="text-[11px] text-gray-400 mt-1">
-                Örnek format: <code className="font-mono text-gray-600">GTM-5G6JF6TV</code>. Boş bırakılırsa GTM kodu yüklenmez.
+                Birden fazla GTM kapsayıcısını virgülle ayırarak girebilirsiniz (Örn: <code className="font-mono text-gray-600">GTM-MVFDVLJL, GTM-5G6JF6TV</code>).
               </p>
+              {/* Aktif GTM Rozetleri */}
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {seo.gtmId
+                  .split(/[\s,;]+/)
+                  .map((s) => s.trim().toUpperCase())
+                  .filter((s) => /^GTM-[A-Z0-9]+$/i.test(s))
+                  .map((id) => (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 font-mono text-xs font-bold"
+                    >
+                      {id}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = seo.gtmId
+                            .split(/[\s,;]+/)
+                            .map((s) => s.trim().toUpperCase())
+                            .filter((s) => s && s !== id)
+                            .join(", ");
+                          update("gtmId", next);
+                        }}
+                        className="text-amber-600 hover:text-rose-600 cursor-pointer"
+                        title={`${id} kapsayıcısını kaldır`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+              </div>
             </div>
 
             <div>
@@ -699,17 +729,32 @@ export default function SeoAdminPage() {
           <div className="rounded-xl bg-slate-900 text-slate-100 p-4 space-y-2">
             <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-slate-400 font-bold">
               <span>Canlı Siteye Enjekte Edilecek Script Önizlemesi</span>
-              <span className="text-emerald-400 font-mono">{seo.gtmId || "Devre Dışı"}</span>
+              <span className="text-emerald-400 font-mono">
+                {seo.gtmId
+                  .split(/[\s,;]+/)
+                  .filter((s) => /^GTM-[A-Z0-9]+$/i.test(s.trim())).length}{" "}
+                Kapsayıcı
+              </span>
             </div>
             <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
-{seo.gtmEnabled && seo.gtmId
-  ? `<script async src="https://www.googletagmanager.com/gtm.js?id=${seo.gtmId.trim()}"></script>
+{(() => {
+  const validIds = seo.gtmId
+    .split(/[\s,;]+/)
+    .map((s) => s.trim().toUpperCase())
+    .filter((s) => /^GTM-[A-Z0-9]+$/i.test(s));
+  if (!seo.gtmEnabled || validIds.length === 0) {
+    return "<!-- Google Tag Manager şu an pasif veya geçerli GTM ID girilmemiş -->";
+  }
+  const loaders = validIds
+    .map((id) => `<script async src="https://www.googletagmanager.com/gtm.js?id=${id}"></script>`)
+    .join("\n");
+  return `${loaders}
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-</script>`
-  : "<!-- Google Tag Manager şu an pasif veya ID girilmemiş -->"}
+</script>`;
+})()}
             </pre>
           </div>
         </div>

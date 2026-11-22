@@ -257,15 +257,9 @@ export function deleteLocalProduct(targetId: string): boolean {
       return pId !== cleanTarget && pSku !== cleanTarget;
     });
 
-    _writeLock = _writeLock.then(() => {
-      try {
-        const dir = path.dirname(DB_FILE_PATH);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(DB_FILE_PATH, JSON.stringify(filtered, null, 2), 'utf8');
-      } catch (e) {
-        console.error('Error deleting local JSON product:', e);
-      }
-    });
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(filtered, null, 2), 'utf8');
     return true;
   } catch (e) {
     console.error('Error deleting local JSON product:', e);

@@ -305,6 +305,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(FALLBACK_PRODUCTS, { status: 200 });
     }
     let products: any[] = [];
+    let dbConnected = false;
     try {
       const fetchPromise = prisma.product.findMany({
         where: { isDeleted: false },
@@ -319,54 +320,21 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { createdAt: 'desc' }
       });
-      const remoteRes = await withTimeout(fetchPromise, 2500, null as any);
+      const remoteRes = await withTimeout(fetchPromise, 3000, null as any);
       if (remoteRes && Array.isArray(remoteRes)) {
         products = remoteRes;
+        dbConnected = true;
       }
     } catch (dbErr) {
       console.warn("Direct Remote DB notice, serving local JSON DB products");
     }
 
-    const localProducts = readLocalProducts();
-    const localById = new Map<string, any>();
-    for (const lp of localProducts) {
-      if (lp?.id) localById.set(String(lp.id), lp);
-      if (lp?.sku) localById.set(String(lp.sku), lp);
-    }
-
-    // Apply newer local publish/active overrides onto remote DB products if any
-    products = (products || []).map((p) => {
-      const lp = localById.get(String(p.id)) || localById.get(String(p.sku));
-      if (!lp) return p;
-      const lpUpdated = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
-      const dbUpdated = p.updatedAt ? new Date(p.updatedAt).getTime() : 0;
-      if (lpUpdated >= dbUpdated && (lp.active !== undefined || lp.isPublished !== undefined)) {
-        const dbAttrs =
-          typeof p.attributes === 'string'
-            ? (() => { try { return JSON.parse(p.attributes); } catch { return {}; } })()
-            : (p.attributes || {});
-        return {
-          ...p,
-          ...(lp.active !== undefined ? { active: Boolean(lp.active) } : {}),
-          ...(lp.isPublished !== undefined ? { isPublished: Boolean(lp.isPublished) } : {}),
-          attributes: {
-            ...dbAttrs,
-            ...(lp.active !== undefined ? { isActive: Boolean(lp.active), active: Boolean(lp.active) } : {}),
-            ...(lp.isPublished !== undefined ? { isPublished: Boolean(lp.isPublished) } : {}),
-          },
-        };
-      }
-      return p;
-    });
-
-    const existingIds = new Set((products || []).map(p => String(p.id || p.sku)));
-    const unsyncedLocals = localProducts.filter(p => p && !existingIds.has(String(p.id)) && !existingIds.has(String(p.sku)));
-    
-    // Merge remote DB products with local disk JSON products
-    products = [...(products || []), ...unsyncedLocals];
-
-    if (!products || products.length === 0) {
-      products = FALLBACK_PRODUCTS || [];
+    // Tek doğru kaynak (Single Source of Truth):
+    // MySQL erişilebilir olduğunda YALNIZCA veritabanındaki aktif (isDeleted: false) ürünler döndürülür.
+    // Yerel JSON dosyası (data/products_db.json) yalnızca veritabanı erişilemediğinde çevrimdışı yedek olarak kullanılır.
+    if (!dbConnected) {
+      const localProducts = readLocalProducts().filter((p) => p && !p.isDeleted);
+      products = localProducts.length > 0 ? localProducts : (FALLBACK_PRODUCTS || []);
     }
 
     let dealerAccount = null;

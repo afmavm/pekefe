@@ -10,7 +10,7 @@ import { computeProductPricing } from '../route';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
-import { readLocalProducts, saveLocalProduct } from '@/lib/jsonProductDb';
+import { readLocalProducts, saveLocalProduct, deleteLocalProduct } from '@/lib/jsonProductDb';
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
   if (branchIdInput) {
@@ -794,36 +794,77 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const { deleteLocalProduct } = require("@/lib/jsonProductDb");
-
-    try {
-      const target = await prisma.product.findFirst({
-        where: { OR: [{ id }, { sku: id }] },
-        select: { id: true }
-      });
-      if (target) {
-        await prisma.product.update({
-          where: { id: target.id },
-          data: { isDeleted: true }
-        });
-      }
-    } catch (dbErr) {
-      console.warn(`[API DELETE PRODUCT NOTICE] DB delete skipped: ${id}`, dbErr);
+    const auth = await requireAdmin(request);
+    if (auth && 'authorized' in auth && !auth.authorized) {
+      return auth.response;
     }
 
-    // Always delete from local JSON DB & FALLBACK_PRODUCTS as well
+    const { id } = await params;
+    const decodedId = decodeURIComponent(id);
+
+    let deletedFromDb = false;
+    let targetSku: string | null = null;
+    let targetId: string | null = null;
+
+    const target = await prisma.product.findFirst({
+      where: {
+        OR: [{ id }, { id: decodedId }, { sku: id }, { sku: decodedId }],
+      },
+      select: { id: true, sku: true },
+    });
+
+    if (target) {
+      targetId = target.id;
+      targetSku = target.sku;
+      await prisma.product.update({
+        where: { id: target.id },
+        data: { isDeleted: true },
+      });
+      deletedFromDb = true;
+    }
+
+    // Yerel JSON deposundan ve bellek içi fallback listesinden de kalıcı olarak temizle
     deleteLocalProduct(id);
-    const fbIndex = FALLBACK_PRODUCTS.findIndex((p: any) => p.id === id || p.sku === id);
+    if (decodedId !== id) deleteLocalProduct(decodedId);
+    if (targetId) deleteLocalProduct(targetId);
+    if (targetSku) deleteLocalProduct(targetSku);
+
+    const fbIndex = FALLBACK_PRODUCTS.findIndex(
+      (p: any) => p.id === id || p.sku === id || p.id === decodedId || p.sku === decodedId
+    );
     if (fbIndex !== -1) {
       FALLBACK_PRODUCTS.splice(fbIndex, 1);
     }
 
     revalidatePath('/', 'layout');
+    revalidatePath('/kategoriler');
+    revalidatePath('/pestil-cesitleri');
+    revalidatePath('/pekmez-cesitleri');
+    revalidatePath('/kome-cesitleri');
+    revalidatePath('/yoresel-urunler');
+    revalidatePath('/hediyelik-lezzetler');
     revalidatePath('/admin/stock');
-    return NextResponse.json({ success: true, message: "Ürün başarıyla silindi." });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    return NextResponse.json({ success: true, message: "Ürün başarıyla silindi." });
+    revalidatePath('/api/products');
+    revalidatePath('/sitemap.xml');
+
+    return NextResponse.json(
+      {
+        success: true,
+        deletedFromDb,
+        id: targetId || id,
+        message: "Ürün kalıcı olarak silindi.",
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
+  } catch (error: any) {
+    console.error('[API DELETE PRODUCT ERROR]:', error);
+    return NextResponse.json(
+      { success: false, error: error?.message || "Ürün silinirken veritabanı hatası oluştu." },
+      { status: 500 }
+    );
   }
 }

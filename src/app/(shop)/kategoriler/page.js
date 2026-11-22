@@ -29,6 +29,7 @@ export default async function KategorilerPage() {
   return (
     <AllProductsClient
       initialProducts={products}
+      allCategories={allCategories}
       mainCategories={mainCategories}
     />
   );

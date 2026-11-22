@@ -6,11 +6,16 @@ import Image from "next/image";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Toast } from "@/components/ui/Toast";
 import { addToCart } from "@/utils/cartStorage";
-import { trNormalize, type CategoryRecord } from "@/lib/category-utils";
-import { Search, SlidersHorizontal, ArrowRight, PackageCheck } from "lucide-react";
+import {
+  trNormalize,
+  productMatchesCategory,
+  type CategoryRecord,
+} from "@/lib/category-utils";
+import { Search, SlidersHorizontal, ArrowRight, PackageCheck, ChevronDown } from "lucide-react";
 
 interface AllProductsClientProps {
   initialProducts: any[];
+  allCategories: CategoryRecord[];
   mainCategories: CategoryRecord[];
 }
 
@@ -23,9 +28,12 @@ const BANNER_IMAGES = [
 
 export default function AllProductsClient({
   initialProducts,
+  allCategories,
   mainCategories,
 }: AllProductsClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  // selectedCategoryId: "all" veya aktif bir CategoryRecord.id
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [expandedMainIds, setExpandedMainIds] = useState<Record<string, boolean>>({});
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [onlyInStock, setOnlyInStock] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -38,53 +46,36 @@ export default function AllProductsClient({
     [initialProducts]
   );
 
-  const dynamicCategories = useMemo(() => {
-    const list: { name: string; value: string; slug?: string }[] = [
-      { name: "Tüm Ürünler", value: "all" },
-    ];
-    const seen = new Set<string>(["all"]);
+  const getSubCategories = (parentId: string) =>
+    allCategories
+      .filter((c) => c.parentId === parentId && c.isActive !== false)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
 
-    // Önce tanımlı ana kategorileri (ürün içerenleri) ekle
-    for (const mc of mainCategories) {
-      const key = trNormalize(mc.name);
-      if (!seen.has(key)) {
-        seen.add(key);
-        list.push({ name: mc.name, value: key, slug: mc.slug });
-      }
+  const categoryCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const cat of allCategories) {
+      map[cat.id] = safeProducts.filter((p) =>
+        productMatchesCategory(p, cat, allCategories)
+      ).length;
     }
+    return map;
+  }, [allCategories, safeProducts]);
 
-    // Ürünlerde farklı kategori adı varsa onları da koru
-    for (const p of safeProducts) {
-      const display = p.categoryDisplay || p.category;
-      if (display && typeof display === "string" && display.trim()) {
-        const key = trNormalize(display);
-        if (!seen.has(key)) {
-          seen.add(key);
-          list.push({ name: display.trim(), value: key });
-        }
-      }
-    }
-
-    return list;
-  }, [mainCategories, safeProducts]);
+  const selectedCategoryObj = useMemo(
+    () =>
+      selectedCategoryId === "all"
+        ? null
+        : allCategories.find((c) => c.id === selectedCategoryId) || null,
+    [selectedCategoryId, allCategories]
+  );
 
   const filteredProducts = useMemo(() => {
     let result = [...safeProducts];
 
-    if (selectedCategory && selectedCategory !== "all") {
-      const sel = trNormalize(selectedCategory);
-      result = result.filter((p) => {
-        const c1 = trNormalize(p.category || "");
-        const c2 = trNormalize(p.categoryDisplay || "");
-        const c3 = trNormalize(p.subCategory || "");
-        return (
-          c1 === sel ||
-          c2 === sel ||
-          c3 === sel ||
-          c1.includes(sel) ||
-          sel.includes(c1)
-        );
-      });
+    if (selectedCategoryObj) {
+      result = result.filter((p) =>
+        productMatchesCategory(p, selectedCategoryObj, allCategories)
+      );
     }
 
     if (onlyInStock) {
@@ -126,7 +117,7 @@ export default function AllProductsClient({
     }
 
     return result;
-  }, [safeProducts, selectedCategory, onlyInStock, searchQuery, maxPrice, sortBy]);
+  }, [safeProducts, selectedCategoryObj, allCategories, onlyInStock, searchQuery, maxPrice, sortBy]);
 
   const handleAddToCart = (product: any) => {
     const chosenVariant = product?.selectedVariant || null;
@@ -174,8 +165,7 @@ export default function AllProductsClient({
               PEKEFE · Erzurum İspir Geleneksel Ürünler
             </span>
             <h1 className="font-serif text-white text-[28px] md:text-[40px] font-bold leading-tight">
-              {dynamicCategories.find((c) => c.value === selectedCategory)?.name ||
-                "Tüm Ürünler"}
+              {selectedCategoryObj ? selectedCategoryObj.name : "Tüm Ürünler"}
             </h1>
             <p className="text-white/80 text-sm">
               {filteredProducts.length} ürün listeleniyor
@@ -188,13 +178,24 @@ export default function AllProductsClient({
           className="flex lg:hidden gap-2 overflow-x-auto pb-1 -mx-4 px-4"
           style={{ scrollbarWidth: "none" }}
         >
-          {dynamicCategories.map((cat) => (
+          <button
+            type="button"
+            onClick={() => setSelectedCategoryId("all")}
+            className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+              selectedCategoryId === "all"
+                ? "bg-[#5D1924] text-white border-[#5D1924]"
+                : "bg-white text-stone-700 border-stone-200"
+            }`}
+          >
+            Tüm Ürünler ({safeProducts.length})
+          </button>
+          {mainCategories.map((cat) => (
             <button
-              key={cat.value}
+              key={cat.id}
               type="button"
-              onClick={() => setSelectedCategory(cat.value)}
+              onClick={() => setSelectedCategoryId(cat.id)}
               className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                selectedCategory === cat.value
+                selectedCategoryId === cat.id
                   ? "bg-[#5D1924] text-white border-[#5D1924]"
                   : "bg-white text-stone-700 border-stone-200"
               }`}
@@ -225,28 +226,89 @@ export default function AllProductsClient({
               </div>
             </div>
 
-            {/* Kategoriler */}
+            {/* Kategoriler — Yeni 5 Ana + Alt Kategori Hiyerarşisi */}
             <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 p-4 space-y-2">
               <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
                 Kategoriler
               </p>
               <div className="space-y-1">
-                {dynamicCategories.map((cat) => {
-                  const isActive = selectedCategory === cat.value;
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryId("all")}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
+                    selectedCategoryId === "all"
+                      ? "bg-[#5D1924] text-white"
+                      : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                  }`}
+                >
+                  <span>Tüm Ürünler</span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      selectedCategoryId === "all"
+                        ? "bg-white/20 text-white"
+                        : "bg-stone-100 dark:bg-stone-800 text-stone-500"
+                    }`}
+                  >
+                    {safeProducts.length}
+                  </span>
+                </button>
+
+                {mainCategories.map((cat) => {
+                  const subs = getSubCategories(cat.id);
+                  const isActive = selectedCategoryId === cat.id;
+                  const hasActiveChild = subs.some((s) => s.id === selectedCategoryId);
+                  const isExpanded = Boolean(expandedMainIds[cat.id]) || isActive || hasActiveChild;
+                  const count = categoryCounts[cat.id] ?? 0;
+
                   return (
-                    <div key={cat.value} className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategory(cat.value)}
-                        className={`flex-1 text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
-                          isActive
-                            ? "bg-[#5D1924] text-white"
-                            : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-                        }`}
-                      >
-                        {cat.name}
-                      </button>
-                      {cat.slug && (
+                    <div key={cat.id} className="space-y-0.5">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategoryId(cat.id);
+                            if (subs.length > 0) {
+                              setExpandedMainIds((prev) => ({ ...prev, [cat.id]: true }));
+                            }
+                          }}
+                          className={`flex-1 flex items-center justify-between text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
+                            isActive
+                              ? "bg-[#5D1924] text-white"
+                              : hasActiveChild
+                              ? "bg-[#5D1924]/10 text-[#5D1924]"
+                              : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                          }`}
+                        >
+                          <span className="truncate pr-2">{cat.name}</span>
+                          <span
+                            className={`text-[11px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                              isActive
+                                ? "bg-white/20 text-white"
+                                : "bg-stone-100 dark:bg-stone-800 text-stone-500"
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        </button>
+                        {subs.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedMainIds((prev) => ({
+                                ...prev,
+                                [cat.id]: !isExpanded,
+                              }))
+                            }
+                            aria-label={`${cat.name} alt kategorileri`}
+                            className="p-2 rounded-lg text-stone-400 hover:text-[#5D1924] hover:bg-stone-100 transition-colors cursor-pointer"
+                          >
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                                isExpanded ? "rotate-180 text-[#5D1924]" : ""
+                              }`}
+                            />
+                          </button>
+                        )}
                         <Link
                           href={`/${cat.slug}`}
                           title={`${cat.name} sayfasına git`}
@@ -254,6 +316,44 @@ export default function AllProductsClient({
                         >
                           <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
+                      </div>
+
+                      {subs.length > 0 && isExpanded && (
+                        <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-stone-200 dark:border-stone-800 ml-3">
+                          {subs.map((sub) => {
+                            const subActive = selectedCategoryId === sub.id;
+                            const subCount = categoryCounts[sub.id] ?? 0;
+                            return (
+                              <div key={sub.id} className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedCategoryId(sub.id)}
+                                  className={`flex-1 flex items-center justify-between text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                                    subActive
+                                      ? "bg-[#5D1924] text-white font-semibold"
+                                      : "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-[#5D1924]"
+                                  }`}
+                                >
+                                  <span className="truncate pr-1">{sub.name}</span>
+                                  <span
+                                    className={`text-[10px] ${
+                                      subActive ? "text-white/80" : "text-stone-400"
+                                    }`}
+                                  >
+                                    {subCount}
+                                  </span>
+                                </button>
+                                <Link
+                                  href={`/${cat.slug}/${sub.slug}`}
+                                  title={`${sub.name} sayfasına git`}
+                                  className="p-1 rounded text-stone-400 hover:text-[#5D1924]"
+                                >
+                                  <ArrowRight className="w-3 h-3" />
+                                </Link>
+                              </div>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
                   );
@@ -340,7 +440,7 @@ export default function AllProductsClient({
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedCategory("all");
+                    setSelectedCategoryId("all");
                     setSearchQuery("");
                     setMaxPrice(5000);
                     setOnlyInStock(false);

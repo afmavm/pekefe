@@ -269,6 +269,122 @@ img, video {
   image-rendering: -webkit-optimize-contrast;
 }
 
+/* ==========================================================================
+   PEKEFE Zengin Metin (HTML Editör & Ürün Açıklaması) Tipografi Stilleri
+   Tailwind Preflight sıfırlamalarına karşı başlık, paragraf, liste ve tablo
+   düzenini hem Admin HTML Editöründe hem canlı ürün detayında birebir korur.
+   ========================================================================== */
+.pekefe-rich-content {
+  line-height: 1.75;
+  word-break: break-word;
+}
+.pekefe-rich-content h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #5D1924;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.pekefe-rich-content h2 {
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #5D1924;
+  margin-top: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+.pekefe-rich-content h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #5D1924;
+  margin-top: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+.pekefe-rich-content h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+.pekefe-rich-content p {
+  margin-bottom: 0.9rem;
+}
+.pekefe-rich-content p:last-child {
+  margin-bottom: 0;
+}
+.pekefe-rich-content div {
+  min-height: 1.2em;
+}
+.pekefe-rich-content strong,
+.pekefe-rich-content b {
+  font-weight: 700;
+  color: #1e293b;
+}
+.pekefe-rich-content em,
+.pekefe-rich-content i {
+  font-style: italic;
+}
+.pekefe-rich-content u {
+  text-decoration: underline;
+}
+.pekefe-rich-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.85rem 0;
+}
+.pekefe-rich-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.85rem 0;
+}
+.pekefe-rich-content li {
+  margin-bottom: 0.4rem;
+}
+.pekefe-rich-content blockquote {
+  border-left: 4px solid #8B5E3C;
+  background: rgba(139, 94, 60, 0.06);
+  padding: 0.75rem 1.25rem;
+  margin: 1rem 0;
+  border-radius: 0 0.75rem 0.75rem 0;
+  font-style: italic;
+}
+.pekefe-rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+}
+.pekefe-rich-content th,
+.pekefe-rich-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+}
+.pekefe-rich-content th {
+  background: #FAF8F5;
+  font-weight: 700;
+  color: #5D1924;
+}
+.pekefe-rich-content a {
+  color: #8B5E3C;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.pekefe-rich-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+}
+.pekefe-rich-content hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 1.25rem 0;
+}
+
+
 
 
 

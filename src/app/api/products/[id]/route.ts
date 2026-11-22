@@ -367,8 +367,8 @@ export async function PUT(
     if (body.image !== undefined) data.image = body.image;
     if (body.images !== undefined) data.images = body.images || [];
     if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl;
-    if (body.desc !== undefined) data.desc = body.desc || body.shortDesc;
-    if (body.shortDesc !== undefined) data.shortDesc = body.shortDesc;
+    if (body.desc !== undefined) data.desc = body.desc;
+    // NOT: Product tablosunda shortDesc sütunu yoktur; shortDesc aşağıda data.attributes.shortDesc içine kaydedilir.
     if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
     if (body.seoDesc !== undefined) data.seoDesc = body.seoDesc;
     if (body.seoKeywords !== undefined) data.seoKeywords = body.seoKeywords;
@@ -456,7 +456,7 @@ export async function PUT(
         if (primaryLoc) {
           await prisma.stockLocation.update({
             where: { id: primaryLoc.id },
-            data: { quantity: Number(data.stock) }
+            data: { stock: Number(data.stock) }
           });
         }
       } catch (locErr) {}
@@ -671,7 +671,19 @@ export async function PUT(
     }
 
     revalidatePath('/', 'layout');
-    return NextResponse.json(formattedResponse);
+    revalidatePath('/kategoriler');
+    revalidatePath('/pestil-cesitleri');
+    revalidatePath('/pekmez-cesitleri');
+    revalidatePath('/kome-cesitleri');
+    revalidatePath('/yoresel-urunler');
+    revalidatePath('/hediyelik-lezzetler');
+    revalidatePath('/admin/stock');
+    revalidatePath('/api/products');
+    return NextResponse.json(formattedResponse, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    });
   } catch (error) {
     console.warn('Error updating product in DB, saving directly to local catalog:', error);
     try {

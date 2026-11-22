@@ -501,7 +501,7 @@ function RichTextEditor({ value, onChange }: RichTextEditorProps) {
             onKeyUp={saveSelection}
             onMouseUp={saveSelection}
             onKeyDown={handleKeyDown}
-            className="w-full min-h-[300px] p-4 text-sm text-slate-800 outline-none overflow-y-auto leading-relaxed text-left"
+            className="pekefe-rich-content w-full min-h-[300px] p-4 text-sm text-slate-800 outline-none overflow-y-auto leading-relaxed text-left"
             dir="ltr"
             style={{ minHeight: "300px", direction: "ltr", textAlign: "left" }}
           />

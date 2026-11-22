@@ -15882,50 +15882,128 @@ export namespace Prisma {
 
   export type AggregateCategoryDetail = {
     _count: CategoryDetailCountAggregateOutputType | null
+    _avg: CategoryDetailAvgAggregateOutputType | null
+    _sum: CategoryDetailSumAggregateOutputType | null
     _min: CategoryDetailMinAggregateOutputType | null
     _max: CategoryDetailMaxAggregateOutputType | null
+  }
+
+  export type CategoryDetailAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type CategoryDetailSumAggregateOutputType = {
+    sortOrder: number | null
   }
 
   export type CategoryDetailMinAggregateOutputType = {
     id: string | null
     name: string | null
+    slug: string | null
     parentId: string | null
+    shortDesc: string | null
+    seoDesc: string | null
+    metaTitle: string | null
+    metaDescription: string | null
+    image: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type CategoryDetailMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    slug: string | null
     parentId: string | null
+    shortDesc: string | null
+    seoDesc: string | null
+    metaTitle: string | null
+    metaDescription: string | null
+    image: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type CategoryDetailCountAggregateOutputType = {
     id: number
     name: number
+    slug: number
     parentId: number
+    shortDesc: number
+    seoDesc: number
+    metaTitle: number
+    metaDescription: number
+    image: number
+    sortOrder: number
+    isActive: number
     attributes: number
     variants: number
+    createdAt: number
+    updatedAt: number
     _all: number
   }
 
 
+  export type CategoryDetailAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type CategoryDetailSumAggregateInputType = {
+    sortOrder?: true
+  }
+
   export type CategoryDetailMinAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     parentId?: true
+    shortDesc?: true
+    seoDesc?: true
+    metaTitle?: true
+    metaDescription?: true
+    image?: true
+    sortOrder?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
   export type CategoryDetailMaxAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     parentId?: true
+    shortDesc?: true
+    seoDesc?: true
+    metaTitle?: true
+    metaDescription?: true
+    image?: true
+    sortOrder?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
   export type CategoryDetailCountAggregateInputType = {
     id?: true
     name?: true
+    slug?: true
     parentId?: true
+    shortDesc?: true
+    seoDesc?: true
+    metaTitle?: true
+    metaDescription?: true
+    image?: true
+    sortOrder?: true
+    isActive?: true
     attributes?: true
     variants?: true
+    createdAt?: true
+    updatedAt?: true
     _all?: true
   }
 
@@ -15967,6 +16045,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: CategoryDetailAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CategoryDetailSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: CategoryDetailMinAggregateInputType
@@ -15997,6 +16087,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: CategoryDetailCountAggregateInputType | true
+    _avg?: CategoryDetailAvgAggregateInputType
+    _sum?: CategoryDetailSumAggregateInputType
     _min?: CategoryDetailMinAggregateInputType
     _max?: CategoryDetailMaxAggregateInputType
   }
@@ -16004,10 +16096,22 @@ export namespace Prisma {
   export type CategoryDetailGroupByOutputType = {
     id: string
     name: string
+    slug: string | null
     parentId: string | null
+    shortDesc: string | null
+    seoDesc: string | null
+    metaTitle: string | null
+    metaDescription: string | null
+    image: string | null
+    sortOrder: number
+    isActive: boolean
     attributes: JsonValue
     variants: JsonValue
+    createdAt: Date
+    updatedAt: Date
     _count: CategoryDetailCountAggregateOutputType | null
+    _avg: CategoryDetailAvgAggregateOutputType | null
+    _sum: CategoryDetailSumAggregateOutputType | null
     _min: CategoryDetailMinAggregateOutputType | null
     _max: CategoryDetailMaxAggregateOutputType | null
   }
@@ -16029,9 +16133,19 @@ export namespace Prisma {
   export type CategoryDetailSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    slug?: boolean
     parentId?: boolean
+    shortDesc?: boolean
+    seoDesc?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    image?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
     attributes?: boolean
     variants?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["categoryDetail"]>
 
 
@@ -16039,12 +16153,22 @@ export namespace Prisma {
   export type CategoryDetailSelectScalar = {
     id?: boolean
     name?: boolean
+    slug?: boolean
     parentId?: boolean
+    shortDesc?: boolean
+    seoDesc?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    image?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
     attributes?: boolean
     variants?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }
 
-  export type CategoryDetailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "parentId" | "attributes" | "variants", ExtArgs["result"]["categoryDetail"]>
+  export type CategoryDetailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "shortDesc" | "seoDesc" | "metaTitle" | "metaDescription" | "image" | "sortOrder" | "isActive" | "attributes" | "variants" | "createdAt" | "updatedAt", ExtArgs["result"]["categoryDetail"]>
 
   export type $CategoryDetailPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CategoryDetail"
@@ -16052,9 +16176,19 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      slug: string | null
       parentId: string | null
+      shortDesc: string | null
+      seoDesc: string | null
+      metaTitle: string | null
+      metaDescription: string | null
+      image: string | null
+      sortOrder: number
+      isActive: boolean
       attributes: Prisma.JsonValue
       variants: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
     }, ExtArgs["result"]["categoryDetail"]>
     composites: {}
   }
@@ -16426,9 +16560,19 @@ export namespace Prisma {
   interface CategoryDetailFieldRefs {
     readonly id: FieldRef<"CategoryDetail", 'String'>
     readonly name: FieldRef<"CategoryDetail", 'String'>
+    readonly slug: FieldRef<"CategoryDetail", 'String'>
     readonly parentId: FieldRef<"CategoryDetail", 'String'>
+    readonly shortDesc: FieldRef<"CategoryDetail", 'String'>
+    readonly seoDesc: FieldRef<"CategoryDetail", 'String'>
+    readonly metaTitle: FieldRef<"CategoryDetail", 'String'>
+    readonly metaDescription: FieldRef<"CategoryDetail", 'String'>
+    readonly image: FieldRef<"CategoryDetail", 'String'>
+    readonly sortOrder: FieldRef<"CategoryDetail", 'Int'>
+    readonly isActive: FieldRef<"CategoryDetail", 'Boolean'>
     readonly attributes: FieldRef<"CategoryDetail", 'Json'>
     readonly variants: FieldRef<"CategoryDetail", 'Json'>
+    readonly createdAt: FieldRef<"CategoryDetail", 'DateTime'>
+    readonly updatedAt: FieldRef<"CategoryDetail", 'DateTime'>
   }
     
 
@@ -78821,9 +78965,19 @@ export namespace Prisma {
   export const CategoryDetailScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    slug: 'slug',
     parentId: 'parentId',
+    shortDesc: 'shortDesc',
+    seoDesc: 'seoDesc',
+    metaTitle: 'metaTitle',
+    metaDescription: 'metaDescription',
+    image: 'image',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
     attributes: 'attributes',
-    variants: 'variants'
+    variants: 'variants',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
   };
 
   export type CategoryDetailScalarFieldEnum = (typeof CategoryDetailScalarFieldEnum)[keyof typeof CategoryDetailScalarFieldEnum]
@@ -79992,7 +80146,13 @@ export namespace Prisma {
   export const CategoryDetailOrderByRelevanceFieldEnum: {
     id: 'id',
     name: 'name',
-    parentId: 'parentId'
+    slug: 'slug',
+    parentId: 'parentId',
+    shortDesc: 'shortDesc',
+    seoDesc: 'seoDesc',
+    metaTitle: 'metaTitle',
+    metaDescription: 'metaDescription',
+    image: 'image'
   };
 
   export type CategoryDetailOrderByRelevanceFieldEnum = (typeof CategoryDetailOrderByRelevanceFieldEnum)[keyof typeof CategoryDetailOrderByRelevanceFieldEnum]
@@ -81634,40 +81794,82 @@ export namespace Prisma {
     NOT?: CategoryDetailWhereInput | CategoryDetailWhereInput[]
     id?: StringFilter<"CategoryDetail"> | string
     name?: StringFilter<"CategoryDetail"> | string
+    slug?: StringNullableFilter<"CategoryDetail"> | string | null
     parentId?: StringNullableFilter<"CategoryDetail"> | string | null
+    shortDesc?: StringNullableFilter<"CategoryDetail"> | string | null
+    seoDesc?: StringNullableFilter<"CategoryDetail"> | string | null
+    metaTitle?: StringNullableFilter<"CategoryDetail"> | string | null
+    metaDescription?: StringNullableFilter<"CategoryDetail"> | string | null
+    image?: StringNullableFilter<"CategoryDetail"> | string | null
+    sortOrder?: IntFilter<"CategoryDetail"> | number
+    isActive?: BoolFilter<"CategoryDetail"> | boolean
     attributes?: JsonFilter<"CategoryDetail">
     variants?: JsonFilter<"CategoryDetail">
+    createdAt?: DateTimeFilter<"CategoryDetail"> | Date | string
+    updatedAt?: DateTimeFilter<"CategoryDetail"> | Date | string
   }
 
   export type CategoryDetailOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrderInput | SortOrder
     parentId?: SortOrderInput | SortOrder
+    shortDesc?: SortOrderInput | SortOrder
+    seoDesc?: SortOrderInput | SortOrder
+    metaTitle?: SortOrderInput | SortOrder
+    metaDescription?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
     attributes?: SortOrder
     variants?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     _relevance?: CategoryDetailOrderByRelevanceInput
   }
 
   export type CategoryDetailWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     name?: string
+    slug?: string
     AND?: CategoryDetailWhereInput | CategoryDetailWhereInput[]
     OR?: CategoryDetailWhereInput[]
     NOT?: CategoryDetailWhereInput | CategoryDetailWhereInput[]
     parentId?: StringNullableFilter<"CategoryDetail"> | string | null
+    shortDesc?: StringNullableFilter<"CategoryDetail"> | string | null
+    seoDesc?: StringNullableFilter<"CategoryDetail"> | string | null
+    metaTitle?: StringNullableFilter<"CategoryDetail"> | string | null
+    metaDescription?: StringNullableFilter<"CategoryDetail"> | string | null
+    image?: StringNullableFilter<"CategoryDetail"> | string | null
+    sortOrder?: IntFilter<"CategoryDetail"> | number
+    isActive?: BoolFilter<"CategoryDetail"> | boolean
     attributes?: JsonFilter<"CategoryDetail">
     variants?: JsonFilter<"CategoryDetail">
-  }, "id" | "name">
+    createdAt?: DateTimeFilter<"CategoryDetail"> | Date | string
+    updatedAt?: DateTimeFilter<"CategoryDetail"> | Date | string
+  }, "id" | "name" | "slug">
 
   export type CategoryDetailOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrderInput | SortOrder
     parentId?: SortOrderInput | SortOrder
+    shortDesc?: SortOrderInput | SortOrder
+    seoDesc?: SortOrderInput | SortOrder
+    metaTitle?: SortOrderInput | SortOrder
+    metaDescription?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
     attributes?: SortOrder
     variants?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     _count?: CategoryDetailCountOrderByAggregateInput
+    _avg?: CategoryDetailAvgOrderByAggregateInput
     _max?: CategoryDetailMaxOrderByAggregateInput
     _min?: CategoryDetailMinOrderByAggregateInput
+    _sum?: CategoryDetailSumOrderByAggregateInput
   }
 
   export type CategoryDetailScalarWhereWithAggregatesInput = {
@@ -81676,9 +81878,19 @@ export namespace Prisma {
     NOT?: CategoryDetailScalarWhereWithAggregatesInput | CategoryDetailScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"CategoryDetail"> | string
     name?: StringWithAggregatesFilter<"CategoryDetail"> | string
+    slug?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
     parentId?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    shortDesc?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    seoDesc?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    metaTitle?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    metaDescription?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    image?: StringNullableWithAggregatesFilter<"CategoryDetail"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"CategoryDetail"> | number
+    isActive?: BoolWithAggregatesFilter<"CategoryDetail"> | boolean
     attributes?: JsonWithAggregatesFilter<"CategoryDetail">
     variants?: JsonWithAggregatesFilter<"CategoryDetail">
+    createdAt?: DateTimeWithAggregatesFilter<"CategoryDetail"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CategoryDetail"> | Date | string
   }
 
   export type ProductVariantWhereInput = {
@@ -87972,57 +88184,127 @@ export namespace Prisma {
   export type CategoryDetailCreateInput = {
     id?: string
     name: string
+    slug?: string | null
     parentId?: string | null
+    shortDesc?: string | null
+    seoDesc?: string | null
+    metaTitle?: string | null
+    metaDescription?: string | null
+    image?: string | null
+    sortOrder?: number
+    isActive?: boolean
     attributes: JsonNullValueInput | InputJsonValue
     variants: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CategoryDetailUncheckedCreateInput = {
     id?: string
     name: string
+    slug?: string | null
     parentId?: string | null
+    shortDesc?: string | null
+    seoDesc?: string | null
+    metaTitle?: string | null
+    metaDescription?: string | null
+    image?: string | null
+    sortOrder?: number
+    isActive?: boolean
     attributes: JsonNullValueInput | InputJsonValue
     variants: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CategoryDetailUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     attributes?: JsonNullValueInput | InputJsonValue
     variants?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CategoryDetailUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     attributes?: JsonNullValueInput | InputJsonValue
     variants?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CategoryDetailCreateManyInput = {
     id?: string
     name: string
+    slug?: string | null
     parentId?: string | null
+    shortDesc?: string | null
+    seoDesc?: string | null
+    metaTitle?: string | null
+    metaDescription?: string | null
+    image?: string | null
+    sortOrder?: number
+    isActive?: boolean
     attributes: JsonNullValueInput | InputJsonValue
     variants: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CategoryDetailUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     attributes?: JsonNullValueInput | InputJsonValue
     variants?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CategoryDetailUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    seoDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     attributes?: JsonNullValueInput | InputJsonValue
     variants?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProductVariantCreateInput = {
@@ -95062,21 +95344,59 @@ export namespace Prisma {
   export type CategoryDetailCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     parentId?: SortOrder
+    shortDesc?: SortOrder
+    seoDesc?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    image?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
     attributes?: SortOrder
     variants?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CategoryDetailAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
   }
 
   export type CategoryDetailMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     parentId?: SortOrder
+    shortDesc?: SortOrder
+    seoDesc?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    image?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type CategoryDetailMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    slug?: SortOrder
     parentId?: SortOrder
+    shortDesc?: SortOrder
+    seoDesc?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    image?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CategoryDetailSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
   }
 
   export type ProductScalarRelationFilter = {

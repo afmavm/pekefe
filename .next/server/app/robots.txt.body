@@ -6,6 +6,11 @@ Allow: /mensei-dogrulama
 Allow: /akademi
 Allow: /tadim-odasi
 Allow: /kategoriler
+Allow: /pestil-cesitleri
+Allow: /pekmez-cesitleri
+Allow: /kome-cesitleri
+Allow: /yoresel-urunler
+Allow: /hediyelik-lezzetler
 Allow: /hikayemiz
 Allow: /tesisimiz
 Allow: /galeri

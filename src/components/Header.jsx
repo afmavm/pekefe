@@ -10,6 +10,11 @@ import { getCart, updateCartQty, removeFromCart } from "@/utils/cartStorage";
 import { useSession, signOut } from "next-auth/react";
 import GlobalSearchModal from "@/components/GlobalSearchModal";
 import { useCMS } from "@/context/CMSContext";
+import { PEKEFE_DEFAULT_CATEGORIES } from "@/lib/category-utils";
+
+const NAV_SHORT_LABELS = {
+  "yoresel-urunler": "Yöresel Ürünler",
+};
 
 const stripHtml = (str) => {
   if (!str || typeof str !== "string") return "";
@@ -45,7 +50,34 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState(PEKEFE_DEFAULT_CATEGORIES);
+  const [openDropdownSlug, setOpenDropdownSlug] = useState(null);
+  const [expandedMobileSlug, setExpandedMobileSlug] = useState(null);
   const profileRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/categories?activeOnly=true")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const mainCategories = categories
+    .filter((c) => !c.parentId && c.isActive !== false)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+  const getSubCategories = (parentId) =>
+    categories
+      .filter((c) => c.parentId === parentId && c.isActive !== false)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 
   useEffect(() => {
     const handleOpenSearch = () => setSearchOpen(true);
@@ -135,13 +167,89 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-6 xl:gap-8" role="menubar" aria-label="Birincil Menü">
-            <Link href="/" className={getLinkClass("/")}>Mağaza</Link>
-            <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Kategoriler</Link>
-            <Link href="/hikayemiz" className={getLinkClass("/hikayemiz")}>Hikayemiz</Link>
-            <Link href="/tesisimiz" className={getLinkClass("/tesisimiz")}>Tesisimiz</Link>
-            <Link href="/blog" className={getLinkClass("/blog")}>Blog</Link>
-            <Link href="/b2b" className={getLinkClass("/b2b")}>B2B</Link>
+          <div className="hidden lg:flex items-center gap-3.5 xl:gap-5" role="menubar" aria-label="Birincil Menü">
+            <Link href="/" className={getLinkClass("/")}>Ana Sayfa</Link>
+            <Link href="/kategoriler" className={getLinkClass("/kategoriler")}>Tüm Ürünler</Link>
+
+            {mainCategories.map((cat) => {
+              const subs = getSubCategories(cat.id);
+              const catHref = `/${cat.slug}`;
+              const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
+              const isDropdownOpen = openDropdownSlug === cat.slug;
+
+              if (subs.length === 0) {
+                return (
+                  <Link key={cat.id} href={catHref} className={getLinkClass(catHref)}>
+                    {label}
+                  </Link>
+                );
+              }
+
+              return (
+                <div
+                  key={cat.id}
+                  className="relative py-2"
+                  onMouseEnter={() => setOpenDropdownSlug(cat.slug)}
+                  onMouseLeave={() => setOpenDropdownSlug(null)}
+                >
+                  <Link
+                    href={catHref}
+                    className={`${getLinkClass(catHref)} inline-flex items-center gap-1`}
+                    aria-haspopup="true"
+                    aria-expanded={isDropdownOpen}
+                    onFocus={() => setOpenDropdownSlug(cat.slug)}
+                  >
+                    <span>{label}</span>
+                    <svg
+                      className={`w-3 h-3 opacity-60 transition-transform duration-150 ${isDropdownOpen ? "rotate-180 opacity-100" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </Link>
+
+                  {isDropdownOpen && (
+                    <div
+                      role="menu"
+                      className="absolute left-0 top-full pt-1 w-60 z-50"
+                    >
+                      <div className="bg-surface-container-lowest dark:bg-stone-900 rounded-2xl shadow-lg border border-outline-variant/20 overflow-hidden py-2">
+                        <div className="px-4 py-2 border-b border-outline-variant/10">
+                          <Link
+                            href={catHref}
+                            onClick={() => setOpenDropdownSlug(null)}
+                            className="text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+                          >
+                            Tüm {cat.name}
+                          </Link>
+                        </div>
+                        <div className="py-1">
+                          {subs.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              href={`/${cat.slug}/${sub.slug}`}
+                              onClick={() => setOpenDropdownSlug(null)}
+                              role="menuitem"
+                              className={`block px-4 py-2.5 text-sm transition-colors ${
+                                pathname === `/${cat.slug}/${sub.slug}`
+                                  ? "bg-primary/10 text-primary font-semibold"
+                                  : "text-on-surface hover:bg-surface-container-low hover:text-primary"
+                              }`}
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <Link href="/hikayemiz" className={getLinkClass("/hikayemiz")}>Hikâyemiz</Link>
           </div>
 
           {/* Trailing Actions */}
@@ -284,12 +392,9 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen((prev) => !prev);
-              }}
-              className="md:hidden p-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all cursor-pointer text-primary flex items-center justify-center w-10 h-10 border border-outline-variant/20"
+              className="lg:hidden p-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all cursor-pointer text-primary flex items-center justify-center w-10 h-10 border border-outline-variant/20"
               aria-label="Menü"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
                 <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,30 +411,139 @@ export default function Header() {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-outline-variant/10 bg-surface-container-lowest/98 backdrop-blur-xl shadow-2xl animate-in slide-in-from-top duration-300">
-            <div className="max-w-container-max mx-auto px-margin-mobile py-4 space-y-1.5">
-              {[
-                { href: "/", label: "Mağaza", icon: "storefront" },
-                { href: "/kategoriler", label: "Kategoriler", icon: "grid_view" },
-                { href: "/hikayemiz", label: "Hikayemiz", icon: "history_edu" },
-                { href: "/tesisimiz", label: "Tesisimiz", icon: "factory" },
-                { href: "/blog", label: "Blog & Yazılar", icon: "article" },
-                { href: "/b2b", label: "B2B Bayilik Portalı", icon: "business_center" },
-              ].map(({ href, label, icon }) => (
+          <div className="lg:hidden border-t border-outline-variant/10 bg-surface-container-lowest/98 backdrop-blur-xl shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="max-w-container-max mx-auto px-margin-mobile py-4 space-y-1">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  pathname === "/"
+                    ? "bg-primary/10 text-primary font-bold"
+                    : "text-on-surface hover:bg-surface-container-low"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg text-primary">home</span>
+                <span>Ana Sayfa</span>
+              </Link>
+
+              <Link
+                href="/kategoriler"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  pathname.startsWith("/kategoriler")
+                    ? "bg-primary/10 text-primary font-bold"
+                    : "text-on-surface hover:bg-surface-container-low"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg text-primary">grid_view</span>
+                <span>Tüm Ürünler</span>
+              </Link>
+
+              {/* Dinamik Ana ve Alt Kategoriler */}
+              <div className="py-1 border-y border-outline-variant/10 my-1 space-y-1">
+                {mainCategories.map((cat) => {
+                  const subs = getSubCategories(cat.id);
+                  const catHref = `/${cat.slug}`;
+                  const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
+                  const isExpanded = expandedMobileSlug === cat.slug;
+                  const isActive = pathname.startsWith(catHref);
+
+                  return (
+                    <div key={cat.id} className="rounded-xl overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={catHref}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex-1 flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                            isActive
+                              ? "text-primary font-bold"
+                              : "text-on-surface hover:text-primary"
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-lg text-primary">category</span>
+                          <span>{label}</span>
+                        </Link>
+                        {subs.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedMobileSlug(isExpanded ? null : cat.slug)
+                            }
+                            className="p-3 text-on-surface-variant hover:text-primary cursor-pointer"
+                            aria-label={`${label} alt kategorilerini ${isExpanded ? "gizle" : "göster"}`}
+                            aria-expanded={isExpanded}
+                          >
+                            <svg
+                              className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+
+                      {subs.length > 0 && isExpanded && (
+                        <div className="pl-11 pr-4 pb-2 space-y-1 bg-surface-container-low/50">
+                          {subs.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              href={`/${cat.slug}/${sub.slug}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={`block py-2 px-3 rounded-lg text-sm transition-colors ${
+                                pathname === `/${cat.slug}/${sub.slug}`
+                                  ? "bg-primary/10 text-primary font-semibold"
+                                  : "text-on-surface-variant hover:text-primary"
+                              }`}
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Link
+                href="/hikayemiz"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  pathname.startsWith("/hikayemiz")
+                    ? "bg-primary/10 text-primary font-bold"
+                    : "text-on-surface hover:bg-surface-container-low"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg text-primary">history_edu</span>
+                <span>Hikâyemiz</span>
+              </Link>
+
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-outline-variant/10">
                 <Link
-                  key={href}
-                  href={href}
+                  href="/tesisimiz"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                    (href === "/" ? pathname === "/" : pathname.startsWith(href))
-                      ? "bg-primary/10 text-primary font-bold shadow-sm"
-                      : "text-on-surface hover:bg-surface-container-low"
-                  }`}
+                  className="text-center py-2 px-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
                 >
-                  <span className="material-symbols-outlined text-lg text-primary">{icon}</span>
-                  <span>{label}</span>
+                  Tesisimiz
                 </Link>
-              ))}
+                <Link
+                  href="/blog"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center py-2 px-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
+                >
+                  Blog
+                </Link>
+                <Link
+                  href="/b2b"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center py-2 px-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
+                >
+                  B2B Bayi
+                </Link>
+              </div>
             </div>
           </div>
         )}

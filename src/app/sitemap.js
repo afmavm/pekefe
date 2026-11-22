@@ -5,6 +5,7 @@
 
 import { prisma, withTimeout } from '@/lib/prisma';
 import { readLocalProducts } from '@/lib/jsonProductDb';
+import { getAllCategoriesServer } from '@/lib/category-server';
 
 function generateSlug(text) {
   if (!text) return '';
@@ -118,5 +119,35 @@ export default async function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...productEntries, ...blogPages];
+  // Aktif Ana ve Alt Kategoriler (Dinamik SEO Sitemap)
+  let categoryEntries = [];
+  try {
+    const activeCategories = await getAllCategoriesServer({ activeOnly: true });
+    const catById = new Map(activeCategories.map((c) => [c.id, c]));
+    for (const cat of activeCategories) {
+      if (!cat.slug) continue;
+      if (!cat.parentId) {
+        categoryEntries.push({
+          url: `${BASE_URL}/${cat.slug}`,
+          lastModified: cat.updatedAt ? new Date(cat.updatedAt) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.92,
+        });
+      } else {
+        const parent = catById.get(cat.parentId);
+        if (parent && parent.slug) {
+          categoryEntries.push({
+            url: `${BASE_URL}/${parent.slug}/${cat.slug}`,
+            lastModified: cat.updatedAt ? new Date(cat.updatedAt) : new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.85,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[SITEMAP WARN] Category entries fallback:', e);
+  }
+
+  return [...staticPages, ...categoryEntries, ...productEntries, ...blogPages];
 }

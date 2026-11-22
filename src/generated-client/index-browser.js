@@ -238,9 +238,19 @@ exports.Prisma.ProductScalarFieldEnum = {
 exports.Prisma.CategoryDetailScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  slug: 'slug',
   parentId: 'parentId',
+  shortDesc: 'shortDesc',
+  seoDesc: 'seoDesc',
+  metaTitle: 'metaTitle',
+  metaDescription: 'metaDescription',
+  image: 'image',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
   attributes: 'attributes',
-  variants: 'variants'
+  variants: 'variants',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {
@@ -1187,7 +1197,13 @@ exports.Prisma.ProductOrderByRelevanceFieldEnum = {
 exports.Prisma.CategoryDetailOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
-  parentId: 'parentId'
+  slug: 'slug',
+  parentId: 'parentId',
+  shortDesc: 'shortDesc',
+  seoDesc: 'seoDesc',
+  metaTitle: 'metaTitle',
+  metaDescription: 'metaDescription',
+  image: 'image'
 };
 
 exports.Prisma.ProductVariantOrderByRelevanceFieldEnum = {

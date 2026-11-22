@@ -196,13 +196,25 @@ model Product {
 }
 
 model CategoryDetail {
-  id         String  @id @default(cuid())
-  name       String  @unique
-  parentId   String?
-  attributes Json
-  variants   Json
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String?  @unique
+  parentId        String?
+  shortDesc       String?  @db.Text
+  seoDesc         String?  @db.LongText
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  image           String?
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  attributes      Json
+  variants        Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
 
   @@index([parentId])
+  @@index([slug])
+  @@index([isActive, sortOrder])
 }
 
 model ProductVariant {

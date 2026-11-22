@@ -540,6 +540,23 @@
         "nxtPslug": "nxtPslug"
       },
       "namedRegex": "^/urun/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[categorySlug]",
+      "regex": "^/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcategorySlug": "nxtPcategorySlug"
+      },
+      "namedRegex": "^/(?<nxtPcategorySlug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[categorySlug]/[subCategorySlug]",
+      "regex": "^/([^/]+?)/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcategorySlug": "nxtPcategorySlug",
+        "nxtPsubCategorySlug": "nxtPsubCategorySlug"
+      },
+      "namedRegex": "^/(?<nxtPcategorySlug>[^/]+?)/(?<nxtPsubCategorySlug>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -614,6 +631,12 @@
       "regex": "^/admin/cargo(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/cargo(?:/)?$"
+    },
+    {
+      "page": "/admin/categories",
+      "regex": "^/admin/categories(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/categories(?:/)?$"
     },
     {
       "page": "/admin/dashboard",

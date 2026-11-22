@@ -144,6 +144,7 @@ const navGroups: NavGroup[] = [
         feature: "inventory",
         subItems: [
           { name: "Ürünler", href: "/admin/stock", icon: Package, permission: "edit_stock" },
+          { name: "Kategori Yönetimi", href: "/admin/categories", icon: Layers, permission: "edit_stock" },
           { name: "Fırsat Ürünleri", href: "/admin/deals", icon: Tags },
           { name: "Stok Durumu", href: "/admin/inventory/stock-status", icon: Layers3, permission: "edit_stock" },
           { name: "Stok Hareketleri", href: "/admin/inventory/movements", icon: Activity, permission: "edit_stock" },
@@ -291,6 +292,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/orders": "Sipariş Listesi & Havuz",
   "/admin/cargo": "Kargo Takip Entegrasyonu",
   "/admin/stock": "Ürünler & Stok Listesi",
+  "/admin/categories": "Kategori ve SEO Yönetimi",
   "/admin/inventory": "Envanter & Depo Genel Bakış",
   "/admin/inventory/stock-status": "Stok Durumu",
   "/admin/inventory/movements": "Stok Hareketleri & Audit Log",

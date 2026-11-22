@@ -120,6 +120,16 @@ if command -v pm2 &> /dev/null; then
   if pm2 describe pekefe-app > /dev/null 2>&1; then
     pm2 delete pekefe-app 2>/dev/null || true
   fi
+  # Yalnızca Port 4000'de asılı kalmış eski PEKEFE next-server alt sürecini temizle (Port 3000'e ASLA dokunmaz)
+  if command -v fuser &> /dev/null; then
+    fuser -k 4000/tcp 2>/dev/null || true
+  elif command -v lsof &> /dev/null; then
+    PORT4000_PID=$(lsof -ti :4000 2>/dev/null || true)
+    if [ -n "$PORT4000_PID" ]; then
+      kill -9 $PORT4000_PID 2>/dev/null || true
+    fi
+  fi
+  sleep 1
   PORT=4000 pm2 start "$CURRENT_DIR/ecosystem.config.js" --only pekefe-app --update-env 2>/dev/null || true
   pm2 save --force 2>/dev/null || true
 fi

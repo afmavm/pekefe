@@ -24,7 +24,7 @@ const INITIAL_COURSES: AcademyCourse[] = [
     id: "course-pekmez-gastronomi",
     title: "Anadolu Yavaş Gıda: Geleneksel Dut Pekmezi Zanaatı",
     category: "Gastronomi",
-    instructor: "Gurme Şef & Pekmez Ustaları",
+    instructor: "Mutfak & Pekmez Ustaları",
     duration: "4 Hafta",
     lessonsCount: 12,
     level: "Orta Seviye",
@@ -79,7 +79,7 @@ export default function AcademyClient() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-900/5 dark:bg-amber-500/10 border border-amber-900/15 dark:border-amber-500/20 text-[#6b1d2f] dark:text-amber-400 text-xs font-bold uppercase tracking-[0.2em]">
             <GraduationCap className="w-3.5 h-3.5" />
-            PEKEFE Gurme Akademisi
+            PEKEFE Lezzet Akademisi
           </div>
           <h1 className="text-3xl md:text-5xl font-serif font-black text-slate-900 dark:text-white tracking-tight">
             Anadolu Zanaat Mirasını <span className="italic font-normal text-[#6b1d2f] dark:text-amber-400">Geleceğe Taşımak</span>

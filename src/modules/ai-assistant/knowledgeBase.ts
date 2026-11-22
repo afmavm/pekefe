@@ -104,7 +104,7 @@ export async function queryAiAssistant(message: string, role: string, userEmail?
     lowerMsg.includes("iskonto") ||
     lowerMsg.includes("bayilik")
   ) {
-    return "PEKEFE yöresel gıda ürünlerimiz için şarküteri, gurme market ve kurumsal hediyelik toptan alımlarda özel B2B bayi iskontoları sunmaktayız. B2B portalımız üzerinden başvuru yapabilir veya müşteri hizmetlerimizle iletişime geçebilirsiniz.";
+    return "PEKEFE yöresel gıda ürünlerimiz için şarküteri, yöresel market ve kurumsal hediyelik toptan alımlarda özel B2B bayi iskontoları sunmaktayız. B2B portalımız üzerinden başvuru yapabilir veya müşteri hizmetlerimizle iletişime geçebilirsiniz.";
   }
 
   // Default fallback answer

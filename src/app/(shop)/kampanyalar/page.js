@@ -227,7 +227,7 @@ export default function Kampanyalar() {
                 FIRSAT MAHSULLERİ
               </span>
               <h2 className="font-display text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                Kampanyalı & İndirimli Gurme Ürünler
+                Kampanyalı & İndirimli Yöresel Ürünler
               </h2>
             </div>
             <Link

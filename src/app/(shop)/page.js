@@ -259,8 +259,8 @@ export default function Home() {
   const recipes = {
     tahini: {
       title: "Dut Gün Pekmezi & Taş Değirmen Tahin Eşleşmesi",
-      quote: "Sessiz bir sabah kahvaltısının en asil ritüeli.",
-      description: "İspir'in güneşte doğal yoğunlaşan akışkan kıvamlı Dut Gün Pekmezi ile kepeği alınmış susamdan taş değirmende çekilen taze tahinin %40'a %60 asimetrik birleşimi. Üzerine eklenen hafif kavrulmuş yerli İspir cevizi, pekmezin doğal meyve tatlılığını dengeler ve damakta ipeksi bir gastronomi deneyimi sunar.",
+      quote: "Huzurlu bir sabah kahvaltısının en güzel geleneği.",
+      description: "İspir'in güneşte doğal yoğunlaşan akışkan kıvamlı Dut Gün Pekmezi ile kepeği alınmış susamdan taş değirmende çekilen taze tahinin %40'a %60 oranında dengeli birleşimi. Üzerine eklenen hafif kavrulmuş yerli İspir cevizi, pekmezin doğal meyve tatlılığını dengeler ve damakta ipeksi bir lezzet deneyimi sunar.",
       tips: "Karıştırma işlemini seramik veya ahşap kaşık kullanarak dairesel hareketlerle yapın; metal kaşık pekmezin doğal meyve asiditesini etkileyebilir.",
       bg: "/uploads/tahini_pekmez_pair.jpg",
     },
@@ -708,10 +708,10 @@ export default function Home() {
         <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-16">
           <div className="text-center space-y-3">
             <span className="text-secondary font-label-md text-sm uppercase tracking-[0.2em] font-semibold">
-              Gurme Gastronomi
+              Geleneksel Lezzet Kültürü
             </span>
             <h2 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold">
-              Editoryal Servis Önerileri
+              Doğal Sunum ve Servis Önerileri
             </h2>
             <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
           </div>

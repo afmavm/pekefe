@@ -424,7 +424,7 @@ export default function B2b() {
                 B2B Kurumsal Bayilik Sistemine Katılın
               </h1>
               <p className="text-white/80 text-sm md:text-base leading-relaxed">
-                Şarküteri, restoran, otel ve gurme market işletmelerinize özel toptan fiyatlar, koli bazlı iskonto oranları ve vadeli cari hesap avantajları ile Pekefe lezzetlerini sunun.
+                Şarküteri, restoran, otel ve yöresel market işletmelerinize özel toptan fiyatlar, koli bazlı iskonto oranları ve vadeli cari hesap avantajları ile Pekefe lezzetlerini sunun.
               </p>
             </div>
           </div>

@@ -211,7 +211,7 @@ export default function Kategoriler() {
     { src: "/uploads/ispir-dut-bahcesi-hasat-baba-ogul.jpg", label: "1. Doğal Hasat" },
     { src: "/uploads/ispir-bakir-kazan-ahsap-cendere.webp", label: "2. Bakır Kazan" },
     { src: "/uploads/ispir-keten-bezde-pestil-serimi.webp", label: "3. İspir Güneşi" },
-    { src: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp", label: "4. Gurme Mahsul" },
+    { src: "/uploads/ispir-el-sarimi-pestil-cesitleri.webp", label: "4. Özel Yöresel Mahsul" },
   ];
 
   return (

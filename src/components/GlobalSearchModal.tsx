@@ -30,7 +30,7 @@ const CATEGORY_LINKS = [
   { name: "Geleneksel Pekmezler", slug: "pekmez", icon: "🍯" },
   { name: "Pestil Çeşitleri", slug: "pestil", icon: "🌾" },
   { name: "Cevizli Kömeler", slug: "kome", icon: "🌰" },
-  { name: "Gurme Tatlılar", slug: "tatli", icon: "✨" },
+  { name: "Yöresel Tatlılar", slug: "tatli", icon: "✨" },
 ];
 
 export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {

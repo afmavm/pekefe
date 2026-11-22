@@ -270,7 +270,7 @@ export default function Hesap() {
     }
   };
 
-  const loyaltyTier = loyaltyPoints >= 2000 ? "PEKEFE USTASI" : loyaltyPoints >= 500 ? "PEKEFE GURMESİ" : "PEKEFE DOSTU";
+  const loyaltyTier = loyaltyPoints >= 2000 ? "PEKEFE USTASI" : loyaltyPoints >= 500 ? "PEKEFE TUTKUNU" : "PEKEFE DOSTU";
 
   if (status === "loading") {
     return (

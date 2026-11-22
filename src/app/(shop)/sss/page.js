@@ -166,7 +166,7 @@ const faqData = [
       { 
         id: "b2b-1", 
         q: "Toptan veya kurumsal (B2B) sipariş verebilir miyim?", 
-        a: "Evet! Restoranlar, butik gurme marketler, oteller ve kurumsal firmalar için toptan koli ve palet bazında özel fiyat listelerimiz bulunmaktadır. Sitemizdeki B2B Bayi Portalı üzerinden başvuruda bulunabilir veya info@pekefe.com adresinden kurumsal fiyat teklifi talep edebilirsiniz." 
+        a: "Evet! Restoranlar, yöresel ve seçkin marketler, oteller ve kurumsal firmalar için toptan koli ve palet bazında özel fiyat listelerimiz bulunmaktadır. Sitemizdeki B2B Bayi Portalı üzerinden başvuruda bulunabilir veya info@pekefe.com adresinden kurumsal fiyat teklifi talep edebilirsiniz." 
       },
       { 
         id: "b2b-2", 

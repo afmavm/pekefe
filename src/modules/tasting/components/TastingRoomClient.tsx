@@ -10,34 +10,34 @@ const LOCATIONS: TastingRoomLocation[] = [
   {
     id: "loc-istanbul",
     city: "İstanbul",
-    name: "PEKEFE Bebek Butik Tadım Odası",
+    name: "PEKEFE Bebek Özel Tadım Odası",
     address: "Cevdet Paşa Caddesi No: 42, Bebek, İstanbul",
     image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=1200&q=80",
     availableTimes: ["14:00", "16:00", "18:00", "20:00"],
     maxCapacity: 8,
-    experienceName: "Anadolu Hasat & Bal Sommelier Tadım Seansı",
+    experienceName: "Anadolu Hasat & Bal Uzmanı Eşliğinde Tadım Seansı",
     pricePerPerson: 1250
   },
   {
     id: "loc-[#london]",
     city: "Londra",
-    name: "PEKEFE Mayfair Private Gastronomy Room",
+    name: "PEKEFE Londra Mayfair Özel Tadım Salonu",
     address: "Mount Street No: 18, Mayfair, London W1K",
     image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
     availableTimes: ["15:00", "17:30", "19:30"],
     maxCapacity: 6,
-    experienceName: "Artisan Anatolian Honey & Molasses Pairing Session",
+    experienceName: "Geleneksel Anadolu Balı & Dut Pekmezi Tadım Seansı",
     pricePerPerson: 1850
   },
   {
     id: "loc-paris",
     city: "Paris",
-    name: "PEKEFE Le Marais Salon de Dégustation",
+    name: "PEKEFE Paris Le Marais Özel Tadım Salonu",
     address: "Rue des Francs-Bourgeois No: 24, 75003 Paris",
     image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80",
     availableTimes: ["14:30", "16:30", "18:30"],
     maxCapacity: 6,
-    experienceName: "Dégustation Privée d'Épicerie Fine d'Anatolie",
+    experienceName: "Özel Anadolu Yöresel Lezzetler Tadım Seansı",
     pricePerPerson: 1950
   }
 ];
@@ -96,13 +96,13 @@ export default function TastingRoomClient() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-900/5 dark:bg-amber-500/10 border border-amber-900/15 dark:border-amber-500/20 text-[#6b1d2f] dark:text-amber-400 text-xs font-bold uppercase tracking-[0.2em]">
             <Compass className="w-3.5 h-3.5" />
-            Butik Tadım Odası Rezervasyonu
+            Özel Tadım Odası Rezervasyonu
           </div>
           <h1 className="text-3xl md:text-5xl font-serif font-black text-slate-900 dark:text-white tracking-tight">
             İstanbul, Londra & Paris: <span className="italic font-normal text-[#6b1d2f] dark:text-amber-400">Özel Tadım Deneyimi</span>
           </h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-medium leading-relaxed">
-            PEKEFE'nin 2200m rakım ham ballarını, bakır kazan rekolte dut pekmezlerini ve zanaatkar lezzetlerini uzman sommelier eşliğinde özel tadım salonlarımızda keşfedin.
+            PEKEFE'nin 2200m rakım ham ballarını, bakır kazan hasat dut pekmezlerini ve el yapımı yöresel lezzetlerini tadım uzmanlarımız eşliğinde özel salonlarımızda keşfedin.
           </p>
         </div>
 

@@ -342,7 +342,7 @@ export default function Home() {
               Adım Adım Gelenek
             </span>
             <h2 className="font-display-lg text-primary text-3xl md:text-headline-lg font-bold">
-              Artisanal Üretim Sürecimiz
+              Geleneksel El Yapımı Üretim Sürecimiz
             </h2>
             <div className="w-12 h-[1px] bg-secondary mx-auto"></div>
           </div>
@@ -500,7 +500,7 @@ export default function Home() {
       <section id="koleksiyon" className="py-12 md:py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-10 md:space-y-16 reveal-element scroll-mt-20">
         <div className="text-center space-y-2.5 md:space-y-3">
           <span className="text-secondary font-label-md text-xs sm:text-sm uppercase tracking-[0.2em] font-semibold">
-            Butik Koleksiyon
+            Özel Yöresel Seçki
           </span>
           <h2 className="font-display-lg text-primary text-2xl sm:text-3xl md:text-headline-lg font-bold">
             Özel Reçeteli Mahsullerimiz
@@ -602,7 +602,7 @@ export default function Home() {
               </div>
               <h4 className="font-display-lg text-primary text-lg font-bold">Katkı ve Koruyucu Yok</h4>
               <p className="text-sm text-on-surface-variant leading-relaxed font-body-md">
-                Laboratuvar analiz raporları ile onaylanmış, HMF değerleri düşük, sıfır koruyucu ve sıfır kıvam arttırıcı içeren gerçek butik üretim.
+                Laboratuvar analiz raporları ile onaylanmış, HMF değerleri düşük, sıfır koruyucu ve sıfır kıvam arttırıcı içeren gerçek geleneksel üretim.
               </p>
             </div>
           </div>
@@ -990,7 +990,7 @@ export default function Home() {
               </h2>
 
               <p className="text-sm text-white/80 max-w-md mx-auto font-light leading-relaxed">
-                İspir yaylalarının en özel rekolte ürünleri ve butik kampanya ayrıcalıklarından haberdar olmak için bültenimize katılın.
+                İspir yaylalarının en özel rekolte ürünleri ve özel kampanya fırsatlarından haberdar olmak için bültenimize katılın.
               </p>
 
               <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto pt-2">

@@ -50,7 +50,7 @@ export default function Tesisimiz() {
             İSPİR · ERZURUM · TKDK VE BAKANLIK ONAYLI TESİS
           </span>
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-[1.15] drop-shadow-md">
-            Zanaatın ve Bilimin <br className="hidden md:block" /> Buluştuğu Butik Tesisimiz
+            Zanaatın ve Bilimin <br className="hidden md:block" /> Buluştuğu Üretim Tesisimiz
           </h1>
           <p className="text-amber-100/90 max-w-2xl mx-auto text-base sm:text-lg md:text-xl leading-relaxed font-light drop-shadow">
             Doğanın sunduğu en saf lezzetleri, şırayı ateşte yakmadan İspir yayla güneşinin doğal sıcaklığı ve TKDK onaylı hijyen standartlarında geleceğe taşıyoruz.

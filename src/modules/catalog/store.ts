@@ -202,7 +202,7 @@ export const useCartStore = create<CartStore>()(
             qty: quantity,
             image: item.image || item.img || "/premium-pekefe-kavanoz.png",
             img: item.img || item.image || "/premium-pekefe-kavanoz.png",
-            desc: item.desc || "Premium Kavanoz",
+            desc: item.desc || "Özel Cam Kavanoz",
             badge: item.badge || "Geleneksel",
             variantLabel: item.variantLabel || "",
             sku: item.sku || "",

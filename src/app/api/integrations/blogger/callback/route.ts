@@ -20,8 +20,11 @@ export async function GET(request: Request) {
   const error = reqUrl.searchParams.get('error');
   const state = reqUrl.searchParams.get('state');
 
-  const isLocal = reqUrl.hostname === 'localhost' || reqUrl.hostname === '127.0.0.1';
-  const baseOrigin = isLocal ? reqUrl.origin : 'https://www.pekefe.com';
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const isLocalDev =
+    process.env.NODE_ENV !== 'production' &&
+    (forwardedHost.startsWith('localhost') || forwardedHost.startsWith('127.0.0.1'));
+  const baseOrigin = isLocalDev ? reqUrl.origin : 'https://www.pekefe.com';
   const redirectUri = `${baseOrigin}/api/integrations/blogger/callback`;
 
   if (error || !code) {

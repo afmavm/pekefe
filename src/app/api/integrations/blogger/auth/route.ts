@@ -21,8 +21,11 @@ export async function GET(request: Request) {
   }
 
   const reqUrl = new URL(request.url);
-  const isLocal = reqUrl.hostname === 'localhost' || reqUrl.hostname === '127.0.0.1';
-  const redirectUri = isLocal
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const isLocalDev =
+    process.env.NODE_ENV !== 'production' &&
+    (forwardedHost.startsWith('localhost') || forwardedHost.startsWith('127.0.0.1'));
+  const redirectUri = isLocalDev
     ? `${reqUrl.origin}/api/integrations/blogger/callback`
     : 'https://www.pekefe.com/api/integrations/blogger/callback';
 
@@ -33,7 +36,7 @@ export async function GET(request: Request) {
   response.cookies.set('pekefe_blogger_oauth_state', state, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: !isLocal,
+    secure: !isLocalDev,
     maxAge: 600,
     path: '/',
   });

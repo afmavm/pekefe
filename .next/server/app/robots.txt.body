@@ -38,7 +38,6 @@ Disallow: /reset-password
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
-Disallow: /_next/
 
 User-Agent: GPTBot
 User-Agent: ChatGPT-User
@@ -66,7 +65,6 @@ Disallow: /reset-password
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
-Disallow: /_next/
 
 User-Agent: AhrefsBot
 User-Agent: SemrushBot

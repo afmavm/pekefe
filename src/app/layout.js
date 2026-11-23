@@ -57,12 +57,6 @@ export const metadata = {
       { url: "/apple-icon.png", type: "image/png" },
     ],
   },
-  alternates: {
-    canonical: "https://www.pekefe.com",
-    languages: {
-      "tr-TR": "https://www.pekefe.com",
-    },
-  },
   openGraph: {
     title: "PEKEFE | Geleneksel İspir Dut Gün Pekmezi, Pestil & Cevizli Köme",
     description: "İspir yaylalarından geleneksel yöntemlerle, güneşin doğal sıcaklığında yoğunlaştırılarak hazırlanan %100 saf dut pekmezi, yaprak pestil ve cevizli köme koleksiyonu.",

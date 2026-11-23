@@ -18,7 +18,6 @@ export default function robots() {
     '/admin',
     '/admin/',
     '/api/',
-    '/_next/',
   ];
 
   return {

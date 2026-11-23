@@ -1587,6 +1587,30 @@
       "namedRegex": "^/api/integrations(?:/)?$"
     },
     {
+      "page": "/api/integrations/blogger",
+      "regex": "^/api/integrations/blogger(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/integrations/blogger(?:/)?$"
+    },
+    {
+      "page": "/api/integrations/blogger/auth",
+      "regex": "^/api/integrations/blogger/auth(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/integrations/blogger/auth(?:/)?$"
+    },
+    {
+      "page": "/api/integrations/blogger/callback",
+      "regex": "^/api/integrations/blogger/callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/integrations/blogger/callback(?:/)?$"
+    },
+    {
+      "page": "/api/integrations/blogger/sync",
+      "regex": "^/api/integrations/blogger/sync(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/integrations/blogger/sync(?:/)?$"
+    },
+    {
       "page": "/api/integrations/efatura",
       "regex": "^/api/integrations/efatura(?:/)?$",
       "routeKeys": {},

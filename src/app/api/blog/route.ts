@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
+import { getBloggerConfig, syncPostToBlogger } from '@/lib/blogger-sync';
 import fs from 'fs';
 import path from 'path';
 
@@ -363,6 +364,15 @@ export async function GET(request: Request) {
     let result = Array.from(mergedMap.values());
     if (!adminMode) {
       result = result.filter(p => p.isActive);
+    } else {
+      try {
+        const bloggerCfg = await getBloggerConfig();
+        const postMap = bloggerCfg.postMap || {};
+        result = result.map((p: any) => ({
+          ...p,
+          bloggerSync: postMap[p.id] || null,
+        }));
+      } catch {}
     }
 
     return NextResponse.json(result);
@@ -431,7 +441,15 @@ export async function POST(request: Request) {
       console.warn("DB create blog failed, but disk fallback succeeded:", dbErr);
     }
 
-    return NextResponse.json(newPost);
+    // Auto-sync to Google Blogger if connected & enabled
+    let bloggerSync: any = null;
+    try {
+      bloggerSync = await syncPostToBlogger(newPost);
+    } catch (syncErr) {
+      console.warn('[BLOG POST] Blogger auto-sync warning:', syncErr);
+    }
+
+    return NextResponse.json({ ...newPost, bloggerSync });
   } catch (error: any) {
     console.error('Blog POST error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });

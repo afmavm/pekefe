@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { 
   Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, X, Save, Search, 
-  Calendar, Tag, Upload, Star, Clock, Filter, ImageIcon, Check, Loader2, RefreshCw 
+  Calendar, Tag, Upload, Star, Clock, Filter, ImageIcon, Check, Loader2, RefreshCw,
+  UploadCloud, ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
+import BloggerIntegrationPanel, { PublicBloggerConfig } from "@/components/admin/BloggerIntegrationPanel";
 
 interface BlogPost {
   id: string;
@@ -21,6 +23,13 @@ interface BlogPost {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  bloggerSync?: {
+    bloggerPostId: string;
+    bloggerUrl?: string;
+    syncedAt: string;
+    lastError?: string | null;
+    isDraft?: boolean;
+  } | null;
 }
 
 const CATEGORIES = ["Genel", "Haberler", "Tarifler", "Sağlık", "Üretim", "Kampanya"];
@@ -61,6 +70,32 @@ export default function AdminBlogPage() {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
   const [pickerTarget, setPickerTarget] = useState<"form" | "direct">("form");
+
+  // Google Blogger Integration State
+  const [bloggerConfig, setBloggerConfig] = useState<PublicBloggerConfig | null>(null);
+  const [syncingPostId, setSyncingPostId] = useState<string | null>(null);
+
+  const handleSyncSingleToBlogger = async (post: BlogPost) => {
+    setSyncingPostId(post.id);
+    try {
+      const res = await fetch("/api/integrations/blogger/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: post.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`"${post.title}" Google Blogger ile senkronize edildi.`);
+        fetchPosts();
+      } else {
+        toast.error(data.error || data.result?.error || "Blogger senkronizasyonu başarısız.");
+      }
+    } catch {
+      toast.error("Blogger bağlantı hatası.");
+    } finally {
+      setSyncingPostId(null);
+    }
+  };
 
   const fetchPosts = () => {
     setLoading(true);
@@ -249,7 +284,19 @@ export default function AdminBlogPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success(editingPost ? "Yazı güncellendi." : "Yazı oluşturuldu.");
+        if (data?.bloggerSync?.synced) {
+          toast.success(
+            editingPost
+              ? "Yazı güncellendi ve Google Blogger'da senkronize edildi."
+              : "Yazı oluşturuldu ve Google Blogger'da yayınlandı."
+          );
+        } else if (data?.bloggerSync?.error && !data?.bloggerSync?.skipped) {
+          toast.warning(
+            `${editingPost ? "Yazı güncellendi" : "Yazı oluşturuldu"}, ancak Blogger hatası: ${data.bloggerSync.error}`
+          );
+        } else {
+          toast.success(editingPost ? "Yazı güncellendi." : "Yazı oluşturuldu.");
+        }
         setModalOpen(false);
         fetchPosts();
       } else {
@@ -366,6 +413,12 @@ export default function AdminBlogPage() {
         </div>
       </div>
 
+      {/* Google Blogger Otomatik Senkronizasyon Paneli */}
+      <BloggerIntegrationPanel
+        onSynced={fetchPosts}
+        onConfigLoaded={setBloggerConfig}
+      />
+
       {/* Toolbar & Filters */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Search Input */}
@@ -469,6 +522,18 @@ export default function AdminBlogPage() {
                           Öne Çıkan
                         </span>
                       )}
+                      {post.bloggerSync?.bloggerPostId && (
+                        <a
+                          href={post.bloggerSync.bloggerUrl || bloggerConfig?.blogUrl || "#"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition inline-flex items-center gap-1"
+                          title={`Son Blogger senkronizasyonu: ${new Date(post.bloggerSync.syncedAt).toLocaleString("tr-TR")}`}
+                        >
+                          Blogger&apos;da Yayında
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 text-xs text-slate-400 font-semibold flex-wrap">
@@ -492,6 +557,25 @@ export default function AdminBlogPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                  {bloggerConfig?.isConnected && bloggerConfig?.blogId && (
+                    <button
+                      onClick={() => handleSyncSingleToBlogger(post)}
+                      disabled={syncingPostId === post.id}
+                      title={
+                        post.bloggerSync?.bloggerPostId
+                          ? "Google Blogger'daki Yazıyı Güncelle"
+                          : "Google Blogger'a Gönder"
+                      }
+                      className="w-9 h-9 bg-orange-50 border border-orange-200 rounded-xl flex items-center justify-center hover:bg-orange-100 transition text-orange-700 cursor-pointer disabled:opacity-50"
+                    >
+                      {syncingPostId === post.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UploadCloud className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+
                   <button
                     onClick={() => openMediaPickerForDirect(post.id)}
                     title="Kapak Fotoğrafını Değiştir"

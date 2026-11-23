@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { readLocalBlogPostsFallback, writeLocalBlogPostsFallback } from '../route';
+import { deletePostFromBlogger, syncPostToBlogger } from '@/lib/blogger-sync';
 
 // PUT /api/blog/[id] — Blog yazısını güncelle
 export async function PUT(
@@ -74,7 +75,15 @@ export async function PUT(
       console.warn('[BLOG PUT WARNING] DB update failed, but disk data saved successfully:', dbErr);
     }
 
-    return NextResponse.json(updatedItem);
+    // 3. Auto-sync update to Google Blogger if connected & enabled
+    let bloggerSync: any = null;
+    try {
+      bloggerSync = await syncPostToBlogger(updatedItem);
+    } catch (syncErr) {
+      console.warn('[BLOG PUT] Blogger auto-sync warning:', syncErr);
+    }
+
+    return NextResponse.json({ ...updatedItem, bloggerSync });
   } catch (error: any) {
     console.error('Blog PUT error:', error);
     // Return fallback updated item if any error occurs
@@ -105,7 +114,15 @@ export async function DELETE(
       console.warn('[BLOG DELETE WARNING] DB delete failed, but disk item was removed:', dbErr);
     }
 
-    return NextResponse.json({ success: true });
+    // 3. Auto-delete on Google Blogger if syncDelete is enabled
+    let bloggerSync: any = null;
+    try {
+      bloggerSync = await deletePostFromBlogger(id);
+    } catch (syncErr) {
+      console.warn('[BLOG DELETE] Blogger delete warning:', syncErr);
+    }
+
+    return NextResponse.json({ success: true, bloggerSync });
   } catch (error: any) {
     console.error('Blog DELETE error:', error);
     return NextResponse.json({ success: true });

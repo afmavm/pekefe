@@ -1775,6 +1775,42 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/integrations/blogger/auth/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/integrations/blogger/auth">> = Specific
+  const handler = {} as typeof import("../../src/app/api/integrations/blogger/auth/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/integrations/blogger/callback/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/integrations/blogger/callback">> = Specific
+  const handler = {} as typeof import("../../src/app/api/integrations/blogger/callback/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/integrations/blogger/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/integrations/blogger">> = Specific
+  const handler = {} as typeof import("../../src/app/api/integrations/blogger/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/integrations/blogger/sync/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/integrations/blogger/sync">> = Specific
+  const handler = {} as typeof import("../../src/app/api/integrations/blogger/sync/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/integrations/efatura/pdf/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/integrations/efatura/pdf">> = Specific

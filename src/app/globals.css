@@ -383,6 +383,19 @@ img, video {
   border-top: 1px solid #e2e8f0;
   margin: 1.25rem 0;
 }
+@media (max-width: 768px) {
+  .pekefe-rich-content h1 {
+    font-size: 1.4rem;
+  }
+  .pekefe-rich-content h2 {
+    font-size: 1.2rem;
+  }
+  .pekefe-rich-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 
 

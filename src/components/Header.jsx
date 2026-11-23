@@ -633,18 +633,18 @@ export default function Header() {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-outline-variant/10 bg-surface-container-lowest/98 backdrop-blur-xl shadow-2xl max-h-[80vh] overflow-y-auto">
-            <div className="max-w-container-max mx-auto px-margin-mobile py-4 space-y-1">
+          <div className="lg:hidden border-t border-outline-variant/10 bg-surface-container-lowest/98 dark:bg-stone-950/98 backdrop-blur-xl shadow-2xl max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
+            <div className="max-w-7xl mx-auto px-4 py-4 space-y-1.5 pb-8">
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   pathname === "/"
-                    ? "bg-primary/10 text-primary font-bold"
+                    ? "bg-[#6b1d2f]/10 text-[#6b1d2f] font-bold"
                     : "text-on-surface hover:bg-surface-container-low"
                 }`}
               >
-                <span className="material-symbols-outlined text-lg text-primary">home</span>
+                <span className="material-symbols-outlined text-lg text-[#6b1d2f]">home</span>
                 <span>Ana Sayfa</span>
               </Link>
 
@@ -653,37 +653,64 @@ export default function Header() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   pathname.startsWith("/kategoriler")
-                    ? "bg-primary/10 text-primary font-bold"
+                    ? "bg-[#6b1d2f]/10 text-[#6b1d2f] font-bold"
                     : "text-on-surface hover:bg-surface-container-low"
                 }`}
               >
-                <span className="material-symbols-outlined text-lg text-primary">grid_view</span>
+                <span className="material-symbols-outlined text-lg text-[#6b1d2f]">grid_view</span>
                 <span>Tüm Ürünler</span>
               </Link>
 
-              {/* Dinamik Ana ve Alt Kategoriler */}
-              <div className="py-1 border-y border-outline-variant/10 my-1 space-y-1">
+              {/* Dinamik Ana ve Alt Kategoriler (Görsel + Tam Cümle Alt Açıklamalar) */}
+              <div className="py-2 border-y border-outline-variant/15 my-2 space-y-1.5">
+                <p className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8B5E3C] mb-1">
+                  Kategoriler
+                </p>
                 {mainCategories.map((cat) => {
                   const subs = getSubCategories(cat.id);
                   const catHref = `/${cat.slug}`;
                   const label = NAV_SHORT_LABELS[cat.slug] || cat.name;
                   const isExpanded = expandedMobileSlug === cat.slug;
                   const isActive = pathname.startsWith(catHref);
+                  const mediaConfig = MEGA_MENU_PRODUCTION_MEDIA[cat.slug] || {
+                    src: cat.image || "/ispir-manzara-hero.png",
+                    badge: "Erzurum İspir",
+                  };
 
                   return (
-                    <div key={cat.id} className="rounded-xl overflow-hidden">
-                      <div className="flex items-center justify-between">
+                    <div
+                      key={cat.id}
+                      className={`rounded-2xl overflow-hidden border transition-colors ${
+                        isExpanded
+                          ? "border-[#6b1d2f]/20 bg-[#FAF8F5] dark:bg-stone-900"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
                         <Link
                           href={catHref}
                           onClick={() => setMobileMenuOpen(false)}
-                          className={`flex-1 flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                            isActive
-                              ? "text-primary font-bold"
-                              : "text-on-surface hover:text-primary"
+                          className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors min-w-0 ${
+                            isActive || isExpanded
+                              ? "text-[#6b1d2f] dark:text-amber-400 font-bold"
+                              : "text-on-surface hover:text-[#6b1d2f]"
                           }`}
                         >
-                          <span className="material-symbols-outlined text-lg text-primary">category</span>
-                          <span>{label}</span>
+                          <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-stone-200/80 bg-stone-100">
+                            <Image
+                              src={mediaConfig.src}
+                              alt={cat.name}
+                              fill
+                              sizes="40px"
+                              className="object-cover object-center"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block truncate leading-tight">{label}</span>
+                            <span className="block text-[11px] font-normal text-stone-500 truncate mt-0.5">
+                              {mediaConfig.badge}
+                            </span>
+                          </div>
                         </Link>
                         {subs.length > 0 && (
                           <button
@@ -691,12 +718,12 @@ export default function Header() {
                             onClick={() =>
                               setExpandedMobileSlug(isExpanded ? null : cat.slug)
                             }
-                            className="p-3 text-on-surface-variant hover:text-primary cursor-pointer"
+                            className="w-11 h-11 flex items-center justify-center text-stone-500 hover:text-[#6b1d2f] cursor-pointer shrink-0"
                             aria-label={`${label} alt kategorilerini ${isExpanded ? "gizle" : "göster"}`}
                             aria-expanded={isExpanded}
                           >
                             <svg
-                              className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                              className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180 text-[#6b1d2f]" : ""}`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -708,21 +735,46 @@ export default function Header() {
                       </div>
 
                       {subs.length > 0 && isExpanded && (
-                        <div className="pl-11 pr-4 pb-2 space-y-1 bg-surface-container-low/50">
-                          {subs.map((sub) => (
-                            <Link
-                              key={sub.id}
-                              href={`/${cat.slug}/${sub.slug}`}
-                              onClick={() => setMobileMenuOpen(false)}
-                              className={`block py-2 px-3 rounded-lg text-sm transition-colors ${
-                                pathname === `/${cat.slug}/${sub.slug}`
-                                  ? "bg-primary/10 text-primary font-semibold"
-                                  : "text-on-surface-variant hover:text-primary"
-                              }`}
-                            >
-                              {sub.name}
-                            </Link>
-                          ))}
+                        <div className="px-3 pb-3 pt-1 space-y-1">
+                          {subs.map((sub) => {
+                            const subDesc =
+                              MEGA_MENU_SUB_DESCRIPTIONS[sub.slug] ||
+                              sub.shortDesc ||
+                              "";
+                            return (
+                              <Link
+                                key={sub.id}
+                                href={`/${cat.slug}/${sub.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={`flex items-start justify-between gap-2 py-2 px-3 rounded-xl transition-colors ${
+                                  pathname === `/${cat.slug}/${sub.slug}`
+                                    ? "bg-[#6b1d2f]/10 text-[#6b1d2f]"
+                                    : "bg-white dark:bg-stone-950/60 text-stone-800 dark:text-stone-200 hover:text-[#6b1d2f]"
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="block text-sm font-semibold leading-snug">
+                                    {sub.name}
+                                  </span>
+                                  {subDesc && (
+                                    <span className="block text-[11px] text-stone-500 dark:text-stone-400 leading-snug mt-0.5">
+                                      {subDesc}
+                                    </span>
+                                  )}
+                                </div>
+                                <span aria-hidden="true" className="text-xs text-stone-400 mt-0.5 shrink-0">
+                                  →
+                                </span>
+                              </Link>
+                            );
+                          })}
+                          <Link
+                            href={catHref}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block pt-1.5 px-3 text-xs font-bold text-[#6b1d2f]"
+                          >
+                            Tüm {cat.name} Sayfasına Git →
+                          </Link>
                         </div>
                       )}
                     </div>

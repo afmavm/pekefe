@@ -106,15 +106,16 @@ export default function CategoryCatalogClient({
 
   return (
     <div className="space-y-8">
-      {/* Alt Kategori Bağlantıları */}
+      {/* Alt Kategori Bağlantıları (Mobilde Yatay Kaydırmalı, Masaüstünde Sarılı) */}
       {subCategories.length > 0 && (
         <nav
           aria-label="Alt Kategoriler"
-          className="flex flex-wrap items-center gap-2.5 border-b border-stone-200 dark:border-stone-800 pb-6"
+          className="flex flex-nowrap sm:flex-wrap items-center gap-2.5 overflow-x-auto sm:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-stone-200 dark:border-stone-800 pb-5"
+          style={{ scrollbarWidth: "none" }}
         >
           <Link
             href={`/${mainCategory.slug}`}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${
+            className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${
               !activeSubCategory
                 ? "bg-[#5D1924] text-white border-[#5D1924]"
                 : "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-[#5D1924] hover:text-[#5D1924]"
@@ -134,7 +135,7 @@ export default function CategoryCatalogClient({
               <Link
                 key={sub.id}
                 href={`/${mainCategory.slug}/${sub.slug}`}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${
+                className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${
                   isActive
                     ? "bg-[#5D1924] text-white border-[#5D1924]"
                     : "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-[#5D1924] hover:text-[#5D1924]"

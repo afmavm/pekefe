@@ -173,36 +173,123 @@ export default function AllProductsClient({
           </div>
         </header>
 
-        {/* MOBİL KATEGORİ ÇUBUĞU */}
-        <div
-          className="flex lg:hidden gap-2 overflow-x-auto pb-1 -mx-4 px-4"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <button
-            type="button"
-            onClick={() => setSelectedCategoryId("all")}
-            className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-              selectedCategoryId === "all"
-                ? "bg-[#5D1924] text-white border-[#5D1924]"
-                : "bg-white text-stone-700 border-stone-200"
-            }`}
-          >
-            Tüm Ürünler ({safeProducts.length})
-          </button>
-          {mainCategories.map((cat) => (
+        {/* MOBİL ARAMA, STOK VE KATEGORİ ÇUBUĞU */}
+        <div className="lg:hidden space-y-3">
+          {/* Mobil Arama & Stokta Olanlar */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Ürün ara..."
+                aria-label="Ürün ara"
+                className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 focus:outline-none focus:border-[#5D1924]"
+              />
+            </div>
             <button
-              key={cat.id}
               type="button"
-              onClick={() => setSelectedCategoryId(cat.id)}
+              onClick={() => setOnlyInStock((v) => !v)}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                onlyInStock
+                  ? "bg-[#5D1924] text-white border-[#5D1924]"
+                  : "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700"
+              }`}
+            >
+              <PackageCheck className="w-3.5 h-3.5" />
+              <span>Stokta</span>
+            </button>
+          </div>
+
+          {/* Mobil Ana Kategori Hapları (Ürün Sayılı) */}
+          <div
+            className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedCategoryId("all")}
               className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                selectedCategoryId === cat.id
+                selectedCategoryId === "all"
                   ? "bg-[#5D1924] text-white border-[#5D1924]"
                   : "bg-white text-stone-700 border-stone-200"
               }`}
             >
-              {cat.name}
+              Tüm Ürünler ({safeProducts.length})
             </button>
-          ))}
+            {mainCategories.map((cat) => {
+              const subs = getSubCategories(cat.id);
+              const isSelected =
+                selectedCategoryId === cat.id ||
+                subs.some((s) => s.id === selectedCategoryId);
+              const count = categoryCounts[cat.id] ?? 0;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategoryId(cat.id)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                    isSelected
+                      ? "bg-[#5D1924] text-white border-[#5D1924]"
+                      : "bg-white text-stone-700 border-stone-200"
+                  }`}
+                >
+                  {cat.name} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Seçili Ana Kategorinin Mobil Alt Kategorileri */}
+          {(() => {
+            const activeMain = selectedCategoryObj
+              ? selectedCategoryObj.parentId
+                ? mainCategories.find((m) => m.id === selectedCategoryObj.parentId)
+                : selectedCategoryObj
+              : null;
+            if (!activeMain) return null;
+            const activeSubs = getSubCategories(activeMain.id);
+            if (activeSubs.length === 0) return null;
+            return (
+              <div
+                className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4"
+                style={{ scrollbarWidth: "none" }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryId(activeMain.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors cursor-pointer ${
+                    selectedCategoryId === activeMain.id
+                      ? "bg-[#8B5E3C] text-white border-[#8B5E3C]"
+                      : "bg-stone-100 text-stone-700 border-stone-200"
+                  }`}
+                >
+                  Tümü ({categoryCounts[activeMain.id] ?? 0})
+                </button>
+                {activeSubs.map((sub) => (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => setSelectedCategoryId(sub.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors cursor-pointer ${
+                      selectedCategoryId === sub.id
+                        ? "bg-[#8B5E3C] text-white border-[#8B5E3C]"
+                        : "bg-stone-100 text-stone-700 border-stone-200"
+                    }`}
+                  >
+                    {sub.name} ({categoryCounts[sub.id] ?? 0})
+                  </button>
+                ))}
+                <Link
+                  href={`/${activeMain.slug}`}
+                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold text-[#5D1924] bg-white border border-[#5D1924]/25"
+                >
+                  Kategori Sayfası →
+                </Link>
+              </div>
+            );
+          })()}
         </div>
 
         {/* ANA İÇERİK GRID */}

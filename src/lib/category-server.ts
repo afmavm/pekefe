@@ -6,6 +6,7 @@ import {
   PEKEFE_DEFAULT_CATEGORIES,
   normalizeCategoryRecord,
   productMatchesCategory,
+  slugifyTr,
 } from '@/lib/category-utils';
 
 let _ensuredColumns = false;
@@ -193,10 +194,13 @@ export async function getPublishedProductsServer(): Promise<any[]> {
 
       return {
         id: String(p.id),
+        slug: p.slug ? String(p.slug) : slugifyTr(String(p.name || p.id || '')),
         name: String(p.name || ''),
         sku: String(p.sku || ''),
         category: String(p.category || ''),
         subCategory: p.subCategory ? String(p.subCategory) : null,
+        seoTitle: p.seoTitle ? String(p.seoTitle) : (attrs?.seoTitle ? String(attrs.seoTitle) : null),
+        seoDesc: p.seoDesc ? String(p.seoDesc) : (attrs?.seoDesc ? String(attrs.seoDesc) : null),
         price: effectivePrice,
         oldPrice: listPrice && listPrice > effectivePrice ? listPrice : null,
         list_price: listPrice,

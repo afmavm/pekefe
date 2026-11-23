@@ -7,6 +7,9 @@ import { prisma, withTimeout } from '@/lib/prisma';
 import { readLocalProducts } from '@/lib/jsonProductDb';
 import { getAllCategoriesServer } from '@/lib/category-server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function generateSlug(text) {
   if (!text) return '';
   const trMap = {

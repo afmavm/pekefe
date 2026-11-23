@@ -27,8 +27,8 @@ export default function CategoryPageView({
   const displayCategory = activeSubCategory || mainCategory;
   const heroImage = displayCategory.image || mainCategory.image || "/ispir-manzara-hero.png";
   const pageUrl = activeSubCategory
-    ? `https://pekefe.com/${mainCategory.slug}/${activeSubCategory.slug}`
-    : `https://pekefe.com/${mainCategory.slug}`;
+    ? `https://www.pekefe.com/${mainCategory.slug}/${activeSubCategory.slug}`
+    : `https://www.pekefe.com/${mainCategory.slug}`;
 
   // BreadcrumbList JSON-LD
   const breadcrumbItems: any[] = [
@@ -36,13 +36,13 @@ export default function CategoryPageView({
       "@type": "ListItem",
       position: 1,
       name: "Ana Sayfa",
-      item: "https://pekefe.com",
+      item: "https://www.pekefe.com",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: mainCategory.name,
-      item: `https://pekefe.com/${mainCategory.slug}`,
+      item: `https://www.pekefe.com/${mainCategory.slug}`,
     },
   ];
 
@@ -74,7 +74,7 @@ export default function CategoryPageView({
       itemListElement: products.slice(0, 24).map((p, idx) => ({
         "@type": "ListItem",
         position: idx + 1,
-        url: `https://pekefe.com/urun/${p.id}`,
+        url: `https://www.pekefe.com/urun/${p.slug || p.id}`,
         name: p.name,
       })),
     },

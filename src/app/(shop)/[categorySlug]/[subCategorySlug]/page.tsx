@@ -39,11 +39,11 @@ export async function generateMetadata({
     sub.metaDescription ||
     sub.shortDesc ||
     `${sub.name} çeşitlerini PEKEFE kalitesiyle inceleyin ve sipariş verin.`;
-  const canonicalUrl = `https://pekefe.com/${parent.slug}/${sub.slug}`;
+  const canonicalUrl = `https://www.pekefe.com/${parent.slug}/${sub.slug}`;
   const ogImgRaw = sub.image || parent.image || "/og-image.jpg";
   const ogImage = ogImgRaw.startsWith("http")
     ? ogImgRaw
-    : `https://pekefe.com${ogImgRaw}`;
+    : `https://www.pekefe.com${ogImgRaw}`;
 
   const hasFilterParams = Object.keys(resolvedSearchParams || {}).length > 0;
 

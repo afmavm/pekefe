@@ -12,7 +12,7 @@ export const metadata = {
   description:
     "Erzurum İspir'in geleneksel dut pestili, dut ve karadut pekmezi, cevizli köme ve doğal yöresel ürünlerini PEKEFE kalitesiyle keşfedin.",
   alternates: {
-    canonical: "https://pekefe.com/kategoriler",
+    canonical: "https://www.pekefe.com/kategoriler",
   },
 };
 

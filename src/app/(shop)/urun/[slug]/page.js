@@ -1,192 +1,209 @@
-"use client";
+import React from "react";
+import ProductDetailClient from "@/components/product/ProductDetailClient";
+import {
+  getAllCategoriesServer,
+  getPublishedProductsServer,
+} from "@/lib/category-server";
+import {
+  resolveProductCategories,
+  slugifyTr,
+} from "@/lib/category-utils";
 
-import Link from "next/link";
-import { Toast } from "@/components/ui/Toast";
-import JsonLd from "@/components/seo/JsonLd";
-import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductConfigurator } from "@/components/product/ProductConfigurator";
-import { ProductTabs } from "@/components/product/ProductTabs";
-import { HmfInfoSection } from "@/components/product/HmfInfoSection";
-import { ProductModals } from "@/components/product/ProductModals";
-import { ProductRecommendations } from "@/components/product/ProductRecommendations";
-import { useProductDetailState, getVariantLabel } from "@/components/product/useProductDetailState";
-import { PEKEFE_DEFAULT_CATEGORIES, resolveProductCategories } from "@/lib/category-utils";
+export const dynamic = "force-dynamic";
 
-export default function UrunDetay({ params }) {
-  const state = useProductDetailState(params);
+const BASE_URL = "https://www.pekefe.com";
 
-  // ── Loading Guard ─────────────────────────────────────────────────────────
-  if (state.isLoading) {
-    return (
-      <div className="relative w-full min-h-screen bg-background flex flex-col items-center justify-center gap-6">
-        <div className="animate-pulse flex flex-col lg:flex-row gap-10 w-full max-w-5xl px-6">
-          <div className="bg-surface-container-low rounded-2xl w-full lg:w-1/2 aspect-square" />
-          <div className="flex flex-col gap-4 flex-1 py-4">
-            <div className="h-4 bg-surface-container-low rounded-full w-1/3" />
-            <div className="h-8 bg-surface-container-low rounded-full w-3/4" />
-            <div className="h-4 bg-surface-container-low rounded-full w-1/2" />
-            <div className="h-12 bg-surface-container-low rounded-2xl w-1/4 mt-4" />
-            <div className="h-10 bg-surface-container rounded-2xl w-full mt-4" />
-            <div className="h-10 bg-primary/20 rounded-2xl w-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+function stripHtml(str = "") {
+  return String(str || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  // ── Not-Found Guard ───────────────────────────────────────────────────────
-  if (!state.product) {
-    return (
-      <div className="relative w-full min-h-screen bg-background flex flex-col items-center justify-center gap-6 text-center px-6">
-        <span className="material-symbols-outlined text-6xl text-outline-variant">inventory_2</span>
-        <h1 className="font-display text-2xl text-on-surface">Ürün Bulunamadı</h1>
-        <p className="text-on-surface-variant">Bu ürün mevcut değil veya kaldırılmış olabilir.</p>
-        <Link
-          href="/kategoriler"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-2xl font-label-md hover:bg-primary/90 transition-colors"
-        >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Tüm Ürünlere Dön
-        </Link>
-      </div>
-    );
-  }
+function toAbsoluteUrl(url) {
+  if (!url || typeof url !== "string") return `${BASE_URL}/pekefe-dut-pekmezi-kavanoz-tr.jpg`;
+  const trimmed = url.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  return `${BASE_URL}${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+}
 
-  // ── Main Page Render ──────────────────────────────────────────────────────
+async function findProductBySlugServer(rawSlug) {
+  const slug = decodeURIComponent(String(rawSlug || "")).trim();
+  if (!slug) return null;
+  const products = await getPublishedProductsServer();
+  const lower = slug.toLowerCase();
+
   return (
-    <div className="relative w-full min-h-screen bg-background text-on-surface pb-24 overflow-hidden">
-      {state.productSchema && <JsonLd data={state.productSchema} />}
-      <div className="absolute inset-0 bg-surface-container/30 pointer-events-none opacity-40 mix-blend-multiply" />
+    products.find((p) => {
+      const pSlug = (p.slug || slugifyTr(p.name || "")).toLowerCase();
+      return (
+        pSlug === lower ||
+        String(p.id || "").toLowerCase() === lower ||
+        String(p.sku || "").toLowerCase() === lower
+      );
+    }) || null
+  );
+}
 
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-base relative z-10">
-        {/* Breadcrumbs */}
-        {(() => {
-          const resolved = resolveProductCategories(state.product, PEKEFE_DEFAULT_CATEGORIES);
-          return (
-            <nav aria-label="Sayfa konumu" className="flex items-center flex-wrap gap-2 py-8 text-on-surface-variant font-label-sm text-[11px] uppercase tracking-widest">
-              <Link className="hover:text-primary transition-colors" href="/">Ana Sayfa</Link>
-              <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
-              {resolved.main ? (
-                <Link className="hover:text-primary transition-colors" href={`/${resolved.main.slug}`}>
-                  {resolved.main.name}
-                </Link>
-              ) : (
-                <Link className="hover:text-primary transition-colors" href="/kategoriler">
-                  {state.product?.categoryDisplay || state.product?.category || "Ürünler"}
-                </Link>
-              )}
-              {resolved.main && resolved.sub && (
-                <>
-                  <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
-                  <Link className="hover:text-primary transition-colors" href={`/${resolved.main.slug}/${resolved.sub.slug}`}>
-                    {resolved.sub.name}
-                  </Link>
-                </>
-              )}
-              <span className="material-symbols-outlined text-[12px] text-outline">chevron_right</span>
-              <span className="text-primary font-bold">{state.product?.name}</span>
-            </nav>
-          );
-        })()}
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const product = await findProductBySlugServer(slug);
 
-        {/* ── Showcase Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-24">
-          <ProductGallery
-            product={state.product}
-            mediaList={state.mediaList}
-            selectedMedia={state.selectedMedia}
-            setSelectedMedia={state.setSelectedMedia}
-            mainImage={state.mainImage}
-            onImageClick={() => { state.setIsZoomModalOpen(true); state.setZoomScale(1); }}
-          />
+  if (!product) {
+    return {
+      title: "Ürün Bulunamadı | PEKEFE İspir Yöresel Ürünler",
+      robots: { index: false, follow: false },
+    };
+  }
 
-          <ProductConfigurator
-            product={state.product}
-            variantsList={state.variantsList}
-            selectedVariant={state.selectedVariant}
-            setSelectedVariant={state.setSelectedVariant}
-            getVariantLabel={getVariantLabel}
-            displayPrice={state.displayPrice}
-            displayOldPrice={state.displayOldPrice}
-            discountPercent={state.discountPercent}
-            summaryDescription={state.summaryDescription}
-            quantity={state.quantity}
-            handleQuantityChange={state.handleQuantityChange}
-            handleAddToCart={state.handleAddToCart}
-            isFavorite={state.isFavorite}
-            handleFavoriteToggle={state.handleFavoriteToggle}
-            handleShareClick={state.handleShareClick}
-          />
-        </div>
+  const canonicalSlug = product.slug || slugifyTr(product.name) || product.id;
+  const canonicalUrl = `${BASE_URL}/urun/${canonicalSlug}`;
+  const title = product.seoTitle || `${product.name} | PEKEFE İspir Yöresel Ürünler`;
+  const cleanDesc = stripHtml(product.seoDesc || product.shortDesc || product.desc || "");
+  const description =
+    cleanDesc.length >= 40
+      ? cleanDesc.slice(0, 158)
+      : `${product.name} — Erzurum İspir'in doğal ve katkısız geleneksel lezzeti. PEKEFE güvencesiyle taze paketlenerek kapınızda.`;
+  const imageUrl = toAbsoluteUrl(product.image);
 
-        {/* ── Tabs ── */}
-        <ProductTabs
-          product={state.product}
-          activeTab={state.activeTab}
-          setActiveTab={state.setActiveTab}
-          fullDescriptionText={state.fullDescriptionText}
-          specificationsList={state.specificationsList}
-          harvestStoryText={state.harvestStoryText}
-          ingredientsText={state.ingredientsText}
-          nutrientsData={state.nutrientsData}
-          hmfLevelText={state.hmfLevelText}
-          ritualText={state.ritualText}
-          usageGuideText={state.usageGuideText}
-          reviewsList={state.reviewsList}
-          setIsReviewModalOpen={state.setIsReviewModalOpen}
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "PEKEFE İspir Yöresel Ürünler",
+      locale: "tr_TR",
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 1200,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
+export default async function UrunDetayPage({ params }) {
+  const resolvedParams = await params;
+  const [product, allCategories] = await Promise.all([
+    findProductBySlugServer(resolvedParams?.slug),
+    getAllCategoriesServer({ activeOnly: true }),
+  ]);
+
+  let productJsonLd = null;
+  let breadcrumbJsonLd = null;
+
+  if (product) {
+    const canonicalSlug = product.slug || slugifyTr(product.name) || product.id;
+    const canonicalUrl = `${BASE_URL}/urun/${canonicalSlug}`;
+    const mainImage = toAbsoluteUrl(product.image);
+    const galleryImages = Array.isArray(product.images)
+      ? product.images
+          .filter((u) => typeof u === "string" && u.trim())
+          .map(toAbsoluteUrl)
+      : [];
+    const allImages = Array.from(new Set([mainImage, ...galleryImages]));
+    const cleanDesc = stripHtml(product.shortDesc || product.desc || product.name).slice(0, 500);
+    const price = Number(product.price || 0);
+    const stock = Number(product.stock ?? product.stock_quantity ?? 0);
+
+    productJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      image: allImages,
+      description: cleanDesc,
+      sku: product.sku || product.id,
+      mpn: product.sku || product.id,
+      brand: {
+        "@type": "Brand",
+        name: "PEKEFE",
+      },
+      offers: {
+        "@type": "Offer",
+        url: canonicalUrl,
+        priceCurrency: "TRY",
+        price: price.toFixed(2),
+        availability:
+          stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: {
+          "@type": "Organization",
+          name: "PEKEFE İspir Yöresel Ürünler",
+        },
+      },
+    };
+
+    const resolvedCats = resolveProductCategories(product, allCategories);
+    const crumbItems = [
+      { "@type": "ListItem", position: 1, name: "Ana Sayfa", item: BASE_URL },
+    ];
+    if (resolvedCats.main) {
+      crumbItems.push({
+        "@type": "ListItem",
+        position: crumbItems.length + 1,
+        name: resolvedCats.main.name,
+        item: `${BASE_URL}/${resolvedCats.main.slug}`,
+      });
+    }
+    if (resolvedCats.main && resolvedCats.sub) {
+      crumbItems.push({
+        "@type": "ListItem",
+        position: crumbItems.length + 1,
+        name: resolvedCats.sub.name,
+        item: `${BASE_URL}/${resolvedCats.main.slug}/${resolvedCats.sub.slug}`,
+      });
+    }
+    crumbItems.push({
+      "@type": "ListItem",
+      position: crumbItems.length + 1,
+      name: product.name,
+      item: canonicalUrl,
+    });
+
+    breadcrumbJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbItems,
+    };
+  }
+
+  return (
+    <>
+      {productJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
         />
-
-        {/* ── HMF Bilgi Bloğu (Sadece PEKEFE Geleneksel İspir Dut Gün Pekmezi için) ── */}
-        {(state.product?.slug === "ispir-dut-gun-pekmezi" ||
-          state.product?.id === "PKF-DUT-PEKMEZI" ||
-          state.product?.sku === "PKF-DUT-001" ||
-          state.product?.name?.toLowerCase().includes("dut gün pekmezi")) && (
-          <HmfInfoSection
-            productName={state.product?.name}
-            isMulberryMolasses={true}
-          />
-        )}
-
-        {/* ── Recommendations ── */}
-        <ProductRecommendations
-          recommendations={state.recommendations}
-          failedImages={state.failedImages}
-          setFailedImages={state.setFailedImages}
-          setToastMsg={state.setToastMsg}
-          setToastOpen={state.setToastOpen}
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
-      </div>
-
-      {/* ── All Modals ── */}
-      <ProductModals
-        product={state.product}
-        isZoomModalOpen={state.isZoomModalOpen}
-        setIsZoomModalOpen={state.setIsZoomModalOpen}
-        zoomScale={state.zoomScale}
-        setZoomScale={state.setZoomScale}
-        mousePos={state.mousePos}
-        setMousePos={state.setMousePos}
-        isHoveringZoom={state.isHoveringZoom}
-        setIsHoveringZoom={state.setIsHoveringZoom}
-        selectedMedia={state.selectedMedia}
-        setSelectedMedia={state.setSelectedMedia}
-        mediaList={state.mediaList}
-        mainImage={state.mainImage}
-        isReviewModalOpen={state.isReviewModalOpen}
-        setIsReviewModalOpen={state.setIsReviewModalOpen}
-        newReview={state.newReview}
-        setNewReview={state.setNewReview}
-        handleAddReviewSubmit={state.handleAddReviewSubmit}
-        isShareModalOpen={state.isShareModalOpen}
-        setIsShareModalOpen={state.setIsShareModalOpen}
-        displayPrice={state.displayPrice}
-        getPublicShareUrl={state.getPublicShareUrl}
-        getWhatsAppShareText={state.getWhatsAppShareText}
-        setToastMsg={state.setToastMsg}
-        setToastOpen={state.setToastOpen}
-      />
-
-      <Toast message={state.toastMsg} isOpen={state.toastOpen} onClose={() => state.setToastOpen(false)} />
-    </div>
+      )}
+      <ProductDetailClient params={params} />
+    </>
   );
 }

@@ -36,12 +36,12 @@ export async function generateMetadata({
     category.metaDescription ||
     category.shortDesc ||
     `${category.name} çeşitlerini PEKEFE kalitesiyle keşfedin.`;
-  const canonicalUrl = `https://pekefe.com/${category.slug}`;
+  const canonicalUrl = `https://www.pekefe.com/${category.slug}`;
   const ogImage = category.image
     ? category.image.startsWith("http")
       ? category.image
-      : `https://pekefe.com${category.image}`
-    : "https://pekefe.com/og-image.jpg";
+      : `https://www.pekefe.com${category.image}`
+    : "https://www.pekefe.com/og-image.jpg";
 
   const hasFilterParams = Object.keys(resolvedSearchParams || {}).length > 0;
 

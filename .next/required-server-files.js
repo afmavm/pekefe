@@ -388,6 +388,46 @@ self.__SERVER_FILES_MANIFEST={
         "permanent": true
       },
       {
+        "source": "/urun/sade-pestil",
+        "destination": "/urun/pekefe-sade-dut-pestili",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/ispir-kome",
+        "destination": "/urun/pekefe-ispir-dut-komesi-cevizli",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/cevizli-pestil",
+        "destination": "/urun/pekefe-cevizli-dut-pestili",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/dut-pekmezi",
+        "destination": "/urun/pekefe-ispir-dut-pekmezi",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/karadut-pekmezi",
+        "destination": "/urun/pekefe-ispir-karadut-pekmezi",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/pekefe-geleneksel-ispir-dut-gun-pekmezi",
+        "destination": "/urun/pekefe-ispir-dut-pekmezi",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/pekefe-geleneksel-ispir-cevizli-kome-cevizli-sucuk",
+        "destination": "/urun/pekefe-ispir-dut-komesi-cevizli",
+        "statusCode": 301
+      },
+      {
+        "source": "/urun/pekefe-hakiki-yaprak-dut-pestili",
+        "destination": "/urun/pekefe-sade-dut-pestili",
+        "statusCode": 301
+      },
+      {
         "source": "/mesafeli-satis-sozlesmesi",
         "destination": "/sozlesme",
         "permanent": true

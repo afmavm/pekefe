@@ -68,6 +68,54 @@
       "regex": "^(?!/_next)/kullanim-sartlari(?:/)?$"
     },
     {
+      "source": "/urun/sade-pestil",
+      "destination": "/urun/pekefe-sade-dut-pestili",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/sade-pestil(?:/)?$"
+    },
+    {
+      "source": "/urun/ispir-kome",
+      "destination": "/urun/pekefe-ispir-dut-komesi-cevizli",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/ispir-kome(?:/)?$"
+    },
+    {
+      "source": "/urun/cevizli-pestil",
+      "destination": "/urun/pekefe-cevizli-dut-pestili",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/cevizli-pestil(?:/)?$"
+    },
+    {
+      "source": "/urun/dut-pekmezi",
+      "destination": "/urun/pekefe-ispir-dut-pekmezi",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/dut-pekmezi(?:/)?$"
+    },
+    {
+      "source": "/urun/karadut-pekmezi",
+      "destination": "/urun/pekefe-ispir-karadut-pekmezi",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/karadut-pekmezi(?:/)?$"
+    },
+    {
+      "source": "/urun/pekefe-geleneksel-ispir-dut-gun-pekmezi",
+      "destination": "/urun/pekefe-ispir-dut-pekmezi",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/pekefe-geleneksel-ispir-dut-gun-pekmezi(?:/)?$"
+    },
+    {
+      "source": "/urun/pekefe-geleneksel-ispir-cevizli-kome-cevizli-sucuk",
+      "destination": "/urun/pekefe-ispir-dut-komesi-cevizli",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/pekefe-geleneksel-ispir-cevizli-kome-cevizli-sucuk(?:/)?$"
+    },
+    {
+      "source": "/urun/pekefe-hakiki-yaprak-dut-pestili",
+      "destination": "/urun/pekefe-sade-dut-pestili",
+      "statusCode": 301,
+      "regex": "^(?!/_next)/urun/pekefe-hakiki-yaprak-dut-pestili(?:/)?$"
+    },
+    {
       "source": "/mesafeli-satis-sozlesmesi",
       "destination": "/sozlesme",
       "statusCode": 308,

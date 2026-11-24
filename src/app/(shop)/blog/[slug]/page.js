@@ -114,8 +114,11 @@ export async function generateMetadata({ params }) {
 
   const title = `${post.title} | PEKEFE Geleneksel Bilgi`;
   const description = post.metaDesc || post.title;
-  const canonicalUrl = `https://pekefe.com/blog/${post.slug}`;
-  const imageUrl = post.image || "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
+  const canonicalUrl = `https://www.pekefe.com/blog/${post.slug}`;
+  const rawImg = post.image || "/pekefe-dut-pekmezi-kavanoz-tr.jpg";
+  const imageUrl = rawImg.startsWith("http")
+    ? rawImg
+    : `https://www.pekefe.com${rawImg.startsWith("/") ? "" : "/"}${rawImg}`;
 
   return {
     title,
@@ -199,15 +202,21 @@ export default async function BlogPostPage({ params }) {
   const formattedDate = safeFormatDate(post.createdAt);
   const isHmf = post.slug === "hmf-nedir-pekmez-uretiminde-sicakligin-onemi" || post.id === "blog-hmf";
 
+  const absPostImage = !post.image
+    ? "https://www.pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg"
+    : post.image.startsWith("http")
+      ? post.image
+      : `https://www.pekefe.com${post.image.startsWith("/") ? "" : "/"}${post.image}`;
+
   // Article JSON-LD Schema
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
-    description: post.metaDesc,
-    image: post.image ? `https://pekefe.com${post.image}` : "https://pekefe.com/pekefe-dut-pekmezi-kavanoz-tr.jpg",
+    description: post.metaDesc || post.title,
+    image: absPostImage,
     datePublished: post.createdAt,
-    dateModified: post.createdAt,
+    dateModified: post.updatedAt || post.createdAt,
     author: {
       "@type": "Person",
       name: "İlhan Efe",
@@ -218,18 +227,29 @@ export default async function BlogPostPage({ params }) {
       name: "PEKEFE İspir Yöresel Ürünler",
       logo: {
         "@type": "ImageObject",
-        url: "https://pekefe.com/logo.png",
+        url: "https://www.pekefe.com/logo.png",
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://pekefe.com/blog/${post.slug}`,
+      "@id": `https://www.pekefe.com/blog/${post.slug}`,
     },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Ana Sayfa", item: "https://www.pekefe.com" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://www.pekefe.com/blog" },
+      { "@type": "ListItem", position: 3, name: post.title, item: `https://www.pekefe.com/blog/${post.slug}` },
+    ],
   };
 
   return (
     <main className="max-w-4xl mx-auto px-4 md:px-8 py-12 md:py-16">
       <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbSchema} />
 
       {/* Geri Dön Navigasyonu */}
       <div className="mb-8">

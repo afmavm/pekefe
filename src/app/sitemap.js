@@ -115,12 +115,41 @@ export default async function sitemap() {
     }));
   }
 
-  const blogPages = BLOG_SLUGS.map((slug) => ({
-    url: `${BASE_URL}/blog/${slug}`,
-    lastModified: new Date('2026-02-01'),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }));
+  // Aktif Blog Yazıları (Canlı MySQL + Varsayılanlar)
+  const blogMap = new Map();
+  for (const slug of BLOG_SLUGS) {
+    blogMap.set(`${BASE_URL}/blog/${slug}`, {
+      url: `${BASE_URL}/blog/${slug}`,
+      lastModified: new Date('2026-08-30'),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    });
+  }
+  try {
+    const dbBlogs = await withTimeout(
+      prisma.blogPost.findMany({
+        where: { isActive: true },
+        select: { slug: true, updatedAt: true, createdAt: true },
+      }),
+      1500,
+      []
+    );
+    if (Array.isArray(dbBlogs)) {
+      for (const b of dbBlogs) {
+        if (!b?.slug) continue;
+        const url = `${BASE_URL}/blog/${b.slug}`;
+        blogMap.set(url, {
+          url,
+          lastModified: b.updatedAt ? new Date(b.updatedAt) : b.createdAt ? new Date(b.createdAt) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.75,
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[SITEMAP WARN] Blog DB query skipped:', e);
+  }
+  const blogPages = Array.from(blogMap.values());
 
   // Aktif Ana ve Alt Kategoriler (Dinamik SEO Sitemap)
   let categoryEntries = [];

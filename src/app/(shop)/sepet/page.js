@@ -235,6 +235,60 @@ export default function Sepet() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
           {/* Cart Items List */}
           <div className="lg:col-span-8 space-y-4 sm:space-y-5">
+            {/* Ücretsiz Kargo İlerleme Çubuğu */}
+            {!isReceiverPay && shippingThreshold > 0 && (
+              <div
+                className={`p-4 sm:p-5 rounded-2xl border shadow-2xs transition-all ${
+                  isShippingFree
+                    ? "bg-emerald-50/90 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+                    : "bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-white dark:from-slate-900 dark:to-slate-900 border-amber-200/80 dark:border-amber-900/50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3 flex-wrap mb-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className={`material-symbols-outlined text-xl ${
+                        isShippingFree ? "text-emerald-600" : "text-[#b45309]"
+                      }`}
+                    >
+                      {isShippingFree ? "verified" : "local_shipping"}
+                    </span>
+                    <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
+                      {isShippingFree ? (
+                        <>Tebrikler! Siparişinizde <span className="text-emerald-700 dark:text-emerald-400">Ücretsiz Kargo</span> hakkı kazandınız.</>
+                      ) : (
+                        <>
+                          Ücretsiz kargo için sepetinize{" "}
+                          <span className="text-[#6b1d2f] dark:text-amber-400 font-black font-mono">
+                            ₺{remainingForFreeShipping.toLocaleString("tr-TR")}
+                          </span>{" "}
+                          daha ekleyin!
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  {!isShippingFree && recommendations.length > 0 && (
+                    <a
+                      href="#birlikte-iyi-gider"
+                      className="text-[11px] font-bold text-[#6b1d2f] hover:underline shrink-0"
+                    >
+                      Tamamlayıcı Ürünlere Göz At ↓
+                    </a>
+                  )}
+                </div>
+                <div className="w-full h-2.5 bg-slate-200/80 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isShippingFree
+                        ? "bg-emerald-500"
+                        : "bg-gradient-to-r from-[#6b1d2f] to-[#b45309]"
+                    }`}
+                    style={{ width: `${Math.max(4, progressPercent)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             {cartItems.map((item) => (
               <div
                 key={item.id}
@@ -506,7 +560,7 @@ export default function Sepet() {
 
       {/* Dynamic Catalog Recommendations Section ("Birlikte İyi Gider") */}
       {recommendations.length > 0 && (
-        <section className="mt-section-gap">
+        <section id="birlikte-iyi-gider" className="mt-section-gap scroll-mt-24">
           <div className="flex justify-between items-end mb-8">
             <div>
               <span className="text-secondary font-label-md uppercase tracking-[0.2em]">Sepetini Tamamla</span>
@@ -566,13 +620,13 @@ export default function Sepet() {
                         {tagLabel}
                       </div>
                     </div>
-                    <Link href={`/urun/${p.id}`} className="block">
+                    <Link href={`/urun/${p.slug || p.id}`} className="block">
                       <h4 className="font-display-lg text-primary text-base font-bold mb-1 hover:underline transition-colors line-clamp-1">
                         {p.name}
                       </h4>
                     </Link>
                     <p className="text-on-surface-variant text-xs mb-4 font-mono line-clamp-1">
-                      {p.meta || p.desc || "Asırlık İspir Kalitesi"}
+                      {String(p.meta || p.shortDesc || p.desc || "Asırlık İspir Kalitesi").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()}
                     </p>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-outline-variant/10">
@@ -597,9 +651,10 @@ export default function Sepet() {
                         });
                       }}
                       aria-label={`${p.name} sepete ekle`}
-                      className="bg-primary/5 hover:bg-primary text-primary hover:text-white p-2.5 rounded-lg border border-primary/10 transition-all cursor-pointer flex items-center justify-center"
+                      className="bg-primary/5 hover:bg-primary text-primary hover:text-white px-3.5 py-2 rounded-lg border border-primary/15 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
                     >
-                      <span className="material-symbols-outlined text-sm">shopping_cart</span>
+                      <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
+                      <span>Ekle</span>
                     </button>
                   </div>
                 </div>

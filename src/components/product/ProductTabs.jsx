@@ -281,19 +281,24 @@ export function ProductTabs({
         )}
 
         {/* ── TAB 4: MÜŞTERİ YORUMLARI ── */}
-        {activeTab === "yorumlar" && (
+        {activeTab === "yorumlar" && (() => {
+          const avgRating =
+            reviewsList.length > 0
+              ? (reviewsList.reduce((acc, r) => acc + Number(r.rating || 5), 0) / reviewsList.length).toFixed(1)
+              : "5.0";
+          return (
           <div className="bg-surface dark:bg-on-surface border-2 border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl space-y-8 animate-in fade-in duration-300">
             <TabHeader
               icon="rate_review"
               label="PEKEFE MÜŞTERİ DENEYİMİ VE DEĞERLENDİRMELERİ"
               subtitle={`Doğrulanmış Müşteri Yorumları (${reviewsList.length})`}
-              badge={<><span className="material-symbols-outlined text-base text-secondary">star</span><span>5.0 / 5 Tam Puan</span></>}
+              badge={<><span className="material-symbols-outlined text-base text-secondary">star</span><span>{avgRating} / 5 Ortalama Puan</span></>}
             />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Rating Summary */}
               <div className="lg:col-span-4 space-y-6">
                 <div className="bg-surface-container-low/70 p-7 rounded-2xl border border-outline-variant/20 text-center shadow-inner space-y-4">
-                  <div className="text-5xl font-display-lg text-primary font-bold">5.0</div>
+                  <div className="text-5xl font-display-lg text-primary font-bold">{avgRating}</div>
                   <div className="flex justify-center text-secondary gap-1">
                     {[...Array(5)].map((_, i) => (
                       <span key={i} className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
@@ -332,7 +337,8 @@ export function ProductTabs({
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

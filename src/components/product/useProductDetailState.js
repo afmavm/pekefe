@@ -238,6 +238,28 @@ export function useProductDetailState(params) {
     { id: "2", author: "Mehmet Kaya", rating: 5, date: "05.07.2026", comment: "İspirli biri olarak söylüyorum, tam kıvamında ve çok lezzetli. Tahinle harika oluyor." },
   ]);
 
+  // Canlı onaylı müşteri yorumlarını veritabanından çek
+  useEffect(() => {
+    const slugParam = product?.slug || unwrappedParams?.slug || "";
+    if (!slugParam) return;
+    let active = true;
+    fetch(`/api/feedback?public=true&productSlug=${encodeURIComponent(slugParam)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        if (!active || !Array.isArray(rows) || rows.length === 0) return;
+        const mapped = rows.map((f) => ({
+          id: String(f.id),
+          author: f.name || "PEKEFE Müşterisi",
+          rating: Number(f.rating || 5),
+          date: f.createdAt ? new Date(f.createdAt).toLocaleDateString("tr-TR") : "",
+          comment: f.message || "",
+        }));
+        setReviewsList(mapped);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [product?.slug, unwrappedParams?.slug]);
+
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const [zoomScale,       setZoomScale]       = useState(1);
   const [mousePos,        setMousePos]        = useState({ x: 50, y: 50 });
@@ -364,20 +386,55 @@ export function useProductDetailState(params) {
     setIsShareModalOpen(true);
   };
 
-  const handleAddReviewSubmit = (e) => {
+  const handleAddReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newReview.author.trim() || !newReview.comment.trim()) {
       setToastMsg("Lütfen adınızı ve yorumunuzu doldurunuz.");
       setToastOpen(true);
       return;
     }
+    if (newReview.comment.trim().length < 5) {
+      setToastMsg("Yorumunuz en az 5 karakter olmalıdır.");
+      setToastOpen(true);
+      return;
+    }
+
+    const authorName = newReview.author.trim();
+    const commentText = newReview.comment.trim();
+    const ratingVal = Number(newReview.rating || 5);
+    const targetSlug = product?.slug || unwrappedParams?.slug || "";
+
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: authorName,
+          rating: ratingVal,
+          message: commentText,
+          productSlug: targetSlug,
+          productName: product?.name || "",
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setToastMsg(errData.error || "Yorum gönderilemedi. Lütfen tekrar deneyin.");
+        setToastOpen(true);
+        return;
+      }
+    } catch {
+      setToastMsg("Bağlantı hatası. Lütfen tekrar deneyin.");
+      setToastOpen(true);
+      return;
+    }
+
     setReviewsList((prev) => [
-      { id: Math.random().toString(), author: newReview.author.trim(), rating: newReview.rating, date: new Date().toLocaleDateString("tr-TR"), comment: newReview.comment.trim() },
+      { id: `local-${Date.now()}`, author: authorName, rating: ratingVal, date: new Date().toLocaleDateString("tr-TR"), comment: commentText },
       ...prev,
     ]);
     setIsReviewModalOpen(false);
     setNewReview({ author: "", rating: 5, comment: "" });
-    setToastMsg("Değerlendirmeniz başarıyla iletildi. Teşekkür ederiz!");
+    setToastMsg("Değerlendirmeniz kaydedildi, yönetici onayından sonra yayına alınacaktır. Teşekkür ederiz!");
     setToastOpen(true);
   };
 

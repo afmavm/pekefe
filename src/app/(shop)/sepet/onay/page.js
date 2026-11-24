@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { clearCart } from "@/utils/cartStorage";
+import { trackPurchase } from "@/lib/gtm-ecommerce";
 import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
 
 function SepetOnayContent() {
@@ -79,6 +80,19 @@ function SepetOnayContent() {
 
     clearCart();
   }, [queryOrderId]);
+
+  // GTM / Google Ads Purchase Conversion Event (idempotent per orderId)
+  useEffect(() => {
+    if (!completedOrder?.orderId) return;
+    trackPurchase({
+      orderId: completedOrder.orderId,
+      total: completedOrder.total,
+      subtotal: completedOrder.subtotal,
+      shippingCost: completedOrder.shippingCost,
+      coupon: completedOrder.coupon?.code || completedOrder.couponCode || null,
+      items: completedOrder.items || [],
+    });
+  }, [completedOrder]);
 
   const orderNum = completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);
   

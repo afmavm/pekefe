@@ -74,6 +74,31 @@ export default function AdminBlogPage() {
   // Google Blogger Integration State
   const [bloggerConfig, setBloggerConfig] = useState<PublicBloggerConfig | null>(null);
   const [syncingPostId, setSyncingPostId] = useState<string | null>(null);
+  const [seedingSeo, setSeedingSeo] = useState(false);
+
+  const handleSeedSeoBlogs = async () => {
+    setSeedingSeo(true);
+    const t = toast.loading("3 yüksek arama hacimli SEO rehberi ekleniyor ve Blogger'a aktarılıyor...");
+    try {
+      const res = await fetch("/api/admin/seed-seo-blogs", { method: "POST" });
+      const data = await res.json();
+      toast.dismiss(t);
+      if (res.ok && data.success) {
+        const syncedCount = (data.results || []).filter((r: any) => r.bloggerSynced).length;
+        toast.success(
+          `${data.count} SEO blog yazısı yayınlandı${syncedCount > 0 ? ` ve ${syncedCount} yazı Blogger'a aktarıldı!` : "!"}`
+        );
+        fetchPosts();
+      } else {
+        toast.error(data.error || "SEO yazıları eklenemedi.");
+      }
+    } catch {
+      toast.dismiss(t);
+      toast.error("Bağlantı hatası.");
+    } finally {
+      setSeedingSeo(false);
+    }
+  };
 
   const handleSyncSingleToBlogger = async (post: BlogPost) => {
     setSyncingPostId(post.id);
@@ -396,7 +421,16 @@ export default function AdminBlogPage() {
             Toplam {posts.length} yazı · {posts.filter(p => p.isActive).length} yayında · {posts.filter(p => p.isFeatured).length} öne çıkarılan
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleSeedSeoBlogs}
+            disabled={seedingSeo}
+            className="px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+            title="3 adet yüksek arama hacimli İspir Pekmez, Köme ve Pestil SEO rehberini ekle"
+          >
+            {seedingSeo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4 text-emerald-600" />}
+            3 SEO Rehberi Ekle
+          </button>
           <button
             onClick={fetchPosts}
             className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"

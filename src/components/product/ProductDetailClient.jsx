@@ -1,6 +1,8 @@
 ﻿"use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { trackViewItem } from "@/lib/gtm-ecommerce";
 import { Toast } from "@/components/ui/Toast";
 import JsonLd from "@/components/seo/JsonLd";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -14,6 +16,20 @@ import { PEKEFE_DEFAULT_CATEGORIES, resolveProductCategories } from "@/lib/categ
 
 export default function UrunDetay({ params }) {
   const state = useProductDetailState(params);
+  const trackedProductIdRef = useRef(null);
+
+  useEffect(() => {
+    const p = state.product;
+    if (!p || !p.id || trackedProductIdRef.current === p.id) return;
+    trackedProductIdRef.current = p.id;
+    trackViewItem({
+      id: p.id,
+      sku: p.sku || p.id,
+      name: p.name,
+      category: p.categoryDisplay || p.category,
+      price: state.activePrice || p.price,
+    });
+  }, [state.product, state.activePrice]);
 
   // ── Loading Guard ─────────────────────────────────────────────────────────
   if (state.isLoading) {

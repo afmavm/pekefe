@@ -1,5 +1,6 @@
 import React from "react";
 import ProductDetailClient from "@/components/product/ProductDetailClient";
+import { prisma, withTimeout } from "@/lib/prisma";
 import {
   getAllCategoriesServer,
   getPublishedProductsServer,
@@ -104,9 +105,18 @@ export async function generateMetadata({ params }) {
 
 export default async function UrunDetayPage({ params }) {
   const resolvedParams = await params;
-  const [product, allCategories] = await Promise.all([
+  const [product, allCategories, approvedFeedbacks] = await Promise.all([
     findProductBySlugServer(resolvedParams?.slug),
     getAllCategoriesServer({ activeOnly: true }),
+    withTimeout(
+      prisma.feedback.findMany({
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+      }),
+      1200,
+      []
+    ).catch(() => []),
   ]);
 
   let productJsonLd = null;
@@ -126,6 +136,49 @@ export default async function UrunDetayPage({ params }) {
     const price = Number(product.price || 0);
     const stock = Number(product.stock ?? product.stock_quantity ?? 0);
 
+    // Match product-specific approved reviews (fallback to general approved store reviews if none)
+    const tagRe = /^\[product:([a-z0-9-]+)\]\s*/i;
+    const parsedReviews = (Array.isArray(approvedFeedbacks) ? approvedFeedbacks : []).map((f) => {
+      const rawMsg = String(f.message || "");
+      const m = rawMsg.match(tagRe);
+      return {
+        author: f.name || "PEKEFE Müşterisi",
+        rating: Math.min(5, Math.max(1, Number(f.rating || 5))),
+        body: m ? rawMsg.replace(tagRe, "").trim() : rawMsg.trim(),
+        productSlug: m ? m[1].toLowerCase() : null,
+        datePublished: f.createdAt ? new Date(f.createdAt).toISOString().split("T")[0] : undefined,
+      };
+    });
+    const specificReviews = parsedReviews.filter((r) => r.productSlug === canonicalSlug.toLowerCase());
+    const effectiveReviews = specificReviews.length > 0 ? specificReviews : parsedReviews.filter((r) => !r.productSlug);
+
+    const ratingBlock =
+      effectiveReviews.length > 0
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: (
+                effectiveReviews.reduce((acc, r) => acc + r.rating, 0) / effectiveReviews.length
+              ).toFixed(1),
+              reviewCount: String(effectiveReviews.length),
+              bestRating: "5",
+              worstRating: "1",
+            },
+            review: effectiveReviews.slice(0, 5).map((r) => ({
+              "@type": "Review",
+              author: { "@type": "Person", name: r.author },
+              ...(r.datePublished ? { datePublished: r.datePublished } : {}),
+              reviewBody: r.body,
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: String(r.rating),
+                bestRating: "5",
+                worstRating: "1",
+              },
+            })),
+          }
+        : {};
+
     productJsonLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -138,6 +191,7 @@ export default async function UrunDetayPage({ params }) {
         "@type": "Brand",
         name: "PEKEFE",
       },
+      ...ratingBlock,
       offers: {
         "@type": "Offer",
         url: canonicalUrl,

@@ -132,6 +132,7 @@
   "/api/admin/route": "app/api/admin/route.js",
   "/api/admin/search/route": "app/api/admin/search/route.js",
   "/api/admin/seed-email-templates/route": "app/api/admin/seed-email-templates/route.js",
+  "/api/admin/seed-seo-blogs/route": "app/api/admin/seed-seo-blogs/route.js",
   "/api/admin/seo-audit/route": "app/api/admin/seo-audit/route.js",
   "/api/admin/users/route": "app/api/admin/users/route.js",
   "/api/ai-assistant/route": "app/api/ai-assistant/route.js",

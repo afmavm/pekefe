@@ -1,4 +1,5 @@
 import { useCartStore } from "@/modules/catalog/store";
+import { trackAddToCart, trackRemoveFromCart } from "@/lib/gtm-ecommerce";
 
 const CART_KEY = "pekefe_cart";
 
@@ -152,6 +153,17 @@ export function addToCart(product, quantity = 1) {
     });
 
     saveCart(getCart());
+    trackAddToCart(
+      {
+        id: targetId,
+        sku: product.sku || targetId,
+        name: cleanName,
+        category: product.categoryDisplay || product.category || "",
+        variantLabel: stripHtml(variantLabel),
+        price,
+      },
+      quantity
+    );
     return true;
   } catch (e) {
     console.error("Error adding to cart", e);
@@ -212,8 +224,10 @@ export function removeFromCart(id) {
   try {
     const targetId = String(id);
     const currentItems = getCart();
+    const removedItem = currentItems.find(item => String(item.id) === targetId);
     const updatedList = currentItems.filter(item => String(item.id) !== targetId);
     saveCart(updatedList);
+    if (removedItem) trackRemoveFromCart(removedItem);
 
     try {
       const store = useCartStore.getState();

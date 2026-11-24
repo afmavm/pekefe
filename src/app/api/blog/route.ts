@@ -56,7 +56,7 @@ const defaultBlogPosts = [
 <div style="background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
   <h3 style="color: #78350f; margin-top: 0;">🔥 Rekolteye Özel Şifa Kaynağı!</h3>
   <p style="color: #92400e; font-size: 14px;">Geleneksel yöntemlerle sınırlı sayıda üretilen %100 katkısız <strong>İspir Dut Pekmezini</strong> hemen keşfedin. Sepette geçerli <strong>PEKEFE15</strong> koduyla %15 indirim avantajını kaçırmayın!</p>
-  <a href="/products/ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezini Sipariş Ver →</a>
+  <a href="/urun/pekefe-ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezini Sipariş Ver →</a>
 </div>
 
 <h3>Dut Pekmezinin Sağlığınıza Katkıları</h3>
@@ -146,7 +146,7 @@ const defaultBlogPosts = [
 <div style="background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 20px; border-radius: 16px; margin: 25px 0; text-align: center;">
   <h3 style="color: #78350f; margin-top: 0;">☀️ Günlük Şifa Kürünüzü Hazırlayın</h3>
   <p style="color: #92400e; font-size: 14px;">Katkısız, koruyucusuz ve şekersiz %100 Erzurum İspir Dut Pekmezi ile ailenizin sağlığını güvenceye alın.</p>
-  <a href="/products/ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezi Satın Al →</a>
+  <a href="/urun/pekefe-ispir-dut-pekmezi" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 10px;">🛒 İspir Dut Pekmezi Satın Al →</a>
 </div>`,
     isFeatured: false,
     isActive: true,

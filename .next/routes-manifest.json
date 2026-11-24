@@ -1329,6 +1329,12 @@
       "namedRegex": "^/api/admin/seed\\-email\\-templates(?:/)?$"
     },
     {
+      "page": "/api/admin/seed-seo-blogs",
+      "regex": "^/api/admin/seed\\-seo\\-blogs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/seed\\-seo\\-blogs(?:/)?$"
+    },
+    {
       "page": "/api/admin/seo-audit",
       "regex": "^/api/admin/seo\\-audit(?:/)?$",
       "routeKeys": {},

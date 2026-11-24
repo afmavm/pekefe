@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Toast } from "@/components/ui/Toast";
 import { getCart, clearCart, addToCart } from "@/utils/cartStorage";
+import { trackBeginCheckout } from "@/lib/gtm-ecommerce";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { turkeyLocations } from "@/data/turkey-locations";
 import { CreditCard, Landmark, FileText, Truck, ShieldCheck, Check, Scale, Lock } from "lucide-react";
@@ -50,6 +51,13 @@ export default function Odeme() {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [copiedIban, setCopiedIban] = useState(false);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const trackedCheckoutRef = useRef(false);
+
+  useEffect(() => {
+    if (trackedCheckoutRef.current || !Array.isArray(cartItems) || cartItems.length === 0) return;
+    trackedCheckoutRef.current = true;
+    trackBeginCheckout(cartItems, subtotal, appliedCoupon?.code || null);
+  }, [cartItems, subtotal, appliedCoupon]);
 
   const handleCopyIban = (iban) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {

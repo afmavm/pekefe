@@ -67,6 +67,49 @@ export default function Sepet() {
     };
   }, []);
 
+  // Sihirli Sepet Kurtarma (?recover=<cartId>&coupon=<CODE>)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const recoverId = params.get("recover");
+    const couponParam = params.get("coupon");
+
+    if (couponParam) {
+      setPromoCode(couponParam.trim().toUpperCase());
+    }
+
+    if (!recoverId) return;
+
+    fetch(`/api/retention/abandoned-cart?recover=${encodeURIComponent(recoverId)}`, {
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data?.found || !Array.isArray(data.items) || data.items.length === 0) return;
+        const existingIds = new Set(getCart().map((i) => String(i.id)));
+        let addedAny = false;
+        for (const item of data.items) {
+          if (!existingIds.has(String(item.id))) {
+            addToCart(item, Number(item.quantity || 1));
+            addedAny = true;
+          }
+        }
+        setCartItems(getCart());
+        if (addedAny) {
+          setToast({
+            isOpen: true,
+            message: "Sepetinizdeki ürünler sizin için otomatik geri yüklendi!",
+            type: "success",
+          });
+        }
+        // URL'deki recover parametresini temizle (sayfa yenilenince tekrar eklemesin)
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("recover");
+        window.history.replaceState({}, "", cleanUrl.pathname + cleanUrl.search);
+      })
+      .catch(() => {});
+  }, []);
+
   const [promoCode, setPromoCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);

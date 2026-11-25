@@ -1,10 +1,64 @@
 import { NextResponse } from 'next/server';
 import {
+  getRetentionConfig,
   markAbandonedCartRecovered,
   upsertAbandonedCart,
 } from '@/lib/retention-service';
+import { getPublishedProductsServer } from '@/lib/category-server';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * GET /api/retention/abandoned-cart?recover=<cartId>
+ * Sihirli Sepet Kurtarma: Musteri farkli tarayici/cihazdan mail/WhatsApp linkine tikladiginda
+ * sepet urunlerini PII (kisisel veri) sizdirmadan geri yukler.
+ */
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const cartId = (searchParams.get('recover') || '').trim();
+    if (!cartId) {
+      return NextResponse.json({ items: [] }, { status: 400 });
+    }
+
+    // Test e-postasi linki icin canli katalogdan ilk 2 aktif urunu dondur
+    if (cartId === 'test-cart') {
+      const liveProducts = await getPublishedProductsServer().catch(() => []);
+      const sample = liveProducts.slice(0, 2).map((p: any) => ({
+        id: String(p.id),
+        productId: String(p.id),
+        sku: String(p.sku || p.id),
+        name: String(p.name || 'PEKEFE Ürün'),
+        price: Number(p.price || 0),
+        quantity: 1,
+        stock: Number(p.stock || 50),
+        image: p.image || '/pekefe-dut-pekmezi-kavanoz-tr.jpg',
+      }));
+      return NextResponse.json({ found: sample.length > 0, items: sample, isTest: true });
+    }
+
+    const config = await getRetentionConfig();
+    const cart = config.abandonedCarts.find((c) => c.id === cartId);
+    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+      return NextResponse.json({ found: false, items: [] });
+    }
+
+    return NextResponse.json({
+      found: true,
+      items: cart.items.map((i) => ({
+        id: i.id,
+        productId: i.id,
+        name: i.name,
+        price: Number(i.price || 0),
+        quantity: Math.max(1, Number(i.quantity || 1)),
+        image: i.image || '/pekefe-dut-pekmezi-kavanoz-tr.jpg',
+        variantLabel: i.variantLabel || '',
+      })),
+    });
+  } catch {
+    return NextResponse.json({ found: false, items: [] }, { status: 200 });
+  }
+}
 
 /**
  * POST /api/retention/abandoned-cart

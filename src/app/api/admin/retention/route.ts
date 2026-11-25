@@ -12,6 +12,7 @@ import {
   sendReorderReminder,
 } from '@/lib/retention-service';
 import { emailNotificationService } from '@/lib/email-notification-service';
+import { getPublishedProductsServer } from '@/lib/category-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,13 +142,29 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Geçerli bir test e-posta adresi girin.' }, { status: 400 });
       }
       const config = await getRetentionConfig();
+      const liveProducts = await getPublishedProductsServer().catch(() => []);
+      const testItems =
+        liveProducts.length > 0
+          ? liveProducts.slice(0, 2).map((p: any) => ({
+              id: String(p.id),
+              name: String(p.name || 'PEKEFE Ürün'),
+              price: Number(p.price || 0),
+              quantity: 1,
+              image: p.image || '/pekefe-dut-pekmezi-kavanoz-tr.jpg',
+            }))
+          : [
+              { id: '1', name: 'PEKEFE İspir Dut Pekmezi', price: 690, quantity: 1 },
+              { id: '2', name: 'PEKEFE Cevizli Dut Pestili', price: 490, quantity: 1 },
+            ];
+      const testSubtotal = testItems.reduce((acc: number, i: any) => acc + i.price * i.quantity, 0);
+
       const msg =
         templateType === 'reorder'
           ? buildReorderMessages(
               {
                 orderId: 'TEST-1001',
                 customerName: 'Değerli Müşterimiz',
-                itemsSummary: 'PEKEFE İspir Dut Pekmezi (1 adet), PEKEFE Cevizli Dut Kömesi (1 adet)',
+                itemsSummary: testItems.map((i: any) => `${i.name} (1 adet)`).join(', '),
                 daysAgo: config.reorderDelayDays || 28,
               },
               config
@@ -159,15 +176,12 @@ export async function POST(request: Request) {
                 customerName: 'Değerli Müşterimiz',
                 email,
                 phone: '',
-                subtotal: 1180,
+                subtotal: testSubtotal,
                 status: 'active',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 reminderCount: 0,
-                items: [
-                  { id: '1', name: 'PEKEFE İspir Dut Pekmezi', price: 690, quantity: 1 },
-                  { id: '2', name: 'PEKEFE Cevizli Dut Pestili', price: 490, quantity: 1 },
-                ],
+                items: testItems,
               },
               config
             );

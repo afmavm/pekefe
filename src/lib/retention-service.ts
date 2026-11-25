@@ -338,8 +338,11 @@ export function buildAbandonedCartMessages(
   config: RetentionConfig
 ): { subject: string; emailHtml: string; whatsappText: string } {
   const firstName = (cart.customerName || 'Değerli Müşterimiz').split(' ')[0];
-  const recoveryUrl = `${PEKEFE_SITE_URL}/sepet?utm_source=retention&utm_medium=email&utm_campaign=abandoned_cart`;
-  const waUrl = `${PEKEFE_SITE_URL}/sepet?utm_source=retention&utm_medium=whatsapp&utm_campaign=abandoned_cart`;
+  const couponParam = config.abandonedCartCouponCode
+    ? `&coupon=${encodeURIComponent(config.abandonedCartCouponCode)}`
+    : '';
+  const recoveryUrl = `${PEKEFE_SITE_URL}/sepet?recover=${encodeURIComponent(cart.id)}${couponParam}&utm_source=retention&utm_medium=email&utm_campaign=abandoned_cart`;
+  const waUrl = `${PEKEFE_SITE_URL}/sepet?recover=${encodeURIComponent(cart.id)}${couponParam}&utm_source=retention&utm_medium=whatsapp&utm_campaign=abandoned_cart`;
 
   const itemsRows = cart.items
     .map(

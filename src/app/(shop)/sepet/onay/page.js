@@ -537,23 +537,23 @@ function SepetOnayContent() {
     <div className="w-full bg-gradient-to-b from-[#faf6f2] via-[#fdfbf9] to-[#f7f2ec] text-slate-900 min-h-screen py-8 sm:py-12">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* 3-Step Completed Progress Bar */}
-        <div className="flex items-center justify-center gap-2 sm:gap-5 print:hidden">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-5 print:hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+            <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs shrink-0">
               <Check className="w-4 h-4 stroke-[3]" />
             </div>
             <span className="text-xs sm:text-sm font-bold text-emerald-800">Sepetim</span>
           </div>
-          <div className="w-8 sm:w-16 h-[2px] bg-emerald-500 rounded-full" />
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+          <div className="w-5 sm:w-16 h-[2px] bg-emerald-500 rounded-full" />
+          <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+            <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs shrink-0">
               <Check className="w-4 h-4 stroke-[3]" />
             </div>
             <span className="text-xs sm:text-sm font-bold text-emerald-800">Teslimat &amp; Ödeme</span>
           </div>
-          <div className="w-8 sm:w-16 h-[2px] bg-[#6b1d2f] rounded-full" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#6b1d2f] text-amber-300 flex items-center justify-center text-xs font-bold shadow-md shadow-[#6b1d2f]/25 ring-4 ring-[#6b1d2f]/10">
+          <div className="w-5 sm:w-16 h-[2px] bg-[#6b1d2f] rounded-full" />
+          <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+            <div className="w-8 h-8 rounded-full bg-[#6b1d2f] text-amber-300 flex items-center justify-center text-xs font-bold shadow-md shadow-[#6b1d2f]/25 ring-4 ring-[#6b1d2f]/10 shrink-0">
               <Check className="w-4 h-4 stroke-[3]" />
             </div>
             <span className="text-xs sm:text-sm font-black text-[#6b1d2f]">Sipariş Onayı</span>
@@ -720,7 +720,7 @@ function SepetOnayContent() {
                             {b.accountHolder || siteSettings?.companyName || "İLHAN EFE"}
                           </strong>
                         </div>
-                        <div className="font-mono font-black text-base sm:text-lg text-[#6b1d2f] tracking-wider pt-0.5">
+                        <div className="font-mono font-black text-sm sm:text-lg text-[#6b1d2f] tracking-wider pt-0.5 break-all">
                           {formatted}
                         </div>
                       </div>

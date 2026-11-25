@@ -827,19 +827,19 @@ export default function Odeme() {
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
       {/* Progress Steps */}
-      <div className="flex items-center justify-center mb-12 gap-3 md:gap-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">✓</div>
+      <div className="flex flex-wrap items-center justify-center mb-8 md:mb-12 gap-2 sm:gap-4 md:gap-6">
+        <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</div>
           <span className="font-label-md text-emerald-800 font-bold text-xs md:text-sm">Sepetim</span>
         </div>
-        <div className="w-10 md:w-16 h-[2px] bg-emerald-600"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#6b1d2f]/20">2</div>
+        <div className="w-6 sm:w-10 md:w-16 h-[2px] bg-emerald-600"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#6b1d2f]/20 shrink-0">2</div>
           <span className="font-label-md text-primary font-bold text-xs md:text-sm">Teslimat & Ödeme</span>
         </div>
-        <div className="w-10 md:w-16 h-[2px] bg-gray-200"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-surface-container text-gray-400 flex items-center justify-center font-bold text-xs">3</div>
+        <div className="w-6 sm:w-10 md:w-16 h-[2px] bg-gray-200"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-container text-gray-400 flex items-center justify-center font-bold text-xs shrink-0">3</div>
           <span className="font-label-md text-gray-400 text-xs md:text-sm">Sipariş Onayı</span>
         </div>
       </div>
@@ -1268,7 +1268,7 @@ export default function Odeme() {
             {/* TAB 2: BANK TRANSFER */}
             {paymentMethod === "bankTransfer" && (
               <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200/80 dark:border-amber-900/40 space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 text-[#6b1d2f] dark:text-amber-400 font-extrabold text-sm sm:text-base">
                     <Landmark className="w-5 h-5 text-amber-700 dark:text-amber-400" />
                     <span>Pekefe Resmi Banka Hesap Bilgileri</span>
@@ -1325,7 +1325,7 @@ export default function Odeme() {
                             </div>
 
                             {rawIban && (
-                              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                                 <div className="min-w-0">
                                   <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
                                   <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all break-all">
@@ -1375,7 +1375,7 @@ export default function Odeme() {
                         </div>
 
                         {fallbackIban && (
-                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                             <div className="min-w-0">
                               <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
                               <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all break-all">

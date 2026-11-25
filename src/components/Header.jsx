@@ -523,7 +523,7 @@ export default function Header() {
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/20 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 top-full mt-2 w-[min(16rem,calc(100vw-2rem))] bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/20 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   {isLoggedIn ? (
                     <>
                       {/* User Info Header */}

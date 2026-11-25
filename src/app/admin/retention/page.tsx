@@ -328,7 +328,7 @@ export default function AdminRetentionPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+      <div className="flex flex-wrap items-center gap-2 pb-1">
         {[
           { key: "abandoned", label: `Terk Edilen Sepetler (${data?.abandonedCarts?.length || 0})`, icon: ShoppingCart },
           { key: "reorder", label: `Tekrar Sipariş Adayları (${data?.reorderCandidates?.length || 0})`, icon: Repeat },
@@ -728,18 +728,18 @@ export default function AdminRetentionPage() {
                   28. Gün Tekrar Sipariş
                 </button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   value={testEmail}
                   onChange={(e) => setTestEmail(e.target.value)}
                   placeholder="ornek@pekefe.com"
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-w-0"
                 />
                 <button
                   onClick={handleSendTest}
                   disabled={sendingTest}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 shrink-0"
                 >
                   {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   Test Gönder

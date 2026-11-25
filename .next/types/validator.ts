@@ -767,6 +767,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/admin/retention/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/retention">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/retention/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/admin/seo/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/seo">> = Specific
@@ -1221,6 +1230,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/reports">> = Specific
   const handler = {} as typeof import("../../src/app/api/admin/reports/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/admin/retention/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/retention">> = Specific
+  const handler = {} as typeof import("../../src/app/api/admin/retention/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -2175,6 +2193,24 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/recommendations">> = Specific
   const handler = {} as typeof import("../../src/app/api/recommendations/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/retention/abandoned-cart/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/retention/abandoned-cart">> = Specific
+  const handler = {} as typeof import("../../src/app/api/retention/abandoned-cart/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/retention/cron/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/retention/cron">> = Specific
+  const handler = {} as typeof import("../../src/app/api/retention/cron/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

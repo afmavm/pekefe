@@ -962,6 +962,63 @@ export class EmailNotificationService {
 
   /**
    * Processes all pending emails in the queue
+  /**
+   * Sends a custom branded HTML email immediately using live SMTP and records it in EmailLog.
+   */
+  public async sendCustomHtmlEmail(
+    recipient: string,
+    subject: string,
+    bodyHtml: string,
+    eventType = "RETENTION"
+  ): Promise<{ success: boolean; error?: string }> {
+    let logId: string | null = null;
+    try {
+      const log = await prisma.emailLog.create({
+        data: {
+          recipient,
+          subject,
+          bodyHtml,
+          eventType,
+          status: "PENDING",
+        },
+      });
+      logId = log.id;
+    } catch {}
+
+    try {
+      const { transporter, fromEmail, fromName } = this.getTransporter();
+      try {
+        await transporter.sendMail({
+          from: `"${fromName}" <${fromEmail}>`,
+          to: recipient,
+          subject,
+          html: bodyHtml,
+        });
+      } finally {
+        try { transporter.close(); } catch {}
+      }
+
+      if (logId) {
+        await prisma.emailLog.update({
+          where: { id: logId },
+          data: { status: "SENT" },
+        }).catch(() => {});
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || "SMTP gonderim hatasi";
+      if (logId) {
+        await prisma.emailLog.update({
+          where: { id: logId },
+          data: { status: "FAILED", errorMessage: msg },
+        }).catch(() => {});
+      }
+      return { success: false, error: msg };
+    }
+  }
+
+  /**
+   * Process pending emails in the EmailLog queue
    */
   public async processQueue(): Promise<void> {
     if (this.isProcessing) return;

@@ -59,6 +59,31 @@ export default function Odeme() {
     trackBeginCheckout(cartItems, subtotal, appliedCoupon?.code || null);
   }, [cartItems, subtotal, appliedCoupon]);
 
+  // Sessiz Terk Edilen Sepet Yakalama (Retention Engine — 2.5s debounce)
+  useEffect(() => {
+    if (!Array.isArray(cartItems) || cartItems.length === 0) return;
+    const emailVal = (formData.email || session?.user?.email || "").trim();
+    const phoneVal = (formData.phone || "").trim();
+    if ((!emailVal || !emailVal.includes("@")) && phoneVal.replace(/\D/g, "").length < 10) return;
+
+    const timer = setTimeout(() => {
+      const fullName = `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || session?.user?.name || "";
+      fetch("/api/retention/abandoned-cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: fullName,
+          email: emailVal,
+          phone: phoneVal,
+          items: cartItems,
+          subtotal,
+        }),
+      }).catch(() => {});
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [cartItems, subtotal, formData.email, formData.phone, formData.firstName, formData.lastName, session]);
+
   const handleCopyIban = (iban) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText((iban || "").replace(/\s+/g, ""));

@@ -81,7 +81,7 @@ function SepetOnayContent() {
     clearCart();
   }, [queryOrderId]);
 
-  // GTM / Google Ads Purchase Conversion Event (idempotent per orderId)
+  // GTM / Google Ads Purchase Conversion Event (idempotent per orderId) + Retention Cart Recovery
   useEffect(() => {
     if (!completedOrder?.orderId) return;
     trackPurchase({
@@ -92,6 +92,22 @@ function SepetOnayContent() {
       coupon: completedOrder.coupon?.code || completedOrder.couponCode || null,
       items: completedOrder.items || [],
     });
+
+    // Terk edilen sepet kaydı varsa "Kurtarıldı" olarak işaretle
+    const emailVal = completedOrder?.shippingAddress?.email || completedOrder?.email || "";
+    const phoneVal = completedOrder?.shippingAddress?.phone || completedOrder?.phone || "";
+    if (emailVal || phoneVal) {
+      fetch("/api/retention/abandoned-cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "recover",
+          email: emailVal,
+          phone: phoneVal,
+          orderId: completedOrder.orderId,
+        }),
+      }).catch(() => {});
+    }
   }, [completedOrder]);
 
   const orderNum = completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);

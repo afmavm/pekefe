@@ -1059,6 +1059,12 @@
       "namedRegex": "^/admin/reports(?:/)?$"
     },
     {
+      "page": "/admin/retention",
+      "regex": "^/admin/retention(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/retention(?:/)?$"
+    },
+    {
       "page": "/admin/seo",
       "regex": "^/admin/seo(?:/)?$",
       "routeKeys": {},
@@ -1291,6 +1297,12 @@
       "regex": "^/api/admin/reports(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/admin/reports(?:/)?$"
+    },
+    {
+      "page": "/api/admin/retention",
+      "regex": "^/api/admin/retention(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/retention(?:/)?$"
     },
     {
       "page": "/api/admin/roles",
@@ -1777,6 +1789,18 @@
       "regex": "^/api/recommendations(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/recommendations(?:/)?$"
+    },
+    {
+      "page": "/api/retention/abandoned-cart",
+      "regex": "^/api/retention/abandoned\\-cart(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/retention/abandoned\\-cart(?:/)?$"
+    },
+    {
+      "page": "/api/retention/cron",
+      "regex": "^/api/retention/cron(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/retention/cron(?:/)?$"
     },
     {
       "page": "/api/settings",

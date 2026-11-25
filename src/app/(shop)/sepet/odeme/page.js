@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Toast } from "@/components/ui/Toast";
-import { getCart, clearCart, addToCart } from "@/utils/cartStorage";
+import { getCart, clearCart, addToCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { trackBeginCheckout } from "@/lib/gtm-ecommerce";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { turkeyLocations } from "@/data/turkey-locations";
@@ -98,7 +98,7 @@ export default function Odeme() {
     }
   };
 
-  // Load Applied Coupon from Cart
+  // Load Applied Coupon from Cart & re-validate live against server
   useEffect(() => {
     try {
       const stored = localStorage.getItem("pekefe_applied_coupon");
@@ -109,6 +109,62 @@ export default function Odeme() {
       console.error("Error loading applied coupon:", e);
     }
   }, []);
+
+  useEffect(() => {
+    if (cartItems.length === 0 || subtotal <= 0) {
+      if (appliedCoupon) {
+        setAppliedCoupon(null);
+        clearAppliedCoupon();
+      }
+      return;
+    }
+    if (!appliedCoupon?.code) return;
+
+    let cancelled = false;
+    const recoverCartId = (() => {
+      try {
+        return sessionStorage.getItem("pekefe_recovery_cart_id") || undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+
+    fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: appliedCoupon.code,
+        cartTotal: subtotal,
+        recoverCartId,
+      }),
+    })
+      .then(async (r) => ({ ok: r.ok, data: await r.json().catch(() => null) }))
+      .then(({ ok, data }) => {
+        if (cancelled) return;
+        if (!ok || !data?.success) {
+          // Geçersiz, süresi dolmuş, başka kullanıcıya ait veya daha önce kullanılmış kuponu temizle
+          setAppliedCoupon(null);
+          clearAppliedCoupon();
+          return;
+        }
+        const freshDiscount = Number(data.discountAmount || 0);
+        if (Math.abs(freshDiscount - Number(appliedCoupon.discountAmount || 0)) > 0.01) {
+          const updated = {
+            ...appliedCoupon,
+            discountAmount: freshDiscount,
+            type: data.coupon?.type || appliedCoupon.type,
+            value: data.coupon?.value ?? appliedCoupon.value,
+          };
+          setAppliedCoupon(updated);
+          localStorage.setItem("pekefe_applied_coupon", JSON.stringify(updated));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems.length, subtotal, appliedCoupon?.code, session?.user?.email]);
 
   // Fetch Bank Accounts and CMS Settings live (no-store + refresh on tab focus)
   useEffect(() => {
@@ -402,8 +458,17 @@ export default function Odeme() {
   const isShippingFree = isCurrentCarrierAlwaysFree || (subtotal >= carrierFreeThreshold);
   const shippingCost = subtotal === 0 ? 0 : (isCurrentCarrierReceiverPay ? 0 : (isShippingFree ? 0 : carrierFee));
 
-  // Coupon Discount (Dynamic from Cart)
-  const couponDiscount = appliedCoupon ? Number(appliedCoupon.discountAmount || 0) : 0;
+  // Coupon Discount (Dynamically recalculated from current subtotal — never stale)
+  const couponDiscount = useMemo(() => {
+    if (!appliedCoupon || subtotal <= 0 || cartItems.length === 0) return 0;
+    if (appliedCoupon.type === "percentage" && Number(appliedCoupon.value) > 0) {
+      return Math.min(subtotal, Math.round(((subtotal * Number(appliedCoupon.value)) / 100) * 100) / 100);
+    }
+    if (appliedCoupon.type === "fixed" && Number(appliedCoupon.value) > 0) {
+      return Math.min(subtotal, Number(appliedCoupon.value));
+    }
+    return Math.min(subtotal, Number(appliedCoupon.discountAmount || 0));
+  }, [appliedCoupon, subtotal, cartItems.length]);
 
   // Bank Transfer Extra Discount (Dynamic from Management Settings)
   const bankDiscountRate = siteSettings?.bankTransferDiscountRate ?? 2;
@@ -714,8 +779,11 @@ export default function Odeme() {
         bankDiscount,
         total: grandTotal,
         paymentMethod,
+        email: formData.email || session?.user?.email || "",
+        couponCode: appliedCoupon?.code || null,
         shippingAddress: {
           name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email || session?.user?.email || "",
           address: formData.address,
           city: `${formData.district ? `${formData.district} / ` : ""}${formData.city}`,
           phone: formData.phone,
@@ -724,6 +792,7 @@ export default function Odeme() {
 
       localStorage.setItem("pekefe_completed_order", JSON.stringify(completedOrder));
       clearCart();
+      clearAppliedCoupon();
 
       setToast({
         isOpen: true,

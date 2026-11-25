@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { clearCart } from "@/utils/cartStorage";
+import { clearCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { trackPurchase } from "@/lib/gtm-ecommerce";
 import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
 
@@ -79,6 +79,7 @@ function SepetOnayContent() {
     }
 
     clearCart();
+    clearAppliedCoupon();
   }, [queryOrderId]);
 
   // GTM / Google Ads Purchase Conversion Event (idempotent per orderId) + Retention Cart Recovery

@@ -2,6 +2,17 @@ import { useCartStore } from "@/modules/catalog/store";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/gtm-ecommerce";
 
 const CART_KEY = "pekefe_cart";
+const COUPON_KEY = "pekefe_applied_coupon";
+const RECOVERY_KEY = "pekefe_recovery_cart_id";
+
+export function clearAppliedCoupon() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(COUPON_KEY);
+    sessionStorage.removeItem(RECOVERY_KEY);
+    window.dispatchEvent(new Event("pekefe_coupon_changed"));
+  } catch {}
+}
 
 /**
  * Safely extracts an array from any stored cart format:
@@ -80,6 +91,9 @@ export function saveCart(cart) {
   try {
     const safeCart = Array.isArray(cart) ? cart : [];
     localStorage.setItem(CART_KEY, JSON.stringify(safeCart));
+    if (safeCart.length === 0) {
+      clearAppliedCoupon();
+    }
     window.dispatchEvent(new Event("pekefe_cart_changed"));
   } catch (e) {
     console.error("Error saving cart", e);
@@ -243,6 +257,7 @@ export function removeFromCart(id) {
 export function clearCart() {
   try {
     saveCart([]);
+    clearAppliedCoupon();
     try {
       const store = useCartStore.getState();
       if (store?.clearCart) {

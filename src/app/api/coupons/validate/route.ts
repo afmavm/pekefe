@@ -10,7 +10,9 @@ import path from 'path';
 
 const ValidateSchema = z.object({
   code: z.string().min(1),
-  cartTotal: z.number().min(0)
+  cartTotal: z.number().min(0),
+  recoverCartId: z.string().optional(),
+  email: z.string().optional(),
 });
 
 const CAMPAIGNS_FILE = path.join(process.cwd(), 'data', 'campaigns.json');
@@ -73,14 +75,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geçersiz istek formatı." }, { status: 400 });
     }
 
-    const { code, cartTotal } = result.data;
+    const { code, cartTotal, recoverCartId } = result.data;
     const upperCode = code.toUpperCase().trim();
+
+    if (!Number.isFinite(cartTotal) || cartTotal <= 0) {
+      return NextResponse.json(
+        { error: "Sepetiniz boşken indirim kuponu uygulanamaz." },
+        { status: 400 }
+      );
+    }
 
     // 2. Fetch Session & User Role
     let isB2B = false;
+    let sessionEmail = "";
+    let sessionRole = "";
     try {
       const session = await getServerSession(authOptions);
       if (session?.user?.email) {
+        sessionEmail = String(session.user.email).trim().toLowerCase();
+        sessionRole = String((session.user as any)?.role || "").toUpperCase();
         const accountPromise = prisma.currentAccount.findFirst({
           where: { email: session.user.email }
         });
@@ -160,7 +173,7 @@ export async function POST(request: NextRequest) {
       foundCampaign = localCampaigns.find(c => c.code && c.code.toUpperCase() === upperCode);
     }
 
-    // 4.5. Check active Retention Engine coupons (SEPET5, TEKRAR5, etc.)
+    // 4.5. Check active Retention Engine coupons (STRICTLY PER-USER & SINGLE-USE — NOT global campaigns!)
     if (!foundCampaign) {
       try {
         const retCfg = await getRetentionConfig();
@@ -170,12 +183,45 @@ export async function POST(request: NextRequest) {
           return Number.isFinite(n) && n > 0 && n <= 50 ? n : fallback;
         };
 
-        if (
+        const isAbandonedCode =
           retCfg.enabled &&
           retCfg.abandonedCartEnabled &&
           retCfg.abandonedCartCouponCode &&
-          retCfg.abandonedCartCouponCode.toUpperCase() === upperCode
-        ) {
+          retCfg.abandonedCartCouponCode.toUpperCase() === upperCode;
+
+        const isReorderCode =
+          retCfg.enabled &&
+          retCfg.reorderEnabled &&
+          retCfg.reorderCouponCode &&
+          retCfg.reorderCouponCode.toUpperCase() === upperCode;
+
+        if (isAbandonedCode) {
+          const cleanRecoverId = String(recoverCartId || '').trim();
+          const isAdminTest =
+            cleanRecoverId === 'test-sample' &&
+            (sessionRole === 'ADMIN' || sessionRole === 'SUPER_ADMIN');
+
+          const matchedCart = (retCfg.abandonedCarts || []).find((c) => {
+            if (c.status !== 'reminded' || (c.reminderCount || 0) <= 0) return false;
+            const cartEmail = String(c.email || '').trim().toLowerCase();
+            if (cleanRecoverId && c.id === cleanRecoverId) {
+              // Eğer oturum açıksa, kurtarılan sepet başka bir kullanıcıya ait olmamalı
+              if (sessionEmail && cartEmail && cartEmail !== sessionEmail) return false;
+              return true;
+            }
+            if (sessionEmail && cartEmail && cartEmail === sessionEmail) {
+              return true;
+            }
+            return false;
+          });
+
+          if (!matchedCart && !isAdminTest) {
+            const msg = sessionEmail
+              ? "Bu sepet hatırlatma kodu yalnızca kendisine sepet hatırlatması gönderilen ve henüz tamamlanmamış sepetler için tek seferlik geçerlidir."
+              : "Bu kod kişiye özel sepet hatırlatma indirimidir. Kullanmak için hesabınıza giriş yapın veya size gönderilen hatırlatma bağlantısından gelin.";
+            return NextResponse.json({ error: msg }, { status: 400 });
+          }
+
           foundCampaign = {
             code: upperCode,
             name: retCfg.abandonedCartDiscountText || 'Sepet Hatırlatma İndirimi',
@@ -184,13 +230,55 @@ export async function POST(request: NextRequest) {
             minOrder: 0,
             isActive: true,
             target: 'all',
+            isRetention: true,
+            retentionType: 'abandoned_cart',
+            ownerEmail: sessionEmail || matchedCart?.email || '',
+            cartId: matchedCart?.id || cleanRecoverId || null,
           };
-        } else if (
-          retCfg.enabled &&
-          retCfg.reorderEnabled &&
-          retCfg.reorderCouponCode &&
-          retCfg.reorderCouponCode.toUpperCase() === upperCode
-        ) {
+        } else if (isReorderCode) {
+          if (!sessionEmail) {
+            return NextResponse.json(
+              { error: "Bu sadakat indirim kodu kişiye özeldir. Kullanmak için lütfen hesabınıza giriş yapın." },
+              { status: 400 }
+            );
+          }
+
+          const entries = Object.values(retCfg.reorderedOrderIds || {});
+          const matchedReorder = entries.find(
+            (entry: any) => String(entry?.email || '').trim().toLowerCase() === sessionEmail
+          );
+
+          if (!matchedReorder) {
+            return NextResponse.json(
+              { error: "Bu sadakat kodu yalnızca tekrar sipariş hatırlatması gönderilen müşterilerimiz için geçerlidir." },
+              { status: 400 }
+            );
+          }
+
+          // Hatırlatma gönderildikten sonra zaten yeni bir sipariş verildiyse tek seferlik hak dolmuştur
+          try {
+            const sentTime = new Date(matchedReorder.sentAt);
+            if (!isNaN(sentTime.getTime())) {
+              const newerOrder = await withTimeout(
+                prisma.order.findFirst({
+                  where: {
+                    customerEmail: sessionEmail,
+                    createdAt: { gt: sentTime },
+                  },
+                  select: { id: true },
+                }),
+                1000,
+                null
+              );
+              if (newerOrder) {
+                return NextResponse.json(
+                  { error: "Bu tekrar sipariş sadakat indirimi daha önce kullanılmıştır." },
+                  { status: 400 }
+                );
+              }
+            }
+          } catch {}
+
           foundCampaign = {
             code: upperCode,
             name: retCfg.reorderDiscountText || 'Sadakat İndirimi',
@@ -199,6 +287,9 @@ export async function POST(request: NextRequest) {
             minOrder: 0,
             isActive: true,
             target: 'all',
+            isRetention: true,
+            retentionType: 'reorder',
+            ownerEmail: sessionEmail,
           };
         }
       } catch (retErr) {
@@ -255,12 +346,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      discountAmount: Math.min(discountAmount, cartTotal),
+      discountAmount: Math.round(Math.min(discountAmount, cartTotal) * 100) / 100,
       coupon: {
         code: foundCampaign.code,
         name: foundCampaign.name,
         type: foundCampaign.type,
-        value: foundCampaign.value
+        value: foundCampaign.value,
+        isRetention: Boolean(foundCampaign.isRetention),
+        retentionType: foundCampaign.retentionType || null,
+        ownerEmail: foundCampaign.ownerEmail || null,
+        cartId: foundCampaign.cartId || null,
       }
     });
 

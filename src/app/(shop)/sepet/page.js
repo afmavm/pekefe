@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Toast } from "@/components/ui/Toast";
-import { getCart, updateCartQty, removeFromCart, addToCart } from "@/utils/cartStorage";
+import { getCart, updateCartQty, removeFromCart, addToCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 
@@ -80,6 +80,10 @@ export default function Sepet() {
 
     if (!recoverId) return;
 
+    try {
+      sessionStorage.setItem("pekefe_recovery_cart_id", recoverId);
+    } catch {}
+
     fetch(`/api/retention/abandoned-cart?recover=${encodeURIComponent(recoverId)}`, {
       cache: "no-store",
     })
@@ -152,6 +156,63 @@ export default function Sepet() {
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  // Sepet boşaldığında veya kupon/tutar değiştiğinde kuponu canlı doğrula ve geçersizse temizle
+  useEffect(() => {
+    if (cartItems.length === 0 || subtotal <= 0) {
+      if (appliedCoupon) {
+        setAppliedCoupon(null);
+        clearAppliedCoupon();
+      }
+      return;
+    }
+    if (!appliedCoupon?.code) return;
+
+    let cancelled = false;
+    const recoverCartId = (() => {
+      try {
+        return sessionStorage.getItem("pekefe_recovery_cart_id") || undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+
+    fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: appliedCoupon.code,
+        cartTotal: subtotal,
+        recoverCartId,
+      }),
+    })
+      .then(async (r) => ({ ok: r.ok, data: await r.json().catch(() => null) }))
+      .then(({ ok, data }) => {
+        if (cancelled) return;
+        if (!ok || !data?.success) {
+          setAppliedCoupon(null);
+          clearAppliedCoupon();
+          return;
+        }
+        const freshDiscount = Number(data.discountAmount || 0);
+        if (Math.abs(freshDiscount - Number(appliedCoupon.discountAmount || 0)) > 0.01) {
+          const updated = {
+            ...appliedCoupon,
+            discountAmount: freshDiscount,
+            type: data.coupon?.type || appliedCoupon.type,
+            value: data.coupon?.value ?? appliedCoupon.value,
+            isRetention: Boolean(data.coupon?.isRetention),
+          };
+          setAppliedCoupon(updated);
+          localStorage.setItem("pekefe_applied_coupon", JSON.stringify(updated));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems.length, subtotal, appliedCoupon?.code]);
+
   const handleApplyPromo = async (e) => {
     e.preventDefault();
     const codeToTest = promoCode.trim();
@@ -159,12 +220,21 @@ export default function Sepet() {
 
     setIsApplyingPromo(true);
     try {
+      const recoverCartId = (() => {
+        try {
+          return sessionStorage.getItem("pekefe_recovery_cart_id") || undefined;
+        } catch {
+          return undefined;
+        }
+      })();
+
       const res = await fetch("/api/coupons/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: codeToTest,
           cartTotal: subtotal,
+          recoverCartId,
         }),
       });
 
@@ -175,6 +245,9 @@ export default function Sepet() {
           discountAmount: data.discountAmount,
           type: data.coupon.type,
           value: data.coupon.value,
+          isRetention: Boolean(data.coupon.isRetention),
+          ownerEmail: data.coupon.ownerEmail || null,
+          cartId: data.coupon.cartId || null,
         };
         setAppliedCoupon(couponObj);
         localStorage.setItem("pekefe_applied_coupon", JSON.stringify(couponObj));
@@ -205,7 +278,7 @@ export default function Sepet() {
   const handleRemovePromo = () => {
     setAppliedCoupon(null);
     setPromoCode("");
-    localStorage.removeItem("pekefe_applied_coupon");
+    clearAppliedCoupon();
     setToast({
       isOpen: true,
       message: "İndirim kodu kaldırıldı.",
@@ -236,7 +309,16 @@ export default function Sepet() {
     defaultCarrier?.isReceiverPay === true
   );
 
-  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const discountAmount = useMemo(() => {
+    if (!appliedCoupon || subtotal <= 0) return 0;
+    if (appliedCoupon.type === "percentage" && Number(appliedCoupon.value) > 0) {
+      return Math.min(subtotal, Math.round(((subtotal * Number(appliedCoupon.value)) / 100) * 100) / 100);
+    }
+    if (appliedCoupon.type === "fixed" && Number(appliedCoupon.value) > 0) {
+      return Math.min(subtotal, Number(appliedCoupon.value));
+    }
+    return Math.min(subtotal, Number(appliedCoupon.discountAmount || 0));
+  }, [appliedCoupon, subtotal]);
   const isCouponFreeShipping = appliedCoupon?.type === "free_shipping";
   const shippingThreshold = Number(defaultCarrier?.freeThreshold ?? settings?.shippingThreshold ?? 5000);
   const baseShippingFee = Number(defaultCarrier?.fallbackFee ?? settings?.shippingFee ?? 150);

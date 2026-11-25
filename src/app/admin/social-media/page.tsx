@@ -26,31 +26,83 @@ import { toast } from "sonner";
 type MainView = "studio" | "settings";
 type PlatformTab = "visuals" | "instagram" | "facebook" | "whatsapp" | "youtube" | "googleBusiness";
 
+const VISUAL_THEME_LABELS = [
+  "Tasarım 1 · İmza",
+  "Tasarım 2 · Krem",
+  "Tasarım 3 · Gece Lüks",
+  "Tasarım 4 · Yayla Zümrüt",
+  "Tasarım 5 · Altın Hasat",
+];
+
 function VisualPreviewCard({
   packId,
   format,
   title,
   sizeLabel,
   aspectClass = "aspect-[4/5]",
+  globalVariantOffset = 0,
 }: {
   packId: string;
   format: string;
   title: string;
   sizeLabel: string;
   aspectClass?: string;
+  globalVariantOffset?: number;
 }) {
-  const previewUrl = `/api/social-media/visual?packId=${encodeURIComponent(packId)}&format=${encodeURIComponent(format)}`;
+  const [localOffset, setLocalOffset] = useState(0);
+  const [imgLoading, setImgLoading] = useState(true);
+  const [imgError, setImgError] = useState(false);
+
+  const variant = (localOffset + globalVariantOffset) % 5;
+  const previewUrl = `/api/social-media/visual?packId=${encodeURIComponent(packId)}&format=${encodeURIComponent(format)}&v=${variant}`;
   const downloadUrl = `${previewUrl}&download=1`;
+
+  useEffect(() => {
+    setImgLoading(true);
+    setImgError(false);
+  }, [previewUrl]);
+
+  const handleRegenerate = () => {
+    setImgLoading(true);
+    setImgError(false);
+    setLocalOffset((prev) => (prev + 1) % 5);
+  };
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs flex flex-col">
-      <div className={`relative w-full ${aspectClass} bg-slate-100 overflow-hidden`}>
-        <img
-          src={previewUrl}
-          alt={title}
-          loading="lazy"
-          className="w-full h-full object-contain bg-slate-900/5"
-        />
+      <div className={`relative w-full ${aspectClass} bg-slate-100 overflow-hidden flex items-center justify-center`}>
+        {imgLoading && !imgError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/90 z-10 gap-1.5">
+            <Loader2 className="w-5 h-5 animate-spin text-[#6b1d2f]" />
+            <span className="text-[10px] font-bold text-slate-500">Görsel hazırlanıyor...</span>
+          </div>
+        )}
+        {imgError ? (
+          <div className="p-4 text-center space-y-2">
+            <p className="text-[11px] font-bold text-red-600">Görsel yüklenemedi</p>
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              className="px-2.5 py-1 bg-[#6b1d2f] text-white rounded-lg text-[10px] font-bold cursor-pointer"
+            >
+              Tekrar Dene
+            </button>
+          </div>
+        ) : (
+          <img
+            src={previewUrl}
+            alt={title}
+            onLoad={() => setImgLoading(false)}
+            onError={() => {
+              setImgLoading(false);
+              setImgError(true);
+            }}
+            className="w-full h-full object-contain bg-slate-900/5"
+          />
+        )}
+        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/65 backdrop-blur-xs text-[9px] font-bold text-amber-200 z-10">
+          {VISUAL_THEME_LABELS[variant]}
+        </span>
       </div>
       <div className="p-2.5 flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/70">
         <div className="min-w-0">
@@ -58,6 +110,15 @@ function VisualPreviewCard({
           <div className="text-[10px] font-mono text-slate-500">{sizeLabel}</div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={handleRegenerate}
+            title="Beğenmedin mi? Farklı Tasarımla Tekrar Üret"
+            className="px-2 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300/70 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
+          >
+            <RefreshCw className={`w-3 h-3 ${imgLoading ? "animate-spin" : ""}`} />
+            Tekrar Üret
+          </button>
           <a
             href={previewUrl}
             target="_blank"
@@ -87,7 +148,8 @@ export default function AdminSocialMediaPage() {
   const [view, setView] = useState<MainView>("studio");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedPackId, setSelectedPackId] = useState<string | null>(null);
-  const [platformTab, setPlatformTab] = useState<PlatformTab>("instagram");
+  const [platformTab, setPlatformTab] = useState<PlatformTab>("visuals");
+  const [globalVisualVariant, setGlobalVisualVariant] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [publishingKey, setPublishingKey] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -455,7 +517,7 @@ export default function AdminSocialMediaPage() {
                   </div>
 
                   {/* Platform Selector Pills */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  <div className="flex flex-wrap items-center gap-2 pb-1">
                     {[
                       { id: "visuals", label: "Hazır Görseller (9 PNG)", icon: ImageIcon },
                       { id: "instagram", label: "Instagram (Post · Hikaye · Reels)", icon: Camera },
@@ -485,21 +547,32 @@ export default function AdminSocialMediaPage() {
                   {/* ALL 9 BRANDED VISUALS TAB */}
                   {platformTab === "visuals" && (
                     <div className="space-y-4">
-                      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 flex items-center justify-between flex-wrap gap-2">
+                      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 flex items-center justify-between flex-wrap gap-3">
                         <span>
-                          <strong>Otomatik Marka Görsel Stüdyosu:</strong> Her platformun piksel standardına uygun, kanca (hook) metinli ve PEKEFE fiyat rozetli 9 yüksek çözünürlüklü PNG görsel otomatik üretilir.
+                          <strong>Otomatik Marka Görsel Stüdyosu:</strong> Beğenmediğiniz herhangi bir görselin altındaki <strong>Tekrar Üret</strong> butonuna basarak 5 farklı lüks PEKEFE tasarımından yenisini anında üretebilirsiniz.
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGlobalVisualVariant((prev) => (prev + 1) % 5);
+                            toast.success("Tüm görseller yeni tasarım temasıyla yeniden üretiliyor!");
+                          }}
+                          className="px-3.5 py-2 bg-[#6b1d2f] hover:bg-[#521423] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          Tümünü Yeni Tasarımla Üret
+                        </button>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                        <VisualPreviewCard packId={activePack.id} format="ig-post" title="Instagram Post" sizeLabel="1080×1350 (4:5)" aspectClass="aspect-[4/5]" />
-                        <VisualPreviewCard packId={activePack.id} format="ig-story-1" title="Instagram Hikaye 1 (Kanca)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
-                        <VisualPreviewCard packId={activePack.id} format="ig-story-2" title="Instagram Hikaye 2 (Fayda)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
-                        <VisualPreviewCard packId={activePack.id} format="ig-story-3" title="Instagram Hikaye 3 (CTA)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
-                        <VisualPreviewCard packId={activePack.id} format="ig-reels" title="Instagram Reels Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
-                        <VisualPreviewCard packId={activePack.id} format="yt-shorts" title="YouTube Shorts Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
-                        <VisualPreviewCard packId={activePack.id} format="wa-card" title="WhatsApp Paylaşım Kartı" sizeLabel="1080×1080 (1:1)" aspectClass="aspect-square" />
-                        <VisualPreviewCard packId={activePack.id} format="fb-post" title="Facebook Sayfa Görseli" sizeLabel="1200×630" aspectClass="aspect-[1200/630]" />
-                        <VisualPreviewCard packId={activePack.id} format="gbp-post" title="Google İşletme (Haritalar)" sizeLabel="1200×900 (4:3)" aspectClass="aspect-[4/3]" />
+                        <VisualPreviewCard packId={activePack.id} format="ig-post" title="Instagram Post" sizeLabel="1080×1350 (4:5)" aspectClass="aspect-[4/5]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-1" title="Instagram Hikaye 1 (Kanca)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-2" title="Instagram Hikaye 2 (Fayda)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-3" title="Instagram Hikaye 3 (CTA)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="ig-reels" title="Instagram Reels Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="yt-shorts" title="YouTube Shorts Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="wa-card" title="WhatsApp Paylaşım Kartı" sizeLabel="1080×1080 (1:1)" aspectClass="aspect-square" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="fb-post" title="Facebook Sayfa Görseli" sizeLabel="1200×630" aspectClass="aspect-[1200/630]" globalVariantOffset={globalVisualVariant} />
+                        <VisualPreviewCard packId={activePack.id} format="gbp-post" title="Google İşletme (Haritalar)" sizeLabel="1200×900 (4:3)" aspectClass="aspect-[4/3]" globalVariantOffset={globalVisualVariant} />
                       </div>
                     </div>
                   )}

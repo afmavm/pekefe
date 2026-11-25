@@ -5,8 +5,10 @@ import {
   Camera,
   Check,
   Copy,
+  Download,
   ExternalLink,
   Globe,
+  Image as ImageIcon,
   Loader2,
   MapPin,
   MessageCircle,
@@ -22,7 +24,62 @@ import {
 import { toast } from "sonner";
 
 type MainView = "studio" | "settings";
-type PlatformTab = "instagram" | "facebook" | "whatsapp" | "youtube" | "googleBusiness";
+type PlatformTab = "visuals" | "instagram" | "facebook" | "whatsapp" | "youtube" | "googleBusiness";
+
+function VisualPreviewCard({
+  packId,
+  format,
+  title,
+  sizeLabel,
+  aspectClass = "aspect-[4/5]",
+}: {
+  packId: string;
+  format: string;
+  title: string;
+  sizeLabel: string;
+  aspectClass?: string;
+}) {
+  const previewUrl = `/api/social-media/visual?packId=${encodeURIComponent(packId)}&format=${encodeURIComponent(format)}`;
+  const downloadUrl = `${previewUrl}&download=1`;
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs flex flex-col">
+      <div className={`relative w-full ${aspectClass} bg-slate-100 overflow-hidden`}>
+        <img
+          src={previewUrl}
+          alt={title}
+          loading="lazy"
+          className="w-full h-full object-contain bg-slate-900/5"
+        />
+      </div>
+      <div className="p-2.5 flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/70">
+        <div className="min-w-0">
+          <div className="text-[11px] font-extrabold text-slate-900 truncate">{title}</div>
+          <div className="text-[10px] font-mono text-slate-500">{sizeLabel}</div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noreferrer"
+            title="Tam Boyut Aç"
+            className="p-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg transition"
+          >
+            <ExternalLink className="w-3 h-3" />
+          </a>
+          <a
+            href={downloadUrl}
+            download
+            title="PNG İndir"
+            className="px-2 py-1.5 bg-[#6b1d2f] hover:bg-[#521423] text-white rounded-lg text-[10px] font-bold flex items-center gap-1 transition"
+          >
+            <Download className="w-3 h-3" /> PNG
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminSocialMediaPage() {
   const [data, setData] = useState<any>(null);
@@ -400,6 +457,7 @@ export default function AdminSocialMediaPage() {
                   {/* Platform Selector Pills */}
                   <div className="flex items-center gap-2 overflow-x-auto pb-1">
                     {[
+                      { id: "visuals", label: "Hazır Görseller (9 PNG)", icon: ImageIcon },
                       { id: "instagram", label: "Instagram (Post · Hikaye · Reels)", icon: Camera },
                       { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
                       { id: "facebook", label: "Facebook", icon: Globe },
@@ -423,6 +481,28 @@ export default function AdminSocialMediaPage() {
                       );
                     })}
                   </div>
+
+                  {/* ALL 9 BRANDED VISUALS TAB */}
+                  {platformTab === "visuals" && (
+                    <div className="space-y-4">
+                      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 flex items-center justify-between flex-wrap gap-2">
+                        <span>
+                          <strong>Otomatik Marka Görsel Stüdyosu:</strong> Her platformun piksel standardına uygun, kanca (hook) metinli ve PEKEFE fiyat rozetli 9 yüksek çözünürlüklü PNG görsel otomatik üretilir.
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <VisualPreviewCard packId={activePack.id} format="ig-post" title="Instagram Post" sizeLabel="1080×1350 (4:5)" aspectClass="aspect-[4/5]" />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-1" title="Instagram Hikaye 1 (Kanca)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-2" title="Instagram Hikaye 2 (Fayda)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
+                        <VisualPreviewCard packId={activePack.id} format="ig-story-3" title="Instagram Hikaye 3 (CTA)" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
+                        <VisualPreviewCard packId={activePack.id} format="ig-reels" title="Instagram Reels Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
+                        <VisualPreviewCard packId={activePack.id} format="yt-shorts" title="YouTube Shorts Kapağı" sizeLabel="1080×1920 (9:16)" aspectClass="aspect-[9/16]" />
+                        <VisualPreviewCard packId={activePack.id} format="wa-card" title="WhatsApp Paylaşım Kartı" sizeLabel="1080×1080 (1:1)" aspectClass="aspect-square" />
+                        <VisualPreviewCard packId={activePack.id} format="fb-post" title="Facebook Sayfa Görseli" sizeLabel="1200×630" aspectClass="aspect-[1200/630]" />
+                        <VisualPreviewCard packId={activePack.id} format="gbp-post" title="Google İşletme (Haritalar)" sizeLabel="1200×900 (4:3)" aspectClass="aspect-[4/3]" />
+                      </div>
+                    </div>
+                  )}
 
                   {/* INSTAGRAM TAB: POST + STORY + REELS */}
                   {platformTab === "instagram" && (
@@ -454,11 +534,24 @@ export default function AdminSocialMediaPage() {
                             </button>
                           </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-pink-100 text-xs whitespace-pre-line text-slate-700 leading-relaxed">
-                          {activePack.instagram.post.caption}
-                        </div>
-                        <div className="text-[11px] font-mono text-pink-700 break-words">
-                          {activePack.instagram.post.hashtags.join(" ")}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                          <div className="md:col-span-4">
+                            <VisualPreviewCard
+                              packId={activePack.id}
+                              format="ig-post"
+                              title="Instagram Post Görseli"
+                              sizeLabel="1080×1350"
+                              aspectClass="aspect-[4/5]"
+                            />
+                          </div>
+                          <div className="md:col-span-8 space-y-2.5">
+                            <div className="p-3 bg-white rounded-lg border border-pink-100 text-xs whitespace-pre-line text-slate-700 leading-relaxed">
+                              {activePack.instagram.post.caption}
+                            </div>
+                            <div className="text-[11px] font-mono text-pink-700 break-words">
+                              {activePack.instagram.post.hashtags.join(" ")}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -493,14 +586,23 @@ export default function AdminSocialMediaPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {(activePack.instagram.story.slides || []).map((s: any) => (
-                            <div key={s.slideNo} className="p-3 bg-white rounded-xl border border-purple-100 space-y-1.5">
-                              <span className="text-[10px] font-black uppercase text-purple-700">
-                                Slayt {s.slideNo}
-                              </span>
-                              <div className="text-xs font-extrabold text-slate-900">{s.headline}</div>
-                              <div className="text-[11px] text-slate-600 whitespace-pre-line">{s.body}</div>
-                              <div className="text-[10px] bg-purple-50 text-purple-800 px-2 py-1 rounded-md font-semibold">
-                                {s.stickerSuggestion}
+                            <div key={s.slideNo} className="space-y-2">
+                              <VisualPreviewCard
+                                packId={activePack.id}
+                                format={`ig-story-${s.slideNo}`}
+                                title={`Slayt ${s.slideNo} Görseli`}
+                                sizeLabel="1080×1920"
+                                aspectClass="aspect-[9/16]"
+                              />
+                              <div className="p-3 bg-white rounded-xl border border-purple-100 space-y-1.5">
+                                <span className="text-[10px] font-black uppercase text-purple-700">
+                                  Slayt {s.slideNo}
+                                </span>
+                                <div className="text-xs font-extrabold text-slate-900">{s.headline}</div>
+                                <div className="text-[11px] text-slate-600 whitespace-pre-line">{s.body}</div>
+                                <div className="text-[10px] bg-purple-50 text-purple-800 px-2 py-1 rounded-md font-semibold">
+                                  {s.stickerSuggestion}
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -525,18 +627,29 @@ export default function AdminSocialMediaPage() {
                             <Copy className="w-3 h-3" /> Senaryoyu Kopyala
                           </button>
                         </div>
-                        <div className="space-y-2 text-xs">
-                          <div className="p-2.5 bg-white rounded-lg border border-amber-100">
-                            <strong className="text-[#6b1d2f]">0–3 sn (Kanca / Hook):</strong> {activePack.instagram.reels.hook0_3s}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                          <div className="md:col-span-4">
+                            <VisualPreviewCard
+                              packId={activePack.id}
+                              format="ig-reels"
+                              title="Reels Kapak Görseli"
+                              sizeLabel="1080×1920"
+                              aspectClass="aspect-[9/16]"
+                            />
                           </div>
-                          <div className="p-2.5 bg-white rounded-lg border border-amber-100">
-                            <strong className="text-slate-800">3–15 sn (Değer &amp; Hikaye):</strong> {activePack.instagram.reels.body3_15s}
-                          </div>
-                          <div className="p-2.5 bg-white rounded-lg border border-amber-100">
-                            <strong className="text-emerald-700">15–25 sn (Harekete Geçirici):</strong> {activePack.instagram.reels.cta15_25s}
-                          </div>
-                          <div className="p-2.5 bg-amber-100/50 rounded-lg text-[11px] text-amber-950">
-                            <strong>Görsel Çekim Yönergesi:</strong> {activePack.instagram.reels.visualDirection}
+                          <div className="md:col-span-8 space-y-2 text-xs">
+                            <div className="p-2.5 bg-white rounded-lg border border-amber-100">
+                              <strong className="text-[#6b1d2f]">0–3 sn (Kanca / Hook):</strong> {activePack.instagram.reels.hook0_3s}
+                            </div>
+                            <div className="p-2.5 bg-white rounded-lg border border-amber-100">
+                              <strong className="text-slate-800">3–15 sn (Değer &amp; Hikaye):</strong> {activePack.instagram.reels.body3_15s}
+                            </div>
+                            <div className="p-2.5 bg-white rounded-lg border border-amber-100">
+                              <strong className="text-emerald-700">15–25 sn (Harekete Geçirici):</strong> {activePack.instagram.reels.cta15_25s}
+                            </div>
+                            <div className="p-2.5 bg-amber-100/50 rounded-lg text-[11px] text-amber-950">
+                              <strong>Görsel Çekim Yönergesi:</strong> {activePack.instagram.reels.visualDirection}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -567,14 +680,27 @@ export default function AdminSocialMediaPage() {
                           </a>
                         </div>
                       </div>
-                      <div className="p-4 bg-white rounded-xl border border-emerald-100 text-xs whitespace-pre-line text-slate-800 leading-relaxed">
-                        {activePack.whatsapp.broadcastText}
-                      </div>
-                      <div className="p-3 bg-white rounded-xl border border-emerald-100 text-xs">
-                        <span className="text-[10px] font-black uppercase text-emerald-700 block mb-1">
-                          Kısa Durum (Status) Metni
-                        </span>
-                        {activePack.whatsapp.statusCaption}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        <div className="md:col-span-5">
+                          <VisualPreviewCard
+                            packId={activePack.id}
+                            format="wa-card"
+                            title="WhatsApp Paylaşım Kartı"
+                            sizeLabel="1080×1080"
+                            aspectClass="aspect-square"
+                          />
+                        </div>
+                        <div className="md:col-span-7 space-y-3">
+                          <div className="p-4 bg-white rounded-xl border border-emerald-100 text-xs whitespace-pre-line text-slate-800 leading-relaxed">
+                            {activePack.whatsapp.broadcastText}
+                          </div>
+                          <div className="p-3 bg-white rounded-xl border border-emerald-100 text-xs">
+                            <span className="text-[10px] font-black uppercase text-emerald-700 block mb-1">
+                              Kısa Durum (Status) Metni
+                            </span>
+                            {activePack.whatsapp.statusCaption}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -607,6 +733,13 @@ export default function AdminSocialMediaPage() {
                           </button>
                         </div>
                       </div>
+                      <VisualPreviewCard
+                        packId={activePack.id}
+                        format="fb-post"
+                        title="Facebook Paylaşım Görseli"
+                        sizeLabel="1200×630"
+                        aspectClass="aspect-[1200/630]"
+                      />
                       <div className="p-4 bg-white rounded-xl border border-blue-100 text-xs whitespace-pre-line text-slate-800 leading-relaxed">
                         {activePack.facebook.postText}
                         {"\n\n"}
@@ -645,20 +778,33 @@ export default function AdminSocialMediaPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="p-3 bg-white rounded-xl border border-red-100 text-xs">
-                        <span className="text-[10px] font-black uppercase text-red-700 block mb-1">SEO Video Başlığı</span>
-                        <span className="font-bold text-slate-900">{activePack.youtube.shortsTitle}</span>
-                      </div>
-                      <div className="p-3 bg-white rounded-xl border border-red-100 text-xs whitespace-pre-line text-slate-700">
-                        <span className="text-[10px] font-black uppercase text-red-700 block mb-1">30 Saniyelik Shorts Senaryosu</span>
-                        {activePack.youtube.script0_30s}
-                      </div>
-                      <div className="p-3 bg-white rounded-xl border border-red-100 text-xs whitespace-pre-line text-slate-700">
-                        <span className="text-[10px] font-black uppercase text-red-700 block mb-1">SEO Açıklama</span>
-                        {activePack.youtube.seoDescription}
-                      </div>
-                      <div className="text-[11px] font-mono text-slate-600">
-                        <strong>Etiketler:</strong> {activePack.youtube.tags.join(", ")}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        <div className="md:col-span-4">
+                          <VisualPreviewCard
+                            packId={activePack.id}
+                            format="yt-shorts"
+                            title="YouTube Shorts Kapağı"
+                            sizeLabel="1080×1920"
+                            aspectClass="aspect-[9/16]"
+                          />
+                        </div>
+                        <div className="md:col-span-8 space-y-3">
+                          <div className="p-3 bg-white rounded-xl border border-red-100 text-xs">
+                            <span className="text-[10px] font-black uppercase text-red-700 block mb-1">SEO Video Başlığı</span>
+                            <span className="font-bold text-slate-900">{activePack.youtube.shortsTitle}</span>
+                          </div>
+                          <div className="p-3 bg-white rounded-xl border border-red-100 text-xs whitespace-pre-line text-slate-700">
+                            <span className="text-[10px] font-black uppercase text-red-700 block mb-1">30 Saniyelik Shorts Senaryosu</span>
+                            {activePack.youtube.script0_30s}
+                          </div>
+                          <div className="p-3 bg-white rounded-xl border border-red-100 text-xs whitespace-pre-line text-slate-700">
+                            <span className="text-[10px] font-black uppercase text-red-700 block mb-1">SEO Açıklama</span>
+                            {activePack.youtube.seoDescription}
+                          </div>
+                          <div className="text-[11px] font-mono text-slate-600">
+                            <strong>Etiketler:</strong> {activePack.youtube.tags.join(", ")}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -685,11 +831,24 @@ export default function AdminSocialMediaPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="p-4 bg-white rounded-xl border border-sky-100 text-xs text-slate-800 leading-relaxed">
-                        {activePack.googleBusiness.summary}
-                      </div>
-                      <div className="text-[11px] text-slate-600">
-                        <strong>CTA Butonu:</strong> Sipariş Ver → <span className="font-mono text-sky-700">{activePack.googleBusiness.ctaUrl}</span>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        <div className="md:col-span-5">
+                          <VisualPreviewCard
+                            packId={activePack.id}
+                            format="gbp-post"
+                            title="Google İşletme Kartı"
+                            sizeLabel="1200×900"
+                            aspectClass="aspect-[4/3]"
+                          />
+                        </div>
+                        <div className="md:col-span-7 space-y-3">
+                          <div className="p-4 bg-white rounded-xl border border-sky-100 text-xs text-slate-800 leading-relaxed">
+                            {activePack.googleBusiness.summary}
+                          </div>
+                          <div className="text-[11px] text-slate-600">
+                            <strong>CTA Butonu:</strong> Sipariş Ver → <span className="font-mono text-sky-700">{activePack.googleBusiness.ctaUrl}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

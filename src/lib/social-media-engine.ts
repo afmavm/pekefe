@@ -20,6 +20,34 @@ export interface SocialProductInput {
   shortDesc?: string;
 }
 
+export interface SocialPackVisuals {
+  instagramPost: string;
+  instagramStory1: string;
+  instagramStory2: string;
+  instagramStory3: string;
+  instagramReelsCover: string;
+  facebookPost: string;
+  whatsappCard: string;
+  youtubeShortsCover: string;
+  googleBusinessPost: string;
+}
+
+export function buildSocialVisualUrls(packId: string, absolute = false): SocialPackVisuals {
+  const prefix = absolute ? SITE_URL : '';
+  const enc = encodeURIComponent(packId);
+  return {
+    instagramPost: `${prefix}/api/social-media/visual?packId=${enc}&format=ig-post`,
+    instagramStory1: `${prefix}/api/social-media/visual?packId=${enc}&format=ig-story-1`,
+    instagramStory2: `${prefix}/api/social-media/visual?packId=${enc}&format=ig-story-2`,
+    instagramStory3: `${prefix}/api/social-media/visual?packId=${enc}&format=ig-story-3`,
+    instagramReelsCover: `${prefix}/api/social-media/visual?packId=${enc}&format=ig-reels`,
+    facebookPost: `${prefix}/api/social-media/visual?packId=${enc}&format=fb-post`,
+    whatsappCard: `${prefix}/api/social-media/visual?packId=${enc}&format=wa-card`,
+    youtubeShortsCover: `${prefix}/api/social-media/visual?packId=${enc}&format=yt-shorts`,
+    googleBusinessPost: `${prefix}/api/social-media/visual?packId=${enc}&format=gbp-post`,
+  };
+}
+
 export interface GeneratedSocialPack {
   id: string;
   productId: string;
@@ -31,6 +59,7 @@ export interface GeneratedSocialPack {
   productCategory: string;
   generatedBy: 'gemini' | 'template';
   createdAt: string;
+  visuals?: SocialPackVisuals;
   instagram: {
     post: {
       hook: string;
@@ -237,11 +266,15 @@ export async function getSocialMediaConfig(): Promise<SocialMediaConfig> {
       ...(localData?.googleBusiness || {}),
       ...(dbData?.googleBusiness || {}),
     },
-    packs: Array.isArray(dbData?.packs)
+    packs: (Array.isArray(dbData?.packs)
       ? dbData!.packs
       : Array.isArray(localData?.packs)
         ? localData!.packs
-        : [],
+        : []
+    ).map((p) => ({
+      ...p,
+      visuals: p.visuals || buildSocialVisualUrls(p.id, false),
+    })),
   };
 }
 
@@ -509,10 +542,12 @@ Sadece geçerli JSON döndür (markdown kod bloğu kullanma), şema:
     }
   }
 
+  const packId = `soc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const pack: GeneratedSocialPack = {
     ...finalCore,
-    id: `soc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    id: packId,
     createdAt: new Date().toISOString(),
+    visuals: buildSocialVisualUrls(packId, false),
     publishStatus: {},
   };
 
@@ -535,10 +570,11 @@ export async function publishSocialPack(
   if (idx < 0) throw new Error('İçerik paketi bulunamadı.');
 
   const pack = { ...config.packs[idx], publishStatus: { ...(config.packs[idx].publishStatus || {}) } };
+  const absVisuals = buildSocialVisualUrls(pack.id, true);
   const results: Record<string, any> = {};
   const nowIso = new Date().toISOString();
 
-  // 1. Instagram Post (Meta Graph API v21)
+  // 1. Instagram Post (Meta Graph API v21 — 1080x1350 Marka Görseli)
   if ((target === 'all' || target === 'instagramPost') && config.instagram.enabled && config.instagram.publishPost) {
     if (config.instagram.accountId && config.instagram.accessToken) {
       try {
@@ -549,7 +585,7 @@ export async function publishSocialPack(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              image_url: pack.productImage,
+              image_url: absVisuals.instagramPost,
               caption,
               access_token: config.instagram.accessToken,
             }),
@@ -603,7 +639,7 @@ export async function publishSocialPack(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               media_type: 'STORIES',
-              image_url: pack.productImage,
+              image_url: absVisuals.instagramStory1,
               access_token: config.instagram.accessToken,
             }),
           }
@@ -656,7 +692,7 @@ export async function publishSocialPack(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              url: pack.productImage,
+              url: absVisuals.facebookPost,
               caption: message,
               access_token: config.facebook.pageAccessToken,
             }),
@@ -751,6 +787,7 @@ export async function publishSocialPack(
     await triggerWebhook('youtube', ytUrl, {
       event: 'pekefe.social.youtube',
       product: { id: pack.productId, name: pack.productName, url: pack.productUrl, image: pack.productImage, price: pack.productPrice },
+      visuals: absVisuals,
       youtube: pack.youtube,
       instagramReels: pack.instagram.reels,
     });
@@ -761,6 +798,7 @@ export async function publishSocialPack(
     await triggerWebhook('googleBusiness', gbpUrl, {
       event: 'pekefe.social.google_business',
       product: { id: pack.productId, name: pack.productName, url: pack.productUrl, image: pack.productImage, price: pack.productPrice },
+      visuals: absVisuals,
       googleBusiness: pack.googleBusiness,
     });
   }

@@ -9,6 +9,7 @@
           "originalSource": "/((?!api|_next|_vercel|.*\\..*).*)"
         }
       ]
-    }
+    },
+    "/api/social-media/visual": {}
   }
 }

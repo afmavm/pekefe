@@ -1821,6 +1821,12 @@
       "namedRegex": "^/api/settings(?:/)?$"
     },
     {
+      "page": "/api/social-media/visual",
+      "regex": "^/api/social\\-media/visual(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/social\\-media/visual(?:/)?$"
+    },
+    {
       "page": "/api/stock-transfers",
       "regex": "^/api/stock\\-transfers(?:/)?$",
       "routeKeys": {},

@@ -171,6 +171,7 @@
   "/api/retention/abandoned-cart/route": "/api/retention/abandoned-cart",
   "/api/retention/cron/route": "/api/retention/cron",
   "/api/settings/route": "/api/settings",
+  "/api/social-media/visual/route": "/api/social-media/visual",
   "/api/uploads/[...path]/route": "/api/uploads/[...path]",
   "/api/user/route": "/api/user",
   "/api/webhooks/paytr/route": "/api/webhooks/paytr",

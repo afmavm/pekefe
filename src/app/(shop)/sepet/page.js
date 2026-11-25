@@ -278,8 +278,8 @@ export default function Sepet() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
           {/* Cart Items List */}
           <div className="lg:col-span-8 space-y-4 sm:space-y-5">
-            {/* Ücretsiz Kargo İlerleme Çubuğu */}
-            {!isReceiverPay && shippingThreshold > 0 && (
+            {/* Ücretsiz Kargo İlerleme Çubuğu (sadece ücretli kargo varsa göster) */}
+            {!isReceiverPay && baseShippingFee > 0 && shippingThreshold > 0 && (
               <div
                 className={`p-4 sm:p-5 rounded-2xl border shadow-2xs transition-all ${
                   isShippingFree
@@ -423,8 +423,8 @@ export default function Sepet() {
               </div>
             ))}
 
-            {/* Shipping Progress & Information */}
-            {isReceiverPay ? (
+            {/* Receiver Pay Information (if applicable) */}
+            {isReceiverPay && (
               <div className="bg-amber-500/10 p-5 rounded-2xl border-2 border-amber-500/30 flex items-start sm:items-center gap-3.5 shadow-xs">
                 <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
                   <span className="material-symbols-outlined text-2xl">local_shipping</span>
@@ -441,26 +441,6 @@ export default function Sepet() {
                   <p className="text-xs text-amber-800/95 dark:text-amber-300 font-medium leading-relaxed">
                     Kargo taşıma bedeli sepet tutarınıza <strong>eklenmez (0 TL)</strong>; teslimat anında kapıda doğrudan kuryeye ödenir.
                   </p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-secondary-container/20 p-6 rounded-xl border border-secondary-container">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-secondary">local_shipping</span>
-                    <p className="font-bold text-secondary">
-                      {isShippingFree
-                        ? "Tebrikler, Kargonuz Bedava!"
-                        : `Ücretsiz Kargo İçin Son ₺${remainingForFreeShipping}`}
-                    </p>
-                  </div>
-                  <span className="font-label-md text-secondary">{Math.round(progressPercent)}%</span>
-                </div>
-                <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-secondary transition-all duration-1000"
-                    style={{ width: `${progressPercent}%` }}
-                  ></div>
                 </div>
               </div>
             )}

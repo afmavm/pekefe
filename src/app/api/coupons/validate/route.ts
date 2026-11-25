@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { withRateLimit } from '@/lib/rate-limit';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { getRetentionConfig } from '@/lib/retention-service';
 import fs from 'fs';
 import path from 'path';
 
@@ -157,6 +158,52 @@ export async function POST(request: NextRequest) {
     if (!foundCampaign) {
       const localCampaigns = getLocalCampaigns();
       foundCampaign = localCampaigns.find(c => c.code && c.code.toUpperCase() === upperCode);
+    }
+
+    // 4.5. Check active Retention Engine coupons (SEPET5, TEKRAR5, etc.)
+    if (!foundCampaign) {
+      try {
+        const retCfg = await getRetentionConfig();
+        const parsePercent = (text?: string, fallback = 5) => {
+          const m = String(text || '').match(/(\d+(?:[.,]\d+)?)/);
+          const n = m ? Number(m[1].replace(',', '.')) : fallback;
+          return Number.isFinite(n) && n > 0 && n <= 50 ? n : fallback;
+        };
+
+        if (
+          retCfg.enabled &&
+          retCfg.abandonedCartEnabled &&
+          retCfg.abandonedCartCouponCode &&
+          retCfg.abandonedCartCouponCode.toUpperCase() === upperCode
+        ) {
+          foundCampaign = {
+            code: upperCode,
+            name: retCfg.abandonedCartDiscountText || 'Sepet Hatırlatma İndirimi',
+            type: 'percentage',
+            value: parsePercent(retCfg.abandonedCartDiscountText, 5),
+            minOrder: 0,
+            isActive: true,
+            target: 'all',
+          };
+        } else if (
+          retCfg.enabled &&
+          retCfg.reorderEnabled &&
+          retCfg.reorderCouponCode &&
+          retCfg.reorderCouponCode.toUpperCase() === upperCode
+        ) {
+          foundCampaign = {
+            code: upperCode,
+            name: retCfg.reorderDiscountText || 'Sadakat İndirimi',
+            type: 'percentage',
+            value: parsePercent(retCfg.reorderDiscountText, 5),
+            minOrder: 0,
+            isActive: true,
+            target: 'all',
+          };
+        }
+      } catch (retErr) {
+        console.warn('Retention coupon lookup skipped:', retErr);
+      }
     }
 
     if (!foundCampaign) {

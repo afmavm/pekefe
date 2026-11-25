@@ -634,15 +634,20 @@ export async function sendAbandonedCartReminder(
 
   if (config.channels.whatsapp && cart.phone) {
     const waRes = await WhatsAppNotificationService.sendWhatsApp(cart.phone, whatsappText);
-    whatsappOk = waRes.success;
+    const isRealApiSend = Boolean(
+      waRes.success && waRes.provider && waRes.provider !== 'deep-link' && waRes.provider !== 'none'
+    );
+    whatsappOk = isRealApiSend;
     logs.unshift({
       id: `log-${Date.now()}-w`,
       type: 'abandoned_cart',
       channel: 'whatsapp',
       recipient: cart.phone,
       customerName: cart.customerName,
-      status: waRes.success ? 'sent' : 'skipped',
-      detail: waRes.error || `Provider: ${waRes.provider}`,
+      status: isRealApiSend ? 'sent' : 'skipped',
+      detail: isRealApiSend
+        ? `Otomatik gönderildi (${waRes.provider})`
+        : 'WhatsApp API bağlı değil — tablodaki yeşil WA butonu ile tek tıkla gönderebilirsiniz.',
       createdAt: nowIso,
     });
   }
@@ -704,15 +709,20 @@ export async function sendReorderReminder(
 
   if (config.channels.whatsapp && candidate.phone) {
     const waRes = await WhatsAppNotificationService.sendWhatsApp(candidate.phone, whatsappText);
-    whatsappOk = waRes.success;
+    const isRealApiSend = Boolean(
+      waRes.success && waRes.provider && waRes.provider !== 'deep-link' && waRes.provider !== 'none'
+    );
+    whatsappOk = isRealApiSend;
     logs.unshift({
       id: `log-${Date.now()}-rw`,
       type: 'reorder',
       channel: 'whatsapp',
       recipient: candidate.phone,
       customerName: candidate.customerName,
-      status: waRes.success ? 'sent' : 'skipped',
-      detail: waRes.error || `Provider: ${waRes.provider}`,
+      status: isRealApiSend ? 'sent' : 'skipped',
+      detail: isRealApiSend
+        ? `Otomatik gönderildi (${waRes.provider})`
+        : 'WhatsApp API bağlı değil — tablodaki yeşil WA butonu ile tek tıkla gönderebilirsiniz.',
       createdAt: nowIso,
     });
   }

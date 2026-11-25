@@ -813,7 +813,9 @@ export default function AdminRetentionPage() {
                           {log.status === "sent" ? "Gönderildi" : log.status === "skipped" ? "Atlandı" : "Hata"}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-[11px] text-slate-500 max-w-xs truncate">{log.detail}</td>
+                      <td className="py-3 px-4 text-[11px] text-slate-600 max-w-md whitespace-normal break-words leading-relaxed">
+                        {log.detail || "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

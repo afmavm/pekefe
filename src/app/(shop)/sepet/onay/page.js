@@ -178,6 +178,272 @@ function SepetOnayContent() {
     }
   };
 
+  const escapeHtml = (val) =>
+    String(val ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+  const handlePrintOrderSummary = () => {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+
+    const itemRowsHtml =
+      items.length > 0
+        ? items
+            .map(
+              (item, idx) => `
+          <tr>
+            <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#64748b;">${idx + 1}</td>
+            <td style="padding:10px 10px;border-bottom:1px solid #e2e8f0;font-weight:600;color:#0f172a;">
+              ${escapeHtml(item.name || "PEKEFE Ürün")}
+              ${item.variantLabel ? `<div style="font-size:11px;color:#64748b;font-weight:400;margin-top:2px;">${escapeHtml(item.variantLabel)}</div>` : ""}
+            </td>
+            <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:center;">${Number(item.quantity || 1)}</td>
+            <td style="padding:10px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;">₺${formatPrice(item.price)}</td>
+            <td style="padding:10px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;font-weight:700;color:#6b1d2f;">₺${formatPrice((item.price || 0) * (item.quantity || 1))}</td>
+          </tr>`
+            )
+            .join("")
+        : `<tr><td colspan="5" style="padding:14px;text-align:center;color:#64748b;">Sipariş kalemleri Hesabım &gt; Siparişlerim ekranında yer almaktadır.</td></tr>`;
+
+    const bankSectionHtml =
+      isBankTransfer && banksToDisplay.length > 0
+        ? `
+        <div style="margin-top:20px;padding:14px 16px;border:1.5px solid #f59e0b;border-radius:10px;background:#fffbeb;">
+          <div style="font-size:12px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+            Banka Havalesi / EFT Ödeme Bilgileri
+          </div>
+          ${banksToDisplay
+            .map(
+              (b) => `
+            <div style="margin-bottom:8px;padding:8px 10px;background:#ffffff;border:1px solid #fde68a;border-radius:8px;font-size:12px;">
+              <strong>${escapeHtml(b.bankName)}${b.branch ? ` · ${escapeHtml(b.branch)}` : ""}</strong> — Alıcı: <strong>${escapeHtml(b.accountHolder || siteSettings?.companyName || "İLHAN EFE")}</strong><br/>
+              <span style="font-family:monospace;font-size:13px;font-weight:800;color:#6b1d2f;letter-spacing:0.05em;">${escapeHtml(formatIban(b.iban))}</span>
+            </div>`
+            )
+            .join("")}
+          <div style="font-size:11px;color:#78350f;margin-top:6px;">
+            <strong>Önemli:</strong> Havale/EFT açıklama kısmına mutlaka <strong>#${escapeHtml(orderNum)}</strong> sipariş numaranızı yazınız.
+          </div>
+        </div>`
+        : "";
+
+    const addressLines = shippingAddress
+      ? [
+          shippingAddress.name ? `<strong>${escapeHtml(shippingAddress.name)}</strong>` : "",
+          escapeHtml(shippingAddress.address || shippingAddress.fullAddress || shippingAddress.street || ""),
+          shippingAddress.city
+            ? escapeHtml(`${shippingAddress.district ? `${shippingAddress.district} / ` : ""}${shippingAddress.city}`)
+            : "",
+          shippingAddress.phone ? `Tel: ${escapeHtml(shippingAddress.phone)}` : "",
+        ]
+          .filter(Boolean)
+          .join("<br/>")
+      : escapeHtml(completedOrder?.address || "Adres Bilgisi Kaydedildi");
+
+    const printHtml = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>PEKEFE Sipariş Özeti — #${escapeHtml(orderNum)}</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet { max-width: 780px; margin: 0 auto; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2.5px solid #6b1d2f;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .brand { font-size: 24px; font-weight: 900; color: #6b1d2f; letter-spacing: 0.06em; }
+    .brand-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .doc-meta { text-align: right; }
+    .doc-title { font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: 0.08em; }
+    .order-no { font-family: monospace; font-size: 15px; font-weight: 800; color: #6b1d2f; margin-top: 4px; }
+    .grid { display: flex; gap: 16px; margin-bottom: 20px; }
+    .box {
+      flex: 1;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .box-title {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #6b1d2f;
+      margin-bottom: 6px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      background: #6b1d2f;
+      color: #ffffff;
+      padding: 9px 10px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .totals {
+      margin-top: 16px;
+      margin-left: auto;
+      width: 280px;
+      font-size: 13px;
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      color: #475569;
+    }
+    .totals-grand {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 2px solid #6b1d2f;
+      font-size: 17px;
+      font-weight: 900;
+      color: #6b1d2f;
+    }
+    .footer {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="header">
+      <div>
+        <div class="brand">PEKEFE</div>
+        <div class="brand-sub">İspir Yöresel Ürünler · ${escapeHtml(siteSettings?.companyName || "İLHAN EFE")}</div>
+        <div class="brand-sub">www.pekefe.com · ${escapeHtml(siteSettings?.contactPhone || "+90 534 270 91 40")} · ${escapeHtml(siteSettings?.contactEmail || "info@pekefe.com")}</div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-title">SİPARİŞ ÖZETİ</div>
+        <div class="order-no">#${escapeHtml(orderNum)}</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">Tarih: ${escapeHtml(orderDate)}</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="box">
+        <div class="box-title">Teslimat Bilgileri</div>
+        <div>${addressLines}</div>
+      </div>
+      <div class="box">
+        <div class="box-title">Sipariş &amp; Ödeme Bilgileri</div>
+        <div><strong>Durum:</strong> ${isBankTransfer ? "Ödeme Bekliyor" : "Onaylandı / Hazırlanıyor"}</div>
+        <div><strong>Ödeme Yöntemi:</strong> ${escapeHtml(paymentMethodLabel)}</div>
+        <div><strong>Kargo Firması:</strong> ${escapeHtml(completedOrder?.cargoCompany || "Sürat Kargo")}</div>
+        <div><strong>Tahmini Teslimat:</strong> 2–3 İş Günü</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px;text-align:center;">#</th>
+          <th>Ürün</th>
+          <th style="width:65px;text-align:center;">Adet</th>
+          <th style="width:105px;text-align:right;">Birim Fiyat</th>
+          <th style="width:115px;text-align:right;">Tutar</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemRowsHtml}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="totals-row">
+        <span>Ürünler Ara Toplamı</span>
+        <strong style="font-family:monospace;">₺${formatPrice(subtotal)}</strong>
+      </div>
+      ${
+        bankDiscount > 0
+          ? `<div class="totals-row" style="color:#b45309;">
+              <span>Havale / EFT İndirimi</span>
+              <strong style="font-family:monospace;">-₺${formatPrice(bankDiscount)}</strong>
+            </div>`
+          : ""
+      }
+      <div class="totals-row">
+        <span>Kargo Bedeli</span>
+        <strong style="font-family:monospace;">${shippingCost === 0 ? "ÜCRETSİZ" : `₺${formatPrice(shippingCost)}`}</strong>
+      </div>
+      <div class="totals-grand">
+        <span>Genel Toplam</span>
+        <span style="font-family:monospace;">₺${formatPrice(total)}</span>
+      </div>
+      <div style="text-align:right;font-size:10px;color:#64748b;margin-top:3px;">Tüm fiyatlara KDV dâhildir.</div>
+    </div>
+
+    ${bankSectionHtml}
+
+    <div class="footer">
+      Bu belge PEKEFE dijital sipariş özetidir ve bilgilendirme amaçlıdır. Mali fatura yerine geçmez; e-Arşiv / e-Faturanız ayrıca e-posta adresinize iletilecektir.<br/>
+      PEKEFE İspir Yöresel Ürünler · Çamlıca Mah. İspir / Erzurum · www.pekefe.com
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) {
+      document.body.removeChild(iframe);
+      window.print();
+      return;
+    }
+
+    doc.open();
+    doc.write(printHtml);
+    doc.close();
+
+    setTimeout(() => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(() => {
+          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 1500);
+      }
+    }, 250);
+  };
+
   const orderNum =
     completedOrder?.orderId || "PKF-" + Math.floor(100000 + Math.random() * 900000);
 
@@ -360,10 +626,10 @@ function SepetOnayContent() {
 
               <button
                 type="button"
-                onClick={() => typeof window !== "undefined" && window.print()}
+                onClick={handlePrintOrderSummary}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-200 hover:text-white transition cursor-pointer print:hidden"
               >
-                <Printer className="w-3.5 h-3.5" /> Sipariş Özetini Yazdır
+                <Printer className="w-3.5 h-3.5" /> Sipariş Özetini Yazdır / PDF
               </button>
             </div>
           </div>

@@ -155,6 +155,26 @@ export default function Header() {
   ].includes(session?.user?.role);
   const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "Hesabım";
   const userInitial = userName.charAt(0).toUpperCase();
+  const [isB2BDealer, setIsB2BDealer] = useState(false);
+
+  useEffect(() => {
+    if (!session?.user?.email) {
+      setIsB2BDealer(false);
+      return;
+    }
+    const sessionDealer =
+      session.user.role === "DEALER" && session.user.isApproved !== false;
+    if (sessionDealer) setIsB2BDealer(true);
+
+    fetch(`/api/b2b/limits?t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && typeof data.isB2B === "boolean") {
+          setIsB2BDealer(data.isB2B);
+        }
+      })
+      .catch(() => {});
+  }, [session?.user?.email, session?.user?.role, session?.user?.isApproved]);
 
   useEffect(() => {
     const items = getCart();
@@ -529,10 +549,12 @@ export default function Header() {
                           <span className="material-symbols-outlined text-[18px] text-primary">shopping_bag</span>
                           Siparişlerim
                         </Link>
-                        <Link href="/b2b" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
-                          <span className="material-symbols-outlined text-[18px] text-primary">business</span>
-                          {session?.user?.role === "DEALER" && session?.user?.isApproved !== false ? "B2B Bayi Portalı" : "B2B Bayilik Başvurusu"}
-                        </Link>
+                        {!isB2BDealer && (
+                          <Link href="/b2b" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                            <span className="material-symbols-outlined text-[18px] text-primary">business</span>
+                            B2B Bayilik Başvurusu
+                          </Link>
+                        )}
                         {isAdmin && (
                           <Link href="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-secondary hover:bg-secondary/5 transition-colors border-t border-outline-variant/10">
                             <span className="material-symbols-outlined text-[18px] text-secondary">admin_panel_settings</span>
@@ -810,13 +832,15 @@ export default function Header() {
                 >
                   Blog
                 </Link>
-                <Link
-                  href="/b2b"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-center py-2 px-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
-                >
-                  B2B Bayi
-                </Link>
+                {!isB2BDealer && (
+                  <Link
+                    href="/b2b"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-center py-2 px-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-primary"
+                  >
+                    B2B Bayilik
+                  </Link>
+                )}
               </div>
             </div>
           </div>

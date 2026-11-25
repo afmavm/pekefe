@@ -255,6 +255,14 @@ export async function POST(request: NextRequest) {
       console.warn("[CHECKOUT] Remote DB lookup bypassed, operating in resilient local mode");
     }
 
+    // B2B Vadeli Açık Hesap yalnızca onaylı B2B kurumsal müşteriler için aktiftir
+    if (paymentMethod === "openAccount" && !isB2BUser) {
+      return NextResponse.json(
+        { error: "B2B Vadeli Açık Hesap ödeme yöntemi yalnızca onaylı B2B kurumsal bayilerimiz için aktiftir." },
+        { status: 403 }
+      );
+    }
+
     // Ürün fiyatlarını güvenle hesapla
     const serverCartItems: Array<{
       id: string | number;

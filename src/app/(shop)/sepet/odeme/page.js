@@ -51,6 +51,7 @@ export default function Odeme() {
   const [siteSettings, setSiteSettings] = useState(null);
   const [paytrToken, setPaytrToken] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isB2BCustomer, setIsB2BCustomer] = useState(false);
   const [copiedIban, setCopiedIban] = useState("");
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const trackedCheckoutRef = useRef(false);
@@ -243,6 +244,16 @@ export default function Odeme() {
       if (!nameOnCard && fullName) {
         setNameOnCard(fullName.toUpperCase());
       }
+
+      // Kullanıcının onaylı B2B müşterisi olup olmadığını sunucudan canlı doğrula
+      fetch(`/api/b2b/limits?t=${Date.now()}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          setIsB2BCustomer(Boolean(data?.isB2B));
+        })
+        .catch(() => setIsB2BCustomer(false));
+    } else {
+      setIsB2BCustomer(false);
     }
   }, [session]);
 
@@ -518,7 +529,7 @@ export default function Odeme() {
         iconType: "openAccount",
         badge: "Kurumsal",
         desc: "Anlaşmalı Bayiler",
-        enabled: configMap ? configMap.openAccount !== false : true,
+        enabled: isB2BCustomer && (configMap ? configMap.openAccount !== false : true),
       },
       {
         id: "cashOnDelivery",
@@ -531,7 +542,7 @@ export default function Odeme() {
     ];
 
     return allMethods.filter((m) => m.enabled);
-  }, [siteSettings]);
+  }, [siteSettings, isB2BCustomer]);
 
   // Keep paymentMethod selection valid if settings change
   useEffect(() => {

@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { PaymentService, PaymentRequest } from '@/modules/orders/server/payment-service';
 import { emailNotificationService } from '@/lib/email-notification-service';
 import { WhatsAppNotificationService } from '@/lib/whatsapp-service';
+import { wrapPekefeEmail, PEKEFE_SITE_URL } from '@/lib/email-brand-layout';
+import fs from 'fs';
+import path from 'path';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { z } from 'zod';
@@ -23,6 +26,7 @@ const CheckoutSchema = z.object({
   expDate: z.string().optional(),
   cvv: z.string().optional(),
   name: z.string().min(2, "İsim en az 2 karakter olmalıdır"),
+  email: z.string().optional(),
   phone: z.string().min(10, "Geçerli bir telefon numarası giriniz"),
   address: z.string().min(5, "Açık adres gereklidir"),
   shippingFee: z.number().optional(),
@@ -177,7 +181,7 @@ export async function POST(request: NextRequest) {
 
     const { 
       cart, cartTotal, paymentMethod, couponCode, couponDiscount = 0,
-      cardNumber, expDate, cvv, name, phone, address,
+      cardNumber, expDate, cvv, name, email: bodyEmail, phone, address,
       shippingFee = 0, selectedCarrierName = "",
       shippingAddress, billingAddress
     } = resultSchema.data;
@@ -190,6 +194,9 @@ export async function POST(request: NextRequest) {
         customerEmail = session.user.email;
       }
     } catch (e) {}
+    if (bodyEmail && bodyEmail.includes("@")) {
+      customerEmail = bodyEmail.trim();
+    }
 
     let customerAccount: any = null;
     let isB2BUser = false;
@@ -516,21 +523,178 @@ export async function POST(request: NextRequest) {
     // 5. Arka Plan Bildirimleri (Asenkron - Kullanıcıyı bekletmez)
     (async () => {
       try {
-        if (customerEmail !== "guest@nexab2b.com") {
-          const customerOrderItemsText = cart
-            .map((item: any) => `• ${item.name} × ${item.quantity} adet — ₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}`)
-            .join("\n");
+        const formatIban = (raw?: string | null) =>
+          String(raw || "").replace(/\s+/g, "").toUpperCase().replace(/(.{4})/g, "$1 ").trim();
 
-          const paymentLabel =
-            paymentMethod === "creditCard" ? "Kredi Kartı" :
-            paymentMethod === "bankTransfer" ? "Banka Havalesi / EFT" :
-            "Açık Hesap (Vadeli)";
+        const customerOrderItemsText = cart
+          .map((item: any) => `• ${item.name} × ${item.quantity} adet — ₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}`)
+          .join("\n");
 
-          const orderDateStr = new Date().toLocaleDateString("tr-TR", {
-            day: "2-digit", month: "long", year: "numeric",
-            hour: "2-digit", minute: "2-digit"
-          });
+        const paymentLabel =
+          paymentMethod === "creditCard" ? "Kredi Kartı" :
+          paymentMethod === "bankTransfer" ? "Banka Havalesi / EFT" :
+          paymentMethod === "cashOnDelivery" ? "Kapıda Ödeme" :
+          "Açık Hesap (Vadeli)";
 
+        const orderDateStr = new Date().toLocaleDateString("tr-TR", {
+          day: "2-digit", month: "long", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        });
+
+        // Banka Havalesi / EFT seçildiyse güncel banka & IBAN bilgilerini çekip özel bilgilendirme e-postası + WhatsApp gönder
+        if (paymentMethod === "bankTransfer") {
+          let activeBanks: Array<{ bankName: string; branch?: string; accountHolder: string; iban: string }> = [];
+          let legalHolder = "PEKEFE İSPİR YÖRESEL ÜRÜNLER";
+
+          try {
+            const cms = await prisma.cMSData.findUnique({ where: { id: "singleton" } }).catch(() => null);
+            if (cms?.companyName) legalHolder = cms.companyName;
+
+            const dbBanks = await prisma.bankAccount.findMany({
+              where: { status: "active" },
+              orderBy: { createdAt: "desc" },
+            }).catch(() => []);
+
+            if (Array.isArray(dbBanks) && dbBanks.length > 0) {
+              activeBanks = dbBanks
+                .filter((b: any) => b.iban && String(b.iban).trim())
+                .map((b: any) => ({
+                  bankName: b.bankName || b.name || "Banka Hesabı",
+                  branch: b.branch || "",
+                  accountHolder: b.accountHolder || legalHolder,
+                  iban: formatIban(b.iban),
+                }));
+            }
+
+            if (activeBanks.length === 0 && cms?.bankIban) {
+              activeBanks.push({
+                bankName: cms.bankName || "HALKBANK",
+                branch: "",
+                accountHolder: legalHolder,
+                iban: formatIban(cms.bankIban),
+              });
+            }
+          } catch {}
+
+          // Yerel yedek ayar dosyasından banka bilgisi fallback
+          if (activeBanks.length === 0) {
+            try {
+              const fbPath = path.join(process.cwd(), "public", "data", "cms_settings_fallback.json");
+              if (fs.existsSync(fbPath)) {
+                const fb = JSON.parse(fs.readFileSync(fbPath, "utf-8"));
+                if (fb?.companyName) legalHolder = fb.companyName;
+                if (fb?.bankIban) {
+                  activeBanks.push({
+                    bankName: fb.bankName || "HALKBANK",
+                    branch: "",
+                    accountHolder: legalHolder,
+                    iban: formatIban(fb.bankIban),
+                  });
+                }
+              }
+            } catch {}
+          }
+
+          const amountStr = `₺${verifiedTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+          // 5A. Müşteriye Özel Banka Havalesi / EFT Ödeme Bilgilendirme E-postası
+          if (customerEmail && customerEmail !== "guest@nexab2b.com" && customerEmail.includes("@")) {
+            const bankBlocksHtml = activeBanks.length > 0
+              ? activeBanks
+                  .map(
+                    (b) => `
+                  <div style="margin:12px 0;padding:16px 18px;border-radius:14px;background-color:#fffbeb;border:1.5px solid #fcd34d;">
+                    <div style="font-size:11px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:0.08em;">
+                      ${b.bankName}${b.branch ? ` · ${b.branch}` : ""}
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:#1e293b;margin-top:4px;">
+                      Alıcı Ünvanı: <strong>${b.accountHolder}</strong>
+                    </div>
+                    <div style="margin-top:8px;padding:10px 12px;border-radius:10px;background-color:#ffffff;border:1px solid #fde68a;font-family:monospace;font-size:15px;font-weight:900;color:#6b1d2f;letter-spacing:0.06em;">
+                      ${b.iban}
+                    </div>
+                  </div>`
+                  )
+                  .join("")
+              : `<p style="font-size:13px;color:#475569;">Güncel banka hesap bilgilerimiz için bizimle WhatsApp veya telefon üzerinden iletişime geçebilirsiniz.</p>`;
+
+            const itemsHtml = cart
+              .map(
+                (item: any) => `
+                <tr>
+                  <td style="padding:8px 10px;border-bottom:1px solid #f1e8e3;font-size:13px;color:#1e293b;font-weight:600;">${item.name}</td>
+                  <td align="center" style="padding:8px 8px;border-bottom:1px solid #f1e8e3;font-size:13px;color:#475569;">${item.quantity}</td>
+                  <td align="right" style="padding:8px 10px;border-bottom:1px solid #f1e8e3;font-size:13px;color:#6b1d2f;font-weight:700;">₺${(Number(item.price) * Number(item.quantity)).toLocaleString("tr-TR")}</td>
+                </tr>`
+              )
+              .join("");
+
+            const bankEmailBody = `
+              <p style="margin:0 0 12px 0;font-size:15px;line-height:1.65;color:#334155;">
+                Merhaba <strong>${name}</strong>,
+              </p>
+              <p style="margin:0 0 16px 0;font-size:14px;line-height:1.7;color:#475569;">
+                <strong>#${finalOrderId}</strong> numaralı siparişiniz başarıyla oluşturuldu. Banka Havalesi / EFT ödemenizi aşağıdaki resmi PEKEFE banka hesabımıza gerçekleştirebilirsiniz.
+              </p>
+              <div style="margin:16px 0;padding:14px 18px;border-radius:12px;background-color:#faf6f4;border:1px solid #ece3de;">
+                <div style="font-size:12px;color:#64748b;">Sipariş Numarası: <strong style="color:#6b1d2f;">#${finalOrderId}</strong></div>
+                <div style="font-size:12px;color:#64748b;margin-top:4px;">Ödenecek Net Tutar: <strong style="font-size:16px;color:#6b1d2f;">${amountStr}</strong></div>
+              </div>
+              <div style="margin:18px 0 6px 0;font-size:12px;font-weight:800;color:#6b1d2f;text-transform:uppercase;letter-spacing:0.08em;">
+                PEKEFE Resmi Banka Hesap Bilgileri
+              </div>
+              ${bankBlocksHtml}
+              <div style="margin:16px 0;padding:13px 16px;border-radius:12px;background-color:#fef2f2;border:1px solid #fecaca;font-size:13px;color:#7f1d1d;line-height:1.6;">
+                <strong>Önemli:</strong> Havale / EFT açıklama kısmına mutlaka <strong>#${finalOrderId}</strong> sipariş numaranızı yazınız. Ödemeniz hesabımıza ulaştığında siparişiniz onaylanıp aynı gün kargoya hazırlanacaktır.
+              </div>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #ece3de;border-radius:12px;overflow:hidden;margin-top:16px;">
+                <thead>
+                  <tr style="background-color:#faf6f4;">
+                    <th align="left" style="padding:8px 10px;font-size:11px;color:#64748b;">ÜRÜN</th>
+                    <th align="center" style="padding:8px 8px;font-size:11px;color:#64748b;">ADET</th>
+                    <th align="right" style="padding:8px 10px;font-size:11px;color:#64748b;">TUTAR</th>
+                  </tr>
+                </thead>
+                <tbody>${itemsHtml}</tbody>
+              </table>
+            `;
+
+            const bankEmailHtml = wrapPekefeEmail({
+              badge: "BANKA HAVALESİ / EFT BİLGİLENDİRME",
+              title: `Siparişiniz Alındı (#${finalOrderId})`,
+              bodyHtml: bankEmailBody,
+              ctaText: "Siparişimi Görüntüle →",
+              ctaUrl: `${PEKEFE_SITE_URL}/hesap`,
+            });
+
+            await emailNotificationService.sendCustomHtmlEmail(
+              customerEmail,
+              `PEKEFE Havale / EFT Ödeme Bilgileri — Sipariş #${finalOrderId} (${amountStr})`,
+              bankEmailHtml,
+              "BANK_TRANSFER_INSTRUCTIONS"
+            );
+          }
+
+          // 5B. Müşteriye Otomatik WhatsApp Banka Havalesi Bilgilendirmesi
+          if (phone && phone.replace(/\D/g, "").length >= 10) {
+            const firstBank = activeBanks[0];
+            const waMsg = [
+              `Merhaba ${name} 👋`,
+              `PEKEFE siparişiniz (*#${finalOrderId}*) başarıyla oluşturuldu.`,
+              `💳 *Ödenecek Tutar:* ${amountStr}`,
+              firstBank
+                ? `🏦 *Banka:* ${firstBank.bankName}${firstBank.branch ? ` (${firstBank.branch})` : ""}\n👤 *Alıcı:* ${firstBank.accountHolder}\n🔢 *IBAN:* ${firstBank.iban}`
+                : "",
+              `📝 Lütfen havale/EFT açıklama kısmına *#${finalOrderId}* sipariş numaranızı yazınız. Ödeme teyidi sonrası siparişiniz aynı gün kargoya hazırlanacaktır.`,
+              `Sipariş takibi: ${PEKEFE_SITE_URL}/hesap`,
+              `_PEKEFE İspir Yöresel Ürünler_`,
+            ]
+              .filter(Boolean)
+              .join("\n\n");
+
+            await WhatsAppNotificationService.sendWhatsApp(phone, waMsg).catch(() => {});
+          }
+        } else if (customerEmail !== "guest@nexab2b.com") {
           await emailNotificationService.queueEmail(customerEmail, "order_received", {
             kullanici_adi: name,
             siparis_no: finalOrderId,

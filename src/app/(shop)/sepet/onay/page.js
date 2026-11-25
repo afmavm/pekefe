@@ -6,13 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { clearCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { trackPurchase } from "@/lib/gtm-ecommerce";
-import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck } from "lucide-react";
+import { CheckCircle2, PackageCheck, Truck, Award, Coins, MapPin, CreditCard, ArrowRight, Home, ShoppingBag, ShieldCheck, Landmark, Copy, Check } from "lucide-react";
 
 function SepetOnayContent() {
   const searchParams = useSearchParams();
   const queryOrderId = searchParams.get("orderId");
   const queryOid = searchParams.get("oid");
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [copiedIban, setCopiedIban] = useState("");
 
   useEffect(() => {
     let loaded = false;
@@ -35,8 +38,8 @@ function SepetOnayContent() {
       console.error("Error reading completed order from storage:", e);
     }
 
-    // PayTR 3D Secure onay dönüşünde siparişi sunucuya anında kesinleştir (idempotent)
-    if (queryOid || parsedOrder?.orderId) {
+    // PayTR 3D Secure onay dönüşünde siparişi sunucuya anında kesinleştir (yalnızca kredi kartı / PayTR akışında)
+    if (queryOid || (parsedOrder?.orderId && (!parsedOrder?.paymentMethod || parsedOrder?.paymentMethod === "creditCard"))) {
       fetch("/api/checkout/confirm-paytr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,6 +49,24 @@ function SepetOnayContent() {
           completedOrder: parsedOrder,
         }),
       }).catch(() => {});
+    }
+
+    // Banka havalesi seçildiyse güncel resmi banka hesaplarını canlı yükle
+    if (parsedOrder?.paymentMethod === "bankTransfer") {
+      const ts = Date.now();
+      fetch(`/api/accounting/banks?t=${ts}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (data?.data || []);
+          setBankAccounts(list);
+        })
+        .catch(() => {});
+      fetch(`/api/settings?t=${ts}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data) setSiteSettings(data);
+        })
+        .catch(() => {});
     }
 
     // If queryOrderId is provided, fetch latest details from orders API
@@ -328,6 +349,60 @@ function SepetOnayContent() {
                 </div>
               </div>
             </div>
+
+            {/* Banka Havalesi / EFT Ödeme Talimatı Kutusu */}
+            {completedOrder?.paymentMethod === "bankTransfer" && (
+              <div className="bg-amber-50/90 dark:bg-amber-950/30 rounded-3xl p-6 sm:p-8 border-2 border-amber-300/80 dark:border-amber-800 shadow-xs space-y-4">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <h4 className="font-serif font-bold text-lg text-[#6b1d2f] dark:text-amber-300 flex items-center gap-2">
+                    <Landmark className="w-5 h-5 text-amber-700" /> Banka Havalesi / EFT Ödeme Bilgileri
+                  </h4>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    Bilgiler e-posta ile gönderildi ✓
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-amber-950/90 dark:text-amber-200 leading-relaxed">
+                  Siparişinizin hazırlanabilmesi için <strong>₺{formatPrice(total)}</strong> tutarındaki havale/EFT ödemenizi aşağıdaki resmi hesabımıza yaparken açıklama kısmına mutlaka <strong className="font-mono text-[#6b1d2f]">#{orderNum}</strong> yazınız.
+                </p>
+                {(() => {
+                  const fmtIban = (raw) => String(raw || "").replace(/\s+/g, "").toUpperCase().replace(/(.{4})/g, "$1 ").trim();
+                  const activeList = (bankAccounts || []).filter((b) => b?.status === "active" && b?.iban);
+                  const fallbackList = siteSettings?.bankIban
+                    ? [{ id: "cms", bankName: siteSettings.bankName || "HALKBANK", branch: "", accountHolder: siteSettings.companyName || "İLHAN EFE", iban: siteSettings.bankIban }]
+                    : [];
+                  const banksToRender = activeList.length > 0 ? activeList : fallbackList;
+                  return (
+                    <div className="space-y-3">
+                      {banksToRender.map((b, i) => {
+                        const formatted = fmtIban(b.iban);
+                        const copyKey = b.id || `bank-${i}`;
+                        return (
+                          <div key={copyKey} className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                              <div className="text-[11px] font-black uppercase text-amber-800">{b.bankName}{b.branch ? ` · ${b.branch}` : ""}</div>
+                              <div className="text-xs font-bold text-slate-700 mt-0.5">Alıcı: {b.accountHolder || siteSettings?.companyName || "İLHAN EFE"}</div>
+                              <div className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] mt-1 tracking-wide">{formatted}</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard?.writeText(formatted.replace(/\s+/g, ""));
+                                setCopiedIban(copyKey);
+                                setTimeout(() => setCopiedIban(""), 2000);
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0 self-start sm:self-center"
+                            >
+                              {copiedIban === copyKey ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedIban === copyKey ? "Kopyalandı" : "IBAN Kopyala"}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {/* Şimdi Ne Olacak? Bilgilendirme Kutusu */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-xs">

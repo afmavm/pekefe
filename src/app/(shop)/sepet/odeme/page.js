@@ -744,6 +744,7 @@ export default function Odeme() {
         cartTotal: grandTotal,
         paymentMethod: paymentMethod, // bankTransfer, openAccount
         name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email || session?.user?.email || "",
         phone: formData.phone,
         address: `${formData.address}${formData.district ? `, ${formData.district}` : ""} / ${formData.city}`,
         shippingFee: shippingCost,
@@ -1580,7 +1581,15 @@ export default function Odeme() {
                 {isSubmitting ? (
                   <>
                     <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                    <span>PayTR 3D Secure Ekranına Yönlendiriliyorsunuz...</span>
+                    <span>
+                      {paymentMethod === "creditCard"
+                        ? "PayTR 3D Secure Ekranına Yönlendiriliyorsunuz..."
+                        : paymentMethod === "bankTransfer"
+                        ? "Banka Havalesi Siparişiniz Oluşturuluyor..."
+                        : paymentMethod === "cashOnDelivery"
+                        ? "Kapıda Ödeme Siparişiniz Oluşturuluyor..."
+                        : "Siparişiniz Oluşturuluyor..."}
+                    </span>
                   </>
                 ) : (
                   <>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withTimeout } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { handleNewProductSocialAutomation } from '@/lib/social-media-engine';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { PriceCalculator } from '@/modules/catalog/server/price-calculator';
@@ -726,6 +727,20 @@ export async function POST(request: NextRequest) {
     revalidatePath('/', 'layout');
     revalidatePath('/admin/stock');
     revalidatePath('/api/products');
+
+    // Yeni vitrin ürünü eklendiğinde 5 platformluk kanca yöntemli sosyal medya otomasyonunu arka planda tetikle
+    if (!(returnedProd as any).isRawMaterial && (returnedProd as any).active !== false) {
+      handleNewProductSocialAutomation({
+        id: String(returnedProd.id),
+        name: String(returnedProd.name || ''),
+        slug: (returnedProd as any).slug || undefined,
+        category: String((returnedProd as any).category || ''),
+        price: Number((returnedProd as any).price || 0),
+        image: (returnedProd as any).image || undefined,
+        desc: (returnedProd as any).desc || '',
+      }).catch((e) => console.warn('[PRODUCT CREATE] Social automation warning:', e));
+    }
+
     return NextResponse.json(returnedProd);
   } catch (error: any) {
     console.error('CRITICAL DB PRODUCT CREATE NOTICE:', error?.message || error);

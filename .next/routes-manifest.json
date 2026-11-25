@@ -1077,6 +1077,12 @@
       "namedRegex": "^/admin/site\\-editor(?:/)?$"
     },
     {
+      "page": "/admin/social-media",
+      "regex": "^/admin/social\\-media(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/social\\-media(?:/)?$"
+    },
+    {
       "page": "/admin/stock",
       "regex": "^/admin/stock(?:/)?$",
       "routeKeys": {},
@@ -1351,6 +1357,12 @@
       "regex": "^/api/admin/seo\\-audit(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/admin/seo\\-audit(?:/)?$"
+    },
+    {
+      "page": "/api/admin/social-media",
+      "regex": "^/api/admin/social\\-media(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/social\\-media(?:/)?$"
     },
     {
       "page": "/api/admin/users",

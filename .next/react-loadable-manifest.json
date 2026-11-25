@@ -9,7 +9,7 @@
   "..\\node_modules\\jspdf\\dist\\jspdf.es.min.js -> dompurify": {
     "id": 91992,
     "files": [
-      "static/chunks/1992.6778c158fb989464.js"
+      "static/chunks/9611.3d5aeeaba53b036c.js"
     ]
   },
   "..\\node_modules\\jspdf\\dist\\jspdf.es.min.js -> html2canvas": {
@@ -39,7 +39,7 @@
   "app\\admin\\orders\\[type]\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
     "id": 73445,
     "files": [
-      "static/chunks/164f4fb6-65fb7b51181b1996.js",
+      "static/chunks/164f4fb6-bdb77e897ef9c2fa.js",
       "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
       "static/chunks/2170a4aa-d54b305c3bc2e2e2.js",
       "static/chunks/6609-cb163718e066ee48.js",
@@ -52,7 +52,7 @@
   "app\\admin\\orders\\page.tsx -> @/modules/orders/components/OrderCommandCenter": {
     "id": 73445,
     "files": [
-      "static/chunks/164f4fb6-65fb7b51181b1996.js",
+      "static/chunks/164f4fb6-bdb77e897ef9c2fa.js",
       "static/chunks/2f0b94e8-42b78e3e2fa16a91.js",
       "static/chunks/2170a4aa-d54b305c3bc2e2e2.js",
       "static/chunks/6609-cb163718e066ee48.js",

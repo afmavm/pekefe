@@ -794,6 +794,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/admin/social-media/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/social-media">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/social-media/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/admin/stock/form/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/stock/form">> = Specific
@@ -1320,6 +1329,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/seo-audit">> = Specific
   const handler = {} as typeof import("../../src/app/api/admin/seo-audit/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/admin/social-media/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/social-media">> = Specific
+  const handler = {} as typeof import("../../src/app/api/admin/social-media/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

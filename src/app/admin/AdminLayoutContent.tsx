@@ -423,10 +423,95 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sidebarSearch, setSidebarSearch] = useState("");
+  const sidebarSearchInputRef = useRef<HTMLInputElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+
+  // Türkçe karakter duyarlı normalizasyon (ş->s, ı/İ->i, ğ->g, ü->u, ö->o, ç->c)
+  const normalizeTr = (text: string): string =>
+    String(text || "")
+      .toLocaleLowerCase("tr-TR")
+      .replace(/ı/g, "i")
+      .replace(/i̇/g, "i")
+      .replace(/ş/g, "s")
+      .replace(/ğ/g, "g")
+      .replace(/ü/g, "u")
+      .replace(/ö/g, "o")
+      .replace(/ç/g, "c")
+      .trim();
+
+  const normalizedSidebarQuery = normalizeTr(sidebarSearch);
+  const isSidebarSearching = normalizedSidebarQuery.length > 0;
+
+  const displayedNavGroups = !isSidebarSearching
+    ? filteredNavGroups
+    : filteredNavGroups
+        .map((group) => {
+          const groupLabelMatches = normalizeTr(group.label).includes(normalizedSidebarQuery);
+          const matchedItems = group.items
+            .map((item) => {
+              const parentMatches =
+                groupLabelMatches ||
+                normalizeTr(item.name).includes(normalizedSidebarQuery) ||
+                normalizeTr(item.description || "").includes(normalizedSidebarQuery);
+
+              if (item.subItems) {
+                const matchedSubs = item.subItems.filter(
+                  (sub) =>
+                    parentMatches ||
+                    normalizeTr(sub.name).includes(normalizedSidebarQuery) ||
+                    normalizeTr(sub.href).includes(normalizedSidebarQuery)
+                );
+                if (matchedSubs.length === 0) return null;
+                return { ...item, subItems: matchedSubs };
+              }
+
+              return parentMatches || normalizeTr(item.href || "").includes(normalizedSidebarQuery)
+                ? item
+                : null;
+            })
+            .filter(Boolean) as NavItem[];
+
+          return { ...group, items: matchedItems };
+        })
+        .filter((group) => group.items.length > 0);
+
+  const firstMatchedSidebarHref = (() => {
+    if (!isSidebarSearching) return null;
+    for (const group of displayedNavGroups) {
+      for (const item of group.items) {
+        if (item.subItems && item.subItems.length > 0) return item.subItems[0].href;
+        if (item.href) return item.href;
+      }
+    }
+    return null;
+  })();
+
+  const allFlatNavLinks = filteredNavGroups.flatMap((g) =>
+    g.items.flatMap((item) => {
+      if (item.subItems) {
+        return item.subItems.map((sub) => ({
+          name: sub.name,
+          href: sub.href,
+          icon: sub.icon,
+          desc: `${g.label} › ${item.name}`,
+          keywords: `${sub.name} ${item.name} ${item.description || ""} ${g.label} ${sub.href}`,
+        }));
+      }
+      return [
+        {
+          name: item.name,
+          href: item.href || "/admin",
+          icon: item.icon,
+          desc: `${g.label} › ${item.description || "Genel Özet"}`,
+          keywords: `${item.name} ${item.description || ""} ${g.label} ${item.href || ""}`,
+        },
+      ];
+    })
+  );
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
@@ -995,9 +1080,71 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
         </div>
 
+        {/* Sidebar Quick Menu Search */}
+        <div className="px-3 pt-3 pb-2 border-b border-slate-100 shrink-0">
+          {!isCollapsed ? (
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                ref={sidebarSearchInputRef}
+                type="text"
+                value={sidebarSearch}
+                onChange={(e) => setSidebarSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && firstMatchedSidebarHref) {
+                    e.preventDefault();
+                    router.push(firstMatchedSidebarHref);
+                    setSidebarSearch("");
+                    setSidebarOpen(false);
+                  } else if (e.key === "Escape") {
+                    setSidebarSearch("");
+                  }
+                }}
+                placeholder="Menüde ara... (örn: fatura, sosyal)"
+                aria-label="Menüde ara"
+                className="w-full pl-8 pr-7 py-2 text-xs font-medium bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-500/15 rounded-xl text-slate-700 placeholder:text-slate-400 outline-none transition-all"
+              />
+              {sidebarSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarSearch("")}
+                  title="Aramayı temizle"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 rounded-md transition"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                toggleSidebarCollapse();
+                setTimeout(() => sidebarSearchInputRef.current?.focus(), 200);
+              }}
+              title="Menüde Ara"
+              className="w-full flex items-center justify-center p-2.5 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-4 custom-scrollbar">
-          {filteredNavGroups.map((group) => (
+        <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4 custom-scrollbar">
+          {displayedNavGroups.length === 0 ? (
+            <div className="py-8 px-3 text-center">
+              <Search className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-semibold text-slate-500">Eşleşen menü bulunamadı</p>
+              <button
+                type="button"
+                onClick={() => setSidebarSearch("")}
+                className="mt-2 text-[11px] font-bold text-orange-600 hover:text-orange-700 underline"
+              >
+                Aramayı Temizle
+              </button>
+            </div>
+          ) : displayedNavGroups.map((group) => (
             <div key={group.label}>
               {!isCollapsed ? (
                 <div className="text-[10px] tracking-[0.15em] font-extrabold text-slate-400 uppercase px-2 mb-2 select-none">
@@ -1010,7 +1157,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const ItemIcon = item.icon;
-                  const isExpanded = expandedItems.includes(item.name);
+                  const isExpanded = isSidebarSearching || expandedItems.includes(item.name);
                   const hasActiveSub = item.subItems?.some((sub) => isActive(sub.href)) ?? false;
                   const isParentActive = item.href ? isActive(item.href) : hasActiveSub;
 
@@ -1408,6 +1555,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {(() => {
+                    const normQ = normalizeTr(searchQuery);
+                    const matchedMenus = allFlatNavLinks.filter((m) =>
+                      normalizeTr(m.keywords).includes(normQ)
+                    );
+                    if (matchedMenus.length === 0) return null;
+                    return (
+                      <div className="space-y-2">
+                        <div className="text-[10px] tracking-widest font-extrabold text-slate-400 uppercase flex items-center gap-1.5">
+                          <LayoutDashboard className="w-3 h-3 text-orange-500" />
+                          Menüler & Özellikler ({matchedMenus.length})
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                          {matchedMenus.slice(0, 8).map((menuItem) => {
+                            const MenuIcon = menuItem.icon;
+                            return (
+                              <button
+                                key={menuItem.name + menuItem.href}
+                                onClick={() => {
+                                  router.push(menuItem.href);
+                                  setCommandPaletteOpen(false);
+                                  setSearchQuery("");
+                                }}
+                                className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-orange-50 hover:border-orange-300 text-left transition"
+                              >
+                                <div className="w-7 h-7 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
+                                  <MenuIcon className="w-3.5 h-3.5 text-orange-500" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-700 truncate">{menuItem.name}</p>
+                                  <p className="text-[9px] text-slate-400 truncate">{menuItem.desc}</p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {searchResults.orders.length > 0 && (
                     <div className="space-y-2">
                       <div className="text-[10px] tracking-widest font-extrabold text-slate-400 uppercase flex items-center gap-1.5">
@@ -1515,7 +1702,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
                   )}
 
-                  {searchResults.orders.length === 0 &&
+                  {allFlatNavLinks.filter((m) => normalizeTr(m.keywords).includes(normalizeTr(searchQuery))).length === 0 &&
+                    searchResults.orders.length === 0 &&
                     searchResults.products.length === 0 &&
                     searchResults.dealers.length === 0 && (
                       <div className="py-12 text-center text-slate-400 text-xs flex flex-col items-center gap-2">

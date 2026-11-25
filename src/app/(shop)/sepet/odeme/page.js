@@ -46,10 +46,11 @@ export default function Odeme() {
   const [errorMsg, setErrorMsg] = useState("");
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "info" });
   const [bankAccounts, setBankAccounts] = useState([]);
+  const [banksLoading, setBanksLoading] = useState(true);
   const [siteSettings, setSiteSettings] = useState(null);
   const [paytrToken, setPaytrToken] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [copiedIban, setCopiedIban] = useState(false);
+  const [copiedIban, setCopiedIban] = useState("");
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const trackedCheckoutRef = useRef(false);
 
@@ -84,11 +85,16 @@ export default function Odeme() {
     return () => clearTimeout(timer);
   }, [cartItems, subtotal, formData.email, formData.phone, formData.firstName, formData.lastName, session]);
 
-  const handleCopyIban = (iban) => {
+  const formatIbanDisplay = (raw) => {
+    const clean = String(raw || "").replace(/\s+/g, "").toUpperCase();
+    return clean.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const handleCopyIban = (iban, key = "default") => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText((iban || "").replace(/\s+/g, ""));
-      setCopiedIban(true);
-      setTimeout(() => setCopiedIban(false), 2500);
+      navigator.clipboard.writeText((iban || "").replace(/\s+/g, "").toUpperCase());
+      setCopiedIban(key);
+      setTimeout(() => setCopiedIban(""), 2500);
     }
   };
 
@@ -104,22 +110,37 @@ export default function Odeme() {
     }
   }, []);
 
-  // Fetch Bank Accounts and CMS Settings from management backend
+  // Fetch Bank Accounts and CMS Settings live (no-store + refresh on tab focus)
   useEffect(() => {
-    fetch(`/api/settings?t=${Date.now()}`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data) setSiteSettings(data);
-      })
-      .catch((e) => console.error("Error loading settings:", e));
+    const loadLiveFinanceData = () => {
+      const ts = Date.now();
+      fetch(`/api/settings?t=${ts}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data) setSiteSettings(data);
+        })
+        .catch((e) => console.error("Error loading settings:", e));
 
-    fetch("/api/accounting/banks")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        const list = Array.isArray(data) ? data : (data?.data || []);
-        setBankAccounts(list);
-      })
-      .catch((e) => console.error("Error loading bank accounts:", e));
+      fetch(`/api/accounting/banks?t=${ts}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (data?.data || []);
+          setBankAccounts(list);
+        })
+        .catch((e) => console.error("Error loading bank accounts:", e))
+        .finally(() => setBanksLoading(false));
+    };
+
+    loadLiveFinanceData();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") loadLiveFinanceData();
+    };
+    window.addEventListener("focus", loadLiveFinanceData);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("focus", loadLiveFinanceData);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
 
   const [allProducts, setAllProducts] = useState([]);
@@ -1181,95 +1202,129 @@ export default function Odeme() {
                 </div>
                 
                 <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-2xs space-y-4">
-                  {bankAccounts && bankAccounts.length > 0 ? (
-                    bankAccounts.map((bank, idx) => (
-                      <div key={bank.id || idx} className={`space-y-3 ${idx > 0 ? "pt-4 border-t border-slate-100 dark:border-slate-800" : ""}`}>
+                  {(() => {
+                    const ownerFullName = [siteSettings?.companyOwnerName, siteSettings?.companyOwnerSurname]
+                      .filter(Boolean)
+                      .join(" ")
+                      .trim();
+                    const legalRecipient =
+                      ownerFullName ||
+                      siteSettings?.companyName ||
+                      siteSettings?.companyNameField ||
+                      "PEKEFE İSPİR YÖRESEL ÜRÜNLER";
+
+                    if (banksLoading) {
+                      return (
+                        <div className="animate-pulse space-y-3 py-2">
+                          <div className="h-4 bg-slate-100 rounded w-1/2" />
+                          <div className="h-12 bg-slate-100 rounded-xl w-full" />
+                        </div>
+                      );
+                    }
+
+                    if (bankAccounts && bankAccounts.length > 0) {
+                      return bankAccounts.map((bank, idx) => {
+                        const rowKey = String(bank.id || idx);
+                        const rawIban = bank.iban || siteSettings?.bankIban || "";
+                        const recipientName = bank.accountHolder || legalRecipient;
+                        return (
+                          <div key={rowKey} className={`space-y-3 ${idx > 0 ? "pt-4 border-t border-slate-100 dark:border-slate-800" : ""}`}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-slate-400 text-[10px] block uppercase font-bold">Banka / Şube</span>
+                                <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                                  {bank.name}{bank.branch ? ` - ${bank.branch}` : ""}
+                                  {bank.currency && bank.currency !== "TRY" ? ` (${bank.currency})` : ""}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400 text-[10px] block uppercase font-bold">Alıcı Ünvanı</span>
+                                <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                                  {recipientName}
+                                </span>
+                              </div>
+                            </div>
+
+                            {rawIban && (
+                              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
+                                  <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all break-all">
+                                    {formatIbanDisplay(rawIban)}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyIban(rawIban, rowKey)}
+                                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
+                                >
+                                  {copiedIban === rowKey ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span className="text-emerald-600 font-black">Kopyalandı!</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="material-symbols-outlined text-sm">content_copy</span>
+                                      <span>Kopyala</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    }
+
+                    const fallbackIban = siteSettings?.bankIban || "";
+                    return (
+                      <div className="space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                           <div>
                             <span className="text-slate-400 text-[10px] block uppercase font-bold">Banka / Şube</span>
                             <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
-                              {bank.name} {bank.branch ? `- ${bank.branch}` : ""}
+                              {siteSettings?.bankName || "Banka bilgisi tanımlanmadı"}
                             </span>
                           </div>
                           <div>
                             <span className="text-slate-400 text-[10px] block uppercase font-bold">Alıcı Ünvanı</span>
                             <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
-                              {siteSettings?.companyName || siteSettings?.companyNameField || "İlhan EFE - Pekefe Gıda"}
+                              {legalRecipient}
                             </span>
                           </div>
                         </div>
 
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
-                          <div>
-                            <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
-                            <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all">
-                              {bank.iban || "TR02 0001 2001 3350 0009 1000 39"}
-                            </span>
+                        {fallbackIban && (
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
+                              <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all break-all">
+                                {formatIbanDisplay(fallbackIban)}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyIban(fallbackIban, "fallback")}
+                              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
+                            >
+                              {copiedIban === "fallback" ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="text-emerald-600 font-black">Kopyalandı!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="material-symbols-outlined text-sm">content_copy</span>
+                                  <span>Kopyala</span>
+                                </>
+                              )}
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyIban(bank.iban || "TR020001200133500009100039")}
-                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
-                          >
-                            {copiedIban ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                <span className="text-emerald-600 font-black">Kopyalandı!</span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="material-symbols-outlined text-sm">content_copy</span>
-                                <span>Kopyala</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
+                        )}
                       </div>
-                    ))
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-slate-400 text-[10px] block uppercase font-bold">Banka / Şube</span>
-                          <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
-                            {siteSettings?.bankName || "Halkbank - İspir Şubesi"}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 text-[10px] block uppercase font-bold">Alıcı Ünvanı</span>
-                          <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
-                            {siteSettings?.companyName || siteSettings?.companyNameField || "İlhan EFE"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase font-bold">IBAN Numarası</span>
-                          <span className="font-mono font-black text-sm sm:text-base text-[#6b1d2f] dark:text-amber-400 tracking-wider select-all">
-                            {siteSettings?.bankIban || "TR02 0001 2001 3350 0009 1000 39"}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyIban(siteSettings?.bankIban || "TR020001200133500009100039")}
-                          className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs active:scale-95"
-                        >
-                          {copiedIban ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                              <span className="text-emerald-600 font-black">Kopyalandı!</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="material-symbols-outlined text-sm">content_copy</span>
-                              <span>Kopyala</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
 
                 <div className="flex items-start gap-2 text-xs text-amber-900/90 dark:text-amber-300 font-medium">

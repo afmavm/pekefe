@@ -60,17 +60,20 @@ const createBankSchema = z.object({
 });
 
 export async function GET() {
+  const noCacheHeaders = {
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  };
   try {
     const banks = await withTimeout(prisma.bank.findMany({ orderBy: { name: "asc" } }), 3000);
     if (Array.isArray(banks) && banks.length > 0) {
       saveLocalBanks(banks);
-      return NextResponse.json({ success: true, data: banks });
+      return NextResponse.json({ success: true, data: banks }, { headers: noCacheHeaders });
     }
   } catch (err) {
     console.warn("Prisma banks unreachable, using local JSON fallback");
   }
   const localBanks = getLocalBanks();
-  return NextResponse.json({ success: true, data: localBanks });
+  return NextResponse.json({ success: true, data: localBanks }, { headers: noCacheHeaders });
 }
 
 export async function POST(request: Request) {

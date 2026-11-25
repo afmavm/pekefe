@@ -111,6 +111,36 @@ function writeLocalStore(cfg: RetentionConfig): void {
   }
 }
 
+async function persistRetentionConfig(next: RetentionConfig): Promise<void> {
+  writeLocalStore(next);
+
+  try {
+    await withTimeout(
+      prisma.integration.upsert({
+        where: { id: INTEGRATION_ID },
+        update: {
+          status: next.enabled ? 'active' : 'paused',
+          lastSync: next.lastCronRun,
+          settings: next as any,
+        },
+        create: {
+          id: INTEGRATION_ID,
+          name: 'PEKEFE Retention Engine',
+          type: 'retention',
+          status: next.enabled ? 'active' : 'paused',
+          lastSync: next.lastCronRun,
+          logo: 'retention',
+          settings: next as any,
+        },
+      }),
+      2000,
+      null
+    );
+  } catch (err) {
+    console.warn('[RETENTION] DB save warning:', err);
+  }
+}
+
 export async function getRetentionConfig(): Promise<RetentionConfig> {
   const defaults = createDefaultConfig();
   let dbData: Partial<RetentionConfig> | null = null;
@@ -152,9 +182,9 @@ export async function getRetentionConfig(): Promise<RetentionConfig> {
         : [],
   };
 
-  // Ensure a persistent cronSecret is saved once generated
+  // Persist newly generated cronSecret directly without re-entering getRetentionConfig
   if (!dbData?.cronSecret && !localData?.cronSecret) {
-    await saveRetentionConfig(merged).catch(() => {});
+    await persistRetentionConfig(merged).catch(() => {});
   }
 
   return merged;
@@ -173,30 +203,7 @@ export async function saveRetentionConfig(
     logs: (patch.logs ?? current.logs).slice(0, 150),
   };
 
-  writeLocalStore(next);
-
-  try {
-    await prisma.integration.upsert({
-      where: { id: INTEGRATION_ID },
-      update: {
-        status: next.enabled ? 'active' : 'paused',
-        lastSync: next.lastCronRun,
-        settings: next as any,
-      },
-      create: {
-        id: INTEGRATION_ID,
-        name: 'PEKEFE Retention Engine',
-        type: 'retention',
-        status: next.enabled ? 'active' : 'paused',
-        lastSync: next.lastCronRun,
-        logo: 'retention',
-        settings: next as any,
-      },
-    });
-  } catch (err) {
-    console.warn('[RETENTION] DB save warning:', err);
-  }
-
+  await persistRetentionConfig(next);
   return next;
 }
 

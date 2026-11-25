@@ -7,6 +7,7 @@ import { Toast } from "@/components/ui/Toast";
 import { getCart, updateCartQty, removeFromCart, addToCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { getSettings, fetchLiveSettings, DEFAULT_SETTINGS } from "@/utils/settingsStorage";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
+import { parseActiveShippingCarriers, calculateShippingSummary } from "@/lib/shipping-calculator";
 
 export default function Sepet() {
   const [cartItems, setCartItems] = useState([]);
@@ -286,28 +287,12 @@ export default function Sepet() {
     });
   };
 
-  const parsedCarriers = useMemo(() => {
-    if (!settings?.shippingCarriers) return [];
-    let list = settings.shippingCarriers;
-    if (typeof list === "string") {
-      try {
-        list = JSON.parse(list);
-      } catch (e) {
-        list = [];
-      }
-    }
-    if (Array.isArray(list) && list.length > 0) {
-      return list.filter((c) => c.isActive !== false);
-    }
-    return [];
-  }, [settings]);
+  const parsedCarriers = useMemo(
+    () => parseActiveShippingCarriers(settings?.shippingCarriers),
+    [settings]
+  );
 
   const defaultCarrier = parsedCarriers[0] || null;
-  const isReceiverPay = Boolean(
-    defaultCarrier?.pricingType === "receiver_pay" ||
-    defaultCarrier?.pricingType === "buyer_pays" ||
-    defaultCarrier?.isReceiverPay === true
-  );
 
   const discountAmount = useMemo(() => {
     if (!appliedCoupon || subtotal <= 0) return 0;
@@ -319,14 +304,28 @@ export default function Sepet() {
     }
     return Math.min(subtotal, Number(appliedCoupon.discountAmount || 0));
   }, [appliedCoupon, subtotal]);
+
   const isCouponFreeShipping = appliedCoupon?.type === "free_shipping";
-  const shippingThreshold = Number(defaultCarrier?.freeThreshold ?? settings?.shippingThreshold ?? 5000);
-  const baseShippingFee = Number(defaultCarrier?.fallbackFee ?? settings?.shippingFee ?? 150);
-  const isShippingFree = isCouponFreeShipping || (subtotal >= shippingThreshold);
-  const shippingCost = subtotal === 0 || isReceiverPay ? 0 : isShippingFree ? 0 : baseShippingFee;
+  const shippingSummary = useMemo(
+    () =>
+      calculateShippingSummary({
+        carrier: defaultCarrier,
+        subtotal,
+        cartItems,
+        siteSettings: settings,
+        isCouponFreeShipping,
+      }),
+    [defaultCarrier, subtotal, cartItems, settings, isCouponFreeShipping]
+  );
+
+  const isReceiverPay = shippingSummary.isReceiverPay;
+  const shippingThreshold = shippingSummary.freeThreshold;
+  const baseShippingFee = shippingSummary.carrierBaseFee;
+  const isShippingFree = shippingSummary.isShippingFree;
+  const shippingCost = shippingSummary.shippingCost;
   const total = Math.max(0, subtotal - discountAmount + shippingCost);
-  const remainingForFreeShipping = Math.max(0, shippingThreshold - subtotal);
-  const progressPercent = Math.min(100, (subtotal / shippingThreshold) * 100);
+  const remainingForFreeShipping = shippingSummary.remainingForFreeShipping;
+  const progressPercent = shippingSummary.progressPercent;
 
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
@@ -551,7 +550,9 @@ export default function Sepet() {
                         <span className="text-amber-800 dark:text-amber-300 font-extrabold px-2.5 py-0.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/80 rounded-md text-[11px]">
                           Kapıda Alıcı Öder
                         </span>
-                      ) : shippingCost === 0 ? (
+                      ) : subtotal <= 0 ? (
+                        <span className="font-mono font-bold text-slate-400">₺0</span>
+                      ) : isShippingFree ? (
                         <span className="text-emerald-700 dark:text-emerald-400 font-bold">Ücretsiz</span>
                       ) : (
                         <span className="font-mono font-bold text-slate-900 dark:text-white">

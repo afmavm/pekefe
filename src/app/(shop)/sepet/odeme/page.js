@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { Toast } from "@/components/ui/Toast";
 import { getCart, clearCart, addToCart, clearAppliedCoupon } from "@/utils/cartStorage";
 import { trackBeginCheckout } from "@/lib/gtm-ecommerce";
+import { calculateShippingSummary } from "@/lib/shipping-calculator";
 import { getProducts, fetchLiveProducts } from "@/utils/productsStorage";
 import { turkeyLocations } from "@/data/turkey-locations";
 import { CreditCard, Landmark, FileText, Truck, ShieldCheck, Check, Scale, Lock } from "lucide-react";
@@ -439,24 +440,25 @@ export default function Odeme() {
          selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr'))
   ) || activeCarriers[0];
 
-  const isCurrentCarrierAlwaysFree = Boolean(
-    currentCarrierObj?.isFreeShipping === true ||
-    currentCarrierObj?.isFreeShipping === "true" ||
-    currentCarrierObj?.isFree === true ||
-    currentCarrierObj?.alwaysFree === true ||
-    currentCarrierObj?.pricingType === "free"
+  const isCouponFreeShipping = appliedCoupon?.type === "free_shipping";
+  const currentShippingSummary = useMemo(
+    () =>
+      calculateShippingSummary({
+        carrier: currentCarrierObj,
+        subtotal,
+        cartItems,
+        siteSettings,
+        isCouponFreeShipping,
+      }),
+    [currentCarrierObj, subtotal, cartItems, siteSettings, isCouponFreeShipping]
   );
 
-  const isCurrentCarrierReceiverPay = Boolean(
-    currentCarrierObj?.pricingType === "receiver_pay" ||
-    currentCarrierObj?.pricingType === "buyer_pays" ||
-    currentCarrierObj?.isReceiverPay === true
-  );
-
-  const carrierFreeThreshold = Number(currentCarrierObj?.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000);
-  const carrierFee = getCarrierTierFee(currentCarrierObj, totalCartDesi);
-  const isShippingFree = isCurrentCarrierAlwaysFree || (subtotal >= carrierFreeThreshold);
-  const shippingCost = subtotal === 0 ? 0 : (isCurrentCarrierReceiverPay ? 0 : (isShippingFree ? 0 : carrierFee));
+  const isCurrentCarrierAlwaysFree = currentShippingSummary.isCarrierAlwaysFree;
+  const isCurrentCarrierReceiverPay = currentShippingSummary.isReceiverPay;
+  const carrierFreeThreshold = currentShippingSummary.freeThreshold;
+  const carrierFee = currentShippingSummary.carrierBaseFee;
+  const isShippingFree = currentShippingSummary.isShippingFree;
+  const shippingCost = currentShippingSummary.shippingCost;
 
   // Coupon Discount (Dynamically recalculated from current subtotal — never stale)
   const couponDiscount = useMemo(() => {
@@ -1003,20 +1005,16 @@ export default function Odeme() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeCarriers.map((c) => {
-                  const fee = getCarrierTierFee(c, totalCartDesi);
-                  const isCarrierAlwaysFree = Boolean(
-                    c.isFreeShipping === true ||
-                    c.isFreeShipping === "true" ||
-                    c.isFree === true ||
-                    c.alwaysFree === true ||
-                    c.pricingType === "free"
-                  );
-                  const isReceiverPay = Boolean(
-                    c.pricingType === "receiver_pay" ||
-                    c.pricingType === "buyer_pays" ||
-                    c.isReceiverPay === true
-                  );
-                  const isFree = !isReceiverPay && (isCarrierAlwaysFree || (subtotal >= Number(c.freeThreshold ?? siteSettings?.shippingThreshold ?? 5000)));
+                  const summary = calculateShippingSummary({
+                    carrier: c,
+                    subtotal,
+                    cartItems,
+                    siteSettings,
+                    isCouponFreeShipping,
+                  });
+                  const fee = summary.carrierBaseFee;
+                  const isReceiverPay = summary.isReceiverPay;
+                  const isFree = summary.isShippingFree;
                   const isSelected = selectedCarrier.toLocaleLowerCase('tr').includes(c.name.toLocaleLowerCase('tr')) || c.name.toLocaleLowerCase('tr').includes(selectedCarrier.toLocaleLowerCase('tr'));
                   const logo = getCarrierLogo(c);
 
@@ -1524,7 +1522,9 @@ export default function Odeme() {
                       <span className="text-amber-700 font-bold px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md text-xs">
                         Kapıda Alıcı Öder
                       </span>
-                    ) : shippingCost === 0 ? (
+                    ) : subtotal <= 0 || cartItems.length === 0 ? (
+                      <span className="text-slate-400 font-bold">₺0</span>
+                    ) : isShippingFree ? (
                       <span className="text-emerald-600 font-bold">ÜCRETSİZ</span>
                     ) : (
                       `₺${shippingCost.toLocaleString("tr-TR")}`

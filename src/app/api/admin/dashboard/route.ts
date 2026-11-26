@@ -359,13 +359,14 @@ export async function GET(request: Request) {
 
     const combinedProducts = Array.from(productMap.values());
 
-    // Kritik stok ve tükenen ürünler (Sayaç ve Liste %100 aynı kuralı kullanır)
-    const criticalStocksList: any[] = [];
-    const seenCriticalIds = new Set<string>();
+    // Kritik stok ve tükenen ürünler (Tükenenler ile kritik stoklar çakışmaz)
+    const depletedProductsList = combinedProducts
+      .filter((p) => p.stock <= 0)
+      .map((p) => ({ id: p.id, name: p.name, sku: p.sku }));
 
+    const criticalStocksList: any[] = [];
     for (const p of combinedProducts) {
-      if (p.stock <= p.criticalLimit) {
-        seenCriticalIds.add(p.id);
+      if (p.stock > 0 && p.stock <= p.criticalLimit) {
         criticalStocksList.push({
           id: p.id,
           productName: p.name,
@@ -376,27 +377,23 @@ export async function GET(request: Request) {
         });
       }
     }
-    const criticalStockCount = criticalStocksList.length;
+    const criticalStockCount = depletedProductsList.length + criticalStocksList.length;
 
-    const depletedProductsList = combinedProducts
-      .filter((p) => p.stock <= 0)
-      .map((p) => ({ id: p.id, name: p.name, sku: p.sku }));
-
-    // Depo dağılımı ve stok değerleme (Maliyet bazlı tutarlı hesaplama)
-    const totalStockValue = combinedProducts.reduce(
-      (sum, p) => sum + p.stock * (p.cost > 0 ? p.cost : p.price),
-      0
-    );
+    // Depo dağılımı ve stok değerleme (Yalnızca aktif/silinmemiş ürünler ve tek tutarlı birim maliyet formülü)
+    const getUnitValuation = (costRaw: any, priceRaw: any) => {
+      const c = typeof costRaw?.toNumber === 'function' ? costRaw.toNumber() : Number(costRaw || 0);
+      const p = typeof priceRaw?.toNumber === 'function' ? priceRaw.toNumber() : Number(priceRaw || 0);
+      return c > 0 ? c : p;
+    };
 
     const warehouseDistribution =
       warehouses && warehouses.length > 0
         ? warehouses.map((w: any) => {
-            const totalStock = (w.locations || []).reduce((sum: number, l: any) => sum + Number(l.stock || 0), 0);
-            const totalVal = (w.locations || []).reduce(
+            const activeLocs = (w.locations || []).filter((l: any) => l?.product && !l.product.isDeleted);
+            const totalStock = activeLocs.reduce((sum: number, l: any) => sum + Number(l.stock || 0), 0);
+            const totalVal = activeLocs.reduce(
               (sum: number, l: any) =>
-                sum +
-                Number(l.stock || 0) *
-                  (l.product?.cost?.toNumber ? l.product.cost.toNumber() : Number(l.product?.cost || 0)),
+                sum + Number(l.stock || 0) * getUnitValuation(l.product?.cost, l.product?.price),
               0
             );
             return {
@@ -404,7 +401,7 @@ export async function GET(request: Request) {
               name: w.name,
               code: w.code,
               stock: totalStock,
-              value: totalVal,
+              value: Math.round(totalVal),
             };
           })
         : [
@@ -413,9 +410,14 @@ export async function GET(request: Request) {
               name: 'İspir Üretim & Merkez Depo',
               code: 'WH-MRKZ',
               stock: combinedProducts.reduce((s, p) => s + p.stock, 0),
-              value: totalStockValue,
+              value: Math.round(
+                combinedProducts.reduce((sum, p) => sum + p.stock * getUnitValuation(p.cost, p.price), 0)
+              ),
             },
           ];
+
+    // Toplam stok değerlemesi depo satırlarının toplamıyla %100 birebir tutarlı
+    const totalStockValue = warehouseDistribution.reduce((sum: number, w: any) => sum + Number(w.value || 0), 0);
 
     const transformedMovements = (recentMovements || []).map((m: any) => ({
       id: m.id,
@@ -428,12 +430,45 @@ export async function GET(request: Request) {
       description: m.description,
     }));
 
-    // Ciro, Kâr & Ortalama Sepet (Seçilen aralıkta aktif siparişler)
+    // Ciro, Kâr & Ortalama Sepet (Seçilen aralıkta aktif siparişler + gerçek ürün maliyeti)
     const totalRevenue = activeOrdersInRange.reduce((sum, o) => sum + Number(o.total || 0), 0);
     const orderCount = activeOrdersInRange.length;
     const averageOrderValue = orderCount > 0 ? Math.round(totalRevenue / orderCount) : 0;
-    const totalCost = totalRevenue * 0.55;
-    const totalProfit = Math.max(0, totalRevenue - totalCost);
+
+    // Gerçek ürün maliyetine göre COGS hesaplama (maliyet girilmemiş kalemlerde %55 tahmini fallback)
+    const productById = new Map(combinedProducts.map((p) => [String(p.id), p]));
+    const productByName = new Map(combinedProducts.map((p) => [String(p.name || '').toLowerCase(), p]));
+    let realCostItems = 0;
+    let totalItemCount = 0;
+    let computedCost = 0;
+
+    for (const order of activeOrdersInRange) {
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        let orderItemsRev = 0;
+        let orderItemsCost = 0;
+        for (const it of order.items) {
+          const qty = Number(it.quantity || 1);
+          const itemRev = Number(it.price || it.total || 0) * qty;
+          orderItemsRev += itemRev;
+          totalItemCount += 1;
+          const matched =
+            productById.get(String(it.productId || it.id || '')) ||
+            productByName.get(String(it.name || it.productName || '').toLowerCase());
+          if (matched && Number(matched.cost || 0) > 0) {
+            orderItemsCost += Number(matched.cost) * qty;
+            realCostItems += 1;
+          } else {
+            orderItemsCost += itemRev * 0.55;
+          }
+        }
+        computedCost += orderItemsRev > 0 ? orderItemsCost : Number(order.total || 0) * 0.55;
+      } else {
+        computedCost += Number(order.total || 0) * 0.55;
+      }
+    }
+
+    const hasRealCostData = totalItemCount > 0 && realCostItems > 0;
+    const totalProfit = Math.max(0, totalRevenue - computedCost);
     const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
 
     // Gerçek günlük satış grafiği
@@ -458,16 +493,8 @@ export async function GET(request: Request) {
     }, {});
     const barChartData = Object.entries(channelRevenue).map(([name, revenue]) => ({ name, revenue }));
 
-    // En çok satan ürünler (fatura + aktif siparişlerden gerçek hesaplama)
+    // En çok satan ürünler (seçilen aralıktaki aktif siparişlerden çift sayım olmadan)
     const salesMap: Record<string, { quantity: number; revenue: number }> = {};
-    (invoiceItems || []).forEach((item: any) => {
-      if (!salesMap[item.name]) salesMap[item.name] = { quantity: 0, revenue: 0 };
-      salesMap[item.name].quantity += Number(item.quantity || 0);
-      salesMap[item.name].revenue +=
-        typeof item.totalAmount?.toNumber === 'function'
-          ? item.totalAmount.toNumber()
-          : Number(item.totalAmount || 0);
-    });
 
     activeOrdersInRange.forEach((order) => {
       if (Array.isArray(order.items) && order.items.length > 0) {
@@ -523,12 +550,14 @@ export async function GET(request: Request) {
     const b2cOrderCount = activeOrdersInRange.filter((o) => o.type === 'B2C').length;
     const otherOrderCount = Math.max(0, activeOrdersInRange.length - (b2bOrderCount + b2cOrderCount));
 
-    // Son 6 ayın gerçek aktif sipariş trendi
-    const trendList: Array<{ year: number; month: number; count: number }> = [];
+    // Son 6 ayın gerçek aktif sipariş trendi ve dinamik ay etiketleri
+    const TR_MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const trendList: Array<{ year: number; month: number; label: string; count: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
+      d.setDate(1);
       d.setMonth(d.getMonth() - i);
-      trendList.push({ year: d.getFullYear(), month: d.getMonth(), count: 0 });
+      trendList.push({ year: d.getFullYear(), month: d.getMonth(), label: TR_MONTHS[d.getMonth()], count: 0 });
     }
     allActiveOrders.forEach((o) => {
       const oDate = new Date(o.date);
@@ -538,6 +567,7 @@ export async function GET(request: Request) {
       if (match) match.count++;
     });
     const monthlyOrdersTrend = trendList.map((t) => t.count);
+    const monthlyOrdersLabels = trendList.map((t) => t.label);
 
     // Entegrasyonlar
     const activeIntegrationCount = (integrations || []).filter(
@@ -614,6 +644,7 @@ export async function GET(request: Request) {
           activeIntegrationCount,
           profitMargin,
           totalProfit: Math.round(totalProfit),
+          hasRealCostData,
           totalAR,
           totalAP,
           pendingIncomingInvoices,
@@ -624,6 +655,7 @@ export async function GET(request: Request) {
           b2cOrderCount,
           otherOrderCount,
           monthlyOrdersTrend,
+          monthlyOrdersLabels,
         },
       },
       {

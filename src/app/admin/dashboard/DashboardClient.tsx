@@ -594,7 +594,9 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
           <p className="text-2xl font-extrabold text-emerald-700">
             ₺{(kpis.totalProfit || 0).toLocaleString("tr-TR", { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[10px] text-slate-400 mt-1 font-semibold">%55 maliyet tahmini ile</p>
+          <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+            {kpis.hasRealCostData ? "Gerçek ürün maliyetine göre" : "%55 tahmini maliyet ile"}
+          </p>
         </div>
 
         {/* Profit Margin */}
@@ -711,16 +713,19 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
           <div className="mt-4">
             <span className="text-3xl font-black text-slate-900">{kpis.orderCount || 0} Sipariş</span>
             <p className="text-xs text-slate-400 mt-1">
-              {kpis.cancelledOrderCount > 0 ? `${kpis.cancelledOrderCount} iptal sipariş hariç` : "Son 30 günde tamamlanan satış"}
+              {kpis.cancelledOrderCount > 0 ? `${kpis.cancelledOrderCount} iptal sipariş hariç` : "Bu ay tamamlanan aktif sipariş"}
             </p>
           </div>
           <div className="h-[70px] mt-4">
             <MiniLineChart data={monthlyOrdersTrend} color="#f97316" />
           </div>
           <div className="flex justify-between mt-2 text-[9px] text-slate-400 font-bold uppercase">
-            <span>Oca</span>
-            <span>May</span>
-            <span>Kas</span>
+            {(kpis.monthlyOrdersLabels && kpis.monthlyOrdersLabels.length === 6
+              ? kpis.monthlyOrdersLabels
+              : ["6 Ay Önce", "5 Ay", "4 Ay", "3 Ay", "Geçen Ay", "Bu Ay"]
+            ).map((lbl: string, i: number) => (
+              <span key={`${lbl}-${i}`}>{lbl}</span>
+            ))}
           </div>
         </div>
       </div>

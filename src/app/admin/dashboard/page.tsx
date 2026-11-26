@@ -180,31 +180,54 @@ async function getInitialDashboardData() {
 
     const criticalStockCount = finalProducts.filter(p => Number(p.stock) <= Number(p.criticalLimit || 5)).length;
 
-    const totalRevenue = activeOrders.reduce((sum, o: any) => {
+    const totalRevenue = monthOrders.reduce((sum, o: any) => {
       const val = typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
       return sum + val;
     }, 0);
 
-    const averageOrderValue = activeOrders.length > 0 ? Math.round(totalRevenue / activeOrders.length) : 0;
-    const totalProfit = Math.max(0, totalRevenue - (totalRevenue * 0.55));
+    const averageOrderValue = monthOrders.length > 0 ? Math.round(totalRevenue / monthOrders.length) : 0;
+
+    // Gerçek ürün maliyetine göre net kâr (maliyet girilmemiş kalemlerde %55 fallback)
+    const prodById = new Map(finalProducts.map((p: any) => [String(p.id), p]));
+    const prodByName = new Map(finalProducts.map((p: any) => [String(p.name || '').toLowerCase(), p]));
+    let ssrRealCostItems = 0;
+    let ssrTotalItems = 0;
+    let ssrComputedCost = 0;
+    for (const o of monthOrders as any[]) {
+      if (Array.isArray(o.items) && o.items.length > 0) {
+        let itemsRev = 0;
+        let itemsCost = 0;
+        for (const it of o.items) {
+          const qty = Number(it.quantity || 1);
+          const rev = Number(it.price || it.total || 0) * qty;
+          itemsRev += rev;
+          ssrTotalItems += 1;
+          const m = prodById.get(String(it.productId || it.id || '')) || prodByName.get(String(it.name || it.productName || '').toLowerCase());
+          const mCost = typeof m?.cost?.toNumber === 'function' ? m.cost.toNumber() : Number(m?.cost || 0);
+          if (m && mCost > 0) {
+            itemsCost += mCost * qty;
+            ssrRealCostItems += 1;
+          } else {
+            itemsCost += rev * 0.55;
+          }
+        }
+        const orderTotal = typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
+        ssrComputedCost += itemsRev > 0 ? itemsCost : orderTotal * 0.55;
+      } else {
+        const orderTotal = typeof o.total?.toNumber === 'function' ? o.total.toNumber() : Number(o.total || o.amount || 0);
+        ssrComputedCost += orderTotal * 0.55;
+      }
+    }
+    const hasRealCostData = ssrTotalItems > 0 && ssrRealCostItems > 0;
+    const totalProfit = Math.max(0, totalRevenue - ssrComputedCost);
     const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
 
-    // ERP Stok & Depo Değerlemeleri (Maliyet bazlı tutarlı hesaplama)
-    const totalStockValue = finalProducts.reduce((sum, p) => {
-      const unitCost = Number(p.cost || 0) > 0 ? Number(p.cost) : Number(p.price || 0);
-      return sum + (Number(p.stock || 0) * unitCost);
-    }, 0);
-
-    const criticalStocksList = finalProducts
-      .filter(p => Number(p.stock) <= Number(p.criticalLimit || 5))
-      .map(p => ({
-        id: String(p.id),
-        productName: p.name,
-        sku: p.sku,
-        warehouseName: 'İspir Merkez Depo',
-        stock: Number(p.stock),
-        criticalLimit: Number(p.criticalLimit || 5)
-      }));
+    // ERP Stok & Depo Değerlemeleri (Yalnızca aktif/silinmemiş ürünler ve tek tutarlı birim maliyet formülü)
+    const getUnitVal = (costRaw: any, priceRaw: any) => {
+      const c = typeof costRaw?.toNumber === 'function' ? costRaw.toNumber() : Number(costRaw || 0);
+      const p = typeof priceRaw?.toNumber === 'function' ? priceRaw.toNumber() : Number(priceRaw || 0);
+      return c > 0 ? c : p;
+    };
 
     const depletedProductsList = finalProducts
       .filter(p => Number(p.stock) <= 0)
@@ -214,25 +237,42 @@ async function getInitialDashboardData() {
         sku: p.sku
       }));
 
+    const criticalStocksList = finalProducts
+      .filter(p => Number(p.stock) > 0 && Number(p.stock) <= Number(p.criticalLimit || 5))
+      .map(p => ({
+        id: String(p.id),
+        productName: p.name,
+        sku: p.sku,
+        warehouseName: 'İspir Üretim & Merkez Depo',
+        stock: Number(p.stock),
+        criticalLimit: Number(p.criticalLimit || 5)
+      }));
+
     const warehouseDistribution = warehouses.length > 0 ? warehouses.map(w => {
-      const totalStock = w.locations.reduce((sum, l) => sum + l.stock, 0);
-      const totalVal = w.locations.reduce((sum, l) => sum + (l.stock * (l.product?.cost ? l.product.cost.toNumber() : 0)), 0);
+      const activeLocs = (w.locations || []).filter((l: any) => l?.product && !l.product.isDeleted);
+      const totalStock = activeLocs.reduce((sum, l) => sum + Number(l.stock || 0), 0);
+      const totalVal = activeLocs.reduce(
+        (sum, l) => sum + Number(l.stock || 0) * getUnitVal(l.product?.cost, l.product?.price),
+        0
+      );
       return {
         id: w.id,
         name: w.name,
         code: w.code,
         stock: totalStock,
-        value: totalVal
+        value: Math.round(totalVal)
       };
     }) : [
       {
         id: "wh-1",
-        name: "İspir Merkez Depo",
+        name: "İspir Üretim & Merkez Depo",
         code: "WH-MRKZ",
         stock: finalProducts.reduce((s, p) => s + Number(p.stock || 0), 0),
-        value: totalStockValue
+        value: Math.round(finalProducts.reduce((sum, p) => sum + Number(p.stock || 0) * getUnitVal(p.cost, p.price), 0))
       }
     ];
+
+    const totalStockValue = warehouseDistribution.reduce((sum, w) => sum + Number(w.value || 0), 0);
 
     const transformedMovements = recentMovements.length > 0 ? recentMovements.map(m => ({
       id: m.id,
@@ -270,19 +310,22 @@ async function getInitialDashboardData() {
     }
     const topSellingProducts = Object.values(salesMap).sort((a, b) => b.quantity - a.quantity).slice(0, 5);
 
-    // Dynamic B2B / B2C channel splits from active orders
-    const b2bOrderCount = activeOrders.filter(o => o.type === 'B2B').length;
-    const b2cOrderCount = activeOrders.filter(o => o.type === 'B2C' || !o.type).length;
-    const otherOrderCount = Math.max(0, activeOrders.length - (b2bOrderCount + b2cOrderCount));
+    // Dynamic B2B / B2C channel splits from this month's active orders (matches live polling)
+    const b2bOrderCount = monthOrders.filter(o => o.type === 'B2B').length;
+    const b2cOrderCount = monthOrders.filter(o => o.type === 'B2C' || !o.type).length;
+    const otherOrderCount = Math.max(0, monthOrders.length - (b2bOrderCount + b2cOrderCount));
 
-    // Calculate 6-month trend from active orders
-    const trendList: Array<{ year: number; month: number; count: number }> = [];
+    // Calculate 6-month trend from active orders with dynamic Turkish month labels
+    const TR_MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const trendList: Array<{ year: number; month: number; label: string; count: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
+      d.setDate(1);
       d.setMonth(d.getMonth() - i);
       trendList.push({
         year: d.getFullYear(),
         month: d.getMonth(),
+        label: TR_MONTHS[d.getMonth()],
         count: 0
       });
     }
@@ -294,6 +337,7 @@ async function getInitialDashboardData() {
       }
     });
     const monthlyOrdersTrend = trendList.map(t => t.count);
+    const monthlyOrdersLabels = trendList.map(t => t.label);
 
     const fastestDepletingProducts = finalProducts
       .filter(p => Number(p.stock) <= Number(p.criticalLimit || 5))
@@ -348,7 +392,7 @@ async function getInitialDashboardData() {
       },
       kpis: {
         totalRevenue,
-        orderCount: activeOrders.length,
+        orderCount: monthOrders.length,
         cancelledOrderCount,
         averageOrderValue,
         activeDealerCount,
@@ -356,16 +400,18 @@ async function getInitialDashboardData() {
         activeIntegrationCount: 3,
         profitMargin: totalRevenue > 0 ? profitMargin : 0,
         totalProfit: Math.round(totalProfit),
+        hasRealCostData,
         totalAR,
         totalAP,
         pendingIncomingInvoices: 0,
-        pendingShippingOrders: activeOrders.filter(o => o.status === 'Hazırlanıyor' || o.status === 'Yeni' || o.status === 'Ödeme Bekliyor').length,
+        pendingShippingOrders: activeOrders.filter(o => ['Yeni', 'Yeni Sipariş', 'Hazırlanıyor', 'Hazirlaniyor', 'Ödeme Bekliyor', 'Ödeme Bekleniyor'].includes(o.status)).length,
         pendingCargoQueue: 0,
-        pendingDespatchAdvices: 0,
+        pendingDespatchAdvices: activeOrders.filter(o => o.status === 'Paketlendi').length,
         b2bOrderCount,
         b2cOrderCount,
         otherOrderCount,
         monthlyOrdersTrend,
+        monthlyOrdersLabels,
         monthOrders: monthOrdersCount,
         lastMonthOrders: lastMonthOrdersCount
       }
@@ -478,7 +524,7 @@ export default async function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Clock className="w-3.5 h-3.5" />
-          <span>Son 30 Gün (Canlı Polling Aktif)</span>
+          <span>Bu Ay (Canlı Polling Aktif)</span>
         </div>
       </div>
 

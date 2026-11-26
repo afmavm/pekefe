@@ -218,12 +218,8 @@ export default function Odeme() {
     return (available.length > 0 ? available : allProducts).slice(0, 4);
   }, [allProducts, cartItems]);
 
-  // Enforce mandatory user authentication for checkout
-  useEffect(() => {
-    if (sessionResult.status === "unauthenticated") {
-      router.push("/giris?redirect=/sepet/odeme");
-    }
-  }, [sessionResult.status, router]);
+  // Misafir Ödeme (Guest Checkout) Aktif: Üye olmadan da doğrudan sipariş verilebilir.
+  const isGuestCheckout = sessionResult.status === "unauthenticated";
 
   // Pre-fill user data if logged in
   useEffect(() => {
@@ -575,8 +571,15 @@ export default function Odeme() {
       return;
     }
 
-    if (formData.phone.length < 10) {
+    if (formData.phone.replace(/\D/g, "").length < 10) {
       const msg = "Lütfen geçerli bir telefon numarası giriniz.";
+      setErrorMsg(msg);
+      setToast({ isOpen: true, message: msg, type: "error" });
+      return;
+    }
+
+    if (!formData.email || !formData.email.includes("@")) {
+      const msg = "Sipariş onayı ve kargo takibi için lütfen geçerli bir e-posta adresi giriniz.";
       setErrorMsg(msg);
       setToast({ isOpen: true, message: msg, type: "error" });
       return;
@@ -848,6 +851,31 @@ export default function Odeme() {
         {/* Left Form Area */}
         <div className="lg:col-span-8 space-y-8">
 
+          {/* Guest Checkout Friendly Banner */}
+          {isGuestCheckout && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#faf6f2] via-amber-50/60 to-white border border-amber-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-lg">bolt</span>
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                    Üye Olmadan Hızlı Sipariş (Misafir Ödeme)
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
+                    Kayıt gerekmeden 30 saniyede sipariş verebilirsiniz. Onay ve kargo bilgileri e-postanıza iletilir.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/giris?redirect=/sepet/odeme"
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[#6b1d2f] text-xs font-bold whitespace-nowrap self-start sm:self-center transition shadow-2xs"
+              >
+                Üyeyim, Giriş Yap →
+              </Link>
+            </div>
+          )}
+
           {/* Section 1: Delivery Address */}
           <section className="bg-white p-6 md:p-8 rounded-3xl border border-outline-variant/20 shadow-xl">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/20">
@@ -901,7 +929,7 @@ export default function Odeme() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">E-POSTA ADRESİ</label>
+                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">E-POSTA ADRESİ *</label>
                 <input
                   name="email"
                   value={formData.email}

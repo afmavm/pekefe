@@ -130,27 +130,38 @@ async function generateWithGoogleGemini(
   const apiKey = process.env.GEMINI_API_KEY || '';
   if (!apiKey) return null;
 
-  // 1. Try Gemini native image generation model
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 25000);
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseModalities: ['IMAGE', 'TEXT'],
-          },
-        }),
-      }
-    );
-    clearTimeout(timer);
+  // Live Google Gemini native image generation models (verified against v1beta/models)
+  const imageModels = [
+    'gemini-3.1-flash-image',
+    'gemini-2.5-flash-image',
+    'gemini-3.1-flash-lite-image',
+  ];
 
-    if (res.ok) {
+  for (const modelName of imageModels) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseModalities: ['IMAGE', 'TEXT'],
+            },
+          }),
+        }
+      );
+      clearTimeout(timer);
+
+      if (!res.ok) {
+        console.warn(`[AI VISUAL] Google ${modelName} status ${res.status}`);
+        continue;
+      }
+
       const json = await res.json();
       const parts = json?.candidates?.[0]?.content?.parts || [];
       for (const part of parts) {
@@ -159,38 +170,9 @@ async function generateWithGoogleGemini(
           return { buffer: Buffer.from(b64, 'base64'), provider: 'google-gemini' };
         }
       }
+    } catch (err) {
+      console.warn(`[AI VISUAL] Google ${modelName} error:`, err);
     }
-  } catch {
-    // try Imagen 3 next
-  }
-
-  // 2. Try Google Imagen 3 predict endpoint
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 25000);
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { sampleCount: 1 },
-        }),
-      }
-    );
-    clearTimeout(timer);
-
-    if (res.ok) {
-      const json = await res.json();
-      const b64 = json?.predictions?.[0]?.bytesBase64Encoded;
-      if (b64) {
-        return { buffer: Buffer.from(b64, 'base64'), provider: 'google-imagen' };
-      }
-    }
-  } catch {
-    // fall through to free FLUX
   }
 
   return null;
@@ -201,30 +183,41 @@ async function generateWithFreeFlux(
   width: number,
   height: number
 ): Promise<Buffer | null> {
+  const shortPrompt = prompt.slice(0, 280);
   const seed = Math.floor(Math.random() * 9999999);
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-    prompt
-  )}?width=${width}&height=${height}&model=flux&nologo=true&enhance=true&seed=${seed}`;
+  const safeW = Math.min(768, width);
+  const safeH = Math.min(960, height);
 
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 40000);
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'PEKEFE-SocialStudio/2.0',
-        Accept: 'image/jpeg,image/png,image/webp,*/*',
-      },
-    });
-    clearTimeout(timer);
+  const candidateUrls = [
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(shortPrompt)}?width=${safeW}&height=${safeH}&nologo=true&seed=${seed}`,
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(shortPrompt)}?width=512&height=512&model=turbo&nologo=true&seed=${seed}`,
+  ];
 
-    if (!res.ok) return null;
-    const arr = await res.arrayBuffer();
-    if (!arr || arr.byteLength < 4000) return null;
-    return Buffer.from(arr);
-  } catch {
-    return null;
+  for (const url of candidateUrls) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 35000);
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          Accept: 'image/jpeg,image/png,image/webp,*/*',
+        },
+      });
+      clearTimeout(timer);
+
+      if (!res.ok) continue;
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.startsWith('image/')) continue;
+      const arr = await res.arrayBuffer();
+      if (!arr || arr.byteLength < 4000) continue;
+      return Buffer.from(arr);
+    } catch {
+      // try next URL
+    }
   }
+
+  return null;
 }
 
 async function loadProductImageBuffer(imageUrl?: string): Promise<Buffer | null> {

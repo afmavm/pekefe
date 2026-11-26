@@ -359,17 +359,17 @@ export default function AdminSocialMediaPage() {
   return (
     <div className="space-y-6 pb-12 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 flex items-center gap-2.5">
-            <Share2 className="w-6 h-6 text-[#6b1d2f]" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2.5">
+            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#6b1d2f] shrink-0" />
             Sosyal Medya AI İçerik &amp; Otomatik Yayın Stüdyosu
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Instagram (Post · Hikaye · Reels), WhatsApp, Facebook, YouTube Shorts &amp; Google İşletme — Yeni üründe otomatik kanca yöntemli üretim
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setView("studio")}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
@@ -565,7 +565,7 @@ export default function AdminSocialMediaPage() {
             </div>
 
             {/* Right Content: 5-Platform Viewer */}
-            <div className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+            <div className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
               {!activePack ? (
                 <div className="py-16 text-center text-xs text-slate-400">
                   İçerikleri görüntülemek için soldan bir paket seçin veya yeni paket üretin.

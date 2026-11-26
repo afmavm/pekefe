@@ -128,7 +128,7 @@ export default function AiVisualStudioPanel({ pack, onUpdated }: AiVisualStudioP
           <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/40 text-amber-300 flex items-center justify-center shrink-0">
             <Wand2 className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-black text-white">
                 AI Reklam Fotoğrafı Stüdyosu
@@ -226,12 +226,14 @@ export default function AiVisualStudioPanel({ pack, onUpdated }: AiVisualStudioP
           Sahne &amp; Işık Stili
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {AI_STYLES.map((st) => (
+          {AI_STYLES.map((st, idx) => (
             <button
               key={st.id}
               type="button"
               onClick={() => setStyle(st.id)}
               className={`p-2.5 rounded-xl text-left border transition cursor-pointer ${
+                idx === AI_STYLES.length - 1 ? "col-span-2 sm:col-span-1" : ""
+              } ${
                 style === st.id
                   ? "bg-amber-400/20 border-amber-400 text-white shadow-sm"
                   : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"

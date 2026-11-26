@@ -128,7 +128,7 @@ export default function VisitorAnalyticsWidget({ stats, conversion }: VisitorAna
                 GERÇEK ZAMANLI
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 truncate">
+            <p className="text-[11px] text-slate-500 leading-snug">
               Botlar ve admin paneli hariç gerçek mağaza ziyaretçileri
               {startedLabel ? ` • Kayıt başlangıcı: ${startedLabel}` : ""}
             </p>
@@ -235,7 +235,7 @@ export default function VisitorAnalyticsWidget({ stats, conversion }: VisitorAna
                 </span>
               )}
             </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500">
               <span className="inline-flex items-center gap-1">
                 <Eye className="w-3 h-3 text-slate-400" />
                 {formatNumber(daily.pageviews)} görüntüleme
@@ -320,13 +320,18 @@ export default function VisitorAnalyticsWidget({ stats, conversion }: VisitorAna
                 return (
                   <div
                     key={day.date}
+                    onClick={() =>
+                      setHoveredDay(
+                        `${day.label}: ${formatNumber(day.visitors)} ziyaretçi • ${formatNumber(day.pageviews)} görüntüleme`
+                      )
+                    }
                     onMouseEnter={() =>
                       setHoveredDay(
                         `${day.label}: ${formatNumber(day.visitors)} ziyaretçi • ${formatNumber(day.pageviews)} görüntüleme`
                       )
                     }
                     onMouseLeave={() => setHoveredDay(null)}
-                    className="flex flex-col items-center justify-end h-full gap-1 cursor-default group"
+                    className="flex flex-col items-center justify-end h-full gap-1 cursor-pointer group"
                   >
                     <span className="text-[10px] font-bold text-slate-600 tabular-nums">
                       {formatNumber(day.visitors)}

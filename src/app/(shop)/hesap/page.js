@@ -723,8 +723,8 @@ export default function Hesap() {
                       isCancelled ? "border-red-200/80 bg-red-50/15" : "border-outline-variant/30"
                     }`}
                   >
-                    <div className="p-6">
-                      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+                    <div className="p-4 sm:p-6">
+                      <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
                         <div className="flex flex-wrap gap-6 sm:gap-8">
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Sipariş Tarihi</p>
@@ -770,10 +770,10 @@ export default function Hesap() {
                         </div>
                       )}
 
-                      <div className="flex flex-wrap gap-4 pt-6 border-t border-outline-variant/20">
+                      <div className="flex flex-wrap gap-3 pt-5 border-t border-outline-variant/20">
                         <Link
                           href={`/sepet/onay?orderId=${order.id}`}
-                          className="bg-primary text-white px-6 py-3 rounded-lg font-label-md hover:opacity-95 transition-all shadow-sm active:scale-95 cursor-pointer text-xs uppercase tracking-wider font-bold"
+                          className="w-full sm:w-auto text-center bg-primary text-white px-6 py-3 rounded-lg font-label-md hover:opacity-95 transition-all shadow-sm active:scale-95 cursor-pointer text-xs uppercase tracking-wider font-bold"
                         >
                           Sipariş Detayı
                         </Link>

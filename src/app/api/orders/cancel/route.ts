@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { isAdminRole } from "@/lib/auth-helpers";
 import { cancelOrderWithSideEffects } from "@/lib/orderCancellation";
+import { prisma, withTimeout } from "@/lib/prisma";
+import { readLocalOrders } from "@/lib/jsonOrderDb";
 
 export const dynamic = "force-dynamic";
 
@@ -37,8 +39,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Sipariş ID belirtilmedi." }, { status: 400 });
     }
 
+    const isAdmin = isDev || Boolean(session?.user && isAdminRole(role));
+    const callerEmail = String(session?.user?.email || "").toLowerCase().trim();
+    const localOrders = isAdmin ? [] : readLocalOrders();
+
     const results = [];
     for (const target of targets) {
+      // Bayi (DEALER) veya normal kullanıcı kendi siparişi dışındaki siparişleri iptal edemez
+      // ve kargoya verilmiş/teslim edilmiş siparişi doğrudan iptal edemez (iade akışı gerekir).
+      if (!isAdmin) {
+        const dbOrd = await withTimeout(
+          prisma.order.findUnique({
+            where: { id: target.id },
+            include: { currentAccount: { select: { email: true } } },
+          }),
+          3000,
+          null
+        );
+        const locOrd = localOrders.find(
+          (o) => String(o.id) === target.id || String(o.orderNumber || "") === target.id
+        );
+        const ownerEmail = String(dbOrd?.currentAccount?.email || locOrd?.email || "").toLowerCase().trim();
+        const currentStatus = String(dbOrd?.status || locOrd?.status || "");
+
+        if (!ownerEmail || ownerEmail !== callerEmail) {
+          results.push({
+            id: target.id,
+            dbId: dbOrd?.id || null,
+            success: false,
+            dbUpdated: false,
+            localUpdated: false,
+            alreadyCancelled: false,
+            stockRestoredCount: 0,
+            ledgerReversed: false,
+            loyaltyReversedPoints: 0,
+            invoicesCancelled: 0,
+            requiresPaymentRefund: false,
+            error: "Bu siparişi iptal etme yetkiniz bulunmamaktadır.",
+          });
+          continue;
+        }
+
+        if (/kargo|teslim|tamamland/i.test(currentStatus)) {
+          results.push({
+            id: target.id,
+            dbId: dbOrd?.id || null,
+            success: false,
+            dbUpdated: false,
+            localUpdated: false,
+            alreadyCancelled: false,
+            stockRestoredCount: 0,
+            ledgerReversed: false,
+            loyaltyReversedPoints: 0,
+            invoicesCancelled: 0,
+            requiresPaymentRefund: false,
+            error: "Kargoya verilmiş veya teslim edilmiş siparişler doğrudan iptal edilemez; iade talebi oluşturmalısınız.",
+          });
+          continue;
+        }
+      }
+
       const res = await cancelOrderWithSideEffects({
         rawId: target.id,
         orderNumber: target.orderNumber,

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth-helpers';
+import { cancelOrderWithSideEffects } from '@/lib/orderCancellation';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,12 +32,39 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (!auth.authorized) return auth.response;
+
   try {
     const resolvedParams = await params;
     const orderId = resolvedParams.id;
 
     const body = await request.json();
-    const { cargoCompany, trackingNo, status } = body;
+    const { cargoCompany, trackingNo, status, reason } = body;
+
+    // İptal / İade durum geçişlerinde tüm yan etkileri (Stok + StockLocation + StockTransaction + Cari + Sadakat Puanı + Fatura + E-posta + WhatsApp) tek merkezden çalıştır
+    if (status && /iptal|iade|cancel|refund/i.test(String(status))) {
+      const cancelRes = await cancelOrderWithSideEffects({
+        rawId: orderId,
+        targetStatus: String(status),
+        reason: String(reason || ""),
+        userId: (auth.session?.user as any)?.id || null,
+        userEmail: auth.session?.user?.email || null,
+      });
+
+      if (!cancelRes.success) {
+        return NextResponse.json(
+          { error: cancelRes.error || "Sipariş iptal edilemedi.", details: cancelRes },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        order: { id: cancelRes.dbId || orderId, status: String(status) },
+        cancellation: cancelRes,
+      });
+    }
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },

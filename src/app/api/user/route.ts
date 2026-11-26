@@ -76,10 +76,10 @@ export const GET = withAuth<any>(
       const activeUserOrders = userOrders.filter(o => !isCancelledOrReturned(o.status));
       const ordersPoints = activeUserOrders.reduce((sum, o) => sum + Math.floor(Number(o.total || o.amount || 0)), 0);
 
-      const calculatedLoyaltyPoints = Math.max(
-        Number(currentAccount?.loyaltyPoints || 0),
-        ordersPoints
-      );
+      // Eğer kullanıcının yerel/aktif sipariş geçmişi varsa iptal edilenler hariç gerçek puanı kullan;
+      // hiç siparişi yoksa cari karttaki manuel tanımlı sadakat puanını koru.
+      const calculatedLoyaltyPoints =
+        userOrders.length > 0 ? ordersPoints : Number(currentAccount?.loyaltyPoints || 0);
 
       const accountData = currentAccount
         ? {

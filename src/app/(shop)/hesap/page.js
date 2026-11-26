@@ -234,40 +234,81 @@ export default function Hesap() {
     signOut({ callbackUrl: "/giris" });
   };
 
-  // Helper for Order Status Display
+  // Helper for Order Status Display (Türkçe & İngilizce tüm sipariş statüleri)
+  const isOrderCancelledStatus = (statusStr) => {
+    const s = String(statusStr || "").toLocaleLowerCase("tr-TR");
+    return s.includes("iptal") || s.includes("cancel");
+  };
+
+  const isOrderReturnedStatus = (statusStr) => {
+    const s = String(statusStr || "").toLocaleLowerCase("tr-TR");
+    return s.includes("iade") || s.includes("refund");
+  };
+
   const renderOrderStatusBadge = (statusStr) => {
-    switch (statusStr) {
-      case "COMPLETED":
-      case "DELIVERED":
-        return (
-          <span className="px-4 py-1.5 rounded-full bg-green-100 text-green-800 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-            Tamamlandı
-          </span>
-        );
-      case "SHIPPED":
-        return (
-          <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-            Kargoya Verildi
-          </span>
-        );
-      case "PREPARING":
-      case "APPROVED":
-        return (
-          <span className="px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>inventory</span>
-            Hazırlanıyor
-          </span>
-        );
-      default:
-        return (
-          <span className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">schedule</span>
-            İşleniyor
-          </span>
-        );
+    const raw = String(statusStr || "").trim();
+    const s = raw.toLocaleLowerCase("tr-TR");
+
+    if (s.includes("iptal") || s.includes("cancel")) {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-red-100 text-red-700 border border-red-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>cancel</span>
+          İptal Edildi
+        </span>
+      );
     }
+
+    if (s.includes("iade") || s.includes("refund")) {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>assignment_return</span>
+          İade Edildi
+        </span>
+      );
+    }
+
+    if (s.includes("teslim") || s.includes("tamamland") || raw === "COMPLETED" || raw === "DELIVERED") {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-green-100 text-green-800 border border-green-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          {s.includes("teslim") ? "Teslim Edildi" : "Tamamlandı"}
+        </span>
+      );
+    }
+
+    if (s.includes("kargo") || raw === "SHIPPED") {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+          Kargoya Verildi
+        </span>
+      );
+    }
+
+    if (s.includes("hazırlan") || s.includes("hazirlan") || s.includes("paket") || raw === "PREPARING" || raw === "APPROVED") {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>inventory</span>
+          {s.includes("paket") ? "Paketlendi" : "Hazırlanıyor"}
+        </span>
+      );
+    }
+
+    if (s.includes("ödeme bekliyor") || s.includes("odeme bekliyor") || s.includes("bekliyor")) {
+      return (
+        <span className="px-4 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm">payments</span>
+          Ödeme Bekliyor
+        </span>
+      );
+    }
+
+    return (
+      <span className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+        <span className="material-symbols-outlined text-sm">schedule</span>
+        {raw || "Sipariş Alındı"}
+      </span>
+    );
   };
 
   const loyaltyTier = loyaltyPoints >= 2000 ? "PEKEFE USTASI" : loyaltyPoints >= 500 ? "PEKEFE TUTKUNU" : "PEKEFE DOSTU";
@@ -673,11 +714,18 @@ export default function Hesap() {
                   </Link>
                 </div>
               ) : (
-                orders.map((order) => (
-                  <div key={order.id} className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                orders.map((order) => {
+                  const isCancelled = isOrderCancelledStatus(order.status) || isOrderReturnedStatus(order.status);
+                  return (
+                  <div
+                    key={order.id}
+                    className={`bg-surface-container-lowest rounded-xl border shadow-sm hover:shadow-md transition-shadow overflow-hidden ${
+                      isCancelled ? "border-red-200/80 bg-red-50/15" : "border-outline-variant/30"
+                    }`}
+                  >
                     <div className="p-6">
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-                        <div className="flex gap-8">
+                        <div className="flex flex-wrap gap-6 sm:gap-8">
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Sipariş Tarihi</p>
                             <p className="font-body-md font-semibold">
@@ -698,13 +746,29 @@ export default function Hesap() {
                           </div>
                           <div>
                             <p className="text-on-surface-variant text-[11px] font-label-md uppercase tracking-wider mb-1">Toplam</p>
-                            <p className="font-body-md font-bold text-primary font-mono">
+                            <p className={`font-body-md font-bold font-mono ${isCancelled ? "line-through text-slate-400" : "text-primary"}`}>
                               ₺{Number(order.totalAmount ?? order.total ?? order.amount ?? 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                           </div>
                         </div>
                         {renderOrderStatusBadge(order.status)}
                       </div>
+
+                      {isCancelled && (
+                        <div className="mb-5 rounded-xl bg-red-50 border border-red-200/80 px-4 py-3 text-xs text-red-800 flex items-start gap-2.5">
+                          <span className="material-symbols-outlined text-base text-red-600 shrink-0 mt-0.5">info</span>
+                          <div className="space-y-0.5">
+                            <p className="font-bold">
+                              {isOrderReturnedStatus(order.status) ? "Bu sipariş iade edilmiştir." : "Bu sipariş iptal edilmiştir."}
+                            </p>
+                            {order.cancelReason && (
+                              <p className="text-red-700/90">
+                                <strong>Açıklama:</strong> {order.cancelReason}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap gap-4 pt-6 border-t border-outline-variant/20">
                         <Link
@@ -716,7 +780,8 @@ export default function Hesap() {
                       </div>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}

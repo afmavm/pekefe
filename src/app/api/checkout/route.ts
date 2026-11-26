@@ -497,24 +497,73 @@ export async function POST(request: NextRequest) {
       console.error("[LOCAL ORDER SAVE ERROR]:", localOrderSaveErr);
     }
 
-    // 4. Stok Düşürme İşlemi (Hem Ana Ürün Hem Varyantlar için Canlı Senkronizasyon)
+    // 4. Stok Düşürme İşlemi (Yerel JSON + Product.stock + StockLocation + StockTransaction Çıkış Kaydı)
     try {
       const { deductLocalProductStock } = await import('@/lib/jsonProductDb');
       for (const item of cart) {
-        const qty = Number(item.quantity || 1);
+        const qty = Math.max(1, Number(item.quantity || 1));
         deductLocalProductStock(item, qty);
 
-        // Prisma üzerinde de stok düşür
+        // Prisma üzerinde ana stok, depo lokasyon stoğu ve çıkış hareketini senkronize işle
         try {
           if (item.productId || item.id) {
             const prodId = String(item.productId || item.id).split('_')[0];
-            await prisma.product.updateMany({
-              where: { id: prodId },
-              data: { stock: { decrement: qty } }
+            const dbProd = await prisma.product.findFirst({
+              where: { OR: [{ id: prodId }, { sku: prodId }] },
+              select: { id: true },
             });
+            if (dbProd) {
+              await prisma.product.update({
+                where: { id: dbProd.id },
+                data: { stock: { decrement: qty } },
+              });
+
+              let deductedWarehouseId: string | undefined;
+              try {
+                const loc = await prisma.stockLocation.findFirst({
+                  where: { productId: dbProd.id },
+                  orderBy: { stock: 'desc' },
+                });
+                if (loc) {
+                  const nextLocStock = Math.max(0, Number(loc.stock || 0) - qty);
+                  await prisma.stockLocation.update({
+                    where: { id: loc.id },
+                    data: { stock: nextLocStock },
+                  });
+                  deductedWarehouseId = loc.warehouseId;
+                }
+              } catch {}
+
+              await prisma.stockTransaction.create({
+                data: {
+                  productId: dbProd.id,
+                  warehouseId: deductedWarehouseId,
+                  type: 'SALE',
+                  quantity: -qty,
+                  description: `Sipariş Stok Çıkışı (#${finalOrderId})`,
+                  moduleSource: 'CHECKOUT',
+                  referenceId: finalOrderId,
+                  userEmail: customerEmail !== 'guest@nexab2b.com' ? customerEmail : undefined,
+                },
+              });
+            }
           }
         } catch (dbStockErr) {}
       }
+
+      // Sadakat Puanı Kazanımı (1 TL = 1 PTS, iptalde orderCancellation tarafından geri alınır)
+      if (verifiedTotal > 0 && customerEmail && customerEmail !== 'guest@nexab2b.com') {
+        try {
+          const earnedPoints = Math.floor(Number(verifiedTotal || 0));
+          if (earnedPoints > 0) {
+            await prisma.currentAccount.updateMany({
+              where: { email: customerEmail },
+              data: { loyaltyPoints: { increment: earnedPoints } },
+            });
+          }
+        } catch {}
+      }
+
       console.log(`[STOCK DEDUCTION SUCCESS] All cart items deducted from stock for order ${finalOrderId}`);
     } catch (stockDeductErr) {
       console.error("[STOCK DEDUCTION ERROR]:", stockDeductErr);

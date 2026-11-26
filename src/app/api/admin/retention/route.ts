@@ -28,7 +28,15 @@ export async function GET() {
     const config = await getRetentionConfig();
     const reorderCandidates = await getReorderCandidates(config);
 
-    const abandonedCarts = config.abandonedCarts.map((cart) => {
+    // Hatirlatma gonderilmeden normal tamamlanmis eski "recovered" kayitlarini temizle (gercek attribution)
+    const cleanedCarts = config.abandonedCarts.filter(
+      (c) => !(c.status === 'recovered' && (c.reminderCount || 0) === 0 && !c.remindedAt)
+    );
+    if (cleanedCarts.length !== config.abandonedCarts.length) {
+      await saveRetentionConfig({ abandonedCarts: cleanedCarts }).catch(() => {});
+    }
+
+    const abandonedCarts = cleanedCarts.map((cart) => {
       const { whatsappText } = buildAbandonedCartMessages(cart, config);
       return {
         ...cart,
@@ -44,13 +52,15 @@ export async function GET() {
       };
     });
 
-    const recoveredCarts = config.abandonedCarts.filter((c) => c.status === 'recovered');
-    const remindedCarts = config.abandonedCarts.filter((c) => c.reminderCount > 0);
-    const activeCarts = config.abandonedCarts.filter((c) => c.status === 'active');
+    const recoveredCarts = cleanedCarts.filter(
+      (c) => c.status === 'recovered' && ((c.reminderCount || 0) > 0 || Boolean(c.remindedAt))
+    );
+    const remindedCarts = cleanedCarts.filter((c) => (c.reminderCount || 0) > 0 || Boolean(c.remindedAt));
+    const activeCarts = cleanedCarts.filter((c) => c.status === 'active');
 
     const kpis = {
       activeAbandoned: activeCarts.length,
-      totalAbandoned: config.abandonedCarts.length,
+      totalAbandoned: cleanedCarts.length,
       remindedCount: remindedCarts.length,
       recoveredCount: recoveredCarts.length,
       recoveredRevenue: recoveredCarts.reduce((acc, c) => acc + Number(c.subtotal || 0), 0),

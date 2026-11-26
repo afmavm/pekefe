@@ -292,7 +292,11 @@ export async function upsertAbandonedCart(input: {
 }
 
 /**
- * Siparis tamamlandiginda sepeti "recovered" (kurtarildi) olarak isaretler.
+ * Siparis tamamlandiginda:
+ * - Eger bu sepet gercekten terk edilip hatirlatma gonderilmisse (status === 'reminded' / reminderCount > 0),
+ *   "recovered" (Kurtarildi) olarak isaretler ve Kurtarilan Ciro'ya yazar.
+ * - Eger henuz hic hatirlatma gonderilmemis normal bir siparisse (sepet terk edilmeden hemen satin alindiysa),
+ *   taslak sepet kaydini listeden siler (sahte "Kurtarildi" olarak saymaz!).
  */
 export async function markAbandonedCartRecovered(input: {
   email?: string;
@@ -304,30 +308,42 @@ export async function markAbandonedCartRecovered(input: {
   if (!cleanEmail && !cleanPhone) return false;
 
   const config = await getRetentionConfig();
-  let matched = false;
+  let changed = false;
+  let trulyRecovered = false;
   const nowIso = new Date().toISOString();
 
-  const updated = config.abandonedCarts.map((c) => {
-    if (
+  const updated: AbandonedCartRecord[] = [];
+  for (const c of config.abandonedCarts) {
+    const isMatch =
       c.status !== 'recovered' &&
-      ((cleanEmail && c.email === cleanEmail) || (cleanPhone && c.phone === cleanPhone))
-    ) {
-      matched = true;
-      return {
+      ((cleanEmail && c.email === cleanEmail) || (cleanPhone && c.phone === cleanPhone));
+
+    if (!isMatch) {
+      updated.push(c);
+      continue;
+    }
+
+    changed = true;
+    const wasReminded =
+      c.status === 'reminded' || (c.reminderCount || 0) > 0 || Boolean(c.remindedAt);
+
+    if (wasReminded) {
+      trulyRecovered = true;
+      updated.push({
         ...c,
         status: 'recovered' as const,
         recoveredAt: nowIso,
         recoveredOrderId: input.orderId || null,
         updatedAt: nowIso,
-      };
+      });
     }
-    return c;
-  });
+    // wasReminded === false ise: normal tamamlanan siparis -> terk edilen sepet listesinden cikar (push etme)
+  }
 
-  if (matched) {
+  if (changed) {
     await saveRetentionConfig({ abandonedCarts: updated });
   }
-  return matched;
+  return trulyRecovered;
 }
 
 /**

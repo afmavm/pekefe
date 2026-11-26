@@ -10,6 +10,7 @@ import {
 } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import { resolveProductMediaItems } from "@/lib/utils";
+import { slugifyTr } from "@/lib/category-utils";
 
 // Helper image translation
 export const translateImage = (url) => {
@@ -62,7 +63,7 @@ export function useProductDetailState(params) {
       const found = getProductBySlug(slugOrId);
       if (found) { setProductState(found); }
       else if (Array.isArray(all)) {
-        const byId = all.find((p) => String(p.id) === String(slugOrId) || String(p.sku) === String(slugOrId) || String(p.slug) === String(slugOrId) || generateSlug(p.name) === String(slugOrId));
+        const byId = all.find((p) => String(p.id) === String(slugOrId) || String(p.sku) === String(slugOrId) || String(p.slug) === String(slugOrId) || slugifyTr(p.name || "") === String(slugOrId));
         if (byId) setProductState(byId);
       }
       setIsLoading(false);
@@ -240,7 +241,7 @@ export function useProductDetailState(params) {
 
   // Canlı onaylı müşteri yorumlarını veritabanından çek
   useEffect(() => {
-    const slugParam = product?.slug || unwrappedParams?.slug || "";
+    const slugParam = product?.slug || resolvedParams?.slug || "";
     if (!slugParam) return;
     let active = true;
     fetch(`/api/feedback?public=true&productSlug=${encodeURIComponent(slugParam)}`, { cache: "no-store" })
@@ -258,7 +259,7 @@ export function useProductDetailState(params) {
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [product?.slug, unwrappedParams?.slug]);
+  }, [product?.slug, resolvedParams?.slug]);
 
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const [zoomScale,       setZoomScale]       = useState(1);
@@ -402,7 +403,7 @@ export function useProductDetailState(params) {
     const authorName = newReview.author.trim();
     const commentText = newReview.comment.trim();
     const ratingVal = Number(newReview.rating || 5);
-    const targetSlug = product?.slug || unwrappedParams?.slug || "";
+    const targetSlug = product?.slug || resolvedParams?.slug || "";
 
     try {
       const res = await fetch("/api/feedback", {

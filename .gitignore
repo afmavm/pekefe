@@ -27,3 +27,4 @@ yarn-error.log*
 .vercel
 data/visitor_analytics_db.json
 data/*.tmp
+public/uploads/social-ai/

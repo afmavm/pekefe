@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import AiVisualStudioPanel from "@/components/admin/AiVisualStudioPanel";
 
 type MainView = "studio" | "settings";
 type PlatformTab = "visuals" | "instagram" | "facebook" | "whatsapp" | "youtube" | "googleBusiness";
@@ -147,6 +148,8 @@ export default function AdminSocialMediaPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<MainView>("studio");
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedTone, setSelectedTone] = useState<"viral" | "heritage" | "promo" | "luxury" | "ugc">("viral");
+  const [customBrief, setCustomBrief] = useState("");
   const [selectedPackId, setSelectedPackId] = useState<string | null>(null);
   const [platformTab, setPlatformTab] = useState<PlatformTab>("visuals");
   const [globalVisualVariant, setGlobalVisualVariant] = useState(0);
@@ -256,13 +259,18 @@ export default function AdminSocialMediaPage() {
       const res = await fetch("/api/admin/social-media", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "generate", productId: selectedProductId }),
+        body: JSON.stringify({
+          action: "generate",
+          productId: selectedProductId,
+          tone: selectedTone,
+          customBrief,
+        }),
       });
       const json = await res.json();
       toast.dismiss(t);
       if (res.ok && json.pack) {
         toast.success(
-          `5 platform içeriği hazırlandı (${json.pack.generatedBy === "gemini" ? "Gemini AI ✨" : "Akıllı Şablon"})!`
+          `5 platform içeriği hazırlandı (${json.pack.generatedBy === "gemini" ? `${json.pack.modelUsed || "Gemini 2.5"} ✨` : "Akıllı Şablon"})!`
         );
         setSelectedPackId(json.pack.id);
         loadData();
@@ -389,32 +397,106 @@ export default function AdminSocialMediaPage() {
       {/* STUDIO VIEW */}
       {view === "studio" && (
         <>
-          {/* Generator Bar */}
-          <div className="bg-gradient-to-r from-[#6b1d2f] to-[#46111e] text-white rounded-2xl p-5 shadow-md flex flex-col md:flex-row items-stretch md:items-center gap-3">
-            <div className="flex-1">
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-amber-300 mb-1">
-                5 Platform İçin Kanca Yöntemli AI İçerik Üret
-              </label>
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-white text-slate-900 rounded-xl text-xs font-bold focus:outline-none"
-              >
-                {(data?.products || []).map((p: any) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} — ₺{Number(p.price || 0).toLocaleString("tr-TR")}
-                  </option>
-                ))}
-              </select>
+          {/* Generator Bar (Google Gemini 2.5 Flash + Kampanya Tonu + Özel Not) */}
+          <div className="bg-gradient-to-r from-[#6b1d2f] to-[#46111e] text-white rounded-2xl p-5 shadow-md space-y-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                  5 Platform İçin Kanca Yöntemli AI İçerik Üret
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-bold text-emerald-200">
+                  ⚡ {data?.aiCapabilities?.textModel || "Google Gemini 2.5 Flash"}
+                </span>
+              </div>
+              {/* Google Araçları Hızlı Kısayolları */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(() => {
+                  const selProd = (data?.products || []).find((p: any) => p.id === selectedProductId);
+                  const trendKw = encodeURIComponent(selProd?.name || "İspir dut pekmezi");
+                  return (
+                    <>
+                      <a
+                        href={`https://trends.google.com/trends/explore?geo=TR&q=${trendKw}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-bold text-amber-100 inline-flex items-center gap-1 transition"
+                      >
+                        Google Trends (TR) <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <a
+                        href="https://aistudio.google.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-bold text-amber-100 inline-flex items-center gap-1 transition"
+                      >
+                        Google AI Studio <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <a
+                        href="https://business.google.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-bold text-amber-100 inline-flex items-center gap-1 transition"
+                      >
+                        Google İşletme <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
-            <button
-              onClick={handleGenerate}
-              disabled={generating || !selectedProductId}
-              className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-2 cursor-pointer shadow-lg shrink-0 disabled:opacity-60 md:mt-5"
-            >
-              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              5 Platform İçin Üret
-            </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div className="md:col-span-4">
+                <label className="block text-[10px] font-bold text-rose-100/80 mb-1">Ürün Seçin</label>
+                <select
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white text-slate-900 rounded-xl text-xs font-bold focus:outline-none"
+                >
+                  {(data?.products || []).map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — ₺{Number(p.price || 0).toLocaleString("tr-TR")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-3">
+                <label className="block text-[10px] font-bold text-rose-100/80 mb-1">Kampanya Tonu</label>
+                <select
+                  value={selectedTone}
+                  onChange={(e) => setSelectedTone(e.target.value as any)}
+                  className="w-full px-3.5 py-2.5 bg-white text-slate-900 rounded-xl text-xs font-bold focus:outline-none"
+                >
+                  <option value="viral">🔥 Viral Kanca &amp; Satış</option>
+                  <option value="heritage">🌿 İspir Hikayesi &amp; Doğallık</option>
+                  <option value="promo">🎁 Fırsat &amp; Kampanya Aciliyeti</option>
+                  <option value="luxury">💎 Premium Gurme Marka</option>
+                  <option value="ugc">🎬 Samimi Müşteri Dili (UGC)</option>
+                </select>
+              </div>
+              <div className="md:col-span-3">
+                <label className="block text-[10px] font-bold text-rose-100/80 mb-1">
+                  Özel Vurgu (İsteğe Bağlı)
+                </label>
+                <input
+                  type="text"
+                  value={customBrief}
+                  onChange={(e) => setCustomBrief(e.target.value)}
+                  placeholder="Örn: Yeni hasat, %10 indirim..."
+                  className="w-full px-3.5 py-2.5 bg-white/15 border border-white/20 text-white placeholder:text-rose-200/70 rounded-xl text-xs focus:outline-none focus:bg-white/20"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <button
+                  onClick={handleGenerate}
+                  disabled={generating || !selectedProductId}
+                  className="w-full px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer shadow-lg disabled:opacity-60"
+                >
+                  {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  5 Platform Üret
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -544,12 +626,14 @@ export default function AdminSocialMediaPage() {
                     })}
                   </div>
 
-                  {/* ALL 9 BRANDED VISUALS TAB */}
+                  {/* ALL 9 BRANDED VISUALS TAB + AI PHOTO STUDIO */}
                   {platformTab === "visuals" && (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
+                      <AiVisualStudioPanel pack={activePack} onUpdated={loadData} />
+
                       <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 flex items-center justify-between flex-wrap gap-3">
                         <span>
-                          <strong>Otomatik Marka Görsel Stüdyosu:</strong> Beğenmediğiniz herhangi bir görselin altındaki <strong>Tekrar Üret</strong> butonuna basarak 5 farklı lüks PEKEFE tasarımından yenisini anında üretebilirsiniz.
+                          <strong>Anlık Hazır Marka Şablonları (9 PNG):</strong> Saniyeler içinde hazır! Beğenmediğiniz kartın altındaki <strong>Tekrar Üret</strong> butonuyla 5 farklı PEKEFE temasını anında deneyebilirsiniz.
                         </span>
                         <button
                           type="button"

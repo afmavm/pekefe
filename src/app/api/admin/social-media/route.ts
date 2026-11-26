@@ -25,6 +25,13 @@ export async function GET() {
     ]);
 
     return NextResponse.json({
+      aiCapabilities: {
+        hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
+        textModel: 'Google Gemini 2.5 Flash',
+        imageEngines: Boolean(process.env.GEMINI_API_KEY)
+          ? ['Google Gemini/Imagen AI', 'FLUX.1 (Ücretsiz AI)', 'PEKEFE Sharp Stüdyo']
+          : ['FLUX.1 (Ücretsiz AI)', 'PEKEFE Sharp Stüdyo'],
+      },
       settings: {
         enabled: config.enabled,
         autoGenerateOnNewProduct: config.autoGenerateOnNewProduct,
@@ -97,7 +104,10 @@ export async function POST(request: Request) {
       if (!target) {
         return NextResponse.json({ error: 'Ürün bulunamadı.' }, { status: 404 });
       }
-      const pack = await generateSocialPackForProduct(target);
+      const pack = await generateSocialPackForProduct(target, {
+        tone: body.tone || 'viral',
+        customBrief: typeof body.customBrief === 'string' ? body.customBrief : '',
+      });
       return NextResponse.json({ success: true, pack });
     }
 

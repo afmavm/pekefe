@@ -1833,6 +1833,12 @@
       "namedRegex": "^/api/settings(?:/)?$"
     },
     {
+      "page": "/api/social-media/ai-visual",
+      "regex": "^/api/social\\-media/ai\\-visual(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/social\\-media/ai\\-visual(?:/)?$"
+    },
+    {
       "page": "/api/social-media/visual",
       "regex": "^/api/social\\-media/visual(?:/)?$",
       "routeKeys": {},

@@ -48,6 +48,19 @@ export function buildSocialVisualUrls(packId: string, absolute = false): SocialP
   };
 }
 
+export type SocialTone = 'viral' | 'heritage' | 'promo' | 'luxury' | 'ugc';
+
+export interface AiGeneratedVisualItem {
+  id: string;
+  url: string;
+  format: string;
+  style: string;
+  mode: 'branded' | 'scene-only';
+  provider: 'google-gemini' | 'google-imagen' | 'flux-free';
+  prompt: string;
+  createdAt: string;
+}
+
 export interface GeneratedSocialPack {
   id: string;
   productId: string;
@@ -58,6 +71,11 @@ export interface GeneratedSocialPack {
   productPrice: number;
   productCategory: string;
   generatedBy: 'gemini' | 'template';
+  modelUsed?: string;
+  tone?: SocialTone;
+  customBrief?: string;
+  aiScenePrompt?: string;
+  aiGeneratedVisuals?: AiGeneratedVisualItem[];
   createdAt: string;
   visuals?: SocialPackVisuals;
   instagram: {
@@ -457,31 +475,50 @@ function buildTemplatePack(product: SocialProductInput): Omit<GeneratedSocialPac
   };
 }
 
+const TONE_INSTRUCTIONS: Record<SocialTone, string> = {
+  viral: 'TON: Dikkat çekici, merak uyandıran viral kanca (hook) odaklı, yüksek kaydetme/paylaşma ve satış dönüşümü hedefleyen dinamik dil.',
+  heritage: 'TON: Erzurum İspir yaylalarının 2014\'ten beri süregelen doğal üretim mirasını, güneşin doğal sıcaklığını, katkısızlığı ve güveni öne çıkaran sıcak hikaye anlatımı.',
+  promo: 'TON: Sınırlı taze hasat, fırsat ve aciliyet hissi oluşturan, net aksiyon çağrılı (CTA) kampanya ve satış odaklı dil.',
+  luxury: 'TON: Gurme, rafine, seçkin sofra kültürü ve hediyelik değerini vurgulayan premium lüks marka dili.',
+  ugc: 'TON: Gerçek bir müşteri/deneyim paylaşımı gibi samimi, doğal, abartısız ve doğrudan sohbet havasında UGC dili.',
+};
+
 /**
- * Gemini AI ile 5 platform (Instagram Post/Story/Reels, Facebook, WhatsApp, YouTube Shorts, Google Business)
- * icin kanca yontemli, SEO uyumlu, etkileşim odakli icerik paketi uretir.
+ * Google Gemini 2.5 Flash (otomatik yedekli) ile 5 platform
+ * (Instagram Post/Story/Reels, Facebook, WhatsApp, YouTube Shorts, Google Business)
+ * icin kanca yontemli, SEO uyumlu, etkilesim odakli icerik paketi ve AI gorsel sahne promptu uretir.
  */
 export async function generateSocialPackForProduct(
-  product: SocialProductInput
+  product: SocialProductInput,
+  options?: { tone?: SocialTone; customBrief?: string }
 ): Promise<GeneratedSocialPack> {
+  const tone: SocialTone = options?.tone || 'viral';
+  const customBrief = String(options?.customBrief || '').trim().slice(0, 300);
   const fallback = buildTemplatePack(product);
   const apiKey = process.env.GEMINI_API_KEY || '';
 
-  let finalCore = fallback;
+  let finalCore: Omit<GeneratedSocialPack, 'id' | 'createdAt' | 'publishStatus'> = {
+    ...fallback,
+    tone,
+    customBrief: customBrief || undefined,
+    aiScenePrompt: `Editorial luxury Turkish gourmet food photography of ${product.name}, warm sunlit Anatolian walnut wood table, natural morning sunbeams, soft golden bokeh, shallow depth of field, 8k commercial studio lighting, ultra detailed, no text, no watermark`,
+  };
 
   if (apiKey) {
-    try {
-      const prompt = `Sen Türkiye'nin en iyi D2C e-ticaret sosyal medya ve SEO stratejistisin.
+    const prompt = `Sen Türkiye'nin en iyi D2C e-ticaret sosyal medya, görsel yönetmen ve SEO stratejistisin.
 Marka: PEKEFE İspir Yöresel Ürünler (Erzurum İspir, 2014'ten beri %100 doğal, ilave şekersiz, glikozsuz, güneşte olgunlaşan dut pekmezi, yaprak pestil, cevizli köme).
 Ürün Adı: ${product.name}
 Kategori: ${fallback.productCategory}
 Fiyat: ${fallback.productPrice > 0 ? `${fallback.productPrice} TL` : 'Belirtilmedi'}
 Ürün URL: ${fallback.productUrl}
 Açıklama: ${stripHtml(product.shortDesc || product.desc || '').slice(0, 450)}
+${TONE_INSTRUCTIONS[tone]}
+${customBrief ? `ÖZEL KAMPANYA VURGUSU / NOT: ${customBrief}` : ''}
 
-Bu ürün için 5 platforma özel, HER PLATFORMUN KENDİ KURALLARINA VE SEO YAPISINA UYGUN, ETKİLİ KANCA (HOOK) YÖNTEMLİ Türkçe içerik paketi üret.
+Bu ürün için 5 platforma özel, HER PLATFORMUN KENDİ KURALLARINA VE SEO YAPISINA UYGUN, ETKİLİ KANCA (HOOK) YÖNTEMLİ Türkçe içerik paketi ve İngilizce 1 adet fotogerçekçi reklam fotoğrafı arka plan sahne promptu ("aiScenePrompt", kesinlikle metin/yazı içermesin) üret.
 Sadece geçerli JSON döndür (markdown kod bloğu kullanma), şema:
 {
+  "aiScenePrompt": "Photorealistic luxury editorial food photography background scene in English, no text, no logos...",
   "instagram": {
     "post": { "hook": "...", "caption": "...", "hashtags": ["#..."], "cta": "..." },
     "story": { "slides": [
@@ -497,30 +534,39 @@ Sadece geçerli JSON döndür (markdown kod bloğu kullanma), şema:
   "googleBusiness": { "summary": "...", "ctaType": "ORDER", "ctaUrl": "${fallback.productUrl}", "localKeywords": ["..."] }
 }`;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.75,
-              responseMimeType: 'application/json',
-            },
-          }),
-        }
-      );
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    for (const modelName of candidateModels) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.78,
+                responseMimeType: 'application/json',
+              },
+            }),
+          }
+        );
 
-      if (res.ok) {
+        if (!res.ok) continue;
+
         const json = await res.json();
         const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const cleaned = rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
         const parsed = JSON.parse(cleaned);
         if (parsed?.instagram?.post && parsed?.facebook && parsed?.youtube && parsed?.googleBusiness) {
           finalCore = {
-            ...fallback,
+            ...finalCore,
             generatedBy: 'gemini',
+            modelUsed: modelName,
+            aiScenePrompt:
+              typeof parsed.aiScenePrompt === 'string' && parsed.aiScenePrompt.trim().length > 20
+                ? parsed.aiScenePrompt.trim()
+                : finalCore.aiScenePrompt,
             instagram: {
               post: { ...fallback.instagram.post, ...parsed.instagram.post },
               story: parsed.instagram.story?.slides?.length ? parsed.instagram.story : fallback.instagram.story,
@@ -535,12 +581,16 @@ Sadece geçerli JSON döndür (markdown kod bloğu kullanma), şema:
             youtube: { ...fallback.youtube, ...parsed.youtube },
             googleBusiness: { ...fallback.googleBusiness, ...parsed.googleBusiness, ctaUrl: fallback.productUrl },
           };
+          break;
         }
+      } catch (aiErr) {
+        console.warn(`[SOCIAL AI] ${modelName} failed, trying fallback:`, aiErr);
       }
-    } catch (aiErr) {
-      console.warn('[SOCIAL AI] Gemini fallback to template:', aiErr);
     }
   }
+
+  const config = await getSocialMediaConfig();
+  const existingForProduct = config.packs.find((p) => p.productId === String(product.id));
 
   const packId = `soc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const pack: GeneratedSocialPack = {
@@ -548,10 +598,10 @@ Sadece geçerli JSON döndür (markdown kod bloğu kullanma), şema:
     id: packId,
     createdAt: new Date().toISOString(),
     visuals: buildSocialVisualUrls(packId, false),
+    aiGeneratedVisuals: existingForProduct?.aiGeneratedVisuals || [],
     publishStatus: {},
   };
 
-  const config = await getSocialMediaConfig();
   const nextPacks = [pack, ...config.packs.filter((p) => p.productId !== pack.productId)].slice(0, 50);
   await saveSocialMediaConfig({ packs: nextPacks });
 

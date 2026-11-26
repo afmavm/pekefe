@@ -173,6 +173,7 @@
   "/api/retention/abandoned-cart/route": "app/api/retention/abandoned-cart/route.js",
   "/api/retention/cron/route": "app/api/retention/cron/route.js",
   "/api/settings/route": "app/api/settings/route.js",
+  "/api/social-media/ai-visual/route": "app/api/social-media/ai-visual/route.js",
   "/api/social-media/visual/route": "app/api/social-media/visual/route.js",
   "/api/uploads/[...path]/route": "app/api/uploads/[...path]/route.js",
   "/api/user/route": "app/api/user/route.js",

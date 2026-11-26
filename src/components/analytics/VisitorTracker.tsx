@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 const VISITOR_ID_KEY = "pekefe_vid";
+const SESSION_SOURCE_KEY = "pekefe_vsrc_logged";
 const HEARTBEAT_INTERVAL_MS = 60 * 1000; // 60 seconds
 
 function getOrCreateVisitorId(): string {
@@ -19,9 +20,13 @@ function getOrCreateVisitorId(): string {
     window.localStorage.setItem(VISITOR_ID_KEY, generated);
     return generated;
   } catch {
-    // Fallback if localStorage is disabled (private mode)
     return "";
   }
+}
+
+function hasCampaignParams(search: string): boolean {
+  if (!search) return false;
+  return /(?:gclid|gbraid|wbraid|gad_source|fbclid|utm_source)=/i.test(search);
 }
 
 export function VisitorTracker() {
@@ -31,7 +36,6 @@ export function VisitorTracker() {
 
   useEffect(() => {
     if (!pathname) return;
-    // Never track admin panel or internal routes as storefront visitors
     if (pathname.startsWith("/admin") || pathname.startsWith("/api")) {
       return;
     }
@@ -39,10 +43,29 @@ export function VisitorTracker() {
     const sendPing = (type: "pageview" | "heartbeat") => {
       try {
         const visitorId = getOrCreateVisitorId();
+        const search = typeof window !== "undefined" ? window.location.search || "" : "";
+        const referrer = typeof document !== "undefined" ? document.referrer || "" : "";
+
+        let isSessionEntry = false;
+        if (type === "pageview") {
+          try {
+            const alreadyLogged = window.sessionStorage.getItem(SESSION_SOURCE_KEY) === "1";
+            if (!alreadyLogged || hasCampaignParams(search)) {
+              isSessionEntry = true;
+              window.sessionStorage.setItem(SESSION_SOURCE_KEY, "1");
+            }
+          } catch {
+            isSessionEntry = true;
+          }
+        }
+
         const payload = JSON.stringify({
           visitorId,
           path: pathname,
           type,
+          referrer: isSessionEntry ? referrer : "",
+          search: isSessionEntry ? search : "",
+          isSessionEntry,
         });
 
         fetch("/api/analytics/visit", {
@@ -51,7 +74,7 @@ export function VisitorTracker() {
           body: payload,
           keepalive: true,
         }).catch(() => {
-          // Silently ignore network errors so storefront UX is never affected
+          // Silently ignore network errors
         });
       } catch {
         // ignore
@@ -59,14 +82,12 @@ export function VisitorTracker() {
     };
 
     const now = Date.now();
-    // Avoid React Strict Mode double-fire on mount
     if (lastTrackedPathRef.current !== pathname || now - lastTrackedAtRef.current > 2500) {
       lastTrackedPathRef.current = pathname;
       lastTrackedAtRef.current = now;
       sendPing("pageview");
     }
 
-    // Periodic heartbeat while tab is visible to keep "Anlık" online count accurate
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         sendPing("heartbeat");

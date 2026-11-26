@@ -363,7 +363,7 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
       {/* ============================================================
           LIVE WEBSITE VISITOR ANALYTICS (Anlık / Günlük / Haftalık / Yıllık)
          ============================================================ */}
-      <VisitorAnalyticsWidget stats={data?.visitorStats} />
+      <VisitorAnalyticsWidget stats={data?.visitorStats} conversion={data?.visitorConversion} />
 
       {/* ============================================================
           ACTIONABLE METRICS ALERT GRID (Gold Standard 2)

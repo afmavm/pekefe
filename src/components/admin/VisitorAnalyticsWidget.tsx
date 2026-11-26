@@ -12,11 +12,20 @@ import {
   TrendingUp,
   TrendingDown,
   Radio,
+  Compass,
+  FileBarChart2,
+  Percent,
 } from "lucide-react";
 import type { VisitorStatsSummary } from "@/lib/visitor-analytics";
 
+interface VisitorConversionInfo {
+  todayOrders: number;
+  weekOrders: number;
+}
+
 interface VisitorAnalyticsWidgetProps {
   stats?: VisitorStatsSummary | null;
+  conversion?: VisitorConversionInfo | null;
 }
 
 function formatNumber(n?: number | null): string {
@@ -39,7 +48,18 @@ function formatStartedAt(iso?: string): string {
   }
 }
 
-export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidgetProps) {
+const SOURCE_STYLE_MAP: Record<string, { bar: string; badge: string }> = {
+  "Google Ads": { bar: "bg-amber-500", badge: "bg-amber-50 text-amber-800 border-amber-200" },
+  "Google Organik": { bar: "bg-blue-500", badge: "bg-blue-50 text-blue-700 border-blue-200" },
+  Instagram: { bar: "bg-pink-500", badge: "bg-pink-50 text-pink-700 border-pink-200" },
+  Facebook: { bar: "bg-indigo-500", badge: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  WhatsApp: { bar: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  YouTube: { bar: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200" },
+  Doğrudan: { bar: "bg-[#6b1d2f]", badge: "bg-rose-50 text-[#6b1d2f] border-rose-200" },
+  Diğer: { bar: "bg-slate-400", badge: "bg-slate-100 text-slate-700 border-slate-200" },
+};
+
+export default function VisitorAnalyticsWidget({ stats, conversion }: VisitorAnalyticsWidgetProps) {
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
   const realtime = stats?.realtime || {
@@ -58,6 +78,7 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
   const weekly = stats?.weekly || {
     uniqueVisitors: 0,
     pageviews: 0,
+    dailyAverage: 0,
     trend: [],
   };
   const yearly = stats?.yearly || {
@@ -72,9 +93,19 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
     mobilePercent: 0,
     desktopPercent: 0,
   };
+  const topPages = stats?.topPages || [];
+  const trafficSources = stats?.trafficSources || [];
 
   const maxTrendVal = Math.max(1, ...weekly.trend.map((d) => d.visitors));
   const startedLabel = formatStartedAt(stats?.startedAt);
+
+  // Real Conversion Rate Calculation (Son 7 Gün & Bugün)
+  const todayOrders = Number(conversion?.todayOrders || 0);
+  const weekOrders = Number(conversion?.weekOrders || 0);
+  const weekConversionRate =
+    weekly.uniqueVisitors > 0 ? Math.min(100, (weekOrders / weekly.uniqueVisitors) * 100) : 0;
+  const todayConversionRate =
+    daily.uniqueVisitors > 0 ? Math.min(100, (todayOrders / daily.uniqueVisitors) * 100) : 0;
 
   return (
     <section className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden">
@@ -104,24 +135,41 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
           </div>
         </div>
 
-        {/* Device split pill */}
-        {(devices.mobile > 0 || devices.desktop > 0) && (
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/70 rounded-xl px-2.5 py-1">
-            <span className="inline-flex items-center gap-1">
-              <Smartphone className="w-3.5 h-3.5 text-indigo-500" />
-              Mobil %{devices.mobilePercent}
+        {/* Right Header Pills: Conversion Rate + Device Split */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            title={`Son 7 günde ${formatNumber(weekly.uniqueVisitors)} tekil ziyaretçiden ${formatNumber(weekOrders)} aktif sipariş • Bugün: ${formatNumber(todayOrders)} sipariş (%${todayConversionRate.toFixed(1)})`}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#6b1d2f] bg-rose-50/80 border border-rose-200/80 rounded-xl px-2.5 py-1"
+          >
+            <Percent className="w-3.5 h-3.5 text-[#6b1d2f]" />
+            <span>Dönüşüm (7g):</span>
+            <span className="font-black tabular-nums">
+              %{weekConversionRate.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
             </span>
-            <span className="text-slate-300">|</span>
-            <span className="inline-flex items-center gap-1">
-              <Monitor className="w-3.5 h-3.5 text-slate-500" />
-              Masaüstü %{devices.desktopPercent}
+            <span className="text-[10px] font-medium text-rose-700/80 hidden sm:inline">
+              ({formatNumber(weekOrders)} sipariş)
             </span>
           </div>
-        )}
+
+          {(devices.mobile > 0 || devices.desktop > 0) && (
+            <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200/70 rounded-xl px-2.5 py-1">
+              <span className="inline-flex items-center gap-1">
+                <Smartphone className="w-3.5 h-3.5 text-indigo-500" />
+                Mobil %{devices.mobilePercent}
+              </span>
+              <span className="text-slate-300">|</span>
+              <span className="inline-flex items-center gap-1">
+                <Monitor className="w-3.5 h-3.5 text-slate-500" />
+                Masaüstü %{devices.desktopPercent}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 4 Primary KPI Cards: Anlık, Günlük, Haftalık, Yıllık */}
+      {/* Body */}
       <div className="p-4 sm:p-5 space-y-4">
+        {/* 4 Primary KPI Cards: Anlık, Günlük, Haftalık, Yıllık */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* 1. ANLIK */}
           <div className="relative rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-white p-4 transition hover:shadow-md">
@@ -192,7 +240,9 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
                 <Eye className="w-3 h-3 text-slate-400" />
                 {formatNumber(daily.pageviews)} görüntüleme
               </span>
-              <span>Dün: {formatNumber(daily.yesterdayVisitors)}</span>
+              <span>
+                Dün: {formatNumber(daily.yesterdayVisitors)} • {formatNumber(todayOrders)} sipariş
+              </span>
             </div>
           </div>
 
@@ -218,9 +268,7 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
                 <Eye className="w-3 h-3 text-slate-400" />
                 {formatNumber(weekly.pageviews)} görüntüleme
               </span>
-              <span>
-                Ort. {formatNumber(Math.round(weekly.uniqueVisitors / 7))}/gün
-              </span>
+              <span>Ort. {formatNumber(weekly.dailyAverage)}/gün</span>
             </div>
           </div>
 
@@ -251,8 +299,8 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
           </div>
         </div>
 
-        {/* Bottom Row: 7-Day Trend Bar Chart + Live Active Pages */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 pt-1">
+        {/* Middle Row: 7-Day Trend Bar Chart + Live Active Pages */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
           {/* 7-Day Bar Trend */}
           <div className="lg:col-span-2 rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
             <div className="flex items-center justify-between mb-2.5">
@@ -273,7 +321,9 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
                   <div
                     key={day.date}
                     onMouseEnter={() =>
-                      setHoveredDay(`${day.label}: ${formatNumber(day.visitors)} ziyaretçi • ${formatNumber(day.pageviews)} görüntüleme`)
+                      setHoveredDay(
+                        `${day.label}: ${formatNumber(day.visitors)} ziyaretçi • ${formatNumber(day.pageviews)} görüntüleme`
+                      )
                     }
                     onMouseLeave={() => setHoveredDay(null)}
                     className="flex flex-col items-center justify-end h-full gap-1 cursor-default group"
@@ -340,6 +390,98 @@ export default function VisitorAnalyticsWidget({ stats }: VisitorAnalyticsWidget
                   Ziyaretçiler geldiğinde anlık olarak burada görünür.
                 </p>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Row: Traffic Sources + Top Visited Pages (Last 7 Days) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+          {/* Traffic Sources */}
+          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-amber-600" />
+                Trafik Kaynakları (Son 7 Gün)
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">
+                Google Ads • Instagram • Doğrudan
+              </span>
+            </div>
+            {trafficSources.length > 0 ? (
+              <div className="space-y-2">
+                {trafficSources.map((src) => {
+                  const style = SOURCE_STYLE_MAP[src.source] || SOURCE_STYLE_MAP["Diğer"];
+                  return (
+                    <div key={src.source} className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border ${style.badge}`}>
+                          {src.source}
+                        </span>
+                        <span className="font-bold text-slate-700 tabular-nums">
+                          {formatNumber(src.visits)} oturum{" "}
+                          <span className="text-slate-400 font-medium">(%{src.percent})</span>
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-slate-200/70 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${style.bar}`}
+                          style={{ width: `${Math.max(4, src.percent)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-400 py-4 text-center">
+                Yeni ziyaretler geldikçe trafik kaynakları (Google Ads, Instagram, Doğrudan vb.) burada otomatik sınıflandırılır.
+              </p>
+            )}
+          </div>
+
+          {/* Top Visited Pages */}
+          <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                <FileBarChart2 className="w-3.5 h-3.5 text-blue-600" />
+                En Çok Ziyaret Edilen Sayfalar (Son 7 Gün)
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">
+                Görüntüleme sayısı
+              </span>
+            </div>
+            {topPages.length > 0 ? (
+              <div className="space-y-2">
+                {topPages.map((pg) => (
+                  <div key={pg.path} className="space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <a
+                        href={pg.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-slate-700 hover:text-[#6b1d2f] truncate transition"
+                        title={pg.path}
+                      >
+                        {pg.path}
+                      </a>
+                      <span className="shrink-0 font-bold text-slate-700 tabular-nums">
+                        {formatNumber(pg.views)}{" "}
+                        <span className="text-slate-400 font-medium">(%{pg.percent})</span>
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200/70 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-blue-500/85 transition-all duration-500"
+                        style={{ width: `${Math.max(4, pg.percent)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-400 py-4 text-center">
+                Sayfa ziyaretleri biriktikçe en çok incelenen ürün ve kategori sayfaları burada listelenir.
+              </p>
             )}
           </div>
         </div>

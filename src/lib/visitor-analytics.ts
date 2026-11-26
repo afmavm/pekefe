@@ -12,11 +12,22 @@ const MAX_DAILY_RETENTION_DAYS = 400; // Keep > 1 full year of exact daily bucke
 const BOT_USER_AGENT_REGEX =
   /bot|crawler|spider|slurp|mediapartners|googlebot|bingbot|yandex|baidu|duckduckbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkshare|w3c_validator|whatsapp|telegrambot|applebot|semrush|ahrefs|mj12bot|dotbot|petalbot|bytespider|gptbot|claudebot|anthropic-ai|ccbot|lighthouse|headlesschrome|phantomjs|selenium|puppeteer|playwright|curl|wget|python-requests|httpclient|axios|go-http-client|uptime|pingdom|statuscake/i;
 
+export type TrafficSourceName =
+  | "Google Ads"
+  | "Google Organik"
+  | "Instagram"
+  | "Facebook"
+  | "WhatsApp"
+  | "YouTube"
+  | "Doğrudan"
+  | "Diğer";
+
 export interface ActiveSession {
   lastSeen: number;
   lastPageviewAt?: number;
   path: string;
   device: "mobile" | "desktop";
+  source?: TrafficSourceName;
 }
 
 export interface DailyVisitorBucket {
@@ -25,6 +36,8 @@ export interface DailyVisitorBucket {
   pageviews: number;
   mobile: number;
   desktop: number;
+  pages?: Record<string, number>;
+  sources?: Record<string, number>;
 }
 
 interface VisitorAnalyticsStore {
@@ -52,6 +65,7 @@ export interface VisitorStatsSummary {
   weekly: {
     uniqueVisitors: number;
     pageviews: number;
+    dailyAverage: number;
     trend: Array<{
       date: string;
       label: string;
@@ -71,11 +85,20 @@ export interface VisitorStatsSummary {
     mobilePercent: number;
     desktopPercent: number;
   };
+  topPages: Array<{
+    path: string;
+    views: number;
+    percent: number;
+  }>;
+  trafficSources: Array<{
+    source: string;
+    visits: number;
+    percent: number;
+  }>;
   startedAt: string;
   updatedAt: string;
 }
 
-// Keep a short-lived in-memory reference so concurrent requests in the same worker stay consistent
 let memoryCache: { store: VisitorAnalyticsStore; loadedAt: number } | null = null;
 const CACHE_TTL_MS = 2000;
 
@@ -91,6 +114,65 @@ export function detectDevice(userAgent?: string | null): "mobile" | "desktop" {
     : "desktop";
 }
 
+export function classifyTrafficSource(
+  referrer?: string | null,
+  search?: string | null
+): TrafficSourceName {
+  const qs = typeof search === "string" ? search.trim() : "";
+  const params = new URLSearchParams(qs.startsWith("?") ? qs.slice(1) : qs);
+
+  const gclid = params.get("gclid") || params.get("gbraid") || params.get("wbraid") || params.get("gad_source");
+  const fbclid = params.get("fbclid");
+  const utmSource = (params.get("utm_source") || "").toLowerCase();
+  const utmMedium = (params.get("utm_medium") || "").toLowerCase();
+
+  // 1. Paid Google Ads detection
+  if (
+    gclid ||
+    (utmSource.includes("google") &&
+      (utmMedium.includes("cpc") ||
+        utmMedium.includes("ppc") ||
+        utmMedium.includes("paid") ||
+        utmMedium.includes("ads")))
+  ) {
+    return "Google Ads";
+  }
+
+  // 2. Explicit UTM sources
+  if (utmSource.includes("instagram") || utmSource === "ig") return "Instagram";
+  if (utmSource.includes("facebook") || utmSource === "fb") return "Facebook";
+  if (utmSource.includes("whatsapp") || utmSource === "wa") return "WhatsApp";
+  if (utmSource.includes("youtube") || utmSource === "yt") return "YouTube";
+  if (utmSource.includes("google")) return "Google Organik";
+
+  // 3. Facebook click ID fallback
+  if (fbclid) return "Facebook";
+
+  // 4. Referrer hostname classification
+  if (referrer && typeof referrer === "string" && referrer.trim()) {
+    try {
+      const host = new URL(referrer.trim()).hostname.toLowerCase();
+      if (host.includes("pekefe.com") || host === "localhost" || host === "127.0.0.1") {
+        return "Doğrudan";
+      }
+      if (host.includes("instagram.com") || host.includes("l.instagram.com")) return "Instagram";
+      if (host.includes("facebook.com") || host.includes("fb.com") || host.includes("m.facebook.com") || host.includes("l.facebook.com")) {
+        return "Facebook";
+      }
+      if (host.includes("whatsapp.com") || host.includes("wa.me")) return "WhatsApp";
+      if (host.includes("youtube.com") || host.includes("youtu.be")) return "YouTube";
+      if (host.includes("google.") || host.includes("googleapis.com") || host.includes("googleadservices.com")) {
+        return host.includes("googleadservices.com") ? "Google Ads" : "Google Organik";
+      }
+      return "Diğer";
+    } catch {
+      return "Diğer";
+    }
+  }
+
+  return "Doğrudan";
+}
+
 export function getIstanbulDateString(date: Date = new Date()): string {
   try {
     return new Intl.DateTimeFormat("en-CA", {
@@ -100,7 +182,6 @@ export function getIstanbulDateString(date: Date = new Date()): string {
       day: "2-digit",
     }).format(date);
   } catch {
-    // Fallback UTC+3
     const tr = new Date(date.getTime() + 3 * 60 * 60 * 1000);
     return tr.toISOString().slice(0, 10);
   }
@@ -132,7 +213,7 @@ function getPastIstanbulDates(count: number, now: Date = new Date()): string[] {
 function createEmptyStore(): VisitorAnalyticsStore {
   const nowIso = new Date().toISOString();
   return {
-    version: 1,
+    version: 2,
     startedAt: nowIso,
     updatedAt: nowIso,
     activeSessions: {},
@@ -155,7 +236,7 @@ function readStore(forceDisk = false): VisitorAnalyticsStore {
     const raw = fs.readFileSync(DB_PATH, "utf8");
     const parsed = JSON.parse(raw);
     const store: VisitorAnalyticsStore = {
-      version: parsed.version || 1,
+      version: parsed.version || 2,
       startedAt: parsed.startedAt || new Date().toISOString(),
       updatedAt: parsed.updatedAt || new Date().toISOString(),
       activeSessions: parsed.activeSessions && typeof parsed.activeSessions === "object" ? parsed.activeSessions : {},
@@ -165,8 +246,7 @@ function readStore(forceDisk = false): VisitorAnalyticsStore {
     return store;
   } catch (err) {
     console.error("[VisitorAnalytics] Error reading store:", err);
-    const fallback = memoryCache?.store || createEmptyStore();
-    return fallback;
+    return memoryCache?.store || createEmptyStore();
   }
 }
 
@@ -196,7 +276,6 @@ function writeStore(store: VisitorAnalyticsStore): void {
 }
 
 function pruneStore(store: VisitorAnalyticsStore, nowMs: number): void {
-  // 1. Prune expired live sessions (> 5 min)
   const cutoff = nowMs - ACTIVE_WINDOW_MS;
   for (const [vid, session] of Object.entries(store.activeSessions)) {
     if (!session || typeof session.lastSeen !== "number" || session.lastSeen < cutoff) {
@@ -204,7 +283,6 @@ function pruneStore(store: VisitorAnalyticsStore, nowMs: number): void {
     }
   }
 
-  // 2. Prune daily buckets older than MAX_DAILY_RETENTION_DAYS
   const keys = Object.keys(store.daily);
   if (keys.length > MAX_DAILY_RETENTION_DAYS) {
     keys.sort();
@@ -238,6 +316,9 @@ export function recordVisit(params: {
   userAgent: string;
   path: string;
   type: "pageview" | "heartbeat";
+  referrer?: string | null;
+  search?: string | null;
+  isSessionEntry?: boolean;
 }): { recorded: boolean } {
   if (isBotUserAgent(params.userAgent)) {
     return { recorded: false };
@@ -271,11 +352,22 @@ export function recordVisit(params: {
 
   const shouldCountPageview = params.type === "pageview" && !isDuplicatePageview;
 
+  let detectedSource: TrafficSourceName | undefined = prevSession?.source;
+  const shouldAttributeSource =
+    params.type === "pageview" &&
+    !isDuplicatePageview &&
+    (params.isSessionEntry === true || !prevSession);
+
+  if (shouldAttributeSource) {
+    detectedSource = classifyTrafficSource(params.referrer, params.search);
+  }
+
   store.activeSessions[visitorHash] = {
     lastSeen: nowMs,
     lastPageviewAt: shouldCountPageview ? nowMs : prevSession?.lastPageviewAt,
     path: cleanPath,
     device,
+    source: detectedSource,
   };
 
   if (!store.daily[todayStr]) {
@@ -285,10 +377,15 @@ export function recordVisit(params: {
       pageviews: 0,
       mobile: 0,
       desktop: 0,
+      pages: {},
+      sources: {},
     };
   }
 
   const bucket = store.daily[todayStr];
+  if (!bucket.pages) bucket.pages = {};
+  if (!bucket.sources) bucket.sources = {};
+
   const isNewDailyVisitor = !bucket.visitors.includes(visitorHash);
   if (isNewDailyVisitor) {
     bucket.visitors.push(visitorHash);
@@ -301,6 +398,11 @@ export function recordVisit(params: {
 
   if (shouldCountPageview) {
     bucket.pageviews += 1;
+    bucket.pages[cleanPath] = (bucket.pages[cleanPath] || 0) + 1;
+  }
+
+  if (shouldAttributeSource && detectedSource) {
+    bucket.sources[detectedSource] = (bucket.sources[detectedSource] || 0) + 1;
   }
 
   writeStore(store);
@@ -312,7 +414,6 @@ export function getVisitorStats(): VisitorStatsSummary {
   const nowMs = now.getTime();
   const store = readStore(true);
 
-  // Clean expired active sessions in memory for accurate live count
   const cutoff = nowMs - ACTIVE_WINDOW_MS;
   const activeEntries = Object.values(store.activeSessions).filter(
     (s) => s && typeof s.lastSeen === "number" && s.lastSeen >= cutoff
@@ -351,19 +452,36 @@ export function getVisitorStats(): VisitorStatsSummary {
     changePercent = Math.round(((dailyUnique - yesterdayUnique) / yesterdayUnique) * 100);
   }
 
-  // Weekly (Last 7 calendar days unique union + pageview sum)
+  // Weekly (Last 7 calendar days unique union + pageviews + top pages + traffic sources)
   const weeklyVisitorSet = new Set<string>();
   let weeklyPageviews = 0;
   let weeklyMobile = 0;
   let weeklyDesktop = 0;
+  let weeklyActiveDays = 0;
+  const weeklyPageMap: Record<string, number> = {};
+  const weeklySourceMap: Record<string, number> = {};
 
   const weeklyTrend = last7Dates.map((dateStr) => {
     const b = store.daily[dateStr];
     if (b) {
+      if (b.visitors.length > 0 || b.pageviews > 0) {
+        weeklyActiveDays += 1;
+      }
       for (const vid of b.visitors) weeklyVisitorSet.add(vid);
       weeklyPageviews += b.pageviews || 0;
       weeklyMobile += b.mobile || 0;
       weeklyDesktop += b.desktop || 0;
+
+      if (b.pages) {
+        for (const [p, count] of Object.entries(b.pages)) {
+          weeklyPageMap[p] = (weeklyPageMap[p] || 0) + Number(count || 0);
+        }
+      }
+      if (b.sources) {
+        for (const [src, count] of Object.entries(b.sources)) {
+          weeklySourceMap[src] = (weeklySourceMap[src] || 0) + Number(count || 0);
+        }
+      }
     }
     return {
       date: dateStr,
@@ -372,6 +490,30 @@ export function getVisitorStats(): VisitorStatsSummary {
       pageviews: b ? b.pageviews : 0,
     };
   });
+
+  const weeklyUnique = weeklyVisitorSet.size;
+  const weeklyDailyAverage = weeklyActiveDays > 0 ? Math.round(weeklyUnique / weeklyActiveDays) : 0;
+
+  // Top Pages (Last 7 Days)
+  const totalTrackedPageviews = Object.values(weeklyPageMap).reduce((s, v) => s + v, 0);
+  const topPages = Object.entries(weeklyPageMap)
+    .map(([pagePath, views]) => ({
+      path: pagePath,
+      views,
+      percent: totalTrackedPageviews > 0 ? Math.round((views / totalTrackedPageviews) * 100) : 0,
+    }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 6);
+
+  // Traffic Sources (Last 7 Days)
+  const totalSourceVisits = Object.values(weeklySourceMap).reduce((s, v) => s + v, 0);
+  const trafficSources = Object.entries(weeklySourceMap)
+    .map(([source, visits]) => ({
+      source,
+      visits,
+      percent: totalSourceVisits > 0 ? Math.round((visits / totalSourceVisits) * 100) : 0,
+    }))
+    .sort((a, b) => b.visits - a.visits);
 
   // Yearly (Current Istanbul calendar year YYYY)
   const currentYear = Number(todayStr.slice(0, 4));
@@ -411,8 +553,9 @@ export function getVisitorStats(): VisitorStatsSummary {
       changePercent,
     },
     weekly: {
-      uniqueVisitors: weeklyVisitorSet.size,
+      uniqueVisitors: weeklyUnique,
       pageviews: weeklyPageviews,
+      dailyAverage: weeklyDailyAverage,
       trend: weeklyTrend,
     },
     yearly: {
@@ -427,6 +570,8 @@ export function getVisitorStats(): VisitorStatsSummary {
       mobilePercent,
       desktopPercent,
     },
+    topPages,
+    trafficSources,
     startedAt: store.startedAt,
     updatedAt: store.updatedAt,
   };

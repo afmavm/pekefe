@@ -4,7 +4,7 @@ import { requirePermission } from '@/lib/auth-helpers';
 import { readLocalOrders } from '@/lib/jsonOrderDb';
 import { readLocalProducts } from '@/lib/jsonProductDb';
 import { readLocalAccounts } from '@/lib/jsonCurrentAccountsDb';
-import { getVisitorStats } from '@/lib/visitor-analytics';
+import { getVisitorStats, getIstanbulDateString } from '@/lib/visitor-analytics';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -562,13 +562,30 @@ export async function GET(request: Request) {
         ? dbAccountsCount
         : localAccounts.filter((a: any) => a.type?.includes('MUSTERI') || a.type?.includes('BAYI')).length;
 
+    const visitorStats = getVisitorStats();
+    const todayTrStr = visitorStats.daily.date;
+    const last7DateSet = new Set(visitorStats.weekly.trend.map((d) => d.date));
+    let todayOrderCount = 0;
+    let weekOrderCount = 0;
+    for (const o of allActiveOrders) {
+      const oDate = o.date instanceof Date ? o.date : new Date(o.date);
+      if (isNaN(oDate.getTime())) continue;
+      const trDay = getIstanbulDateString(oDate);
+      if (trDay === todayTrStr) todayOrderCount += 1;
+      if (last7DateSet.has(trDay)) weekOrderCount += 1;
+    }
+
     return NextResponse.json(
       {
         chartData,
         pieChartData,
         barChartData,
         integrationAlerts,
-        visitorStats: getVisitorStats(),
+        visitorStats,
+        visitorConversion: {
+          todayOrders: todayOrderCount,
+          weekOrders: weekOrderCount,
+        },
         recentOrders: modeFilteredOrders.slice(0, 8).map((o) => ({
           id: o.id,
           orderNumber: o.orderNumber,

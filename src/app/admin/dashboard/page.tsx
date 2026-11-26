@@ -15,7 +15,7 @@ async function getInitialDashboardData() {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
     const { readLocalOrders } = await import("@/lib/jsonOrderDb");
     const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
-    const { getVisitorStats } = await import("@/lib/visitor-analytics");
+    const { getVisitorStats, getIstanbulDateString } = await import("@/lib/visitor-analytics");
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -317,8 +317,25 @@ async function getInitialDashboardData() {
     const cancelledOrderCount = finalOrders.filter(o => isOrderCancelledOrReturned(o.status)).length;
     const activeDealerCount = localAccounts.filter((a: any) => a.type?.includes("MUSTERI") || a.type?.includes("BAYI") || a.type?.includes("customer")).length || 1;
 
+    const visitorStats = getVisitorStats();
+    const todayTrStr = visitorStats.daily.date;
+    const last7DateSet = new Set(visitorStats.weekly.trend.map((d) => d.date));
+    let todayOrderCount = 0;
+    let weekOrderCount = 0;
+    for (const o of activeOrders) {
+      const oDate = o.date instanceof Date ? o.date : new Date(o.date);
+      if (isNaN(oDate.getTime())) continue;
+      const trDay = getIstanbulDateString(oDate);
+      if (trDay === todayTrStr) todayOrderCount += 1;
+      if (last7DateSet.has(trDay)) weekOrderCount += 1;
+    }
+
     return {
-      visitorStats: getVisitorStats(),
+      visitorStats,
+      visitorConversion: {
+        todayOrders: todayOrderCount,
+        weekOrders: weekOrderCount,
+      },
       recentOrders: recentOrdersMapped,
       erpStockStats: {
         totalStockValue,
@@ -371,7 +388,7 @@ export default async function AdminDashboardPage() {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
     const { readLocalOrders } = await import("@/lib/jsonOrderDb");
     const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
-    const { getVisitorStats } = await import("@/lib/visitor-analytics");
+    const { getVisitorStats, getIstanbulDateString } = await import("@/lib/visitor-analytics");
 
     [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([
       prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),

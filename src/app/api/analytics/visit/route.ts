@@ -21,7 +21,15 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get("user-agent") || "";
     const ip = extractClientIp(request);
 
-    let body: { visitorId?: string; path?: string; type?: string } = {};
+    let body: {
+      visitorId?: string;
+      path?: string;
+      type?: string;
+      referrer?: string;
+      search?: string;
+      isSessionEntry?: boolean;
+    } = {};
+
     try {
       body = await request.json();
     } catch {
@@ -37,6 +45,9 @@ export async function POST(request: NextRequest) {
       userAgent,
       path: visitPath,
       type: visitType,
+      referrer: typeof body.referrer === "string" ? body.referrer.slice(0, 300) : "",
+      search: typeof body.search === "string" ? body.search.slice(0, 300) : "",
+      isSessionEntry: body.isSessionEntry === true,
     });
 
     return NextResponse.json(

@@ -4,6 +4,7 @@ import { requirePermission } from '@/lib/auth-helpers';
 import { readLocalOrders } from '@/lib/jsonOrderDb';
 import { readLocalProducts } from '@/lib/jsonProductDb';
 import { readLocalAccounts } from '@/lib/jsonCurrentAccountsDb';
+import { getVisitorStats } from '@/lib/visitor-analytics';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -567,6 +568,7 @@ export async function GET(request: Request) {
         pieChartData,
         barChartData,
         integrationAlerts,
+        visitorStats: getVisitorStats(),
         recentOrders: modeFilteredOrders.slice(0, 8).map((o) => ({
           id: o.id,
           orderNumber: o.orderNumber,

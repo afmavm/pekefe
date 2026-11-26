@@ -15,6 +15,7 @@ async function getInitialDashboardData() {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
     const { readLocalOrders } = await import("@/lib/jsonOrderDb");
     const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
+    const { getVisitorStats } = await import("@/lib/visitor-analytics");
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -317,6 +318,7 @@ async function getInitialDashboardData() {
     const activeDealerCount = localAccounts.filter((a: any) => a.type?.includes("MUSTERI") || a.type?.includes("BAYI") || a.type?.includes("customer")).length || 1;
 
     return {
+      visitorStats: getVisitorStats(),
       recentOrders: recentOrdersMapped,
       erpStockStats: {
         totalStockValue,
@@ -369,6 +371,7 @@ export default async function AdminDashboardPage() {
     const { readLocalProducts } = await import("@/lib/jsonProductDb");
     const { readLocalOrders } = await import("@/lib/jsonOrderDb");
     const { readLocalAccounts } = await import("@/lib/jsonCurrentAccountsDb");
+    const { getVisitorStats } = await import("@/lib/visitor-analytics");
 
     [productCount, todayOrders, dealerCount, pageCount, cmsData] = await Promise.all([
       prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),

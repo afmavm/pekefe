@@ -3,6 +3,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import AnalyticsScripts from "@/components/seo/AnalyticsScripts";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PwaRegister } from "@/components/pwa/PwaRegister";
+import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 
 const playfair = { variable: "font-playfair" };
 const manrope = { variable: "font-manrope" };
@@ -161,6 +162,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           {children}
           <PwaRegister />
+          <VisitorTracker />
           <AnalyticsScripts />
         </AuthProvider>
       </body>

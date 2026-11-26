@@ -25,3 +25,5 @@ yarn-error.log*
 .env.*
 **/.env*
 .vercel
+data/visitor_analytics_db.json
+data/*.tmp

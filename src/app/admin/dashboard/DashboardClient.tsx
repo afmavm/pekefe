@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import VisitorAnalyticsWidget from "@/components/admin/VisitorAnalyticsWidget";
 import {
   Package,
   ShoppingCart,
@@ -359,6 +360,11 @@ export default function DashboardClient({ initialData, scanResults, siteName, do
   return (
     <div className="space-y-6">
       
+      {/* ============================================================
+          LIVE WEBSITE VISITOR ANALYTICS (Anlık / Günlük / Haftalık / Yıllık)
+         ============================================================ */}
+      <VisitorAnalyticsWidget stats={data?.visitorStats} />
+
       {/* ============================================================
           ACTIONABLE METRICS ALERT GRID (Gold Standard 2)
          ============================================================ */}

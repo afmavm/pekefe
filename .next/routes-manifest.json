@@ -1221,6 +1221,12 @@
       "namedRegex": "^/api/admin(?:/)?$"
     },
     {
+      "page": "/api/admin/analytics/visitors",
+      "regex": "^/api/admin/analytics/visitors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/analytics/visitors(?:/)?$"
+    },
+    {
       "page": "/api/admin/dashboard",
       "regex": "^/api/admin/dashboard(?:/)?$",
       "routeKeys": {},
@@ -1387,6 +1393,12 @@
       "regex": "^/api/ai\\-assistant/ask(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/ai\\-assistant/ask(?:/)?$"
+    },
+    {
+      "page": "/api/analytics/visit",
+      "regex": "^/api/analytics/visit(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/analytics/visit(?:/)?$"
     },
     {
       "page": "/api/applications",

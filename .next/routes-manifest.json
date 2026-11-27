@@ -208,16 +208,15 @@
         "source": "/callback.php",
         "destination": "/api/webhooks/paytr",
         "regex": "^/callback\\.php(?:/)?$"
-      }
-    ],
-    "afterFiles": [],
-    "fallback": [
+      },
       {
         "source": "/uploads/:path*",
         "destination": "/api/uploads/:path*",
         "regex": "^/uploads(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
       }
-    ]
+    ],
+    "afterFiles": [],
+    "fallback": []
   },
   "dynamicRoutes": [
     {

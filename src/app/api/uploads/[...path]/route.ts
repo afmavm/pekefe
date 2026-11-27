@@ -9,12 +9,17 @@ const MIME_TYPES: Record<string, string> = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
+  ".jfif": "image/jpeg",
   ".gif": "image/gif",
+  ".bmp": "image/bmp",
   ".svg": "image/svg+xml",
   ".avif": "image/avif",
+  ".heic": "image/heic",
   ".ico": "image/x-icon",
   ".mp4": "video/mp4",
   ".webm": "video/webm",
+  ".mov": "video/quicktime",
+  ".ogg": "video/ogg",
   ".pdf": "application/pdf",
 };
 
@@ -34,6 +39,7 @@ export async function GET(
 
     const candidateDirs = [
       path.join(process.cwd(), "public", "uploads"),
+      path.join(process.cwd(), "uploads"),
       "/home/ata3a6icilikcom/public_html/pekefe.com/uploads",
     ];
 

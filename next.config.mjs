@@ -169,8 +169,6 @@ const nextConfig = {
           source: "/callback.php",
           destination: "/api/webhooks/paytr",
         },
-      ],
-      fallback: [
         {
           source: "/uploads/:path*",
           destination: "/api/uploads/:path*",

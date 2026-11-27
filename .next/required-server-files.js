@@ -331,15 +331,14 @@ self.__SERVER_FILES_MANIFEST={
         {
           "source": "/callback.php",
           "destination": "/api/webhooks/paytr"
-        }
-      ],
-      "afterFiles": [],
-      "fallback": [
+        },
         {
           "source": "/uploads/:path*",
           "destination": "/api/uploads/:path*"
         }
-      ]
+      ],
+      "afterFiles": [],
+      "fallback": []
     },
     "_originalRedirects": [
       {

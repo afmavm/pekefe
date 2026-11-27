@@ -4874,7 +4874,11 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         seoDesc={form.seoDesc}
                         barcode={form.barcode}
                         price={Number((form as any).webPrice || form.salePrice || 0)}
-                        stock={Number((form as any).stock || (form as any).stockQuantity || 0)}
+                        stock={
+                          warehouses.reduce((sum, w) => sum + (Number((w as any).stockCount ?? (w as any).stock) || 0), 0) ||
+                          variants.reduce((sum, v) => sum + (Number((v as any).stock) || 0), 0) ||
+                          Number((form as any).stock || (form as any).stockCount || (form as any).stock_quantity || 0)
+                        }
                         mediaCount={mediaList.length}
                         description={form.description || form.harvestStory || ""}
                       />

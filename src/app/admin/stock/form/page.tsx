@@ -3147,32 +3147,117 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
              ──────────────────────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Consolidated Dynamic Upper Tabs */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-1.5 shadow-sm flex flex-wrap gap-1.5">
-              {[
-                { id: "genel", label: "Genel Bilgiler", icon: Package },
-                { id: "hikaye_analiz", label: "Mahsul Hikayesi & Besin Analizi", icon: BookOpen },
-                { id: "varyantlar", label: "Varyant & Fiyatlandırma", icon: Layers },
-                { id: "b2b_lojistik", label: "B2B & Şube Lojistiği", icon: Database },
-                { id: "diger", label: "Teknik & SEO", icon: Info },
-              ].map(tab => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id || ((activeTab === ("b2b" as any) || activeTab === ("sube" as any)) && tab.id === "b2b_lojistik");
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                      active 
-                        ? "bg-orange-500 text-white shadow-md shadow-orange-500/10" 
-                        : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+            {/* Modern Sticky 5-Tab Navigation Bar */}
+            <div className="sticky top-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2 shadow-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-1.5">
+                {[
+                  {
+                    id: "genel",
+                    label: "Genel Bilgiler",
+                    sub: "Ad, kategori, stok",
+                    icon: Package,
+                    ready: Boolean(form.name && Number(form.price || 0) > 0),
+                    badge: null as string | null,
+                  },
+                  {
+                    id: "hikaye_analiz",
+                    label: "Mahsul & Analiz",
+                    sub: "Hikaye & besin değeri",
+                    icon: BookOpen,
+                    ready: Boolean(form.harvestStory || form.altitude),
+                    badge: null as string | null,
+                  },
+                  {
+                    id: "varyantlar",
+                    label: "Varyant & Fiyat",
+                    sub: "Gramaj & fiyatlar",
+                    icon: Layers,
+                    ready: Array.isArray(variants) && variants.length > 0,
+                    badge: Array.isArray(variants) && variants.length > 0 ? String(variants.length) : null,
+                  },
+                  {
+                    id: "b2b_lojistik",
+                    label: "B2B & Lojistik",
+                    sub: "Bayi & şube ayarları",
+                    icon: Database,
+                    ready: Boolean((form as any).b2bEnabled || (form as any).b2bPrice),
+                    badge: null as string | null,
+                  },
+                  {
+                    id: "diger",
+                    label: "Teknik & SEO",
+                    sub: "Meta, URL & barkod",
+                    icon: Info,
+                    ready: Boolean(form.seoTitle || form.seoDesc || form.barcode),
+                    badge: null as string | null,
+                  },
+                ].map((tab, idx, arr) => {
+                  const Icon = tab.icon;
+                  const active =
+                    activeTab === tab.id ||
+                    ((activeTab === ("b2b" as any) || activeTab === ("sube" as any)) && tab.id === "b2b_lojistik");
+                  const isLastOdd = idx === arr.length - 1;
+                  return (
+                    <button
+                      type="button"
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      className={`group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer border ${
+                        isLastOdd ? "col-span-2 sm:col-span-1" : ""
+                      } ${
+                        active
+                          ? "bg-gradient-to-br from-[#6b1d2f] to-[#8c253d] text-white border-[#6b1d2f] shadow-md shadow-[#6b1d2f]/20"
+                          : "bg-slate-50/70 hover:bg-slate-100/90 text-slate-700 border-transparent hover:border-slate-200"
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          active
+                            ? "bg-white/15 text-amber-300"
+                            : "bg-white text-slate-500 border border-slate-200/80 group-hover:text-[#6b1d2f] group-hover:border-rose-200"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`text-[11px] font-extrabold tracking-tight truncate ${
+                              active ? "text-white" : "text-slate-800"
+                            }`}
+                          >
+                            {tab.label}
+                          </span>
+                          {tab.badge && (
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[9px] font-black leading-4 shrink-0 ${
+                                active ? "bg-amber-400 text-slate-950" : "bg-orange-100 text-orange-700"
+                              }`}
+                            >
+                              {tab.badge}
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          className={`block text-[10px] truncate mt-0.5 ${
+                            active ? "text-rose-100/85" : "text-slate-400"
+                          }`}
+                        >
+                          {tab.sub}
+                        </span>
+                      </div>
+                      {tab.ready && !tab.badge && (
+                        <span
+                          title="Bilgiler girilmiş"
+                          className={`w-2 h-2 rounded-full shrink-0 ${
+                            active ? "bg-emerald-300" : "bg-emerald-500"
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* TAB CONTENTS PANEL (Enhanced High-Contrast Layout) */}

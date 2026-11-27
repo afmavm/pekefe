@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useProduct } from "@/context/ProductContext";
 import { fetchProductsFromApi } from "@/utils/productsStorage";
 import { isVideoUrl } from "@/lib/utils";
+import ProductSeoPreviewCard from "@/components/admin/ProductSeoPreviewCard";
 
 function generateSlug(text: string): string {
   if (!text) return "";
@@ -3451,15 +3452,54 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                        DÖVİZ & KDV DESTEKLİ GELİŞMİŞ FİYAT MATRİSİ
                      ──────────────────────────────────────────────────────── */}
                   <div className="border border-slate-200 rounded-2xl p-5.5 bg-slate-50/50 space-y-4 shadow-inner">
-                    <div className="flex justify-between items-center pb-2.5 border-b border-slate-200/80">
+                    <div className="flex flex-wrap justify-between items-center gap-2 pb-2.5 border-b border-slate-200/80">
                       <div>
                         <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-500">Premium Fiyat Matrisi</h3>
                         <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Döviz seçicili ve anlık kar marjı hesaplayıcılı ERP matrisi</p>
                       </div>
-                      <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase">
-                        <Coins className="w-3.5 h-3.5 text-emerald-500" /> Çoklu Döviz Aktif
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(() => {
+                          const webP = Number((form as any).webPrice || form.salePrice || 0);
+                          const costP = Number(form.purchasePrice || 0);
+                          if (webP > 0 && costP > 0) {
+                            const netP = webP - costP;
+                            const marginPct = Math.round((netP / webP) * 100);
+                            return (
+                              <span
+                                className={`flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-extrabold border ${
+                                  netP >= 0
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : "bg-red-50 text-red-700 border-red-200"
+                                }`}
+                              >
+                                Net Kâr: ₺{netP.toLocaleString("tr-TR", { maximumFractionDigits: 0 })} (%{marginPct})
+                              </span>
+                            );
+                          }
+                          return (
+                            <span
+                              title="Alış fiyatı girildiğinde /admin ana sayfasındaki net kâr ve depo değerleme %100 gerçek maliyetten hesaplanır."
+                              className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-3 py-1 text-[10px] font-bold"
+                            >
+                              <AlertTriangle className="w-3 h-3 text-amber-500" /> Gerçek kâr için alış fiyatı girin
+                            </span>
+                          );
+                        })()}
+                        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase">
+                          <Coins className="w-3.5 h-3.5 text-emerald-500" /> Çoklu Döviz Aktif
+                        </span>
+                      </div>
                     </div>
+                    {form.name && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200/80 text-[11px]">
+                        <span className="text-slate-500 font-semibold truncate">
+                          Canlı Ürün URL:{" "}
+                          <span className="font-mono font-bold text-[#6b1d2f]">
+                            https://www.pekefe.com/urun/{generateSlug(form.name)}
+                          </span>
+                        </span>
+                      </div>
+                    )}
 
                     {/* Responsive Price Matrix Grid - Solves Squishing */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
@@ -4105,8 +4145,20 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         </p>
                       </div>
                     </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-700 whitespace-nowrap shrink-0">
-                      <Sparkles className="w-3.5 h-3.5" /> Canlı Ürün Detay Kartı Entegrasyonlu
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleGenerateAiSeo("all")}
+                        disabled={isGeneratingAi}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6b1d2f] to-[#8c253d] hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+                      >
+                        {isGeneratingAi ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-300" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        )}
+                        {isGeneratingAi ? "Gemini Yazıyor..." : "Gemini AI ile Hikaye & Analiz Üret"}
+                      </button>
                     </div>
                   </div>
 
@@ -4763,7 +4815,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                           type="text"
                           value={form.seoKeywords}
                           onChange={e => setForm({ ...form, seoKeywords: e.target.value })}
-                          placeholder="arı körüğü, paslanmaz körük, Geleneksel & Doğal Lezzetler"
+                          placeholder="ispir dut pekmezi, katkısız gün pekmezi, cevizli köme, dut pestili"
                           className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-semibold focus:border-orange-500 focus:bg-white outline-none transition"
                         />
                       </div>
@@ -4816,6 +4868,18 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         </div>
 
                       </div>
+
+                      <ProductSeoPreviewCard
+                        name={form.name}
+                        slug={generateSlug(form.name)}
+                        seoTitle={form.seoTitle}
+                        seoDesc={form.seoDesc}
+                        barcode={form.barcode}
+                        price={Number((form as any).webPrice || form.salePrice || 0)}
+                        stock={Number((form as any).stock || (form as any).stockQuantity || 0)}
+                        mediaCount={mediaList.length}
+                        description={form.description || form.harvestStory || ""}
+                      />
 
                     </div>
                   </div>

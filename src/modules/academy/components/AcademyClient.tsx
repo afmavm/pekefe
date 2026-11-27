@@ -29,8 +29,8 @@ const INITIAL_COURSES: AcademyCourse[] = [
     lessonsCount: 12,
     level: "Orta Seviye",
     image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1200&q=80",
-    description: "İspir dutlarının toplanmasından bakır kazan ateşi yönetimine, kıvam kontrolünden cam kavanoz mühürlemeye kadar tüm asamalar.",
-    modules: ["1. Modül: Meyve Olgunluk İndeksi ve Serin Hasat", "2. Modül: Odun Ateşinde Isı Yönetimi", "3. Modül: Doğal Şeker Dengenleme & Saklama"],
+    description: "İspir dutlarının toplanmasından güneşin doğal sıcaklığıyla yoğunlaştırılmasına, kıvam kontrolünden cam kavanoz mühürlemeye kadar tüm aşamalar.",
+    modules: ["1. Modül: Meyve Olgunluk İndeksi ve Serin Hasat", "2. Modül: Güneşin Doğal Sıcaklığıyla Yoğunlaştırma & HMF Kontrolü", "3. Modül: Doğal Şeker Dengesi & Saklama"],
     isFeatured: false
   }
 ];

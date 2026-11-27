@@ -258,13 +258,13 @@ export default function Tesisimiz() {
           <div className="rounded-3xl overflow-hidden shadow-lg relative group border border-slate-200/80 dark:border-slate-800">
             <Image
               src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
-              alt="Geleneksel Bakır Kazanlar"
+              alt="Geleneksel Ahşap Cendere & Güneşte Doğal Yoğunlaştırma"
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6 z-10">
-              <span className="text-white font-serif text-base font-bold">Geleneksel Ahşap Cendere &amp; Bakır Kazanlar</span>
+              <span className="text-white font-serif text-base font-bold">Geleneksel Ahşap Cendere &amp; Güneşte Doğal Yoğunlaştırma</span>
             </div>
           </div>
 

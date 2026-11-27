@@ -75,7 +75,7 @@ const faqData = [
       { 
         id: "urun-4", 
         q: "İspir Kömesi nedir ve coğrafi işaret tescili var mıdır?", 
-        a: "İspir Kömesi; İspir beyaz dut şırası, yerli İspir cevizi, bal ve tam buğday ununun bakır kazanlarda geleneksel usulle karıştırılıp iplere dizilerek İspir güneşinde kurutulmasıyla yapılan tescilli bir yöresel lezzettir. TÜRKPATENT tarafından Coğrafi İşaret ile tescillenmiş olup yalnızca İspir yöresine özgü standartlarda üretilir." 
+        a: "İspir Kömesi; İspir beyaz dut şırası, yerli İspir cevizi, bal ve tam buğday ununun geleneksel usulle hazırlanıp iplere dizilerek İspir güneşinde doğal olarak kurutulmasıyla yapılan tescilli bir yöresel lezzettir. TÜRKPATENT tarafından Coğrafi İşaret ile tescillenmiş olup yalnızca İspir yöresine özgü standartlarda üretilir." 
       },
       { 
         id: "urun-5", 

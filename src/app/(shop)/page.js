@@ -954,13 +954,13 @@ export default function Home() {
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
               <Image
                 src="/uploads/ispir-bakir-kazan-ahsap-cendere.webp"
-                alt="Geleneksel Bakır Kazan & Odun Ateşi"
+                alt="Güneşte Doğal Yoğunlaştırma (İspir Gün Pekmezi)"
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Meşe Ateşi Bakır Kazan</span>
+                <span className="text-white text-xs font-label-sm tracking-wider uppercase font-bold">Güneşte Doğal Yoğunlaştırma</span>
               </div>
             </div>
           </div>

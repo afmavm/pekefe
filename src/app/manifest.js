@@ -8,7 +8,7 @@ export default function manifest() {
   return {
     name: 'PEKEFE',
     short_name: 'PEKEFE',
-    description: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, bakır kazanlarda geleneksel yöntemlerle üretilen %100 doğal ham dut pekmezi, ham bal ve yöresel lezzetler.",
+    description: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, yüksek ateşte kaynatılmadan güneşin doğal sıcaklığıyla yoğunlaştırılan %100 doğal İspir dut gün pekmezi, yaprak pestil ve cevizli köme.",
     start_url: '/',
     scope: '/',
     display: 'standalone',

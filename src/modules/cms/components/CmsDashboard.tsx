@@ -85,7 +85,7 @@ const SECTION_DEFINITIONS: SectionBlock[] = [
     icon: "📣",
     visible: true,
     fields: {
-      announcement: "Paslanmaz Arı Körükleri ve Ekipmanları",
+      announcement: "%100 Doğal İspir Dut Gün Pekmezi, Yaprak Pestil ve Cevizli Köme",
       announcement2: "%100 Yerli İmalat",
     }
   },

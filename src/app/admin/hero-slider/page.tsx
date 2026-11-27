@@ -42,7 +42,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     tag: "Erzurum İspir'in Geleneksel El Emeği Mirası",
     title: "Zamanın Yavaş Akışında,",
     highlightTitle: "Doğanın Saf İmzası.",
-    subtitle: "2000 metre rakımlı İspir yaylalarından şafak vakti toplanan saf beyaz dutlar; meşe odun ateşinde ve bakır kazanlarda kaynatılarak asırlık lezzetine kavuşur.",
+    subtitle: "2000 metre rakımlı İspir yaylalarından şafak vakti toplanan saf beyaz dutlar; yüksek ateşte kaynatılmadan güneşin doğal sıcaklığıyla yoğunlaştırılarak asırlık lezzetine kavuşur.",
     image: "/ispir-manzara-hero.png",
     active: true,
     objectPositionX: 50,
@@ -53,7 +53,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: "slide-2",
-    tag: "Odun Ateşi & Geleneksel Bakır Kazanlar",
+    tag: "Güneşte Doğal Yoğunlaştırma (Gün Pekmezi)",
     title: "Kuşaktan Kuşağa Aktarılan",
     highlightTitle: "Asırlık Usuller.",
     subtitle: "Hiçbir katkı maddesi, ilave şeker veya koruyucu kimyasal içermeyen %100 saf ve yoğun gövdeli geleneksel Pekefe lezzet şöleni.",

@@ -63,7 +63,7 @@ interface SeoState {
 
 const defaults: SeoState = {
   siteName: "PEKEFE | Geleneksel İspir Dut Pekmezi & Ham Çiçek Balı",
-  siteDescription: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, bakır kazanlarda ağır ağır üretilen %100 doğal ham dut pekmezi, ham bal ve yöresel lezzetler.",
+  siteDescription: "İspir'in 2200m+ rakımlı el değmemiş yaylalarından sofranıza uzanan, yüksek ateşte kaynatılmadan güneşin doğal sıcaklığıyla yoğunlaştırılan %100 doğal İspir dut gün pekmezi, yaprak pestil ve cevizli köme.",
   siteKeywords: "İspir Dut Pekmezi, Pekefe, Geleneksel Pekmez, Kaçkar Ham Balı, Coğrafi İşaretli Pekmez, Erzurum Yöresel Ürünler",
   ogImageUrl: "/og-image.jpg",
   googleVerificationCode: "QTYkkg0-x4Z8s5nuv0Qg3T0ePXA35ZhKuLp0ryCXS2s",
@@ -384,7 +384,7 @@ export default function SeoAdminPage() {
                 </h3>
 
                 <p className="text-xs text-gray-600 leading-normal line-clamp-2">
-                  {seo.siteDescription || "İspir yaylasının saf ham balı ve bakır kazanlarda üretilen %100 doğal ham dut pekmezi..."}
+                  {seo.siteDescription || "İspir yaylasının güneşin doğal sıcaklığıyla yoğunlaştırılan %100 doğal dut gün pekmezi, pestil ve cevizli kömesi..."}
                 </p>
               </div>
 

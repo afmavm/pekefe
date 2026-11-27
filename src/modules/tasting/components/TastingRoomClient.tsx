@@ -102,7 +102,7 @@ export default function TastingRoomClient() {
             İstanbul, Londra & Paris: <span className="italic font-normal text-[#6b1d2f] dark:text-amber-400">Özel Tadım Deneyimi</span>
           </h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-medium leading-relaxed">
-            PEKEFE'nin 2200m rakım ham ballarını, bakır kazan hasat dut pekmezlerini ve el yapımı yöresel lezzetlerini tadım uzmanlarımız eşliğinde özel salonlarımızda keşfedin.
+            PEKEFE'nin 2200m rakım İspir yaylalarında güneşin doğal sıcaklığıyla yoğunlaştırılan dut gün pekmezlerini, yaprak pestillerini ve cevizli kömelerini tadım uzmanlarımız eşliğinde özel salonlarımızda keşfedin.
           </p>
         </div>
 

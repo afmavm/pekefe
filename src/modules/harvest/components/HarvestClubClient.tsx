@@ -10,7 +10,7 @@ const INITIAL_BATCHES: HarvestBatch[] = [
   {
     id: "rekolte-2026-dut",
     title: "2026 İspir Yaylası Ham Dut Pekmezi",
-    subtitle: "Tek Rekolte · 2200m Rakım · Geleneksel Bakır Kazan",
+    subtitle: "Tek Rekolte · 2200m Rakım · Güneşte Doğal Yoğunlaştırma",
     rekolteYear: 2026,
     originVillage: "İspir, Erzurum",
     altitude: "2.200 Metre",
@@ -20,7 +20,7 @@ const INITIAL_BATCHES: HarvestBatch[] = [
     pricePerUnit: 850,
     unitVolume: "750g Cam Kavanoz",
     image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1200&q=80",
-    storyContent: "İspir'in el değmemiş yüksek rakımlı vadilerinde, asırlık dut ağaçlarından gün ağarırken el emeğiyle toplanan meyveler. Hiçbir şeker katkısı veya endüstriyel vakumlama yapılmadan, serin kaynak suyu ve odun ateşinde 12 saat ağır ağır kıvamlandırılır.",
+    storyContent: "İspir'in el değmemiş yüksek rakımlı vadilerinde, asırlık dut ağaçlarından gün ağarırken el emeğiyle toplanan meyveler. Hiçbir şeker katkısı veya yüksek ateşte kaynatma yapılmadan, İspir güneşinin doğal sıcaklığıyla ağır ağır kıvamlandırılır.",
     flavorNotes: ["Koyu Karamel", "Yaban Odun Nüansı", "Hafif Mayhoş Meyvemsilik"],
     isActive: true,
   },
@@ -99,7 +99,7 @@ export default function HarvestClubClient() {
             <span className="italic text-[#6b1d2f] dark:text-amber-400 font-normal">2026 Hasat Rezervasyonu</span>
           </h1>
           <p className="max-w-2xl mx-auto text-base md:text-lg text-slate-600 dark:text-zinc-400 font-medium leading-relaxed mb-10">
-            PEKEFE rekolte ürünleri endüstriyel bantlarda değil; doğanın iklimine, arıların nektar döngüsüne ve bakır kazan ustalarının sabrına bağlı olarak üretilir. Her rekolte numaralı ve sınırlı miktardadır.
+            PEKEFE rekolte ürünleri endüstriyel bantlarda değil; doğanın iklimine, İspir'in temiz dağ güneşine ve geleneksel ustaların sabrına bağlı olarak üretilir. Her rekolte numaralı ve sınırlı miktardadır.
           </p>
 
           {/* Quick Pillars */}

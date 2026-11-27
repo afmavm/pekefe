@@ -605,7 +605,7 @@ export default function ThemeAdminPage() {
                 </div>
 
                 <h4 className="text-xs font-extrabold text-slate-900">İspir Geleneksel Dut Pekmezi</h4>
-                <p className="text-[10px] text-slate-500">Meşe odun ateşinde karamelize edilmeden pişirilen şifa kaynağı.</p>
+                <p className="text-[10px] text-slate-500">Yüksek ateşte kaynatılmadan, güneşin doğal sıcaklığıyla yoğunlaştırılan şifa kaynağı.</p>
 
                 <button 
                   className="w-full py-2 text-xs font-bold text-white transition shadow-xs text-center"

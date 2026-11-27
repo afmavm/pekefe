@@ -4177,7 +4177,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                         rows={4}
                         value={form.harvestStory || ""}
                         onChange={e => setForm({ ...form, harvestStory: e.target.value })}
-                        placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık dut ağaçlarından toplanıp odun ateşinde ve bakır kazanlarda kaynatılan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
+                        placeholder="İspir'in 2000 rakımlı yaylalarındaki asırlık dut ağaçlarından toplanıp yüksek ateşte kaynatılmadan, güneşin doğal sıcaklığıyla yoğunlaştırılarak hazırlanan, hiçbir katkı maddesi içermeyen %100 saf geleneksel lezzet..."
                         className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-orange-500 outline-none leading-relaxed transition-all resize-none"
                       />
                       <p className="text-[11px] text-slate-400 font-medium">
@@ -4334,12 +4334,12 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Pişirme / Kurutma Yöntemi</label>
+                        <label className="block text-xs font-bold text-slate-700">Üretim &amp; Yoğunlaştırma Yöntemi</label>
                         <input
                           type="text"
                           value={form.specsBellows || ""}
                           onChange={e => setForm({ ...form, specsBellows: e.target.value })}
-                          placeholder="Örnek: Odun Ateşinde Bakır Kazanlar"
+                          placeholder="Örnek: Güneşin Doğal Sıcaklığıyla Yoğunlaştırma (Gün Pekmezi / Güneş Kurutması)"
                           className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-orange-500 outline-none"
                         />
                       </div>
@@ -4356,7 +4356,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Ambalaj Özelliği / Kalınlık</label>
+                        <label className="block text-xs font-bold text-slate-700">Ambalaj &amp; Saklama Özelliği</label>
                         <input
                           type="text"
                           value={form.specsDimensions || ""}

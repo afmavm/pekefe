@@ -715,11 +715,35 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAdmin(request);
+    if (auth && 'authorized' in auth && !auth.authorized) {
+      return auth.response;
+    }
+
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
-    const { active, isPublished, isDeleted } = body;
+    const {
+      active,
+      isPublished,
+      isDeleted,
+      stock,
+      stock_quantity,
+      price,
+      sale_price,
+      cost,
+      criticalLimit,
+    } = body;
+
     const resolvedActive = active !== undefined ? Boolean(active) : (isPublished !== undefined ? Boolean(isPublished) : undefined);
     const resolvedPublished = isPublished !== undefined ? Boolean(isPublished) : resolvedActive;
+    const hasStockUpdate = stock !== undefined || stock_quantity !== undefined;
+    const resolvedStock = hasStockUpdate ? Math.max(0, Math.round(Number(stock ?? stock_quantity) || 0)) : undefined;
+    const hasPriceUpdate = price !== undefined || sale_price !== undefined;
+    const resolvedPrice = hasPriceUpdate ? Math.max(0, Number(sale_price ?? price) || 0) : undefined;
+    const hasCostUpdate = cost !== undefined;
+    const resolvedCost = hasCostUpdate ? Math.max(0, Number(cost) || 0) : undefined;
+    const hasCriticalUpdate = criticalLimit !== undefined;
+    const resolvedCritical = hasCriticalUpdate ? Math.max(0, Math.round(Number(criticalLimit) || 0)) : undefined;
 
     let targetId = id;
     let targetSku = id;
@@ -727,13 +751,14 @@ export async function PATCH(
       const target = await Promise.race([
         prisma.product.findFirst({
           where: { OR: [{ id }, { sku: id }] },
-          select: { id: true, sku: true, attributes: true }
+          select: { id: true, sku: true, stock: true, attributes: true }
         }),
         new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000))
       ]);
       if (target) {
         targetId = target.id;
         targetSku = target.sku || id;
+        const previousStock = Number(target.stock || 0);
         let attrs: any = target.attributes || {};
         if (typeof attrs === "string") {
           try { attrs = JSON.parse(attrs); } catch { attrs = {}; }
@@ -746,17 +771,70 @@ export async function PATCH(
         if (resolvedPublished !== undefined) {
           attrs.isPublished = resolvedPublished;
         }
+        if (resolvedPrice !== undefined) {
+          attrs.webPrice = resolvedPrice;
+          attrs.salePrice = resolvedPrice;
+        }
+
+        const updateData: any = {
+          attributes: attrs,
+          ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {}),
+          ...(resolvedStock !== undefined ? { stock: resolvedStock } : {}),
+          ...(resolvedPrice !== undefined ? { price: resolvedPrice, sale_price: resolvedPrice } : {}),
+          ...(resolvedCost !== undefined ? { cost: resolvedCost } : {}),
+          ...(resolvedCritical !== undefined ? { criticalLimit: resolvedCritical } : {}),
+        };
 
         await Promise.race([
           prisma.product.update({
             where: { id: target.id },
-            data: {
-              attributes: attrs,
-              ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {})
-            }
+            data: updateData
           }),
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500))
         ]);
+
+        // Keep StockLocation + StockTransaction audit trail in sync on quick stock adjustment
+        if (resolvedStock !== undefined && resolvedStock !== previousStock) {
+          try {
+            const delta = resolvedStock - previousStock;
+            const locs = await prisma.stockLocation.findMany({
+              where: { productId: target.id },
+              orderBy: { stock: 'desc' }
+            });
+            let primaryWarehouseId: string | null = null;
+            if (locs.length === 1) {
+              primaryWarehouseId = locs[0].warehouseId;
+              await prisma.stockLocation.update({
+                where: { id: locs[0].id },
+                data: { stock: resolvedStock }
+              });
+            } else if (locs.length > 1) {
+              // Apply delta to primary warehouse so sum(locations) matches resolvedStock
+              primaryWarehouseId = locs[0].warehouseId;
+              const otherSum = locs.slice(1).reduce((s, l) => s + Number(l.stock || 0), 0);
+              const nextPrimary = Math.max(0, resolvedStock - otherSum);
+              await prisma.stockLocation.update({
+                where: { id: locs[0].id },
+                data: { stock: nextPrimary }
+              });
+            }
+            if (primaryWarehouseId) {
+              await prisma.stockTransaction.create({
+                data: {
+                  productId: target.id,
+                  warehouseId: primaryWarehouseId,
+                  type: 'ADJUSTMENT',
+                  quantity: delta,
+                  previousStock,
+                  newStock: resolvedStock,
+                  reason: 'Hızlı Stok Düzenleme (Ürün Kataloğu)',
+                }
+              });
+            }
+          } catch (locErr) {
+            console.warn("[API PATCH PRODUCT] StockLocation/Transaction sync notice:", locErr);
+          }
+        }
       }
     } catch (dbErr) {
       console.warn("[API PATCH PRODUCT NOTICE] Prisma update fallback:", dbErr);
@@ -776,10 +854,15 @@ export async function PATCH(
       ...(resolvedActive !== undefined ? { active: resolvedActive } : {}),
       ...(resolvedPublished !== undefined ? { isPublished: resolvedPublished } : {}),
       ...(isDeleted !== undefined ? { isDeleted: Boolean(isDeleted) } : {}),
+      ...(resolvedStock !== undefined ? { stock: resolvedStock, stock_quantity: resolvedStock } : {}),
+      ...(resolvedPrice !== undefined ? { price: resolvedPrice, sale_price: resolvedPrice } : {}),
+      ...(resolvedCost !== undefined ? { cost: resolvedCost } : {}),
+      ...(resolvedCritical !== undefined ? { criticalLimit: resolvedCritical } : {}),
       attributes: {
         ...existingLocalAttrs,
         ...(resolvedActive !== undefined ? { isActive: resolvedActive, active: resolvedActive } : {}),
         ...(resolvedPublished !== undefined ? { isPublished: resolvedPublished } : {}),
+        ...(resolvedPrice !== undefined ? { webPrice: resolvedPrice, salePrice: resolvedPrice } : {}),
       },
       updatedAt: new Date().toISOString(),
     };
@@ -788,6 +871,8 @@ export async function PATCH(
     revalidatePath('/', 'layout');
     revalidatePath('/kategoriler');
     revalidatePath('/admin/stock');
+    revalidatePath('/admin/inventory/stock-status');
+    revalidatePath('/admin/inventory/movements');
     revalidatePath('/api/products');
     return NextResponse.json(updatedLocal, {
       headers: {

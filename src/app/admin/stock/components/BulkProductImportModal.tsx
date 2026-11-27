@@ -65,21 +65,6 @@ export default function BulkProductImportModal({
   const [rows, setRows] = useState<BulkProductRow[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Manual grid rows (Mode B)
-  const [gridRows, setGridRows] = useState<BulkProductRow[]>([
-    {
-      name: "",
-      sku: "",
-      category: "Dut Pekmezi",
-      price: 0,
-      cost: 0,
-      stock: 50,
-      unit: "Adet",
-      criticalLimit: 5,
-      active: true
-    }
-  ]);
-
   if (!isOpen) return null;
 
   // 1. Generate & Download Sample Excel Template
@@ -171,8 +156,17 @@ export default function BulkProductImportModal({
         XLSX.writeFile(wb, "Pekefe_Toplu_Urun_Sablonu.xlsx");
         toast.success("Örnek Excel şablonu (.xlsx) başarıyla indirildi.");
       } else {
-        XLSX.writeFile(wb, "Pekefe_Toplu_Urun_Sablonu.csv");
-        toast.success("Örnek CSV şablonu (.csv) başarıyla indirildi.");
+        const csvContent = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Pekefe_Toplu_Urun_Sablonu.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Örnek CSV şablonu (.csv, UTF-8) başarıyla indirildi.");
       }
     } catch (err: any) {
       console.error("Şablon indirme hatası:", err);
@@ -240,15 +234,18 @@ export default function BulkProductImportModal({
     });
   };
 
-  // 3. Handle File Upload (Excel or CSV)
+  // 3. Handle File Upload (Excel or CSV with UTF-8 Turkish character support)
   const handleFileUpload = (file: File) => {
     if (!file) return;
     const reader = new FileReader();
+    const isCsv = file.name.toLowerCase().endsWith(".csv");
 
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
+        const workbook = isCsv
+          ? XLSX.read(data, { type: "string" })
+          : XLSX.read(new Uint8Array(data as ArrayBuffer), { type: "array", codepage: 65001 });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(sheet);
@@ -268,7 +265,11 @@ export default function BulkProductImportModal({
       }
     };
 
-    reader.readAsBinaryString(file);
+    if (isCsv) {
+      reader.readAsText(file, "UTF-8");
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
   };
 
   // 4. Handle Clipboard Paste (Copy from Excel and Ctrl+V directly)

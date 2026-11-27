@@ -1,3 +1,3 @@
-:HL["/_next/static/css/22ac29e8f3cc7d8f.css","style"]
+:HL["/_next/static/css/d8585df729522bb8.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(shop)","param":null,"prefetchHints":0,"slots":{"children":{"name":"iletisim","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"uuoE3b8fPIISMiK8NF59Q"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(shop)","param":null,"prefetchHints":0,"slots":{"children":{"name":"iletisim","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"1OXC-5QHWD2VbNvspmfpA"}

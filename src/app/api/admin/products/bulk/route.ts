@@ -69,6 +69,8 @@ export async function POST(request: NextRequest) {
       const activeRaw = p.active ?? p.isPublished ?? p['Durum'] ?? true;
       const active = activeRaw === true || activeRaw === 'Yayında' || activeRaw === 'Aktif' || activeRaw === 1 || activeRaw === '1';
 
+      const criticalLimit = Math.max(0, Number(p.criticalLimit ?? p['Kritik Stok Limiti'] ?? p['Kritik Limit'] ?? 5) || 5);
+
       cleanedProducts.push({
         id: p.id,
         name,
@@ -76,6 +78,7 @@ export async function POST(request: NextRequest) {
         category,
         stock,
         stock_quantity: stock,
+        criticalLimit,
         price,
         sale_price: price,
         oldPrice: listPrice,
@@ -87,7 +90,16 @@ export async function POST(request: NextRequest) {
         shortDesc: desc,
         image: image || (category.toLowerCase().includes('pekmez') ? '/pekefe-dut-pekmezi-kavanoz-tr.jpg' : (category.toLowerCase().includes('kome') ? '/ispir-kome-beyaz.png' : '/pekefe-dut-pekmezi-kavanoz-tr.jpg')),
         active,
-        isPublished: active
+        isPublished: active,
+        attributes: {
+          isActive: active,
+          active,
+          isPublished: active,
+          webPrice: price,
+          salePrice: price,
+          unit,
+          barcode,
+        }
       });
     }
 
@@ -105,7 +117,9 @@ export async function POST(request: NextRequest) {
     for (const savedProd of jsonResult.products) {
       const existingIdx = FALLBACK_PRODUCTS.findIndex((fp: any) => fp.id === savedProd.id || fp.sku === savedProd.sku);
       if (existingIdx !== -1) {
-        FALLBACK_PRODUCTS[existingIdx] = { ...FALLBACK_PRODUCTS[existingIdx], ...savedProd };
+        if (updateExisting) {
+          FALLBACK_PRODUCTS[existingIdx] = { ...FALLBACK_PRODUCTS[existingIdx], ...savedProd };
+        }
       } else {
         FALLBACK_PRODUCTS.unshift(savedProd as any);
       }
@@ -116,26 +130,49 @@ export async function POST(request: NextRequest) {
     try {
       for (const p of cleanedProducts) {
         try {
-          await prisma.product.upsert({
-            where: { sku: p.sku },
-            update: {
-              name: p.name,
-              category: p.category,
-              stock: p.stock,
-              price: p.price,
-              cost: p.cost,
-              isDeleted: false
-            },
-            create: {
-              name: p.name,
-              sku: p.sku,
-              category: p.category,
-              stock: p.stock,
-              price: p.price,
-              cost: p.cost,
-              isDeleted: false
-            }
-          });
+          const existingDb = await prisma.product.findUnique({ where: { sku: p.sku }, select: { id: true } });
+          if (existingDb && !updateExisting) {
+            continue;
+          }
+          if (existingDb) {
+            await prisma.product.update({
+              where: { id: existingDb.id },
+              data: {
+                name: p.name,
+                category: p.category,
+                stock: p.stock,
+                criticalLimit: p.criticalLimit,
+                price: p.price,
+                sale_price: p.sale_price,
+                list_price: p.list_price,
+                oldPrice: p.oldPrice,
+                cost: p.cost,
+                desc: p.desc || undefined,
+                image: p.image || undefined,
+                attributes: p.attributes,
+                isDeleted: false
+              }
+            });
+          } else {
+            await prisma.product.create({
+              data: {
+                name: p.name,
+                sku: p.sku,
+                category: p.category,
+                stock: p.stock,
+                criticalLimit: p.criticalLimit,
+                price: p.price,
+                sale_price: p.sale_price,
+                list_price: p.list_price,
+                oldPrice: p.oldPrice,
+                cost: p.cost,
+                desc: p.desc || null,
+                image: p.image || null,
+                attributes: p.attributes,
+                isDeleted: false
+              }
+            });
+          }
           dbSuccessCount++;
         } catch (itemErr) {
           // ignore individual item Prisma error if Prisma offline

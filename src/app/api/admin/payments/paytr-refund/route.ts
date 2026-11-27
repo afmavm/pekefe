@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { refundPayTROrder } from '@/lib/paytr';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/lib/rate-limit';
+import { requireAdmin } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return auth.response;
+
   const rateLimitResponse = await withRateLimit(request, 'apiLimit');
   if (rateLimitResponse) return rateLimitResponse;
 

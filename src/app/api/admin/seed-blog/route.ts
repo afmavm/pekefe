@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-helpers";
 
 const defaultBlogPosts = [
   {
@@ -54,7 +55,9 @@ const defaultBlogPosts = [
   }
 ];
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if (!auth.ok) return auth.response;
   try {
     const results = [];
     for (const post of defaultBlogPosts) {

@@ -6,6 +6,49 @@ import bcrypt from "bcryptjs";
 import { readUsersAndRoles, upsertLocalUser } from "@/lib/jsonUserDb";
 import { readLocalAccounts } from "@/lib/jsonCurrentAccountsDb";
 
+// In-memory brute-force lockout tracker (per email: 5 failed attempts -> 15 min lock)
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCK_MS = 15 * 60 * 1000;
+const loginAttemptsMap = new Map<string, { count: number; lockedUntil: number }>();
+
+function checkLoginLockout(emailKey: string): void {
+  const rec = loginAttemptsMap.get(emailKey);
+  if (!rec) return;
+  const now = Date.now();
+  if (rec.lockedUntil > now) {
+    const minsLeft = Math.ceil((rec.lockedUntil - now) / 60000);
+    throw new Error(`Çok fazla başarısız giriş denemesi. Lütfen ${minsLeft} dakika sonra tekrar deneyin.`);
+  }
+  if (rec.lockedUntil > 0 && rec.lockedUntil <= now) {
+    loginAttemptsMap.delete(emailKey);
+  }
+}
+
+function recordFailedLogin(emailKey: string): void {
+  const now = Date.now();
+  const prev = loginAttemptsMap.get(emailKey) || { count: 0, lockedUntil: 0 };
+  const nextCount = prev.count + 1;
+  const lockedUntil = nextCount >= LOGIN_MAX_ATTEMPTS ? now + LOGIN_LOCK_MS : 0;
+  loginAttemptsMap.set(emailKey, { count: nextCount, lockedUntil });
+  try {
+    prisma.authLog.create({
+      data: {
+        ip: "credentials-login",
+        userId: null,
+        route: "/api/auth/callback/credentials",
+        method: "POST",
+        failReason: lockedUntil > 0
+          ? `Brute-force kilidi tetiklendi (${emailKey}, ${nextCount} deneme)`
+          : `Hatalı giriş denemesi (${emailKey}, #${nextCount})`,
+      },
+    }).catch(() => {});
+  } catch {}
+}
+
+function clearFailedLogins(emailKey: string): void {
+  loginAttemptsMap.delete(emailKey);
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as any) as any,
 
@@ -24,6 +67,9 @@ export const authOptions: NextAuthOptions = {
         const inputEmail = credentials.email.trim().toLowerCase();
         const inputPassword = credentials.password;
 
+        // Brute-force lockout check
+        checkLoginLockout(inputEmail);
+
         // ── 1. Yerel Kullanıcı & Rol Veritabanında (users_roles_db.json) Doğrulama ──
         let localUserWithPasswordFound = false;
         try {
@@ -41,6 +87,7 @@ export const authOptions: NextAuthOptions = {
                 email: localUser.email,
                 lastLogin: new Date().toISOString()
               });
+              clearFailedLogins(inputEmail);
               return {
                 id: localUser.id,
                 name: localUser.name || "Kullanıcı",
@@ -81,6 +128,7 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordCorrect) {
+            recordFailedLogin(inputEmail);
             throw new Error("Hatalı şifre.");
           }
 
@@ -102,6 +150,7 @@ export const authOptions: NextAuthOptions = {
             });
           } catch {}
 
+          clearFailedLogins(inputEmail);
           return {
             id: user.id,
             name: user.name || "Kullanıcı",
@@ -117,8 +166,9 @@ export const authOptions: NextAuthOptions = {
           } as any;
         }
 
-        // Eğer yerel veritabanında kullanıcının kayıtlı şifresi varsa ve eşleşmediyse eski demo şifresine düşme
+        // Eğer yerel veritabanında kullanıcının kayıtlı şifresi varsa ve eşleşmediyse reddet
         if (localUserWithPasswordFound) {
+          recordFailedLogin(inputEmail);
           throw new Error("Hatalı şifre.");
         }
 
@@ -163,41 +213,9 @@ export const authOptions: NextAuthOptions = {
           if (accErr.message?.includes("pasif")) throw accErr;
         }
 
-        // ── 4. İlk Kurulumda Tanımlı Yönetici Hesapları Fallback (ve Otomatik DB Kaydı) ──
-        const DEMO_ACCOUNTS: Record<string, { role: string; name: string; customer_type?: string }> = {
-          "admin@nexab2b.com": { role: "SUPER_ADMIN", name: "Süper Yönetici", customer_type: "b2b" },
-          "manager@nexab2b.com": { role: "ADMIN", name: "PEKEFE Yöneticisi", customer_type: "b2b" },
-          "info@pekefe.com": { role: "SUPER_ADMIN", name: "PEKEFE Yönetim", customer_type: "b2b" },
-          "admin@pekefe.com": { role: "SUPER_ADMIN", name: "PEKEFE Yönetici", customer_type: "b2b" },
-          "afmavm@gmail.com": { role: "SUPER_ADMIN", name: "Muhammed AKÇELİK", customer_type: "b2b" },
-          "ahmet@zeta.com": { role: "DEALER", name: "Ahmet Bey (Bayi)", customer_type: "b2b" },
-        };
-
-        if (DEMO_ACCOUNTS[inputEmail] && (inputPassword === "password123" || inputPassword === "Pekefe.25")) {
-          const account = DEMO_ACCOUNTS[inputEmail];
-          const salt = await bcrypt.genSalt(10);
-          const hash = await bcrypt.hash(inputPassword, salt);
-          const synced = upsertLocalUser({
-            id: `local-${inputEmail}`,
-            name: account.name,
-            email: inputEmail,
-            role: account.role,
-            passwordHash: hash,
-            customer_type: (account.customer_type || "b2b") as any,
-            isApproved: true,
-            lastLogin: new Date().toISOString()
-          });
-          return {
-            id: synced.id,
-            name: synced.name,
-            email: inputEmail,
-            role: synced.role as any,
-            isApproved: true,
-            customer_type: account.customer_type || "b2b",
-            permissions: synced.customPermissions || [],
-          } as any;
-        }
-
+        // GÜVENLİK: Hardcoded demo yönetici şifreleri kaldırılmıştır.
+        // Tüm yönetici ve kullanıcı girişleri yalnızca veritabanındaki bcrypt hash'li şifrelerle yapılır.
+        recordFailedLogin(inputEmail);
         throw new Error("Kullanıcı bulunamadı veya şifre hatalı.");
       },
     }),
@@ -325,8 +343,8 @@ export const authOptions: NextAuthOptions = {
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-    updateAge: 24 * 60 * 60,
+    maxAge: 24 * 60 * 60, // 24 saat (üst düzey oturum güvenliği)
+    updateAge: 60 * 60,   // Saatlik yenileme
   },
 
   secret: process.env.NEXTAUTH_SECRET,

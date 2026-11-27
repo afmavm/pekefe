@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { requireAdmin } from "@/lib/auth-helpers";
 
 const masterProducts = [
   {
@@ -1613,7 +1614,15 @@ const masterProducts = [
   }
 ];
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if (!auth.ok) return auth.response;
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "Seed endpointi canlı ortamda güvenlik nedeniyle devre dışıdır." },
+      { status: 403 }
+    );
+  }
   try {
     console.log("[API SEED] Seeding exact 23 local products from dev.db...");
     const hashedPassword = await bcrypt.hash("password123", 10);

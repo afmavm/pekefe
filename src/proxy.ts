@@ -68,7 +68,14 @@ export default async function proxy(req: NextRequest) {
     return intlMiddleware(req);
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+  if (matchesAny(pathname, ADMIN_ROUTES)) {
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    res.headers.set('Cache-Control', 'no-store, private, max-age=0');
+    res.headers.set('X-Frame-Options', 'DENY');
+    res.headers.set('X-Content-Type-Options', 'nosniff');
+  }
+  return res;
 }
 
 export const config = {

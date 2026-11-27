@@ -1,14 +1,37 @@
 import React from "react";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { isAdminRole } from "@/lib/auth-helpers";
 import AdminProviders from "./AdminProviders";
 import { prisma, withTimeout } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
 
 export default async function RootAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Çift katmanlı sunucu güvenliği (Defense-in-Depth):
+  // Middleware'e ek olarak Server Component düzeyinde oturum ve rol doğrulaması
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect("/giris");
+  }
+  const userRole = String((session.user as any).role || "");
+  if (!isAdminRole(userRole)) {
+    redirect("/403");
+  }
+
   let initialCMSData = null;
   let initialPages: any[] = [];
   try {

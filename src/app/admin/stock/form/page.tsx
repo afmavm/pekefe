@@ -1263,17 +1263,17 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           purchaseVat: attrs.purchaseVat || "20",
           purchaseVatIncluded: attrs.purchaseVatIncluded ?? false,
 
-          salePrice: product.sale_price ? Number(product.sale_price) : (product.b2b_base_price ? Number(product.b2b_base_price) : (product.price || 0)),
+          salePrice: Number(attrs.b2bPrice || product.b2b_base_price || product.sale_price || product.price || 0),
           saleCurrency: attrs.saleCurrency || "TRY",
           saleVat: attrs.saleVat || "20",
           saleVatIncluded: attrs.saleVatIncluded ?? true,
 
-          retailPrice: attrs.retailPrice || 0,
+          retailPrice: Number(attrs.retailPrice || attrs.webPrice || product.price || 0),
           retailCurrency: attrs.retailCurrency || "TRY",
           retailVat: attrs.retailVat || "20",
           retailVatIncluded: attrs.retailVatIncluded ?? true,
 
-          webPrice: attrs.webPrice || 0,
+          webPrice: Number(attrs.webPrice || product.sale_price || product.price || 0),
           webCurrency: attrs.webCurrency || "TRY",
           webVat: attrs.webVat || "20",
           webVatIncluded: attrs.webVatIncluded ?? true,
@@ -1960,9 +1960,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
       return;
     }
 
-    const finalSalePrice = Number(form.salePrice || form.retailPrice || form.webPrice || 0);
+    const finalWebPrice = Number(form.webPrice || form.retailPrice || form.salePrice || 0);
+    const finalB2bPrice = Number(form.salePrice || 0);
     const rawMarketPrice = Number(form.marketPrice || 0);
-    const finalMarketPrice = rawMarketPrice > 0 ? (rawMarketPrice < finalSalePrice ? finalSalePrice : rawMarketPrice) : finalSalePrice;
+    const finalMarketPrice = rawMarketPrice > 0 ? (rawMarketPrice < finalWebPrice ? finalWebPrice : rawMarketPrice) : finalWebPrice;
     const resolvedCategory = form.category?.trim() || "Genel";
 
     setIsSaving(true);
@@ -1985,9 +1986,10 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         warehouses: warehouses,
         variants: variants,
         criticalLimit: 5,
-        price: finalSalePrice,
+        price: finalWebPrice,
         oldPrice: finalMarketPrice,
         cost: Number(form.purchasePrice || 0),
+        b2b_base_price: finalB2bPrice > 0 ? finalB2bPrice : null,
         image: mediaList[0]?.url || "",
         images: mediaList.map(m => m.url),
         desc: form.desc || form.shortDesc,
@@ -1996,7 +1998,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
         discount_start_date: parseSafeIsoDate(form.discount_start_date),
         discount_end_date: parseSafeIsoDate(form.discount_end_date),
         list_price: finalMarketPrice,
-        sale_price: finalSalePrice,
+        sale_price: finalWebPrice,
         stock_quantity: totalStock,
         isRawMaterial: form.stockType === "Hammadde",
         barcode: form.barcode,
@@ -2022,6 +2024,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           purchaseVat: form.purchaseVat,
           purchaseVatIncluded: form.purchaseVatIncluded,
 
+          b2bPrice: finalB2bPrice,
           saleCurrency: form.saleCurrency,
           saleVat: form.saleVat,
           saleVatIncluded: form.saleVatIncluded,

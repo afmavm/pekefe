@@ -8,6 +8,10 @@ import {
   productMatchesCategory,
   slugifyTr,
 } from '@/lib/category-utils';
+import {
+  resolveWebRetailPrice,
+  resolveMarketListPrice,
+} from '@/lib/pricing-resolver';
 
 let _ensuredColumns = false;
 
@@ -187,9 +191,10 @@ export async function getPublishedProductsServer(): Promise<any[]> {
           attrs = {};
         }
       }
-      const listPrice = p.list_price != null ? Number(p.list_price) : p.oldPrice != null ? Number(p.oldPrice) : null;
-      const salePrice = p.sale_price != null && Number(p.sale_price) > 0 ? Number(p.sale_price) : Number(p.price || 0);
-      const effectivePrice = Number(p.price || salePrice || 0);
+      // Google Merchant Center, JSON-LD ve halka açık SSR sayfaları HER ZAMAN Web Perakende fiyatını kullanır
+      const effectivePrice = resolveWebRetailPrice({ ...p, attributes: attrs });
+      const listPrice = resolveMarketListPrice({ ...p, attributes: attrs }, effectivePrice);
+      const salePrice = effectivePrice;
       const effectiveStock = typeof p.stock === 'number' ? p.stock : Number(p.stock_quantity || 0);
 
       return {

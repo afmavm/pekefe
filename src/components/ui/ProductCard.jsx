@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { parseNumericPrice } from "@/utils/productsStorage";
+import { parseNumericPrice, resolveProductPrice } from "@/utils/productsStorage";
 
 function CardCountdownTimer({ endDate }) {
   const [timeLeft, setTimeLeft] = useState(null);
@@ -140,7 +140,12 @@ export function ProductCard(props) {
   const { data: session } = useSession();
 
   const cardDesc = shortDesc || desc || "";
-  const isB2B = session?.user?.role === "dealer" || session?.user?.customer_type === "B2B";
+  const userRole = String(session?.user?.role || "").toUpperCase();
+  const userCustomerType = String(session?.user?.customer_type || "").toLowerCase();
+  const isB2B =
+    userRole !== "ADMIN" &&
+    userRole !== "SUPER_ADMIN" &&
+    (userRole === "DEALER" || userCustomerType === "b2b" || Boolean(p.is_b2b_user));
 
   // Attributes fallback
   const finalBadge1 = badgeText1 || attributes?.badgeText1 || "";
@@ -154,11 +159,12 @@ export function ProductCard(props) {
   // Active campaign status check
   const activeCampaign = Boolean(finalIsCampaign);
 
-  // Numeric computations
+  // Numeric computations (Role-aware: B2B dealers see B2B price, everyone else sees Web Perakende)
   const rawListPrice = oldPrice || list_price || attributes?.oldPrice || attributes?.list_price;
-  const numericPrice = parseNumericPrice(price);
-  const numericOld = rawListPrice ? parseNumericPrice(rawListPrice) : null;
   const numericB2B = b2b_price ? parseNumericPrice(b2b_price) : null;
+  const webResolved = resolveProductPrice({ ...p, price, attributes, is_b2b_user: isB2B, b2b_price });
+  const numericPrice = (isB2B && numericB2B > 0) ? numericB2B : (webResolved > 0 ? webResolved : parseNumericPrice(price));
+  const numericOld = rawListPrice ? parseNumericPrice(rawListPrice) : null;
 
   // Active Price Resolution
   let activePrice = numericPrice;

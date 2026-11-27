@@ -1,6 +1,7 @@
 import { prisma, withTimeout } from '@/lib/prisma';
 import { WhatsAppNotificationService } from '@/lib/whatsapp-service';
 import { slugifyTr } from '@/lib/category-utils';
+import { resolveWebRetailPrice } from '@/lib/pricing-resolver';
 import fs from 'fs';
 import path from 'path';
 
@@ -335,7 +336,7 @@ function buildTemplatePack(product: SocialProductInput): Omit<GeneratedSocialPac
   const slug = product.slug || slugifyTr(product.name || product.id);
   const productUrl = `${SITE_URL}/urun/${slug}`;
   const productImage = toAbsoluteUrl(product.image);
-  const price = Number(product.price || 0);
+  const price = resolveWebRetailPrice(product);
   const priceText = price > 0 ? `₺${price.toLocaleString('tr-TR')}` : 'Taze Mahsul';
   const category = product.category || 'İspir Yöresel Ürünler';
   const cleanSummary = stripHtml(product.shortDesc || product.desc || '').slice(0, 220) ||

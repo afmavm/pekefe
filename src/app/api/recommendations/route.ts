@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { computeProductPricing } from "@/app/api/products/route";
 import { getCariAccountByEmail } from "@/lib/b2b-helpers";
+import { isEligibleB2BUser } from "@/lib/pricing-resolver";
 
 export const dynamic = 'force-dynamic';
 
@@ -131,22 +132,19 @@ export async function GET(req: NextRequest) {
         }
       });
 
-      if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-        isB2BUser = true;
-        if (dbUser.b2bGroup) {
+      dealerAccount = await getCariAccountByEmail(session.user.email);
+      isB2BUser = isEligibleB2BUser(dbUser, dealerAccount);
+
+      if (isB2BUser) {
+        if (dbUser?.b2bGroup) {
           b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
           b2bTieredRules = dbUser.b2bGroup.tieredPricing;
           b2bPrices = dbUser.b2bGroup.b2bPrices;
         }
-      }
-
-      dealerAccount = await getCariAccountByEmail(session.user.email);
-      if (dealerAccount && dealerAccount.cariTipi === "CORPORATE") {
-        isB2BUser = true;
-        if (b2bGroupDiscountRate === 0) {
+        if (dealerAccount && b2bGroupDiscountRate === 0) {
           b2bGroupDiscountRate = dealerAccount.discountRate || 0;
         }
-        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount.dealerGroup) {
+        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount?.dealerGroup) {
           const groupByName = await prisma.b2BGroup.findFirst({
             where: { group_name: dealerAccount.dealerGroup },
             include: {

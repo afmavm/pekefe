@@ -15,6 +15,11 @@ import { withRateLimit } from '@/lib/rate-limit';
 import { generateNextOrderId } from '@/lib/b2b-helpers';
 import { saveLocalOrder } from '@/lib/jsonOrderDb';
 import { readLocalProducts } from '@/lib/jsonProductDb';
+import {
+  resolveWebRetailPrice,
+  resolveB2BBasePrice,
+  isEligibleB2BUser,
+} from '@/lib/pricing-resolver';
 
 const CheckoutSchema = z.object({
   cart: z.array(z.any()).min(1, "Sepet boş olamaz"),
@@ -138,11 +143,13 @@ async function findProductForCartItem(dbClient: any, item: any) {
         name: found.name,
         sku: found.sku,
         price: { toNumber: () => Number(found.price || 0) },
+        sale_price: found.sale_price,
         cost: { toNumber: () => Number(found.cost || 0) },
         stock: Number(found.stock || 999),
         version: 1,
         cartDiscountRate: 0,
-        b2b_base_price: Number(found.price || 0)
+        b2b_base_price: found.b2b_base_price ?? found.attributes?.b2bPrice ?? Number(found.price || 0),
+        attributes: found.attributes || {},
       };
     }
   }
@@ -242,18 +249,14 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-          isB2BUser = true;
-          if (dbUser.b2bGroup) {
+        isB2BUser = isEligibleB2BUser(dbUser, customerAccount);
+        if (isB2BUser) {
+          if (dbUser?.b2bGroup) {
             b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
             b2bTieredRules = dbUser.b2bGroup.tieredPricing;
             b2bPrices = dbUser.b2bGroup.b2bPrices;
           }
-        }
-
-        if (customerAccount && (customerAccount.cariTipi === "CORPORATE" || customerAccount.type === "BAYI")) {
-          isB2BUser = true;
-          if (b2bGroupDiscountRate === 0) {
+          if (customerAccount && b2bGroupDiscountRate === 0) {
             b2bGroupDiscountRate = customerAccount.discountRate || 0;
           }
         }
@@ -288,26 +291,32 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
-      const basePriceVal = (typeof product.price?.toNumber === 'function')
-        ? product.price.toNumber()
-        : Number(product.price || item.price || 0);
+      const webRetailVal = resolveWebRetailPrice(product) || Number(item.price || 0);
+      const groupOverride = isB2BUser ? b2bPrices.find((bp: any) => bp.productId === product.id) : null;
+      const basePriceVal = isB2BUser
+        ? (groupOverride && Number(groupOverride.price) > 0
+            ? Number(groupOverride.price)
+            : (resolveB2BBasePrice(product) || webRetailVal))
+        : webRetailVal;
 
       const costVal = (typeof product.cost?.toNumber === 'function')
         ? product.cost.toNumber()
         : Number(product.cost || basePriceVal * 0.7);
 
-      const effectivePrice = PriceCalculator.calculateEffectivePrice({
-        basePrice: basePriceVal,
-        cost: costVal,
-        dealerGroup: customerAccount?.dealerGroup || "Standart",
-        priceGroup: customerAccount?.priceGroup || "Liste",
-        priceFormula: customerAccount?.priceFormula,
-        quantity: 1,
-        pricingRules: globalPricingRules as any,
-        customDiscountRate: customerAccount?.discountRate,
-        b2bGroupDiscountRate: b2bGroupDiscountRate,
-        b2bTieredPricingRules: b2bTieredRules
-      });
+      const effectivePrice = isB2BUser
+        ? PriceCalculator.calculateEffectivePrice({
+            basePrice: basePriceVal,
+            cost: costVal,
+            dealerGroup: customerAccount?.dealerGroup || "Standart",
+            priceGroup: customerAccount?.priceGroup || "Liste",
+            priceFormula: customerAccount?.priceFormula,
+            quantity: Number(item.quantity || 1),
+            pricingRules: globalPricingRules as any,
+            customDiscountRate: customerAccount?.discountRate,
+            b2bGroupDiscountRate: b2bGroupDiscountRate,
+            b2bTieredPricingRules: b2bTieredRules
+          })
+        : basePriceVal;
 
       serverCartItems.push({
         id: product.id,

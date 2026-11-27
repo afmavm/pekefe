@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { computeProductPricing } from '@/app/api/products/route';
 import { getCariAccountByEmail } from '@/lib/b2b-helpers';
+import { isEligibleB2BUser } from '@/lib/pricing-resolver';
 
 /**
  * GET /api/products/featured
@@ -35,30 +36,28 @@ export async function GET(request: NextRequest) {
         } as any,
       });
 
-      if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-        isB2BUser = true;
-        const grp = dbUser.b2bGroup as any;
+      dealerAccount = await getCariAccountByEmail(session.user.email);
+      isB2BUser = isEligibleB2BUser(dbUser, dealerAccount);
+
+      if (isB2BUser) {
+        const grp = dbUser?.b2bGroup as any;
         if (grp) {
           b2bGroupDiscountRate = grp.base_discount_rate ?? grp.discountRate ?? 0;
           b2bTieredRules = grp.tieredPricing ?? [];
           b2bPrices = grp.b2bPrices ?? [];
         }
-      }
-      dealerAccount = await getCariAccountByEmail(session.user.email);
-      if (dealerAccount && dealerAccount.cariTipi === "CORPORATE") {
-        isB2BUser = true;
-        if (b2bGroupDiscountRate === 0) {
+        if (dealerAccount && b2bGroupDiscountRate === 0) {
           b2bGroupDiscountRate = dealerAccount.discountRate || 0;
         }
-        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount.dealerGroup) {
+        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount?.dealerGroup) {
           const groupByName = await prisma.b2BGroup.findFirst({
             where: { group_name: dealerAccount.dealerGroup }
           });
           if (groupByName) {
-            const grp = groupByName as any;
-            b2bGroupDiscountRate = grp.base_discount_rate ?? grp.discountRate ?? 0;
-            b2bTieredRules = grp.tieredPricing ?? [];
-            b2bPrices = grp.b2bPrices ?? [];
+            const grp2 = groupByName as any;
+            b2bGroupDiscountRate = grp2.base_discount_rate ?? grp2.discountRate ?? 0;
+            b2bTieredRules = grp2.tieredPricing ?? [];
+            b2bPrices = grp2.b2bPrices ?? [];
           }
         }
       }

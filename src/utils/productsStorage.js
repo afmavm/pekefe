@@ -176,34 +176,48 @@ export function parseNumericPrice(val) {
 
 export function resolveProductPrice(p) {
   if (!p) return 0;
-  
+
+  // Role-aware: If server explicitly flagged this response for an authenticated B2B dealer, use B2B price
+  if (p.is_b2b_user === true) {
+    const b2bP = parseNumericPrice(p.b2b_price);
+    if (b2bP > 0) return b2bP;
+  }
+
+  // Parse attributes first so Web Perakende (attrs.webPrice) ALWAYS takes precedence over legacy B2B sale_price
+  let attrs = p.attributes;
+  if (typeof attrs === "string") {
+    try { attrs = JSON.parse(attrs); } catch {}
+  }
+
+  if (attrs && typeof attrs === "object") {
+    const aWebP = parseNumericPrice(attrs.webPrice);
+    if (aWebP > 0) return aWebP;
+  }
+
   const webP = parseNumericPrice(p.webPrice);
   if (webP > 0) return webP;
 
-  const saleP = parseNumericPrice(p.sale_price);
-  if (saleP > 0) return saleP;
+  if (attrs && typeof attrs === "object") {
+    const aRetailP = parseNumericPrice(attrs.retailPrice);
+    if (aRetailP > 0) return aRetailP;
+  }
 
   const pr = parseNumericPrice(p.price);
   if (pr > 0) return pr;
+
+  const saleP = parseNumericPrice(p.sale_price);
+  if (saleP > 0) return saleP;
 
   const listP = parseNumericPrice(p.list_price);
   if (listP > 0) return listP;
 
   const retailP = parseNumericPrice(p.retail_list_price);
   if (retailP > 0) return retailP;
-  
-  // Check attributes object
-  let attrs = p.attributes;
-  if (typeof attrs === "string") {
-    try { attrs = JSON.parse(attrs); } catch {}
-  }
+
   if (attrs && typeof attrs === "object") {
-    const aWebP = parseNumericPrice(attrs.webPrice);
-    if (aWebP > 0) return aWebP;
-    
     const aSaleP = parseNumericPrice(attrs.salePrice);
     if (aSaleP > 0) return aSaleP;
-    
+
     const aPr = parseNumericPrice(attrs.price);
     if (aPr > 0) return aPr;
   }
@@ -292,6 +306,8 @@ export function formatDbProductToStorefront(p) {
     desc: resolvedDesc,
     shortDesc: resolvedShortDesc,
     price: finalPrice,
+    sale_price: finalPrice,
+    webPrice: parseNumericPrice(attrs.webPrice) || parseNumericPrice(p.webPrice) || finalPrice,
     oldPrice: finalOldPrice,
     list_price: finalOldPrice || p.list_price || attrs.list_price || 0,
     isCampaignActive: isCampaignActive,

@@ -11,6 +11,7 @@ import { getCariAccountByEmail } from '@/lib/b2b-helpers';
 import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActions';
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 import { readLocalProducts, saveLocalProduct, deleteLocalProduct } from '@/lib/jsonProductDb';
+import { isEligibleB2BUser } from '@/lib/pricing-resolver';
 
 async function getSafeBranchId(branchIdInput: string | null | undefined): Promise<string> {
   if (branchIdInput) {
@@ -137,19 +138,16 @@ export async function GET(
           }
         });
 
-        if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-          isB2BUser = true;
-          if (dbUser.b2bGroup) {
+        dealerAccount = await getCariAccountByEmail(session.user.email);
+        isB2BUser = isEligibleB2BUser(dbUser, dealerAccount);
+
+        if (isB2BUser) {
+          if (dbUser?.b2bGroup) {
             b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
             b2bTieredRules = dbUser.b2bGroup.tieredPricing;
             b2bPrices = dbUser.b2bGroup.b2bPrices;
           }
-        }
-
-        dealerAccount = await getCariAccountByEmail(session.user.email);
-        if (dealerAccount) {
-          isB2BUser = true;
-          if (b2bGroupDiscountRate === 0) {
+          if (dealerAccount && b2bGroupDiscountRate === 0) {
             b2bGroupDiscountRate = dealerAccount.discountRate || 0;
           }
         }
@@ -323,28 +321,24 @@ export async function PUT(
     if (body.sale_price !== undefined) {
       data.sale_price = Number(body.sale_price);
       data.price = Number(body.sale_price);
-      data.b2b_base_price = Number(body.sale_price);
-      try {
-        await prisma.productB2BPrice.updateMany({
-          where: { productId: realId },
-          data: { price: Number(body.sale_price) }
-        });
-      } catch (err) {}
-    }
-    if (body.stock_quantity !== undefined) {
-      data.stock_quantity = Number(body.stock_quantity);
-      data.stock = Number(body.stock_quantity);
     }
     if (body.price !== undefined && body.sale_price === undefined) {
       data.price = Number(body.price);
       data.sale_price = Number(body.price);
-      data.b2b_base_price = Number(body.price);
-      try {
-        await prisma.productB2BPrice.updateMany({
-          where: { productId: realId },
-          data: { price: Number(body.price) }
-        });
-      } catch (err) {}
+    }
+    // B2B taban fiyatı yalnızca b2b_base_price / attributes.b2bPrice alanından güncellenir; Web Perakende ile ezilmez!
+    const explicitB2bPrice =
+      body.b2b_base_price !== undefined && body.b2b_base_price !== null
+        ? Number(body.b2b_base_price)
+        : body.attributes?.b2bPrice !== undefined && body.attributes?.b2bPrice !== null && Number(body.attributes.b2bPrice) > 0
+          ? Number(body.attributes.b2bPrice)
+          : undefined;
+    if (explicitB2bPrice !== undefined && explicitB2bPrice >= 0) {
+      data.b2b_base_price = explicitB2bPrice;
+    }
+    if (body.stock_quantity !== undefined) {
+      data.stock_quantity = Number(body.stock_quantity);
+      data.stock = Number(body.stock_quantity);
     }
     if (body.oldPrice !== undefined && body.list_price === undefined) {
       data.oldPrice = body.oldPrice ? Number(body.oldPrice) : null;

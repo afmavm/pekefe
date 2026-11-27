@@ -13,6 +13,12 @@ import { syncProductTotalStock } from '@/modules/inventory/server/inventoryActio
 import { FALLBACK_PRODUCTS } from '@/lib/fallbackProducts';
 import { readLocalProducts, saveLocalProduct } from '@/lib/jsonProductDb';
 import { jsonNoCache } from '@/lib/noCacheResponse';
+import {
+  resolveWebRetailPrice,
+  resolveB2BBasePrice,
+  resolveMarketListPrice,
+  isEligibleB2BUser,
+} from '@/lib/pricing-resolver';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -154,30 +160,21 @@ export function computeProductPricing(
     b2bPrices?: Array<{ productId: string; price: any }> | null;
   }
 ) {
-  let basePriceVal = p.price ? Number(p.price) : 0;
+  const isB2BUser = Boolean(b2bContext?.isB2BUser);
+  const webRetailPrice = resolveWebRetailPrice(p);
+  const b2bBaseVal = resolveB2BBasePrice(p);
 
-  // Parse attributes to get webPrice and retailPrice for standard users
-  let attrs: any = {};
-  try {
-    attrs = typeof p.attributes === 'string' ? JSON.parse(p.attributes) : (p.attributes || {});
-  } catch (e) {
-    attrs = {};
-  }
-  const webPrice = attrs.webPrice ? Number(attrs.webPrice) : null;
-  const retailPrice = attrs.retailPrice ? Number(attrs.retailPrice) : null;
-
-  if (b2bContext?.isB2BUser) {
-    const groupPrice = b2bContext.b2bPrices?.find(bp => bp.productId === p.id);
-    if (groupPrice) {
+  let basePriceVal = webRetailPrice;
+  if (isB2BUser) {
+    const groupPrice = b2bContext?.b2bPrices?.find(bp => bp.productId === p.id);
+    if (groupPrice && Number(groupPrice.price) > 0) {
       basePriceVal = Number(groupPrice.price);
-    } else if (p.b2b_base_price && Number(p.b2b_base_price) > 0) {
-      basePriceVal = Number(p.b2b_base_price);
+    } else if (b2bBaseVal > 0) {
+      basePriceVal = b2bBaseVal;
     }
   }
 
-  const listPrice = p.list_price ? Number(p.list_price) : basePriceVal;
-  const salePrice = p.sale_price ? Number(p.sale_price) : basePriceVal;
-  
+  const listPrice = resolveMarketListPrice(p, webRetailPrice);
   const isCampaignActive = p.isCampaignActive ?? false;
   let isWithinDates = true;
   
@@ -190,19 +187,14 @@ export function computeProductPricing(
     if (now > end) isWithinDates = false;
   }
   
-  const hasCampaignDiscount = salePrice < listPrice;
+  const hasCampaignDiscount = webRetailPrice < listPrice;
   const isCampaignDiscounted = hasCampaignDiscount && isCampaignActive && isWithinDates;
   
-  // For standard B2C retail / guest users: use webPrice / retailPrice as default selling price instead of listPrice or B2B price.
-  const retailBasePrice = (!b2bContext?.isB2BUser && (webPrice || retailPrice))
-    ? (webPrice || retailPrice || 0)
-    : basePriceVal;
-
-  const baseCampaignPrice = isCampaignDiscounted ? salePrice : retailBasePrice;
-  
-  let finalPrice = baseCampaignPrice;
-  if (b2bContext?.isB2BUser) {
-    const groupSpecificRules = b2bContext.b2bTieredPricingRules?.filter(tr => tr.productId === p.id) || [];
+  // Standard B2C / Guest / Admin users ALWAYS receive Web Perakende price.
+  // B2B / DEALER users receive their B2B base/group/tiered price.
+  let finalPrice = basePriceVal;
+  if (isB2BUser) {
+    const groupSpecificRules = b2bContext?.b2bTieredPricingRules?.filter(tr => tr.productId === p.id) || [];
     finalPrice = PriceCalculator.calculateEffectivePrice({
       basePrice: basePriceVal,
       cost: p.cost ? Number(p.cost) : 0,
@@ -210,39 +202,41 @@ export function computeProductPricing(
       priceGroup: dealerAccount?.priceGroup || "Liste",
       priceFormula: dealerAccount?.priceFormula,
       customDiscountRate: dealerAccount?.discountRate,
-      b2bGroupDiscountRate: b2bContext.b2bGroupDiscountRate,
+      b2bGroupDiscountRate: b2bContext?.b2bGroupDiscountRate,
       b2bTieredPricingRules: groupSpecificRules
-    });
-  } else if (dealerAccount) {
-    finalPrice = PriceCalculator.calculateEffectivePrice({
-      basePrice: baseCampaignPrice,
-      cost: p.cost ? Number(p.cost) : 0,
-      dealerGroup: dealerAccount.dealerGroup || "Standart",
-      priceGroup: dealerAccount.priceGroup || "Liste",
-      priceFormula: dealerAccount.priceFormula,
-      customDiscountRate: dealerAccount.discountRate
     });
   }
   
-  // variant calculation
+  // variant calculation (only when variants exist; for B2B prefer variant.b2bPrice if present)
   let lowestVariantPrice = Infinity;
   if (p.variants && p.variants.length > 0) {
     for (const v of p.variants) {
-      const vPrice = computeVariantPrice(v, p, dealerAccount, now);
-      const actualVPrice = vPrice !== null ? vPrice : finalPrice;
-      if (actualVPrice < lowestVariantPrice) {
-        lowestVariantPrice = actualVPrice;
+      let vAttrs: any = v.attributes || {};
+      if (typeof vAttrs === "string") {
+        try { vAttrs = JSON.parse(vAttrs); } catch { vAttrs = {}; }
+      }
+      const vB2b = Number(v.b2bPrice ?? vAttrs.b2bPrice ?? 0);
+      if (isB2BUser && vB2b > 0) {
+        if (vB2b < lowestVariantPrice) lowestVariantPrice = vB2b;
+      } else {
+        const vPrice = computeVariantPrice(v, p, isB2BUser ? dealerAccount : null, now);
+        const actualVPrice = vPrice !== null && vPrice > 0 ? vPrice : finalPrice;
+        if (actualVPrice < lowestVariantPrice) {
+          lowestVariantPrice = actualVPrice;
+        }
       }
     }
   }
 
-  const isDiscounted = finalPrice < listPrice;
-  const savingAmount = isDiscounted ? (listPrice - finalPrice) : 0;
-  const discountPercent = listPrice > 0 ? Math.round((savingAmount / listPrice) * 100) : 0;
+  const finalEffectivePrice = lowestVariantPrice !== Infinity ? lowestVariantPrice : finalPrice;
+  const effectiveListPrice = listPrice > finalEffectivePrice ? listPrice : finalEffectivePrice;
+  const isDiscounted = finalEffectivePrice < effectiveListPrice;
+  const savingAmount = isDiscounted ? (effectiveListPrice - finalEffectivePrice) : 0;
+  const discountPercent = effectiveListPrice > 0 ? Math.round((savingAmount / effectiveListPrice) * 100) : 0;
   
   let discountDisplayText = "";
   if (isDiscounted) {
-    if (finalPrice < 100) {
+    if (finalEffectivePrice < 100) {
       discountDisplayText = `%${discountPercent} İndirim`;
     } else {
       discountDisplayText = `${Math.round(savingAmount)} TL İndirim`;
@@ -250,10 +244,9 @@ export function computeProductPricing(
   }
   
   const showCountdown = isCampaignDiscounted && !!p.discount_end_date;
-  const finalEffectivePrice = lowestVariantPrice !== Infinity ? lowestVariantPrice : finalPrice;
   
   // B2B volume pricing tiers
-  const volume_pricing_tiers = (b2bContext?.isB2BUser && b2bContext.b2bTieredPricingRules)
+  const volume_pricing_tiers = (isB2BUser && b2bContext?.b2bTieredPricingRules)
     ? b2bContext.b2bTieredPricingRules
         .filter(tr => tr.productId === p.id)
         .map(tr => {
@@ -279,22 +272,23 @@ export function computeProductPricing(
 
   return {
     price: finalEffectivePrice,
-    list_price: listPrice,
-    sale_price: salePrice,
+    webPrice: webRetailPrice,
+    list_price: effectiveListPrice,
+    sale_price: finalEffectivePrice,
     discount_amount: savingAmount,
     discount_percent: discountPercent,
     saving_amount: savingAmount,
-    is_discounted: isDiscounted || (b2bContext?.isB2BUser && finalEffectivePrice < listPrice),
-    discount_display_text: discountDisplayText || (b2bContext?.isB2BUser && finalEffectivePrice < listPrice ? `%${Math.round(((listPrice - finalEffectivePrice) / listPrice) * 100)} İndirim` : ""),
+    is_discounted: isDiscounted,
+    discount_display_text: discountDisplayText,
     show_countdown: showCountdown,
     discount_end_date: p.discount_end_date ? new Date(p.discount_end_date).toISOString() : null,
     stock_quantity: p.stock_quantity ?? Number(p.stock),
     server_time_utc: now.toISOString(),
     
-    // B2B Eklemeleri
-    retail_list_price: listPrice,
-    b2b_price: b2bContext?.isB2BUser ? finalEffectivePrice : null,
-    is_b2b_user: b2bContext?.isB2BUser || false,
+    // B2B Eklemeleri (yalnızca yetkili B2B kullanıcılar için dolu döner)
+    retail_list_price: effectiveListPrice,
+    b2b_price: isB2BUser ? finalEffectivePrice : null,
+    is_b2b_user: isB2BUser,
     volume_pricing_tiers
   };
 }
@@ -359,22 +353,19 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      if (dbUser && (dbUser.customer_type === 'b2b' || dbUser.role === 'DEALER')) {
-        isB2BUser = true;
-        if (dbUser.b2bGroup) {
+      dealerAccount = await getCariAccountByEmail(session.user.email);
+      isB2BUser = isEligibleB2BUser(dbUser, dealerAccount);
+
+      if (isB2BUser) {
+        if (dbUser?.b2bGroup) {
           b2bGroupDiscountRate = dbUser.b2bGroup.base_discount_rate;
           b2bTieredRules = dbUser.b2bGroup.tieredPricing;
           b2bPrices = dbUser.b2bGroup.b2bPrices;
         }
-      }
-
-      dealerAccount = await getCariAccountByEmail(session.user.email);
-      if (dealerAccount && dealerAccount.cariTipi === "CORPORATE") {
-        isB2BUser = true;
-        if (b2bGroupDiscountRate === 0) {
+        if (dealerAccount && b2bGroupDiscountRate === 0) {
           b2bGroupDiscountRate = dealerAccount.discountRate || 0;
         }
-        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount.dealerGroup) {
+        if ((!b2bTieredRules || b2bTieredRules.length === 0) && (!b2bPrices || b2bPrices.length === 0) && dealerAccount?.dealerGroup) {
           const groupByName = await prisma.b2BGroup.findFirst({
             where: { group_name: dealerAccount.dealerGroup },
             include: {
@@ -484,9 +475,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bu Stok Kodu (SKU) zaten kullanımda. Lütfen benzersiz bir SKU girin.' }, { status: 400 });
     }
 
-    // Sync old and new fields
-    const list_price = data.list_price !== undefined ? data.list_price : (data.oldPrice !== undefined && data.oldPrice !== null ? data.oldPrice : (data.price ?? 0));
-    const sale_price = data.sale_price !== undefined ? data.sale_price : (data.price ?? 0);
+    // Sync old and new fields (Web Perakende -> price/sale_price, B2B -> b2b_base_price)
+    const webPriceAttr = Number(body?.attributes?.webPrice ?? body?.webPrice ?? 0);
+    const sale_price = webPriceAttr > 0 ? webPriceAttr : (data.sale_price !== undefined ? data.sale_price : (data.price ?? 0));
+    const list_price = data.list_price !== undefined ? data.list_price : (data.oldPrice !== undefined && data.oldPrice !== null ? data.oldPrice : sale_price);
+    const b2b_base_price_raw = Number(body?.b2b_base_price ?? body?.attributes?.b2bPrice ?? 0);
+    const b2b_base_price = b2b_base_price_raw > 0 ? b2b_base_price_raw : sale_price;
     const stock_quantity = data.stock_quantity !== undefined ? data.stock_quantity : (data.stock ?? 0);
 
     const product = await prisma.product.create({
@@ -502,7 +496,7 @@ export async function POST(request: NextRequest) {
         oldPrice: list_price,
         list_price: list_price,
         sale_price: sale_price,
-        b2b_base_price: sale_price,
+        b2b_base_price: b2b_base_price,
         discount_start_date: data.discount_start_date,
         discount_end_date: data.discount_end_date,
         isCampaignActive: data.isCampaignActive,

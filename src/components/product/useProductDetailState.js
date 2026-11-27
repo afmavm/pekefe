@@ -7,6 +7,7 @@ import {
   fetchProductsFromApi,
   formatDbProductToStorefront,
   getProducts,
+  resolveProductPrice,
 } from "@/utils/productsStorage";
 import { addToCart } from "@/utils/cartStorage";
 import { resolveProductMediaItems } from "@/lib/utils";
@@ -165,15 +166,29 @@ export function useProductDetailState(params) {
   }, [variantsList]);
 
   const displayPrice = useMemo(() => {
-    if (selectedVariant?.price && Number(selectedVariant.price) > 0) return Number(selectedVariant.price);
-    if (product?.sale_price && Number(product.sale_price) > 0) return Number(product.sale_price);
+    const isB2B = Boolean(product?.is_b2b_user);
+    if (selectedVariant) {
+      let vAttrs = {};
+      try {
+        vAttrs = typeof selectedVariant.attributes === "string"
+          ? JSON.parse(selectedVariant.attributes)
+          : (selectedVariant.attributes || {});
+      } catch {}
+      if (isB2B) {
+        const vB2b = Number(selectedVariant.b2bPrice ?? vAttrs.b2bPrice ?? 0);
+        if (vB2b > 0) return vB2b;
+      }
+      if (selectedVariant.price && Number(selectedVariant.price) > 0) return Number(selectedVariant.price);
+    }
+    const resolved = resolveProductPrice(product);
+    if (resolved > 0) return resolved;
     if (product?.price && Number(product.price) > 0) return Number(product.price);
     return 280;
   }, [selectedVariant, product]);
 
   const displayOldPrice = useMemo(() => {
     if (!product) return null;
-    const prodSalePrice = Number(product.sale_price || product.price || 0);
+    const prodSalePrice = Number(resolveProductPrice(product) || product.price || 0);
     const prodOldPrice = Number(product.oldPrice || product.list_price || product.attributes?.marketPrice || 0);
 
     if (selectedVariant) {

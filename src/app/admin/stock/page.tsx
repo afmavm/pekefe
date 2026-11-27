@@ -146,10 +146,16 @@ function getEffectiveStock(p: Product): number {
 
 function getWebPrice(p: Product): number {
   const attrs = parseAttributes(p.attributes);
-  if (p.sale_price !== null && p.sale_price !== undefined) {
-    return Number(p.sale_price) || 0;
+  if (attrs.webPrice !== undefined && attrs.webPrice !== null && Number(attrs.webPrice) > 0) {
+    return Number(attrs.webPrice);
   }
-  return Number(p.price || attrs.webPrice || attrs.salePrice || 0) || 0;
+  if (attrs.retailPrice !== undefined && attrs.retailPrice !== null && Number(attrs.retailPrice) > 0) {
+    return Number(attrs.retailPrice);
+  }
+  if (p.sale_price !== null && p.sale_price !== undefined && Number(p.sale_price) > 0) {
+    return Number(p.sale_price);
+  }
+  return Number(p.price || attrs.salePrice || 0) || 0;
 }
 
 function getPrimaryImage(p: Product): string {

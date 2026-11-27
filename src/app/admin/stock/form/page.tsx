@@ -3149,13 +3149,16 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
           <div className="lg:col-span-2 space-y-6">
             
             {/* Modern Sticky 5-Tab Navigation Bar */}
-            <div className="sticky top-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2 shadow-sm">
+            <div
+              className="sticky top-2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 p-1.5 shadow-sm"
+              style={{ borderRadius: "16px" }}
+            >
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-1.5">
                 {[
                   {
                     id: "genel",
                     label: "Genel Bilgiler",
-                    sub: "Ad, kategori, stok",
+                    sub: "Ad, stok, fiyat",
                     icon: Package,
                     ready: Boolean(form.name && Number(form.price || 0) > 0),
                     badge: null as string | null,
@@ -3163,7 +3166,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   {
                     id: "hikaye_analiz",
                     label: "Mahsul & Analiz",
-                    sub: "Hikaye & besin değeri",
+                    sub: "Hikaye & besin",
                     icon: BookOpen,
                     ready: Boolean(form.harvestStory || form.altitude),
                     badge: null as string | null,
@@ -3171,7 +3174,7 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   {
                     id: "varyantlar",
                     label: "Varyant & Fiyat",
-                    sub: "Gramaj & fiyatlar",
+                    sub: "Gramaj & tarife",
                     icon: Layers,
                     ready: Array.isArray(variants) && variants.length > 0,
                     badge: Array.isArray(variants) && variants.length > 0 ? String(variants.length) : null,
@@ -3179,15 +3182,15 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                   {
                     id: "b2b_lojistik",
                     label: "B2B & Lojistik",
-                    sub: "Bayi & şube ayarları",
+                    sub: "Bayi & depolar",
                     icon: Database,
-                    ready: Boolean((form as any).b2bEnabled || (form as any).b2bPrice),
+                    ready: Boolean((form as any).b2bEnabled || (form as any).b2bPrice || form.b2bActive),
                     badge: null as string | null,
                   },
                   {
                     id: "diger",
                     label: "Teknik & SEO",
-                    sub: "Meta, URL & barkod",
+                    sub: "Meta, URL, GTIN",
                     icon: Info,
                     ready: Boolean(form.seoTitle || form.seoDesc || form.barcode),
                     badge: null as string | null,
@@ -3203,58 +3206,53 @@ function EnterpriseStockFormPage({ productId: propProductId }: EnterpriseStockFo
                       type="button"
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer border ${
+                      style={{ borderRadius: "12px" }}
+                      className={`group relative flex flex-col items-start justify-center px-3 py-2.5 text-left transition-all duration-200 cursor-pointer border ${
                         isLastOdd ? "col-span-2 sm:col-span-1" : ""
                       } ${
                         active
                           ? "bg-gradient-to-br from-[#6b1d2f] to-[#8c253d] text-white border-[#6b1d2f] shadow-md shadow-[#6b1d2f]/20"
-                          : "bg-slate-50/70 hover:bg-slate-100/90 text-slate-700 border-transparent hover:border-slate-200"
+                          : "bg-slate-50/80 hover:bg-slate-100 text-slate-700 border-slate-200/60 hover:border-slate-300"
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                          active
-                            ? "bg-white/15 text-amber-300"
-                            : "bg-white text-slate-500 border border-slate-200/80 group-hover:text-[#6b1d2f] group-hover:border-rose-200"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`text-[11px] font-extrabold tracking-tight truncate ${
-                              active ? "text-white" : "text-slate-800"
-                            }`}
-                          >
-                            {tab.label}
-                          </span>
-                          {tab.badge && (
-                            <span
-                              className={`px-1.5 py-0.2 rounded-full text-[9px] font-black leading-4 shrink-0 ${
-                                active ? "bg-amber-400 text-slate-950" : "bg-orange-100 text-orange-700"
-                              }`}
-                            >
-                              {tab.badge}
-                            </span>
-                          )}
-                        </div>
-                        <span
-                          className={`block text-[10px] truncate mt-0.5 ${
-                            active ? "text-rose-100/85" : "text-slate-400"
-                          }`}
-                        >
-                          {tab.sub}
-                        </span>
-                      </div>
                       {tab.ready && !tab.badge && (
                         <span
                           title="Bilgiler girilmiş"
-                          className={`w-2 h-2 rounded-full shrink-0 ${
+                          className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full ${
                             active ? "bg-emerald-300" : "bg-emerald-500"
                           }`}
                         />
                       )}
+                      <div className="flex items-center gap-1.5 w-full pr-2">
+                        <Icon
+                          className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                            active ? "text-amber-300" : "text-slate-500 group-hover:text-[#6b1d2f]"
+                          }`}
+                        />
+                        <span
+                          className={`text-[11px] font-extrabold tracking-tight whitespace-nowrap ${
+                            active ? "text-white" : "text-slate-800"
+                          }`}
+                        >
+                          {tab.label}
+                        </span>
+                        {tab.badge && (
+                          <span
+                            className={`px-1.5 rounded-full text-[9px] font-black leading-4 shrink-0 ${
+                              active ? "bg-amber-400 text-slate-950" : "bg-orange-100 text-orange-700"
+                            }`}
+                          >
+                            {tab.badge}
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={`block text-[10px] leading-tight mt-1 pl-5 whitespace-nowrap ${
+                          active ? "text-rose-100/85" : "text-slate-400"
+                        }`}
+                      >
+                        {tab.sub}
+                      </span>
                     </button>
                   );
                 })}
